@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-13",
+  "scope": "Live xMind VS Code Extension Development Host process run against TestProj",
+  "xmind_source_revision": "e99db6b",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "extension": "agentflow-local.agentflow",
+  "provider": {
+    "id": "claude",
+    "model": "claude-sonnet-4-6",
+    "credential": "reused from the local xMind profile; no key was exposed"
+  },
+  "frontend_build": {
+    "run_id": "4455c89a66ed772ee75a46f7877031b4",
+    "command": "npm.cmd run build",
+    "working_directory": "model-zoo/frontend",
+    "exit_code": 0,
+    "vite": "6.4.4",
+    "transformed_modules": 37,
+    "duration_ms": 692,
+    "stderr_bytes": 0
+  },
+  "backend_default_path_probe": {
+    "run_id": "4455c89a66ed772ee75a46f7877031b4",
+    "command": "xlang3.exe -m pytest -q",
+    "working_directory": "model-zoo/backend",
+    "resolved_executable": "D:/CantorAI/xlang3/build/Release/xlang3.exe",
+    "exit_code": 1,
+    "stderr": "No module named pytest",
+    "tests_executed": 0
+  },
+  "backend_compatibility_branch": {
+    "run_id": "54a2c83247a72fe7e6b0c1fbeda6694d",
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "revision": "d876c281",
+    "runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe",
+    "command": "$env:PYTHONPATH='D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release\\modules;D:\\CantorAI2026\\xlang3\\scratch\\testproj-pydantic-2.14.1;D:\\CantorAI2026\\TestProj\\model-zoo\\backend\\.xlang3-site'; & 'D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release\\xlang3.exe' -m pytest -q",
+    "working_directory": "model-zoo/backend",
+    "pure_python_pydantic_target": "D:/CantorAI2026/xlang3/scratch/testproj-pydantic-2.14.1",
+    "pydantic_version": "2.14.1",
+    "native_pydantic_core_version": "2.50.1",
+    "exit_code": 0,
+    "tests_passed": 9,
+    "tests_failed": 0,
+    "duration_seconds": 1.83,
+    "warnings": [
+      "Starlette/AnyIO deprecation: anyio.abc.BlockingPortal alias"
+    ],
+    "stderr": ""
+  },
+  "limitations": [
+    "The passing run used the explicitly selected xlang3 compatibility-branch executable and an isolated pure-Python Pydantic 2.14.1 target; it does not establish that the default local PowerShell profile resolves the correct runtime.",
+    "This was an Extension Development Host acceptance, not an installed VSIX or release-package acceptance.",
+    "TestProj is not a Git repository, so a source diff is unavailable. The test request prohibited source edits; the frontend build generated its normal dist output."
+  ]
+}

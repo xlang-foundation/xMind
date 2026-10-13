@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## VS Code process validation on the xlang3 compatibility branch — 2026-10-13
+
+The live VS Code Extension Development Host completed TestProj's xlang3-backed
+backend test run through xMind's native process tool: all **9 pytest API tests
+passed** in **1.83 seconds** using xlang3 branch
+`fix/pytest-pathaware-hook-proxy` at `d876c281`, Pydantic 2.14.1's pure-Python
+wheel and native Pydantic Core 2.50.1. The same UI run completed
+`npm.cmd run build` with exit code **0** (Vite 6.4.4, 37 modules, 692 ms).
+The existing unqualified `xlang3.exe` process lookup resolved the older
+`D:\\CantorAI\\xlang3\\build\\Release\\xlang3.exe` and could not find
+pytest; using the explicit branch runtime and package paths passed. This
+verifies the real VS Code extension-to-backend process path for this workspace,
+but not default interpreter discovery, an installed VSIX or a release package.
+No project source edits were requested during this validation. Exact commands,
+run IDs and limits are in
+[the acceptance record](evidence/testproj-vscode-xlang3-pytest-20261013.json).
+
 ## Native agent recovery after stale edit — 2026-10-13
 
 When an `edit_file` proposal is rejected because the file changed, the agent
