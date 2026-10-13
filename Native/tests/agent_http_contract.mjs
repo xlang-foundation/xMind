@@ -243,7 +243,7 @@ try {
   await streaming('http-interrupt-run');
   const viewInterrupt=await fetch(`http://127.0.0.1:${port}/v1/sessions/http-interrupt/interrupt?resume=false`,{method:'POST',headers:{...viewHeaders,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(10000)});
   assert.equal(viewInterrupt.status,200,'An origin-bound local view may interrupt its active session');assert.deepEqual(await viewInterrupt.json(),{interrupted:true});
-  await terminal('http-interrupt-run','cancelled');
+  assert.equal((await api('/v1/runs/http-interrupt-run')).data.state,'cancelled','HTTP 200 must wait for actual native run settlement');
   assert.deepEqual((await api('/v1/sessions/http-interrupt/interrupt',{})),{status:200,data:{interrupted:false}},'Idle interruption is an idempotent no-op');
   assert.equal((await api('/v1/sessions/absent-session/interrupt',{})).status,404);
   assert.equal((await api('/v1/sessions/http-interrupt/interrupt?resume=true',{})).status,400,'Unsupported resume must fail explicitly');
