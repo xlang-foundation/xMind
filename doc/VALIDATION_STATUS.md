@@ -15,8 +15,9 @@ pytest 8.4.2, FastAPI 0.120.4 and Pydantic 2.13.5. TestProj's broad Pydantic
 Core 2.50.1; that combination remains unsupported by the pinned 2.46.5
 implementation. An isolated xMind Release build against the candidate passed
 **137/137 native CTest contracts**; the webpage adapter passed **99/99 browser
-tests**. A live local browser-adapter session attached to TestProj without a
-server-token prompt, discovered **13 Claude, 11 Gemini, 2 DeepSeek and 20
+tests** and the VS Code extension passed **320/320 extension tests**. A live
+local browser-adapter session attached to TestProj without a server-token prompt,
+discovered **13 Claude, 11 Gemini, 2 DeepSeek and 20
 OpenAI models** from the saved `.config/providers.yaml`, selected OpenAI
 `gpt-4.1`, and completed a read-only Model Zoo design review with **29,690 input
 and 592 output tokens**. It made no TestProj edits. This validates the candidate
