@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Live provider-backed xmind chat using the TestProj managed backend and workspace process tool",
+  "command": "xmind --workspace D:\\CantorAI2026\\TestProj chat",
+  "runId": "a09abf9c8a8d1f66c572dfeef0c15213",
+  "sessionId": "226ae4c90727937127111a5293464d90",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "toolCalls": [
+    {
+      "name": "run_process",
+      "workingDirectory": "model-zoo/frontend",
+      "arguments": ["npm.cmd", "run", "build"]
+    }
+  ],
+  "processResult": {
+    "packageName": "model-zoo-frontend@0.1.1.0",
+    "bundler": "vite 6.4.4",
+    "modulesTransformed": 37,
+    "durationMilliseconds": 593,
+    "exitCode": 0,
+    "warnings": 0,
+    "outputDirectory": "model-zoo/frontend/dist"
+  },
+  "runState": "completed",
+  "cliExitStatus": 0,
+  "providerUsage": {
+    "inputTokens": 5415,
+    "outputTokens": 320
+  },
+  "providerSecretsRecorded": false
+}

@@ -23,6 +23,17 @@ no workspace changes. This verifies one live CLI provider/tool cycle, not
 approval-based writes, terminal execution or full interactive CLI parity.
 [Sanitized run metadata](evidence/cli-live-modelzoo-20261013.json).
 
+## Native CLI workspace process build — 2026-10-13
+
+From the same live TestProj CLI session, Claude invoked the managed
+`run_process` tool in `model-zoo/frontend` with `npm.cmd run build`. Vite 6.4.4
+transformed 37 modules, emitted the production bundle to `dist/`, and exited
+**0** in approximately **593 ms**, with no reported warnings. The agent turn
+and CLI both completed successfully. This verifies a live model-to-process
+tool cycle on the shared backend; it does not establish interactive approval
+coverage or broad shell compatibility.
+[Sanitized run metadata](evidence/cli-live-process-build-20261013.json).
+
 ## Native A2A Windows contract checkpoint — 2026-10-13
 
 The local Release build passed all seven focused A2A CTests on Windows:
