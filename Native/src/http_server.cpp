@@ -1001,20 +1001,6 @@ struct HttpServer::Impl {
                     if(current.state==RunState::queued||current.state==RunState::running||current.state==RunState::paused)throw;
                 }
             }
-            // Cancellation only requests that the native runner stop. Do not
-            // acknowledge interruption until it has retired every root in the
-            // session, including graph owners and their cleanup/settlement.
-            const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
-            for(;;){
-                bool settled=true;
-                for(const auto& run:persistence.runs(session).get())
-                    if(run.state==RunState::queued||run.state==RunState::running||run.state==RunState::paused){settled=false;break;}
-                if(settled)break;
-                if(std::chrono::steady_clock::now()>=deadline){
-                    reply(response,{{"detail","Session interruption is still settling"}},503);return;
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
             reply(response,{{"interrupted",interrupted}});
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));

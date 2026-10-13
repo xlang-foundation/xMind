@@ -79,16 +79,16 @@ xlang3 compatibility review; no xlang3 source change is included here.
 
 The native HTTP server now supports `POST /v1/sessions/{id}/interrupt` and
 the console exposes `session-interrupt SESSION [false]`. A focused loopback
-test confirms cancellation of a live streamed run, terminal settlement before
-HTTP 200, idle idempotence, 404 for a missing session, explicit rejection of
+test confirms cancellation of a live streamed run, eventual persisted terminal
+state, idle idempotence, 404 for a missing session, explicit rejection of
 unsupported `resume=true`, and the CLI response shape. The route verifies the
-session exists, requests cancellation from every active owner, then waits up to
-30 seconds for persisted runs to become terminal; it returns 503 if cleanup
-has not settled by then. Durable inbox admission and resume scheduling remain
-incomplete, so this does not establish full session API parity. Release server
-and CLI builds succeeded; CTest passed `native_agent_http_contract` **1/1**.
-The per-operation evidence and current source hash are recorded in [the API
-inventory](OPENCODE_API_INVENTORY.json).
+session exists before handling interruption and responds when the cancellation
+request is accepted; native cleanup and persisted settlement continue
+asynchronously, matching the pinned OpenCode v2.0.26 contract. Durable inbox
+admission and resume scheduling remain incomplete, so this does not establish
+full session API parity. Release server and CLI builds succeeded; CTest passed
+`native_agent_http_contract` **1/1**. The per-operation evidence and current
+source hash are recorded in [the API inventory](OPENCODE_API_INVENTORY.json).
 
 ## Native CLI connection catalog management — 2026-10-12
 

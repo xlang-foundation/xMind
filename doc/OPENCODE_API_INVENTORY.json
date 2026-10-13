@@ -19517,12 +19517,12 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "b9f488160ba667eaa0747111ebb76d7c446aa2f99f95f2c7b1a8df73c86e68b9",
+        "sourceSha256": "39d16017cd89cd9687e49923f8298ef93d947902b180c2e04fc489e376439628",
         "surface": "POST /v1/sessions/{id}/interrupt; xmind_cli session-interrupt",
         "sourceAnchor": "executor->cancel",
-        "gap": "Focused loopback verifies cancellation of an active streamed run, persisted terminal settlement before HTTP 200, idle no-op, missing-session 404 and CLI exposure. Cancellation waits up to 30 seconds and returns 503 if native cleanup has not settled. resume=true and durable session inbox/continuation remain unsupported; full upstream parity is not established.",
+        "gap": "Focused loopback verifies active streamed-run cancellation, eventual persisted terminal state, idle no-op, missing-session 404 and CLI exposure. The HTTP response confirms accepted interruption without waiting for cleanup, matching pinned v2.0.26 behavior. resume=true and durable session inbox/continuation remain unsupported; full upstream parity is not established.",
         "verifiedParity": false,
-        "scope": "Release native_agent_http_contract passed against xlang3-backed server/CLI. The contract covers origin-bound local view interruption, idle no-op, missing session and terminal settlement before 200. resume=true, durable inbox/continuation and full upstream parity remain unverified."
+        "scope": "Release native_agent_http_contract passed against xlang3-backed server/CLI. It covers origin-bound local view interruption, idle no-op, missing session and eventual terminal state after accepted cancellation. resume=true, durable inbox/continuation and full upstream parity remain unverified."
       },
       "agentflowEvidence": null,
       "upstreamContract": {
