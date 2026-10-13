@@ -10,20 +10,23 @@ outside the search boundary; traversal truncation is explicit.
 
 The authenticated native route is `GET /v1/workspace/find` with `query`,
 optional `path`, `type`, `limit`, `hidden` and `respect_ignore` parameters. The
-browser adapter forwards this as a read-only route through its origin-bound
-view credential and rejects duplicate or malformed parameters before
-forwarding. This provides the backend and protocol needed by browser and VS
-Code clients; a dedicated file-finder control is not yet rendered in either
-client.
+browser and VS Code views now render a filename finder above the workspace
+tree. Search spans all registered folders; selecting a result opens that exact
+folder's read-only preview. The local view validates folder membership and
+native identity before searching attached folders. The browser adapter
+forwards the finder as a read-only route through its origin-bound view
+credential and rejects duplicate or malformed parameters before forwarding.
 
 The Release `native_workspace_tools_contract` verifies real filesystem
 fixtures for fuzzy ranking, file/directory filtering, hidden and ignored paths,
 result truncation and the Agent tool JSON. `native_agent_http_contract` checks
 the authenticated API route, malformed-query rejection and view-session access.
-`views/browser/tests/server.test.cjs` passes 10/10, including the browser
-adapter’s forwarded read request and query rejection. Agent, graph, delegation,
-dynamic-plan, process, edit and Responses HTTP contracts were also rerun during
-this change; results are recorded in the current task run.
+`views/browser/tests/connection.test.cjs` verifies single-root search,
+multi-folder search and opening the selected result. `views/browser/tests/server.test.cjs`
+verifies credential forwarding and malformed-query rejection.
+`native_local_view_contract` exercises both registered folders through the real
+xMind local view and rejects an unregistered folder. The browser test suite
+passes 102/102 and the VS Code extension test suite passes 321/321.
 
 This is a reviewed source candidate for pinned OpenCode `fs.find`, not verified
 operation parity. The inventory retains the `missing` parity status until the

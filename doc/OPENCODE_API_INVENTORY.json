@@ -12573,7 +12573,7 @@
         "sourceSha256": "612399b9f86dc641be0364769e1653418c5d8dfd2f626ad2c5254e0e880709a1",
         "surface": "GET /v1/workspace/find; native find_files Agent tool",
         "sourceAnchor": "\"/v1/workspace/find\"",
-        "gap": "Native bounded fuzzy path search, file/directory filtering, hidden/ignore policy and workspace-scoped results exist; exact OpenCode ranking/location semantics, response equivalence and full browser navigation remain unverified.",
+        "gap": "Native bounded fuzzy path search, multi-folder workspace scope and browser/VS Code result previews exist; exact OpenCode ranking/location semantics, response equivalence and CLI navigation remain unverified.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

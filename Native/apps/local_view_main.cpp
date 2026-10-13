@@ -11,6 +11,7 @@
 #include <shobjidl.h>
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <atomic>
 #include <cstdlib>
@@ -412,7 +413,8 @@ int run_local_view(int argc, char **argv) {
                 const std::string browser_origin = request.get_header_value("X-XMind-View-Origin");
                 const bool folder_listing = request.path == "/v1/workspace/folders/files";
                 const bool folder_preview = request.path == "/v1/workspace/folders/file";
-                if ((folder_listing || folder_preview) && request.method == "GET") {
+                const bool folder_find = request.path == "/v1/workspace/folders/find";
+                if ((folder_listing || folder_preview || folder_find) && request.method == "GET") {
                     if (host || request.get_header_value_count("X-XMind-View-Origin") != 1) {
                         response(output, 400, "Workspace folder browsing requires a browser view session");
                         return;
@@ -422,7 +424,8 @@ int run_local_view(int argc, char **argv) {
                         response(output, 401, "Browser view session expired or was revoked");
                         return;
                     }
-                    bool has_folder_id = false, has_path = false;
+                    bool has_folder_id = false, has_path = false, has_query = false, has_type = false,
+                         has_limit = false, has_hidden = false, has_respect_ignore = false;
                     for (const auto &[key, value] : request.params) {
                         if (key == "folder_id") {
                             require(!has_folder_id && !value.empty() && value.size() <= 256,
@@ -432,6 +435,25 @@ int run_local_view(int argc, char **argv) {
                             require(!has_path && !value.empty() && value.size() <= 32768,
                                     "Workspace folder path must appear at most once and fit limits");
                             has_path = true;
+                        } else if (folder_find && key == "query") {
+                            require(!has_query && !value.empty() && value.size() <= 4096,
+                                    "Workspace folder filename query must appear once and fit limits");
+                            has_query = true;
+                        } else if (folder_find && key == "type") {
+                            require(!has_type && (value == "file" || value == "directory"),
+                                    "Workspace folder filename type must be file or directory");
+                            has_type = true;
+                        } else if (folder_find && key == "limit") {
+                            require(!has_limit && !value.empty(), "Workspace folder filename limit must appear once");
+                            has_limit = true;
+                        } else if (folder_find && key == "hidden") {
+                            require(!has_hidden && (value == "true" || value == "false"),
+                                    "Workspace folder hidden option must be true or false");
+                            has_hidden = true;
+                        } else if (folder_find && key == "respect_ignore") {
+                            require(!has_respect_ignore && (value == "true" || value == "false"),
+                                    "Workspace folder ignore option must be true or false");
+                            has_respect_ignore = true;
                         } else {
                             throw std::invalid_argument("Unexpected workspace folder query parameter");
                         }
@@ -440,6 +462,7 @@ int run_local_view(int argc, char **argv) {
                             "Workspace folder browsing requires one folder ID");
                     const auto folder_id = request.get_param_value("folder_id");
                     const auto relative_path = has_path ? request.get_param_value("path") : ".";
+                    require(!folder_find || has_query, "Workspace folder filename search requires one query");
                     if (folder_preview)
                         require(has_path && relative_path != ".", "Workspace file path is required");
                     const auto group = workspace_registry->get(workspace_id);
@@ -463,12 +486,37 @@ int run_local_view(int argc, char **argv) {
                                                 {"folder_id", folder_id}, {"path", relative_path},
                                                 {"entries", std::move(entries)}, {"truncated", listing.truncated}}.dump(),
                                            "application/json");
-                    } else {
+                    } else if (folder_preview) {
                         const auto file = verified_folder.browse_file(relative_path);
                         output.status = 200;
                         output.set_content(Json{{"workspace_id", workspace_id}, {"revision", group.revision},
                                                 {"folder_id", folder_id}, {"path", file.path},
                                                 {"content", file.content}}.dump(),
+                                           "application/json");
+                    } else {
+                        std::size_t limit = 100;
+                        if (has_limit) {
+                            const auto value = request.get_param_value("limit");
+                            const auto parsed = std::from_chars(value.data(), value.data() + value.size(), limit);
+                            require(parsed.ec == std::errc{} && parsed.ptr == value.data() + value.size() &&
+                                        limit > 0 && limit <= 1000,
+                                    "Workspace folder filename limit must be between 1 and 1000");
+                        }
+                        const auto boolean = [&](const char *key, bool fallback) {
+                            if (!request.has_param(key)) return fallback;
+                            return request.get_param_value(key) == "true";
+                        };
+                        const auto type = has_type ? request.get_param_value("type") : std::string("file");
+                        const auto found = verified_folder.find_files(request.get_param_value("query"), relative_path,
+                            limit, {}, boolean("hidden", false), boolean("respect_ignore", true), type);
+                        Json entries = Json::array();
+                        for (const auto &entry : found.entries)
+                            entries.push_back({{"path", entry.path}, {"type", entry.type}});
+                        output.status = 200;
+                        output.set_content(Json{{"workspace_id", workspace_id}, {"revision", group.revision},
+                                                {"folder_id", folder_id}, {"path", relative_path},
+                                                {"entries", std::move(entries)}, {"truncated", found.truncated},
+                                                {"limits", found.limits}}.dump(),
                                            "application/json");
                     }
                     return;
