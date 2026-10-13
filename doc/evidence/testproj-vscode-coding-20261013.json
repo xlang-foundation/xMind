@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-13",
+  "scope": "Live TestProj pytest and code-edit acceptance through the xMind VS Code extension",
+  "xmind_source_revision_at_test": "bc6802b",
+  "xlang3_runtime": {
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "revision": "d876c281",
+    "origin_main_base": "f0c425cf",
+    "interpreter": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe"
+  },
+  "workspace": {
+    "client": "VS Code Extension Development Host",
+    "backend_root": "D:/CantorAI2026/TestProj",
+    "project": "model-zoo"
+  },
+  "pytest": {
+    "initial_path_result": {
+      "command": "xlang3.exe -m pytest -q",
+      "working_directory": "model-zoo/backend",
+      "exit_code": 1,
+      "summary": "PATH selected D:/CantorAI/xlang3/build/Release/xlang3.exe, which could not import pytest; no tests ran."
+    },
+    "branch_interpreter_result": {
+      "command": "$env:PYTHONPATH='D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/modules;D:/CantorAI2026/xlang3/scratch/testproj-pydantic-2.14.1;D:/CantorAI2026/TestProj/model-zoo/backend/.xlang3-site'; & 'D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe' -m pytest -q",
+      "working_directory": "model-zoo/backend",
+      "execution": "xMind native process tool through the trusted PowerShell profile in VS Code",
+      "exit_code": 0,
+      "passed": 9,
+      "failed": 0,
+      "pytest_duration_seconds": 1.83,
+      "process_duration_seconds": 3.04,
+      "warnings": [
+        "Starlette/AnyIO BlockingPortal alias deprecation; no test failures"
+      ],
+      "python_native_extensions_used": false
+    }
+  },
+  "vscode_edit_build_run": {
+    "run_id": "b3050af19ce4dd7a374ea8c9fdffed03",
+    "provider": "Claude",
+    "model": "claude-sonnet-4-6",
+    "changed_files": [
+      "model-zoo/frontend/src/style.css"
+    ],
+    "review": "An initial broad stylesheet rewrite was denied. The follow-up proposal was compared with the existing file and contained only an insertion inside @media (max-width: 640px); it was then approved.",
+    "inserted_rules": [
+      ".button { min-height: 44px; padding-top: 0.62rem; padding-bottom: 0.62rem; }",
+      ".button--sm { min-height: 44px; padding-top: 0.55rem; padding-bottom: 0.55rem; }",
+      ".chip { min-height: 36px; padding: 0.45rem 0.9rem; }"
+    ],
+    "other_source_files_edited": false,
+    "build": {
+      "command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "exit_code": 0,
+      "vite": "6.4.4",
+      "transformed_modules": 37,
+      "duration_ms": 683,
+      "stderr_bytes": 0,
+      "built_css_asset": "index-BKjUfKLU.css",
+      "css_asset_bytes": 24358
+    },
+    "provider_reported_and_measured_usage": {
+      "uncached_input_tokens": 34643,
+      "output_tokens": 592,
+      "first_token_seconds": 1.56,
+      "total_model_seconds": 11.19
+    }
+  },
+  "independent_verification": {
+    "source_contains_mobile_target_rules": true,
+    "built_css_contains_mobile_target_rules": true,
+    "recent_frontend_source_file_changes": [
+      "src/style.css"
+    ]
+  },
+  "client_contracts": {
+    "command": "node --test extensions/vscode/tests/*.test.js views/browser/tests/*.test.cjs",
+    "passed": 421,
+    "failed": 0,
+    "duration_ms": 15401
+  },
+  "limitations": [
+    "This verifies one live VS Code edit/build task and TestProj's nine backend tests, not broad project coverage or OpenCode operation parity.",
+    "No phone-sized rendered viewport review was performed; touch-target declarations and compiled CSS were verified directly.",
+    "TestProj is not a Git repository; its generated source/build artifacts were not committed."
+  ]
+}

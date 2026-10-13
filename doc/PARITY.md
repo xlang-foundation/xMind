@@ -58,6 +58,24 @@ visual-quality review, live VS Code editing, broad project coverage or
 operation-level OpenCode parity. See
 [`testproj-browser-coding-20261013.json`](evidence/testproj-browser-coding-20261013.json).
 
+## Live VS Code coding acceptance (2026-10-13)
+
+The actual VS Code Extension Development Host admitted `D:\CantorAI2026\TestProj`
+as its backend workspace. The default PATH-selected `xlang3.exe -m pytest -q`
+failed before collection because PATH selected a stale runtime without pytest.
+Running the xlang3 compatibility-branch executable explicitly, with its module
+directory and TestProj's pure-Python package target on `PYTHONPATH`, passed all
+9 backend tests (one upstream Starlette/AnyIO deprecation warning). A subsequent
+Claude run in the VS Code panel proposed a broad stylesheet rewrite; that
+proposal was denied. Its follow-up diff added only three mobile touch-target
+rules inside the existing `max-width: 640px` block, and the approved change
+passed the TestProj Vite build (37 modules, 683 ms, exit 0). The changed source
+and emitted CSS were verified from disk. Combined browser/VS Code contracts
+pass **421/421**. This proves a live VS Code write/build loop and explicit
+xlang3 branch pytest path; a mobile viewport review, broader coding coverage
+and OpenCode parity remain open. See
+[`testproj-vscode-coding-20261013.json`](evidence/testproj-vscode-coding-20261013.json).
+
 ## Latest verified native coding checkpoint (2026-10-11)
 
 Single-agent and graph runs now route reads, process execution, file creation,
