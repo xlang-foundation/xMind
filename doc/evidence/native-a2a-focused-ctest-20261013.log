@@ -1,0 +1,19 @@
+Test project D:/CantorAI2026/xMind/build/native
+    Start  6: native_a2a_client_contract
+1/7 Test  #6: native_a2a_client_contract ..............   Passed    0.20 sec
+    Start  7: native_a2a_client_sdk_contract
+2/7 Test  #7: native_a2a_client_sdk_contract ..........   Passed    0.34 sec
+    Start  8: native_a2a_agent_registry_contract
+3/7 Test  #8: native_a2a_agent_registry_contract ......   Passed    1.54 sec
+    Start 33: native_a2a_task_control_http_contract
+4/7 Test #33: native_a2a_task_control_http_contract ...   Passed    0.89 sec
+    Start 34: native_a2a_message_http_contract
+5/7 Test #34: native_a2a_message_http_contract ........   Passed    0.39 sec
+    Start 35: native_a2a_stream_http_contract
+6/7 Test #35: native_a2a_stream_http_contract .........   Passed    1.40 sec
+    Start 36: native_a2a_v1_http_contract
+7/7 Test #36: native_a2a_v1_http_contract .............   Passed    1.04 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   5.82 sec

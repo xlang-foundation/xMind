@@ -1,5 +1,16 @@
 # Current native validation
 
+## Native A2A Windows contract checkpoint — 2026-10-13
+
+The local Release build passed all seven focused A2A CTests on Windows:
+native client, official JavaScript SDK peer, agent registry/delegation, and
+the task-control, message, streaming, and v1 HTTP contracts. The complete
+output is saved at
+[native-a2a-focused-ctest-20261013.log](evidence/native-a2a-focused-ctest-20261013.log).
+This verifies the focused protocol and local effect contracts; remote task
+recovery/resubscription, artifact parity, real remote-model delegation, and
+cross-client CLI/VS Code acceptance remain open.
+
 ## Claude coding response budget and live VS Code write — 2026-10-13
 
 The native provider gateway now assigns a bounded 16,384-token default to
