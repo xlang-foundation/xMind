@@ -28,6 +28,18 @@ snapshot again passed **9/9** without creating `__pycache__` in the runtime.
 This validates the snapshot contents and paired interpreter; it does not
 restart or claim rendered acceptance from the currently open browser run.
 
+## View-contract gate test inventory — 2026-10-13
+
+The hosted browser/VS Code contract job on `9caef7c` ran its suites but failed
+the aggregate gate because `Tools/ci-views.mjs` still expected 47 tracked
+view files, 276 extension tests and 81 browser tests. The current source
+inventory is 57 tracked files (59 including its two pinned vendor files), and
+the actual complete suites pass **328/328** extension tests and **105/105**
+browser tests on this machine. The gate's exact inventory and pass-count
+expectations now match those measured results. Local suite runs passed; the
+guarded aggregate gate requires its isolated GitHub runner, so hosted
+acceptance remains pending on the updated commit.
+
 ## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
 
 VS Code 1.141.0 loaded installed xMind extension 0.1.10 in a trusted TestProj
