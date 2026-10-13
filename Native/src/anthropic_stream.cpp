@@ -38,7 +38,7 @@ std::string_view member(std::string_view source,std::string_view wanted){
 Json tool_input(std::string_view source){if(source.size()>object_limit)throw ModelProtocolError("Claude tool input exceeds limits");auto value=parse(source,16);if(!value.is_object())throw ModelProtocolError("Claude tool input is not an object");return value;}
 }
 struct AnthropicStream::Impl {
-    struct Block {std::string type,id,name,value,input,signature,caller;bool stopped=false,initial_input_empty=false,input_delta=false,signature_phase=false;};
+    struct Block {std::string type,id,name,value,input,signature,caller;bool stopped=false,incomplete=false,initial_input_empty=false,input_delta=false,signature_phase=false;};
     ChatCompletionStream::Sink sink;std::vector<Block> blocks;std::set<std::string> calls;Json usage=Json::object();ModelCompletion result;
     std::string line,data,event,reason;std::size_t bytes=0;bool first=true,skip_lf=false,has_data=false,started=false,delta=false,done=false,failed=false,acknowledged=false;
     explicit Impl(ChatCompletionStream::Sink value):sink(std::move(value)){if(!sink)throw std::invalid_argument("Model event sink is required");}
@@ -76,7 +76,16 @@ struct AnthropicStream::Impl {
             if(delta)throw ModelProtocolError("Claude terminal update repeated");
             const auto& change=value.at("delta");const auto& reported=value.at("usage");if(!change.is_object()||!change.contains("stop_reason")||!reported.contains("output_tokens"))throw ModelProtocolError("Claude message update is invalid");
             if(change["stop_reason"].is_null()){counters(reported);return;}
+            const auto stop=text(change,"stop_reason");
+            if(stop!="end_turn"&&stop!="stop_sequence"&&stop!="tool_use"&&stop!="max_tokens")throw ModelProtocolError("Unsupported Claude stop reason");
             if(!closed()){
+                // Anthropic can stop generation at max_tokens while a content
+                // block is still open. Treat those blocks as incomplete and
+                // discard them from tool execution and replay receipts. A
+                // natural/tool stop with an open block remains a protocol error.
+                if(stop=="max_tokens"){
+                    for(auto& block:blocks)if(!block.stopped){block.stopped=true;block.incomplete=true;}
+                }else{
                 for(const auto& block:blocks)if(!block.stopped){
                     if(block.type=="text")throw ModelProtocolError("Claude terminal update has active text block");
                     if(block.type=="tool_use")throw ModelProtocolError("Claude terminal update has active tool block");
@@ -85,14 +94,15 @@ struct AnthropicStream::Impl {
                     throw ModelProtocolError("Claude terminal update has active unknown block");
                 }
                 throw ModelProtocolError("Claude terminal update has active unknown block");
-            }const auto stop=text(change,"stop_reason");
-            if(stop!="end_turn"&&stop!="stop_sequence"&&stop!="tool_use"&&stop!="max_tokens")throw ModelProtocolError("Unsupported Claude stop reason");
+                }
+            }
             reason=stop;delta=true;counters(reported);result.finish_reason=stop=="tool_use"?"tool_calls":stop=="max_tokens"?"length":"stop";emit("model.finish",{{"reason",result.finish_reason},{"provider_reason",stop}});return;
         }
         if(type=="message_stop"){
             if(!delta||!closed())throw ModelProtocolError("Incomplete Claude message lifecycle");
             std::string content="[";bool first_block=true;
             for(const auto& block:blocks){
+                if(block.incomplete){if(block.type=="text")append(result.content,block.value);continue;}
                 if(!first_block)append(content,",",receipt_limit);first_block=false;std::string encoded;
                 if(block.type=="text"){append(result.content,block.value);encoded=Json{{"type","text"},{"text",block.value}}.dump();}
                 else if(block.type=="tool_use"){

@@ -68,6 +68,14 @@ int main(){try{
     }
     const auto calls=event(start())+tool(0,"call-left")+tool(1,"call-right")+event(update("tool_use"))+stop();AnthropicStream decoder([](const auto&){});decoder.feed(calls);const auto result=decoder.finish();require(result.tool_calls.size()==2&&result.tool_calls[0].id=="call-left"&&result.tool_calls[1].id=="call-right"&&result.tool_calls[0].name=="read_file"&&Json::parse(result.tool_calls[0].arguments_json)==Json{{"path","README.md"}},"Parallel tool deltas retain real call IDs and parsed object arguments");
     AnthropicStream truncated([](const auto&){});truncated.feed(event(start())+tool(0,"fragment")+event(update("max_tokens"))+stop());require(truncated.finish().finish_reason=="length"&&truncated.finish().tool_calls.empty()&&truncated.finish().provider_items_json=="[]","Truncated tool turns cannot expose executable calls or replayable mismatched receipts");
+    {
+        std::size_t acknowledgements=0;AnthropicStream open_tool([&](const ModelEvent& value){if(value.kind=="model.done")++acknowledgements;});
+        const auto partial=event(start())+begin(0,{{"type","tool_use"},{"id","truncated-call"},{"name","edit_file"},{"input",Json::object()}})+
+            change(0,"input_json_delta","partial_json",R"({"path":"HomeView.vue","patch":)")+event(update("max_tokens"))+stop();
+        open_tool.feed(partial);const auto incomplete=open_tool.finish();
+        require(incomplete.finish_reason=="length"&&incomplete.tool_calls.empty()&&incomplete.provider_items_json=="[]"&&acknowledgements==1,
+            "A max-token stop may close an unfinished tool block, but it cannot execute or replay that partial call");
+    }
     const std::string raw_initial=R"({ "\u0070ath" : "README.md", "big":18446744073709551616, "precise":1.234567890123456789e-42 })",raw_fragmented=R"({"\u0070ath":"second.txt","negative":-9223372036854775809,"precise":0.1234567890123456789012345678901234})";
     auto zero=start();zero["message"]["usage"]={{"input_tokens",0},{"output_tokens",0},{"cache_creation_input_tokens",0},{"cache_read_input_tokens",0}};
     const std::string hidden="Synthetic private thinking 🌍",signature="synthetic-signature-fragments",redacted="synthetic-opaque-redacted-data";
