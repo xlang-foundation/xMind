@@ -145,6 +145,7 @@ public:
     std::future<ProcessOutputArtifact> finish_process_output(std::string operation_id,std::string run_id,bool complete);
     std::future<ProcessOutputPage> read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit);
     std::future<void> append_message(std::string id,std::string role,std::string json);
+    std::future<Message> message(std::string id,std::int64_t sequence);
     std::future<std::vector<Message>> history(std::string id);
     std::future<void> put_information(std::string category,std::string id,std::string json);
     // A protected managed-owner replacement may stage only this trusted

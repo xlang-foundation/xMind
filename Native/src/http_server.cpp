@@ -979,6 +979,16 @@ struct HttpServer::Impl {
             if(!request.params.empty())throw std::invalid_argument("Session lookup does not accept query parameters");
             reply(response,encode(persistence.session(identifier(request.matches[1])).get()));
         }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
+            if(!request.params.empty())throw std::invalid_argument("Message lookup does not accept query parameters");
+            const std::string message_id=request.matches[2];
+            if(!message_id.starts_with("msg_")||message_id.size()<5||message_id.find_first_not_of("0123456789",4)!=std::string::npos)
+                throw std::invalid_argument("Message ID must match ^msg_[0-9]+$");
+            std::int64_t sequence=0;const auto parsed=std::from_chars(message_id.data()+4,message_id.data()+message_id.size(),sequence);
+            if(parsed.ec!=std::errc{}||parsed.ptr!=message_id.data()+message_id.size()||sequence<1||sequence>9007199254740991LL)
+                throw std::invalid_argument("Invalid message sequence");
+            reply(response,encode(persistence.message(identifier(request.matches[1]),sequence).get()));
+        }));
         server.Get("/v1/process/profiles",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Process metadata does not accept query parameters");
             Json profiles=Json::array();for(const auto& item:process_profiles)profiles.push_back({{"id",item.id},{"revision",item.revision},{"max_timeout_ms",item.max_timeout_ms}});

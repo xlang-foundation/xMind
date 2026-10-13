@@ -133,6 +133,12 @@ try {
   const writes = await Promise.all(Array.from({length: 12}, (_, i) => request('/v1/sessions/shared/messages', {role: 'user', data: {content: `message ${i}`}})));
   assert.ok(writes.every(result => result.status === 201));
   assert.equal(cli('history', 'shared').length, 12);
+  const observedMessages=(await request('/v1/sessions/shared/history')).data;
+  const selectedMessage=observedMessages.at(-1);
+  assert.deepEqual(await request(`/v1/sessions/shared/messages/${selectedMessage.id}`),{status:200,data:selectedMessage},'Single-message lookup returns the durable typed history entry');
+  assert.equal((await request('/v1/sessions/shared/messages/msg_999999')).status,404,'Single-message lookup reports an absent sequence');
+  assert.equal((await request('/v1/sessions/shared/messages/msg_bad')).status,400,'Single-message lookup validates the public message ID');
+  assert.equal((await request(`/v1/sessions/shared/messages/${selectedMessage.id}?unexpected=true`)).status,400,'Single-message lookup rejects unsupported query parameters');
   for(const data of [{},{unknown:'not conversation content'},{content:[]},{content:''},{content:'embedded\0NUL'},
     {content:'text',tool_calls:[]},{content:'text',refusal:'unsupported user field'}]) {
     assert.equal((await request('/v1/sessions/shared/messages',{role:'user',data})).status,400);

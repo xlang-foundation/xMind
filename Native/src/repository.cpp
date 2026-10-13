@@ -1936,6 +1936,14 @@ void Repository::append_message(const std::string& id,const std::string& role,co
     changed_one(impl_->database.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,?,?)",{id,role,json}));
     transaction.commit();
 }
+Message Repository::message(const std::string& id,std::int64_t sequence) {
+    if(sequence<1||sequence>9007199254740991LL)throw std::invalid_argument("Invalid message sequence");
+    session(id);
+    const auto rows=impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND seq=? AND execution_run_id IS NULL",{id,sequence}).rows;
+    if(rows.empty())throw NotFound("Message not found");
+    if(rows.size()!=1)throw DatabaseError("Message sequence is not unique");
+    return {integer(rows[0][0]),text(rows[0][1]),text(rows[0][2])};
+}
 std::vector<Message> Repository::history(const std::string& id) {
     session(id); std::vector<Message> result;
     for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL ORDER BY seq",{id}).rows)

@@ -272,6 +272,9 @@ std::future<void> PersistenceService::append_message(std::string id,std::string 
 std::future<std::vector<Message>> PersistenceService::history(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.history(id);});
 }
+std::future<Message> PersistenceService::message(std::string id,std::int64_t sequence) {
+    return impl_->observe([id=std::move(id),sequence](Repository& repository){return repository.message(id,sequence);});
+}
 std::future<void> PersistenceService::put_information(std::string category,std::string id,std::string json) {
     return impl_->submit([category=std::move(category),id=std::move(id),json=std::move(json)](Repository& repository){repository.put_information(category,id,json);});
 }

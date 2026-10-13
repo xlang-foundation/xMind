@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-13",
+  "scope": "Native xMind single-message history lookup",
+  "implementation": "GET /v1/sessions/{id}/messages/{message_id} validates the public msg_<sequence> identity and retrieves one top-level session message by indexed SQLite lookup.",
+  "success_case": {
+    "request": "GET /v1/sessions/shared/messages/<existing-message-id>",
+    "result": "200 with the same typed message object returned by the session history endpoint"
+  },
+  "failure_cases": [
+    {
+      "request": "GET /v1/sessions/shared/messages/msg_999999",
+      "status": 404
+    },
+    {
+      "request": "GET /v1/sessions/shared/messages/msg_bad",
+      "status": 400
+    },
+    {
+      "request": "GET /v1/sessions/shared/messages/<existing-message-id>?unexpected=true",
+      "status": 400
+    }
+  ],
+  "verification": {
+    "release_targets": [
+      "xmind",
+      "xmind_server"
+    ],
+    "test": "native_http_cli_contract",
+    "result": "passed",
+    "duration_seconds": 3.65
+  },
+  "parity_limit": "This verifies native single-message retrieval only. Upstream typed message-part and operation-level parity are not claimed."
+}
