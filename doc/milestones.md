@@ -2,8 +2,8 @@
 
 ## MCP catalogue invalidation and same-run refresh — 2026-10-12
 
-Run-owned MCP list-change notifications now invalidate the catalogue shared by
-the notification observer and native registry. The registry checks before
+Run-owned MCP list-change notifications and unexpected listener loss now
+invalidate the catalogue shared by the notification observer and native registry. The registry checks before
 proposal and after human approval, so stale bindings never reach a remote
 effect. AgentRunner reports the blocked call to the model, rediscovers tools,
 and continues with current definitions. Direct graph MCP nodes use pinned

@@ -182,6 +182,7 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
                         server.revision,std::move(observer_client),*filter,deadline,catalogue_invalidated);
                     observer->start();
                 } catch(const std::exception&) {
+                    catalogue_invalidated->store(true,std::memory_order_release);
                     store_.append_event(id,"mcp.subscription.unavailable",
                         Json{{"server_id",server.id},{"config_revision",server.revision},
                              {"source","graph"},{"reason","listener_unavailable"}}.dump()).get();

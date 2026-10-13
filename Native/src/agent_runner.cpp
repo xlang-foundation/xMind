@@ -541,6 +541,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         server.id,server.revision,std::move(observer_client),*filter,run_deadline,runtime.catalogue_invalidated);
                     observer->start();mcp_observers.push_back(std::move(observer));
                 } catch(const std::exception&) {
+                    runtime.catalogue_invalidated->store(true,std::memory_order_release);
                     persistence_.append_event(id,"mcp.subscription.unavailable",
                         Json{{"server_id",server.id},{"config_revision",server.revision},
                              {"reason","listener_unavailable"}}.dump()).get();

@@ -3,8 +3,8 @@
 ## MCP catalogue invalidation during a run — 2026-10-12
 
 Validated `tools/list_changed`, `prompts/list_changed` and
-`resources/list_changed` notifications now set a run-owned invalidation flag
-shared with the registry. The registry checks before proposing and again after
+`resources/list_changed` notifications and unplanned subscription closure now
+set a run-owned invalidation flag shared with the registry. The registry checks before proposing and again after
 approval but before remote dispatch. A change during approval durably fails
 the claimed operation without calling the peer. AgentRunner returns a bounded
 error to the model, refreshes the configured catalogue in the same run, and
@@ -30,8 +30,8 @@ notifications with credential-shaped values and verify sanitization, the cap,
 overflow marker, cancellation and durable closure
 before run completion. Direct graph MCP tool children use the same observer;
 stdio graph tests verify closure for approved, denied and cancelled runs, and
-an HTTP graph test verifies list-change invalidation and closure before child
-failure. The HTTP AgentRunner integration also verifies an MCP effect waits
+an HTTP graph test verifies that unexpected listener completion invalidates a
+pinned registry and closes before child failure. The HTTP AgentRunner integration also verifies an MCP effect waits
 for controller approval and provider token metrics persist. Dedicated stdio
 and HTTP transport contracts verify acknowledgement ordering. Graph/MCP,
 AgentRunner, stdio/HTTP transport and official modern/legacy SDK contracts pass

@@ -88,8 +88,8 @@ For modern `2026-07-28` peers advertising list-change notifications, each direct
 MCP graph child opens a separate run-owned listener alongside its effect
 client. Validated acknowledgement and bounded notification metadata are
 journaled on the child run; peer payloads and resource URIs are excluded. A
-list-change marks the registry stale. Dispatch checks this flag before
-proposal and again after approval, preventing stale definitions from reaching
+list-change or unplanned listener loss marks the registry stale. Dispatch
+checks this flag before proposal and again after approval, preventing stale definitions from reaching
 the peer. Graph aliases are pinned, so the child fails closed and the graph
 must be revised before retry; it never silently rebinds the node. The observer
 is stopped/joined before the child commits a terminal state. Stdio contracts

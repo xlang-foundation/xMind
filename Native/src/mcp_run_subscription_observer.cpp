@@ -46,6 +46,7 @@ void McpRunSubscriptionObserver::start() {
     persist("mcp.subscription.started",Json{{"filter",filter_json(filter_)}}.dump());
     try {worker_=std::jthread([this](std::stop_token stop){observe(stop);});}
     catch(...) {
+        if(catalogue_invalidated_)catalogue_invalidated_->store(true,std::memory_order_release);
         try{persist("mcp.subscription.closed",Json{{"outcome","failed"},{"reason","listener_start_failed"}}.dump());}catch(...){}
         throw;
     }
@@ -83,12 +84,17 @@ void McpRunSubscriptionObserver::observe(std::stop_token stop) noexcept {
             persist("mcp.subscription.acknowledged",Json{{"filter",filter_json(accepted.notifications)}}.dump());
         });
         (void)accepted;
-        persist("mcp.subscription.closed",Json{{"outcome","completed"},{"notification_count",notifications}}.dump());
+        const bool unexpected=!stop.stop_requested();
+        if(unexpected&&catalogue_invalidated_)catalogue_invalidated_->store(true,std::memory_order_release);
+        persist("mcp.subscription.closed",Json{{"outcome","completed"},{"notification_count",notifications},
+            {"catalogue_invalidated",unexpected}}.dump());
     } catch(...) {
+        const bool unexpected=!stop.stop_requested();
+        if(unexpected&&catalogue_invalidated_)catalogue_invalidated_->store(true,std::memory_order_release);
         try {
             persist("mcp.subscription.closed",Json{{"outcome",stop.stop_requested()?"stopped":"failed"},
                 {"reason",stop.stop_requested()?"run_ended":"peer_or_protocol_failure"},
-                {"notification_count",notifications}}.dump());
+                {"notification_count",notifications},{"catalogue_invalidated",unexpected}}.dump());
         } catch(...) {}
     }
 }

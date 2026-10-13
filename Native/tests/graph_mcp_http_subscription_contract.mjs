@@ -34,8 +34,8 @@ const peer=createServer((request,response)=>{
         response.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache'});
         const meta={'io.modelcontextprotocol/subscriptionId':message.id},event=value=>`data: ${JSON.stringify(value)}\r\n\r\n`;
         response.write(event({jsonrpc:'2.0',method:'notifications/subscriptions/acknowledged',params:{_meta:meta,notifications:{toolsListChanged:true}}}));
-        for(let index=0;index<70;index++)response.write(event({jsonrpc:'2.0',method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:'graph-http-private-peer-payload',index}}));
-        response.on('close',()=>{if(!response.writableEnded)writeFile(closedFile,'peer observed HTTP listener disconnect').then(listenerClosedResolve).catch(error=>{peerError=error;listenerClosedResolve();});});
+        response.on('close',()=>writeFile(closedFile,'peer closed HTTP listener stream').then(listenerClosedResolve).catch(error=>{peerError=error;listenerClosedResolve();}));
+        response.end(event({jsonrpc:'2.0',id:message.id,result:{resultType:'complete',_meta:meta}}));
         return;
       }else if(message.method==='tools/call'){
         assert.equal(message.params.name,'write_effect');assert.deepEqual(message.params.arguments,{body});
@@ -71,19 +71,17 @@ try{
   const events=await wait(()=>client.graphEvents(run.id,0),items=>items.some(value=>value.run_id===proposal.child.id&&value.kind==='mcp.catalogue.invalidated'),'graph catalogue invalidation');
   const journal=events.filter(value=>value.run_id===proposal.child.id&&value.kind.startsWith('mcp.subscription.'));
   assert.ok(journal.some(value=>value.kind==='mcp.subscription.acknowledged'));
-  assert.ok(journal.filter(value=>value.kind==='mcp.subscription.notification').length>=1);
-  assert.ok(journal.filter(value=>value.kind==='mcp.subscription.notification').length<=64);
-  assert.ok(journal.filter(value=>value.kind==='mcp.subscription.overflow').length<=1);
+  assert.equal(journal.filter(value=>value.kind==='mcp.subscription.notification').length,0);
   assert.equal(JSON.stringify(journal).includes('graph-http-private-peer-payload'),false);
   await assert.rejects(readFile(effect),error=>error.code==='ENOENT');
   await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error('Graph HTTP listener did not close')),5000);listenerClosed.then(()=>{clearTimeout(timeout);resolve();},reject);});
-  assert.equal(await readFile(closedFile,'utf8'),'peer observed HTTP listener disconnect');
+  assert.equal(await readFile(closedFile,'utf8'),'peer closed HTTP listener stream');
   const terminalEvents=await client.graphEvents(run.id,0),closed=terminalEvents.find(value=>value.run_id===proposal.child.id&&value.kind==='mcp.subscription.closed'),failedEvent=terminalEvents.find(value=>value.run_id===proposal.child.id&&value.kind==='run.failed');
-  assert.ok(closed);assert.equal(closed.data.outcome,'stopped');assert.ok(failedEvent);assert.ok(closed.seq<failedEvent.seq);
+  assert.ok(closed);assert.equal(closed.data.outcome,'completed');assert.equal(closed.data.catalogue_invalidated,true);assert.ok(failedEvent);assert.ok(closed.seq<failedEvent.seq);
   const invalidated=terminalEvents.find(value=>value.run_id===proposal.child.id&&value.kind==='mcp.catalogue.invalidated');assert.ok(invalidated);assert.equal(invalidated.data.effect_dispatched,false);
   assert.ok(methods.includes('subscriptions/listen'));assert.equal(methods.includes('tools/call'),false,'A pinned graph MCP alias must fail closed when its catalogue changes');
   if(pending.operation)assert.equal((await client.operation(pending.operation.id)).state,'failed');
-  console.log('Native graph HTTP MCP subscription contract passed: an in-run list-change invalidates the pinned alias, retires any approved-but-undispatched operation, and closes the listener before the graph child fails. No peer tool effect is sent.');
+  console.log('Native graph HTTP MCP subscription contract passed: unexpected listener completion invalidates the pinned alias, retires any approved-but-undispatched operation, and closes the listener before the graph child fails. No peer tool effect is sent.');
 }finally{
   await stop();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));
   assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-graph-http-subscription-'));await rm(root,{recursive:true,force:true});
