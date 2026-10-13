@@ -1,7 +1,7 @@
 {
   "date": "2026-10-12",
   "scope": "Live local-browser acceptance on the existing TestProj profile",
-  "xmind_source_revision": "2a41758acd56c4136c2a04a69dc9eca46dc4e5e0",
+  "xmind_source_revision": "0a492d3d3e2b595ffcb08c1d50d470afbdcdcd3b",
   "xlang3_source_revision": "f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7",
   "workspace": "TestProj/model-zoo",
   "provider": {
@@ -36,10 +36,43 @@
       "stderr_bytes": 0
     }
   },
+  "follow_up_coding_attempt": {
+    "scope": "Restore removable active-filter controls in HomeView.vue",
+    "edited_files": ["model-zoo/frontend/src/views/HomeView.vue"],
+    "result": "Approved single-file update restored keyboard-accessible active-filter buttons and Clear all control; no other file was edited.",
+    "frontend_build": {
+      "command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "exit_code": 0,
+      "vite": "6.4.4",
+      "transformed_modules": 36,
+      "build_duration_ms": 583,
+      "stderr_bytes": 0
+    },
+    "run_completion": "The file update and build succeeded, but xMind recorded a provider HTTP 400 (invalid_request_error) before a final agent response. No safe code or parameter was returned; the cause is still unknown."
+  },
+  "live_model_zoo_validation": {
+    "browser": "Codex in-app browser on the local machine; Edge was unavailable through the available browser-control surface.",
+    "frontend_url": "http://127.0.0.1:5173/",
+    "backend": "http://127.0.0.1:8000",
+    "http_checks": {
+      "frontend_root": 200,
+      "backend_docs": 200,
+      "backend_openapi": 200,
+      "routes": ["/api/health", "/api/catalog/stats", "/api/models", "/api/models/{model_id}"]
+    },
+    "interactions": [
+      "Selecting Image Classification changed the URL, narrowed results from 12 models to 3, and exposed the accessible Remove filter button.",
+      "Activating Remove filter returned to 12 models and cleared the query string.",
+      "Searching for bert returned 2 models and updated the URL; Reset restored the unfiltered catalog."
+    ],
+    "visual_check": "Desktop viewport showed the catalog hero, seeded-data disclosure, search/filter controls, and model cards without a loading/error state.",
+    "limits": ["No mobile viewport override was available in this browser-control surface.", "No live Edge visual validation was performed."]
+  },
   "limitations": [
-    "The complete multi-step coding run did not reach a final response; the cause of the provider HTTP 400 remains unidentified.",
+    "Both multi-step coding runs applied their authorized file changes and produced a successful Vite build, but ended on provider HTTP 400 before a final response. The safe diagnostic does not identify the cause.",
     "The earlier selected DeepSeek conversation was cancelled after growing to about 64,000 input tokens and many tool turns; it was not used for these clean-session checks.",
-    "The rebuilt Model Zoo page was not visually checked in Microsoft Edge because the available browser-control surface exposed only the in-app browser, and Edge was unavailable there.",
-    "Responsive browser interaction and backend tests were not exercised in this checkpoint."
+    "The page was visually and interactively checked in the Codex in-app browser; Microsoft Edge and mobile viewport checks remain open.",
+    "Backend route availability was checked over HTTP, but separate API contract or failure-path tests were not run."
   ]
 }
