@@ -25,6 +25,7 @@ int main(){try{
     auto limit=config;limit.output_limit=Capability::unknown;rejects([&]{serialize_anthropic_request(limit,request);});
     auto tools=config;tools.tools=Capability::unsupported;rejects([&]{serialize_anthropic_request(tools,request);});
     auto reasoning=config;reasoning.reasoning_effort=ReasoningEffort::medium;rejects([&]{serialize_anthropic_request(reasoning,request);});
+    auto adaptive=config;adaptive.model="claude-sonnet-5-fixture";adaptive.reasoning_effort=ReasoningEffort::medium;const auto adaptive_wire=Json::parse(serialize_anthropic_request(adaptive,request));require(adaptive_wire["thinking"]==Json{{"type","adaptive"}}&&adaptive_wire["output_config"]==Json{{"effort","medium"}},"Adaptive Claude families must receive bounded native effort settings");
     auto invalid=request;invalid.messages.pop_back();rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages.back().tool_call_id="foreign-call";rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages[0].role=MessageRole::developer;rejects([&]{serialize_anthropic_request(config,invalid);});

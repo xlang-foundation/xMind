@@ -240,14 +240,14 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     {
         PersistenceService store(default_database,imports);AgentSettings default_base;
         ProviderProfileRuntime runtime(store,default_base,policy(origin),1,8);
-        const auto enrolled=runtime.save_profile("claude","anthropic.messages","fixture-claude",key("runtime-claude-fixture-key"),0,true);
+        const auto enrolled=runtime.save_profile("claude","anthropic.messages","claude-sonnet-5-fixture",key("runtime-claude-fixture-key"),0,true);
         require(enrolled.revision==1&&enrolled.active=="claude"&&runtime.available(),"Default-output Claude must activate its real saved profile");
         store.create_session("claude-default","Synthetic default output-budget profile").get();
         Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);
         const httplib::Headers authorized{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
         const auto admitted=client.Post("/v1/runs",authorized,R"({"id":"claude-default-run","session_id":"claude-default","prompt":"Claude profile default output fixture","provider_profile_id":"claude","expected_provider_revision":1})","application/json");
         require(admitted&&admitted->status==202,"Absent base output limit must admit a real authenticated Claude profile run");
-        wait(store,"claude-default-run",RunState::completed);reply(store,"claude-default","Actual Claude fixture reply");provenance(store,"claude-default","claude",1,"fixture-claude");
+        wait(store,"claude-default-run",RunState::completed);reply(store,"claude-default","Actual Claude fixture reply");provenance(store,"claude-default","claude",1,"claude-sonnet-5-fixture");
         default_history=store.history("claude-default").get();default_registry=store.information("native-provider-profiles","registry").get();
         const auto response=Json::parse(default_history.back().json);
         require(response.at("usage").at("input_tokens")==3&&response.at("usage").at("output_tokens")==4&&response.at("provider_items").at(0).at("type")=="anthropic_content","Default Claude request must return actual native stream metrics and its original receipt");
@@ -261,9 +261,9 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         for(std::size_t index=0;index<restored.size();++index)require(restored[index].sequence==default_history[index].sequence&&restored[index].role==default_history[index].role&&restored[index].json==default_history[index].json,"Default-output restart must preserve exact history bytes");
         store.create_session("claude-default-reopened","Synthetic reopened default output-budget profile").get();
         runtime.submit("claude-default-reopened-run","claude-default-reopened","Claude profile reopened default output fixture");
-        wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude",1,"fixture-claude");
+        wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude",1,"claude-sonnet-5-fixture");
         require(store.operations("claude-default-reopened-run").get().empty()&&store.information("native-provider-profiles","registry").get()==default_registry,"Reopened default request cannot alter the saved provider or dispatch effects");
     }
     workspace_binding_contract(std::filesystem::u8path(argv[1]),imports,origin);
-    std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit 64-token output override and saved-profile default4096 authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
+    std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit output overrides and saved-profile defaults for legacy and adaptive-thinking Anthropic models, authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

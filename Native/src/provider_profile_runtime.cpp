@@ -32,6 +32,17 @@ std::string model_identity(const ProviderProfileRoute& route,const std::string& 
     if(route.wire==ProviderWire::gemini_generate_content)return model.starts_with("models/")?model:"models/"+model;
     return model;
 }
+std::int64_t anthropic_default_output_tokens(const std::string& model){
+    // Sonnet 5, Opus 5, Fable 5 and Mythos 5 use adaptive thinking by default.
+    // Messages max_tokens covers thinking plus visible output, so 4096 can be
+    // exhausted before an agent finishes a tool cycle. Keep the default
+    // bounded and preserve any explicit application limit.
+    if(model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5"))return 16384;
+    return 4096;
+}
+bool anthropic_adaptive_model(const std::string& model){
+    return model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5");
+}
 Capability model_tools(const ProviderProfileExecutionPolicy& policy,const std::string& model){
     const auto canonical=model_identity(policy.route,model);
     if(policy.model_capabilities){
@@ -145,7 +156,8 @@ struct ProviderProfileRuntime::Impl {
         }
         auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
         if(allowed.model_capabilities)settings.provider=bind_provider_model_policy(*allowed.model_capabilities,settings.provider,model_identity(allowed.route,profile.model),base.workspace.has_value());
-        if(settings.provider.wire==ProviderWire::anthropic_messages&&!settings.max_output_tokens)settings.max_output_tokens=4096;
+        if(settings.provider.wire==ProviderWire::anthropic_messages&&!settings.max_output_tokens)settings.max_output_tokens=anthropic_default_output_tokens(profile.model);
+        if(settings.provider.wire==ProviderWire::anthropic_messages&&anthropic_adaptive_model(profile.model)&&!settings.provider.reasoning_effort)settings.provider.reasoning_effort=ReasoningEffort::medium;
         settings.context=allowed.context;
         settings.provider.tools=model_tools(allowed,profile.model);
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};

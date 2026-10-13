@@ -76,7 +76,16 @@ struct AnthropicStream::Impl {
             if(delta)throw ModelProtocolError("Claude terminal update repeated");
             const auto& change=value.at("delta");const auto& reported=value.at("usage");if(!change.is_object()||!change.contains("stop_reason")||!reported.contains("output_tokens"))throw ModelProtocolError("Claude message update is invalid");
             if(change["stop_reason"].is_null()){counters(reported);return;}
-            if(!closed())throw ModelProtocolError("Claude terminal update has active blocks");const auto stop=text(change,"stop_reason");
+            if(!closed()){
+                for(const auto& block:blocks)if(!block.stopped){
+                    if(block.type=="text")throw ModelProtocolError("Claude terminal update has active text block");
+                    if(block.type=="tool_use")throw ModelProtocolError("Claude terminal update has active tool block");
+                    if(block.type=="thinking")throw ModelProtocolError("Claude terminal update has active thinking block");
+                    if(block.type=="redacted_thinking")throw ModelProtocolError("Claude terminal update has active redacted block");
+                    throw ModelProtocolError("Claude terminal update has active unknown block");
+                }
+                throw ModelProtocolError("Claude terminal update has active unknown block");
+            }const auto stop=text(change,"stop_reason");
             if(stop!="end_turn"&&stop!="stop_sequence"&&stop!="tool_use"&&stop!="max_tokens")throw ModelProtocolError("Unsupported Claude stop reason");
             reason=stop;delta=true;counters(reported);result.finish_reason=stop=="tool_use"?"tool_calls":stop=="max_tokens"?"length":"stop";emit("model.finish",{{"reason",result.finish_reason},{"provider_reason",stop}});return;
         }

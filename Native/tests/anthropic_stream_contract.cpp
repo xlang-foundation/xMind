@@ -31,6 +31,22 @@ int main(){try{
         AnthropicStream stream([](const auto&){});bool failed=false;try{stream.feed(event({{"type","error"},{"error",{{"type",type},{"message","private fixture details"}}}}));}catch(const ModelProtocolError& error){failed=true;require(model_protocol_diagnostic(error)==expected,"Claude SSE errors map to a safe stable diagnostic");require(std::string(error.what()).find("private fixture details")==std::string::npos,"Claude provider messages are not copied into diagnostics");}require(failed,"Claude SSE error event must fail the model response");
     }
     {
+        AnthropicStream stream([](const auto&){});bool failed=false;
+        try{stream.feed(event(start())+begin(0,{{"type","future_block"}}));}
+        catch(const ModelProtocolError& error){failed=true;require(model_protocol_diagnostic(error)=="anthropic_content_block_unsupported","Unsupported Claude response blocks must produce an actionable safe diagnostic");}
+        require(failed,"Unknown Claude response block must fail closed");
+    }
+    for(const auto& [block,expected]:std::vector<std::pair<Json,std::string>>{
+        {{{"type","text"},{"text",""}},"anthropic_terminal_text_block_active"},
+        {{{"type","tool_use"},{"id","open-call"},{"name","read_file"},{"input",Json::object()}},"anthropic_terminal_tool_block_active"},
+        {{{"type","thinking"},{"thinking",""}},"anthropic_terminal_thinking_block_active"},
+        {{{"type","redacted_thinking"},{"data","opaque"}},"anthropic_terminal_redacted_block_active"}}){
+        AnthropicStream stream([](const auto&){});bool failed=false;
+        try{stream.feed(event(start())+begin(0,block)+event(update()));}
+        catch(const ModelProtocolError& error){failed=true;require(model_protocol_diagnostic(error)==expected,"Active Claude block diagnostics reveal only a safe block category");}
+        require(failed,"Claude terminal update cannot silently accept an open content block");
+    }
+    {
         const std::string caller=R"({ "\u0074ype" : "\u0064irect" })";
         const std::string input=R"({ "path" : "README.md", "n" : 1.00000000000000000001 })";
         const std::string prefix="event: content_block_start\ndata: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"tool_use\",\"id\":\"direct-call\",\"name\":\"read_file\",\"input\":{},\"caller\":";

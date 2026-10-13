@@ -40,10 +40,16 @@ void add(std::vector<WireMessage>& messages,std::size_t& content_bytes,std::stri
     if(merging){messages.back().content.pop_back();messages.back().content+=',';messages.back().content+=blocks;messages.back().content+=']';}
     else messages.push_back({std::move(role),'['+blocks+']'});
 }
+bool adaptive_model(const std::string& model){
+    return model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5");
+}
+const char* effort_name(ReasoningEffort effort){
+    switch(effort){case ReasoningEffort::low:return "low";case ReasoningEffort::medium:return "medium";case ReasoningEffort::high:return "high";case ReasoningEffort::max:return "max";default:throw std::invalid_argument("Unsupported Claude adaptive effort");}
+}
 }
 std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request){
     if(request.canonical_window)throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
-    if(config.reasoning_effort)throw std::invalid_argument("Claude reasoning controls are not implemented");
+    if(config.reasoning_effort&&!adaptive_model(config.model))throw std::invalid_argument("Claude reasoning effort is unsupported for this model");
     if(!request.max_output_tokens)throw std::invalid_argument("Claude requires an explicit output token limit");
     if(request.messages.empty()||request.messages.size()>4096||request.tools.size()>64)throw std::invalid_argument("Claude request exceeds configured counts");
     std::size_t receipt_bytes=0;
@@ -59,8 +65,9 @@ std::string serialize_anthropic_request(const ChatProviderConfig& config,const M
         // Actual wire arrays below always retain their original raw source.
         validation.messages[index].provider_items_json="[]";
     }
-    serialize_chat_request(config,validation);
+    auto common_config=config;common_config.reasoning_effort.reset();serialize_chat_request(common_config,validation);
     Json body={{"model",config.model},{"stream",true},{"max_tokens",*request.max_output_tokens}};
+    if(config.reasoning_effort){body["thinking"]={{"type","adaptive"}};body["output_config"]={{"effort",effort_name(*config.reasoning_effort)}};}
     if(!request.tools.empty()){
         body["tools"]=Json::array();
         for(const auto& tool:request.tools)body["tools"].push_back({{"name",tool.name},{"description",tool.description},{"input_schema",object(tool.input_schema_json)}});

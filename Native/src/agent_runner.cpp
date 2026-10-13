@@ -713,6 +713,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 stop_mcp_observers();
                 return persistence_.complete_run(id,reply.dump()).get();
             }
+            if(response.finish_reason=="length")throw ModelProtocolError("Model output token limit reached before completing the agent turn");
             if(response.finish_reason!="tool_calls" || (!workspace_&&xlang_tools.empty())) throw ModelProtocolError("Model did not produce a complete supported turn");
             const auto is_planning=[](const auto& call){return call.name=="plan_tasks"||call.name=="revise_plan"||call.name=="inspect_plan";};
             if(std::any_of(response.tool_calls.begin(),response.tool_calls.end(),is_planning)){
