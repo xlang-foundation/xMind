@@ -44,6 +44,10 @@ std::string_view model_protocol_diagnostic(const ModelProtocolError& error) {
         {"Invalid Responses token details","responses_usage_invalid"},
         {"Responses stream exceeds limits","responses_limit_exceeded"},
         {"Responses continuation exceeds limits","responses_limit_exceeded"},
+        {"Claude provider overloaded","anthropic_overloaded_error"},
+        {"Claude provider rate limited","anthropic_rate_limit_error"},
+        {"Claude provider server error","anthropic_server_error"},
+        {"Claude provider stream failed","anthropic_stream_error"},
         {"Incomplete or invalid model stream","chat_stream_incomplete"}})
         if(message==text)return code;
     return {};

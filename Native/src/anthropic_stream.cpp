@@ -57,7 +57,15 @@ struct AnthropicStream::Impl {
     void chunk(){
         const auto value=parse(data);const auto type=text(value,"type");if(event!=type)throw ModelProtocolError("Claude SSE type differs from payload");
         if(done)throw ModelProtocolError("Claude data follows terminal event");
-        if(type=="error")throw ModelProtocolError("Claude provider stream failed");
+        if(type=="error"){
+            const auto& detail=value.at("error");const auto error_type=text(detail,"type");
+            if(error_type=="overloaded_error")throw ModelProtocolError("Claude provider overloaded");
+            if(error_type=="rate_limit_error")throw ModelProtocolError("Claude provider rate limited");
+            if(error_type=="api_error")throw ModelProtocolError("Claude provider server error");
+            // Error messages and request IDs are deliberately not retained in
+            // durable run events. The stable type above is all the UI needs.
+            throw ModelProtocolError("Claude provider stream failed");
+        }
         if(type=="ping")return;
         if(type=="message_start"){
             const auto& message=value.at("message");if(started||message.value("type",Json{})!="message"||message.value("role",Json{})!="assistant"||!message.at("content").is_array()||!message["content"].empty()||!message.at("stop_reason").is_null()||!message.at("stop_sequence").is_null())throw ModelProtocolError("Invalid Claude message start");

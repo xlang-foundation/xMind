@@ -1,5 +1,6 @@
 // Synthetic wire data validates a real native decoder; no model or network.
 #include "agentflow/anthropic_stream.hpp"
+#include "agentflow/model_stream.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <iostream>
@@ -26,6 +27,9 @@ Json receipt(const ModelCompletion& result){const auto items=Json::parse(result.
 void rejects(const std::string& wire){bool failed=false;std::size_t acknowledgements=0;AnthropicStream decoder([&](const ModelEvent& value){if(value.kind=="model.done")++acknowledgements;});try{decoder.feed(wire);decoder.finish();}catch(const ModelProtocolError&){failed=true;}require(failed&&acknowledgements==0,"Invalid Claude stream cannot acknowledge completion");}
 }
 int main(){try{
+    for(const auto& [type,expected]:std::vector<std::pair<std::string,std::string>>{{"overloaded_error","anthropic_overloaded_error"},{"rate_limit_error","anthropic_rate_limit_error"},{"api_error","anthropic_server_error"},{"fixture_private_error_type","anthropic_stream_error"}}){
+        AnthropicStream stream([](const auto&){});bool failed=false;try{stream.feed(event({{"type","error"},{"error",{{"type",type},{"message","private fixture details"}}}}));}catch(const ModelProtocolError& error){failed=true;require(model_protocol_diagnostic(error)==expected,"Claude SSE errors map to a safe stable diagnostic");require(std::string(error.what()).find("private fixture details")==std::string::npos,"Claude provider messages are not copied into diagnostics");}require(failed,"Claude SSE error event must fail the model response");
+    }
     {
         const std::string caller=R"({ "\u0074ype" : "\u0064irect" })";
         const std::string input=R"({ "path" : "README.md", "n" : 1.00000000000000000001 })";

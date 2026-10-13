@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-12",
+  "scope": "Safe Claude SSE error classification and VS Code display",
+  "changes": {
+    "native": [
+      "Maps overloaded_error, rate_limit_error, and api_error to stable diagnostic codes.",
+      "Maps unknown Claude SSE errors to a generic safe stream diagnostic.",
+      "Does not retain provider-supplied error messages or request identifiers."
+    ],
+    "vscode": [
+      "Recognizes the four Claude diagnostic codes and displays actionable safe messages."
+    ]
+  },
+  "verification": {
+    "native_build": {
+      "command": "cmake --build build/native --config Release --target agentflow_anthropic_stream_contract",
+      "result": "passed",
+      "note": "Invoked the Visual Studio-bundled CMake executable because CMake was not on PATH."
+    },
+    "native_contract": {
+      "binary": "build/native/contract-bin/Release/agentflow_anthropic_stream_contract.exe",
+      "result": "passed",
+      "scope": "Synthetic Claude SSE decoder and safe-diagnostic fixtures; no network or live inference."
+    },
+    "vscode_contracts": {
+      "command": "npm test",
+      "working_directory": "extensions/vscode",
+      "passed": 318,
+      "failed": 0
+    }
+  },
+  "limitations": [
+    "The live VS Code preview has not been upgraded to this native build.",
+    "The exact cause of the prior live Claude stream failure is still unconfirmed.",
+    "A new TestProj xMind coding run and build have not yet completed."
+  ]
+}

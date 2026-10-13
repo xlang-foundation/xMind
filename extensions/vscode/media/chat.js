@@ -204,7 +204,8 @@ const protocolDiagnosticCodes=new Set([
   'responses_sequence_invalid','responses_event_type_mismatch','responses_item_identity_mismatch',
   'responses_identity_mismatch','responses_model_identity_mismatch','responses_final_identity_mismatch',
   'responses_message_mismatch','responses_text_mismatch','responses_summary_mismatch',
-  'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete'
+  'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete',
+  'anthropic_overloaded_error','anthropic_rate_limit_error','anthropic_server_error','anthropic_stream_error'
 ]);
 function runFailure(data){
   const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
@@ -226,6 +227,14 @@ function runFailure(data){
     ?'The model provider stopped this response with its content filter. Partial tool requests were not executed.'
     :data?.reason==='model_protocol_error'&&data.protocol_error_code==='responses_rate_limit'
     ?'The model provider reported a rate limit. This run stopped before completing its response. Try again when provider capacity is available.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='anthropic_overloaded_error'
+    ?'The Claude API is temporarily overloaded. This run stopped before completing its response; retry when capacity is available.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='anthropic_rate_limit_error'
+    ?'The Claude API reported a rate limit. This run stopped before completing its response.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='anthropic_server_error'
+    ?'The Claude API reported a server error. This run stopped before completing its response.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='anthropic_stream_error'
+    ?'The Claude stream ended with an error. Incomplete tool calls from this response were discarded.'
     :data?.reason==='model_protocol_error'
     ?'The model response could not be validated, so this run stopped. Review the recorded tool outcomes before starting another run.'
     :'Execution failed. Inspect the selected run activity for the recorded reason.'));

@@ -580,7 +580,7 @@ test('file creation approval discloses parent directory effects as escaped paths
 });
 test('provider failure codes render actionable messages and exact failed-response usage',()=>{
  const r=renderer(),doc=r.dom.window.document;
- const messages={responses_server_error:/provider reported a server error/,responses_output_token_limit:/reached its output token limit/,responses_content_filter:/content filter/,responses_rate_limit:/reported a rate limit/};
+ const messages={responses_server_error:/provider reported a server error/,responses_output_token_limit:/reached its output token limit/,responses_content_filter:/content filter/,responses_rate_limit:/reported a rate limit/,anthropic_overloaded_error:/Claude API is temporarily overloaded/,anthropic_rate_limit_error:/Claude API reported a rate limit/,anthropic_server_error:/Claude API reported a server error/,anthropic_stream_error:/Claude stream ended with an error/};
  for(const [code,expected] of Object.entries(messages)){
   r.send({type:'reset-run'});r.send({type:'event',event:{kind:'model.usage',data:{prompt_tokens:17,completion_tokens:8,total_tokens:25}}});r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:code,private:'DO_NOT_ECHO'}}});
   assert.match(doc.getElementById('run-failure').textContent,expected);assert.ok(doc.getElementById('run-failure').textContent.includes(code));assert.match(doc.querySelector('#live .metrics').textContent,/Input 17Output 8Total 25/);assert.ok(!doc.getElementById('run-failure').textContent.includes('DO_NOT_ECHO'));
