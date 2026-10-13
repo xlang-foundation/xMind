@@ -6,8 +6,10 @@ database operations continue through embedded xlang3. The profile controller
 does not read or modify agent tables.
 
 Without `--port`, the console selects its current directory, or the explicit
-`--workspace DIR`, and resolves one profile under the user's Local AppData
-`xMind/LocalProfiles` directory. `--profile-root DIR` selects an explicit private
+`--workspace DIR`, and resolves the same profile root used by the VS Code
+extension: `%USERPROFILE%\.xMind\p`. If that path exceeds 84 characters, both
+clients use `%USERPROFILE%\p`; if that path also exceeds the limit, startup
+fails with a clear error. `--profile-root DIR` selects an explicit private
 storage location. Storage that overlaps the selected workspace is rejected.
 The profile directory is keyed by the native workspace directory identity,
 not a spelling of its path or a package revision.

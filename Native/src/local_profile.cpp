@@ -18,7 +18,6 @@
 #include <map>
 #include <sddl.h>
 #include <set>
-#include <shlobj.h>
 #include <thread>
 namespace agentflow {
 namespace {
@@ -32,6 +31,10 @@ struct ProfileRequestError : std::runtime_error {
           status(value), body(std::move(response)) {}
 };
 void require(bool condition, const char *message = "Local profile validation failed; stored state was preserved") {
+    if (!condition)
+        throw std::runtime_error(message);
+}
+void require(bool condition, const std::string &message) {
     if (!condition)
         throw std::runtime_error(message);
 }
@@ -232,10 +235,14 @@ class Store {
             require(held.value != INVALID_HANDLE_VALUE);
             BY_HANDLE_FILE_INFORMATION info{};
             require(GetFileInformationByHandle(held.value, &info) != 0 &&
-                        (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
-                        !(info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
-                        same(final_path(held.value), part.native()),
-                    "Local profile path contains an alias or changed directory");
+                        (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
+                    "Local profile path component is not an accessible directory: " + text(part));
+            require(!(info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT),
+                    "Local profile path component is a reparse point: " + text(part));
+            const auto resolved = final_path(held.value);
+            require(same(resolved, part.native()),
+                    "Local profile path component resolves to a different directory: " + text(part) +
+                        " -> " + text(fs::path(resolved)));
             ancestors.push_back(std::move(held));
         }
         require(!ancestors.empty());
@@ -347,12 +354,25 @@ std::string file_bytes(const fs::path &path, std::size_t bound) {
     return out;
 }
 std::string default_root() {
-    PWSTR value = nullptr;
-    require(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &value)),
-            "Cannot locate local xMind profile storage");
-    const auto path = fs::path(value) / L"xMind" / L"LocalProfiles";
-    CoTaskMemFree(value);
-    return text(path);
+    std::array<wchar_t, 32768> value{};
+    const DWORD length = GetEnvironmentVariableW(L"USERPROFILE", value.data(), static_cast<DWORD>(value.size()));
+    require(length > 0 && length < value.size(), "Local xMind profile storage requires USERPROFILE");
+    const fs::path requested(value.data());
+    Handle profile(CreateFileW(extended(requested).c_str(), FILE_READ_ATTRIBUTES | READ_CONTROL,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
+                               FILE_FLAG_BACKUP_SEMANTICS, nullptr));
+    require(profile.value != INVALID_HANDLE_VALUE, "Cannot open the Windows user profile directory");
+    BY_HANDLE_FILE_INFORMATION info{};
+    require(GetFileInformationByHandle(profile.value, &info) != 0 &&
+                (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
+            "Windows user profile path is not a directory");
+    const fs::path user_root(final_path(profile.value));
+    const auto primary = user_root / L".xMind" / L"p";
+    if (primary.native().size() <= 84) return text(primary);
+    const auto fallback = user_root / L"p";
+    require(fallback.native().size() <= 84,
+            "The local Windows profile location is too long for native runtime preparation");
+    return text(fallback);
 }
 void shape(const Json &value, const Store &store, const WorkspaceTools &workspace) {
     require(value.is_object() && value.contains("schema") && value.at("schema").is_number_integer() &&

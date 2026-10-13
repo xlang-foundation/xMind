@@ -1,5 +1,18 @@
 # Current native validation
 
+## Shared native CLI and VS Code profile — 2026-10-13
+
+The native CLI now uses the same default profile root as the VS Code extension:
+`%USERPROFILE%\.xMind\p`, falling back to `%USERPROFILE%\p` when the
+primary path exceeds the native runtime's 84-character limit. A Release CLI
+`profile-info` attached to the already-running TestProj owner (`started: false`,
+PID 44084), then `sessions` listed the existing Model Zoo and VS Code sessions.
+This confirms both clients reach the same managed backend and SQLite history.
+The full `native_local_profile_contract` passed **1/1** in **212.07 seconds**,
+covering managed startup, encrypted rendezvous, concurrent attach,
+profile-preserving upgrade/recovery and persisted graph history. Exact CTest
+output: [native-cli-vscode-shared-profile-20261013.log](evidence/native-cli-vscode-shared-profile-20261013.log).
+
 ## Native A2A Windows contract checkpoint — 2026-10-13
 
 The local Release build passed all seven focused A2A CTests on Windows:
