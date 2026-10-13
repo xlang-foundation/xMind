@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-13",
+  "scope": "Live-model interactive CLI patch preview and approval on an isolated real filesystem workspace",
+  "xmind_source_base_revision": "21402a8",
+  "client": "compiled native xmind_cli chat",
+  "model": "claude-sonnet-4-6",
+  "workspace_isolated": true,
+  "operation_tool": "patch_file",
+  "operation_state": "succeeded",
+  "preview_before_after_verified": true,
+  "run_status": "completed",
+  "changed_file": "message.txt",
+  "expected_content_verified": true,
+  "other_workspace_files_changed": false,
+  "credentials_recorded": false
+}

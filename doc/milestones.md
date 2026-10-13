@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Live configured-provider CLI patch approval — 2026-10-13
+
+A live Claude Sonnet 4.6 CLI run revealed that xMind's model-facing patch
+description did not distinguish its custom `@@` hunk markers from numbered
+unified-diff headers. The tool guidance and contract now state the accepted
+syntax explicitly. With the rebuilt native CLI, a live `patch_file` proposal
+showed both exact replacements in the before/after preview; after approval,
+only the intended workspace file changed and the run completed. The focused
+native patch-tool contract passed. No xlang3 code change was needed. See the
+[sanitized evidence](evidence/native-cli-live-patch-preview-20261013.json).
+
 ## Live configured-provider CLI edit approval — 2026-10-13
 
 The native CLI discovered and selected Claude Sonnet 4.6 from the existing

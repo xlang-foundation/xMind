@@ -201,9 +201,9 @@ Claude Sonnet 4.6 issued one native `create_file` proposal in the same TestProj
 CLI workspace. The CLI displayed the exact operation and accepted `/allow` for
 that operation ID; the run completed with exit status **0**. I independently
 verified the created file's 55 bytes and SHA-256, then removed the temporary
-acceptance file. This confirms one live model-to-file-write approval path from
-the CLI; live `replace_file` approval is documented below, while live-model
-`patch_file` approval remains unverified. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+acceptance file. This confirms one live model-to-file `create_file` approval
+from the CLI; separate live `replace_file` and `patch_file` approvals are
+documented below. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
 
 ## Live configured-provider CLI edit preview and approval — 2026-10-13
 
@@ -213,8 +213,20 @@ temporary workspace, the live model proposed one `replace_file` operation. The
 CLI displayed the verified before/after preview; approving that operation ID
 changed only `message.txt` from `before` to `after`, and the run completed.
 The temporary server and workspace were removed. This verifies the live-model
-CLI edit path; live-model `patch_file` approval and full coding parity remain
-open. [Sanitized evidence](evidence/native-cli-live-edit-preview-20261013.json).
+CLI edit path; full coding parity remains open. Live `patch_file` approval is
+documented in the later acceptance below. [Sanitized evidence](evidence/native-cli-live-edit-preview-20261013.json).
+
+## Live configured-provider CLI patch preview and approval — 2026-10-13
+
+The live Claude Sonnet 4.6 run initially exposed a mismatch between standard
+numbered unified-diff headers and xMind's custom patch grammar. xMind's patch
+tool guidance now explicitly documents bare `@@` or exact-text anchors and
+forbids numbered hunk ranges. The rebuilt native CLI then displayed both
+changes in its bounded before/after preview. Approving the exact `patch_file`
+operation changed only `message.txt` (`Alpha` to `Beta`, `Omega` to `Sigma`);
+the middle line and sole-file workspace inventory were verified, and the run
+completed. `native_patch_tool_contract` passed 1/1. No xlang3 source change was
+needed. [Sanitized evidence](evidence/native-cli-live-patch-preview-20261013.json).
 
 ## Interactive CLI file-change previews — 2026-10-13
 
