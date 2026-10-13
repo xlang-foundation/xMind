@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {spawn, spawnSync} from 'node:child_process';
-import {mkdtemp, rm} from 'node:fs/promises';
+import {mkdtemp, rm, stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
@@ -83,7 +83,8 @@ try {
   await start();
   await idleConnectionFairness();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
-  const processCatalog=cli('process-profiles');assert.equal(processCatalog.runtime_state,'per_operation');assert.equal(processCatalog.profiles.length,1,'Windows local server provides one trusted built-in shell profile');assert.ok(['powershell','cmd'].includes(processCatalog.profiles[0].id));assert.equal(processCatalog.profiles[0].max_timeout_ms,600000,'The built-in shell is bounded');
+  const processCatalog=cli('process-profiles');assert.equal(processCatalog.runtime_state,'per_operation');assert.ok(['powershell','cmd'].includes(processCatalog.profiles.find(profile=>['powershell','cmd'].includes(profile.id))?.id),'Windows local server provides a trusted built-in shell profile');assert.equal(processCatalog.profiles.find(profile=>['powershell','cmd'].includes(profile.id))?.max_timeout_ms,600000,'The built-in shell is bounded');
+  const bundledXlang=await stat(resolve(dirname(modules),'xlang3.exe')).then(()=>true,()=>false);assert.equal(processCatalog.profiles.some(profile=>profile.id==='xlang3'),bundledXlang,'The trusted xlang3 process profile follows the backend-paired runtime executable');if(bundledXlang){const profile=processCatalog.profiles.find(value=>value.id==='xlang3');assert.deepEqual(profile,{id:'xlang3',revision:1,max_timeout_ms:600000});}
   assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);
   assert.equal((await request('/v1/process/profiles?executable=spoof')).status,400,'Discovery cannot select executable paths');
   assert.equal((await request('/v1/agent/instructions',undefined,{Authorization:''})).status,401);

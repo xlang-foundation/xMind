@@ -1,0 +1,11 @@
+Command: CTest targeted xMind native process/profile contracts in .agentflow/native-mcp-resource-template (Release)
+Result: PASS (4/4, 103.70 sec)
+Tests:
+- native_agent_process_http_contract — PASS (16.03 sec)
+- native_xlang3_default_process_contract — PASS (0.43 sec)
+- native_http_cli_contract — PASS (3.48 sec)
+- native_local_view_contract — PASS (83.75 sec)
+Scenario: Verify built-in process registry behavior, legacy shell-only profile upgrade, paired xlang3 profile discovery, real synthetic-model AgentRunner tool call that executes bundled xlang3.exe -c, no executable-path disclosure, CLI catalogue, packaged local profile startup and workspace/session view behavior.
+Build: Release xmind and xmind_server built successfully from current xMind sources in .agentflow/native-mcp-resource-template.
+Runtime source changes: none. xlang3 executable used from the runtime directory paired with the xMind backend modules.
+Provider: synthetic loopback peer only; no external credentials or requests.

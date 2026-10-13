@@ -70,7 +70,15 @@ built-in PowerShell profile. The server resolves the absolute system
 PowerShell executable, fixes its no-profile/noninteractive command prefix,
 binds its executable identity, assigns a bounded timeout and stores the
 registry through embedded xlang3. If that PowerShell executable is absent,
-the system `cmd.exe` profile is used. Both defaults have `auto_approve: true`;
+the system `cmd.exe` profile is used. When the xlang3 executable adjacent to
+the configured runtime modules exists, the backend adds an `xlang3` profile to
+its active process snapshot and directs the model to use it for
+Python-compatible scripts, tests and package commands instead of resolving
+`xlang3.exe` through machine PATH. The executable identity is recalculated at
+every startup, so updating xlang3 does not leave a stale persisted binding.
+This also adds the profile to an older saved registry containing only the
+built-in auto-approved shell. Explicit startup process-config imports, custom
+multi-profile registries and empty lists are not augmented. Built-in profiles have `auto_approve: true`;
 commands still retain durable process identity and result records. A saved custom registry or
 explicitly empty list prevents bootstrap, and later startup never repopulates
 it. The public process-profile catalogue omits executable paths and bindings.
@@ -222,7 +230,7 @@ The prepared adapter supports trusted absolute local-drive directories with reta
 
 The executor uses the embedded-xlang3 operation journal. Backend-created immutable profiles choose an executable and fixed prefix; model arguments choose a registered profile, literal argument vector, relative directory and bounded timeout. A proposal retains the complete launched argument vector, profile revision, directory identity and budgets. It claims the workspace and stable `process-profile:<id>` resource before dispatch. The adapter retains the enclosing workspace identity as well as the selected nested directory. Completed zero/nonzero exits are acknowledged process results with `independently_verified:false`; invalid text bytes are encoded as hex. Timeout/cancellation after dispatch and failed output observation preserve quarantine. Failed outcome storage leaves the executing claim for restart and causes the conditional agent loop to fail-stop through the existing service health path. The direct executor contract passed actual SQLite outcome faults, recovery, another-workspace quarantine, real timeout and cancellation after an actual file effect at the exact partial CI source scopes above. This does not establish the still-failing adapter contract or a complete process gate.
 
-`AgentSettings.process_profiles` conditionally advertises/routes `run_process` through this executor. Source connects the persisted registry through server startup and offline administration; a missing registry receives the built-in trusted Windows shell, while a saved empty list stays empty. Independent model/server/admin/CLI continuation and restart tests use synthetic inference and actual file/process effects. Populated editor execution, credential/environment configuration, durable output streaming, retained full-output artifacts and broader restart/background behavior remain incomplete. A synchronous adapter observer must be bounded by its caller; the adapter does not preempt an arbitrary blocked C++ callback.
+`AgentSettings.process_profiles` conditionally advertises/routes `run_process` through this executor. Source connects the persisted registry through server startup and offline administration; a missing registry receives the built-in trusted Windows shell and, when present beside the configured modules, the paired `xlang3.exe`. A saved empty list stays empty. Independent model/server/admin/CLI continuation and restart tests use synthetic inference and actual file/process effects. Populated editor execution, credential/environment configuration, durable output streaming, retained full-output artifacts and broader restart/background behavior remain incomplete. A synchronous adapter observer must be bounded by its caller; the adapter does not preempt an arbitrary blocked C++ callback.
 
 ## Durable foreground output
 

@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## Backend-paired xlang3 process profile — 2026-10-13
+
+When a Windows local backend initializes its trusted process registry, its
+active process snapshot now adds an `xlang3` profile if `xlang3.exe` exists next
+to the configured runtime modules. The executable identity is recalculated and
+sealed at each backend startup rather than stored across runtime upgrades.
+Fresh installs and older shell-only saved registries get the paired profile;
+explicit process-config imports, custom multi-profile registries and empty
+registries keep their behavior. The coding agent is told to use this profile
+for Python-compatible scripts, tests and package commands instead of machine
+PATH. The actual model-to-AgentRunner contract started from a shell-only saved
+registry and ran an xlang3 script without a command-approval prompt. All four
+targeted Release contracts passed, including the packaged managed local-view
+contract. This remains native integration coverage; live TestProj pytest through
+a newly initialized xMind profile and VS Code UI acceptance remain open.
+[Native contract output](evidence/native-xlang3-default-process-20261013.log).
+
 ## OpenCode-shaped MCP resource location route — 2026-10-13
 
 The native HTTP API now exposes `GET /v1/mcp/resource?location[directory]=...`
