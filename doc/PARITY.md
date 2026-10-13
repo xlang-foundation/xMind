@@ -97,8 +97,9 @@ useful session-detail read for clients; it does not claim the complete
 OpenCode session metadata contract. [Exact evidence](evidence/native-session-get-20261013.json).
 
 The message-history API also supports `GET /v1/sessions/{id}/messages/{message_id}`.
-It resolves a public `msg_` sequence with one SQLite query and validates
-missing, malformed and query-bearing requests in the HTTP/CLI contract.
+It resolves a public `msg_` sequence with one SQLite query, and the console
+CLI's `message SESSION MESSAGE_ID` command returns the same typed record.
+The HTTP/CLI contract validates missing, malformed and query-bearing requests.
 Upstream typed-part equivalence remains open.
 [Exact evidence](evidence/native-session-message-get-20261013.json).
 

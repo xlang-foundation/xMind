@@ -22,12 +22,15 @@
   ],
   "verification": {
     "release_targets": [
+      "xmind_cli",
       "xmind",
       "xmind_server"
     ],
     "test": "native_http_cli_contract",
     "result": "passed",
-    "duration_seconds": 3.65
+    "duration_seconds": 3.65,
+    "cli_assertion": "message shared <message-id> matched the HTTP typed message object",
+    "malformed_cli_identity": "Rejected before making a request"
   },
   "parity_limit": "This verifies native single-message retrieval only. Upstream typed message-part and operation-level parity are not claimed."
 }

@@ -136,6 +136,8 @@ try {
   const observedMessages=(await request('/v1/sessions/shared/history')).data;
   const selectedMessage=observedMessages.at(-1);
   assert.deepEqual(await request(`/v1/sessions/shared/messages/${selectedMessage.id}`),{status:200,data:selectedMessage},'Single-message lookup returns the durable typed history entry');
+  assert.deepEqual(cli('message','shared',selectedMessage.id),selectedMessage,'Console CLI exposes the same single-message lookup');
+  const malformedMessage=spawnSync(cliExe,[String(port),'message','shared','msg_bad'],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.notEqual(malformedMessage.status,0,'Console CLI rejects malformed message IDs before making a request');
   assert.equal((await request('/v1/sessions/shared/messages/msg_999999')).status,404,'Single-message lookup reports an absent sequence');
   assert.equal((await request('/v1/sessions/shared/messages/msg_bad')).status,400,'Single-message lookup validates the public message ID');
   assert.equal((await request(`/v1/sessions/shared/messages/${selectedMessage.id}?unexpected=true`)).status,400,'Single-message lookup rejects unsupported query parameters');
