@@ -22,7 +22,19 @@ completed after the second normal approval. The run reported no other files
 modified; the recovered bytes were verified and the temporary test file was
 removed. This acceptance used an isolated verified xMind Release package and
 profile. It verifies this webpage recovery path with one real provider/model;
-VS Code recovery and broader conflict cases remain open.
+broader conflict cases remain open.
+
+A live VS Code 1.141 Extension Development Host opened TestProj with the saved
+DeepSeek provider and reached the normal file-approval UI. Changing the
+temporary file during the approval pause produced `content_conflict` and no
+write. That host was attached to an older xMind server binary, which treated a
+changed value on the same line as ambiguous and asked before overwriting it.
+After explicitly authorizing that overwrite for this temporary test only, the
+agent reread the file, submitted a fresh `version=concurrent-edit` to
+`version=agentflow-written` proposal, and wrote it after normal approval. The
+result was verified and the temporary file removed. This verifies VS Code's
+live proposal, approval, and conflict guard; live VS Code acceptance against
+the current server binary's stale-edit recovery guidance remains open.
 
 ## TestProj webpage coding acceptance — 2026-10-13
 
@@ -42,39 +54,34 @@ search/task/framework filters, and a model saved from API page 2 appearing in
 Saved Models after returning to page 1. Unsave removed records immediately and
 the empty state appeared when the final saved record was removed. Test saves
 were cleared after the check. This validates one local browser coding workflow
-and the Model Zoo test project. Full pytest/API test suites and installed VS
-Code write/command acceptance remain open. No backend or model-data files
-changed.
+and the Model Zoo test project. The live VS Code development-host write/conflict
+acceptance is recorded above. Installed VS Code package and command
+acceptance remain open. No backend or model-data files changed.
 
 ## xlang3 pytest and mmap compatibility branch — 2026-10-13
 
-The pushed xlang3 candidate [`1df2603a`](https://github.com/CantorAI/xlang3/commit/1df2603a)
-is based on xlang3 `main` `f0c425cf`. It fixes pytest's lazy
+The pushed xlang3 candidate [`b3ec9bf4`](https://github.com/CantorAI/xlang3/commit/b3ec9bf4)
+is on `fix/pytest-pathaware-hook-proxy`, based on current xlang3 `main`
+`f0c425cf` and four commits ahead. It fixes pytest's lazy
 `PathAwareHookProxy` keyword lookup and native `memoryview(mmap)` buffer
-exports, including derived-view lifetime and close protection. It also stages
-the Pydantic Core 2.50.1 pure-Python facade and iterative schema-gather bridge
-beside xlang3's native validation/serialization core. The full xlang3 Release
-suite passed **56/56 CTest contracts**, including the pytest and schema-gather
-contracts and Visual Studio debugpy launch smoke. TestProj's Model Zoo backend
-passed **9/9** pytest API tests on xlang3 with pytest 8.4.2, FastAPI 0.120.4
-and Pydantic 2.14.1. The earlier 11-case performance gate (21 paired samples
-per case) passed on the preceding branch checkpoint before this facade update.
-An isolated xMind Release rebuild against candidate `1df2603a` passed
-**137/137 native CTest contracts** in 612 seconds ([full test log](evidence/native-xmind-xlang3-1df2603a-ctest.log)). An earlier webpage-adapter run passed
-**99/99 browser tests** and the VS Code extension passed **320/320 extension
-tests**. A live
-local browser-adapter session attached to TestProj without a server-token prompt,
-discovered **13 Claude, 11 Gemini, 2 DeepSeek and 20
-OpenAI models** from the saved `.config/providers.yaml`, selected OpenAI
-`gpt-4.1`, and completed a read-only Model Zoo design review with **29,690 input
-and 592 output tokens**. It made no TestProj edits. This validates the candidate
-through the xMind server and browser session/API paths. A visible external Edge
-interaction and the VS Code pytest flow remain unverified. xMind's default build
-still uses xlang3 `main` `f0c425cf`; candidate `1df2603a` is pushed but not
-merged or installed as the default runtime. The live candidate preview is available at
-`http://127.0.0.1:60543/ui/` while its local backend remains running. The branch benchmark
-[report](https://github.com/CantorAI/xlang3/blob/d5d2f7c7/doc/performance/data/pytest-pathaware-hook-proxy-20261012.json)
-records per-case results.
+exports, including derived-view lifetime and close protection. It includes the
+Pydantic Core 2.50.1 pure-Python facade and iterative schema-gather bridge
+beside xlang3's native validation/serialization core, plus `ast.alias` source
+location constructor support for pytest assertion rewriting.
+
+The candidate's full Release CTest suite passed **56/56**, and the full CLI
+fixture suite passed against its Release executable. TestProj's Model Zoo
+backend passed **9/9** pytest API tests with xlang3, pytest 8.4.2, FastAPI
+0.120.4 and Pydantic 2.14.1. The 11-case performance gate passed with 21 paired
+samples against the preserved pre-change executable. Earlier isolated xMind
+rebuilds passed **137/137 native CTest contracts**, and browser tests passed
+**99/99**; the VS Code extension suite passed **320/320**. The branch is pushed
+and includes latest main, but it is not merged or installed as xMind's default
+runtime. The default remains xlang3 `main` `f0c425cf`. The live candidate
+preview is available at `http://127.0.0.1:60543/ui/` while its local backend
+remains running. The final 11-case performance gate after AST location support passed with 21
+paired samples; the recorded follow-up is in the
+[pytest compatibility trial report](https://github.com/CantorAI/xlang3/blob/b3ec9bf4/doc/performance/pytest-pathaware-hook-proxy-trial-20261012.md).
 
 ## Live webpage coding flow and Model Zoo design pass — 2026-10-12
 
