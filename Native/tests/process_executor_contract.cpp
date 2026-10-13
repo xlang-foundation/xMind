@@ -94,11 +94,13 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         ProcessExecutor xlang_executor(store,workspace,root.string(),{{"xlang3",argv[7],1,{"-c"},10s}});
         const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import xmind_process_probe; print(xmind_process_probe.VALUE)"})},{"workdir","."}}.dump();
         Task xlang_task(xlang_executor,"xlang3-import-path",xlang_request);const auto xlang_record=proposed(store,"xlang3-import-path");const auto xlang_payload=Json::parse(xlang_record.spec.arguments_json);
+        require(xlang_payload["arguments"][0]=="-B"&&xlang_payload["arguments"][1]=="-c","xlang3 executions must disable writes into the paired runtime package");
         require(xlang_payload["environment"].size()==1&&xlang_payload["environment"][0]["name"]=="PYTHONPATH","Approved xlang3 process proposal must bind its Python import path");
         const auto xlang_path=xlang_payload["environment"][0]["value"].get<std::string>();
         require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and workspace package search paths");
         store.decide_operation("xlang3-import-path",OperationDecision::allow,"actual-fixture-controller").get();
         const auto xlang_result=Json::parse(xlang_task.result.get());require(xlang_result["exit_code"]==0&&xlang_result["stdout"]["data"]=="xlang3-workspace-package-visible\r\n"&&store.operation("xlang3-import-path").get().state==OperationState::succeeded, ("Paired xlang3 process must import a pure-Python dependency from the workspace target: "+xlang_result.dump()).c_str());
+        require(!std::filesystem::exists(root/".xlang3-site"/"__pycache__"),"xlang3 process runs must not create bytecode in the workspace package target");
         phase("trusted-process-profile");
         ProcessExecutor trusted_executor(store,workspace,root.string(),{{"trusted-fixture",argv[1],1,{argv[2]},10s,{},true}});
         const auto trusted_arguments=Json{{"profile","trusted-fixture"},{"arguments",Json::array({"normal","trusted-approved.txt"})},{"workdir","."}}.dump();

@@ -19,6 +19,15 @@ disabled; it did not execute CPython or contact a provider. The full hosted CI
 gate still needs to run against this updated pin. Exact local package and test
 results are in the [smoke record](evidence/xlang3-runtime-module-package-20261013.json).
 
+The paired xlang3 process path now adds `-B` for every xlang3 profile so native
+bytecode cannot mutate the verified runtime package. Its Release process
+contract passed, the unified xMind executable rebuilt, and the development UI
+snapshot recipe staged the matching runtime DLL, `xlang3.exe`, 20 product
+plugin DLLs and 3 pure facades. Running TestProj's real backend suite from that
+snapshot again passed **9/9** without creating `__pycache__` in the runtime.
+This validates the snapshot contents and paired interpreter; it does not
+restart or claim rendered acceptance from the currently open browser run.
+
 ## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
 
 VS Code 1.141.0 loaded installed xMind extension 0.1.10 in a trusted TestProj

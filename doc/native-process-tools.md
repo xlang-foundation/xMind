@@ -88,6 +88,18 @@ records. Custom registries are never replaced, and an explicitly empty or
 custom-only list is preserved without adding xlang3. The public process-profile
 catalogue omits executable paths and bindings.
 
+The paired `xlang3` process always prepends `-B`, including for an explicit
+administrator profile. xlang3 otherwise writes versioned `.pyc` files beside
+the pure Python facades in `modules/pydantic_core`, changing the verified
+runtime inventory. The process-executor contract checks the argument order,
+executes a real xlang3 import and confirms no bytecode directory appears in
+the workspace package target.
+
+The development `Tools/start-ui.ps1` snapshot now includes the paired
+`xlang3.exe`, checks that the xMind server and SDK runtime DLL hashes match,
+and stages the selected product plugin DLLs and pure facades. A local TestProj
+run with that snapshot passed all nine backend pytest cases.
+
 The process-configuration contract verifies first-run initialization,
 no-prompt state, persistence and resistance to custom/empty registry
 replacement. The actual Release managed-local-view contract starts a fresh

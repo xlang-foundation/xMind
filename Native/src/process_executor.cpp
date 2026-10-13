@@ -151,6 +151,10 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(args.contains("background")&&!args["background"].is_boolean())throw std::invalid_argument("Invalid process background mode");
     const bool background=args.value("background",false);if(background&&!allow_background)throw std::invalid_argument("Background process execution requires an agent owner");
     ProcessConfiguration launch;launch.executable=found->executable;launch.arguments=found->prefix_arguments;launch.timeout=found->max_timeout;launch.output_limit=65536;
+    // xlang3 writes xlang3-specific .pyc files beside pure module facades by
+    // default. Keep the paired, hash-verified runtime tree immutable during
+    // workspace scripts and tests.
+    if(found->id=="xlang3"&&std::find(launch.arguments.begin(),launch.arguments.end(),"-B")==launch.arguments.end())launch.arguments.insert(launch.arguments.begin(),"-B");
     launch.executable_id=found->executable_id;
     for(const auto& arg:args["arguments"]){if(!arg.is_string() || !text(arg.get<std::string>()))throw std::invalid_argument("Invalid literal process argument");launch.arguments.push_back(arg.get<std::string>());}
     if(args.contains("timeout_ms")){if(!args["timeout_ms"].is_number_integer() || args["timeout_ms"]<1 || args["timeout_ms"]>found->max_timeout.count())throw std::invalid_argument("Process timeout exceeds profile budget");launch.timeout=std::chrono::milliseconds(args["timeout_ms"].get<std::int64_t>());}

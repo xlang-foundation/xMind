@@ -64,11 +64,28 @@ if(-not $BundleDirectory){
     # Load a private immutable snapshot instead of locking the build directory.
     $uiSnapshot=Join-Path $uiState ('runtime-'+[Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path (Join-Path $uiSnapshot 'modules') -Force|Out-Null
+    $uiRuntimeExecutable=Join-Path $RuntimeDirectory 'xlang3.exe'
+    $uiServerRuntime=Join-Path (Split-Path $uiServer -Parent) 'xlang3_runtime.dll'
+    $uiSdkRuntime=Join-Path $RuntimeDirectory 'xlang3_runtime.dll'
+    foreach($uiRequired in @($uiRuntimeExecutable,$uiServerRuntime,$uiSdkRuntime,(Join-Path $uiModules 'xlang_json.x3pkg.dll'),(Join-Path $uiModules 'xlang_sqlite3.x3pkg.dll'))){
+        if(-not(Test-Path -LiteralPath $uiRequired -PathType Leaf)){throw ('Incomplete paired xlang3 development runtime: '+$uiRequired)}
+    }
+    if((Get-FileHash -LiteralPath $uiServerRuntime -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $uiSdkRuntime -Algorithm SHA256).Hash){throw 'The native server and xlang3 executable use different runtime DLLs.'}
     foreach($uiBinary in @('xmind.exe','xlang3_runtime.dll')){
         Copy-Item -LiteralPath (Join-Path (Split-Path $uiServer -Parent) $uiBinary) -Destination (Join-Path $uiSnapshot $uiBinary)
     }
-    foreach($uiModule in Get-ChildItem -LiteralPath $uiModules -File -Filter '*.dll'){
-        Copy-Item -LiteralPath $uiModule.FullName -Destination (Join-Path $uiSnapshot 'modules')
+    Copy-Item -LiteralPath $uiRuntimeExecutable -Destination (Join-Path $uiSnapshot 'xlang3.exe')
+    $uiRuntimeModuleNames=@('_argon2_cffi_bindings._ffi.x3pkg.dll','_brotli.x3pkg.dll','_cffi_backend.x3pkg.dll','_zstd.x3pkg.dll',
+        'cryptography.hazmat.bindings._rust.x3pkg.dll','httptools.parser.parser.x3pkg.dll','httptools.parser.url_parser.x3pkg.dll','mmap.x3pkg.dll',
+        'psutil._psutil_windows.x3pkg.dll','pydantic_core._pydantic_core.x3pkg.dll','rpds.rpds.x3pkg.dll','xlang__blake2.x3pkg.dll',
+        'xlang__hashlib.x3pkg.dll','xlang__ssl.x3pkg.dll','xlang_device.x3pkg.dll','xlang_net.x3pkg.dll','xlang_yaml.x3pkg.dll','zstandard.backend_c.x3pkg.dll',
+        'xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')
+    $uiSelectedModules=Get-ChildItem -LiteralPath $uiModules -Recurse -File|Where-Object {($_.Name -like '*.x3pkg.dll' -and $uiRuntimeModuleNames -contains $_.Name) -or ($_.Extension -eq '.py' -and $_.FullName -notmatch '[\\/]__pycache__[\\/]')}
+    foreach($uiModule in $uiSelectedModules){
+        $uiRelative=[System.IO.Path]::GetRelativePath($uiModules,$uiModule.FullName)
+        $uiTarget=Join-Path (Join-Path $uiSnapshot 'modules') $uiRelative
+        New-Item -ItemType Directory -Force -Path (Split-Path $uiTarget -Parent)|Out-Null
+        Copy-Item -LiteralPath $uiModule.FullName -Destination $uiTarget
     }
     $uiServer=Join-Path $uiSnapshot 'xmind.exe';$uiModules=Join-Path $uiSnapshot 'modules'
 }
