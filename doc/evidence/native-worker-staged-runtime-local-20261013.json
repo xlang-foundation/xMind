@@ -1,0 +1,30 @@
+{
+  "verification": "local-staged-vscode-native-runtime",
+  "verifiedAt": "2026-10-13T13:29:44Z",
+  "xmindRevision": "63b1584b87efccbe43be5b9a652b5ee885b0a4fb",
+  "xlang3Branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3Revision": "d876c281f7967f9d4b17ab111c9948f696264bce",
+  "manifestSha256": "cdeb4fe38b72c1b26412da215afbd3ea180db45534c6e87dcecdc478c3d26d94",
+  "fileCount": 1878,
+  "requiredNativeFiles": [
+    "xmind.exe",
+    "xlang3_runtime.dll",
+    "xlang3.exe",
+    "modules/xlang_json.x3pkg.dll",
+    "modules/xlang_sqlite3.x3pkg.dll",
+    "worker/agent_worker.py"
+  ],
+  "xmindSha256": "b29e71f787689a152d79ea1e8c61da37644eadf167e07307c7c4c7f901ac944f",
+  "xlang3RuntimeSha256": "88c109a947e5e085e99cb58be52ba7b1a3fe07ab9dcd2c3d20b469fc285bb068",
+  "workerScriptSha256": "fb381af1358190bbe846c9551cc90667486724a8c4529577a385764927e36cb4",
+  "checks": {
+    "packageStage": "passed",
+    "extensionNativeRuntimeVerifier": "passed",
+    "workerContract": "passed; actual staged xmind.exe child; real xlang3 fixture result over lrpc shared memory; cancellation terminated a slow worker",
+    "vscodeExtensionSuite": "321 passed, 0 failed"
+  },
+  "limits": [
+    "Local package uses real build outputs and the production staging/verifier code; this is not a GitHub-hosted accepted bundle or VSIX installation test.",
+    "The xlang3 worker is for one trusted registered-tool invocation; durable agent-level workers, resource limits and OS sandboxing remain pending."
+  ]
+}

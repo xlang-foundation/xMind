@@ -20,6 +20,28 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
+## xlang3 tool worker and staged VS Code runtime checkpoint (2026-10-13)
+
+Trusted xlang3 tool registrations now select `execution: in_process` or
+`execution: worker`; worker placement launches the unified `xmind` binary for
+one tool invocation and returns bounded JSON over the selected xlang3
+`lrpc:` shared-memory transport. Release contracts passed the worker tool
+call, cancellation, trusted-config round trip, and the actual AgentRunner/model
+tool loop. The VS Code extension suite passed **321/321**.
+
+The production native-runtime staging and verification code packaged the
+real built `xmind.exe`, xlang3 runtime, pure standard-library sources, and
+`worker/agent_worker.py` into a local 1,878-file staged runtime. The staged
+binary then launched its worker and passed the real shared-memory
+call/cancellation contract. This is local package evidence, not an accepted
+hosted bundle or installed VSIX test; see
+[staged-runtime evidence](evidence/native-worker-staged-runtime-local-20261013.json).
+The operation inventory was regenerated from the pinned OpenCode `v2.0.26`
+source after these changes. It still counts **141 operations, 32 reviewed
+native source candidates, and zero verified operation-level parity**. Worker
+placement for a full agent, a reusable worker pool, resource limits and OS
+sandboxing remain open; this checkpoint does not establish broad coding parity.
+
 ## Latest verified native coding checkpoint (2026-10-11)
 
 Single-agent and graph runs now route reads, process execution, file creation,
