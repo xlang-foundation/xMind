@@ -450,10 +450,10 @@ test('sidebar rename binds selected session and original title, refreshes metada
   for(const conflict of [false,true]){
     const {h,view}=await setupView({health:{agent_execution:false,status:'ok',session_rename:true},renameConflict:conflict});
     view.receive({type:'rename-session',id:'foreign',title:'Forged',expected_title:'Old'});await until(()=>view.posted.some(message=>message.type==='rename-result'));assert.equal(h.renameRequests.length,0);
-    const historyReads=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length;
+    const historyReads=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length;
     view.receive({type:'rename-session',id:'saved',title:'Renamed fixture',expected_title:'Saved session'});await until(()=>h.renameRequests.length===1&&view.posted.some(message=>message.type==='rename-result'&&message.id==='saved'));
     assert.deepEqual(h.renameRequests,[{title:'Renamed fixture',expected_title:'Saved session'}]);assert.equal(view.posted.findLast(message=>message.type==='rename-result').success,!conflict);
-    assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
+    assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
   }
 });
 test('VS Code forks only the active saved conversation boundary and selects the native child',async()=>{
@@ -462,7 +462,7 @@ test('VS Code forks only the active saved conversation boundary and selects the 
   await until(()=>view.posted.some(message=>message.type==='sessions'&&message.selected==='saved'));
   view.receive({type:'fork-session',id:'foreign',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.success===false));assert.deepEqual(h.forkRequests,[]);
   view.receive({type:'fork-session',id:'saved',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.id==='saved'&&message.before==='msg_2'));assert.equal(view.posted.findLast(message=>message.type==='fork-result'&&message.id==='saved').success,true);assert.equal(h.forkRequests.length,1);
-  assert.deepEqual(h.forkRequests,[{before:'msg_2'}]);assert.ok(view.posted.some(message=>message.type==='sessions'&&message.selected==='forked'));assert.ok(h.requests.includes('/v1/sessions/forked/messages?limit=100'));assert.ok(h.requests.includes('/v1/sessions/forked/runs'));assert.ok(!h.requests.includes('/v1/runs'));
+  assert.deepEqual(h.forkRequests,[{before:'msg_2'}]);assert.ok(view.posted.some(message=>message.type==='sessions'&&message.selected==='forked'));assert.ok(h.requests.includes('/v1/sessions/forked/messages?limit=40'));assert.ok(h.requests.includes('/v1/sessions/forked/runs'));assert.ok(!h.requests.includes('/v1/runs'));
  }finally{view.close();}
 });
 test('invalid keys and unsupported provider destinations never transmit credentials',async()=>{
@@ -563,7 +563,7 @@ test('inspection rejects a different backend operation and discards observations
   await until(()=>lateView.posted.some(message=>message.type==='transcript'));
   lateView.receive({type:'inspect-edit',id:'edit'});await until(()=>late.requests.includes('/v1/operations/edit/inspection'));
   lateView.receive({type:'select-run',id:'finished'});resolveInspection(inspectionFixture);
-  await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length>=3);
+  await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length>=3);
   assert.ok(!lateView.posted.some(message=>message.type==='edit-inspection'));assert.equal(late.decisions.length,0);lateView.close();
 });
 test('only a reviewed pending operation can be decided and payload stays backend-owned',async()=>{
@@ -609,7 +609,7 @@ test('session selection intent invalidates an in-flight approval before queued s
   view.receive({type:'decide',id:'edit',decision:'allow'});
   await until(()=>h.requests.includes('/v1/operations/edit'));
   view.receive({type:'select',id:'saved'});resolveOperation(pendingEdit);
-  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length===2);
+  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length===2);
   assert.equal(h.decisions.length,0,'Selection intent must prevent a grant while the selection handler is still queued');view.close();
 });
 
@@ -618,7 +618,7 @@ test('closing a panel during history loading cannot start a detached poller',asy
   h.pauseHistory(new Promise(resolve=>{resolveHistory=resolve;}));
   await h.commands.get('agentflow.open')();const view=h.views[0];
   view.receive({type:'ready'});
-  await until(()=>h.requests.includes('/v1/sessions/saved/messages?limit=100'));
+  await until(()=>h.requests.includes('/v1/sessions/saved/messages?limit=40'));
   view.close();resolveHistory([]);
   await h.commands.get('agentflow.open')();
   assert.equal(h.views.length,2);assert.equal(h.intervals.size,0);
@@ -652,10 +652,10 @@ test('creation comparison opens absent-to-proposed snapshots without creating a 
 test('refresh reloads backend execution capabilities and history without submitting a run',async()=>{
   const h=harness({health:{agent_execution:false}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='transcript')&&h.intervals.size===0);
-  const histories=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length;
+  const histories=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length;
   h.configureBackend({agent_execution:true},{default_model:'configured-after-connect',models:[{id:'configured-after-connect'}]});
   view.receive({type:'refresh'});
-  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length>histories);
+  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length>histories);
   const latest=view.posted.filter(message=>message.type==='capabilities').at(-1);
   assert.equal(latest.execution,true);assert.equal(latest.model,'configured-after-connect');
   assert.equal(h.requests.filter(route=>route==='/v1/health').length,2);

@@ -34,6 +34,14 @@ test('session history page client validates bounded chronological pages and curs
  await assert.rejects(client.historyPage('session',0),/page size/);await assert.rejects(client.historyPage('session',1001),/page size/);await assert.rejects(client.historyPage('session',10,'msg_bad'),/cursor/);
  page.next_before='msg_7';await assert.rejects(client.historyPage('session',2),/history page/);
 });
+test('default session history load is bounded to forty recent messages',async()=>{
+ const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push(url);return{ok:true,json:async()=>({messages:[],has_more:false,next_before:null})};});
+ await client.historyPage('session');assert.equal(new URL(requests[0]).search,'?limit=40');
+ const all=Array.from({length:41},(_,i)=>({id:`msg_${i+1}`,seq:i+1,role:'user',data:{content:`m${i+1}`}}));
+ const pager=new SessionHistoryPager({historyPage:async(_session,limit,before)=>{assert.equal(limit,40);const end=before?Number(before.slice(4))-1:all.length,start=Math.max(0,end-limit);return{messages:all.slice(start,end),has_more:start>0,next_before:start>0?all[start].id:null};}});
+ let page=await pager.select('session');assert.equal(page.history.length,40);assert.equal(page.history[0].seq,2);assert.equal(page.historyHasMore,true);
+ page=await pager.older();assert.equal(page.history.length,41);assert.equal(page.history[0].seq,1);assert.equal(page.historyHasMore,false);
+});
 test('session history pager merges live snapshots and prepends older pages without gaps',async()=>{
  const all=Array.from({length:5},(_,i)=>({id:`msg_${i+1}`,seq:i+1,role:'user',data:{content:`m${i+1}`}})),calls=[];
  const client={historyPage:async(session,limit,before)=>{calls.push({session,limit,before});const end=before?Number(before.slice(4))-1:all.length,start=Math.max(0,end-limit);return{messages:all.slice(start,end),has_more:start>0,next_before:start>0?all[start].id:null};}};

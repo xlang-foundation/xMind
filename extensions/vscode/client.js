@@ -235,7 +235,7 @@ class BackendClient {
     return value;
   }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
-  async historyPage(id,limit=100,before) {
+  async historyPage(id,limit=40,before) {
     executionIdentity(id);if(!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history page size');
     if(before!==undefined&&(typeof before!=='string'||!/^msg_[1-9][0-9]*$/.test(before)))throw new Error('Invalid session history cursor');
     const query=new URLSearchParams({limit:String(limit)});if(before!==undefined)query.set('before',before);
@@ -294,10 +294,10 @@ class BackendClient {
 }
 
 // Keeps the rendered transcript bounded while allowing both browser and
-// VS Code views to load older records on demand. Snapshot refreshes merge new
+// Browser and VS Code views to load older records on demand. Snapshot refreshes merge new
 // messages into the already loaded range without moving its older cursor.
 class SessionHistoryPager {
-  constructor(client,limit=100){if(!client||typeof client!=='object'||!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history pager');this.client=client;this.limit=limit;this.session=undefined;this.messages=[];this.cursor=undefined;this.hasMore=false;this.busy=false;this.epoch=0;}
+  constructor(client,limit=40){if(!client||typeof client!=='object'||!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history pager');this.client=client;this.limit=limit;this.session=undefined;this.messages=[];this.cursor=undefined;this.hasMore=false;this.busy=false;this.epoch=0;}
   async page(session,before){if(typeof this.client.historyPage==='function')return this.client.historyPage(session,this.limit,before);if(before!==undefined||typeof this.client.history!=='function')return{messages:[],has_more:false,next_before:null};const messages=await this.client.history(session);if(!Array.isArray(messages))throw new Error('Invalid session history');return{messages,has_more:false,next_before:null};}
   snapshot(){return{history:this.messages,historyHasMore:this.hasMore,historyLoading:this.busy};}
   async select(session){executionIdentity(session);const epoch=++this.epoch;this.session=session;this.messages=[];this.cursor=undefined;this.hasMore=false;this.busy=true;try{const page=await this.page(session);if(epoch!==this.epoch)return this.snapshot();this.messages=page.messages;this.hasMore=page.has_more;this.cursor=page.next_before||this.messages[0]?.id;this.busy=false;return this.snapshot();}finally{if(epoch===this.epoch)this.busy=false;}}

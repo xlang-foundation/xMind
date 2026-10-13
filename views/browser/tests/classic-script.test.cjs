@@ -94,7 +94,7 @@ test('production classic scripts share a realm without collisions and restore ow
     '/v1/models':{models:[{id:'fixture-model'}],default_model:'fixture-model'},
     '/v1/graphs':{graphs:[]},
     '/v1/sessions':[{id:parent.session_id,title:'Synthetic retained conversation'}],
-    ['/v1/sessions/'+parent.session_id+'/messages?limit=100']:{messages:parentHistory,has_more:false,next_before:null},
+    ['/v1/sessions/'+parent.session_id+'/messages?limit=40']:{messages:parentHistory,has_more:false,next_before:null},
     ['/v1/sessions/'+parent.session_id+'/runs']:[parent],
     ['/v1/runs/'+parent.id]:parent,
     ['/v1/runs/'+parent.id+'/children']:[child],

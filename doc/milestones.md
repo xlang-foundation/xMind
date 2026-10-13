@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+## Bounded recent conversation history in Browser and VS Code — 2026-10-13
+
+Opening a long conversation now fetches and renders at most the 40 newest
+messages in both clients. The existing “Load older messages” paging path still
+reaches the complete durable history and retains its chronological ordering.
+This reduces the initial transcript DOM work; it does not claim model inference
+or general browser latency improvements. The VS Code suite passes **333/333**
+and the browser suite passes **106/106**, with no failures or skips.
+
 ## Live configured-provider CLI patch approval — 2026-10-13
 
 A live Claude Sonnet 4.6 CLI run revealed that xMind's model-facing patch
