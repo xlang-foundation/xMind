@@ -8,7 +8,7 @@ import runtime from '../extensions/vscode/native-runtime.js';
 import {stageNativeRuntime} from '../extensions/vscode/scripts/package-native-runtime.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Native CI staging requires an isolated GitHub runner.');
 const root=resolve(import.meta.dirname,'..'),evidence=join(root,'build/ci-evidence'),bundle=join(root,'build/native-distribution');
-const sdkRevision='f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7',stdlibRevision='ebf955df7a89ed0c7968f79faec1de49f61ed7cb';
+const sdkRevision='f6bbc561673e3c166dc0dab9062cb24db26432a1',stdlibRevision='ebf955df7a89ed0c7968f79faec1de49f61ed7cb';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const need=(condition,message)=>{if(!condition)throw Error(message);};
 const gitRevision=directory=>execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8',windowsHide:true}).trim();
@@ -38,8 +38,8 @@ async function inventory(prefix=''){
  for(const item of (await readdir(directory,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
   const name=prefix?prefix+'/'+item.name:item.name;
   need(runtime.relativeFile(name)&&!item.isSymbolicLink(),'Bundle path is unsupported.');
-  if(item.isDirectory()){need(name==='modules'||name==='worker'||name==='licenses'||name.startsWith('licenses/'),'Bundle directory is unsupported.');await inventory(name);}
-  else {need(item.isFile()&&['native','license','metadata'].includes(runtime.runtimeFileKind(name)),'Bundle file is unsupported.');const raw=await bytes(join(bundle,...name.split('/')));total+=raw.length;need(total<=256*1024*1024,'Bundle exceeds its byte limit.');files[name]=sha(raw);}
+  if(item.isDirectory()){need(name==='modules'||name.startsWith('modules/')||name==='worker'||name==='licenses'||name.startsWith('licenses/'),'Bundle directory is unsupported.');await inventory(name);}
+  else {need(item.isFile()&&['native','module','license','metadata'].includes(runtime.runtimeFileKind(name)),'Bundle file is unsupported.');const raw=await bytes(join(bundle,...name.split('/')));total+=raw.length;need(total<=256*1024*1024,'Bundle exceeds its byte limit.');files[name]=sha(raw);}
   need(Object.keys(files).length<=128,'Bundle exceeds the reviewed source inventory limit.');
  }
 }

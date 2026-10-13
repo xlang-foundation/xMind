@@ -11,8 +11,12 @@ or enable writing there.
 
 An owner-controlled caller supplies an absolute local generation directory and
 the exact manifest digest independently accepted from packaging. Native checks
-the complete file inventory and every file hash, required native binaries and
+the complete file inventory and every file hash, required native binaries,
+xlang3 plugin modules (`modules/**/*.x3pkg.dll`) and their pure Python facades,
 pure standard-library sources, license notices, platform and bridge metadata.
+The module allow-list excludes generic DLLs, `.pyd` files, bytecode and linker
+artifacts; every admitted plugin byte is included in the manifest hash and
+retained package inventory.
 It rejects unexpected files, invalid/duplicate names, path escapes, Windows
 aliases, reparse points, hard links and a generation inside the excluded
 workspace. Traversal depth, entry counts, manifest size and total byte counts

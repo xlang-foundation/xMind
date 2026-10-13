@@ -86,9 +86,11 @@ test('binary tampering and missing pure-source inventory are rejected', async t 
 });
 test('manifest forbids unknown executables, native Python extensions, traversal and private paths', async t => {
   const f = await fixture(t);
-  for (const name of ['python.exe', 'stdlib/_sqlite3.pyd', 'stdlib/os.pyc', '../escape', 'stdlib/.config/private.py', 'stdlib/.GIT/private.py', 'stdlib/site-packages/private.py', 'modules/extra.dll']) {
+  for (const name of ['python.exe', 'stdlib/_sqlite3.pyd', 'stdlib/os.pyc', '../escape', 'stdlib/.config/private.py', 'stdlib/.GIT/private.py', 'stdlib/site-packages/private.py', 'modules/extra.dll', 'modules/extra.pyd', 'modules/extra.pyc', 'modules/extra.lib']) {
     assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, [name]: 'f'.repeat(64) } }), /inventory/);
   }
+  assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core/_pydantic_core.x3pkg.dll'),'module');
+  assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core/core_schema.py'),'module');
   assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'XMIND.EXE': 'f'.repeat(64) } }), /inventory/);
   assert.throws(() => validateManifest({ ...f.manifest, bridgeEnabled: true }), /incompatible/);
 });

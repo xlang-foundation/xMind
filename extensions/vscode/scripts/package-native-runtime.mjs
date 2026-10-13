@@ -22,7 +22,7 @@ function sourceManifest(value){
   need(value.files&&typeof value.files==='object'&&!Array.isArray(value.files)&&Object.keys(value.files).length>=native.length&&Object.keys(value.files).length<=128,'The native source inventory is invalid.');
   const seen=new Set();
   for(const [name,digest]of Object.entries(value.files)){
-    need(relativeFile(name)&&['native','license','metadata'].includes(runtimeFileKind(name))&&/^[a-f0-9]{64}$/.test(digest)&&!seen.has(name.toLowerCase()),'The native source inventory contains an unsupported file.');seen.add(name.toLowerCase());
+    need(relativeFile(name)&&['native','module','license','metadata'].includes(runtimeFileKind(name))&&/^[a-f0-9]{64}$/.test(digest)&&!seen.has(name.toLowerCase()),'The native source inventory contains an unsupported file.');seen.add(name.toLowerCase());
   }
   need(native.every(name=>Object.hasOwn(value.files,name))&&Object.keys(value.files).some(name=>name.startsWith('licenses/')),'The native source files or notices are incomplete.');return value;
 }

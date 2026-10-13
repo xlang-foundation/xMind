@@ -12,12 +12,12 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'f6bbc561673e3c166dc0dab9062cb24db26432a1'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
-# This pinned runtime includes the reviewed SQLite transaction/text prerequisite
-# and native Windows path support; applying the historical overlay again fails.
+# This pinned runtime includes xMind's tested pytest/async compatibility and
+# native package inventory; applying the historical overlay again fails.
 $ciVsWhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $ciVisualStudio=(& $ciVsWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json|ConvertFrom-Json)|Select-Object -First 1
 if($LASTEXITCODE -ne 0 -or -not $ciVisualStudio){throw 'No supported MSVC x64 toolchain is installed.'}
@@ -35,7 +35,14 @@ $ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevisio
 $ciProvenance|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'provenance.json')
 $ciRuntimeBuild=Join-Path $ciRuntime 'build'
 Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF','-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF')
-Invoke-CiCommand 'runtime-build' $ciCmake @('--build',$ciRuntimeBuild,'--config','Release','--target','xlang3','xlang_json_native_package','xlang_sqlite3_native_package','--parallel',$ciParallelism.ToString())
+$ciRuntimeTargets=@('xlang3','xlang_json_native_package','xlang_sqlite3_native_package','xlang_yaml_native_package',
+    'xlang_device_native_package','xlang_net_native_package','xlang_ssl_native_package','xlang_hashlib_native_package',
+    'xlang_blake2_native_package','xlang_pydantic_core_native_package','xlang_argon2_cffi_native_package',
+    'xlang_cffi_backend_native_package','xlang_httptools_url_native_package','xlang_httptools_parser_native_package',
+    'xlang_zstd_native_package','xlang_zstandard_native_package','xlang_brotli_native_package','xlang_mmap_native_package',
+    'xlang_cryptography_rust_native_package','xlang_psutil_windows_native_package','xlang_rpds_native_package')
+$ciRuntimeBuildArguments=@('--build',$ciRuntimeBuild,'--config','Release','--target')+$ciRuntimeTargets+@('--parallel',$ciParallelism.ToString())
+Invoke-CiCommand 'runtime-build' $ciCmake $ciRuntimeBuildArguments
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
@@ -182,6 +189,19 @@ foreach($ciBinary in @('xmind.exe','xlang3_runtime.dll')){
 }
 foreach($ciModule in @('xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')){
     Copy-Item -LiteralPath (Join-Path $ciRelease ('modules/'+$ciModule)) -Destination (Join-Path $ciBundle 'modules')
+}
+$ciRuntimeModules=@('_argon2_cffi_bindings._ffi.x3pkg.dll','_brotli.x3pkg.dll','_cffi_backend.x3pkg.dll','_zstd.x3pkg.dll',
+    'cryptography.hazmat.bindings._rust.x3pkg.dll','httptools.parser.parser.x3pkg.dll','httptools.parser.url_parser.x3pkg.dll','mmap.x3pkg.dll',
+    'psutil._psutil_windows.x3pkg.dll','pydantic_core._pydantic_core.x3pkg.dll','rpds.rpds.x3pkg.dll','xlang__blake2.x3pkg.dll',
+    'xlang__hashlib.x3pkg.dll','xlang__ssl.x3pkg.dll','xlang_device.x3pkg.dll','xlang_net.x3pkg.dll',
+    'xlang_yaml.x3pkg.dll','zstandard.backend_c.x3pkg.dll')
+Get-ChildItem -LiteralPath (Join-Path $ciRelease 'modules') -Recurse -File | Where-Object {
+    ($_.Name -like '*.x3pkg.dll' -and $ciRuntimeModules -contains $_.Name) -or $_.Extension -eq '.py'
+} | ForEach-Object {
+    $ciRelative=[System.IO.Path]::GetRelativePath((Join-Path $ciRelease 'modules'),$_.FullName)
+    $ciTarget=Join-Path (Join-Path $ciBundle 'modules') $ciRelative
+    New-Item -ItemType Directory -Force -Path (Split-Path $ciTarget -Parent)|Out-Null
+    Copy-Item -LiteralPath $_.FullName -Destination $ciTarget
 }
 Copy-Item -LiteralPath (Join-Path $ciNative 'Release/worker/agent_worker.py') -Destination (Join-Path $ciBundle 'worker/agent_worker.py')
 Copy-Item -LiteralPath (Join-Path $ciRelease 'xlang3.exe') -Destination $ciBundle

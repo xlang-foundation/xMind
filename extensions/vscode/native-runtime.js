@@ -37,6 +37,8 @@ async function regular(file, directory = false, io = fs) {
 }
 function runtimeFileKind(name) {
   if (REQUIRED_NATIVE.includes(name)) return 'native';
+  // Admit only xlang3 package plugins and their pure Python facades.
+  if (name.startsWith('modules/') && (name.endsWith('.x3pkg.dll') || name.endsWith('.py'))) return 'module';
   if (name.startsWith('stdlib/') && name.endsWith('.py')) return 'stdlib';
   if (name.startsWith('licenses/') && !/\.(?:exe|dll|pyd|pyc|pyo)$/i.test(name)) return 'license';
   if (['README.txt', 'provenance.json'].includes(name)) return 'metadata';
