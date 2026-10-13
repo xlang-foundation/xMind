@@ -170,6 +170,9 @@ class WorkspaceBackend {
     if(roots.some(root=>contained(root,profileRoot)||contained(profileRoot,root)))throw new Error('Local profile storage overlaps an opened workspace.');
     const args=['view','--workspace',canonical,'--profile-root',profileRoot,'--ready-file',ready];
     if(upgradeBackend)args.push('--upgrade-backend');
+    // Native scopes host-authorized provider import to this exact trusted path.
+    // Pass only the path, never the YAML contents or credentials, to the adapter.
+    if(runtime.providerConfig)args.push('--trusted-provider-config',runtime.providerConfig);
     if(runtime.languageServerConfig)args.push('--language-server-config',runtime.languageServerConfig);
     if(runtime.processConfig)args.push('--process-config',runtime.processConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');

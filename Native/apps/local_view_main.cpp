@@ -128,6 +128,7 @@ std::string verify_client_image() {
 
 int run_local_view(int argc, char **argv) {
     agentflow::LocalProfileOptions options;
+    std::string trusted_provider_config;
     std::string ready;
     try {
         std::map<std::string, bool> seen;
@@ -150,6 +151,8 @@ int run_local_view(int argc, char **argv) {
                 options.profile_root = value;
             else if (key == "--config")
                 options.provider_config = value;
+            else if (key == "--trusted-provider-config")
+                trusted_provider_config = value;
             else if (key == "--graphs-config")
                 options.graphs_config = value;
             else if (key == "--python-tools-config")
@@ -183,6 +186,12 @@ int run_local_view(int argc, char **argv) {
         options.upgrade_backend = true;
         options.defer_busy_upgrade = true;
         agentflow::validate_local_view_ready(ready, options.workspace);
+        require(trusted_provider_config.empty() ||
+                    std::filesystem::path(trusted_provider_config).is_absolute(),
+                "Trusted provider configuration path must be absolute");
+        // Provider YAML is imported by the adapter through a host-authenticated
+        // API call. It is not part of the backend's profile launch identity.
+        options.provider_config.clear();
         const auto client_package_root = verify_client_image();
         auto connection = std::make_shared<agentflow::LocalProfileConnection>(
             agentflow::connect_local_profile(options));
@@ -229,7 +238,7 @@ int run_local_view(int argc, char **argv) {
         // profile. The native registry merges supplied entries, so profiles
         // already present do not prevent newly added or rotated keys from loading.
         const auto import_shared_provider_config = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target) {
-            if (options.provider_config.empty())
+            if (trusted_provider_config.empty())
                 return;
             httplib::Client client("127.0.0.1", target->port);
             configure(client);
@@ -251,7 +260,7 @@ int run_local_view(int argc, char **argv) {
                         metadata["revision"].is_number_integer() && metadata["revision"] >= 0 &&
                         metadata.contains("profiles") && metadata["profiles"].is_array(),
                     "Native provider settings are invalid");
-            const auto config_path = std::filesystem::absolute(options.provider_config).u8string();
+            const auto config_path = std::filesystem::absolute(trusted_provider_config).u8string();
             const std::string config(reinterpret_cast<const char *>(config_path.data()), config_path.size());
             auto import = client.Post("/v1/provider/configuration/import", headers,
                 Json{{"path", config}, {"expected_revision", metadata["revision"]}}.dump(),
@@ -848,7 +857,7 @@ int run_local_view(int argc, char **argv) {
                     body = lease.dump();
                     headers.emplace("Authorization", "Bearer " + master);
                 } else if (host && request.path == "/v1/provider/configuration/import" && request.method == "POST") {
-                    require(request.target == request.path && !options.provider_config.empty(),
+                    require(request.target == request.path && !trusted_provider_config.empty(),
                             "Trusted provider configuration import is unavailable");
                     std::set<std::string> keys;
                     const auto input = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
@@ -859,7 +868,7 @@ int run_local_view(int argc, char **argv) {
                         return true;
                     });
                     require(input.is_object() && input.size() == 2 && input.contains("path") &&
-                                input.at("path").is_string() && input.at("path").get<std::string>() == options.provider_config &&
+                                input.at("path").is_string() && input.at("path").get<std::string>() == trusted_provider_config &&
                                 input.contains("expected_revision") && input.at("expected_revision").is_number_integer() &&
                                 input.at("expected_revision").get<std::int64_t>() >= 0,
                             "Trusted provider import must use its configured path and current revision");

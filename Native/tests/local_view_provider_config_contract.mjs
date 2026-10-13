@@ -51,7 +51,7 @@ try{
  const exe=path.join(runtime,'xmind.exe'),languageServers=path.join(base,'language-servers.json');await fs.writeFile(languageServers,JSON.stringify({profiles:[{id:'fixture-lsp',executable:exe,language_id:'fixture',extensions:['.txt'],request_timeout_ms:1000}]}));const seededProfile=await profilePid(exe,profiles,existing,languageServers,yaml);
  await fs.writeFile(yaml,'version: 1\nprofiles:\n  openai:\n    route: openai.responses\n    api_key: synthetic-openai-key-never-sent\n  claude:\n    route: anthropic.messages\n    api_key: synthetic-claude-key-never-sent\n');
  const token=randomBytes(32).toString('hex');
- const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--upgrade-backend','--config',yaml,'--language-server-config',languageServers];
+ const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--upgrade-backend','--trusted-provider-config',yaml,'--language-server-config',languageServers];
  viewProcess=cp.spawn(exe,viewArgs,{cwd:initial,env:{...env,XMIND_VIEW_TOKEN:token},windowsHide:true,stdio:['ignore','ignore','pipe']});
  viewProcess.stderr.on('data',bytes=>{if(viewError.length<4096)viewError+=bytes.toString('utf8').slice(0,4096-viewError.length);});
  const readyRecord=await waitReady();assert.equal(readyRecord.workspace.root,await fs.realpath(initial));assert.equal(readyRecord.started_backend,true);pids.add(readyRecord.backend_process_id);

@@ -529,6 +529,7 @@ renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conver
 byId('rename-form').onsubmit=event=>{event.preventDefault();if(!renameSnapshot||byId('rename-save').disabled)return;const title=byId('conversation-title').value;if(!title.trim())return;byId('rename-save').disabled=true;byId('rename-status').textContent='Saving…';api.postMessage({type:'rename-session',id:renameSnapshot.id,title,expected_title:renameSnapshot.title});};
 const settings=byId('provider-settings');
 let profileState;
+let settingsProfileSelection;
 function savedProviders(){
   const select=byId('footer-provider');select.replaceChildren();
   const profiles=profileState?.profiles||[],active=profiles.find(value=>value.id===profileState?.active);
@@ -551,10 +552,11 @@ function profileRoutes(){
   const keyStatus=byId('provider-key-status');keyStatus.hidden=!selected;keyStatus.textContent=selected?'Saved provider key is configured on this xMind backend and will be used automatically. You do not need to enter it here.':'';
   choose.disabled=!routes.length;byId('profile-use').disabled=!selected||selected.id===profileState.active;
 }
-byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
+byId('provider-profile').onchange=()=>{settingsProfileSelection=byId('provider-profile').value;byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
 byId('provider-name').onchange=()=>{byId('provider-key').value='';api.postMessage({type:'discardProviderKey'});};
 byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({type:'select-provider',id:byId('provider-profile').value});};
-byId('settings').onclick=()=>{byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});api.postMessage({type:'connections-refresh'});};
+settings.addEventListener('close',()=>{settingsProfileSelection=undefined;});
+byId('settings').onclick=()=>{settingsProfileSelection=profileState?.active||'';byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});api.postMessage({type:'connections-refresh'});};
 byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
 byId('connections-refresh').onclick=()=>api.postMessage({type:'connections-refresh'});
 byId('connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
@@ -614,7 +616,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
-  else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
+  else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();}
   else if(m.type==='connections-state'){
     const list=byId('connections-list'),busy=!!m.busy;byId('connection-add').disabled=busy;byId('connections-refresh').disabled=busy;
     if(m.busy){byId('connections-status').textContent=m.text||'Updating connections…';return;}

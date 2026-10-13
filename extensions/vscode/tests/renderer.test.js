@@ -67,6 +67,18 @@ test('footer saved-provider chooser uses public profiles, preserves actual selec
  }finally{r.dom.window.close();}
 });
 
+test('Settings keeps a chosen saved provider selected while host refreshes its profile registry',()=>{
+ const r=renderer(),doc=r.dom.window.document,profiles=[{id:'claude-saved',provider:'anthropic',model:'',route_id:'anthropic.messages',revision:1},{id:'deepseek-saved',provider:'deepseek',model:'',route_id:'deepseek.chat',revision:1}],routes=[{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true},{id:'deepseek.chat',provider:'deepseek',wire:'chat-completions',discovery:true}];
+ try{
+  r.send({type:'provider-profiles',active:'',profiles,routes});doc.getElementById('settings').click();const choice=doc.getElementById('provider-profile');
+  choice.value='claude-saved';choice.dispatchEvent(new r.dom.window.Event('change'));assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'discardProviderKey'});
+  // The extension refreshes public profile metadata after discarding a draft.
+  r.send({type:'provider-profiles',active:'',profiles,routes});assert.equal(choice.value,'claude-saved');assert.equal(doc.getElementById('profile-use').disabled,false);assert.equal(doc.getElementById('provider-name').value,'anthropic.messages');
+  doc.getElementById('profile-use').click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'select-provider',id:'claude-saved'});
+  r.send({type:'provider-profiles',active:'claude-saved',profiles,routes});assert.equal(choice.value,'claude-saved');assert.equal(doc.getElementById('profile-use').disabled,true);
+ }finally{r.dom.window.close();}
+});
+
 test('model picker explains that a saved provider must be chosen before model discovery',()=>{
  const r=renderer(),doc=r.dom.window.document,model=doc.querySelector('footer #model');
  try{
