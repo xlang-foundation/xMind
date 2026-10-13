@@ -1,5 +1,27 @@
 # Current native validation
 
+## TestProj webpage coding acceptance — 2026-10-13
+
+The local xMind webpage was connected to the saved TestProj workspace and ran
+the OpenAI `gpt-4.1` agent against the Model Zoo frontend. The coding run added
+accessible save/unsave controls and a Saved Models filter. The first version
+filtered only the current API page; live review caught that saved records on
+other pages would be omitted. The webpage editor then repeatedly reported a
+content conflict while attempting the repair, so the missing HomeView state and
+cross-page loading logic were completed directly in TestProj. The xMind webpage
+subsequently ran `npm.cmd run build` against that current content: exit **0**,
+Vite transformed **37 modules** and built in **591 ms**, with no stderr.
+
+The live Vue page at `http://127.0.0.1:5173/` verified save/unsave pressed
+states, persistence after reload, the `saved=1` URL state, composition with
+search/task/framework filters, and a model saved from API page 2 appearing in
+Saved Models after returning to page 1. Unsave removed records immediately and
+the empty state appeared when the final saved record was removed. Test saves
+were cleared after the check. This validates one local browser coding workflow
+and the Model Zoo test project; it does not establish reliable model-authored
+file edits after a content conflict, full pytest/API test suites, or installed
+VS Code write/command acceptance. No backend or model-data files changed.
+
 ## xlang3 pytest and mmap compatibility branch — 2026-10-13
 
 The pushed xlang3 candidate [`1df2603a`](https://github.com/CantorAI/xlang3/commit/1df2603a)
