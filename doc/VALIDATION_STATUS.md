@@ -1,5 +1,24 @@
 # Current native validation
 
+## xlang3 pytest and mmap compatibility branch — 2026-10-13
+
+The pushed xlang3 candidate [`d5d2f7c7`](https://github.com/CantorAI/xlang3/commit/d5d2f7c7)
+is based on current xlang3 `main` `f0c425cf`. It fixes pytest's lazy
+`PathAwareHookProxy` keyword lookup and native `memoryview(mmap)` buffer
+exports, including derived-view lifetime and close protection. It also stages
+the matching pure-Python Pydantic Core 2.46.5 facade beside xlang3's native
+implementation. Candidate Release validation passed the full xlang3 CLI
+fixture suite and the 11-case performance gate (21 paired samples per case).
+TestProj's Model Zoo backend passed **9/9** pytest API tests on xlang3 with
+pytest 8.4.2, FastAPI 0.120.4 and Pydantic 2.13.5. TestProj's broad Pydantic
+`<3.0` constraint also admits Pydantic 2.14.1, which requires native Pydantic
+Core 2.50.1; that combination remains unsupported by the pinned 2.46.5
+implementation. xMind still builds against xlang3 `main` `f0c425cf`; this
+candidate is not merged or installed in xMind's active runtime, so the webpage
+and VS Code pytest flow remain unverified with the fix. The branch benchmark
+[report](https://github.com/CantorAI/xlang3/blob/d5d2f7c7/doc/performance/data/pytest-pathaware-hook-proxy-20261012.json)
+records per-case results.
+
 ## Live webpage coding flow and Model Zoo design pass — 2026-10-12
 
 From the xMind webpage on the saved TestProj workspace, DeepSeek Flash
@@ -72,8 +91,10 @@ The native `run_process` tool description now tells agents to avoid shell-level
 owns and joins long-running servers. Its provider-facing contract is covered
 by `native_agent_process_http_contract`, which passes **1/1** after the Release
 `xmind_server` and `xmind_cli` build. This guardrail does not turn the failed
-run into a pass. The pytest lookup failure is pending a separate
-xlang3 compatibility review; no xlang3 source change is included here.
+run into a pass. At the time of this run, pytest lookup was pending a separate
+xlang3 compatibility review. The branch candidate is now validated as
+documented above; integration into xlang3 main and xMind's active runtime
+remain open.
 
 ## Session-level interrupt — 2026-10-12
 
@@ -127,10 +148,10 @@ process contract verifies a changed trusted executable fails the run before a
 follow-up model request. Full output is preserved in
 [CTest evidence](evidence/native-release-ctest-schema17-20261012.log).
 
-The xlang3-hosted pure-Python `cryptography` package probe still stops at
-`ModuleNotFoundError: mmap`; this suite does not validate that package. No
-xlang3 native API was changed pending the user's decision on that separate
-compatibility gap. This source Release gate also does not establish a complete
+This 2026-10-12 source Release gate did not validate xlang3-hosted pure-Python
+`cryptography` or pytest. The later xlang3 candidate branch now exports mmap
+buffers and passes the TestProj pytest suite, but remains outside this pinned
+main build. This source Release gate also does not establish a complete
 installed VS Code/IDE or live-provider acceptance run.
 
 ## MCP catalogue invalidation during a run — 2026-10-12
