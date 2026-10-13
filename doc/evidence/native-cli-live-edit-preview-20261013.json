@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-13",
+  "scope": "Live-model interactive CLI edit preview and approval on an isolated real filesystem workspace",
+  "xmind_revision": "73a6166dcdaef0e904dc4467fe6584f5d7058711",
+  "xlang3_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "client": "compiled native xmind_cli chat",
+  "model": "claude-sonnet-4-6",
+  "workspace_isolated": true,
+  "operation_tool": "replace_file",
+  "operation_state": "succeeded",
+  "preview_before_after_verified": true,
+  "run_status": "completed",
+  "changed_file": "message.txt",
+  "expected_content_verified": true,
+  "other_workspace_files_changed": false,
+  "credentials_recorded": false
+}

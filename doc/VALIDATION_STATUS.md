@@ -202,7 +202,19 @@ CLI workspace. The CLI displayed the exact operation and accepted `/allow` for
 that operation ID; the run completed with exit status **0**. I independently
 verified the created file's 55 bytes and SHA-256, then removed the temporary
 acceptance file. This confirms one live model-to-file-write approval path from
-the CLI; live-model edit/patch approval remains unverified. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+the CLI; live `replace_file` approval is documented below, while live-model
+`patch_file` approval remains unverified. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+
+## Live configured-provider CLI edit preview and approval — 2026-10-13
+
+Using the saved local provider configuration, the native CLI discovered and
+selected Claude Sonnet 4.6 without asking for the API key again. In an isolated
+temporary workspace, the live model proposed one `replace_file` operation. The
+CLI displayed the verified before/after preview; approving that operation ID
+changed only `message.txt` from `before` to `after`, and the run completed.
+The temporary server and workspace were removed. This verifies the live-model
+CLI edit path; live-model `patch_file` approval and full coding parity remain
+open. [Sanitized evidence](evidence/native-cli-live-edit-preview-20261013.json).
 
 ## Interactive CLI file-change previews — 2026-10-13
 
@@ -213,8 +225,9 @@ bounded to 40 lines and 8 KiB. The exact durable operation event remains
 available to machine clients, and `/allow`/`/deny` still target the same
 operation ID. Focused Release CTests `native_agent_edit_http_contract` and
 `native_agent_patch_http_contract` passed 2/2 with actual files and approval
-decisions against synthetic inference. This does not claim live-model CLI
-edit/patch acceptance or complete coding parity.
+decisions against synthetic inference. Live-model CLI edit acceptance is
+documented above; this contract does not establish live `patch_file` or
+complete coding parity.
 
 ## Narrow browser sidebar layout — 2026-10-13
 

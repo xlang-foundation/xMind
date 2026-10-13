@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Live configured-provider CLI edit approval — 2026-10-13
+
+The native CLI discovered and selected Claude Sonnet 4.6 from the existing
+local provider configuration without another key prompt. In an isolated
+temporary workspace, one live `replace_file` proposal showed its before/after
+preview before approval. The approved operation changed only `message.txt`
+from `before` to `after`; the run completed and the temporary server/workspace
+were removed. Live-model CLI `patch_file` acceptance remains open. See the
+[sanitized evidence](evidence/native-cli-live-edit-preview-20261013.json).
+
 ## Human-readable CLI edit and patch approval previews — 2026-10-13
 
 The interactive console still emits its exact JSON `operation_review` record
