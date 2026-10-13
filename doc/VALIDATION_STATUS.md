@@ -34,6 +34,20 @@ tool cycle on the shared backend; it does not establish interactive approval
 coverage or broad shell compatibility.
 [Sanitized run metadata](evidence/cli-live-process-build-20261013.json).
 
+## Narrow browser sidebar layout — 2026-10-13
+
+Live inspection found a cascade-order bug at a **648 px** viewport: the
+workspace pane remained visible at 60 px while the saved 648 px agent sidebar
+overflowed the page by 60 px. The final mobile rule now hides the workspace
+pane and fills the viewport with the chat sidebar. After rebuilding and
+restarting the isolated TestProj view, the same saved history reconnected
+without another prompt; document width matched the viewport at **648 px**.
+The browser controller/renderer suite passes **100/100**, including a
+regression check that the mobile rule follows the component defaults it must
+override. This verifies the narrow-window layout only; desktop splitter drag
+and resizing remain scoped to their existing contract.
+[Live layout measurements](evidence/browser-mobile-layout-live-20261013.json).
+
 ## Native A2A Windows contract checkpoint — 2026-10-13
 
 The local Release build passed all seven focused A2A CTests on Windows:

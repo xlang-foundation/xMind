@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Live xMind browser view in the existing TestProj profile at a narrow viewport",
+  "url": "http://127.0.0.1:60420/ui/",
+  "viewportWidth": 648,
+  "before": {
+    "documentScrollWidth": 708,
+    "workspacePaneWidth": 60,
+    "agentSidebarWidth": 648,
+    "horizontalOverflow": 60
+  },
+  "after": {
+    "documentScrollWidth": 648,
+    "workspacePaneDisplay": "none",
+    "agentSidebarLeft": 0,
+    "agentSidebarRight": 648,
+    "connected": true,
+    "savedHistoryRestored": true
+  },
+  "browserAssetBuild": "passed",
+  "browserContracts": {
+    "passed": 100,
+    "failed": 0
+  },
+  "providerSecretsRecorded": false
+}
