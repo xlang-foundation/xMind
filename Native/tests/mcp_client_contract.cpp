@@ -27,6 +27,8 @@ void success(char** argv,const std::string& mode) {
     require(resources.next_cursor=="resource-page-2","Resource pagination cursor must remain exact");
     const auto last_resources=client.list_resources(resources.next_cursor,std::chrono::steady_clock::now()+5s);
     require(last_resources.entries_json.empty()&&!last_resources.next_cursor,"Resource cursor must be sent to the peer");
+    const auto templates=client.list_resource_templates({},std::chrono::steady_clock::now()+5s);
+    require(templates.entries_json.size()==1&&nlohmann::json::parse(templates.entries_json[0])["uriTemplate"]=="file:///fixture/{path}","Actual peer resource templates must reach the native owner");
     const auto resource=client.read_resource("file:///fixture/readme.md",std::chrono::steady_clock::now()+5s);
     require(!resource.request_id.empty()&&nlohmann::json::parse(resource.result_json)["contents"][0]["text"]=="fixture resource body","Actual peer resource contents and correlated request identity must be retained");
     const auto prompts=client.list_prompts({},std::chrono::steady_clock::now()+5s);

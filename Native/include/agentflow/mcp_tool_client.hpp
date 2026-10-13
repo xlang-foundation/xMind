@@ -51,6 +51,9 @@ public:
     virtual McpMetadataPage list_resources(std::optional<std::string>,Deadline,std::stop_token={}) {
         throw McpProtocolError("MCP resource discovery is not implemented by this client");
     }
+    virtual McpMetadataPage list_resource_templates(std::optional<std::string>,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP resource-template discovery is not implemented by this client");
+    }
     virtual McpReadOnlyReply read_resource(const std::string&,Deadline,std::stop_token={}) {
         throw McpProtocolError("MCP resource reads are not implemented by this client");
     }

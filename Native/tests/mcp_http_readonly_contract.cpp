@@ -14,6 +14,7 @@ int main(int argc,char** argv){
         const auto capabilities=nlohmann::json::parse(client.server().capabilities_json);require(capabilities.contains("resources")&&capabilities.contains("prompts"),"HTTP peer must advertise both read-only capabilities");
         const auto resources=client.list_resources({},deadline);require(resources.entries_json.size()==1&&nlohmann::json::parse(resources.entries_json[0])["uri"]=="fixture://http/readme"&&resources.next_cursor=="http-resource-page-2","HTTP resource catalogue and opaque pagination cursor must be retained");
         const auto last=client.list_resources(resources.next_cursor,deadline);require(last.entries_json.empty()&&!last.next_cursor,"HTTP client must send the resource cursor to the peer");
+        const auto templates=client.list_resource_templates({},deadline);require(templates.entries_json.size()==1&&nlohmann::json::parse(templates.entries_json[0])["uriTemplate"]=="https://fixture/{id}","HTTP MCP resource templates must reach the native owner");
         const auto resource=client.read_resource("fixture://http/readme",deadline);require(!resource.request_id.empty()&&nlohmann::json::parse(resource.result_json)["contents"][0]["text"]=="HTTP resource body","HTTP resource result must retain validated content and correlation identity");
         const auto prompts=client.list_prompts({},deadline);require(prompts.entries_json.size()==1&&nlohmann::json::parse(prompts.entries_json[0])["name"]=="fixture.http.prompt","HTTP prompt catalogue must reach the native owner");
         const auto prompt=client.get_prompt("fixture.http.prompt",R"({"topic":"AgentFlow"})",deadline);require(!prompt.request_id.empty()&&nlohmann::json::parse(prompt.result_json)["messages"][0]["content"]["text"]=="HTTP prompt for AgentFlow","HTTP prompt result must retain its exact message and correlation identity");
@@ -26,6 +27,6 @@ int main(int argc,char** argv){
         McpHttpClient unrequested(argv[1]);unrequested.connect(deadline);McpSubscriptionFilter resource_only;resource_only.resource_subscriptions={"fixture://http/readme"};bool rejected=false;
         try{(void)unrequested.listen_subscriptions(resource_only,{},deadline);}catch(const McpProtocolError&){rejected=true;}
         require(rejected&&!unrequested.ready(),"An unrequested list-change notification must retire the MCP HTTP owner");
-        std::cout<<"Native MCP Streamable HTTP passed resources/prompts, modern subscriptions/listen, SSE updates and graceful closure. No external service or credential was used.\n";return 0;
+        std::cout<<"Native MCP Streamable HTTP passed resources/resource templates/prompts, modern subscriptions/listen, SSE updates and graceful closure. No external service or credential was used.\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

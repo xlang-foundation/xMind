@@ -124,6 +124,14 @@ McpMetadataPage McpStdioClient::list_resources(std::optional<std::string> cursor
     try{return mcp_decode_resource_page(state.exchange("resources/list",params.dump(),deadline,cancel).response);}
     catch(...){state.retire();throw;}
 }
+McpMetadataPage McpStdioClient::list_resource_templates(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    if(cursor&&(cursor->empty()||cursor->size()>4096||cursor->find('\0')!=std::string::npos))throw std::invalid_argument("Invalid MCP resource-template cursor");
+    if(!Json::parse(state.handshake.server().capabilities_json).contains("resources"))throw McpProtocolError("MCP server did not advertise resources");
+    Json params=Json::object();if(cursor)params["cursor"]=*cursor;
+    try{return mcp_decode_resource_template_page(state.exchange("resources/templates/list",params.dump(),deadline,cancel).response);}
+    catch(...){state.retire();throw;}
+}
 McpReadOnlyReply McpStdioClient::read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel){
     auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
     if(uri.empty()||uri.size()>8192||uri.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid MCP resource URI");

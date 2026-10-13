@@ -577,14 +577,16 @@ function renderMcpSettings(message){
 }
 function renderMcpResources(message){
   const list=byId('mcp-resources');list.replaceChildren();byId('mcp-resources-refresh').disabled=!!message.busy;
-  byId('mcp-resources-status').textContent=message.busy?'Connecting to configured MCP servers…':message.error||(!message.catalog?'Resource catalog has not been loaded.':message.catalog.servers.length?`${message.catalog.resources.length} resource${message.catalog.resources.length===1?'':'s'} found.`:'No MCP servers configured.');
+  byId('mcp-resources-status').textContent=message.busy?'Connecting to configured MCP servers…':message.error||(!message.catalog?'Resource catalog has not been loaded.':message.catalog.servers.length?`${message.catalog.resources.length} resource${message.catalog.resources.length===1?'':'s'} and ${message.catalog.templates.length} template${message.catalog.templates.length===1?'':'s'} found.`:'No MCP servers configured.');
   const catalog=message.catalog;if(!catalog||message.busy)return;
   const stateLabels={disabled:'Disabled',unsupported:'Resource discovery unsupported',authorization_required:'Sign in required',unavailable:'Unavailable',connected:'Connected'};
   for(const server of catalog.servers){
     const resources=catalog.resources.filter(item=>item.server_id===server.id),row=node('section',undefined,'mcp-server'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',server.id),node('span',stateLabels[server.state]||'Unavailable','hint'));row.append(heading);
-    if(server.state==='connected'&&!resources.length)row.append(node('p','No resources published by this server.','hint'));
+    const templates=catalog.templates.filter(item=>item.server_id===server.id);if(server.state==='connected'&&!resources.length&&!templates.length)row.append(node('p','No resources or templates published by this server.','hint'));
     for(const item of resources.slice(0,100)){const resource=item.resource,detail=node('div',undefined,'mcp-resource');detail.append(node('strong',resource.name||resource.title||resource.uri));detail.append(node('code',resource.uri));if(resource.mimeType)detail.append(node('span',resource.mimeType,'hint'));if(resource.description)detail.append(node('p',resource.description,'hint'));row.append(detail);}
     if(resources.length>100)row.append(node('p',`Showing 100 of ${resources.length} resources.`,'hint'));list.append(row);
+    for(const item of templates.slice(0,100)){const resourceTemplate=item.template,detail=node('div',undefined,'mcp-resource');detail.append(node('strong',resourceTemplate.name||resourceTemplate.title||resourceTemplate.uriTemplate));detail.append(node('code',resourceTemplate.uriTemplate));if(resourceTemplate.mimeType)detail.append(node('span',resourceTemplate.mimeType,'hint'));if(resourceTemplate.description)detail.append(node('p',resourceTemplate.description,'hint'));row.append(detail);}
+    if(templates.length>100)row.append(node('p',`Showing 100 of ${templates.length} resource templates.`,'hint'));
   }
 }
 byId('settings-close').onclick=()=>{api.postMessage({type:'discardProviderKey'});settings.close();};

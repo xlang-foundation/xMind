@@ -19,6 +19,7 @@ public:
     McpToolPage list_tools(std::optional<std::string> cursor,Deadline deadline,
         std::stop_token cancel={}) override;
     McpMetadataPage list_resources(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel={}) override;
+    McpMetadataPage list_resource_templates(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel={}) override;
     McpReadOnlyReply read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel={}) override;
     McpMetadataPage list_prompts(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel={}) override;
     McpReadOnlyReply get_prompt(const std::string& name,std::string_view arguments_json,Deadline deadline,std::stop_token cancel={}) override;

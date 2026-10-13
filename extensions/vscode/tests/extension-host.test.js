@@ -37,7 +37,7 @@ function harness(options={}) {
     if(target.pathname==='/v1/vcs/base')return {ok:true,json:async()=>options.vcsBase??null};
     if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
-    if(target.pathname==='/v1/mcp/resources')return {ok:true,json:async()=>options.mcpResources||{servers:[],resources:[]}};
+    if(target.pathname==='/v1/mcp/resources')return {ok:true,json:async()=>options.mcpResources||{servers:[],resources:[],templates:[]}};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
     else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
@@ -191,7 +191,7 @@ test('sidebar MCP login is bound to its backend and closing the sidebar detaches
  finally{view.close();}assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));
 });
 test('sidebar loads MCP resources from the currently opened workspace backend on explicit request',async()=>{
- const catalog={servers:[{id:'tools.peer',revision:4,enabled:true,state:'connected',resource_count:1}],resources:[{server_id:'tools.peer',config_revision:4,resource:{uri:'fixture://readme',name:'README'}}]};const h=harness({mcpResources:catalog});await h.commands.get('agentflow.open')();const view=h.views[0];
+ const catalog={servers:[{id:'tools.peer',revision:4,enabled:true,state:'connected',resource_count:1,template_count:0}],resources:[{server_id:'tools.peer',config_revision:4,resource:{uri:'fixture://readme',name:'README'}}],templates:[]};const h=harness({mcpResources:catalog});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'mcp-resources-refresh'});await until(()=>view.posted.some(value=>value.type==='mcp-resources'&&value.busy===false));assert.ok(h.requests.includes('/v1/mcp/resources'));assert.deepEqual(JSON.parse(JSON.stringify(view.posted.findLast(value=>value.type==='mcp-resources'))),{type:'mcp-resources',busy:false,catalog});}
  finally{view.close();}
 });

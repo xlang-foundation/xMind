@@ -131,6 +131,11 @@ McpMetadataPage McpHttpClient::list_resources(std::optional<std::string> next,De
     try{Json params=Json::object();if(next)params["cursor"]=*next;const auto request=state.requests.prepare("resources/list",params.dump(),state.handshake.server().era);bool attempted=false;return mcp_decode_resource_page(state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted)->response);}
     catch(...){state.retire();throw;}
 }
+McpMetadataPage McpHttpClient::list_resource_templates(std::optional<std::string> next,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");cursor(next);capability(state.handshake.server(),"resources");
+    try{Json params=Json::object();if(next)params["cursor"]=*next;const auto request=state.requests.prepare("resources/templates/list",params.dump(),state.handshake.server().era);bool attempted=false;return mcp_decode_resource_template_page(state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted)->response);}
+    catch(...){state.retire();throw;}
+}
 McpReadOnlyReply McpHttpClient::read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel){
     auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");identity(uri,"resource URI",8192);capability(state.handshake.server(),"resources");
     try{const auto request=state.requests.prepare("resources/read",Json{{"uri",uri}}.dump(),state.handshake.server().era);bool attempted=false;const auto reply=state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted);if(!reply)throw McpProtocolError("MCP resource read ended without a correlated result");return mcp_decode_resource_reply(reply->request.id,reply->response);}

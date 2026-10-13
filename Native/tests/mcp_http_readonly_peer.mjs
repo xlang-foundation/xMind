@@ -22,6 +22,10 @@ const server=createServer(async(request,response)=>{
       resourcePages++;
       if(resourcePages===1){assert.equal(message.params.cursor,undefined);result={resultType:'complete',resources:[{uri:'fixture://http/readme',name:'http.readme',mimeType:'text/plain'}],nextCursor:'http-resource-page-2'};}
       else{assert.equal(resourcePages,2);assert.equal(message.params.cursor,'http-resource-page-2');result={resultType:'complete',resources:[]};}
+    }else if(message.method==='resources/templates/list'){
+      assert.equal(message.params.cursor,undefined);result={resultType:'complete',resourceTemplates:[{name:'http.template',uriTemplate:'https://fixture/{id}',description:'HTTP template metadata'}]};
+    }else if(message.method==='resources/templates/list'){
+      assert.equal(message.params.cursor,undefined);result={resultType:'complete',resourceTemplates:[{name:'http.template',uriTemplate:'https://fixture/{id}',description:'HTTP template metadata'}]};
     }else if(message.method==='resources/read'){
       assert.equal(message.params.uri,'fixture://http/readme');result={resultType:'complete',contents:[{uri:message.params.uri,mimeType:'text/plain',text:'HTTP resource body'}]};
     }else if(message.method==='prompts/list'){
@@ -59,5 +63,5 @@ const exit=await new Promise((resolve,reject)=>{child.once('error',reject);child
 await new Promise(resolve=>server.close(resolve));
 if(fixtureError)throw fixtureError;
 assert.deepEqual(exit,{code:0,signal:null},`Native HTTP client failed: ${stderr.slice(0,2000)}`);
-assert.deepEqual(methods,['server/discover','resources/list','resources/list','resources/read','prompts/list','prompts/get','subscriptions/listen','server/discover','subscriptions/listen']);
+assert.deepEqual(methods,['server/discover','resources/list','resources/list','resources/templates/list','resources/read','prompts/list','prompts/get','subscriptions/listen','server/discover','subscriptions/listen']);
 process.stdout.write(stdout);

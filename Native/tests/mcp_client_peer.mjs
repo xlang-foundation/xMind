@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {createInterface} from 'node:readline';
 const mode=process.argv[2], input=createInterface({input:process.stdin});
-let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false,resourcePages=0,promptPages=0,subscriptionRequest;
+let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false,resourcePages=0,templatePages=0,promptPages=0,subscriptionRequest;
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.read',description:'Untrusted labeled fixture description',inputSchema:{type:'object',properties:{path:{type:'string'}},required:['path']},annotations:{readOnlyHint:true}};
 function page(request){
@@ -56,6 +56,10 @@ for await(const line of input){
   }else if(request.method==='resources/read'){
     assert.equal(request.params.uri,'file:///fixture/readme.md');
     send({id:request.id,result:{resultType:'complete',contents:[{uri:request.params.uri,mimeType:'text/markdown',text:'fixture resource body'}]}});
+  }else if(request.method==='resources/templates/list'){
+    if(mode==='legacy')assert.equal(request.params._meta,undefined);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    templatePages++;assert.equal(request.params.cursor,undefined);
+    send({id:request.id,result:{resultType:'complete',resourceTemplates:[{name:'fixture.template',uriTemplate:'file:///fixture/{path}',description:'Untrusted template description'}]}});
   }else if(request.method==='prompts/list'){
     if(mode==='legacy')assert.equal(request.params._meta,undefined);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     promptPages++;assert.equal(request.params.cursor,undefined);

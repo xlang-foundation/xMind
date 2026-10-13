@@ -39,6 +39,12 @@ McpMetadataPage metadata_page(const McpWireMessage& message,const char* collecti
             for(const auto* field:{"title","description","mimeType"})if(item.contains(field))(void)bounded_text(item,field,field==std::string("description")?65536:4096,false);
             if(item.contains("size")&&(!item["size"].is_number_integer()||item["size"]<0||item["size"]>9007199254740991LL))throw McpProtocolError("Invalid MCP resource size");
             if(item.contains("annotations")&&!item["annotations"].is_object())throw McpProtocolError("Invalid MCP resource annotations");
+        } else if(collection==std::string("resourceTemplates")) {
+            (void)bounded_text(item,"name",128);
+            (void)bounded_text(item,"uriTemplate",8192);
+            for(const auto* field:{"title","description","mimeType"})if(item.contains(field))(void)bounded_text(item,field,field==std::string("description")?65536:4096,false);
+            if(item.contains("annotations")&&!item["annotations"].is_object())throw McpProtocolError("Invalid MCP resource-template annotations");
+            if(item.contains("_meta")&&!item["_meta"].is_object())throw McpProtocolError("Invalid MCP resource-template metadata");
         } else {
             (void)bounded_text(item,"name",128);
             for(const auto* field:{"title","description"})if(item.contains(field))(void)bounded_text(item,field,field==std::string("description")?65536:4096,false);
@@ -93,6 +99,7 @@ McpToolReply mcp_decode_tool_reply(std::string request_id,const McpWireMessage& 
     return {std::move(request_id),message.raw_json,message.payload_json,value.value("isError",false)};
 }
 McpMetadataPage mcp_decode_resource_page(const McpWireMessage& message){return metadata_page(message,"resources","uri");}
+McpMetadataPage mcp_decode_resource_template_page(const McpWireMessage& message){return metadata_page(message,"resourceTemplates","uriTemplate");}
 McpMetadataPage mcp_decode_prompt_page(const McpWireMessage& message){return metadata_page(message,"prompts","name");}
 McpReadOnlyReply mcp_decode_resource_reply(std::string request_id,const McpWireMessage& message){return read_reply(std::move(request_id),message,false);}
 McpReadOnlyReply mcp_decode_prompt_reply(std::string request_id,const McpWireMessage& message){return read_reply(std::move(request_id),message,true);}

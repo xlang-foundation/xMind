@@ -41,6 +41,10 @@ for await(const line of input){
     if(mode==='resource-catalog')send({id:request.id,result:{resultType:'complete',resources:[{uri:request.params.cursor?'fixture://second':'fixture://readme',name:request.params.cursor?'fixture.second':'fixture.readme',description:'Read-only fixture resource'}],...(request.params.cursor?{}:{nextCursor:'resource-page-2'})}});
     else if(mode==='resource-secret')send({id:request.id,result:{resultType:'complete',resources:[{uri:'fixture://secret',name:'fixture.secret',description:process.env.MCP_TEST_KEY}]}});
     else send({id:request.id,result:{resultType:'complete',resources:[{uri:'fixture://readme',name:'fixture.readme',description:'Read-only fixture resource'}]}});
+  }else if(request.method==='resources/templates/list'){
+    assert.ok(readonly);if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    if(mode==='resource-catalog')send({id:request.id,result:{resultType:'complete',resourceTemplates:[{name:'fixture.template',uriTemplate:'fixture://{name}',description:'Read-only fixture resource template'}]}});
+    else send({id:request.id,result:{resultType:'complete',resourceTemplates:[]}});
   }else if(request.method==='prompts/list'){
     assert.ok(readonly);if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     send({id:request.id,result:{resultType:'complete',prompts:[{name:'fixture.prompt',description:'Prompt fixture',arguments:[{name:'topic',required:true}]}]}});

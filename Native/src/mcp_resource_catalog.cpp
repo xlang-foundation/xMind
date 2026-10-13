@@ -32,7 +32,9 @@ std::string NativeMcpResourceCatalog::list_json() {
     const auto deadline = McpToolClient::Deadline::clock::now() + std::chrono::seconds(8);
     Json servers = Json::array();
     Json resources = Json::array();
+    Json templates = Json::array();
     std::size_t total_resources = 0;
+    std::size_t total_templates = 0;
     std::size_t total_bytes = 0;
     for (const auto& setting : servers_) {
         Json entry = {{"id", setting.id}, {"revision", setting.revision},
@@ -79,11 +81,39 @@ std::string NativeMcpResourceCatalog::list_json() {
                     throw McpProtocolError("MCP resource catalog pagination is invalid");
                 cursor = page.next_cursor;
             }
+            Json discovered_templates = Json::array();
+            identities.clear();cursors.clear();cursor.reset();
+            for (std::size_t page_number = 0; page_number < 32; ++page_number) {
+                if (McpToolClient::Deadline::clock::now() >= deadline)
+                    throw McpTransportTimeout("MCP resource-template catalog deadline exceeded");
+                const auto page = client->list_resource_templates(cursor, deadline);
+                for (const auto& raw : page.entries_json) {
+                    if (++total_templates > 1024) throw McpProtocolError("MCP resource-template catalog exceeds limits");
+                    total_bytes += raw.size();
+                    if (total_bytes > 4 * 1024 * 1024) throw McpProtocolError("MCP resource catalog metadata exceeds limits");
+                    if (reflects_credential(raw, private_credentials)) { reflected = true; break; }
+                    const auto resource_template = Json::parse(raw);
+                    if (reflects_credential(resource_template.dump(), private_credentials)) { reflected = true; break; }
+                    if (!resource_template.is_object() || !resource_template.contains("uriTemplate") || !resource_template.at("uriTemplate").is_string() ||
+                        resource_template.at("uriTemplate").get_ref<const std::string&>().empty() ||
+                        !identities.insert(resource_template.at("uriTemplate").get<std::string>()).second)
+                        throw McpProtocolError("MCP resource-template catalog contains an invalid or duplicate URI template");
+                    discovered_templates.push_back({{"server_id", setting.id}, {"config_revision", setting.revision},
+                        {"template", resource_template}});
+                }
+                if (reflected) break;
+                if (!page.next_cursor) break;
+                if (page_number == 31 || !cursors.insert(*page.next_cursor).second)
+                    throw McpProtocolError("MCP resource-template pagination is invalid");
+                cursor = page.next_cursor;
+            }
             client->shutdown();
             if (reflected) throw McpProtocolError("MCP resource metadata reflected a configured credential");
             entry["state"] = "connected";
             entry["resource_count"] = discovered.size();
+            entry["template_count"] = discovered_templates.size();
             for (auto& item : discovered) resources.push_back(std::move(item));
+            for (auto& item : discovered_templates) templates.push_back(std::move(item));
         } catch (const McpOAuthAuthorizationRequired&) {
             entry["state"] = "authorization_required";
         } catch (...) {
@@ -91,6 +121,6 @@ std::string NativeMcpResourceCatalog::list_json() {
         }
         servers.push_back(std::move(entry));
     }
-    return Json{{"servers", std::move(servers)}, {"resources", std::move(resources)}}.dump();
+    return Json{{"servers", std::move(servers)}, {"resources", std::move(resources)}, {"templates", std::move(templates)}}.dump();
 }
 }
