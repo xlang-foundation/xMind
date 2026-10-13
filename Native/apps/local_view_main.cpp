@@ -150,10 +150,10 @@ int run_local_view(int argc, char **argv) {
                 options.workspace = value;
             else if (key == "--profile-root")
                 options.profile_root = value;
-            else if (key == "--config")
-                options.provider_config = value;
-            else if (key == "--trusted-provider-config")
+            else if (key == "--config" || key == "--trusted-provider-config") {
+                require(trusted_provider_config.empty(), "Duplicate trusted provider configuration path");
                 trusted_provider_config = value;
+            }
             else if (key == "--graphs-config")
                 options.graphs_config = value;
             else if (key == "--python-tools-config")
@@ -374,6 +374,7 @@ int run_local_view(int argc, char **argv) {
                                              "{}", "application/json");
             return revoked && (revoked->status == 200 || revoked->status == 401);
         };
+        import_shared_provider_config(connection);
         issue();
         server.set_pre_routing_handler([&](const httplib::Request &request, httplib::Response &output) {
             output.set_header("Cache-Control", "no-store");

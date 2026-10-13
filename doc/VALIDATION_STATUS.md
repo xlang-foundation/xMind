@@ -1,5 +1,26 @@
 # Current native validation
 
+## Live webpage provider and coding acceptance — 2026-10-13
+
+The local webpage loaded the saved Claude, Gemini, DeepSeek and OpenAI profiles
+from `.config/providers.yaml` during server startup; the browser exposed provider
+metadata only, with credential values redacted. The OpenAI account discovery
+returned 20 models, and the composer selected `gpt-4.1` without a second key
+prompt. A read-only TestProj request correctly identified the Model Zoo frontend
+as `model-zoo-frontend`, Vue 3, with `vite build`; the response displayed
+provider-reported token counts (2,945 input and 72 output).
+
+The subsequent webpage coding run redesigned the catalog in
+`TestProj/model-zoo/frontend/src/views/HomeView.vue`. The first build found a
+missing Vue section close; the agent repaired it, and live review then exposed
+duplicated legacy hero/disclosure blocks. A follow-up removed the duplicates.
+The final `npm.cmd run build` passed (37 Vite modules, 607 ms). A fresh live
+browser render showed one filter rail, hero, data disclosure, results row, grid
+and pager. Selecting the Text Generation task returned GPT-2 on page 1 of 1;
+Reset restored the 12-model catalog on page 1 of 2. This verifies one real
+provider-backed webpage edit/repair/build/filter cycle, not full coding parity.
+Sanitized run and UI evidence: [browser-live-modelzoo-coding-20261013.json](evidence/browser-live-modelzoo-coding-20261013.json).
+
 ## Shared native CLI and VS Code profile — 2026-10-13
 
 The native CLI now uses the same default profile root as the VS Code extension:

@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-13",
+  "scope": "Live local xMind webpage coding acceptance against TestProj Model Zoo",
+  "url": "http://127.0.0.1:60422/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "provider": "openai.responses",
+  "model": "gpt-4.1",
+  "providerSetup": {
+    "source": ".config/providers.yaml imported by the local xMind server at startup",
+    "providerProfilesVisible": ["claude", "gemini", "deepseek", "openai"],
+    "credentialValuesExposedToPage": false,
+    "openaiModelsDiscovered": 20
+  },
+  "runs": [
+    {
+      "id": "1ce46212915561cff7ff4b1891a59854",
+      "status": "completed",
+      "promptScope": "Read frontend/package.json and report project name, framework, and build script; no writes or commands",
+      "result": "model-zoo-frontend; Vue 3; vite build",
+      "providerReportedInputTokens": 2945,
+      "providerReportedOutputTokens": 72
+    },
+    {
+      "id": "3df96fbdfcf81d0c4f104215b1a09d2f",
+      "status": "completed",
+      "promptScope": "Redesign the catalog using the existing Vue/API behavior",
+      "result": "Approved HomeView.vue edits; the first production build caught a missing closing section tag."
+    },
+    {
+      "id": "ee36b8deaa3c49d5a04c8fcef6cc72ff",
+      "status": "completed",
+      "promptScope": "Repair malformed Vue template, continue the frontend build",
+      "result": "Approved section cleanup; the production build passed, then live review found duplicate legacy sections."
+    },
+    {
+      "id": "4aa2dd324b5397f8766606bd89774828",
+      "status": "completed",
+      "promptScope": "Remove duplicated catalog blocks and re-run the build",
+      "result": "Removed duplicate hero/disclosure and obsolete controls; npm.cmd run build passed."
+    }
+  ],
+  "finalBuild": {
+    "command": "npm.cmd run build",
+    "result": "passed",
+    "viteModulesTransformed": 37,
+    "durationMilliseconds": 607
+  },
+  "liveUiChecks": {
+    "filterRailVisible": true,
+    "catalogHeaderCount": 1,
+    "demoDisclosureCount": 1,
+    "textGenerationFilterResult": "GPT-2; page 1 of 1",
+    "resetRestoredCatalog": "12 models; page 1 of 2",
+    "responseMetricsShown": true
+  },
+  "changedTestProjectFile": "model-zoo/frontend/src/views/HomeView.vue"
+}

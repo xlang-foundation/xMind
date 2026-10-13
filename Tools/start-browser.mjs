@@ -64,7 +64,7 @@ if(!backend){
   const args=['view','--workspace',workspace,'--profile-root',profileRoot,'--ready-file',readyFile];
   let providerConfig=options.get('--provider-config');
   if(!providerConfig){const candidate=join(root,'.config','providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
-  if(providerConfig)args.push('--config',resolve(providerConfig));
+  if(providerConfig)args.push('--trusted-provider-config',resolve(providerConfig));
   languageServerConfig=options.get('--language-server-config');
   if(!languageServerConfig){const candidate=join(root,'.config','language-servers.yaml');try{if((await stat(candidate)).isFile())languageServerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(languageServerConfig){languageServerConfig=resolve(languageServerConfig);args.push('--language-server-config',languageServerConfig);}
