@@ -23,6 +23,22 @@ Sanitized run and UI evidence: [browser-live-modelzoo-coding-20261013.json](evid
 
 ## Shared native CLI and VS Code profile — 2026-10-13
 
+The exact xMind main source at `7411150` and xlang3 compatibility branch at
+`f6bbc56` passed the complete local native gate (**141/141 CTest**), VS Code
+extension suite (**324/324**), browser suite (**103/103**) and browser/native
+integration. A fresh bridge-disabled runtime package verified **1,900** files,
+including six native inputs and 1,869 pure standard-library sources; VSIX
+`0.1.10` packaged and installed in VS Code `1.141.0`. Opening TestProj caused
+an isolated real VS Code extension host to load the installed package at its
+exact version, execute **xMind: Open Workspace** against the trusted TestProj
+folder and report no extension error. The host did not spawn a separate native
+process, so backend attribution remains unverified. This is local Windows
+package and extension-host evidence, not a hosted release gate, rendered
+sidebar capture or live model run. Exact hashes and scopes are in the
+[local package evidence](evidence/native-local-package-20261013.json); its
+[source inventory](evidence/native-local-source-manifest-20261013.json) binds
+the staged native files, SDK modules and license notices.
+
 The native CLI now uses the same default profile root as the VS Code extension:
 `%USERPROFILE%\.xMind\p`, falling back to `%USERPROFILE%\p` when the
 primary path exceeds the native runtime's 84-character limit. A Release CLI

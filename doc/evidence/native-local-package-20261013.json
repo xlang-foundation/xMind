@@ -1,0 +1,56 @@
+{
+  "verification": "local-native-vsix-and-client-integration",
+  "verifiedAt": "2026-10-13T16:35:55.8448584Z",
+  "source": {
+    "xmindRevision": "74111500119112242f4027cb08881026d5e48011",
+    "xlang3Branch": "fix/pytest-pathaware-hook-proxy",
+    "xlang3Revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+    "sourceManifestSha256": "17a3e7acec451c940d0161efc96522fa498a11cf1bd6d74d255bc1a31219118e"
+  },
+  "gates": {
+    "nativeCTest": "141/141 passed",
+    "nativeCTestLogSha256": "a097d99a5b53440057cc6241aea77ec0cc35d6f945537b147138f59e71cc0157",
+    "vscode": "324/324 passed",
+    "vscodeLogSha256": "f8412028454d5eae5e5a2518754b94baca9fdec2e6e8913a87d74d38516b165e",
+    "browser": "103/103 passed",
+    "browserLogSha256": "d49b39d9b5165bc83806a244f3f51ffe012f39167f283b06fab5d58953dae45b",
+    "browserNativeIntegration": "passed",
+    "browserNativeLogSha256": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+  },
+  "runtime": {
+    "manifestSha256": "0fb615a901515da8e48d5b4e1cff12acc242e63e641eb2f6a1235f1adc9f19fd",
+    "nativeFiles": 6,
+    "pureStandardLibrarySourceFiles": 1869,
+    "inventoryFiles": 1900,
+    "bridgeEnabled": false,
+    "providerConfigurationRead": false
+  },
+  "package": {
+    "path": "extensions/vscode/agentflow-0.1.10.vsix",
+    "sha256": "6d337d2af47f2b851b9ae1cefedf2c4012e349877c96e3e7ce6daa53fc3714b6",
+    "includedFiles": 1940,
+    "packagedRuntimeFiles": 1901
+  },
+  "installed": {
+    "vscodeVersion": "1.141.0",
+    "extensionId": "agentflow-local.agentflow",
+    "version": "0.1.10",
+    "installed": true,
+    "testProjectWindowOpen": true,
+    "packagedHost": {
+      "loadedExtensionPath": ".agentflow/package-host-diagnostic-20261013/extensions/agentflow-local.agentflow-0.1.10",
+      "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+      "workspaceTrusted": true,
+      "openWorkspaceCommandExecuted": true,
+      "displayedErrors": []
+    },
+    "newNativeOwnerSpawnedByPackagedHost": false,
+    "workspaceRoot": "D:\\CantorAI2026\\TestProj"
+  },
+  "limits": [
+    "Local Windows package and runtime validation, not a hosted release gate.",
+    "The packaged extension host opened TestProj and executed Open Workspace, but no separate native process was observed from that host; attribution to the already-running shared owner is unproven. No rendered screenshot or live model request was part of this checkpoint.",
+    "Provider settings were passed by file path; packaging did not read provider configuration or secrets.",
+    "No CPython interpreter or native extension is included in the runtime."
+  ]
+}
