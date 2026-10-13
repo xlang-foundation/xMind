@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { BackendClient } = require('../client');
+const { BackendClient,SessionHistoryPager } = require('../client');
 const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
@@ -33,6 +33,20 @@ test('session history page client validates bounded chronological pages and curs
  assert.deepEqual(await client.historyPage('session',2,'msg_8'),page);assert.equal(new URL(requests[1].url).search,'?limit=2&before=msg_8');
  await assert.rejects(client.historyPage('session',0),/page size/);await assert.rejects(client.historyPage('session',1001),/page size/);await assert.rejects(client.historyPage('session',10,'msg_bad'),/cursor/);
  page.next_before='msg_7';await assert.rejects(client.historyPage('session',2),/history page/);
+});
+test('session history pager merges live snapshots and prepends older pages without gaps',async()=>{
+ const all=Array.from({length:5},(_,i)=>({id:`msg_${i+1}`,seq:i+1,role:'user',data:{content:`m${i+1}`}})),calls=[];
+ const client={historyPage:async(session,limit,before)=>{calls.push({session,limit,before});const end=before?Number(before.slice(4))-1:all.length,start=Math.max(0,end-limit);return{messages:all.slice(start,end),has_more:start>0,next_before:start>0?all[start].id:null};}};
+ const pager=new SessionHistoryPager(client,2);let view=await pager.select('session');assert.deepEqual(view.history.map(item=>item.seq),[4,5]);assert.equal(view.historyHasMore,true);
+ view=await pager.older();assert.deepEqual(view.history.map(item=>item.seq),[2,3,4,5]);assert.equal(view.historyHasMore,true);
+ view=await pager.refresh();assert.deepEqual(view.history.map(item=>item.seq),[2,3,4,5]);assert.equal(view.historyHasMore,true);
+ view=await pager.older();assert.deepEqual(view.history.map(item=>item.seq),[1,2,3,4,5]);assert.equal(view.historyHasMore,false);
+ all.push({id:'msg_6',seq:6,role:'assistant',data:{content:'m6'}});view=await pager.refresh();assert.deepEqual(view.history.map(item=>item.seq),[1,2,3,4,5,6]);assert.equal(view.historyHasMore,false);
+ assert.deepEqual(calls.map(call=>call.before),[undefined,'msg_4',undefined,'msg_2',undefined]);
+});
+test('session history pager ignores a page response retired by a session switch',async()=>{
+ let release;const pending=new Promise(resolve=>release=resolve),client={historyPage:session=>session==='old'?pending:Promise.resolve({messages:[{id:'msg_1',seq:1,role:'user',data:{content:'new'}}],has_more:false,next_before:null})};
+ const pager=new SessionHistoryPager(client,10),old=pager.select('old'),fresh=await pager.select('new');release({messages:[{id:'msg_9',seq:9,role:'user',data:{content:'old'}}],has_more:false,next_before:null});await old;assert.equal(fresh.history[0].id,'msg_1');assert.equal(pager.snapshot().history[0].id,'msg_1');
 });
 test('session fork client binds the selected source and exact before-message boundary',async()=>{
  const requests=[],receipt={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:'msg_9'}};

@@ -192,6 +192,7 @@ function entry(role,data,parent=byId('history'),messageId){
   }
   parent.append(card);return card;
 }
+const olderHistoryButton=node('button','Load older messages','history-older');olderHistoryButton.id='history-older';olderHistoryButton.type='button';olderHistoryButton.hidden=true;olderHistoryButton.onclick=()=>{olderHistoryButton.disabled=true;api.postMessage({type:'history-older'});};byId('history').parentNode.insertBefore(olderHistoryButton,byId('history'));
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;}
 const protocolDiagnosticCodes=new Set([
@@ -597,7 +598,7 @@ function renderModels(models,selected){byId('model').replaceChildren();const pro
 window.addEventListener('message',event=>{
   if(globalThis.xMindView&&(event.source!==window||event.origin!==location.origin))return;
   const m=event.data;if(!m||typeof m.type!=='string')return;
-  const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
+  const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80,priorHeight=scroll.scrollHeight,priorTop=scroll.scrollTop;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
   else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
@@ -628,7 +629,7 @@ window.addEventListener('message',event=>{
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
   else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();}
+  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();}
@@ -685,5 +686,5 @@ window.addEventListener('message',event=>{
   else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.
-  if(follow&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;
+  if(follow&&!m.preserveOlder&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;
 });api.postMessage({type:'ready'});

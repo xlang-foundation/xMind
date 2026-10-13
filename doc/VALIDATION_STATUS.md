@@ -1,6 +1,6 @@
 # Current native validation
 
-## Bounded native session history — 2026-10-13
+## Bounded native and rendered session history — 2026-10-13
 
 The native server now exposes SQL-bounded `GET /v1/sessions/{id}/messages`
 pages, and the console CLI exposes `history-page SESSION LIMIT
@@ -8,17 +8,19 @@ pages, and the console CLI exposes `history-page SESSION LIMIT
 each `next_before` boundary continues to the preceding page. Limits are capped
 at 1,000, and cursors are checked against the requested session. The shared
 client validates response shape and cursor consistency, and the local browser
-adapter allows this authenticated read route. Existing full-history clients
-remain supported. This provides bounded retrieval and does not yet replace
-unbounded history loading in either rendered chat view.
+adapter allows this authenticated read route. Both rendered chat views now
+retrieve the latest 100 messages, merge refreshed snapshots without duplicate
+records, and request older pages on demand. Prepending a page preserves the
+reader's scroll position. Existing full-history clients remain supported.
 
 Release `native_http_cli_contract` passed **1/1** (3.63 seconds), covering
 three pages of a twelve-message transcript, continuation without skipped or
 repeated messages, HTTP/CLI equivalence, limits, malformed and missing
 cursors, unknown/duplicate query parameters and single-message lookup.
-Browser adapter and shared-client contracts passed **55/55**. Full OpenCode
-message/part projection, message-type filters, selectable ordering, opaque
-cursors and rendered UI adoption remain incomplete. See
+The VS Code suite passed **249** with **83** intentionally skipped contracts;
+the browser suite passed **106/106**. Full OpenCode message/part projection,
+message-type filters, selectable ordering and opaque cursors remain incomplete.
+See
 [bounded-history scope](native-session-history-pages.md) and
 [local evidence](evidence/native-session-history-pages-20261013.json).
 

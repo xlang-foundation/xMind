@@ -9,6 +9,10 @@ test('browser retrieves bounded saved process output pages only for an observed 
   const before=calls.length;await view.handle({type:'process-output',id:'foreign-op',channel:'stdout',after:0});assert.equal(calls.length,before);assert.equal(posted.at(-1).type,'process-output-error');
  }finally{view.dispose();}
 });
+test('browser older-history command publishes the expanded transcript for scroll-preserving prepend',async()=>{
+ const messages=[1,2,3].map(seq=>({id:`msg_${seq}`,seq,role:'user',data:{content:`m${seq}`}})),posted=[],client={historyPage:async(session,limit,before)=>{assert.equal(session,'session');return before?{messages:[messages[0]],has_more:false,next_before:null}:{messages:[messages[1],messages[2]],has_more:true,next_before:'msg_2'};}};
+ const view=new BrowserController(client,value=>posted.push(value));view.session='session';await view.historyPager.select('session');try{await view.handle({type:'history-older'});const result=posted.at(-1);assert.equal(result.type,'transcript');assert.equal(result.preserveOlder,true);assert.deepEqual(result.history.map(item=>item.seq),[1,2,3]);assert.equal(result.historyHasMore,false);}finally{view.dispose();}
+});
 test('browser session client shares the committed parser using cookies without bearer access',async()=>{
  const run={id:'root',session_id:'session',state:'completed',parent_id:'',node_id:'',graph_root:false},event={seq:7,run_id:'root',kind:'model.text',data:{text:'Synthetic cookie stream 雪'}},frame=(type,value,id)=>`${id===undefined?'':'id: '+id+'\n'}event: ${type}\ndata: ${JSON.stringify(value)}\n\n`,requests=[],delivered=[];
  const wire=frame('observation',{run,scope:'run',after:0})+frame('committed',event,7)+frame('end',{reason:'terminal',after:7});

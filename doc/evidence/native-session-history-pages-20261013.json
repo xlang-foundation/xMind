@@ -11,7 +11,7 @@
     "storage": "xlang3 SQLite query fetches at most limit+1 rows and returns the latest page in chronological order",
     "response": "{messages, has_more, next_before}",
     "cli": "history-page SESSION LIMIT [BEFORE_MESSAGE_ID]",
-    "compatibility": "Existing /history route remains unchanged; this does not claim OpenCode operation parity or rendered UI adoption."
+    "compatibility": "Existing /history route remains unchanged; browser and VS Code use bounded latest-page loading with older-page continuation; this does not claim full OpenCode operation parity."
   },
   "validation": {
     "release_targets": [
@@ -32,12 +32,14 @@
       ]
     },
     "client_and_adapter_contracts": {
-      "command": "node --test extensions/vscode/tests/client.test.js views/browser/tests/server.test.cjs",
+      "command": "npm test (extensions/vscode); node --test views/browser/tests/*.test.cjs",
       "result": "passed",
-      "passed": 55,
+      "vscode_passed": 249,
+      "vscode_skipped": 83,
+      "browser_passed": 106,
       "failed": 0
     },
     "source_whitespace_check": "git diff --check passed"
   },
-  "parity_limit": "OpenCode typed message/part projection, type filter, selectable order, opaque cursor semantics, and rendered browser/VS Code history-page adoption remain incomplete."
+  "parity_limit": "OpenCode typed message/part projection, type filter, selectable order, and opaque cursor semantics remain incomplete."
 }

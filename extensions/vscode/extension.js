@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('./client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview}=require('./patch-review');
@@ -34,6 +34,7 @@ async function activate(context) {
   const terminalBridges=new Set();
   let resolveSidebar;
   let client;
+  let historyPager;
   let health;
   let sessionId;
   let runId;
@@ -157,7 +158,7 @@ async function activate(context) {
     if(['completed','failed','cancelled'].includes(root.run.state)){
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
       for(const event of finalEvents){if(event.seq<=cursor)continue;if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
-      const history=await client.history(sessionId);if(version!==generation || !panel)return;post({type:'transcript',history});
+      const history=await historyPager.refresh();if(version!==generation || !panel)return;post({type:'transcript',...history});
       await refreshGitChangesSnapshot().catch(()=>{});
     }
   }
@@ -182,9 +183,9 @@ async function activate(context) {
         cursor = event.seq;
       }
       {
-        const history = await client.history(sessionId);
+        const history = await historyPager.refresh();
         if (version !== generation) return;
-        post({ type:'transcript',history,preserveLive:true });
+        post({ type:'transcript',...history,preserveLive:true });
       }
       const run = await client.status(id);
       if (version !== generation) return;
@@ -201,9 +202,9 @@ async function activate(context) {
         const finalEvents = await client.events(id, cursor);
         if (version !== generation) return;
         for (const event of finalEvents) { if(event.seq<=cursor)continue;post({ type: 'event', event }); cursor = event.seq; }
-        const history = await client.history(sessionId);
+        const history = await historyPager.refresh();
         if (version !== generation) return;
-        post({ type: 'transcript', history });
+        post({ type: 'transcript', ...history });
         await refreshGitChangesSnapshot().catch(()=>{});
 
       }
@@ -226,8 +227,8 @@ async function activate(context) {
     validRoot(run);
     if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);await refreshGitChangesSnapshot().catch(()=>{});}
     await readPlan(id,version);if(version!==generation||!panel)return;
-    const history=await client.history(sessionId),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
-    sessionRuns=runs;presentRuns();post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
+    const history=await historyPager.refresh(),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
+    sessionRuns=runs;presentRuns();post({type:'transcript',...history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
     pendingTreeEvents=!snapshot.caughtUp;
   }
 
@@ -270,9 +271,9 @@ async function activate(context) {
     cursor = 0;
     await context.workspaceState.update(stateKey, { ...connectionState(), id });
     if (version !== generation || !panel) return;
-    const history = await client.history(id);
+    const history = await historyPager.select(id);
     if (version !== generation || !panel) return;
-    post({ type: 'history', history });
+    post({ type: 'history', ...history });
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
     const previousProfile=profileController?.state;await profileController?.refresh();
@@ -397,7 +398,7 @@ async function activate(context) {
     }else connection=await workspaceBackend.connect();
     const origin=connection.origin,connectionEpoch=workspaceBackend.epoch;
     const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
-    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));historyPager=new SessionHistoryPager(client);
     client.bindWorkspace(workspaceBackend);
     await languageServerEditor.connect(client);
     if(!connectionCurrent())throw new Error('Workspace changed while connecting language servers.');
@@ -448,6 +449,11 @@ async function activate(context) {
           try{await configureModel();}catch{}
           await readSkills();
           await readAgentSelection();
+        } else if(message.type==='history-older'){
+          const target=client,session=sessionId,version=generation;
+          if(!historyPager||!session)return;
+          const history=await historyPager.older();
+          if(panel===view&&client===target&&sessionId===session&&version===generation)post({type:'transcript',...history,preserveOlder:true,preserveLive:true});
         } else if(message.type==='open-terminal'){
           try{await openTerminalView();}catch(error){post({type:'status',text:error.message});vscode.window.showErrorMessage(error.message);}
         } else if(message.type==='git-menu'){

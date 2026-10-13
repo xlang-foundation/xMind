@@ -578,6 +578,12 @@ test('history renders Markdown/code, copies plain code and shows exact provider 
   assert.match(doc.querySelector('.metrics').textContent,/Input 12Output 6Total 18/);assert.match(doc.querySelector('.metrics').textContent,/1.50s/);
   doc.querySelector('.copy-code').click();assert.equal(r.posted.at(-1).type,'copy');assert.equal(r.posted.at(-1).text,'x < y\n');r.dom.window.close();
 });
+test('history paging control requests an older page and updates after transcript prepend',()=>{
+ const r=renderer(),doc=r.dom.window.document,button=doc.getElementById('history-older'),scroll=doc.getElementById('scroll');let scrollTop=0;Object.defineProperty(scroll,'scrollHeight',{get:()=>200+doc.querySelectorAll('#history .message').length*100});Object.defineProperty(scroll,'clientHeight',{value:200});Object.defineProperty(scroll,'scrollTop',{get:()=>scrollTop,set:value=>scrollTop=value});try{
+  r.send({type:'history',history:[3,4].map(seq=>({id:`msg_${seq}`,role:'user',data:{content:`Message ${seq}`}})),historyHasMore:true});assert.equal(button.hidden,false);button.click();assert.equal(button.disabled,true);assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'history-older'});
+  scroll.scrollTop=50;r.send({type:'transcript',history:[1,2,3,4].map(seq=>({id:`msg_${seq}`,role:'user',data:{content:`Message ${seq}`}})),historyHasMore:false,preserveOlder:true,preserveLive:true});assert.equal(button.hidden,true);assert.equal(button.disabled,false);assert.equal(scroll.scrollTop,250,'The same visible transcript item stays at the same viewport position');assert.deepEqual([...doc.querySelectorAll('#history .message-body')].map(item=>item.textContent.trim()),['Message 1','Message 2','Message 3','Message 4']);
+ }finally{r.dom.window.close();}
+});
 test('unknown historical usage stays unavailable and malicious Markdown is sanitized',()=>{
   const r=renderer();r.send({type:'history',history:[{role:'assistant',data:{content:'<script>fixtureAttack()</script><img src="https://fixture.invalid" onerror="fixtureAttack()"><iframe src="https://fixture.invalid"></iframe>[fixture](javascript:fixtureAttack())'}}]});
   const card=r.dom.window.document.querySelector('.message');assert.equal(card.querySelectorAll('script,iframe,[onerror]').length,0);assert.equal(card.querySelectorAll('a[href^="javascript:"]').length,0);
