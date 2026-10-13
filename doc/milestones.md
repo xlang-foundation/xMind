@@ -1,5 +1,24 @@
 # Reviewable milestones
 
+## Claude adaptive-turn handling and browser coding verification — 2026-10-12
+
+Anthropic adaptive-thinking model families now receive a bounded 16,384-token
+output budget and medium effort by default; legacy Claude families retain the
+4,096-token default. Truncated agent turns report a specific output-limit
+diagnostic, and incomplete Claude stream blocks map to safe, stable diagnostics.
+The focused native request, stream, model-stream and provider-profile contracts
+pass **4/4**. Commit `ac0ad69` is pushed to `main`.
+
+In the external Edge xMind page, a Claude coding run targeted the current
+`D:\CantorAI2026\TestProj` workspace and applied a model-reference copy control
+to `model-zoo/frontend/src/views/ModelDetailView.vue` through the edit review.
+The Vue production build passes and the live FastAPI API returns the actual GPT-2
+detail record. The agent run itself ended with an Anthropic HTTP 400 after the
+write, so full run completion and rendered clipboard interaction are still
+unverified. Backend pytest did not run: `xlang3 -m pip install pytest` failed in
+pip dependency resolution with `memoryview() requires a bytes-like object`;
+tests were not run under CPython.
+
 ## xlang3 main integration and native Release gate — 2026-10-12
 
 xMind now pins the pushed xlang3 `main` revision
