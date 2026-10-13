@@ -1,5 +1,28 @@
 # Current native validation
 
+## Follow-up TestProj run and managed server launch guidance — 2026-10-12
+
+A second live xMind run against `D:\CantorAI2026\TestProj` completed the Vue
+production build and the real FastAPI catalog/statistics/detail checks. Its
+xlang3-hosted pytest invocation stopped before collecting tests with
+`AttributeError: 'PathAwareHookProxy' object has no attribute
+'pytest_cmdline_main'`; this is a runner/runtime compatibility failure, not an
+application assertion result. A subsequent foreground PowerShell command
+started a hidden Vite dev server with `Start-Process` and timed out after 60
+seconds. xMind marked the run failed and quarantined further effects because
+the child-process outcome could not be established. The browser's separate
+Edge session did pass live search, task-filter intersection, empty results,
+reset and pagination through pages 1 and 2. No TestProj source edits are
+attributed to this failed run.
+
+The native `run_process` tool description now tells agents to avoid shell-level
+`Start-Process`/`start` detachment and to request `background=true` so xMind
+owns and joins long-running servers. Its provider-facing contract is covered
+by `native_agent_process_http_contract`, which passes **1/1** after the Release
+`xmind_server` and `xmind_cli` build. This guardrail does not turn the failed
+run into a pass. The pytest lookup failure is pending a separate
+xlang3 compatibility review; no xlang3 source change is included here.
+
 ## Session-level interrupt — 2026-10-12
 
 The native HTTP server now supports `POST /v1/sessions/{id}/interrupt` and

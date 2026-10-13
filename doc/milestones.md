@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Managed coding-agent server launches — 2026-10-12
+
+The native `run_process` tool contract now directs coding agents to start
+long-lived development servers with `background=true` and `wait_process`, and
+warns against shell-level `Start-Process`/`start` detachment. This follows a
+TestProj run whose frontend build and real API probes succeeded but whose
+foreground hidden-server command timed out, leaving child effects uncertain.
+The focused provider-facing process contract verifies the guidance reaches
+the model (Release build plus CTest **1/1**). This addresses tool guidance
+only; the timed-out run remains failed, and pytest/xlang3 compatibility is
+separately pending.
+
 ## Native CLI connection catalog management — 2026-10-12
 
 The native CLI now lists connection profiles, saves and removes Local/Nexus

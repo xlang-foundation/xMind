@@ -23,6 +23,9 @@ const peer=createServer((request,response)=>{
       assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
       assert.ok(body.messages[0].content.includes(repositoryText),'Actual native provider request must include the root guidance read from disk');
       assert.deepEqual(body.tools.find(tool=>tool.function.name==='run_process').function.parameters.properties.profile.enum,['fixture']);
+      const processDescription=body.tools.find(tool=>tool.function.name==='run_process').function.description;
+      assert.ok(processDescription.includes('Do not detach child processes with shell-level Start-Process'),'Agent must keep long-lived child-process ownership inside the native process manager');
+      assert.ok(processDescription.includes('use background=true so the native runtime owns and joins the process'),'Agent must be told how to safely start development servers');
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){assert.notEqual(name,'stale-executable','A changed sealed executable must reject before another provider request');const result=JSON.parse(tool.content);continued.set(name,result);
         if(name==='background'&&tool.tool_call_id==='fixture-background'){
