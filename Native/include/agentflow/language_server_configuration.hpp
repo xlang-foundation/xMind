@@ -9,7 +9,7 @@ class LanguageServerConfigurationStore {
 public:
     explicit LanguageServerConfigurationStore(PersistenceService& store):store_(store){}
     std::vector<LanguageServerProfile> load();
-    std::vector<LanguageServerProfile> apply(const std::string& source);
+    std::vector<LanguageServerProfile> apply(const std::string& source,bool replacement_bootstrap=false);
 private:
     PersistenceService& store_;
 };

@@ -149,7 +149,7 @@ int run_server(int argc,char** argv) {
             const auto runtime_root=loaded_runtime_root();
             if(options.contains("--profile-state")){
                 const auto owner_receipt=options.find("--owner-receipt");
-                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second);
+                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{});
                 runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
                 runtime_generation->require_loaded_server_image();
             }else{
@@ -158,7 +158,8 @@ int run_server(int argc,char** argv) {
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
             if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
-                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--language-server-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                if(options.contains("--language-server-config")&&(!options.contains("--owner-receipt")||!options.contains("--profile-state")))throw std::invalid_argument("Only a protected managed-profile upgrade may apply trusted language-server configuration");
                 if(options.contains("--process-config")&&!options.contains("--owner-receipt"))throw std::invalid_argument("Only a managed native owner handoff may apply a trusted process configuration");
                 if(options.contains("--owner-receipt"))bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
                 else legacy=agentflow::LegacyOwnerBootstrap{options.at("--legacy-owner-ticket"),agentflow::qualify_backend_target(*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"))};
@@ -259,7 +260,7 @@ int run_server(int argc,char** argv) {
         std::vector<agentflow::LanguageServerProfile> language_servers;
         if(options.contains("--language-server-config")){
             std::ifstream file(std::filesystem::u8path(options.at("--language-server-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted language-server configuration");
-            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Language-server configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted language-server configuration");language_servers=language_server_configurations.apply(source);
+            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Language-server configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted language-server configuration");language_servers=language_server_configurations.apply(source,options.contains("--owner-receipt"));
         }else language_servers=language_server_configurations.load();
         for(const auto& item:process_profiles)process_metadata.push_back({item.id,item.revision,item.max_timeout.count()});
         for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled,item.transport});

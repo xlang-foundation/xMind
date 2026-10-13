@@ -54,12 +54,13 @@ public:
     const std::string& value()const{return value_;}
 private:std::string value_;
 };
-void store_environment(PersistenceService& store,LanguageServerProfile& profile){
+void store_environment(PersistenceService& store,LanguageServerProfile& profile,bool replacement_bootstrap){
     if(profile.environment.empty()){profile.environment_credential_id.clear();return;}
     profile.environment_credential_id=new_environment_id(profile);
     const auto payload=environment_json(profile);
     SecretBytes secret(std::span(reinterpret_cast<const std::uint8_t*>(payload.data()),payload.size()));
-    store.put_credential(credential_scope,profile.environment_credential_id,environment_purpose(profile.id),"Native language-server environment",std::move(secret),0).get();
+    if(replacement_bootstrap)store.put_language_server_credential_for_replacement(profile.environment_credential_id,environment_purpose(profile.id),"Native language-server environment",std::move(secret)).get();
+    else store.put_credential(credential_scope,profile.environment_credential_id,environment_purpose(profile.id),"Native language-server environment",std::move(secret),0).get();
 }
 void load_environment(PersistenceService& store,std::vector<LanguageServerProfile>& profiles){
     for(auto& profile:profiles){
@@ -112,10 +113,10 @@ std::vector<LanguageServerProfile> list(const Json& data,bool stored){
     if(!data.contains("profiles")||!data["profiles"].is_array()||data["profiles"].size()>16)throw std::invalid_argument("Invalid language-server profile count");
     std::vector<LanguageServerProfile> result;std::set<std::string> seen;for(const auto& item:data["profiles"]){auto profile_value=profile(item,stored);if(!seen.insert(profile_value.id).second)throw std::invalid_argument("Duplicate language-server profile");result.push_back(std::move(profile_value));}return result;
 }
-void remove_unused_environment_credentials(PersistenceService& store,const std::vector<LanguageServerProfile>& before,const std::vector<LanguageServerProfile>& after){
+void remove_unused_environment_credentials(PersistenceService& store,const std::vector<LanguageServerProfile>& before,const std::vector<LanguageServerProfile>& after,bool replacement_bootstrap){
     std::set<std::string> retained;for(const auto& profile:after)if(!profile.environment_credential_id.empty())retained.insert(profile.environment_credential_id);
     for(const auto& profile:before)if(!profile.environment_credential_id.empty()&&!retained.contains(profile.environment_credential_id)){
-        for(const auto& credential:store.credentials(credential_scope).get())if(credential.id==profile.environment_credential_id){store.delete_credential(credential_scope,credential.id,credential.revision).get();break;}
+        for(const auto& credential:store.credentials(credential_scope).get())if(credential.id==profile.environment_credential_id){if(replacement_bootstrap)store.delete_language_server_credential_for_replacement(credential.id,credential.revision).get();else store.delete_credential(credential_scope,credential.id,credential.revision).get();break;}
     }
 }
 }
@@ -125,7 +126,7 @@ std::vector<LanguageServerProfile> LanguageServerConfigurationStore::load(){
     for(const auto& profile:profiles)if(ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id)throw std::invalid_argument("Registered language-server executable changed; reimport its trusted profile");
     return profiles;
 }
-std::vector<LanguageServerProfile> LanguageServerConfigurationStore::apply(const std::string& source){
+std::vector<LanguageServerProfile> LanguageServerConfigurationStore::apply(const std::string& source,bool replacement_bootstrap){
     const auto desired=Json::parse(parse_input(source));fields(desired,{"profiles"});auto profiles=list(desired,false);const auto before=saved(store_);auto previous=list(before,true);(void)retired(before,previous);load_environment(store_,previous);
     std::map<std::string,LanguageServerProfile> old;for(const auto& profile:previous)old.emplace(profile.id,profile);auto retired_ids=retired(before,previous);std::set<std::string> active;bool changed=false;
     for(auto& profile:profiles){
@@ -133,12 +134,12 @@ std::vector<LanguageServerProfile> LanguageServerConfigurationStore::apply(const
         if(found==old.end()){profile.revision=1;changed=true;}
         else{profile.revision=found->second.revision;if(encode(profile,false)!=encode(found->second,false)){if(profile.revision>=maximum)throw Conflict("Language-server profile revision exhausted");++profile.revision;changed=true;}}
         if(found!=old.end()&&profile.environment==found->second.environment)profile.environment_credential_id=found->second.environment_credential_id;
-        else if(!profile.environment.empty())store_environment(store_,profile);
+        else if(!profile.environment.empty())store_environment(store_,profile,replacement_bootstrap);
     }
     for(const auto& [id,profile]:old)if(!active.contains(id)){(void)profile;retired_ids.insert(id);changed=true;}
     if(retired_ids.size()>4096)throw Conflict("Retired language-server profile limit reached");
     const auto previous_revision=before["revision"].get<std::int64_t>();if(changed&&previous_revision>=maximum)throw Conflict("Language-server configuration revision exhausted");
     Json entries=Json::array();for(const auto& profile:profiles)entries.push_back(encode(profile,true));const auto record=Json{{"version",1},{"revision",changed?previous_revision+1:previous_revision},{"profiles",std::move(entries)},{"retired_ids",retired_ids}}.dump();
-    if(record.size()>256*1024)throw Conflict("Stored language-server configuration exceeds limits");store_.put_information("native-language-servers","profiles",record).get();remove_unused_environment_credentials(store_,previous,profiles);return profiles;
+    if(record.size()>256*1024)throw Conflict("Stored language-server configuration exceeds limits");if(replacement_bootstrap)store_.put_language_server_profiles_for_replacement(record).get();else store_.put_information("native-language-servers","profiles",record).get();remove_unused_environment_credentials(store_,previous,profiles,replacement_bootstrap);return profiles;
 }
 }

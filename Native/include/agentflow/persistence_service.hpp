@@ -150,6 +150,12 @@ public:
     // A protected managed-owner replacement may stage only this trusted
     // process-profile record while quiesced, before it is activated.
     std::future<void> put_process_profiles_for_replacement(std::string json);
+    // Trusted language-server configuration may be staged only by a protected
+    // managed-owner replacement before that owner is activated.
+    std::future<void> put_language_server_profiles_for_replacement(std::string json);
+    std::future<CredentialMetadata> put_language_server_credential_for_replacement(
+        std::string id,std::string purpose,std::string label,SecretBytes secret);
+    std::future<void> delete_language_server_credential_for_replacement(std::string id,std::int64_t expected_revision);
     std::future<void> compare_information(std::string category,std::string id,std::string json,std::optional<std::string> expected);
     std::future<std::string> information(std::string category,std::string id);
     std::future<Operation> request_operation(std::string id,OperationSpec spec,std::int64_t expires_unix_ms);

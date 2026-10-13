@@ -7,12 +7,24 @@
 #include <mutex>
 #include <thread>
 #include <type_traits>
+#include <string_view>
 #include <iomanip>
 #include <random>
 #include <sstream>
 
 namespace agentflow {
-namespace {std::string owner_nonce(){std::random_device random;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<random();return out.str();}}
+namespace {
+std::string owner_nonce(){std::random_device random;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<random();return out.str();}
+bool language_server_credential_id(const std::string& id){
+    constexpr std::string_view prefix="language-server-env-";
+    if(!id.starts_with(prefix)||id.size()>256)return false;
+    const auto revision=id.rfind("-r");if(revision==std::string::npos||revision<=prefix.size()||revision+2==id.size())return false;
+    for(const char value:id.substr(prefix.size(),revision-prefix.size()))
+        if(!((value>='a'&&value<='z')||(value>='A'&&value<='Z')||(value>='0'&&value<='9')||value=='_'||value=='.'||value=='-'))return false;
+    for(const char value:id.substr(revision+2))if(value<'0'||value>'9')return false;
+    return true;
+}
+}
 struct PersistenceService::Impl {
     using Request=std::function<void(Repository&)>;
     std::mutex mutex,close_mutex;
@@ -269,6 +281,36 @@ std::future<void> PersistenceService::put_process_profiles_for_replacement(std::
         const auto owner=repository.backend_owner();
         if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("Process-profile replacement import requires the protected quiesced owner");
         repository.put_information("native-process","profiles",json);
+    },false);
+}
+std::future<void> PersistenceService::put_language_server_profiles_for_replacement(std::string json) {
+    if(!impl_->replacement_bootstrap)throw Conflict("Language-server profiles may bypass quiescence only during a protected replacement startup");
+    return impl_->submit([this,json=std::move(json)](Repository& repository){
+        const auto owner=repository.backend_owner();
+        if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("Language-server replacement import requires the protected quiesced owner");
+        repository.put_information("native-language-servers","profiles",json);
+    },false);
+}
+std::future<CredentialMetadata> PersistenceService::put_language_server_credential_for_replacement(
+    std::string id,std::string purpose,std::string label,SecretBytes secret) {
+    const auto prefix=std::string("language-server.environment.");
+    if(!language_server_credential_id(id)||!purpose.starts_with(prefix)||
+       purpose.substr(prefix.size())!=id.substr(std::string("language-server-env-").size(),id.rfind("-r")-std::string("language-server-env-").size())||
+       label!="Native language-server environment")throw Conflict("Invalid protected language-server credential update");
+    if(!impl_->replacement_bootstrap)throw Conflict("Language-server credentials may bypass quiescence only during a protected replacement startup");
+    return impl_->submit([this,id=std::move(id),purpose=std::move(purpose),label=std::move(label),secret=std::move(secret)](Repository& repository) mutable {
+        const auto owner=repository.backend_owner();
+        if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("Language-server credential update requires the protected quiesced owner");
+        return repository.put_credential("server",id,purpose,label,secret,0);
+    },false);
+}
+std::future<void> PersistenceService::delete_language_server_credential_for_replacement(std::string id,std::int64_t revision) {
+    if(!language_server_credential_id(id)||revision<1)throw Conflict("Invalid protected language-server credential removal");
+    if(!impl_->replacement_bootstrap)throw Conflict("Language-server credentials may bypass quiescence only during a protected replacement startup");
+    return impl_->submit([this,id=std::move(id),revision](Repository& repository){
+        const auto owner=repository.backend_owner();
+        if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("Language-server credential removal requires the protected quiesced owner");
+        repository.delete_credential("server",id,revision);
     },false);
 }
 std::future<std::string> PersistenceService::information(std::string category,std::string id) {

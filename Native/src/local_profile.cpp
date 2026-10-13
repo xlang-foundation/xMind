@@ -373,6 +373,9 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
     if(value.contains("process_config_pending"))require(value.at("process_config_pending").is_boolean()&&
         (!value.at("process_config_pending").get<bool>()||(value.contains("process_config")&&!value.at("process_config").get<std::string>().empty())),
         "Saved process configuration update is invalid");
+    if(value.contains("language_server_config_pending"))require(value.at("language_server_config_pending").is_boolean()&&
+        (!value.at("language_server_config_pending").get<bool>()||(value.contains("language_server_config")&&!value.at("language_server_config").get<std::string>().empty())),
+        "Saved language-server configuration update is invalid");
     require(value.value("phase", std::string{}) == "preparing" ||
             value.value("phase", std::string{}) == "starting" ||
             value.value("phase", std::string{}) == "ready");
@@ -533,8 +536,11 @@ Child launch(Store &store, Json &state) {
         args.push_back(L"approved");
     }
     for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config", "process_config"}) {
-        if(state.contains("owner_receipt")&&std::string(field)!="process_config")continue;
+        if(state.contains("owner_receipt")&&std::string(field)!="process_config"&&
+           !(std::string(field)=="language_server_config"&&state.value("language_server_config_pending",false)))continue;
         if(std::string(field)=="process_config"&&!state.value("process_config_pending",false))continue;
+        if(std::string(field)=="language_server_config"&&state.contains("owner_receipt")&&
+           !state.value("language_server_config_pending",false))continue;
         const auto value = state.value(field, std::string{});
         if (!value.empty()) {
             const auto option=std::string(field)=="provider_config"?L"--provider-config":
@@ -749,12 +755,22 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         std::string loaded_manifest;
         if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
             loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
-        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 4>{
+        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 3>{
                  {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config},
-                  {"python_tools_config", options.python_tools_config}, {"language_server_config", options.language_server_config}}})
+                  {"python_tools_config", options.python_tools_config}}})
             if (!value.empty())
                 require(state.value(field, std::string{}) == text(absolute(value)),
                         "Profile launch configuration changed; update the existing backend explicitly");
+        const auto requested_language_server_path=options.language_server_config.empty()?std::string{}:text(absolute(options.language_server_config));
+        const bool language_server_configuration_changed=!options.language_server_config.empty()&&
+            state.value("language_server_config",std::string{})!=requested_language_server_path;
+        if(state.contains("owner_receipt")&&language_server_configuration_changed)
+            throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing language-server configuration");
+        if(language_server_configuration_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("Profile launch configuration changed; update the existing backend explicitly");
+        if(state.contains("upgrade_intent")&&language_server_configuration_changed){
+            state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;store.write(state);
+        }
         const auto requested_process_path=options.process_config.empty()?std::string{}:text(absolute(options.process_config));
         const auto requested_process_digest=options.process_config.empty()?std::string{}:context_digest(file_bytes(absolute(options.process_config),256*1024));
         const bool process_configuration_changed=!options.process_config.empty()&&
@@ -770,7 +786,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if (options.approved_edits)
             require(state.at("approved_edits") == *options.approved_edits,
                     "Profile edit policy changed; update the existing backend explicitly");
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&(process_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&(process_configuration_changed||language_server_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
@@ -780,6 +796,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     auto [target,digest]=stage_current_runtime(store,workspace);
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
+                    if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
                     state["upgrade_intent"]=true;store.write(state);
                 }
                 const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
@@ -930,6 +947,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     state.erase("owner_receipt");state.erase("replacement_port");state.erase("replacement_manifest");state.erase("replacement_runtime");store.write(state);
                 }
                 if(state.value("process_config_pending",false)){state.erase("process_config_pending");store.write(state);}
+                if(state.value("language_server_config_pending",false)){state.erase("language_server_config_pending");store.write(state);}
                 break;
             }
         }
@@ -952,7 +970,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
 }
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,
-                                   const std::string &auth_token,const std::string &owner_receipt) {
+                                   const std::string &auth_token,const std::string &owner_receipt,
+                                   const std::string &language_server_config) {
     const auto path=absolute(state_file);
     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
     Store store(path.parent_path());
@@ -975,6 +994,11 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                 state.at("owner_receipt").at("revision")==std::stoll(owner_receipt.substr(first+1,last-first-1))&&
                 state.at("owner_receipt").at("receipt_id")==owner_receipt.substr(last+1),
                 "Managed profile replacement receipt differs from its protected startup record");
+        const auto requested_language_server=language_server_config.empty()?std::string{}:text(absolute(language_server_config));
+        const bool pending_language_server=state.value("language_server_config_pending",false);
+        require(pending_language_server?(!requested_language_server.empty()&&
+                    state.value("language_server_config",std::string{})==requested_language_server):requested_language_server.empty(),
+                "Managed profile language-server override differs from its protected upgrade intent");
     }
 }
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
