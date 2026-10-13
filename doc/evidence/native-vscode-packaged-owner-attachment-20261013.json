@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Installed VS Code xMind extension opened TestProj and attached to its existing local owner",
+  "vscode": "1.141.0",
+  "extension": {
+    "id": "agentflow-local.agentflow",
+    "version": "0.1.10",
+    "path": "D:\\CantorAI2026\\xMind\\.agentflow\\package-host-diagnostic-20261013\\extensions\\agentflow-local.agentflow-0.1.10"
+  },
+  "workspace": {
+    "root": "D:\\CantorAI2026\\TestProj",
+    "trusted": true
+  },
+  "command": "agentflow.open",
+  "displayedErrors": [],
+  "owner": {
+    "startedByThisHost": false,
+    "runtimeSdkRevision": "b3ec9bf48e8942ac866ea726143da2d639a8dc94",
+    "compatibilityBranch": "fix/pytest-pathaware-hook-proxy",
+    "branchHead": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+    "matchedPackagedXlangFiles": [
+      "xlang3.exe",
+      "xlang3_runtime.dll",
+      "modules/xlang_json.x3pkg.dll",
+      "modules/xlang_sqlite3.x3pkg.dll"
+    ]
+  },
+  "limits": [
+    "The host attached to a pre-existing local backend owner rather than starting one.",
+    "This check did not submit a model request or approve a workspace edit.",
+    "Only the listed xlang3 executable, runtime DLL, and installed native JSON/SQLite modules were hash-compared; the full native runtime manifests differ."
+  ]
+}

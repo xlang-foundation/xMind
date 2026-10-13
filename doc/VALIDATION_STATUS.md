@@ -1,5 +1,15 @@
 # Current native validation
 
+## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
+
+VS Code 1.141.0 loaded installed xMind extension 0.1.10 in a trusted TestProj
+window. The `agentflow.open` command connected the sidebar without a displayed
+extension error. It attached to the pre-existing TestProj owner; the owner's
+xlang3 executable, runtime DLL, and native JSON/SQLite modules match the
+bundled compatibility-branch package. This verifies the installed client-to-
+shared-owner attachment, but not process startup from this host or a
+model-generated edit. [Run evidence](evidence/native-vscode-packaged-owner-attachment-20261013.json).
+
 ## Packaged runtime owner startup with xlang3 compatibility branch — 2026-10-13
 
 The packaged `xmind.exe` started a fresh local TestProj profile with
