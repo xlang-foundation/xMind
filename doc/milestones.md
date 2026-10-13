@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Webpage workspace creation and switching acceptance — 2026-10-12
+
+The live Edge xMind page created a second local workspace from the existing
+xlang3 folder and switched between it and TestProj through the workspace
+settings selector. TestProj was restored as the active workspace and remains
+selected after closing settings. This verifies webpage workspace creation and
+switching for the current local profile; adding another folder and running an
+agent in the new workspace remain unverified. A literal `%SystemDrive%` tree
+is present in TestProj with a creation timestamp during the failed run; its
+origin is unclear and it remains untouched for review.
+
 ## Managed coding-agent server launches — 2026-10-12
 
 The native `run_process` tool contract now directs coding agents to start

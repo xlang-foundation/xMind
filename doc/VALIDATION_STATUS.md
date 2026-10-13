@@ -1,5 +1,20 @@
 # Current native validation
 
+## Live webpage workspace creation and switching — 2026-10-12
+
+In the external Edge xMind webpage, the workspace settings dialog created a
+second local workspace from the existing `D:\CantorAI2026\xlang3` folder. The
+workspace selector then exposed both saved entries; selecting
+`D:\CantorAI2026\TestProj` switched the file explorer and active workspace back
+to TestProj, which remains selected after closing the dialog. This verifies
+webpage create/select flows on this local profile. Folder attachment and
+agent execution in the newly selected workspace were not tested. The profile
+now retains the xlang3 workspace as a second local entry.
+
+The TestProj tree also contains a literal `%SystemDrive%\ProgramData` cache
+directory tree with filesystem timestamps from 2026-10-12 22:33. Its origin is
+not established, so it was left intact; no cleanup or ownership claim is made.
+
 ## Follow-up TestProj run and managed server launch guidance — 2026-10-12
 
 A second live xMind run against `D:\CantorAI2026\TestProj` completed the Vue
