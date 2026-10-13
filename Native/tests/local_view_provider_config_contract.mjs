@@ -42,6 +42,7 @@ try{
  for(const[name,source]of [['xmind.exe',program],['xlang3_runtime.dll',dll],['xlang3.exe',path.join(path.dirname(modules),'xlang3.exe')],...['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'].map(name=>['modules/'+name,path.join(modules,name)])]){
   const bytes=await fs.readFile(source);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=createHash('sha256').update(bytes).digest('hex');
  }
+ {const name='worker/agent_worker.py',bytes=await fs.readFile(path.join(path.dirname(program),'worker','agent_worker.py'));await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=createHash('sha256').update(bytes).digest('hex');}
  const notice=Buffer.from('Synthetic local provider configuration contract package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);
  files['licenses/NOTICE.txt']=createHash('sha256').update(notice).digest('hex');
  const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));
