@@ -101,6 +101,16 @@ passed on `70bc353` with 328/328 extension and 105/105 browser contracts and
 its source/asset immutability check; see the [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/38458592874).
 The separate native Windows package/contract gate has not passed yet.
 
+## Current VS Code paging fixtures and hosted view gate — 2026-10-13
+
+The extension now uses SQL-bounded session message pages, but its synthetic
+host transport still served only the legacy full-history route. The fixture
+now returns the paged response shape for saved and forked sessions, and the
+route assertions track the current API. The complete VS Code suite passes
+**332/332** and the browser suite passes **106/106**. The guarded view workflow
+now enforces these current counts instead of stale 328/105 values. The native
+server and xlang3 were not changed by this fix.
+
 ## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
 
 VS Code 1.141.0 loaded installed xMind extension 0.1.10 in a trusted TestProj

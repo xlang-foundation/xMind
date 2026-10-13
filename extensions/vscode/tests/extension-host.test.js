@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('../client');
 const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -19,6 +19,7 @@ function harness(options={}) {
   let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
   const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
+  const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
@@ -81,9 +82,10 @@ function harness(options={}) {
     }
     else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
     else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
-    else if(target.pathname==='/v1/sessions/forked/history') data=transcript;
+    else if(target.pathname==='/v1/sessions/forked/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/forked/runs') data=[];
     else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
+    else if(target.pathname==='/v1/sessions/saved/messages') data=await pagedHistory(pendingHistory?pendingHistory:transcript);
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
     else if(options.ownedChildren&&target.pathname.endsWith('/children'))data=options.ownedChildren;
@@ -166,7 +168,7 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
@@ -448,10 +450,10 @@ test('sidebar rename binds selected session and original title, refreshes metada
   for(const conflict of [false,true]){
     const {h,view}=await setupView({health:{agent_execution:false,status:'ok',session_rename:true},renameConflict:conflict});
     view.receive({type:'rename-session',id:'foreign',title:'Forged',expected_title:'Old'});await until(()=>view.posted.some(message=>message.type==='rename-result'));assert.equal(h.renameRequests.length,0);
-    const historyReads=h.requests.filter(route=>route==='/v1/sessions/saved/history').length;
+    const historyReads=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length;
     view.receive({type:'rename-session',id:'saved',title:'Renamed fixture',expected_title:'Saved session'});await until(()=>h.renameRequests.length===1&&view.posted.some(message=>message.type==='rename-result'&&message.id==='saved'));
     assert.deepEqual(h.renameRequests,[{title:'Renamed fixture',expected_title:'Saved session'}]);assert.equal(view.posted.findLast(message=>message.type==='rename-result').success,!conflict);
-    assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/history').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
+    assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
   }
 });
 test('VS Code forks only the active saved conversation boundary and selects the native child',async()=>{
@@ -460,7 +462,7 @@ test('VS Code forks only the active saved conversation boundary and selects the 
   await until(()=>view.posted.some(message=>message.type==='sessions'&&message.selected==='saved'));
   view.receive({type:'fork-session',id:'foreign',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.success===false));assert.deepEqual(h.forkRequests,[]);
   view.receive({type:'fork-session',id:'saved',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.id==='saved'&&message.before==='msg_2'));assert.equal(view.posted.findLast(message=>message.type==='fork-result'&&message.id==='saved').success,true);assert.equal(h.forkRequests.length,1);
-  assert.deepEqual(h.forkRequests,[{before:'msg_2'}]);assert.ok(view.posted.some(message=>message.type==='sessions'&&message.selected==='forked'));assert.ok(h.requests.includes('/v1/sessions/forked/history'));assert.ok(h.requests.includes('/v1/sessions/forked/runs'));assert.ok(!h.requests.includes('/v1/runs'));
+  assert.deepEqual(h.forkRequests,[{before:'msg_2'}]);assert.ok(view.posted.some(message=>message.type==='sessions'&&message.selected==='forked'));assert.ok(h.requests.includes('/v1/sessions/forked/messages?limit=100'));assert.ok(h.requests.includes('/v1/sessions/forked/runs'));assert.ok(!h.requests.includes('/v1/runs'));
  }finally{view.close();}
 });
 test('invalid keys and unsupported provider destinations never transmit credentials',async()=>{
@@ -561,7 +563,7 @@ test('inspection rejects a different backend operation and discards observations
   await until(()=>lateView.posted.some(message=>message.type==='transcript'));
   lateView.receive({type:'inspect-edit',id:'edit'});await until(()=>late.requests.includes('/v1/operations/edit/inspection'));
   lateView.receive({type:'select-run',id:'finished'});resolveInspection(inspectionFixture);
-  await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/history').length>=3);
+  await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length>=3);
   assert.ok(!lateView.posted.some(message=>message.type==='edit-inspection'));assert.equal(late.decisions.length,0);lateView.close();
 });
 test('only a reviewed pending operation can be decided and payload stays backend-owned',async()=>{
@@ -607,7 +609,7 @@ test('session selection intent invalidates an in-flight approval before queued s
   view.receive({type:'decide',id:'edit',decision:'allow'});
   await until(()=>h.requests.includes('/v1/operations/edit'));
   view.receive({type:'select',id:'saved'});resolveOperation(pendingEdit);
-  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/history').length===2);
+  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length===2);
   assert.equal(h.decisions.length,0,'Selection intent must prevent a grant while the selection handler is still queued');view.close();
 });
 
@@ -616,7 +618,7 @@ test('closing a panel during history loading cannot start a detached poller',asy
   h.pauseHistory(new Promise(resolve=>{resolveHistory=resolve;}));
   await h.commands.get('agentflow.open')();const view=h.views[0];
   view.receive({type:'ready'});
-  await until(()=>h.requests.includes('/v1/sessions/saved/history'));
+  await until(()=>h.requests.includes('/v1/sessions/saved/messages?limit=100'));
   view.close();resolveHistory([]);
   await h.commands.get('agentflow.open')();
   assert.equal(h.views.length,2);assert.equal(h.intervals.size,0);
@@ -650,10 +652,10 @@ test('creation comparison opens absent-to-proposed snapshots without creating a 
 test('refresh reloads backend execution capabilities and history without submitting a run',async()=>{
   const h=harness({health:{agent_execution:false}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='transcript')&&h.intervals.size===0);
-  const histories=h.requests.filter(route=>route==='/v1/sessions/saved/history').length;
+  const histories=h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length;
   h.configureBackend({agent_execution:true},{default_model:'configured-after-connect',models:[{id:'configured-after-connect'}]});
   view.receive({type:'refresh'});
-  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/history').length>histories);
+  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=100').length>histories);
   const latest=view.posted.filter(message=>message.type==='capabilities').at(-1);
   assert.equal(latest.execution,true);assert.equal(latest.model,'configured-after-connect');
   assert.equal(h.requests.filter(route=>route==='/v1/health').length,2);
