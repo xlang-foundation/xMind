@@ -114,6 +114,15 @@ test('browser imported key-only profiles guide the footer selection without a ne
  try{await view.discover();assert.deepEqual(calls,[]);assert.equal(view.profileController.state.active,'');assert.ok(!posted.some(value=>value.type==='error'));assert.match(posted.findLast(value=>value.type==='status').text,/Choose a saved provider below/);assert.match(posted.findLast(value=>value.type==='settings-state').text,/saved key will be used/);assert.equal(view.profileController.draft,undefined);}finally{view.dispose();}
 });
 
+test('browser initializes saved provider profiles before any session is selected',async()=>{
+ const profiles=['claude','gemini','deepseek','openai'].map((id,index)=>({id,provider:['anthropic','gemini','deepseek','openai'][index],route_id:['anthropic.messages','gemini.generate-content','deepseek.chat-completions','openai.responses'][index],model:'',revision:1}));
+ const state={revision:1,active:'',profiles,routes:profiles.map(profile=>({id:profile.route_id,provider:profile.provider,wire:'responses',discovery:true}))},posted=[],discoveries=[];
+ const client={health:async()=>({agent_execution:false,provider_profile_admission:true}),models:async()=>({models:[]}),graphs:async()=>({graphs:[]}),sessions:async()=>[],providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{discoveries.push(args);return {models:[]};}};
+ const view=new BrowserController(client,value=>posted.push(value));
+ try{await view.initialize();assert.deepEqual(posted.findLast(value=>value.type==='provider-profiles').profiles.map(profile=>profile.id),['claude','gemini','deepseek','openai']);assert.equal(posted.findLast(value=>value.type==='provider-profiles').active,'');assert.equal(discoveries.length,0);assert.equal(view.profileController.state.revision,1);}
+ finally{view.dispose();}
+});
+
 test('browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes',async()=>{
  let state={revision:4,active:'saved',profiles:[{id:'saved',provider:'openai',route_id:'openai.responses',model:'current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const writes=[],discoveries=[],posted=[],models=Array.from({length:135},(_,n)=>({id:'discovered-'+n}));
  const client={providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{discoveries.push(args);return {models};},saveProviderProfile:async(...args)=>{writes.push(args);state={...state,revision:state.revision+1,profiles:[{...state.profiles[0],revision:state.profiles[0].revision+1,model:args[2]}]};return state;},health:async()=>({agent_execution:true}),models:async()=>({models:[{id:state.profiles[0].model}],default_model:state.profiles[0].model}),graphs:async()=>({graphs:[]}),createSession:async()=>({id:'new-session'}),sessions:async()=>[{id:'new-session'},{id:'older-session'}],history:async()=>[],runs:async()=>[]};
