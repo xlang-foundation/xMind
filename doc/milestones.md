@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## VS Code coding-flow verification against TestProj — 2026-10-12
+
+The xMind right-sidebar extension targeted the opened `D:\CantorAI2026\TestProj`
+workspace and reused the saved Claude profile. It applied scoped styling edits
+to `model-zoo/frontend/src/style.css`; the run then stopped because xMind could
+not validate the model response, before editing `HomeView.vue` or running its
+requested build. Independent verification passed: the frontend production
+build, xlang3-hosted FastAPI health/catalog/stats requests, and external Edge
+checks for search, task filtering and model-detail navigation. This proves the
+workspace binding, real file writes, API-backed page and these browser actions;
+it does not pass the full coding run. The backend pytest entry point remains
+incompatible with xlang3's current pytest hook proxy. See [exact scope and
+outcomes](evidence/testproj-vscode-coding-flow-20261012.json).
+
 ## MCP catalogue invalidation and same-run refresh — 2026-10-12
 
 Run-owned MCP list-change notifications and unexpected listener loss now
