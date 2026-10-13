@@ -63,11 +63,16 @@ std::mutex control_mutex;
 agentflow::HttpServer* active_server=nullptr;
 std::string loaded_runtime_root(){std::wstring image(32768,L'\0');const auto count=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));if(!count||count>=image.size())throw std::runtime_error("Cannot qualify native process image");image.resize(count);const auto value=std::filesystem::path(image).parent_path().u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
 std::string system_command_shell(){std::array<wchar_t,32768> directory{};const auto count=GetSystemDirectoryW(directory.data(),static_cast<UINT>(directory.size()));if(!count||count>=directory.size())throw std::runtime_error("Cannot locate the native terminal shell");const auto path=(std::filesystem::path(std::wstring(directory.data(),count))/L"cmd.exe").u8string();return {reinterpret_cast<const char*>(path.data()),path.size()};}
-std::optional<agentflow::ProcessProfile> paired_xlang3_process_profile(const std::string& modules_directory){
+std::optional<agentflow::ProcessProfile> paired_xlang3_process_profile(const std::string& modules_directory,const agentflow::ProcessProfile& trusted_shell){
     const auto modules=std::filesystem::absolute(std::filesystem::u8path(modules_directory)).lexically_normal();const auto path=modules.parent_path()/L"xlang3.exe";
     if(!std::filesystem::is_regular_file(path))return std::nullopt;const auto executable=path.u8string();agentflow::ProcessProfile profile;
     profile.id="xlang3";profile.executable=std::string(reinterpret_cast<const char*>(executable.data()),executable.size());profile.revision=1;
-    profile.max_timeout=std::chrono::milliseconds(600000);profile.executable_id=agentflow::ForegroundProcess::executable_identity(profile.executable);profile.auto_approve=true;return profile;
+    profile.max_timeout=trusted_shell.max_timeout;profile.executable_id=agentflow::ForegroundProcess::executable_identity(profile.executable);profile.auto_approve=trusted_shell.auto_approve;return profile;
+}
+void append_paired_xlang3_process_profile(std::vector<agentflow::ProcessProfile>& profiles,const std::string& modules_directory){
+    if(profiles.size()>=16||std::any_of(profiles.begin(),profiles.end(),[](const auto& profile){return profile.id=="xlang3";}))return;
+    const auto shell=std::find_if(profiles.begin(),profiles.end(),[](const auto& profile){return profile.id=="powershell"||profile.id=="cmd";});
+    if(shell!=profiles.end())if(auto paired=paired_xlang3_process_profile(modules_directory,*shell))profiles.push_back(std::move(*paired));
 }
 std::string default_windows_process_profiles(){
     std::array<wchar_t,32768> directory{};const auto count=GetSystemDirectoryW(directory.data(),static_cast<UINT>(directory.size()));if(!count||count>=directory.size())throw std::runtime_error("Cannot locate the native process shell");
@@ -266,13 +271,13 @@ int run_server(int argc,char** argv) {
             std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source,options.contains("--owner-receipt"));
         }else {
             process_profiles=process_configurations.load_or_initialize(default_windows_process_profiles);
-            const bool has_xlang3=std::any_of(process_profiles.begin(),process_profiles.end(),[](const auto& profile){return profile.id=="xlang3";});
-            const bool shell_only=process_profiles.size()==1&&process_profiles.front().auto_approve&&
-                (process_profiles.front().id=="powershell"||process_profiles.front().id=="cmd");
-            // Keep the runtime-owned executable binding process-local so an
-            // xlang3 runtime update cannot leave a stale persisted hash.
-            if(!has_xlang3&&shell_only)if(auto paired=paired_xlang3_process_profile(options.at("--modules")))process_profiles.push_back(std::move(*paired));
         }
+        // Keep the runtime-owned executable binding process-local so an
+        // xlang3 runtime update cannot leave a stale persisted hash. Pair it
+        // with a configured trusted shell even when a managed local view
+        // supplies --process-config; an explicitly empty/custom-only list is
+        // still an opt-out. Inherit the shell's approval and timeout policy.
+        append_paired_xlang3_process_profile(process_profiles,options.at("--modules"));
         agentflow::LanguageServerConfigurationStore language_server_configurations(persistence);
         std::vector<agentflow::LanguageServerProfile> language_servers;
         if(options.contains("--language-server-config")){

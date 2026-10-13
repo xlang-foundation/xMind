@@ -71,23 +71,28 @@ PowerShell executable, fixes its no-profile/noninteractive command prefix,
 binds its executable identity, assigns a bounded timeout and stores the
 registry through embedded xlang3. If that PowerShell executable is absent,
 the system `cmd.exe` profile is used. When the xlang3 executable adjacent to
-the configured runtime modules exists, the backend adds an `xlang3` profile to
-its active process snapshot and directs the model to use it for
-Python-compatible scripts, tests and package commands instead of resolving
+the configured runtime modules exists and the registry contains a trusted
+`powershell` or `cmd` profile, the backend adds an `xlang3` profile to its
+active process snapshot—even when a managed local view supplied the shell
+through `--process-config`. The runtime profile inherits that shell's approval
+and timeout policy, and the model is directed to use it for Python-compatible
+scripts, tests and package commands instead of resolving
 `xlang3.exe` through machine PATH. The executable identity is recalculated at
 every startup, so updating xlang3 does not leave a stale persisted binding.
-This also adds the profile to an older saved registry containing only the
-built-in auto-approved shell. Explicit startup process-config imports, custom
-multi-profile registries and empty lists are not augmented. Built-in profiles have `auto_approve: true`;
-commands still retain durable process identity and result records. A saved custom registry or
-explicitly empty list prevents bootstrap, and later startup never repopulates
-it. The public process-profile catalogue omits executable paths and bindings.
+This also adds the profile to an older saved registry containing the built-in
+shell and explicit custom registries that enable `powershell` or `cmd`. Empty
+lists and custom-only registries are not augmented. The profile is process-
+local and does not rewrite administrator configuration. Built-in profiles have
+`auto_approve: true`; commands still retain durable process identity and result
+records. Custom registries are never replaced, and an explicitly empty or
+custom-only list is preserved without adding xlang3. The public process-profile
+catalogue omits executable paths and bindings.
 
 The process-configuration contract verifies first-run initialization,
 no-prompt state, persistence and resistance to custom/empty registry
 replacement. The actual Release managed-local-view contract starts a fresh
-workspace profile without `--process-config` and verifies the public catalogue
-and its path secrecy. Release build plus process configuration, process
+workspace profile with its trusted process config and verifies the public
+catalogue and its path secrecy. Release build plus process configuration, process
 executor and agent-process HTTP contracts pass; rendered browser/VS Code
 command execution and model-driven project build acceptance remain open.
 

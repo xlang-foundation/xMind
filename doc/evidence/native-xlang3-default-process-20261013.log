@@ -1,11 +1,11 @@
 Command: CTest targeted xMind native process/profile contracts in .agentflow/native-mcp-resource-template (Release)
-Result: PASS (4/4, 103.70 sec)
+Result: PASS (4/4, 101.50 sec)
 Tests:
 - native_agent_process_http_contract — PASS (16.03 sec)
-- native_xlang3_default_process_contract — PASS (0.43 sec)
-- native_http_cli_contract — PASS (3.48 sec)
-- native_local_view_contract — PASS (83.75 sec)
-Scenario: Verify built-in process registry behavior, legacy shell-only profile upgrade, paired xlang3 profile discovery, real synthetic-model AgentRunner tool call that executes bundled xlang3.exe -c, no executable-path disclosure, CLI catalogue, packaged local profile startup and workspace/session view behavior.
-Build: Release xmind and xmind_server built successfully from current xMind sources in .agentflow/native-mcp-resource-template.
-Runtime source changes: none. xlang3 executable used from the runtime directory paired with the xMind backend modules.
+- native_xlang3_default_process_contract — PASS (0.55 sec)
+- native_http_cli_contract — PASS (3.60 sec)
+- native_local_view_contract — PASS (81.31 sec)
+Coverage: An explicit managed-view PowerShell profile (240-second limit, auto-approved) receives a paired in-memory xlang3 profile inheriting the same approval and timeout policy; the user-owned config file remains shell-only. An explicit empty process list stays empty. Reopening the shell-only registry without the config file still derives xlang3, and a synthetic model through the actual AgentRunner executes bundled xlang3.exe -c, persisting its result and output event. Public metadata does not disclose executable paths or identity hashes. The packaged local-view contract exercises profile startup, session history and workspace behavior.
+Build: Release xmind and xmind_server built successfully from final xMind sources.
+Runtime source changes: none. The xlang3 executable came from the runtime directory paired with the configured backend modules.
 Provider: synthetic loopback peer only; no external credentials or requests.
