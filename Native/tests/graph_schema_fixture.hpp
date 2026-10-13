@@ -9,6 +9,7 @@
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     auto version=scalar("PRAGMA user_version");if(version==12)return;
+    if(version==18){if(scalar("SELECT count(*) FROM a2a_continuation_messages")!=0)throw std::runtime_error("Legacy fixture cannot discard actual A2A continuation history");database.execute("DROP TABLE a2a_continuation_messages");database.execute("PRAGMA user_version=17");version=17;}
     // Schema 17 only widens the direct-agent budget CHECK. These fixtures
     // contain no direct-agent rows; the context reconstruction below replaces
     // that table with the exact historical schema when it needs to.

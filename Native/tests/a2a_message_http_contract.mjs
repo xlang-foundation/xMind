@@ -36,7 +36,7 @@ try{
   [{...message('push','a'),configuration:{pushNotificationConfig:{}}},-32003],
   [{message:{...message('file','a').message,parts:[{kind:'file',file:{bytes:'AA=='}}]}},-32005],
   [{...message('modes','a'),configuration:{acceptedOutputModes:['image/png']}},-32005],
-  [{message:{...message('continue','a').message,taskId:'other'}},-32004]
+  [{message:{...message('continue','a').message,taskId:'other'}},-32001]
  ];
  for(const [input,code] of invalid)assert.equal((await rpc('message/send',input)).error.code,code);
  assert.deepEqual(await api('/v1/sessions'),[],'Unsupported requests must not admit a context');

@@ -80,6 +80,7 @@ public:
         return submit(std::move(id),std::move(session_id),std::move(prompt));
     }
     virtual Run submit_message(std::string,std::string,std::string,std::string,std::string){throw RunUnavailable("Incoming message admission is unavailable");}
+    virtual Run continue_a2a_task(std::string,std::string,std::string,std::string,std::string,std::string,std::string){throw RunUnavailable("A2A task continuation is unavailable");}
     virtual void cancel(const std::string& id)=0;
     virtual bool healthy() const=0;
     // Unknown execution owners cannot authorize runtime quiescence.

@@ -44,6 +44,7 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
     return agents_->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
 }
 Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
+Run ExecutionPlatform::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input){if(const auto replay=store_.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("A2A task continuation is unavailable");return agents_->continue_a2a_task(std::move(task),std::move(message),std::move(context),std::move(identity),std::move(content),std::move(payload),std::move(input));}
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
 }

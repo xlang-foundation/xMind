@@ -13,6 +13,7 @@ public:
     Run submit(std::string id,std::string session_id,std::string prompt) override;
     Run submit_model(std::string id,std::string session_id,std::string prompt,std::string model_id) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
+    Run continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input_json) override;
     std::vector<std::string> models() const override;
     bool supports_agent_selection()const override{return true;}
     std::vector<AgentDefinitionMetadata> agent_definitions()const override;

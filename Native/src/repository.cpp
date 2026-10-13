@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>17)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>18)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>17) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>18) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -788,6 +788,11 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Direct-agent budget migration did not preserve foreign key ownership");
         db.execute("PRAGMA defer_foreign_keys=OFF");
         if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Direct-agent budget migration foreign key enforcement differs");
+    }
+    if(version<18){
+        db.execute("CREATE TABLE a2a_continuation_messages(message_id TEXT PRIMARY KEY NOT NULL,run_id TEXT NOT NULL REFERENCES runs(id),context_id TEXT NOT NULL REFERENCES sessions(id),identity TEXT NOT NULL CHECK(json_valid(identity) AND json_type(identity)='object'),content TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload) AND json_type(payload)='object'),human_request_id TEXT NOT NULL REFERENCES dynamic_human_requests(id),event_seq INTEGER NOT NULL REFERENCES events(seq),UNIQUE(run_id,human_request_id))");
+        db.execute("CREATE INDEX a2a_continuation_task_history ON a2a_continuation_messages(run_id,event_seq)");db.execute("PRAGMA user_version=18");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("A2A continuation migration did not preserve foreign key ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -1137,8 +1142,26 @@ Run Repository::create_run(const std::string& id,const std::string& session_id) 
 }
 std::optional<Run> Repository::incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content){
     if(message.empty()||message.size()>256||message.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message identity");if(!context.empty())identifier(context);object_json(identity);
+    if(!impl_->database.execute("SELECT message_id FROM a2a_continuation_messages WHERE message_id=?",{message}).rows.empty())throw Conflict("Incoming message ID belongs to an A2A continuation");
     const auto rows=impl_->database.execute("SELECT run_id,context_id,identity,content FROM incoming_messages WHERE message_id=?",{message}).rows;if(rows.empty())return {};
     if((!context.empty()&&text(rows[0][1])!=context)||text(rows[0][2])!=Json::parse(identity).dump()||text(rows[0][3])!=content)throw Conflict("Incoming message identity was reused with changed input");return run(text(rows[0][0]));
+}
+std::optional<Run> Repository::a2a_continuation(const std::string& message,const std::string& task,const std::string& context,const std::string& identity,const std::string& content,const std::string& payload){
+    if(message.empty()||message.size()>256||message.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid A2A continuation identity");identifier(task);if(!context.empty())identifier(context);const auto exact_identity=object_json(identity,65536),exact_payload=object_json(payload,65536);
+    const auto rows=impl_->database.execute("SELECT run_id,context_id,identity,content,payload FROM a2a_continuation_messages WHERE message_id=?",{message}).rows;if(rows.empty())return {};
+    if(text(rows[0][0])!=task||(!context.empty()&&text(rows[0][1])!=context)||text(rows[0][2])!=exact_identity||text(rows[0][3])!=content||text(rows[0][4])!=exact_payload)throw Conflict("A2A continuation identity was reused with changed input");return run(task);
+}
+Run Repository::continue_a2a_message(const std::string& task,const DynamicHumanInputSpec& answer,const std::string& message,const std::string& context,const std::string& identity,const std::string& content,const std::string& payload){
+    if(message.empty()||message.size()>256||message.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid A2A continuation identity");identifier(answer.authenticated_actor);if(answer.authenticated_actor.size()>4096||content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid A2A continuation input");const auto exact_identity=object_json(identity,65536),exact_payload=object_json(payload,65536),input=object_json(answer.input_json,16384);
+    auto& db=impl_->database;Transaction tx(db);if(const auto replay=a2a_continuation(message,task,context,exact_identity,content,exact_payload)){tx.commit();return *replay;}
+    if(!db.execute("SELECT message_id FROM incoming_messages WHERE message_id=?",{message}).rows.empty())throw Conflict("A2A continuation message ID belongs to an initial message");const auto owner=run(task);if(!owner.parent_id.empty()||owner.graph_root||owner.state!=RunState::paused||(!context.empty()&&owner.session_id!=context))throw Conflict("A2A continuation task is not a paused local agent");
+    auto p=dynamic_plan(answer.plan_id);if(p.root_run_id!=owner.id||p.state!="waiting_human"||p.revision!=answer.expected_revision||p.state_sequence!=answer.expected_state_sequence||p.capabilities.backend_identity!=answer.backend_identity)throw DynamicPlanChanged("A2A human continuation plan changed");auto h=dynamic_human_request(p.id,answer.request_id);if(h.root_run_id!=owner.id||h.state!="waiting"||h.expires_unix_ms<=now_ms())throw Conflict("A2A task has no matching live human question");
+    const auto existing=db.execute("SELECT id FROM dynamic_human_requests WHERE plan_id=? AND state='waiting'",{p.id}).rows;if(existing.size()!=1||text(existing[0][0])!=h.id)throw Conflict("A2A continuation requires exactly one pending human question");dynamic_cas(p,answer.expected_revision,answer.expected_state_sequence,answer.backend_identity);dynamic_safe_sequence(p.state_sequence);
+    const auto outcome=Json{{"human_state","answered"},{"request_id",h.id},{"input_json",input}}.dump();if(outcome.size()>32768)throw std::invalid_argument("Encoded human observation exceeds its native outcome bound");
+    const auto answered=impl_->event(owner.id,"plan.human.answered",Json{{"request_id",h.id},{"plan_id",p.id},{"label",h.label},{"input_json",input},{"actor",answer.authenticated_actor},{"source","a2a"}}.dump());changed_one(db.execute("UPDATE dynamic_human_requests SET state='answered',input_json=?,actor=?,input_event_seq=? WHERE id=? AND plan_id=? AND state='waiting'",{input,answer.authenticated_actor,answered.sequence,h.id,p.id}));
+    const auto settled=impl_->event(owner.id,"plan.human.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND human_request_id=? AND definition_revision=? AND state='waiting_human'",{outcome,settled.sequence,p.id,h.label,h.id,h.definition_revision}));changed_one(db.execute("UPDATE dynamic_plans SET state_sequence=state_sequence+1 WHERE id=? AND state_sequence=?",{p.id,p.state_sequence}));
+    const auto user_prompt=Json{{"content",content},{"a2a_message_id",message},{"a2a_message_payload",Json::parse(exact_payload)}}.dump();changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{owner.session_id,user_prompt}));changed_one(db.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{owner.id}));const auto admitted=impl_->event(owner.id,"a2a.message.continued",Json{{"message_id",message},{"human_request_id",h.id},{"context_id",owner.session_id}}.dump());
+    changed_one(db.execute("INSERT INTO a2a_continuation_messages(message_id,run_id,context_id,identity,content,payload,human_request_id,event_seq) VALUES(?,?,?,?,?,?,?,?)",{message,owner.id,owner.session_id,exact_identity,content,exact_payload,h.id,admitted.sequence}));tx.commit();return run(owner.id);
 }
 Run Repository::start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt,const std::string& identity,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic){
     identifier(id);object_json(prompt);const auto provider=prompt_context(prompt);const auto data=Json::parse(prompt);if(!data.contains("content")||!data["content"].is_string())throw std::invalid_argument("Incoming prompt must contain text");const auto content=data["content"].get<std::string>();if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming text");Transaction transaction(impl_->database);if(const auto replay=incoming_message(message,context,identity,content)){transaction.commit();return *replay;}
@@ -1158,9 +1181,9 @@ std::optional<std::vector<Message>> Repository::task_history(const std::string& 
     run(id);if(impl_->database.execute("SELECT run_id FROM task_history_owners WHERE run_id=?",{id}).rows.empty())return {};
     std::vector<Message> result;for(const auto& row:impl_->database.execute("SELECT m.seq,m.role,m.payload FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=? ORDER BY m.seq",{id}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2])});return result;
 }
-std::optional<std::string> Repository::incoming_message_payload(const std::string& id){
-    run(id);const auto rows=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=?",{id}).rows;
-    if(rows.empty())return {};return text(rows[0][0]);
+std::optional<std::string> Repository::incoming_message_payload(const std::string& id,const std::string& message){
+    run(id);if(!message.empty()){const auto continuation=impl_->database.execute("SELECT payload FROM a2a_continuation_messages WHERE run_id=? AND message_id=?",{id,message}).rows;if(!continuation.empty())return text(continuation[0][0]);const auto incoming=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=? AND message_id=?",{id,message}).rows;if(!incoming.empty())return text(incoming[0][0]);return {};}
+    const auto rows=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=?",{id}).rows;if(rows.empty())return {};return text(rows[0][0]);
 }
 Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic) {
     identifier(id);const auto provider=prompt_context(prompt_json);auto& db=impl_->database;Transaction transaction(db);session(session_id);refresh_admission(db);

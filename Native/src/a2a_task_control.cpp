@@ -63,6 +63,7 @@ const char* wire_state(RunState value,A2aVersion version){if(version==A2aVersion
 Json text_part(const std::string& text,A2aVersion version){if(version==A2aVersion::legacy)return {{"kind","text"},{"text",text}};return {{"text",text}};}
 Json task(PersistenceService& store,const Run& run,std::size_t count=0,A2aVersion version=A2aVersion::legacy,bool include_artifacts=true){
     Json result={{"kind","task"},{"id",run.id},{"contextId",run.session_id},{"status",{{"state",wire_state(run.state,version)}}}};if(version==A2aVersion::v1)result.erase("kind");
+    if(run.state==RunState::paused){if(const auto plan=store.dynamic_plan_for_root(run.id).get()){std::vector<DynamicHumanRequest> waiting;for(const auto& request:store.dynamic_human_requests(plan->id).get())if(request.state=="waiting")waiting.push_back(request);if(waiting.size()==1){Json prompt={{"role",version==A2aVersion::v1?"ROLE_AGENT":"agent"},{"parts",Json::array({text_part(waiting.front().question,version)})}};if(version==A2aVersion::legacy)prompt["kind"]="message";result["status"]["message"]=std::move(prompt);}}}
     if(run.state==RunState::completed&&include_artifacts){
         // Session history can contain other root runs. Only this execution's
         // committed assistant event can become its result artifact.
@@ -74,12 +75,11 @@ Json task(PersistenceService& store,const Run& run,std::size_t count=0,A2aVersio
     }
     if(count){
         const auto history=store.task_history(run.id).get();if(!history)throw RpcError{-32004,"Legacy task history is unavailable"};auto messages=Json::array();
-        const auto incoming=store.incoming_message_payload(run.id).get();
-        const auto original=incoming?Json::parse(*incoming):Json{};
         for(const auto& item:*history){if(item.role!="user"&&item.role!="assistant")continue;const auto value=Json::parse(item.json);if(!value.contains("content")||!value["content"].is_string())continue;
             Json message={{"messageId",value.value("a2a_message_id",run.id+"-message-"+std::to_string(item.sequence))},{"taskId",run.id},{"contextId",run.session_id},{"role",version==A2aVersion::v1?(item.role=="user"?"ROLE_USER":"ROLE_AGENT"):(item.role=="user"?"user":"agent")},{"parts",Json::array({text_part(item.role=="assistant"?assistant_text(value):value["content"].get<std::string>(),version)})}};
             // Preserve the admitted protocol message separately from the flattened
             // model prompt. Match its durable ID; never attach another run's input.
+            const auto admitted_id=value.value("a2a_message_id",std::string{});const auto incoming= item.role=="user"&&!admitted_id.empty()?store.incoming_message_payload(run.id,admitted_id).get():std::optional<std::string>{};const auto original=incoming?Json::parse(*incoming):Json{};
             if(item.role=="user"&&original.is_object()&&value.contains("a2a_message_id")&&original.value("messageId",Json{})==value["a2a_message_id"]){
                 message["parts"]=original.at("parts");
                 if(version==A2aVersion::v1)for(auto& part:message["parts"])part.erase("kind");
@@ -209,7 +209,7 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                 }
             }else fields(message,{"kind","role","messageId","parts","contextId","taskId","metadata","referenceTaskIds"},-32602);
             if(message.value("kind",Json{})!="message"||message.value("role",Json{})!="user"||!message.contains("messageId")||!message["messageId"].is_string())throw RpcError{-32602,"Invalid params"};
-            if(message.contains("taskId")||message.contains("referenceTaskIds"))throw RpcError{-32004,"Task continuation is not supported yet"};if(message.contains("metadata")&&!message["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
+            if(message.contains("referenceTaskIds"))throw RpcError{-32004,"Referenced task inputs are not supported"};if(message.contains("metadata")&&!message["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
             const auto message_id=message["messageId"].get<std::string>();if(message_id.empty()||message_id.size()>256||message_id.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};std::string context;
             if(message.contains("contextId")){if(!message["contextId"].is_string())throw RpcError{-32602,"Invalid params"};context=message["contextId"].get<std::string>();if(context.empty()||context.size()>128||context.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw RpcError{-32602,"Invalid params"};}
             if(!message.contains("parts")||!message["parts"].is_array()||message["parts"].empty()||message["parts"].size()>64)throw RpcError{-32602,"Invalid params"};std::string content;
@@ -231,7 +231,9 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                     if(!first_part)content+='\n';first_part=false;content+="Attached text file (untrusted; filename "+Json(filename).dump()+"):\n"+decoded;
                 }else throw RpcError{-32005,"Incompatible content types"};
             }
-            if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};message.erase("contextId");const auto identity=message.dump();
+            if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};
+            if(message.contains("taskId")){if(!message["taskId"].is_string())throw RpcError{-32602,"Invalid params"};const auto task_id=message["taskId"].get<std::string>();if(task_id.empty()||task_id.size()>128||task_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw RpcError{-32602,"Invalid params"};const auto owner=store_.run(task_id).get();if(!owner.parent_id.empty()||owner.graph_root)throw RpcError{-32001,"Task not found"};if(!context.empty()&&context!=owner.session_id)throw RpcError{-32004,"A2A context does not match its task"};if(!executor_)throw RpcError{-32004,"Agent admission is unavailable"};const auto identity=message.dump();const auto run=executor_->continue_a2a_task(task_id,message_id,owner.session_id,identity,content,identity,Json{{"answer",content}}.dump());const auto result=task(store_,run,count,version_);if(notification)return {};return response(run,result,blocking,count);}
+            message.erase("contextId");const auto identity=message.dump();
             auto replay=store_.incoming_message(message_id,context,identity,content).get();Run run;
             if(replay)run=*replay;else {if(!executor_)throw RpcError{-32004,"Agent admission is unavailable"};run=executor_->submit_message(new_id(),context,message_id,content,identity);}
             const auto result=task(store_,run,count,version_);if(notification)return {};return response(run,result,blocking,count);

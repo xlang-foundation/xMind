@@ -52,8 +52,10 @@ public:
     Run create_run(const std::string& id,const std::string& session_id);
     std::optional<Run> incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content);
     Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
+    std::optional<Run> a2a_continuation(const std::string& message,const std::string& task,const std::string& context,const std::string& identity,const std::string& content,const std::string& payload);
+    Run continue_a2a_message(const std::string& task,const DynamicHumanInputSpec& answer,const std::string& message,const std::string& context,const std::string& identity,const std::string& content,const std::string& payload);
     std::optional<std::vector<Message>> task_history(const std::string& id);
-    std::optional<std::string> incoming_message_payload(const std::string& run_id);
+    std::optional<std::string> incoming_message_payload(const std::string& run_id,const std::string& message_id={});
     Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
     DynamicPlanCapabilities dynamic_capabilities(const std::string& root);
     DynamicPlanCapabilities finalize_dynamic_capabilities(const std::string& root,const std::string& backend_identity,const std::string& catalogue_json,const std::vector<DynamicPresetCapability>& presets);

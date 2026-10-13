@@ -7,6 +7,7 @@
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <chrono>
+#include <algorithm>
 #include <atomic>
 #include <filesystem>
 #include <iostream>
@@ -30,7 +31,7 @@ struct Serving {
 const std::string authority(64,'a');
 std::int64_t now(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 struct Controller final:RunExecutor {
-    PersistenceService& store;std::atomic<int> input_calls=0,resume_calls=0;
+    PersistenceService& store;std::atomic<int> input_calls=0,resume_calls=0,continuation_calls=0;
     explicit Controller(PersistenceService& value):store(value){}
     Run submit(std::string,std::string,std::string)override{throw RunUnavailable("Synthetic controller does not execute prompts");}
     void cancel(const std::string&)override{throw RunUnavailable("Synthetic controller does not execute prompts");}
@@ -48,6 +49,9 @@ struct Controller final:RunExecutor {
         // Explicit synthetic physical-owner action: opens the typed segment but
         // does not claim a model continuation or execute another child.
         return store.resume_dynamic_owner({p->id,"resumed_"+root,authority,revision,sequence,store.root_budget(root).get().revision}).get().run;
+    }
+    Run continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input)override{
+        ++continuation_calls;if(const auto replay=store.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;const auto p=store.dynamic_plan_for_root(task).get();require(p.has_value(),"A2A continuation requires a real dynamic plan");std::vector<DynamicHumanRequest> waiting;for(const auto& request:store.dynamic_human_requests(p->id).get())if(request.state=="waiting")waiting.push_back(request);require(waiting.size()==1,"A2A continuation requires one actual pending human question");DynamicHumanInputSpec spec{p->id,waiting.front().id,std::move(input),"a2a-owner",authority,p->revision,p->state_sequence};return store.continue_a2a_message(spec,task,message,context,identity,content,payload).get();
     }
 };
 void seed(PersistenceService& store,const std::string& root,bool coding){
@@ -79,6 +83,7 @@ void contract(PersistenceService& store){
     for(int attempt=0;attempt<20;++attempt){if(client.Get("/v1/health",headers))break;std::this_thread::sleep_for(std::chrono::milliseconds(10));}
     auto get=[&](const std::string& path,int status=200){const auto response=client.Get(path,headers);require(response&&response->status==status,"Unexpected actual HTTP GET status");return Json::parse(response->body);};
     auto post=[&](const std::string& path,const std::string& raw,int status){const auto response=client.Post(path,headers,raw,"application/json");require(response&&response->status==status,"Unexpected actual HTTP POST status");return Json::parse(response->body);};
+    auto rpc=[&](const std::string& method,const Json& params,const std::string& version="1.0"){const httplib::Headers a2a_headers{{"Authorization","Bearer "+token},{"A2A-Version",version}};const auto response=client.Post("/a2a",a2a_headers,Json{{"jsonrpc","2.0"},{"id","http-"+method},{"method",method},{"params",params}}.dump(),"application/json");require(response&&response->status==200,"Unexpected A2A HTTP response");return Json::parse(response->body);};
     require(get("/v1/health")["agent_planning"]==true&&get("/v1/health")["agent_execution"]==false,"Planning must reflect the executor capability rather than invented execution availability");
     require(get("/v1/agent/planning")==Json{{"enabled",true},{"tools",Json::array({"inspect_plan","plan_tasks","revise_plan"})}},"Planning metadata must not invent captured presets/limits");
     auto snapshot=get("/v1/runs/owner/plan");const auto encoded=snapshot.dump();
@@ -97,6 +102,8 @@ void contract(PersistenceService& store){
     post("/v1/runs/owner/plan/human/question_owner",R"({"input_json":"{}","input_json":"{}","expected_revision":1,"expected_state_sequence":1})",400);
     post("/v1/runs/owner/plan/human/question_other",input.dump(),404);post("/v1/runs/coding_child/plan/human/question_owner",input.dump(),404);post("/v1/runs/owner/plan/human/question_owner?after=0",input.dump(),400);
     require(controller.input_calls==0&&store.events("owner").get().size()==events&&store.dynamic_human_request("plan_owner","question_owner").get().state=="waiting","Malformed/foreign inputs must never dispatch or mutate the owner");
+    const auto pending=rpc("GetTask",{{"id","other"}});require(pending["result"]["status"]["message"]["parts"][0]["text"]=="Synthetic public question","A2A input-required task must expose the exact durable human question");
+    const Json continuation={{"messageId","a2a-answer-other"},{"role","ROLE_USER"},{"taskId","other"},{"contextId","session_other"},{"parts",Json::array({{{"text","Answer through A2A"}}})}};const auto continued_params=Json{{"message",continuation},{"configuration",{{"returnImmediately",true},{"historyLength",8}}}};const auto continued=rpc("SendMessage",continued_params);require(continued["result"]["task"]["id"]=="other"&&continued["result"]["task"]["status"]["state"]=="TASK_STATE_INPUT_REQUIRED","A2A continuation must address and retain its same paused task until the owner resumes");const auto continued_history=continued["result"]["task"]["history"];const auto preserved=std::find_if(continued_history.begin(),continued_history.end(),[](const Json& item){return item.value("messageId",std::string{})=="a2a-answer-other";});require(preserved!=continued_history.end()&&(*preserved)["parts"]==continuation["parts"]&&(*preserved)["contextId"]=="session_other","Task history must preserve the exact admitted continuation message");const auto human_answer=store.dynamic_human_request("plan_other","question_other").get();require(human_answer.state=="answered"&&human_answer.actor=="a2a-owner"&&Json::parse(human_answer.input_json)==Json{{"answer","Answer through A2A"}},"A2A continuation must atomically answer its actual human node under the derived protocol actor");const auto after_answer=store.events("other").get().size();const auto replay=rpc("SendMessage",continued_params);require(replay["result"]["task"]["id"]=="other"&&store.events("other").get().size()==after_answer&&controller.continuation_calls==2,"Retrying an A2A continuation must return its same task without answering or auditing twice");auto changed=continued_params;changed["message"]["parts"][0]["text"]="changed answer";require(rpc("SendMessage",changed)["error"]["code"]==-32004&&store.events("other").get().size()==after_answer,"Changed continuation content must conflict without a second mutation");bool cross_kind_id_rejected=false;try{store.incoming_message("a2a-answer-other","session_other",continuation.dump(),"Answer through A2A").get();}catch(const Conflict&){cross_kind_id_rejected=true;}require(cross_kind_id_rejected,"An A2A message ID cannot be reused between initial admission and task continuation");
     auto stale=input;stale["expected_state_sequence"]=1;post("/v1/runs/owner/plan/human/question_owner",stale.dump(),409);require(store.events("owner").get().size()==events,"Stale native CAS must leave question/audit unchanged");
     post("/v1/runs/owner/plan/resume",Json{{"expected_revision",revision},{"expected_state_sequence",sequence},{"state","running"}}.dump(),400);post("/v1/runs/owner/plan/resume",Json{{"expected_revision",revision},{"expected_state_sequence",sequence}}.dump(),409);
     const auto answered=post("/v1/runs/owner/plan/human/question_owner",input.dump(),200);require(answered["id"]=="owner"&&answered["state"]=="paused","HTTP answer must return the actual same paused owner");

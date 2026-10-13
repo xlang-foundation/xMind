@@ -429,6 +429,16 @@ Run AgentService::submit_message(std::string id,std::string context,std::string 
     if(result.id!=id){impl_->remove_ticket(job);impl_->active.erase(id);return result;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
+Run AgentService::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input){
+    std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;impl_->require_available();
+    const auto owned=impl_->active.find(task);if(owned==impl_->active.end())throw NotFound("A2A task is not owned by this agent service");const auto job=owned->second;const auto current=impl_->persistence.run(task).get();if(current.state!=RunState::paused||job->phase!=Impl::Phase::waiting)throw Conflict("A2A task is not waiting for agent input");if(!context.empty()&&current.session_id!=context)throw Conflict("A2A context does not match its task");
+    const auto plan=impl_->persistence.dynamic_plan_for_root(task).get();if(!plan)throw Conflict("A2A task has no dynamic human-input plan");impl_->verify_pause(current,*plan);
+    std::vector<DynamicHumanRequest> waiting;for(const auto& request:impl_->persistence.dynamic_human_requests(plan->id).get())if(request.state=="waiting")waiting.push_back(request);if(waiting.size()!=1)throw Conflict("A2A continuation requires exactly one pending human question");
+    const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=plan->id;answer.request_id=waiting.front().id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=plan->capabilities.backend_identity;answer.expected_revision=plan->revision;answer.expected_state_sequence=plan->state_sequence;
+    try{impl_->persistence.continue_a2a_message(std::move(answer),task,message,current.session_id,identity,content,payload).get();}catch(...){if(reserved)impl_->remove_ticket(job);throw;}
+    try{const auto updated=impl_->persistence.dynamic_plan(plan->id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();lock.unlock();impl_->changed.notify_all();return result;}
+    catch(...){const auto stopping=impl_->fault_locked();lock.unlock();impl_->stop_jobs(stopping);if(impl_->children)impl_->children->fail();throw DynamicOutcomeUnrecorded("Committed A2A answer could not be observed by its native owner");}
+}
 Run AgentService::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){
     controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();
     const auto owned=impl_->active.find(root);if(owned==impl_->active.end())throw NotFound("Dynamic root is not owned by this service");const auto job=owned->second;
