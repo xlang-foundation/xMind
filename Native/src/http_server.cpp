@@ -526,21 +526,21 @@ struct HttpServer::Impl {
             const auto requested=request.get_header_value("A2A-Version");
             if(request.get_header_value_count("A2A-Version")>1||(!requested.empty()&&requested!="0.3"&&requested!="1.0")){reply(response,{{"jsonrpc","2.0"},{"id",nullptr},{"error",{{"code",-32009},{"message","Protocol version is not supported"}}}},400);return;}
             auto skills=Json::array();
-            if(executor&&executor->available())skills.push_back({{"id","native.agent"},{"name","Native agent"},{"description","Run text requests using the configured model and native agent executor."},{"tags",Json::array({"general-agent"})}});
+            if(executor&&executor->available())skills.push_back({{"id","native.agent"},{"name","Native agent"},{"description","Run text or structured JSON requests using the configured model and native agent executor."},{"tags",Json::array({"general-agent"})}});
             if(requested=="1.0"){
                 response.set_header("A2A-Version","1.0");
                 reply(response,{{"name","xMind"},{"description","Local native agent tasks with persistent conversations and authenticated task controls."},{"version","0.1.0"},
                     {"supportedInterfaces",Json::array({{{"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"protocolBinding","JSONRPC"},{"protocolVersion","1.0"}},{{"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"protocolBinding","JSONRPC"},{"protocolVersion","0.3"}}})},
                     {"capabilities",{{"streaming",true},{"pushNotifications",false},{"extendedAgentCard",false}}},
                     {"securitySchemes",{{"ownerToken",{{"httpAuthSecurityScheme",{{"scheme","Bearer"}}}}}}},{"securityRequirements",Json::array({{{"schemes",{{"ownerToken",{{"list",Json::array()}}}}}}})},
-                    {"defaultInputModes",Json::array({"text/plain"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)}});return;
+                    {"defaultInputModes",Json::array({"text/plain","application/json"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)}});return;
             }
             response.set_header("A2A-Version","0.3");
             reply(response,{{"protocolVersion","0.3.0"},{"name","xMind"},{"description","Local native agent tasks with persistent conversations and authenticated task controls."},
                 {"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"preferredTransport","JSONRPC"},{"version","0.1.0"},
                 {"capabilities",{{"streaming",true},{"pushNotifications",false},{"stateTransitionHistory",false}}},
                 {"securitySchemes",{{"ownerToken",{{"type","http"},{"scheme","bearer"}}}}},{"security",Json::array({{{"ownerToken",Json::array()}}})},
-                {"defaultInputModes",Json::array({"text/plain"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)},{"supportsAuthenticatedExtendedCard",false}});
+                {"defaultInputModes",Json::array({"text/plain","application/json"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)},{"supportsAuthenticatedExtendedCard",false}});
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};

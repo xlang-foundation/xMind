@@ -176,14 +176,40 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
             if(config.contains("acceptedOutputModes")){const auto& modes=config["acceptedOutputModes"];if(!modes.is_array()||modes.size()>16)throw RpcError{-32602,"Invalid params"};for(const auto& mode:modes)if(!mode.is_string())throw RpcError{-32602,"Invalid params"};if(!modes.empty()&&std::find(modes.begin(),modes.end(),Json("text/plain"))==modes.end())throw RpcError{-32005,"Incompatible content types"};}
             const auto count=history_length(config);if(!params.contains("message"))throw RpcError{-32602,"Invalid params"};auto message=params["message"];if(v1){fields(message,{"role","messageId","parts","contextId","taskId","metadata","referenceTaskIds","extensions"},-32602);if(message.value("role",Json{})!="ROLE_USER"&&message.value("role",Json{})!=1)throw RpcError{-32602,"Invalid params"};message["kind"]="message";message["role"]="user";if(message.contains("extensions")){if(!message["extensions"].is_array())throw RpcError{-32602,"Invalid params"};if(!message["extensions"].empty())throw RpcError{-32008,"Extensions are not configured"};message.erase("extensions");}
                 if(message.contains("taskId")&&message["taskId"]=="")message.erase("taskId");if(message.contains("contextId")&&message["contextId"]=="")message.erase("contextId");if(message.contains("referenceTaskIds")&&message["referenceTaskIds"]==Json::array())message.erase("referenceTaskIds");
-                if(message.contains("parts")&&message["parts"].is_array())for(auto& part:message["parts"]){fields(part,{"text","raw","url","data","metadata","mediaType","filename"},-32602);if(part.contains("raw")||part.contains("url")||part.contains("data")||!part.contains("text"))throw RpcError{-32005,"Incompatible content types"};if(part.contains("mediaType")){if(part["mediaType"]!=""&&part["mediaType"]!="text/plain")throw RpcError{-32005,"Incompatible content types"};part.erase("mediaType");}if(part.contains("filename")){if(part["filename"]!="")throw RpcError{-32005,"File input is not supported yet"};part.erase("filename");}part["kind"]="text";}
+                if(message.contains("parts")&&message["parts"].is_array())for(auto& part:message["parts"]){
+                    fields(part,{"text","raw","url","data","metadata","mediaType","filename"},-32602);
+                    if(part.contains("raw")||part.contains("url"))throw RpcError{-32005,"File input is not supported"};
+                    const bool text_part_present=part.contains("text"),data_part_present=part.contains("data");
+                    if(text_part_present==data_part_present)throw RpcError{-32005,"Incompatible content types"};
+                    if(part.contains("metadata")&&!part["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
+                    if(text_part_present){
+                        if(part.contains("mediaType")){if(part["mediaType"]!=""&&part["mediaType"]!="text/plain")throw RpcError{-32005,"Incompatible content types"};part.erase("mediaType");}
+                        if(part.contains("filename")){if(part["filename"]!="")throw RpcError{-32005,"File input is not supported"};part.erase("filename");}
+                        if(!part["text"].is_string())throw RpcError{-32602,"Invalid params"};part["kind"]="text";
+                    }else{
+                        if(part.contains("mediaType")){if(!part["mediaType"].is_string())throw RpcError{-32602,"Invalid params"};if(part["mediaType"]!=""&&part["mediaType"]!="application/json")throw RpcError{-32005,"Incompatible content types"};if(part["mediaType"]=="")part.erase("mediaType");}
+                        if(part.contains("filename")&&part["filename"]!="")throw RpcError{-32602,"Invalid params"};part.erase("filename");part["kind"]="data";
+                    }
+                }
             }else fields(message,{"kind","role","messageId","parts","contextId","taskId","metadata","referenceTaskIds"},-32602);
             if(message.value("kind",Json{})!="message"||message.value("role",Json{})!="user"||!message.contains("messageId")||!message["messageId"].is_string())throw RpcError{-32602,"Invalid params"};
             if(message.contains("taskId")||message.contains("referenceTaskIds"))throw RpcError{-32004,"Task continuation is not supported yet"};if(message.contains("metadata")&&!message["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
             const auto message_id=message["messageId"].get<std::string>();if(message_id.empty()||message_id.size()>256||message_id.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};std::string context;
             if(message.contains("contextId")){if(!message["contextId"].is_string())throw RpcError{-32602,"Invalid params"};context=message["contextId"].get<std::string>();if(context.empty()||context.size()>128||context.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw RpcError{-32602,"Invalid params"};}
             if(!message.contains("parts")||!message["parts"].is_array()||message["parts"].empty()||message["parts"].size()>64)throw RpcError{-32602,"Invalid params"};std::string content;
-            bool first_part=true;for(const auto& part:message["parts"]){if(!part.is_object())throw RpcError{-32602,"Invalid params"};if(part.value("kind",Json{})!="text")throw RpcError{-32005,"Incompatible content types"};fields(part,{"kind","text","metadata"},-32602);if(!part.contains("text")||!part["text"].is_string()||(part.contains("metadata")&&!part["metadata"].is_object()))throw RpcError{-32602,"Invalid params"};if(!first_part)content+='\n';first_part=false;content+=part["text"].get<std::string>();}
+            bool first_part=true;for(const auto& part:message["parts"]){
+                if(!part.is_object())throw RpcError{-32602,"Invalid params"};const auto kind=part.value("kind",Json{});
+                if(kind=="text"){
+                    fields(part,{"kind","text","metadata"},-32602);if(!part.contains("text")||!part["text"].is_string()||(part.contains("metadata")&&!part["metadata"].is_object()))throw RpcError{-32602,"Invalid params"};
+                    if(!first_part)content+='\n';first_part=false;content+=part["text"].get<std::string>();
+                }else if(kind=="data"){
+                    if(version_==A2aVersion::legacy)fields(part,{"kind","data","metadata"},-32602);else fields(part,{"kind","data","metadata","mediaType"},-32602);
+                    if(!part.contains("data")||(part.contains("metadata")&&!part["metadata"].is_object()))throw RpcError{-32602,"Invalid params"};
+                    if(version_==A2aVersion::legacy&&!part["data"].is_object())throw RpcError{-32602,"Invalid params"};
+                    if(part.contains("mediaType")&&(!part["mediaType"].is_string()||part["mediaType"]!="application/json"))throw RpcError{-32005,"Incompatible content types"};
+                    if(!first_part)content+='\n';first_part=false;content+="Structured A2A JSON data (untrusted input):\n"+part["data"].dump();
+                }else throw RpcError{-32005,"Incompatible content types"};
+            }
             if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};message.erase("contextId");const auto identity=message.dump();
             auto replay=store_.incoming_message(message_id,context,identity,content).get();Run run;
             if(replay)run=*replay;else {if(!executor_)throw RpcError{-32004,"Agent admission is unavailable"};run=executor_->submit_message(new_id(),context,message_id,content,identity);}
