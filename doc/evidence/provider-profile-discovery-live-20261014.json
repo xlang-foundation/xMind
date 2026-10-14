@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-14",
+  "result": "passed",
+  "xmind_revision": "564299eb769c88d9f09819706652e820481e88c8",
+  "xlang3_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "browser_adapter": "http://127.0.0.1:60417",
+  "provider_profile_revision": 7,
+  "active_profile": "openai",
+  "discovery_route": "POST /v1/provider/profiles/models",
+  "profiles": [
+    { "id": "claude", "provider": "anthropic", "http_status": 200, "model_count": 13, "sample_models": ["claude-fable-5", "claude-fable-5-1", "claude-haiku-4-5-20251001", "claude-haiku-5-5", "claude-opus-4-5-20251101"] },
+    { "id": "gemini", "provider": "gemini", "http_status": 200, "model_count": 11, "sample_models": ["models/gemini-2.5-flash", "models/gemini-2.5-flash-lite", "models/gemini-2.5-pro", "models/gemini-3-flash-preview", "models/gemini-3.1-pro-preview"] },
+    { "id": "deepseek", "provider": "deepseek", "http_status": 200, "model_count": 2, "sample_models": ["deepseek-flash", "deepseek-v4-pro"] },
+    { "id": "openai", "provider": "openai", "http_status": 200, "model_count": 20, "sample_models": ["gpt-4.1", "gpt-4.1-2025-04-14", "gpt-4.1-mini", "gpt-4.1-mini-2025-04-14", "gpt-4.1-nano"] }
+  ],
+  "provider_configuration_changed": false,
+  "provider_secrets_returned": false,
+  "client_contracts": { "command": "node --test extensions/vscode/tests/*.test.js views/browser/tests/*.test.cjs", "passed": 456, "failed": 0 },
+  "browser_discovery_contract": "Active saved-profile catalogue discovery runs asynchronously after session initialization; discovered IDs populate the sidebar model list without re-entering a key.",
+  "limitations": [
+    "External-browser visual inspection was unavailable in this session.",
+    "No model-generated write or build was performed during this discovery check."
+  ]
+}

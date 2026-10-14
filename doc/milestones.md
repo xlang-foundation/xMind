@@ -27,6 +27,20 @@ the provider catalogue returned four saved profiles without keys. This is
 local HTTP/client-route acceptance; external-browser rendering and a new model
 write/build run are still open. [Sanitized evidence](evidence/browser-profile-upgrade-live-20261014.json).
 
+## Live saved-provider model discovery — 2026-10-14
+
+Through the active browser view on the same TestProj backend, xMind used the
+four saved provider profiles to fetch model catalogues without sending keys to
+the browser or changing provider configuration. Anthropic returned 13 models,
+Gemini 11, DeepSeek 2, and OpenAI 20. The active OpenAI model endpoint itself
+still returns only the selected model; the browser's existing background
+discovery fills the sidebar list after workspace/session initialization. A
+regression test verifies that this discovery is asynchronous and populates all
+returned model choices. The combined browser and VS Code client suites pass
+**456/456**. This validates current saved-key discovery and model-list wiring,
+not a live model-generated edit/build or visual browser review.
+[Sanitized evidence](evidence/provider-profile-discovery-live-20261014.json).
+
 ## Fresh full native Release gate — 2026-10-14
 
 The current native source rebuilt in the dedicated `build/native-verify` tree

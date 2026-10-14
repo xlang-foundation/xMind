@@ -132,6 +132,13 @@ test('browser initializes saved provider profiles before any session is selected
  try{await view.initialize();assert.deepEqual(posted.findLast(value=>value.type==='provider-profiles').profiles.map(profile=>profile.id),['claude','gemini','deepseek','openai']);assert.equal(posted.findLast(value=>value.type==='provider-profiles').active,'');assert.equal(discoveries.length,0);assert.equal(view.profileController.state.revision,1);}
  finally{view.dispose();}
 });
+test('browser startup discovers the active saved profile catalogue without delaying workspace readiness',async()=>{
+ const state={revision:7,active:'openai',profiles:[{id:'openai',provider:'openai',route_id:'openai.responses',model:'gpt-5.6-luna',revision:2}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]},posted=[],discoveries=[];let release;
+ const pending=new Promise(resolve=>release=resolve),client={health:async()=>({agent_execution:true,provider_profile_admission:true}),models:async()=>({default_model:'gpt-5.6-luna',models:[{id:'gpt-5.6-luna'}]}),graphs:async()=>({graphs:[]}),sessions:async()=>[],providerProfiles:async()=>state,discoverProfileModels:(...args)=>{discoveries.push(args);return pending;}};
+ const view=new BrowserController(client,value=>posted.push(value));
+ try{await view.initialize();assert.deepEqual(discoveries,[['openai','openai.responses',undefined,7]]);assert.ok(posted.some(value=>value.type==='status'&&value.text==='Ready'));release({models:[{id:'gpt-5.6-luna'},{id:'gpt-5.6-sol'},{id:'gpt-5.6-terra'}]});for(let n=0;n<20&&!posted.some(value=>value.type==='model-list'&&value.models.length===3);n++)await new Promise(resolve=>setImmediate(resolve));assert.deepEqual(posted.findLast(value=>value.type==='model-list').models.map(model=>model.id),['gpt-5.6-luna','gpt-5.6-sol','gpt-5.6-terra']);assert.match(posted.findLast(value=>value.type==='settings-state').text,/Fetched 3 openai models using this profile's saved key/);}
+ finally{view.dispose();release({models:[]});}
+});
 
 test('browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes',async()=>{
  let state={revision:4,active:'saved',profiles:[{id:'saved',provider:'openai',route_id:'openai.responses',model:'current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const writes=[],discoveries=[],posted=[],models=Array.from({length:135},(_,n)=>({id:'discovered-'+n}));
