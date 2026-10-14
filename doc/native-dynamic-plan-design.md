@@ -18,9 +18,11 @@ Current source extends the `tool` node with exact-bound MCP tools, synchronous
 registered `run_process` nodes, and registration-pinned outbound A2A nodes in
 the coding preset. A2A execution re-discovers and compares the accepted remote
 agent binding, uses the usual local approval, and journals streamed task events
-to its owned child. The Release dynamic-plan fixture now uses the actual native
-AgentService and approval journal with a synthetic local A2A 1.0 peer; approved
-dispatch returns the peer's actual task ID, and denial produces no send.
+and explicit event cursors to its owned child. The Release dynamic-plan fixture
+uses the actual native AgentService and approval journal with a synthetic local
+A2A 1.0 streaming peer; approved dispatch records both actual stream events and
+returns the peer's task ID, while denial produces no send. Automatic stream
+resubscription after interruption is still open.
 Background process jobs, MCP resources/prompts in plans, recursive planning,
 live provider and external-browser/installed VS Code acceptance remain open.
 

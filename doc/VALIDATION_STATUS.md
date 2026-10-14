@@ -63,18 +63,21 @@ Dynamic `tool` nodes can now select an exact registration-pinned
 `a2a_delegate_*` binding from the frozen coding preset. The child performs a
 fresh AgentCard discovery and rejects any registration/card drift before it
 offers the usual native controller approval. After approval, the registered
-A2A client sends once and stores the actual task ID/result; denial completes
-the plan report without sending. The contract uses actual native AgentService,
-registration, operation approval/effect persistence and embedded xlang3 SQLite
-against a synthetic local A2A 1.0 peer and synthetic provider response. It
-does not claim live external-peer interoperability.
+A2A client sends once, stores the actual task ID/result and appends both real
+streamed task events plus their latest explicit cursor to the child run;
+denial completes the plan report without sending. The contract uses actual
+native AgentService, registration, operation approval/effect persistence and
+embedded xlang3 SQLite against a synthetic local A2A 1.0 streaming peer and
+synthetic provider response. It does not claim live external-peer
+interoperability.
 
 The focused dynamic-plan Release CTest set passes **4/4**, including both
 approved and denied direct A2A scenarios, MCP/process effects, pure schema
 admission and repository/engine contracts. The full native inventory last
 passed **144/144** before this checkpoint; it has not been rerun here.
-Streaming event recovery within an A2A plan child, recursive planning, live
-external providers/peers and rendered/installed planner acceptance remain open.
+Automatic A2A stream resubscription/recovery after interruption within a plan
+child, recursive planning, live external providers/peers and rendered/installed
+planner acceptance remain open.
 
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 
