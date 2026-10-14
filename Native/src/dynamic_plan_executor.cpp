@@ -43,12 +43,12 @@ bool same_capabilities(const DynamicPlanCapabilities& a,const DynamicPlanCapabil
        a.max_nodes!=b.max_nodes||a.max_revisions!=b.max_revisions||a.max_humans!=b.max_humans||a.change_bytes!=b.change_bytes||a.human_expiry_ms!=b.human_expiry_ms||a.max_parent_turns!=b.max_parent_turns||a.presets.size()!=b.presets.size())return false;
     for(std::size_t i=0;i<a.presets.size();++i){const auto& x=a.presets[i];const auto& y=b.presets[i];if(x.id!=y.id||x.revision!=y.revision||x.readonly!=y.readonly||x.tools!=y.tools||x.turn_limit!=y.turn_limit||x.backend_identity!=y.backend_identity)return false;}return true;
 }
-void generation(PersistenceService& store,const std::string& root,const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel){
+void generation(PersistenceService& store,const std::string& root,const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel,bool nested_owner=false){
     if(!budget||budget->root_id()!=root||!settings.planning||!settings.workspace||!caps.catalogue_finalized)throw DynamicPlanUnavailable("Dynamic execution requires its configured ordinary Agent generation");
     budget->check(cancel);const auto actual=store.dynamic_capabilities(root).get();
     if(!same_capabilities(actual,caps)||budget->snapshot().spec.workspace_identity!=caps.workspace_identity)throw DynamicPlanUnavailable("Dynamic execution capabilities changed");
-    const auto credentials=agent_authority_credentials(store,settings);
-    if(agent_authority_identity(settings,selected_model(caps),caps.workspace_identity,credentials)!=caps.backend_identity)throw DynamicPlanUnavailable("Dynamic execution settings or credential metadata changed");
+    if(!nested_owner){const auto credentials=agent_authority_credentials(store,settings);
+        if(agent_authority_identity(settings,selected_model(caps),caps.workspace_identity,credentials)!=caps.backend_identity)throw DynamicPlanUnavailable("Dynamic execution settings or credential metadata changed");}
     budget->check(cancel);
 }
 Json prompt(const DynamicPreparedNode& prepared,const DynamicPlanCapabilities& caps){
@@ -207,7 +207,7 @@ std::size_t live_count(const std::vector<ActiveBatch>& active){std::size_t resul
 }
 AgentSettings dynamic_child_settings(const AgentSettings& parent,const DynamicPresetCapability& policy,const std::string& model){
     if(policy.revision!=1||(policy.id!="workspace.inspect"&&policy.id!="workspace.coding")||policy.readonly!=(policy.id=="workspace.inspect")||policy.turn_limit<1||policy.turn_limit>(policy.readonly?4:16)||model.empty())throw DynamicPlanUnavailable("Unsupported native dynamic child preset");
-    auto child=parent;child.provider.model=model;child.selectable_models.clear();child.delegation.reset();child.planning.reset();child.max_turns=static_cast<std::size_t>(policy.turn_limit);
+    auto child=parent;child.provider.model=model;child.selectable_models.clear();child.delegation.reset();child.max_turns=static_cast<std::size_t>(policy.turn_limit);
     if(policy.readonly){child.approved_edits=false;child.process_profiles.clear();child.mcp_servers.clear();child.a2a_enabled=false;}
     // workspace.coding deliberately inherits every enabled parent's registered
     // edit/create/process/MCP boundary. Their existing approval and fresh native
@@ -220,14 +220,17 @@ DynamicPlanExecutor::DynamicPlanExecutor(PersistenceService& store,std::shared_p
 bool DynamicPlanExecutor::healthy()const{return children_->healthy();}
 DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,const ModelToolCall& call,const std::string& assistant,const std::string& origin,
     const AgentSettings& frozen,const DynamicPlanCapabilities& caps,std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
-    generation(store_,parent,frozen,caps,budget,cancel);if(!healthy())throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");
-    const auto root=store_.run(parent).get();if(root.graph_root||!root.parent_id.empty()||root.state!=RunState::running)throw DynamicPlanUnavailable("Only the owning ordinary Agent can execute a dynamic plan");
+    if(!budget)throw DynamicPlanUnavailable("Dynamic execution requires its shared root budget");const auto root_id=budget->root_id();generation(store_,root_id,frozen,caps,budget,cancel,parent!=root_id);if(!healthy())throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");
+    const auto owner=store_.run(parent).get();const auto root=store_.run(root_id).get();if(root.graph_root||root.state!=RunState::running||owner.state!=RunState::running)throw DynamicPlanUnavailable("Dynamic plan owner is not running under its admitted root");
+    std::int64_t owner_depth=0;
+    if(parent==root_id){if(!owner.parent_id.empty())throw DynamicPlanUnavailable("Dynamic root owner is not an ordinary Agent");}
+    else {const auto admission=store_.child_admission(parent).get();if(admission.kind!=ChildAdmissionKind::dynamic_agent||admission.root_run_id!=root_id)throw DynamicPlanUnavailable("Nested plans require an admitted dynamic-agent owner");const auto parent_plan=store_.dynamic_plan(admission.plan_id).get();if(parent_plan.state!="active"||parent_plan.root_run_id!=root_id)throw DynamicPlanUnavailable("Nested plan parent is no longer active");const auto parent_node=std::find_if(parent_plan.nodes.begin(),parent_plan.nodes.end(),[&](const auto& node){return node.child_run_id==parent;});if(parent_node==parent_plan.nodes.end())throw DynamicPlanUnavailable("Nested plan owner lost its exact parent claim");const auto& parent_preset=preset(parent_plan.capabilities,parent_node->definition);if(agent_authority_identity(frozen,frozen.provider.model,caps.workspace_identity,agent_authority_credentials(store_,frozen))!=parent_preset.backend_identity)throw DynamicPlanUnavailable("Nested plan owner settings differ from their admitted preset");owner_depth=parent_plan.depth+1;if(owner_depth>1)throw DynamicPlanRejected("planning_depth_exhausted");}
     if(call.name=="inspect_plan"){
         try{if(!Json::parse(mcp_compact_object(call.arguments_json)).empty())throw std::invalid_argument("Plan inspection accepts no model authority fields");}
         catch(const McpProtocolError&){throw DynamicPlanRejected("invalid_plan_arguments");}
         catch(const Json::exception&){throw DynamicPlanRejected("invalid_plan_arguments");}
         catch(const std::invalid_argument&){throw DynamicPlanRejected("invalid_plan_arguments");}
-        const auto plan=store_.dynamic_plan_for_root(parent).get();return {root,{},plan?dynamic_plan_report(*plan):R"({"source":"native_dynamic_plan","plan":null})",false};
+        const auto plan=store_.dynamic_plan_for_owner(parent).get();return {owner,{},plan?dynamic_plan_report(*plan):R"({"source":"native_dynamic_plan","plan":null})",false};
     }
     DynamicPlanCallRecord accepted;
     try{
@@ -235,25 +238,27 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
         if(call.id.empty()||origin.empty()||call.arguments_json.size()>static_cast<std::size_t>(caps.change_bytes))throw std::invalid_argument("Planning call lacks its actual bounded origin");
         // Only this preacceptance phase may become a normal rejected tool turn.
         // Runtime/settlement failures below retain their typed owner retirement.
-        (void)parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
-        const auto existing=store_.dynamic_plan_for_root(parent).get();
-        DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=parent;spec.owner_run_id=parent;spec.provider_tool_call_id=call.id;
+        const auto parsed=parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
+        if(parent!=root_id){if(std::any_of(parsed.add.begin(),parsed.add.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;})||std::any_of(parsed.replace.begin(),parsed.replace.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;}))throw DynamicPlanRejected("nested_human_wait_unsupported");}
+        const auto existing=store_.dynamic_plan_for_owner(parent).get();
+        DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=root_id;spec.owner_run_id=parent;spec.provider_tool_call_id=call.id;
         spec.origin_attempt_id=origin;spec.arguments_json=call.arguments_json;spec.parent_assistant_json=assistant;spec.backend_identity=caps.backend_identity;spec.expected_budget_revision=budget->snapshot().revision;
         accepted=store_.accept_dynamic_plan_change(std::move(spec)).get();
     }catch(const DynamicPlanChanged&){throw DynamicPlanRejected("plan_changed");}
      catch(const RootBudgetExhausted&){throw DynamicPlanRejected("planning_budget_exhausted");}
      catch(const std::invalid_argument&){throw DynamicPlanRejected("invalid_plan_arguments");}
-    if(!accepted.created){if(!accepted.result_json.empty())return {root,accepted.id,accepted.result_json,false};throw DynamicOutcomeUnrecorded("An incomplete planning call cannot be replayed");}
+    if(!accepted.created){if(!accepted.result_json.empty())return {owner,accepted.id,accepted.result_json,false};throw DynamicOutcomeUnrecorded("An incomplete planning call cannot be replayed");}
     return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
 DynamicExecutionResult DynamicPlanExecutor::resume(const std::string& parent,const std::string& id,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
     std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
     generation(store_,parent,frozen,caps,budget,cancel);const auto accepted=store_.dynamic_plan_call(id).get();
-    const auto root=store_.run(parent).get();if(accepted.root_run_id!=parent||accepted.state!="accepted"||root.state!=RunState::running||root.graph_root||!root.parent_id.empty())throw DynamicPlanUnavailable("Dynamic continuation does not own its exact resumed ordinary root");
+    const auto root=store_.run(parent).get();if(accepted.root_run_id!=parent||accepted.owner_run_id!=parent||accepted.state!="accepted"||root.state!=RunState::running||root.graph_root||!root.parent_id.empty())throw DynamicPlanUnavailable("Dynamic continuation does not own its exact resumed ordinary root");
     return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
 DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
     std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
+    const bool nested_owner=accepted.owner_run_id!=accepted.root_run_id;
     std::vector<ActiveBatch> active;active.reserve(8);
     auto settle=[&](bool wait){
         for(auto& batch:active)for(std::size_t i=0;i<batch.children.size();++i){if(batch.settled[i])continue;const auto& result=batch.work->results()[i];
@@ -281,18 +286,18 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
             if(decision.halted)throw WorkspaceEffectUncertain("Dynamic plan retains an uncertain owned outcome");
             if(decision.claimed.size()>live_count(active))throw DynamicOutcomeUnrecorded("Dynamic plan contains an untracked claim; live work cannot be adopted or replayed");
             if(decision.report_ready){
-                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel);
+                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
                 DynamicPlanStepResult result;
                 try{result=store_.settle_dynamic_plan_step(accepted.id).get();}
                 catch(const WorkspaceEffectUncertain&){throw;}
                 catch(...){children_->fail();throw DynamicOutcomeUnrecorded("Dynamic joined report could not be journaled; recovery is required");}
                 if(!result.ready)continue;
                 if(result.call.result_json.empty())throw DynamicOutcomeUnrecorded("Dynamic joined report has no actual owned result");
-                return {store_.run(accepted.root_run_id).get(),accepted.id,result.call.result_json,false};
+                return {store_.run(accepted.owner_run_id).get(),accepted.id,result.call.result_json,false};
             }
             bool published=false;
             for(const auto& id:decision.ready){const auto prepared=prepare_dynamic_node(plan,id);if(prepared.node.definition.kind!=DynamicNodeKind::human)continue;
-                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel);
+                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
                 DynamicHumanRequestSpec spec;spec.id=identity();spec.plan_id=plan.id;spec.label=id;spec.backend_identity=caps.backend_identity;spec.plan_call_id=accepted.id;
                 spec.expected_revision=plan.revision;spec.expected_state_sequence=plan.state_sequence;spec.expires_unix_ms=now_ms()+caps.human_expiry_ms;
                 try{store_.publish_dynamic_human(std::move(spec)).get();}catch(const DynamicPlanChanged&){published=true;break;}
@@ -302,7 +307,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
             const auto live=live_count(active);const auto parallel=static_cast<std::size_t>(budget->snapshot().spec.max_parallel);std::vector<DynamicPreparedNode> frontier;
             for(const auto& id:decision.ready){if(frontier.size()+live>=parallel)break;auto prepared=prepare_dynamic_node(plan,id);if(prepared.node.definition.kind==DynamicNodeKind::agent||prepared.node.definition.kind==DynamicNodeKind::tool)frontier.push_back(std::move(prepared));}
             if(!frontier.empty()){
-                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel);
+                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
                 DynamicFrontierSpec claim;claim.plan_id=plan.id;claim.backend_identity=caps.backend_identity;claim.plan_call_id=accepted.id;
                 claim.expected_revision=plan.revision;claim.expected_state_sequence=plan.state_sequence;claim.expected_budget_revision=budget->snapshot().revision;
                 std::vector<NativeChildWork> work;work.reserve(frontier.size());ActiveBatch staged;staged.children.reserve(frontier.size());staged.settled.assign(frontier.size(),false);
@@ -334,7 +339,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                         if(!available)return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_preset_unavailable"})").get();
                         if(auto retired=retire_before_launch())return *retired;
                         std::unique_ptr<AgentRunner> runner;
-                        try{runner=std::make_unique<AgentRunner>(store_,settings);}
+                        try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
                         catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
                         catch(const ToolAccessDenied&){return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_workspace_precondition_unavailable"})").get();}
                         catch(const ToolFileError&){return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_workspace_precondition_unavailable"})").get();}
@@ -361,7 +366,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                 active.push_back(std::move(staged));active.back().work->dispatch();continue;
             }
             if(live==0&&!decision.waiting_human.empty()&&decision.ready.empty()){
-                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel);
+                generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
                 try{const auto paused=budget->suspend_for_human(plan,accepted.id);return {paused,accepted.id,{},true};}
                 catch(const DynamicPlanChanged&){continue;}
             }

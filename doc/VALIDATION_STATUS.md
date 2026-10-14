@@ -1,5 +1,23 @@
 # Current native validation
 
+## Nested dynamic-agent planning runtime — 2026-10-14
+
+An admitted dynamic-agent child can now own and execute one nested plan under
+the same root budget and native child pool. Owner-scoped tool calls,
+continuations and child histories remain bound to the exact claimed parent
+node. Repository completion refuses an unfinished child plan and marks a
+finished child plan complete in the same transaction as its run. A nested
+human node is rejected with `nested_human_wait_unsupported`; planning deeper
+than the supported nested level is rejected with `planning_depth_exhausted`.
+
+The Release build completed and the focused dynamic-plan contracts passed
+**3/3**: schema/policy, repository ownership/lifecycle, and an actual
+AgentService provider-peer run from root agent through outer agent, nested
+plan, and inner workspace reader. The engine test also exercises nested-human
+rejection. Provider responses and credentials are synthetic. This does not
+validate live-provider interoperability, nested pause/restart recovery, or
+presentation through the CLI, browser and VS Code clients.
+
 ## Nested plan owner repository admission — 2026-10-14
 
 Repository acceptance now admits a signed plan for a running dynamic-agent

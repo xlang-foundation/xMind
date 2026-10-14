@@ -1,25 +1,27 @@
 # Nested dynamic planning contract
 
-Status: **not implemented**. This contract is based on the current native
-schema and execution paths. Schema v24 records immutable plan ownership and
-backfills existing plans to their ordinary Agent roots; schema v25 removes
-the one-plan-per-root table constraint; schema v26 stores owner-scoped signed
-calls and pending-call admission. The runtime still does not admit nested
-plans or give dynamic child agents planning tools.
+Status: **partly implemented**. Schema v24 records immutable plan ownership;
+v25 permits multiple plans per root; v26 stores owner-scoped signed calls.
+The runtime now lets an admitted dynamic-agent child own one nested plan,
+using the same root budget and child pool. Nested plan depth beyond that and
+nested human waits remain unsupported.
 
 ## Current boundary
 
 One `dynamic_capabilities` row is admitted for an ordinary Agent root. Schema
 v25 permits multiple `dynamic_plans` rows under that root, and v26 stores
-owner-scoped signed calls. The repository now admits a nested signed plan only
+owner-scoped signed calls. The repository admits a nested signed plan only
 for the exact running dynamic-agent child claimed by its active parent plan;
 it records the parent plan/node/depth and preserves aggregate root child and
-continuation reservations. The repository contract verifies one actual nested
-owner on xlang3-backed SQLite. The runtime still creates and resumes only the
-ordinary root's plan. `DynamicPlanExecutor::invoke` and `resume` reject child
-owners. `AgentRunner` only exposes plan tools to an ordinary dynamic root, and
-`dynamic_child_settings` clears planning and delegation. These are enforced
-source boundaries, not just documentation policy.
+continuation reservations. At runtime, dynamic children expose owner-scoped
+planning tools, execute nested plans through the shared child pool, and return
+their results to the parent plan. Completion is refused until the child-owned
+plan is finished, then both the run and plan are completed transactionally.
+Focused synthetic-provider contracts exercise root → outer agent → nested plan
+→ inner agent, verify owner links and actual read history, and confirm the
+shared root budget. A nested human node is rejected with
+`nested_human_wait_unsupported`; plans below the supported nested level are
+rejected with `planning_depth_exhausted`.
 
 The runtime already gives a dynamic child the ordinary root's
 `RootExecutionBudget`, and model reservations identify both `root_run_id` and
@@ -67,25 +69,25 @@ operation journals.
 
 ## Runtime and recovery rules
 
-An admitted coding child may receive `plan_tasks`, `revise_plan` and
-`inspect_plan` only when its durable owner binding includes the nested-planning
-capability. `AgentRunner` derives owner, root and plan identities from the
-admission record; none comes from model arguments. Nested model calls retain
-their child `owner_run_id` and common `root_run_id`, and the same budget object
-is passed to every descendant in-process worker.
+An admitted dynamic-agent child may receive `plan_tasks`, `revise_plan` and
+`inspect_plan` within its captured preset authority. `AgentRunner` derives
+owner, root and plan identities from the admission record; none comes from
+model arguments. Nested model calls retain their child `owner_run_id` and
+common `root_run_id`, and the same budget object is passed to every descendant
+in-process worker. The supported nested plan is depth one beneath the ordinary
+root plan; a deeper planning call receives a typed rejection.
 
-A parent plan node cannot settle while its child has an active nested plan,
-pending signed call, running descendant, human wait or unresolved effect. The
-root scheduler must join and drain every descendant before root completion,
-cancellation, clean pause or shutdown recovery. A nested human wait therefore
-needs a durable continuation stack identifying every owning plan/call/node;
-resume must reopen that exact chain and preserve child context pins and the
-root's remaining active-time segment. Restart recovery must settle from actual
-child/event/effect evidence and must never reconstruct or replay a model plan
-from a prompt.
+A parent plan node joins its child only after the child-owned plan reaches a
+finished report, and repository completion guards prevent a running child
+from completing around unfinished plan work. Nested human waits are not
+accepted: they need a durable continuation stack identifying every owning
+plan/call/node, plus resume behavior that reopens that exact chain and preserves
+child context pins and the root's remaining active-time segment. Restart
+recovery must settle from actual child/event/effect evidence and must never
+reconstruct or replay a model plan from a prompt.
 
-Bounds are root-wide as well as per-plan: maximum recursive depth, total
-planned nodes/revisions/human questions, model turns, active descendants and
+Bounds are root-wide as well as per-plan: nested depth, total planned
+nodes/revisions/human questions, model turns, active descendants and
 wall/active time must be checked transactionally against the one root budget.
 An exhausted bound is a durable typed rejection before acceptance. Once a
 plan call is accepted, an execution or settlement failure remains owned and
@@ -105,12 +107,14 @@ inspectable; it cannot be converted into an ordinary tool error.
    immutable parent node/depth, and adds reservations to the shared root
    totals. The focused contract covers a valid nested owner, mismatched-root
    rejection, root-wide call enumeration and aggregate child/continuation
-   reservations. Forged/stale owner cases and runtime invocation are still
-   pending.
-3. Admit a nested plan only from a claimed coding-agent child. Route its tools
-   through the same executor and child pool, preserving root budget ownership
-   and per-owner continuation receipts. Verify a two-level plan with actual
-   synthetic provider turns and real SQLite child history.
+   reservations. The actual nested invocation and owner lifecycle are covered
+   in stage 3; broader forged/stale-owner cases remain pending.
+3. **Implemented for one nested level:** admit a plan only from an exact
+   claimed dynamic-agent child; route its tools through the same executor and
+   child pool; preserve root budget ownership and per-owner continuation
+   receipts; and verify a two-level plan with synthetic provider turns and
+   real SQLite child history. The contract also checks typed rejection of a
+   nested human wait.
 4. Add durable pause/resume and crash-recovery for nested human waits and
    unresolved effects. Verify root restart drains or preserves every nested
    owner without duplicate provider dispatch or effect replay.
@@ -118,8 +122,12 @@ inspectable; it cannot be converted into an ordinary tool error.
    uncertainty through the shared browser/VS Code view and inspect the actual
    CLI output. Test depth/total-work exhaustion and parallel sibling plans.
 
-Completion requires all five stages. The current focused dynamic-plan tests
-prove root-owned plans only and are insufficient evidence for this contract.
+The executor, owner lifecycle and nested-provider acceptance stages now pass
+the focused Release set **3/3** (`native_dynamic_plan_contract`,
+`native_dynamic_plan_repository_contract`, and
+`native_dynamic_plan_engine_contract`). The engine peer is synthetic; this
+does not prove live-provider behavior. Durable nested pause/restart recovery
+and browser, VS Code and CLI presentation remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).

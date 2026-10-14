@@ -1176,25 +1176,27 @@ void Repository::record_rejected_dynamic_tool_turn(const std::string& root,const
     const auto& call=reply["tool_calls"][0];if(!call.is_object()||!call.contains("id")||!call["id"].is_string()||!call.contains("name")||!call["name"].is_string()||!call.contains("arguments")||!call["arguments"].is_string())throw std::invalid_argument("Rejected planning turn has invalid actual call fields");
     const auto provider_call=call["id"].get<std::string>(),name=call["name"].get<std::string>(),arguments=call["arguments"].get<std::string>();bounded_identity(provider_call,256);
     if(name!="plan_tasks"&&name!="revise_plan"&&name!="inspect_plan")throw std::invalid_argument("Only preaccept planning tools use typed rejection");
-    auto& db=impl_->database;Transaction tx(db);const auto owner=run(root);const auto caps=dynamic_capabilities(root);if(!owner.parent_id.empty()||owner.graph_root||!caps.catalogue_finalized)throw Conflict("Rejected planning turn lacks its owning admitted root");
-    const auto origin=db.execute("SELECT actual_assistant_json FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND role='parent' AND state='finished'",{root,origin_id,root}).rows;
-    const auto finished=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='budget.model_call.finished' AND json_extract(payload,'$.attempt_id')=? AND json_extract(payload,'$.was_started')=1",{root,origin_id}).rows;
+    auto& db=impl_->database;Transaction tx(db);const auto owner=run(root);const auto owner_id=owner.id;const auto root_id=owner.parent_id.empty()?owner.id:owner.parent_id;const auto root_run=run(root_id);const auto caps=dynamic_capabilities(root_id);const auto owner_role=owner_id==root_id?std::string("parent"):std::string("leaf");
+    if(root_run.graph_root||!root_run.parent_id.empty()||!caps.catalogue_finalized||root_run.state!=RunState::running||owner.state!=RunState::running)throw Conflict("Rejected planning turn lacks its exact running dynamic owner");
+    if(owner_id!=root_id){const auto admission=child_admission(owner_id);if(admission.kind!=ChildAdmissionKind::dynamic_agent||admission.root_run_id!=root_id)throw Conflict("Rejected nested planning turn is not owned by a dynamic agent");const auto parent_plan=dynamic_plan(admission.plan_id);const auto claimed=std::find_if(parent_plan.nodes.begin(),parent_plan.nodes.end(),[&](const auto& node){return node.child_run_id==owner_id;});if(parent_plan.state!="active"||claimed==parent_plan.nodes.end()||claimed->state!=DynamicNodeState::claimed||claimed->claim_id!=admission.claim_id||claimed->definition_revision!=admission.definition_revision||claimed->claim_revision!=admission.claim_revision)throw Conflict("Rejected nested planning turn lost its exact live claim");}
+    const auto origin=db.execute("SELECT actual_assistant_json FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND role=? AND state='finished'",{root_id,origin_id,owner_id,owner_role}).rows;
+    const auto finished=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='budget.model_call.finished' AND json_extract(payload,'$.attempt_id')=? AND json_extract(payload,'$.was_started')=1",{owner_id,origin_id}).rows;
     if(origin.size()!=1||std::holds_alternative<std::nullptr_t>(origin[0][0])||text(origin[0][0])!=exact||finished.size()!=1)throw Conflict("Rejected planning turn differs from its actual finished response");
-    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND (provider_tool_call_id=? OR state IN ('accepted','report_ready') OR (state='turn_committed' AND continuation_attempt_id IS NULL))",{root,provider_call}).rows.empty())throw Conflict("Accepted planning work cannot acquire a generic rejected conversation");
-    const auto activity=root+":plan:"+provider_call;const auto starts=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.started' AND json_extract(payload,'$.activity_id')=?",{root,activity}).rows;
+    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE owner_run_id=? AND (provider_tool_call_id=? OR state IN ('accepted','report_ready') OR (state='turn_committed' AND continuation_attempt_id IS NULL))",{owner_id,provider_call}).rows.empty())throw Conflict("Accepted planning work cannot acquire a generic rejected conversation");
+    const auto activity=owner_id+":plan:"+provider_call;const auto starts=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.started' AND json_extract(payload,'$.activity_id')=?",{owner_id,activity}).rows;
     if(starts.size()!=1||integer(starts[0][0])<=integer(finished[0][0]))throw Conflict("Rejected planning turn lacks one actual tool start");
     const auto started=Json::parse(text(starts[0][1]));if(!started.contains("call_id")||started["call_id"]!=provider_call||!started.contains("name")||started["name"]!=name)throw Conflict("Rejected planning start differs from actual call");
     if(started.contains("arguments_json")){if(!started["arguments_json"].is_string()||started["arguments_json"].get<std::string>()!=arguments)throw Conflict("Rejected planning start arguments differ");}
     else {if(!started.contains("arguments"))throw Conflict("Rejected planning start arguments are absent");try{if(started["arguments"]!=Json::parse(arguments))throw Conflict("Rejected planning start arguments differ");}catch(const Json::exception&){throw Conflict("Invalid planning JSON requires exact raw start arguments");}}
     const auto output=Json{{"source","native_dynamic_plan"},{"accepted",false},{"error",{{"code",code}}}};
-    const auto markers=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='conversation.tool_turn' AND json_extract(payload,'$.rejected_plan_call_id')=?",{root,provider_call}).rows;
-    const auto completions=db.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND kind IN ('tool.completed','tool.failed') AND json_extract(payload,'$.activity_id')=?",{root,activity}).rows;
+    const auto markers=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='conversation.tool_turn' AND json_extract(payload,'$.rejected_plan_call_id')=?",{owner_id,provider_call}).rows;
+    const auto completions=db.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND kind IN ('tool.completed','tool.failed') AND json_extract(payload,'$.activity_id')=?",{owner_id,activity}).rows;
     if(!markers.empty()){
         const auto marker=Json::parse(text(markers[0][1]));if(markers.size()!=1||marker.value("origin_attempt_id",std::string{})!=origin_id||marker.value("error_code",std::string{})!=code)throw Conflict("Rejected planning commit binding changed");
         if(completions.size()!=1||text(completions[0][1])!="tool.failed"||integer(completions[0][0])>=integer(markers[0][0]))throw DatabaseError("Rejected planning commit lacks once-only actual failure");const auto failure=Json::parse(text(completions[0][2]));if(failure.value("call_id",std::string{})!=provider_call||failure.value("name",std::string{})!=name||!failure.contains("data")||failure["data"]!=output)throw DatabaseError("Rejected planning tool failure differs from fixed safe result");tx.commit();return;
     }
     if(owner.state!=RunState::running||!completions.empty())throw Conflict("Rejected planning owner or activity is already retired");
-    impl_->event(root,"tool.failed",Json{{"activity_id",activity},{"call_id",provider_call},{"name",name},{"data",output}}.dump());impl_->message(owner,"assistant",exact);impl_->message(owner,"tool",Json{{"content",output.dump()},{"tool_call_id",provider_call}}.dump());impl_->event(root,"conversation.tool_turn",Json{{"rejected_plan_call_id",provider_call},{"origin_attempt_id",origin_id},{"error_code",code}}.dump());tx.commit();
+    impl_->event(owner_id,"tool.failed",Json{{"activity_id",activity},{"call_id",provider_call},{"name",name},{"data",output}}.dump());impl_->message(owner,"assistant",exact);impl_->message(owner,"tool",Json{{"content",output.dump()},{"tool_call_id",provider_call}}.dump());impl_->event(owner_id,"conversation.tool_turn",Json{{"rejected_plan_call_id",provider_call},{"origin_attempt_id",origin_id},{"error_code",code}}.dump());tx.commit();
 }catch(const DatabaseError&){throw DynamicOutcomeUnrecorded("Rejected actual planning turn was not durably committed");}
 ModelCallReservation Repository::reserve_dynamic_continuation(const std::string& call_id,const std::string& attempt){
     bounded_identity(attempt);auto& db=impl_->database;Transaction tx(db);const auto c=dynamic_plan_call(call_id);const auto budget=root_budget(c.root_run_id);const auto caps=dynamic_capabilities(c.root_run_id);const auto role=c.owner_run_id==c.root_run_id?ModelCallRole::parent:ModelCallRole::leaf;if(run(c.root_run_id).state!=RunState::running||run(c.owner_run_id).state!=RunState::running||c.state!="turn_committed"||!c.conversation_commit_seq)throw Conflict("Planning continuation lacks its committed actual turn");
@@ -2078,12 +2080,21 @@ void Repository::record_tool_turn(const std::string& id,const std::string& assis
 }
 Run Repository::complete_run(const std::string& id,const std::string& assistant_json) {
     auto& db=impl_->database;Transaction transaction(db);auto current=run(id);
+    std::optional<DynamicPlanRecord> child_plan;
     if(current.state!=RunState::running) throw Conflict("Run is not running");
     if(current.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context completion requires measured typed closure");
+    if(!current.parent_id.empty()){
+        const auto admission=child_admission(id);
+        if(admission.kind==ChildAdmissionKind::dynamic_agent){
+            child_plan=dynamic_plan_for_owner(id);
+            if(child_plan&&!inspect_dynamic_plan(*child_plan).finished)throw Conflict("Dynamic child cannot complete while its owned plan is unfinished");
+        }
+    }
     impl_->root_boundary(current,RunState::completed);
     if(impl_->has_operations(id,"'awaiting_approval','ready','executing','uncertain'")) throw Conflict("Run has unresolved operations");
     impl_->message(current,"assistant",assistant_json);
     changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{id}));
+    if(child_plan)changed_one(db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE id=? AND state='active' AND EXISTS(SELECT 1 FROM dynamic_plan_owners WHERE plan_id=dynamic_plans.id AND owner_run_id=?)",{child_plan->id,id}));
     impl_->event(id,"conversation.assistant",assistant_json);impl_->event(id,"run.completed","{}");transaction.commit();current.state=RunState::completed;return current;
 }
 std::vector<Run> Repository::runs(const std::string& session_id) {
@@ -2111,8 +2122,15 @@ RootRunPage Repository::list_root_runs(const std::string& context,const std::str
 }
 Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json) {
     if(!allowed(expected,next)) throw std::invalid_argument("Invalid run transition");
-    auto& db=impl_->database; Transaction transaction(db); auto result=run(id);
+    auto& db=impl_->database; Transaction transaction(db); auto result=run(id);std::optional<DynamicPlanRecord> child_plan;
     if(result.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context lifecycle requires its typed owner operation");
+    if(next==RunState::completed&&!result.parent_id.empty()){
+        const auto admission=child_admission(id);
+        if(admission.kind==ChildAdmissionKind::dynamic_agent){
+            child_plan=dynamic_plan_for_owner(id);
+            if(child_plan&&!inspect_dynamic_plan(*child_plan).finished)throw Conflict("Dynamic child cannot complete while its owned plan is unfinished");
+        }
+    }
     impl_->root_boundary(result,next);
     const auto executing=db.execute("SELECT tool,arguments FROM operations WHERE run_id=? AND state='executing'",{id}).rows;
     if(!executing.empty()) {
@@ -2123,6 +2141,7 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     const auto changed=db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),id,state_name(expected)});
     if(changed.affected_rows==0) throw Conflict("Run state changed");
     changed_one(changed);
+    if(child_plan)changed_one(db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE id=? AND state='active' AND EXISTS(SELECT 1 FROM dynamic_plan_owners WHERE plan_id=dynamic_plans.id AND owner_run_id=?)",{child_plan->id,id}));
     if(terminal(next)) impl_->cancel_waiting(id);
     impl_->event(id,"run."+state_name(next),json);
     transaction.commit(); result.state=next; return result;

@@ -139,7 +139,7 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
-    std::shared_ptr<DynamicPlanExecutor> planning):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
+    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if(settings_.provider.model.empty() || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -171,7 +171,7 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
             policy.max_humans<1||policy.max_humans>8||policy.change_bytes<1||policy.change_bytes>262144||
             policy.human_expiry_ms<1||policy.human_expiry_ms>900000)throw std::invalid_argument("Invalid registered dynamic planning policy");
         // This allowance is inherited from the native agent configuration.
-        policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
+        if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
     }
     if(settings_.context){
         if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
@@ -348,7 +348,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         graph_agent=admission.kind==ChildAdmissionKind::graph_agent;
         leaf=admission.kind==ChildAdmissionKind::delegated_leaf||dynamic_child;
         if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
-        if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||settings_.planning||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
+        if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||(!dynamic_child&&settings_.planning)||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
+        if(dynamic_child&&settings_.planning&&!planning_)throw std::invalid_argument("Planning-capable dynamic child requires the shared native planning executor");
         if(!dynamic_child&&leaf&&(admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.a2a_enabled||settings_.max_turns>4))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
         if(dynamic_child){
             const auto plan=persistence_.dynamic_plan(admission.plan_id).get();
@@ -373,6 +374,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             throw std::invalid_argument("Registered graph agent requires its exact shared graph context budget");
     }else if(budget)throw std::invalid_argument("Normal agent root must acquire its own durable budget");
     const bool dynamic_root=admitted.parent_id.empty()&&settings_.planning&&planning_;
+    const bool dynamic_plan_owner=dynamic_root||(dynamic_child&&settings_.planning&&planning_);
     const bool resumed=dynamic_root&&admitted.state==RunState::paused;
     auto provider=settings_.provider;
     const auto selected=resumed&&model_id.empty()?admitted_dynamic_model(id):model_id;
@@ -590,7 +592,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         };
         auto offer_orchestration=[&]{
         if(budget&&!leaf&&delegation_&&settings_.delegation){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(DelegationExecutor::definition());}
-        if(dynamic_root){for(auto& definition:dynamic_plan_tool_definitions(*root_caps)){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(std::move(definition));}}
+        if(dynamic_plan_owner){const auto& capabilities=dynamic_root?*root_caps:*child_caps;for(auto& definition:dynamic_plan_tool_definitions(capabilities)){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(std::move(definition));}}
         };
         auto apply_tool_allowlist=[&](bool require_all){
             if(!effective_tool_allowlist)return;
@@ -627,7 +629,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
-            if(dynamic_root){if(!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");validate_dynamic_owner(id,provider.model);}
+            if(dynamic_plan_owner&&!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");if(dynamic_root)validate_dynamic_owner(id,provider.model);
             else if(!leaf&&process_)try{for(const auto& profile:settings_.process_profiles)
                 if(profile.executable_id.empty()||ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id)
                     throw ProcessBeforeDispatchError("Admitted process binding changed");
@@ -722,9 +724,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     joined_process_notes.push_back(observation);if(!context_manager)request.messages.push_back({MessageRole::system,observation});
                     continue;
                 }}
-                if(dynamic_root){
-                    const auto plan=persistence_.dynamic_plan_for_root(id).get();
+                if(dynamic_plan_owner){
+                    const auto plan=persistence_.dynamic_plan_for_owner(id).get();
                     if(plan&&!inspect_dynamic_plan(*plan).finished)return terminate(RunState::failed,{{"reason","dynamic_plan_incomplete"}});
+                }
+                if(dynamic_root){
                     stop_mcp_observers();
                     return persistence_.complete_dynamic_owner(id,reply.dump(),budget->segment_id(),budget->active_elapsed_ms()).get();
                 }
@@ -735,11 +739,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(response.finish_reason!="tool_calls" || (!workspace_&&xlang_tools.empty())) throw ModelProtocolError("Model did not produce a complete supported turn");
             const auto is_planning=[](const auto& call){return call.name=="plan_tasks"||call.name=="revise_plan"||call.name=="inspect_plan";};
             if(std::any_of(response.tool_calls.begin(),response.tool_calls.end(),is_planning)){
-                if(!dynamic_root||response.tool_calls.size()!=1)throw ModelProtocolError("Planning must be the sole tool call of its owning ordinary Agent turn");
+                if(!dynamic_plan_owner||response.tool_calls.size()!=1)throw ModelProtocolError("Planning must be the sole tool call of its admitted planning owner turn");
                 const auto& call=response.tool_calls.front();const auto activity=id+":plan:"+call.id;
                 persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)},{"arguments_json",call.arguments_json}}.dump()).get();
                 close_mcp();stop_mcp_observers();DynamicExecutionResult actual;
-                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,*root_caps,budget,token,planning_guidance);}
+                const auto& capabilities=dynamic_root?*root_caps:*child_caps;
+                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,capabilities,budget,token,planning_guidance);}
                 catch(const DynamicPlanRejected& error){
                     persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
                     reload_history();refresh_tools();continue;

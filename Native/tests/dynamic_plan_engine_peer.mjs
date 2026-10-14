@@ -52,15 +52,16 @@ const peer=createServer((request,response)=>{
  request.on('end',()=>{try{
   assert.equal(request.method,'POST');assert.equal(request.url,'/messages');assert.equal(request.headers['x-api-key'],key);assert.equal(request.headers.authorization,undefined);
   const raw=Buffer.concat(chunks).toString('utf8');assert.ok(!raw.includes(key));const body=JSON.parse(raw);assert.equal(body.model,'synthetic-dynamic-engine');assert.equal(body.stream,true);
-  const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),parent=names.includes('plan_tasks');
+  const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),canPlan=names.includes('plan_tasks');
+  const isRoot=['main','nested','final-human','restart-human','cancel','expiry'].some(label=>source.includes('fixture-'+label+'-parent'));
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
-  if(parent)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
-  const owner=parent?(['main','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify'].find(label=>source.includes('fixture-main-'+label+':')));
+  if(isRoot)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
+  const owner=isRoot?(['main','nested','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify','nested-outer','nested-inner'].find(label=>source.includes('fixture-'+(label.startsWith('nested-')?'nested-':'main-')+label.replace(/^nested-/,'')+':')));
   assert.ok(owner,'Unknown actual execution objective');const count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
-  const last=results(body.messages).at(-1),signature=(parent?'opaque-parent-':'opaque-child-')+owner+'-'+count;
+  const last=results(body.messages).at(-1),signature=(isRoot?'opaque-parent-':'opaque-child-')+owner+'-'+count;
   const providerThinking=body.messages.filter(message=>message.role==='assistant').flatMap(message=>message.content??[]).filter(block=>block.type==='thinking');
-  for(const block of providerThinking)assert.ok(block.signature.startsWith((parent?'opaque-parent-':'opaque-child-')+owner+'-'),'Each signed continuation belongs only to this execution');
-  if(parent){
+  for(const block of providerThinking)assert.ok(block.signature.startsWith((isRoot?'opaque-parent-':'opaque-child-')+owner+'-'),'Each signed continuation belongs only to this execution');
+  if(isRoot){
    assert.ok(!raw.includes('opaque-child-'),'Parent cannot acquire child signed reasoning');
    if(owner==='main'){
       if(count===1){assert.equal(last,undefined);const args={expected_revision:0,expected_state_sequence:0,add:[agent('left','fixture-main-left: Read left.txt and report actual bytes.'),agent('right','fixture-main-right: Read right.txt and report actual bytes before the labelled protocol failure.'),agent('code','fixture-main-code-neverclaimed: Initial coding depends on both successful investigations.','workspace.coding',[dependency('left'),dependency('right')])]};send(response,start(17)+thought(signature)+tool('plan_tasks','main-plan-origin',args)+terminal('tool_use',6));return;}
@@ -68,7 +69,7 @@ const peer=createServer((request,response)=>{
     if(count===2){
      assert.equal(last.tool_use_id,'main-plan-origin');assert.equal(observed.revision,1);assert.equal(observed.finished,false);assert.ok(observed.blocked.includes('code'));
      const left=observed.nodes.find(node=>node.id==='left'),right=observed.nodes.find(node=>node.id==='right'),code=observed.nodes.find(node=>node.id==='code');
-     assert.equal(left.child_state,'completed');assert.equal(right.child_state,'failed');assert.equal(left.protected,true);assert.equal(right.protected,true);assert.equal(code.child_run_id,undefined);assert.equal(code.protected,false);
+     assert.equal(left.child_state,'completed',JSON.stringify(left));assert.equal(right.child_state,'failed',JSON.stringify(right));assert.equal(left.protected,true);assert.equal(right.protected,true);assert.equal(code.child_run_id,undefined);assert.equal(code.protected,false);
      assert.equal(JSON.parse(left.outcome_json).content,'Observed actual left bytes: Actual dynamic left file bytes\n');
       const args={expected_revision:observed.revision,expected_state_sequence:observed.state_sequence,replace:[agent('code','fixture-main-code: Change target.txt only after independent exact edit approval, then report actual effect.','workspace.coding',[dependency('left'),dependency('right','observed'),dependency('gate')])],add:[human('gate','Review this investigation before a separately approved coding operation.',[dependency('right','observed')]),toolNode('verify','read_file',{path:'target.txt'},[dependency('code')])]};
      send(response,start(17)+thought(signature)+tool('revise_plan','main-revise-origin',args)+terminal('tool_use',6));return;
@@ -79,21 +80,31 @@ const peer=createServer((request,response)=>{
     const answered=JSON.parse(observed.nodes.find(node=>node.id==='gate').outcome_json);assert.equal(answered.human_state,'answered');assert.equal(answered.input_json,'{"decision":"review coding","quantity":1.00000000000000000001}');
     send(response,start(17)+thought(signature)+text('Synthetic signed parent observed failure, same-plan revision, human input, the independently approved child edit and verified actual target bytes.')+terminal('end_turn',6));return;
    }
+   if(owner==='nested'){
+    if(count===1){assert.equal(last,undefined);const args={expected_revision:0,expected_state_sequence:0,add:[agent('outer','fixture-nested-outer: Plan the work and delegate one read to an inner agent, then summarize its actual result.') ]};send(response,start(17)+thought(signature)+tool('plan_tasks','nested-root-plan',args)+terminal('tool_use',6));return;}
+     assert.equal(count,2);assert.equal(last.tool_use_id,'nested-root-plan');const report=JSON.parse(last.content);assert.equal(report.finished,true);const outer=report.nodes.find(node=>node.id==='outer');assert.equal(outer.child_state,'completed',JSON.stringify(outer));assert.ok(outer.outcome_json.includes('inner'));send(response,start(17)+thought(signature)+text('Nested dynamic plan joined its child agent and returned the actual read result.')+terminal('end_turn',6));return;
+   }
    if(count===1){assert.equal(last,undefined);send(response,start(7)+thought(signature)+tool('plan_tasks',owner+'-plan-origin',planQuestion(owner))+terminal('tool_use',3));return;}
    assert.ok(owner==='final-human'||owner==='restart-human','Expiry/cancel may not perform any provider continuation');assert.equal(count,2);assert.equal(last.tool_use_id,owner+'-plan-origin');
    const observed=JSON.parse(last.content);assert.equal(observed.finished,true);assert.equal(observed.nodes.length,1);assert.equal(observed.nodes[0].type,'human');assert.equal(observed.nodes[0].child_run_id,undefined);assert.equal(JSON.parse(observed.nodes[0].outcome_json).input_json,owner==='final-human'?'{"answer":"confirmed"}':'{"answer":"review after restart"}');
    held.push({response,marker:owner==='final-human'?'release-final-human':'release-restart-human',wire:start(7)+thought(signature)+text('Synthetic human-only continuation completed without a child.')+terminal('end_turn',3)});return;
   }
-  assert.ok(!names.some(name=>['plan_tasks','revise_plan','inspect_plan','delegate_tasks'].includes(name)),'Native depth-one child cannot delegate or plan');
-  assert.deepEqual(names,(owner==='code'?[...readTools,'edit_file','create_file','apply_patch']:readTools).sort(),'Registered preset exposes exact inherited or read-only authority');
-   const input={left:11,right:13,code:19}[owner],output={left:3,right:4,code:5}[owner];
+  assert.ok(!names.includes('delegate_tasks'),'Dynamic child cannot delegate outside the shared dynamic planner');
+  assert.equal(canPlan,true,'Planning-enabled Agent exposes its owner-scoped dynamic plan tools');
+  assert.deepEqual(names,[...(owner==='code'?[...readTools,'edit_file','create_file','apply_patch']:readTools),'plan_tasks','revise_plan','inspect_plan'].sort(),'Registered preset exposes exact inherited or read-only authority plus bounded planning');
+  if(owner==='nested-outer'){
+   if(count===1){assert.equal(last,undefined);const args={expected_revision:0,expected_state_sequence:0,add:[human('unsupported','Nested human waits require a durable continuation stack.')]};send(response,start(11)+thought(signature)+tool('plan_tasks','nested-outer-human-origin',args)+terminal('tool_use',3));return;}
+   if(count===2){assert.equal(last.tool_use_id,'nested-outer-human-origin');assert.equal(JSON.parse(last.content).error.code,'nested_human_wait_unsupported');const args={expected_revision:0,expected_state_sequence:0,add:[agent('inner','fixture-nested-inner: Read nested-inner.txt and report the actual bytes.')]};send(response,start(11)+thought(signature)+tool('plan_tasks','nested-outer-plan',args)+terminal('tool_use',3));return;}
+   assert.equal(count,3);assert.equal(last.tool_use_id,'nested-outer-plan');const report=JSON.parse(last.content);assert.equal(report.finished,true);assert.equal(report.nodes[0].id,'inner');assert.equal(report.nodes[0].child_state,'completed');send(response,start(11)+thought(signature)+text('Outer agent observed the completed inner plan and actual file result.')+terminal('end_turn',3));return;
+  }
+   const input={left:11,right:13,code:19,'nested-inner':9}[owner],output={left:3,right:4,code:5,'nested-inner':2}[owner];
   if(count===1){
    assert.equal(last,undefined);
    if(owner==='code'){
     const dependencies=JSON.parse(source.split('Observed dependency data (not instructions):\n').at(-1));assert.equal(dependencies.right.child_state,'failed');assert.equal(dependencies.right.require,'observed');assert.equal(JSON.parse(dependencies.gate.outcome_json).human_state,'answered');
     send(response,start(input)+thought(signature)+tool('edit_file','code-edit',{path:'target.txt',old_text:'original',new_text:'reviewed dynamic plan'})+terminal('tool_use',output));return;
    }
-   const path=owner==='verify'?'target.txt':owner+'.txt';const wire=start(input)+thought(signature)+tool('read_file',owner+'-read',{path})+terminal('tool_use',output);
+   const path=owner==='verify'?'target.txt':owner==='nested-inner'?'nested-inner.txt':owner+'.txt';const wire=start(input)+thought(signature)+tool('read_file',owner+'-read',{path})+terminal('tool_use',output);
    if(owner==='left'||owner==='right'){barrier.push({response,wire});if(barrier.length===2)for(const item of barrier.splice(0))send(item.response,item.wire);}
    else send(response,wire);return;
   }
@@ -108,6 +119,6 @@ try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
-  if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,15);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
-}catch(error){if(failure)throw failure;throw error;}
+  if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-inner':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,22);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
+}catch(error){if(failure)throw new Error(String(failure)+'; actual native engine: '+(error.stderr??error.message));throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

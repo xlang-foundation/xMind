@@ -69,7 +69,8 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
 class AgentRunner {
 public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={});
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        bool preserve_dynamic_child_planning_policy=false);
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={});

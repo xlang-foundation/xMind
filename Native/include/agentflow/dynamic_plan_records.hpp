@@ -18,7 +18,7 @@ struct DynamicHumanExpired : std::runtime_error {using std::runtime_error::runti
 struct DynamicPlanRejected : std::runtime_error {
     std::string code;
     explicit DynamicPlanRejected(std::string value):std::runtime_error("Dynamic plan was not accepted"),code(std::move(value)){
-        if(code!="invalid_plan_arguments"&&code!="plan_changed"&&code!="planning_budget_exhausted")throw std::invalid_argument("Invalid bounded planning rejection code");
+        if(code!="invalid_plan_arguments"&&code!="plan_changed"&&code!="planning_budget_exhausted"&&code!="nested_human_wait_unsupported"&&code!="planning_depth_exhausted")throw std::invalid_argument("Invalid bounded planning rejection code");
     }
 };
 
