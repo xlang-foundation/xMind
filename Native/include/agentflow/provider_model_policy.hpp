@@ -22,6 +22,7 @@ struct ProviderModelPolicy {
 ProviderModelPolicy documented_openai_model_policy(ProviderWire wire);
 // Exact xAI model identities reviewed for the native Responses/tool loop.
 ProviderModelPolicy documented_xai_model_policy();
+ProviderModelPolicy documented_mistral_model_policy();
 void validate_provider_model_policy(const ProviderModelPolicy& policy);
 // Rejects before credentials, publication or run admission. Preserves the
 // backend's endpoint and explicit reasoning choice; never switches wires.

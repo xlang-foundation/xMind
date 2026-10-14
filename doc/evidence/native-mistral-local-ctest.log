@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/native
+    Start 10: model_request_contract
+1/2 Test #10: model_request_contract ..........................   Passed    0.02 sec
+    Start 98: native_provider_model_policy_runtime_contract
+2/2 Test #98: native_provider_model_policy_runtime_contract ...   Passed    0.77 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.80 sec

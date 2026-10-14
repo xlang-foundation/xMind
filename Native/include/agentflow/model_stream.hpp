@@ -8,7 +8,7 @@
 
 namespace agentflow {
 // Backend-selected Chat Completions dialect, never inferred from a model name.
-enum class ChatDialect {openai,deepseek};
+enum class ChatDialect {openai,deepseek,mistral};
 struct ModelProtocolError : std::runtime_error {using std::runtime_error::runtime_error;};
 // Only known native invariant codes; never reflect provider payloads/messages.
 std::string_view model_protocol_diagnostic(const ModelProtocolError& error);

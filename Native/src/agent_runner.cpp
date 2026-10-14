@@ -82,6 +82,7 @@ std::string execution_identity(const AgentSettings& settings,const std::string& 
     const char* wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":settings.provider.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions";
     auto identity=Json{{"wire",wire},{"model_id",model.empty()?settings.provider.model:model}};
     if(settings.provider.chat_dialect==ChatDialect::deepseek)identity["chat_dialect"]="deepseek";
+    else if(settings.provider.chat_dialect==ChatDialect::mistral)identity["chat_dialect"]="mistral";
     else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     return identity.dump();
 }

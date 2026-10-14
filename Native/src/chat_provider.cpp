@@ -35,7 +35,8 @@ std::string anthropic_model_usage(const std::string& source){
 }
 ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelRequest& request,
     const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel) {
-    const auto body=config.chat_dialect==ChatDialect::deepseek?serialize_deepseek_request(config,request):serialize_chat_request(config,request);
+    const auto body=config.chat_dialect==ChatDialect::deepseek?serialize_deepseek_request(config,request):
+        config.chat_dialect==ChatDialect::mistral?serialize_mistral_request(config,request):serialize_chat_request(config,request);
     if(!sink) throw std::invalid_argument("Model event sink is required");
     if(config.chat_dialect==ChatDialect::deepseek&&!bearer)throw std::invalid_argument("DeepSeek requires a backend credential");
     ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind!="model.done") sink(event);},config.chat_dialect,config.model);
@@ -59,7 +60,7 @@ ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelReques
 }
 ModelCompletion complete_model(const ChatProviderConfig& config,const ModelRequest& request,const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel){
     if(config.chat_dialect!=ChatDialect::openai&&
-        (config.chat_dialect!=ChatDialect::deepseek||config.wire!=ProviderWire::chat_completions))
+        ((config.chat_dialect!=ChatDialect::deepseek&&config.chat_dialect!=ChatDialect::mistral)||config.wire!=ProviderWire::chat_completions))
         throw std::invalid_argument("Invalid provider chat dialect binding");
     const auto projected=project_provider_history(config,request);const auto& history=projected;
     if(config.wire==ProviderWire::chat_completions)return complete_chat(config,history,bearer,std::move(sink),cancel);

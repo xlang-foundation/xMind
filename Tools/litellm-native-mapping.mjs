@@ -67,4 +67,15 @@ export const nativePartial = {
     scope: 'Native xAI Responses profile discovery and a full AgentRunner tool loop passed against an independent synthetic xAI-compatible catalogue/SSE peer. The C++ runtime, selected Grok profile, actual workspace read, encrypted credential handling and xlang3 SQLite persistence/reopen are real. Only grok-4.7 is admitted for tool execution by the reviewed model policy. No xAI key or live provider request was used.',
     gaps: 'The 58 pinned xAI entries are not individually accepted. Live account catalogue/inference, model-specific tool/reasoning/streaming behavior, non-chat and media modes, xAI error/timeout/cancellation behavior and complete provider-group parity remain unverified.',
   },
+  mistral: {
+    sources: [
+      ['Native/apps/server_main.cpp', 'add("mistral.chat"'],
+      ['Native/src/provider_model_policy.cpp', 'ProviderModelPolicy documented_mistral_model_policy'],
+      ['Native/src/model_request.cpp', 'serialize_mistral_request'],
+      ['Native/tests/provider_model_policy_runtime_contract.cpp', 'Native Mistral model policy read'],
+    ],
+    evidenceFiles: ['doc/evidence/native-mistral-local.json'],
+    scope: 'Native Mistral Chat Completions route and exact function-calling model policy passed focused C++ request/runtime contracts. A synthetic catalogue verifies model filtering; a synthetic SSE peer exercises a native AgentRunner workspace read, usage-bearing continuation, credential encryption and xlang3 SQLite reopen. No live Mistral key or provider request was used.',
+    gaps: 'The documented function-capable aliases are not individually accepted on live Mistral accounts. Native request/reasoning, structured output, media, caching, error/timeout/cancellation and full Mistral provider-group parity remain unverified or incomplete.',
+  },
 };

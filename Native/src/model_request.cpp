@@ -107,5 +107,14 @@ static std::string serialize_request_fields(const ChatProviderConfig& config,con
     } catch(const Json::exception&) {throw std::invalid_argument("Invalid UTF-8 model request");}
 }
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request){return serialize_request_fields(config,request,4096);}
+std::string serialize_mistral_request(const ChatProviderConfig& config,const ModelRequest& request){
+    if(config.wire!=ProviderWire::chat_completions||config.chat_dialect!=ChatDialect::mistral)
+        throw std::invalid_argument("Mistral requires its explicit native chat policy");
+    auto body=Json::parse(serialize_chat_request(config,request));
+    if(body.contains("max_completion_tokens")){
+        body["max_tokens"]=body.at("max_completion_tokens");body.erase("max_completion_tokens");
+    }
+    try{return body.dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid UTF-8 Mistral request");}
+}
 std::string serialize_responses_request_fields(const ChatProviderConfig& config,const ModelRequest& request){return serialize_request_fields(config,request,8192);}
 }

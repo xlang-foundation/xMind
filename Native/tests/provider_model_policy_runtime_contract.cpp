@@ -31,6 +31,10 @@ std::vector<ProviderProfileExecutionPolicy> policies(const std::string& origin){
     ChatProviderConfig xai_config;xai_config.endpoint=xai.endpoint;xai_config.wire=xai.wire;xai_config.deadline=5s;xai_config.idle_timeout=3s;
     ProviderProfileExecutionPolicy xai_policy{xai,xai_config,ProviderCataloguePolicy{origin+"/xai/models",ProviderCatalogueFormat::openai}};
     xai_policy.model_capabilities=documented_xai_model_policy();result.push_back(std::move(xai_policy));
+    ProviderProfileRoute mistral{"mistral.chat","mistral",origin+"/mistral/chat","fixture","fixture:mistral",ProviderWire::chat_completions};
+    ChatProviderConfig mistral_config;mistral_config.endpoint=mistral.endpoint;mistral_config.wire=mistral.wire;mistral_config.chat_dialect=ChatDialect::mistral;mistral_config.deadline=5s;mistral_config.idle_timeout=3s;
+    ProviderProfileExecutionPolicy mistral_policy{mistral,mistral_config,ProviderCataloguePolicy{origin+"/mistral/models",ProviderCatalogueFormat::openai}};
+    mistral_policy.model_capabilities=documented_mistral_model_policy();result.push_back(std::move(mistral_policy));
     return result;
 }
 void unchanged(PersistenceService& store,ProviderProfileRuntime& runtime,std::int64_t revision,const std::string& registry,std::size_t credentials){
@@ -63,6 +67,9 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         const Json xai_draft={{"id","xai"},{"route_id","xai.responses"},{"api_key",fixture_key},{"expected_revision",0}};
         const auto xai_models=post("/v1/provider/profiles/models",xai_draft,200);
         require(xai_models==Json{{"models",Json::array({{{"id","grok-4.7"}}})}},"xAI discovery must expose only the exact natively declared tool-capable Grok frontier model");
+        const Json mistral_draft={{"id","mistral"},{"route_id","mistral.chat"},{"api_key",fixture_key},{"expected_revision",0}};
+        const auto mistral_models=post("/v1/provider/profiles/models",mistral_draft,200);
+        require(mistral_models==Json{{"models",Json::array({{{"id","codestral-latest"}},{{"id","mistral-large-latest"}}})}},"Mistral discovery must filter account models through exact native tool-capability policy");
         require(runtime.configuration().revision==0&&store.credentials("fixture").get().empty(),"Discovery must not publish credentials or configuration");
         {std::ofstream out(config);out<<"version: 1\nprofiles:\n  openai:\n    route: openai.chat\n    api_key: "<<fixture_key<<"\n";}
         require(runtime.import_yaml_configuration(config,0).revision==1&&!runtime.available(),"Key-only YAML profile must remain unconfigured");
@@ -94,6 +101,12 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         const auto xai_until=std::chrono::steady_clock::now()+8s;
         for(;;){const auto run=store.run("xai-read-run").get();if(run.state==RunState::completed)break;require(run.state==RunState::queued||run.state==RunState::running,"Native xAI model policy read failed");require(std::chrono::steady_clock::now()<xai_until,"Native xAI model policy read timed out");std::this_thread::sleep_for(5ms);}
         const auto xai_history=store.history("xai-read").get();require(xai_history.size()==4&&xai_history[2].role=="tool"&&Json::parse(xai_history.back().json).at("content")=="Synthetic xAI native model policy read completed.","Actual native Responses tool loop must execute and retain the owned xAI profile read");require(xai_history[2].json.find("model-policy-file-marker")!=std::string::npos&&store.operations("xai-read-run").get().empty(),"Grok tool call must use the actual workspace file without inventing effects");
+        require(runtime.save_profile("mistral","mistral.chat","mistral-large-latest",key(fixture_key),4,true).revision==5&&runtime.configuration().active=="mistral","Reviewed Mistral tool model must activate on its explicit native chat dialect");
+        store.create_session("mistral-read","Synthetic native Mistral model policy read").get();
+        post("/v1/runs",{{"id","mistral-read-run"},{"session_id","mistral-read"},{"prompt","Read marker.txt using Mistral through its native chat route."},{"provider_profile_id","mistral"},{"expected_provider_revision",5}},202);
+        const auto mistral_until=std::chrono::steady_clock::now()+8s;
+        for(;;){const auto run=store.run("mistral-read-run").get();if(run.state==RunState::completed)break;require(run.state==RunState::queued||run.state==RunState::running,"Native Mistral model policy read failed");require(std::chrono::steady_clock::now()<mistral_until,"Native Mistral model policy read timed out");std::this_thread::sleep_for(5ms);}
+        const auto mistral_history=store.history("mistral-read").get();require(mistral_history.size()==4&&mistral_history[2].role=="tool"&&Json::parse(mistral_history.back().json).at("content")=="Synthetic native Mistral model policy read completed.","Actual native Mistral tool loop must retain the owned workspace read");require(mistral_history[2].json.find("model-policy-file-marker")!=std::string::npos&&store.operations("mistral-read-run").get().empty(),"Mistral tool request must call the real workspace file tool without dispatching effects");
         registry=store.information("native-provider-profiles","registry").get();
         auto malformed=Json::parse(registry);for(auto& p:malformed["profiles"])if(p["id"]=="responses")p["model"]="gpt-image-1";
         store.put_information("native-provider-profiles","registry",malformed.dump()).get();
@@ -103,10 +116,11 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         rejects<DatabaseError>([&]{ProviderProfileRuntime invalid(store,base,allowed,1,8);});
         require(store.information("native-provider-profiles","registry").get()==original&&store.credentials("fixture").get().size()==count,"Invalid stored inactive model must fail closed without changing keys or registry");
         store.put_information("native-provider-profiles","registry",registry).get();
-        ProviderProfileRuntime reopened(store,base,allowed,1,8);require(reopened.available()&&reopened.configuration().revision==4,"Valid stored profiles must reopen without publication");
+        ProviderProfileRuntime reopened(store,base,allowed,1,8);require(reopened.available()&&reopened.configuration().revision==5,"Valid stored profiles must reopen without publication");
         const auto current=store.history("read").get();require(current.size()==history.size(),"Restart changed conversation size");for(std::size_t i=0;i<history.size();++i)require(current[i].json==history[i].json,"Restart changed original native tool/model history");
-        require(reopened.discover_models("responses","openai.responses",key(""),4)==std::vector<std::string>{"gpt-4.1","gpt-6-astra","gpt-6-sol","gpt-6.1-sol"},"Reopened saved-key Responses discovery must retain exact route capabilities");
-        require(reopened.discover_models("xai","xai.responses",key(""),4)==std::vector<std::string>{"grok-4.7"},"Reopened saved-key xAI discovery must retain the native Grok model policy");
+        require(reopened.discover_models("responses","openai.responses",key(""),5)==std::vector<std::string>{"gpt-4.1","gpt-6-astra","gpt-6-sol","gpt-6.1-sol"},"Reopened saved-key Responses discovery must retain exact route capabilities");
+        require(reopened.discover_models("xai","xai.responses",key(""),5)==std::vector<std::string>{"grok-4.7"},"Reopened saved-key xAI discovery must retain the native Grok model policy");
+        require(reopened.discover_models("mistral","mistral.chat",key(""),5)==std::vector<std::string>{"codestral-latest","mistral-large-latest"},"Reopened saved-key Mistral discovery must retain exact native tool models");
     }
     {
         PersistenceService store((root/"plain.sqlite").string(),imports);ProviderProfileRuntime plain(store,AgentSettings{},allowed,1,8);

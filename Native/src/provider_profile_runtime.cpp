@@ -61,7 +61,7 @@ void validate_execution(const ProviderProfileExecutionPolicy& policy,const Agent
     validate_model(policy.route,model,allow_empty);
     if(policy.model_capabilities&&!(allow_empty&&model.empty()))
         (void)bind_provider_model_policy(*policy.model_capabilities,policy.provider,model_identity(policy.route,model),base.workspace.has_value());
-    if((policy.route.wire==ProviderWire::gemini_generate_content||policy.provider.chat_dialect==ChatDialect::deepseek)&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
+    if((policy.route.wire==ProviderWire::gemini_generate_content||policy.provider.chat_dialect==ChatDialect::deepseek||policy.provider.chat_dialect==ChatDialect::mistral)&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
         throw std::invalid_argument("Workspace agent requires declared model tool capability");
 }
 void validate_public_identity(const std::string& id,const std::string& model,const SecretBytes& secret){
@@ -76,8 +76,8 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");
-        if((value.provider.chat_dialect!=ChatDialect::openai&&value.provider.chat_dialect!=ChatDialect::deepseek)||
-            (value.provider.chat_dialect==ChatDialect::deepseek&&value.route.wire!=ProviderWire::chat_completions))
+        if((value.provider.chat_dialect!=ChatDialect::openai&&value.provider.chat_dialect!=ChatDialect::deepseek&&value.provider.chat_dialect!=ChatDialect::mistral)||
+            ((value.provider.chat_dialect==ChatDialect::deepseek||value.provider.chat_dialect==ChatDialect::mistral)&&value.route.wire!=ProviderWire::chat_completions))
             throw std::invalid_argument("Provider chat dialect differs from profile route wire");
         if(value.catalogue&&value.catalogue->format!=format)
             throw std::invalid_argument("Provider catalogue policy differs from route wire");
@@ -246,7 +246,7 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
         const auto& allowed=impl_->route(route_id);
         if(allowed.model_capabilities)
             std::erase_if(result,[&](const auto& model){try{validate_execution(allowed,impl_->base,model);return false;}catch(const std::invalid_argument&){return true;}});
-        if(impl_->base.workspace&&(allowed.route.wire==ProviderWire::gemini_generate_content||allowed.provider.chat_dialect==ChatDialect::deepseek))
+        if(impl_->base.workspace&&(allowed.route.wire==ProviderWire::gemini_generate_content||allowed.provider.chat_dialect==ChatDialect::deepseek||allowed.provider.chat_dialect==ChatDialect::mistral))
             std::erase_if(result,[&](const auto& model){return model_tools(allowed,model)!=Capability::supported;});
     }
     return result;

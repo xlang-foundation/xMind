@@ -15,6 +15,17 @@ template<class Function> void rejects(Function action) {
 }
 int main() {
     try {
+        const auto mistral_policy=documented_mistral_model_policy();validate_provider_model_policy(mistral_policy);
+        require(mistral_policy.models.size()==13&&mistral_policy.models.contains("devstral-latest"),"Mistral policy must declare the documented function-capable models only");
+        ChatProviderConfig mistral;mistral.endpoint="https://api.mistral.ai/v1/chat/completions";mistral.wire=ProviderWire::chat_completions;mistral.chat_dialect=ChatDialect::mistral;
+        const auto mistral_bound=bind_provider_model_policy(mistral_policy,mistral,"mistral-large-latest",true);
+        ModelRequest mistral_probe{{{MessageRole::user,"Synthetic Mistral contract"}},{{"inspect","Synthetic inspection",R"({"type":"object"})"}}};
+        mistral_probe.include_usage=true;mistral_probe.max_output_tokens=64;
+        const auto mistral_payload=Json::parse(serialize_mistral_request(mistral_bound,mistral_probe));
+        require(mistral_payload.at("model")=="mistral-large-latest"&&mistral_payload.at("max_tokens")==64&&!mistral_payload.contains("max_completion_tokens"),"Mistral output limits must use its native max_tokens field");
+        require(mistral_payload.at("stream_options").at("include_usage")==true&&mistral_payload.at("tools").size()==1,"Mistral streaming usage and function tools must survive native serialization");
+        rejects([&]{bind_provider_model_policy(mistral_policy,mistral,"mistral-future-model",true);});
+        auto mistral_wrong=mistral;mistral_wrong.wire=ProviderWire::responses;rejects([&]{serialize_mistral_request(mistral_wrong,mistral_probe);});
         for(const auto wire:{ProviderWire::responses,ProviderWire::chat_completions}){
             const auto policy=documented_openai_model_policy(wire);validate_provider_model_policy(policy);
             ChatProviderConfig selected;selected.endpoint="https://fixture.example.invalid/owned";selected.wire=wire;

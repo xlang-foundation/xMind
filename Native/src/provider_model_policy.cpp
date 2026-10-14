@@ -65,6 +65,26 @@ ProviderModelPolicy documented_xai_model_policy(){
     result.models.emplace("grok-4.7",std::move(grok));
     return result;
 }
+ProviderModelPolicy documented_mistral_model_policy(){
+    // Exact aliases documented as function-calling capable, reviewed 2026-10-14.
+    // https://docs.mistral.ai/studio/conversations/function-calling
+    // https://docs.mistral.ai/api
+    // https://docs.mistral.ai/resources/known-limitations
+    constexpr std::array models{
+        "mistral-large-latest","mistral-medium-latest","mistral-small-latest",
+        "devstral-latest","devstral-small-latest","magistral-medium-latest",
+        "magistral-small-latest","voxtral-small-latest","codestral-latest",
+        "labs-mistral-small-creative","ministral-14b-latest","ministral-8b-latest",
+        "ministral-3b-latest"
+    };
+    ProviderModelPolicy result;result.wire=ProviderWire::chat_completions;
+    for(const auto* id:models){
+        NativeModelCapabilities value;value.tools=Capability::supported;
+        value.stream_usage=Capability::supported;value.output_limit=Capability::supported;
+        result.models.emplace(id,std::move(value));
+    }
+    return result;
+}
 void validate_provider_model_policy(const ProviderModelPolicy& policy){
     if(policy.wire!=ProviderWire::chat_completions&&policy.wire!=ProviderWire::responses&&policy.wire!=ProviderWire::anthropic_messages&&policy.wire!=ProviderWire::gemini_generate_content)
         throw std::invalid_argument("Invalid native model policy wire");

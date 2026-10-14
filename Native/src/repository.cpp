@@ -86,9 +86,9 @@ Json budget_provider_identity(const RootBudgetSpec& spec){
         throw std::invalid_argument("Invalid native execution budget policy");
     const auto identity=Json::parse(object_json(spec.provider_identity_json));
     if(identity.size()==6){(void)provider_context(identity);return identity;}
-    const bool deepseek=identity.size()==3&&identity.contains("chat_dialect");
-    if((identity.size()!=2&&!deepseek) || !identity.contains("wire") || !identity["wire"].is_string() || !identity.contains("model_id") || !identity["model_id"].is_string())throw std::invalid_argument("Invalid public execution provider identity");
-    if(deepseek&&(!identity["chat_dialect"].is_string()||identity["chat_dialect"]!="deepseek"||identity["wire"]!="chat-completions"))throw std::invalid_argument("Invalid public execution chat dialect");
+    const bool dialect=identity.size()==3&&identity.contains("chat_dialect");
+    if((identity.size()!=2&&!dialect) || !identity.contains("wire") || !identity["wire"].is_string() || !identity.contains("model_id") || !identity["model_id"].is_string())throw std::invalid_argument("Invalid public execution provider identity");
+    if(dialect&&(!identity["chat_dialect"].is_string()||(identity["chat_dialect"]!="deepseek"&&identity["chat_dialect"]!="mistral")||identity["wire"]!="chat-completions"))throw std::invalid_argument("Invalid public execution chat dialect");
     const auto model=identity.at("model_id").get<std::string>();if(model.empty()||model.size()>256||model.starts_with("sk-")||model.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid execution model identity");
     const auto wire=identity.at("wire").get<std::string>();if(wire!="chat-completions"&&wire!="responses"&&wire!="anthropic-messages"&&wire!="gemini-generate-content")throw std::invalid_argument("Invalid execution provider wire");
     return identity;

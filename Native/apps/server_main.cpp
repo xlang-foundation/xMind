@@ -361,6 +361,8 @@ int run_server(int argc,char** argv) {
             add("deepseek.chat","deepseek","https://api.deepseek.com/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.deepseek.com/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::deepseek);
             add("xai.responses","xai","https://api.x.ai/v1/responses",agentflow::ProviderWire::responses,"https://api.x.ai/v1/models",agentflow::ProviderCatalogueFormat::openai);
             policies.back().model_capabilities=agentflow::documented_xai_model_policy();
+            add("mistral.chat","mistral","https://api.mistral.ai/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.mistral.ai/v1/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::mistral);
+            policies.back().model_capabilities=agentflow::documented_mistral_model_policy();
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
             if(!bootstrap&&!legacy)configurable->import_legacy_configuration();
             if(options.contains("--provider-config")){

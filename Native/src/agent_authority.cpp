@@ -156,6 +156,9 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
     if(settings.provider.chat_dialect==ChatDialect::deepseek){
         if(settings.provider.wire!=ProviderWire::chat_completions)throw std::invalid_argument("DeepSeek dialect requires its chat wire");
         encoded["provider"]["chat_dialect"]="deepseek";
+    }else if(settings.provider.chat_dialect==ChatDialect::mistral){
+        if(settings.provider.wire!=ProviderWire::chat_completions)throw std::invalid_argument("Mistral dialect requires its chat wire");
+        encoded["provider"]["chat_dialect"]="mistral";
     }else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     encoded["provider_identity"]=settings.provider_identity?Json{{"id",settings.provider_identity->profile_id},
         {"route",settings.provider_identity->route_id},{"provider",settings.provider_identity->provider},

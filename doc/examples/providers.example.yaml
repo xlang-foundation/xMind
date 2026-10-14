@@ -19,3 +19,6 @@ profiles:
   xai:
     route: xai.responses
     api_key: ""
+  mistral:
+    route: mistral.chat
+    api_key: ""

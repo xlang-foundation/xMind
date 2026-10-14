@@ -169,7 +169,7 @@ struct ChatCompletionStream::Impl {
     bool skip_lf=false,first_line=true,has_data=false,done=false,finished=false,failed=false;
     explicit Impl(Sink callback,ChatDialect selected,std::string expected):sink(std::move(callback)),dialect(selected),expected_model(std::move(expected)) {
         if(!sink) throw std::invalid_argument("Model event sink is required");
-        if(dialect!=ChatDialect::openai&&dialect!=ChatDialect::deepseek)throw std::invalid_argument("Invalid chat dialect");
+        if(dialect!=ChatDialect::openai&&dialect!=ChatDialect::deepseek&&dialect!=ChatDialect::mistral)throw std::invalid_argument("Invalid chat dialect");
         if(dialect==ChatDialect::deepseek&&(expected_model.empty()||expected_model.size()>512||expected_model.find('\0')!=std::string::npos))
             throw std::invalid_argument("DeepSeek stream requires an exact model binding");
     }

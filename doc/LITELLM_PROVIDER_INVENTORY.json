@@ -20,8 +20,8 @@
     "fireworks-ai-up-to-4b"
   ],
   "nativeCoverage": {
-    "partialProviderGroups": 4,
-    "unmappedProviderGroups": 132,
+    "partialProviderGroups": 5,
+    "unmappedProviderGroups": 131,
     "verifiedProviderParity": 0,
     "caveat": "Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified."
   },
@@ -138,12 +138,12 @@
           {
             "path": "Native/src/anthropic_request.cpp",
             "anchor": "serialize_anthropic_request",
-            "sha256": "d2351a9921cdb09b18e7f49144504a5c8eb5af1d3ee9209cad97f8b1edf40353"
+            "sha256": "1055bb7e3b7236c0725874ac1f27c80147b6550b6c8812a9d275afc81390e449"
           },
           {
             "path": "Native/src/anthropic_stream.cpp",
             "anchor": "AnthropicStream::feed",
-            "sha256": "4a3e7eba8dcd57bf6243a2e17f28fa1cb6baaed13ad9e4f7f5f2d40cc9ecf828"
+            "sha256": "4f875c229609ca924a3a821de8efdc1896eb5eae15813f2f9785e65bb72713ee"
           },
           {
             "path": "Native/src/anthropic_history.cpp",
@@ -153,12 +153,12 @@
           {
             "path": "Native/src/chat_provider.cpp",
             "anchor": "ProviderWire::anthropic_messages",
-            "sha256": "28c4dc3991ec1afc4f2e90328d1c95442f71f187f1fe9e394dd0b3960b53242b"
+            "sha256": "d251eae3905920cb6aa1d3eeb53d52daded004934f31a26e983ab257c86e2324"
           },
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "e90be8ed78f9cae5040be48a3c9416893d11a0dcef3d5435acacd15f7f6f6766"
+            "sha256": "6cc1e5b1b0caab2c491f0621e9a084fd6bf70f071f93ad986b6a50048c5c7710"
           }
         ],
         "artifacts": [
@@ -947,12 +947,12 @@
           {
             "path": "Native/src/gemini_history.cpp",
             "anchor": "gemini_model_request",
-            "sha256": "8c3ade72eec983a3e917928e350e8cfd0237047733e42aeba4958b84f4f8820a"
+            "sha256": "72e11a6355c6e76a858bcf4d1b477ab9683eefa2b8e3ad955ec00ec0a9cb7e9f"
           },
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "e90be8ed78f9cae5040be48a3c9416893d11a0dcef3d5435acacd15f7f6f6766"
+            "sha256": "6cc1e5b1b0caab2c491f0621e9a084fd6bf70f071f93ad986b6a50048c5c7710"
           },
           {
             "path": "Native/src/provider_catalogue.cpp",
@@ -962,7 +962,7 @@
           {
             "path": "Native/src/provider_profile_runtime.cpp",
             "anchor": "validate_execution",
-            "sha256": "3fbd97e7cbf8a177ecb5b8e76d6e450fc3091dd5d20b85d81fbbc6206bde0897"
+            "sha256": "004c38bbffab5bf1a712ce0da716c3f1b904b8df7fe173bab37f0bf9a95902b7"
           }
         ],
         "artifacts": [
@@ -1336,7 +1336,39 @@
       },
       "agentflowStatus": "unverified",
       "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
-      "nativeStatus": "unmapped"
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/apps/server_main.cpp",
+            "anchor": "add(\"mistral.chat\"",
+            "sha256": "971937d265023fe6b1a990c1e6a04a18bbf49ffb3ed36ae74e7d98a206328a07"
+          },
+          {
+            "path": "Native/src/provider_model_policy.cpp",
+            "anchor": "ProviderModelPolicy documented_mistral_model_policy",
+            "sha256": "85586bb8f843eff554ce21f7b7eba12fb5338ba0a823cf87e4cf78ec3a152b19"
+          },
+          {
+            "path": "Native/src/model_request.cpp",
+            "anchor": "serialize_mistral_request",
+            "sha256": "7adabf39c9662377d4b21630dedc3bb3c59b77e8226737c284ddcf8fb9400dc8"
+          },
+          {
+            "path": "Native/tests/provider_model_policy_runtime_contract.cpp",
+            "anchor": "Native Mistral model policy read",
+            "sha256": "7efe376ddb0b46d7cefa5521337e5612f8c76059be1d61c0fd74ac37ab58a8fe"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/native-mistral-local.json",
+            "sha256": "d639cea5e8bbacc3cf4eba1787db0423eecb93fdc86f75cedc8cc2b8a853d5a4"
+          }
+        ],
+        "scope": "Native Mistral Chat Completions route and exact function-calling model policy passed focused C++ request/runtime contracts. A synthetic catalogue verifies model filtering; a synthetic SSE peer exercises a native AgentRunner workspace read, usage-bearing continuation, credential encryption and xlang3 SQLite reopen. No live Mistral key or provider request was used.",
+        "gaps": "The documented function-capable aliases are not individually accepted on live Mistral accounts. Native request/reasoning, structured output, media, caching, error/timeout/cancellation and full Mistral provider-group parity remain unverified or incomplete."
+      }
     },
     {
       "provider": "moonshot",
@@ -1536,7 +1568,7 @@
           {
             "path": "Native/src/model_request.cpp",
             "anchor": "serialize_chat_request",
-            "sha256": "cf31c8e668534b0cf5f49872021b8116d42cbc64b78b65b431183e90e5d7125d"
+            "sha256": "7adabf39c9662377d4b21630dedc3bb3c59b77e8226737c284ddcf8fb9400dc8"
           },
           {
             "path": "Native/src/responses_request.cpp",
@@ -1551,12 +1583,12 @@
           {
             "path": "Native/src/chat_provider.cpp",
             "anchor": "complete_model",
-            "sha256": "28c4dc3991ec1afc4f2e90328d1c95442f71f187f1fe9e394dd0b3960b53242b"
+            "sha256": "d251eae3905920cb6aa1d3eeb53d52daded004934f31a26e983ab257c86e2324"
           },
           {
             "path": "Native/src/provider_setup.cpp",
             "anchor": "ProviderRuntime::configuration",
-            "sha256": "6fa1d2d0b50725deaf15d05dcce73490797c7955328f36a41873a74c619cc9ae"
+            "sha256": "d6dcd1634601ccd17c3b0ab579d6eca4b76d28ac1226f50e878c14a2099b2f33"
           }
         ],
         "artifacts": [
@@ -2548,12 +2580,12 @@
           {
             "path": "Native/apps/server_main.cpp",
             "anchor": "add(\"xai.responses\"",
-            "sha256": "a59f501f043c2b7886cfa28b04cbac88f65e01344c7bcb5a9009fbaea6a6d189"
+            "sha256": "971937d265023fe6b1a990c1e6a04a18bbf49ffb3ed36ae74e7d98a206328a07"
           },
           {
             "path": "Native/src/provider_model_policy.cpp",
             "anchor": "ProviderModelPolicy documented_xai_model_policy",
-            "sha256": "f130c58dad12081721b7fffc90a5dd2a540883897f885c6bbcc7e52aa8d124b1"
+            "sha256": "85586bb8f843eff554ce21f7b7eba12fb5338ba0a823cf87e4cf78ec3a152b19"
           },
           {
             "path": "Native/src/responses_request.cpp",
@@ -2568,7 +2600,7 @@
           {
             "path": "Native/src/provider_profile_runtime.cpp",
             "anchor": "model_capabilities",
-            "sha256": "3fbd97e7cbf8a177ecb5b8e76d6e450fc3091dd5d20b85d81fbbc6206bde0897"
+            "sha256": "004c38bbffab5bf1a712ce0da716c3f1b904b8df7fe173bab37f0bf9a95902b7"
           }
         ],
         "artifacts": [

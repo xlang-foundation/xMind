@@ -1,0 +1,32 @@
+{
+  "baseRevision": "32c7c8e",
+  "sourceState": "Local working-tree Mistral native route candidate; selected source and compiled binary hashes are recorded below.",
+  "nativeContractsPassed": 2,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "sourceSha256": {
+    "Native/apps/server_main.cpp": "e0dc3f3fa9ac4f5aac3a4f7f0047437cee0d76ab93823ae4a8b02fd4f7c57db3",
+    "Native/src/model_request.cpp": "44d201bc5d782563f56a113a80145aec54305118d4fb20ce807d4c314c8f4b75",
+    "Native/src/provider_model_policy.cpp": "325709085332d2a29ad1b49acf725188dc54d7e2f4bea088e4d5f3eb75bdd02b",
+    "Native/tests/provider_model_policy_runtime_contract.cpp": "04268380158cb79b251ef2c49f45d9dce83f66bd04a887e8d58e1a3c92a33b85",
+    "Native/tests/provider_model_policy_runtime_peer.mjs": "4c75464cfafee2e4a6a51f68d96404654a4c118c214c73537e5fffa6a3b14900"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "c6f97b1208ae05606607a10fc9261bdd2cd47be0c3040f95654667985bacb58a",
+    "agentflow_provider_model_policy_runtime_contract.exe": "3c5e13fcf68da8b24e3138ddeca713de75e10b4467a4c74f7649a00751e5fb42"
+  },
+  "logSha256": {
+    "native-mistral-local-ctest.log": "08eb0e97bc5fe672c339d6cd3a3bfa53180db5d22cff9f6c7092e7dca782ad5e"
+  },
+  "testCommands": [
+    "ctest --test-dir build/native -C Release --output-on-failure -R ^(model_request_contract|native_provider_model_policy_runtime_contract)$"
+  ],
+  "verifiedNewCases": [
+    "Native Mistral Chat Completions route registration and exact 13-model function-calling policy",
+    "Mistral request serialization uses max_tokens and stream_options.include_usage",
+    "Synthetic account catalogue filters unknown models before profile admission",
+    "Native AgentRunner streams a Mistral tool call, reads the actual workspace file and resumes with token usage",
+    "Encrypted synthetic provider credentials and Mistral profile state survive xlang3 SQLite close/reopen"
+  ],
+  "scope": "The two focused native CTest contracts passed (2/2, zero failures/skips). Provider sockets and credentials are synthetic. This does not establish a live Mistral account request, rendered browser/VS Code acceptance, or complete Mistral/LiteLLM model-family parity."
+}

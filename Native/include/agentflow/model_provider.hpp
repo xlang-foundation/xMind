@@ -54,6 +54,8 @@ struct ChatProviderConfig {
 ModelRequest project_provider_history(const ChatProviderConfig& target,const ModelRequest& request);
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);
+// Mistral uses the Chat Completions shape with its documented max_tokens field.
+std::string serialize_mistral_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Common field/correlation validation for the bounded Responses input window.
 // Returns the common field representation, not a transport request.
 std::string serialize_responses_request_fields(const ChatProviderConfig& config,const ModelRequest& request);

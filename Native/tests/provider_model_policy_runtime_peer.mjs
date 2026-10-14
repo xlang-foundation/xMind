@@ -10,7 +10,7 @@ const [binary,modules,stdlib]=process.argv.slice(2);assert.ok(binary&&modules&&s
 const root=await mkdtemp(join(tmpdir(),'xmind-native-model-policy-')),workspace=join(root,'workspace');
 await mkdir(workspace);await writeFile(join(workspace,'marker.txt'),'model-policy-file-marker\n',{flag:'wx'});
 const key='synthetic-native-model-policy-key',rejectedKey='synthetic-rejected-model-policy-key';
-const calls=[];let failure,passed=false,nativeFailure,turn=0,xaiTurn=0;
+const calls=[];let failure,passed=false,nativeFailure,turn=0,xaiTurn=0,mistralTurn=0;
 function matchingPaths(value,needle,path='$',out=[]){if(typeof value==='string'){if(value.includes(needle))out.push(path);}else if(Array.isArray(value))value.forEach((item,index)=>matchingPaths(item,needle,`${path}[${index}]`,out));else if(value&&typeof value==='object')for(const [key,item] of Object.entries(value))matchingPaths(item,needle,`${path}.${key}`,out);return out;}
 const peer=createServer((req,res)=>{
   const chunks=[];let size=0;req.on('error',()=>{});res.on('error',()=>{});
@@ -22,7 +22,8 @@ const peer=createServer((req,res)=>{
       assert.equal(source,'');
       res.writeHead(200,{'Content-Type':'application/json'});
       if(req.url==='/models')res.end(JSON.stringify({object:'list',data:['gpt-image-1','gpt-6.1-sol','gpt-6-sol','gpt-6-astra','gpt-6.2-future','gpt-4.1','text-embedding-3-small'].map(id=>({object:'model',id}))}));
-      else {assert.equal(req.url,'/xai/models');res.end(JSON.stringify({object:'list',data:['grok-4.7','grok-4.6','grok-future','grok-imagine-image-2.0'].map(id=>({object:'model',id}))}));}return;
+      else if(req.url==='/xai/models')res.end(JSON.stringify({object:'list',data:['grok-4.7','grok-4.6','grok-future','grok-imagine-image-2.0'].map(id=>({object:'model',id}))}));
+      else {assert.equal(req.url,'/mistral/models');res.end(JSON.stringify({object:'list',data:['mistral-large-latest','codestral-latest','mistral-next-future'].map(id=>({object:'model',id}))}));}return;
     }
     if(req.url==='/xai/responses'){
       const body=JSON.parse(source);assert.equal(req.method,'POST');assert.equal(req.headers.accept,'text/event-stream');assert.equal(body.model,'grok-4.7');assert.equal(body.stream,true);assert.equal(body.store,false);assert.equal(body.max_output_tokens,64);assert.ok(body.tools.some(tool=>tool.type==='function'&&tool.name==='read_file'));
@@ -32,19 +33,22 @@ const peer=createServer((req,res)=>{
       assert.equal(xaiTurn,2);const output=body.input.findLast(item=>item.type==='function_call_output');assert.equal(output.call_id,'xai_read_1');assert.ok(output.output.includes('model-policy-file-marker'));
       const item={id:'xai_msg_2',type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Synthetic xAI native model policy read completed.',annotations:[]}]};send('response.output_item.added',{output_index:0,item:{id:item.id,type:'message',status:'in_progress',role:'assistant',content:[]}});send('response.content_part.added',{output_index:0,item_id:item.id,content_index:0,part:{type:'output_text',text:''}});send('response.output_text.delta',{output_index:0,item_id:item.id,content_index:0,delta:item.content[0].text});send('response.output_text.done',{output_index:0,item_id:item.id,content_index:0,text:item.content[0].text});send('response.content_part.done',{output_index:0,item_id:item.id,content_index:0,part:item.content[0]});send('response.output_item.done',{output_index:0,item});send('response.completed',{response:{id,model:body.model,status:'completed',output:[item],usage:{input_tokens:42,output_tokens:9,total_tokens:51}}});res.end();return;
     }
-    assert.equal(req.method,'POST');assert.equal(req.url,'/chat');assert.equal(req.headers.accept,'text/event-stream');
-    const body=JSON.parse(source);assert.equal(body.model,'gpt-6-sol');assert.equal(body.reasoning_effort,'none');assert.equal(body.stream,true);assert.equal(body.max_completion_tokens,64);assert.deepEqual(body.stream_options,{include_usage:true});
+    assert.equal(req.method,'POST');assert.ok(req.url==='/chat'||req.url==='/mistral/chat');assert.equal(req.headers.accept,'text/event-stream');
+    const body=JSON.parse(source),mistral=req.url==='/mistral/chat';assert.equal(body.model,mistral?'mistral-large-latest':'gpt-6-sol');assert.equal(body.stream,true);assert.deepEqual(body.stream_options,{include_usage:true});
+    if(mistral){assert.equal(body.max_tokens,64);assert.equal(Object.hasOwn(body,'max_completion_tokens'),false);}
+    else{assert.equal(body.reasoning_effort,'none');assert.equal(body.max_completion_tokens,64);}
     assert.ok(body.tools.some(tool=>tool.function.name==='read_file'));assert.equal(Object.hasOwn(body,'reasoning'),false);
     const chunk=(delta,finish=null,usage=null)=>'data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}],usage})+'\n\n';
     res.writeHead(200,{'Content-Type':'text/event-stream'});
     let stream;
-    if(++turn===1){
-      assert.equal(body.messages.length,2);assert.equal(body.messages[1].content,'Read marker.txt using the actual native tool.');assert.ok(!source.includes('model-policy-file-marker'));
-      stream=chunk({role:'assistant',tool_calls:[{index:0,id:'policy-read',type:'function',function:{name:'read_file',arguments:'{"path":"marker.txt"}'}}]})+chunk({},'tool_calls',{prompt_tokens:17,completion_tokens:4,total_tokens:21});
+    const next=mistral?++mistralTurn:++turn,callId=mistral?'mistral-policy-read':'policy-read';
+    if(next===1){
+      assert.equal(body.messages.length,2);assert.equal(body.messages[1].content,mistral?'Read marker.txt using Mistral through its native chat route.':'Read marker.txt using the actual native tool.');assert.ok(!source.includes('model-policy-file-marker'));
+      stream=chunk({role:'assistant',tool_calls:[{index:0,id:callId,type:'function',function:{name:'read_file',arguments:'{"path":"marker.txt"}'}}]})+chunk({},'tool_calls',{prompt_tokens:17,completion_tokens:4,total_tokens:21});
     }else{
-      assert.equal(turn,2);assert.equal(body.messages.length,4);assert.equal(body.messages[2].tool_calls[0].id,'policy-read');
-      assert.equal(body.messages[3].role,'tool');assert.equal(body.messages[3].tool_call_id,'policy-read');assert.ok(body.messages[3].content.includes('model-policy-file-marker'));
-      stream=chunk({role:'assistant',content:'Synthetic native model policy read completed.'})+chunk({},'stop',{prompt_tokens:27,completion_tokens:8,total_tokens:35});
+      assert.equal(next,2);assert.equal(body.messages.length,4);assert.equal(body.messages[2].tool_calls[0].id,callId);
+      assert.equal(body.messages[3].role,'tool');assert.equal(body.messages[3].tool_call_id,callId);assert.ok(body.messages[3].content.includes('model-policy-file-marker'));
+      stream=chunk({role:'assistant',content:mistral?'Synthetic native Mistral model policy read completed.':'Synthetic native model policy read completed.'})+chunk({},'stop',{prompt_tokens:27,completion_tokens:8,total_tokens:35});
     }
     const wire=Buffer.from(stream+'data: [DONE]\n\n');for(let offset=0;offset<wire.length;offset+=7)res.write(wire.subarray(offset,offset+7));res.end();
   }catch(error){failure??=error;if(!res.headersSent)res.writeHead(500);res.end('Synthetic native model policy oracle failed');}});
@@ -54,7 +58,7 @@ try{
   const env={};for(const name of ['SystemRoot','WINDIR','PATH','TEMP','TMP','ComSpec','PATHEXT','USERPROFILE','LOCALAPPDATA'])if(process.env[name])env[name]=process.env[name];
   let result;try{result=await promisify(execFile)(binary,[root,modules,stdlib,workspace,`http://127.0.0.1:${peer.address().port}`],{windowsHide:true,timeout:45000,maxBuffer:1024*1024,env});}catch(error){nativeFailure=error;throw error;}
   if(failure)throw failure;
-  const expectedCalls=[{method:'GET',path:'/models'},{method:'GET',path:'/models'},{method:'GET',path:'/xai/models'},{method:'GET',path:'/models'},{method:'POST',path:'/chat'},{method:'POST',path:'/chat'},{method:'POST',path:'/xai/responses'},{method:'POST',path:'/xai/responses'},{method:'GET',path:'/models'},{method:'GET',path:'/xai/models'}];
+  const expectedCalls=[{method:'GET',path:'/models'},{method:'GET',path:'/models'},{method:'GET',path:'/xai/models'},{method:'GET',path:'/mistral/models'},{method:'GET',path:'/models'},{method:'POST',path:'/chat'},{method:'POST',path:'/chat'},{method:'POST',path:'/xai/responses'},{method:'POST',path:'/xai/responses'},{method:'POST',path:'/mistral/chat'},{method:'POST',path:'/mistral/chat'},{method:'GET',path:'/models'},{method:'GET',path:'/xai/models'},{method:'GET',path:'/mistral/models'}];
   assert.equal(JSON.stringify(calls),JSON.stringify(expectedCalls),`Exact socket oracle forbids rejected-model requests, retries, route changes or restart replay; actual calls ${JSON.stringify(calls)}`);
   for(const file of await readdir(root))if(/\.sqlite(?:-wal|-shm)?$/.test(file)){
     const bytes=await readFile(join(root,file));for(const secret of [key,rejectedKey])assert.equal(bytes.includes(Buffer.from(secret)),false,'SQLite must retain encrypted credentials only');

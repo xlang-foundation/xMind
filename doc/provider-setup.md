@@ -15,6 +15,14 @@ Responses peer, including model discovery, a streamed `read_file` call, actual
 workspace access and xlang3 SQLite reopen. No xAI account, API key or live
 inference was used, and the 58 pinned xAI entries are not individually accepted.
 
+`mistral.chat` uses Mistral's native Chat Completions endpoint with its
+`max_tokens` output-limit field and streaming usage opt-in. Account discovery is
+filtered to exact function-calling model aliases listed in Mistral's current
+[function-calling guide](https://docs.mistral.ai/studio/conversations/function-calling).
+The C++ provider-policy contract exercises discovery, profile persistence,
+usage-bearing SSE, the native tool loop and a real workspace read against a
+synthetic peer. It does not claim live account or per-model acceptance.
+
 ## Local YAML configuration and native profile integration
 
 The new source accepts a trusted local `--provider-config FILE` using native
