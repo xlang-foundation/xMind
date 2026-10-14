@@ -1,6 +1,7 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/backend_lease.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "graph_schema_fixture.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -76,6 +77,7 @@ int main(int argc,char** argv) {
         }
         {
             XlangSqlite legacy(migration_path,roots);
+            remove_dynamic_plan_owner_scope_fixture(legacy);
             legacy.execute("DROP INDEX session_inbox_order");legacy.execute("ALTER TABLE session_inbox RENAME TO session_inbox_v20");
             legacy.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL)))");
             legacy.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms,run_id) SELECT id,session_id,content,state,created_ms,run_id FROM session_inbox_v20");

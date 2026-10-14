@@ -64,6 +64,7 @@ public:
     DynamicPlanCapabilities finalize_dynamic_capabilities(const std::string& root,const std::string& backend_identity,const std::string& catalogue_json,const std::vector<DynamicPresetCapability>& presets);
     DynamicPlanRecord dynamic_plan(const std::string& plan);
     std::optional<DynamicPlanRecord> dynamic_plan_for_root(const std::string& root);
+    std::optional<DynamicPlanRecord> dynamic_plan_for_owner(const std::string& owner);
     DynamicPlanCallRecord dynamic_plan_call(const std::string& call);
     // Backend-only call records contain exact private provider receipts.
     // HTTP/CLI observation must project a fixed public field whitelist.

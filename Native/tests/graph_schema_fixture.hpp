@@ -6,9 +6,23 @@
 // Only initial EMPTY skill and agent selections can be removed from these
 // disposable legacy fixtures. Activated or later-revised guidance must never
 // be discarded.
+inline void remove_dynamic_plan_owner_scope_fixture(agentflow::XlangSqlite& database){
+    const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
+    if(scalar("PRAGMA user_version")<24)return;
+    const auto owners=scalar("SELECT count(*) FROM dynamic_plan_owners");
+    const auto root_owners=scalar("SELECT count(*) FROM dynamic_plan_owners WHERE owner_run_id=root_run_id AND parent_plan_id IS NULL AND parent_node_label IS NULL AND depth=0");
+    if(owners!=root_owners)throw std::runtime_error("Legacy fixture cannot discard nested dynamic plan ownership");
+    database.execute("DROP TRIGGER dynamic_plan_owner_admission");
+    database.execute("DROP TRIGGER dynamic_plan_owner_identity");
+    database.execute("DROP TRIGGER retain_dynamic_plan_owners");
+    database.execute("DROP INDEX dynamic_plan_owner_root_order");
+    database.execute("DROP TABLE dynamic_plan_owners");
+    database.execute("PRAGMA user_version=23");
+}
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     auto version=scalar("PRAGMA user_version");if(version==12)return;
+    remove_dynamic_plan_owner_scope_fixture(database);version=scalar("PRAGMA user_version");
     if(version>=21){if(scalar("SELECT count(*) FROM session_models")!=0)throw std::runtime_error("Legacy fixture cannot discard actual session model selection");database.execute("DROP TABLE session_models");database.execute("PRAGMA user_version=20");version=20;}
     if(version==20){if(scalar("SELECT count(*) FROM session_inbox")!=0)throw std::runtime_error("Legacy fixture cannot discard actual session inbox state");database.execute("DROP INDEX session_inbox_order");database.execute("DROP TABLE session_inbox");database.execute("PRAGMA user_version=18");version=18;}
     if(version==18){if(scalar("SELECT count(*) FROM a2a_continuation_messages")!=0)throw std::runtime_error("Legacy fixture cannot discard actual A2A continuation history");database.execute("DROP TABLE a2a_continuation_messages");database.execute("PRAGMA user_version=17");version=17;}

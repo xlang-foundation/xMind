@@ -1,9 +1,9 @@
 # Nested dynamic planning contract
 
 Status: **not implemented**. This contract is based on the current native
-schema and execution paths. It defines the ownership changes required before
-dynamic child agents may receive planning tools. It does not claim recursive
-planning support.
+schema and execution paths. Schema v24 now records immutable plan ownership
+and backfills existing plans to their ordinary Agent roots; the runtime still
+does not admit nested plans or give dynamic child agents planning tools.
 
 ## Current boundary
 
@@ -80,13 +80,14 @@ inspectable; it cannot be converted into an ordinary tool error.
 
 ## Implementation and acceptance sequence
 
-1. Add an additive SQLite migration for `owner_run_id`, parent-plan/node
-   linkage, owner-scoped pending/idempotency constraints and owner-bound
-   signed-call triggers. Backfill every existing plan to
-   `owner_run_id = root_run_id`; reopen and integrity-check databases at the
-   previous schema version.
-2. Extend the repository and persistence service with owner-scoped plan lookup
-   and admission. Test forged owner, sibling owner, mismatched root, stale
+1. **Implemented in schema v24:** add an immutable SQLite plan-owner relation
+   with `owner_run_id`, parent-plan/node linkage and depth. Backfill every
+   existing plan to `owner_run_id = root_run_id`; reopen and integrity-check
+   populated v23 databases. Nested owner admission and owner-scoped pending
+   call constraints remain unimplemented.
+2. **Partially implemented:** repository and persistence service expose
+   owner-scoped plan lookup. Add nested admission and test forged owner,
+   sibling owner, mismatched root, stale
    admission, duplicate calls and a second root budget.
 3. Admit a nested plan only from a claimed coding-agent child. Route its tools
    through the same executor and child pool, preserving root budget ownership

@@ -73,8 +73,9 @@ struct DynamicNodeRecord {
     bool protected_definition=false;
 };
 struct DynamicPlanRecord {
-    std::string id,root_run_id;
+    std::string id,root_run_id,owner_run_id,parent_plan_id,parent_node_label;
     std::int64_t revision=0,state_sequence=0;
+    std::int64_t depth=0;
     std::string state="active";
     DynamicPlanCapabilities capabilities;
     std::vector<DynamicNodeRecord> nodes;

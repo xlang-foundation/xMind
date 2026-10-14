@@ -184,7 +184,34 @@ void migration_contract(const std::string& database,const std::vector<std::strin
     {
         PersistenceService store(database,imports);const auto h=store.history("legacy_session").get();require(h.size()==saved.size()&&h[0].json==saved[0].json&&h[1].json==saved[1].json&&store.information("fixture","preserved").get()==R"({"keep":true})","Actual v10-to-v11 migration preserves full saved history/config");
         const auto b=store.root_budget("legacy_root").get();require(b.spec.policy_id=="native.delegation"&&b.model_calls_reserved==1&&b.parent_model_calls_reserved==1&&b.planned_children_reserved==0&&!store.dynamic_plan_for_root("legacy_root").get(),"Legacy budget must retain actual counters without fictional dynamic backfill");rejects<NotFound>([&]{store.dynamic_capabilities("legacy_root").get();},"Legacy root cannot gain invented planning authority");
-        {XlangSqlite sql(database,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==23,"Successful exact old migration must reach the current schema");}store.close();
+        {XlangSqlite sql(database,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==24,"Successful exact old migration must reach the current schema");}store.close();
+    }
+}
+void owner_scope_migration_contract(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
+    std::string plan_id;
+    {
+        PersistenceService store(database,imports);seed_root(store,"scope_root",policy(workspace));
+        const auto args=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({agent("inspect","Synthetic migration owner scope","workspace.inspect")})}}.dump();
+        const auto call=store.accept_dynamic_plan_change(change_spec(store,"scope_root","scope_origin",args)).get();plan_id=call.plan_id;
+        const auto plan=store.dynamic_plan(plan_id).get();require(plan.owner_run_id=="scope_root"&&plan.root_run_id=="scope_root"&&plan.parent_plan_id.empty()&&plan.parent_node_label.empty()&&plan.depth==0,"New root plan must persist an explicit root-owned scope");
+        const auto by_owner=store.dynamic_plan_for_owner("scope_root").get();require(by_owner&&by_owner->id==plan_id&&by_owner->owner_run_id=="scope_root","Owner lookup must resolve the plan through its durable owner relation");
+        rejects<NotFound>([&]{store.dynamic_plan_for_owner("not_an_owner").get();},"Unknown run cannot discover another owner's plan");
+        store.close();
+    }
+    // Remove only the v24 additive owner relation and restore the genuine v23
+    // version marker. The old plan, accepted call and topology remain actual
+    // xlang3 SQLite rows, so reopening exercises a populated migration.
+    {
+        XlangSqlite sql(database,imports);sql.execute("DROP TRIGGER retain_dynamic_plan_owners");sql.execute("DROP TABLE dynamic_plan_owners");sql.execute("PRAGMA user_version=23");
+    }
+    {
+        PersistenceService upgraded(database,imports);const auto plan=upgraded.dynamic_plan(plan_id).get();
+        require(plan.id==plan_id&&plan.root_run_id=="scope_root"&&plan.owner_run_id=="scope_root"&&plan.parent_plan_id.empty()&&plan.parent_node_label.empty()&&plan.depth==0,"v23 populated plan migration must backfill its original root owner without altering plan identity");
+        const auto by_owner=upgraded.dynamic_plan_for_owner("scope_root").get();require(by_owner&&by_owner->id==plan_id&&by_owner->revision==plan.revision,"Migrated owner lookup must retain the exact existing plan revision");
+        XlangSqlite sql(database,imports);require(sql.execute("PRAGMA foreign_key_check").rows.empty()&&std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==24,"Populated owner-scope migration must enforce valid v24 foreign keys");upgraded.close();
+    }
+    {
+        XlangSqlite sql(database,imports);rejects<DatabaseError>([&]{sql.execute("UPDATE dynamic_plan_owners SET owner_run_id='forged_owner' WHERE plan_id=?",{plan_id});},"Accepted dynamic plan ownership cannot be retargeted");rejects<DatabaseError>([&]{sql.execute("DELETE FROM dynamic_plan_owners WHERE plan_id=?",{plan_id});},"Accepted dynamic plan ownership evidence cannot be deleted");
     }
 }
 DelegationBatchSpec legacy_spec(PersistenceService& store,const std::string& root,const std::string& batch,const std::vector<std::string>& children){
@@ -340,6 +367,6 @@ void dynamic_effect_admission(const std::string& database,const std::vector<std:
 }
 int main(int argc,char** argv){
     if(argc!=3)return 2;
-    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared budget, exact human pause/recovery/continuation, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
+    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());owner_scope_migration_contract((dir.path/"owner-scope.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared budget, exact human pause/recovery/continuation, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
     catch(const std::exception& error){std::cerr<<error.what()<<"\n";return 1;}
 }
