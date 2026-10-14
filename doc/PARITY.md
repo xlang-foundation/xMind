@@ -20,6 +20,16 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
+## Native local session archive (2026-10-13)
+
+The local native API and console client can export and import versioned xMind
+conversation archives. Import uses a fresh session ID and destination-local
+message sequences; workspace/provider/agent/fork configuration is intentionally
+not included. Export requires an idle session and includes only user-visible
+settled history. Format and limits are documented in
+[local session archives](session-transfer.md). HTTP/CLI round-trip and invalid
+archive contracts pass in `native_http_cli_contract`.
+
 ## xlang3 tool worker and staged VS Code runtime checkpoint (2026-10-13)
 
 Trusted xlang3 tool registrations now select `execution: in_process` or

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {spawn, spawnSync} from 'node:child_process';
-import {mkdtemp, rm, stat} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
@@ -168,6 +168,17 @@ try {
   assert.equal((await request('/v1/runs/run/transition',{expected:'queued',next:'running'})).status,404);
   assert.equal((await request('/v1/sessions/shared/messages',{role:'assistant',data:{content:'fabricated'}})).status,400);
   cli('append-message','shared','User message from native CLI');
+  const archiveFile=join(folder,'shared-session.xmind.json');const exportResult=spawnSync(cliExe,[String(port),'export-session','shared',archiveFile],{env,encoding:'utf8',timeout:15000,windowsHide:true});
+  assert.equal(exportResult.status,0,exportResult.stderr);assert.deepEqual(JSON.parse(exportResult.stdout),{exported:true,file:archiveFile});
+  const archive=JSON.parse(await readFile(archiveFile,'utf8'));assert.equal(archive.format,'xmind.session');assert.equal(archive.version,1);assert.equal(archive.session.title,'HTTP and CLI');assert.equal(archive.messages.length,13);
+  assert.equal((await request('/v1/sessions/shared/export')).data.messages.length,13,'HTTP export includes the complete settled transcript');
+  assert.equal((await request('/v1/sessions/import',{archive:{...archive,version:2}})).status,400,'Unknown archive versions are rejected');
+  const importedResponse=await request('/v1/sessions/import',{archive});assert.equal(importedResponse.status,201);assert.notEqual(importedResponse.data.id,'shared');assert.equal(importedResponse.data.title,'HTTP and CLI');
+  assert.deepEqual(cli('history',importedResponse.data.id).map(({role,data})=>({role,data})),archive.messages,'HTTP import preserves transcript order and content');
+  const importedCli=spawnSync(cliExe,[String(port),'import-session',archiveFile],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(importedCli.status,0,importedCli.stderr);const importedByCli=JSON.parse(importedCli.stdout);
+  assert.equal(importedByCli.title,'HTTP and CLI');assert.deepEqual(cli('history',importedByCli.id).map(({role,data})=>({role,data})),archive.messages,'Console import preserves transcript order and content');
+  const malformedRole=await request('/v1/sessions/import',{archive:{...archive,messages:[{role:'system',data:{content:'must reject'}}]}});assert.equal(malformedRole.status,400,'Unsupported message roles are rejected');
+  assert.equal((await request('/v1/sessions/shared/export?unexpected=true')).status,400,'Session export rejects unsupported query parameters');
   assert.equal((await request('/v1/runs/run/events?after=-1')).status, 400);
   assert.equal((await request('/v1/runs/run/events?after=0&after=1')).status, 400);
   await stop();await start();

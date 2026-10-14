@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Portable local session archives (2026-10-13)
+
+Added a versioned xMind conversation archive through the native HTTP backend
+and console client. `export-session` writes without overwriting an existing
+file; `import-session` creates a fresh session and new local message sequence
+IDs. Export refuses active runs. The importer validates message roles and
+limits, and stores the session plus all messages atomically through the
+xlang3-backed SQLite repository. The focused HTTP/CLI contract passed. No
+xlang3 changes were required; the change uses existing SQLite capabilities.
+
 ## Durable prompt cancellation in Browser and VS Code — 2026-10-13
 
 Queued prompts can be canceled from either UI. SQLite keeps canceled IDs

@@ -32,6 +32,8 @@ public:
     std::future<BackendOwnerState> request_backend_retirement(BackendOwnerReceipt,std::optional<BackendOwnerTarget> target={});
     std::future<BackendOwnerState> activate_backend_replacement(BackendOwnerReceipt,BackendOwnerTarget);
     std::future<Session> create_session(std::string id,std::string title);
+    std::future<Session> import_session(std::string id,std::string title,std::vector<Message> messages);
+    std::future<SessionArchive> export_session(std::string id);
     std::future<Session> fork_session(std::string id,std::string source_id,std::optional<std::int64_t> before_sequence={});
     std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);

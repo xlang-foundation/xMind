@@ -910,6 +910,30 @@ Session Repository::create_session(const std::string& id,const std::string& titl
     changed_one(impl_->database.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
     transaction.commit(); return {id,title,{},{},{}};
 }
+Session Repository::import_session(const std::string& id,const std::string& title,const std::vector<Message>& messages) {
+    identifier(id);if(title.empty()||title.size()>512||title.find('\0')!=std::string::npos||messages.size()>1000)throw std::invalid_argument("Invalid session archive");
+    std::size_t total=0;
+    for(const auto& message:messages){
+        if(message.role!="user"&&message.role!="assistant"&&message.role!="tool")throw std::invalid_argument("Session archive contains an unsupported message role");
+        if(message.json.empty()||message.json.size()>256*1024||total>4*1024*1024-message.json.size())throw std::invalid_argument("Session archive exceeds its message limits");
+        total+=message.json.size();const auto payload=Json::parse(message.json);if(!payload.is_object())throw std::invalid_argument("Session archive message data must be an object");
+    }
+    auto& db=impl_->database;Transaction tx(db);
+    if(!db.execute("SELECT id FROM sessions WHERE id=?",{id}).rows.empty())throw Conflict("Imported session identity already exists");
+    changed_one(db.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
+    for(const auto& message:messages)changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,?,?)",{id,message.role,message.json}));
+    tx.commit();return {id,title,{},{},{}};
+}
+SessionArchive Repository::export_session(const std::string& id) {
+    auto& db=impl_->database;Transaction tx(db);SessionArchive archive;archive.session=session(id);
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{id}).rows.empty())throw Conflict("Wait for the session to become idle before exporting it");
+    for(const auto& row:db.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL ORDER BY seq LIMIT 1001",{id}).rows){
+        if(archive.messages.size()==1000)throw std::invalid_argument("Session exceeds the 1000-message export limit");
+        archive.messages.push_back({integer(row[0]),text(row[1]),text(row[2])});
+    }
+    std::size_t total=0;for(const auto& message:archive.messages){if(message.json.size()>256*1024||total>4*1024*1024-message.json.size())throw std::invalid_argument("Session exceeds the 4 MiB export limit");total+=message.json.size();}
+    tx.commit();return archive;
+}
 Session Repository::fork_session(const std::string& id,const std::string& source,std::optional<std::int64_t> before_sequence) {
     identifier(id);identifier(source);if(id==source|| (before_sequence&&*before_sequence<1))throw std::invalid_argument("Invalid session fork boundary");
     auto& db=impl_->database;Transaction tx(db);const auto parent=session(source);
