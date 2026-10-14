@@ -32,16 +32,6 @@ std::string model_identity(const ProviderProfileRoute& route,const std::string& 
     if(route.wire==ProviderWire::gemini_generate_content)return model.starts_with("models/")?model:"models/"+model;
     return model;
 }
-std::int64_t anthropic_default_output_tokens(const std::string& model){
-    // Newer Claude coding models can return large edit proposals. The Messages
-    // max_tokens limit covers the whole generated response, so 4096 can cut a
-    // file edit off before its tool arguments close. Keep a bounded default
-    // while preserving any explicit application limit.
-    if(model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5")||
-       model.starts_with("claude-sonnet-4-5")||model.starts_with("claude-opus-4-5")||model.starts_with("claude-sonnet-4-6")||model.starts_with("claude-opus-4-6")||
-       model.starts_with("claude-opus-4-7")||model.starts_with("claude-opus-4-8"))return 16384;
-    return 4096;
-}
 bool anthropic_adaptive_model(const std::string& model){
     return model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5");
 }

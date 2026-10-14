@@ -61,6 +61,8 @@ std::string serialize_mistral_request(const ChatProviderConfig& config,const Mod
 std::string serialize_responses_request_fields(const ChatProviderConfig& config,const ModelRequest& request);
 std::string serialize_responses_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Claude Messages request component; transport/routing enrollment is separate.
+// Bounded provider default used when a saved profile chooses its model per session.
+std::int64_t anthropic_default_output_tokens(const std::string& model);
 std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Transport-backed provider adapter. Credentials remain caller/backend owned.
 // Available on Windows until other native transport implementations are added.

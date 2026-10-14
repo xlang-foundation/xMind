@@ -465,6 +465,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         });
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
+        if(!request.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)
+            request.max_output_tokens=anthropic_default_output_tokens(provider.model);
         auto agent_instructions=settings_.instructions;
         if(settings_.approved_edits&&workspace_){
             agent_instructions.append("\n\nTrusted workspace edit recovery policy: If an edit/create/patch call returns content_conflict, reread the current file or target state before retrying. When the user's requested outcome remains clear from the current contents, make a fresh tool call based on those contents and preserve unrelated intervening changes; do not ask the user to restate the request only because an old precondition changed. The fresh proposal still requires the normal approval. Stop and explain or ask only when the new state makes the requested outcome genuinely ambiguous. Never repeat stale arguments or claim a write occurred before approval and a successful tool result.");

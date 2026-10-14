@@ -47,6 +47,16 @@ const char* effort_name(ReasoningEffort effort){
     switch(effort){case ReasoningEffort::low:return "low";case ReasoningEffort::medium:return "medium";case ReasoningEffort::high:return "high";case ReasoningEffort::max:return "max";default:throw std::invalid_argument("Unsupported Claude adaptive effort");}
 }
 }
+std::int64_t anthropic_default_output_tokens(const std::string& model){
+    // Newer Claude coding models can return large edit proposals. The Messages
+    // max_tokens limit covers the whole generated response, so 4096 can cut a
+    // file edit off before its tool arguments close. Keep a bounded default
+    // while preserving any explicit application limit.
+    if(model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5")||
+       model.starts_with("claude-sonnet-4-5")||model.starts_with("claude-opus-4-5")||model.starts_with("claude-sonnet-4-6")||model.starts_with("claude-opus-4-6")||
+       model.starts_with("claude-opus-4-7")||model.starts_with("claude-opus-4-8"))return 16384;
+    return 4096;
+}
 std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request){
     if(request.canonical_window)throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
     if(config.reasoning_effort&&!adaptive_model(config.model))throw std::invalid_argument("Claude reasoning effort is unsupported for this model");

@@ -222,7 +222,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"key-only-claude.sqlite").string(),imports);
         store.put_credential("server","key-only-claude","fixture:anthropic","Key-only Claude fixture",key("runtime-claude-fixture-key"),0).get();
-        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
+        AgentSettings key_only_base;ProviderProfileRuntime runtime(store,key_only_base,policy(origin),1,8);
         runtime.import_existing_profile("claude","anthropic.messages","","key-only-claude",1);
         require(runtime.available()&&runtime.models().empty(),"Key-only Claude profile must be executable without publishing a placeholder model");
         store.create_session("key-only-claude-session","Choose Claude model per session").get();
