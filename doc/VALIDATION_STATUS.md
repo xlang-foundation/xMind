@@ -1,5 +1,23 @@
 # Current native validation
 
+## Concurrent sibling nested plans — 2026-10-14
+
+Independent dynamic-agent siblings can now accept nested plans while sharing
+one root budget. Plan acceptance reads the current budget inside its serialized
+SQLite transaction and atomically enforces root-wide child and model-call
+limits; a sibling's intervening budget-counter update no longer rejects an
+otherwise valid plan. Each owner's plan revision, signed call identity, and
+root-wide capacity checks remain enforced.
+
+The synthetic-provider AgentService contract synchronizes both planner
+responses and both nested reader calls to prove actual overlap, then verifies
+both owner plans, reader histories, terminal states, and settled shared-budget
+counters. The five focused dynamic-plan, repository, planning HTTP, engine,
+and MCP contracts passed **5/5**. A full Release rebuild succeeded and the
+complete native CTest inventory passed **144/144** in 204.76 seconds with
+six-way parallelism. This is synthetic-provider contract coverage, not live
+provider interoperability.
+
 ## Rebuilt native Release gate — 2026-10-14
 
 The current checkout was rebuilt with
@@ -32,8 +50,8 @@ transcripts with their per-response metrics. Client and renderer fixtures are
 synthetic; the HTTP contract uses actual xlang3-backed persistence with
 synthetic provider receipts. The native CLI prints the same complete plan
 observation as formatted JSON through its existing `inspect-plan` route.
-Nested pause/restart recovery, depth/total-work exhaustion and parallel sibling
-plans remain incomplete.
+Nested pause/restart recovery, depth/total-work exhaustion, and rendering
+nested sibling plans in all clients remain incomplete.
 
 ## Nested dynamic-agent planning runtime — 2026-10-14
 
