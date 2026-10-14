@@ -575,8 +575,8 @@ The original proposed production ownership split is retained for comparison:
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
 The [implementation guide](native-dynamic-plan.md) identifies the subset now
-implemented and its verification limits. Broader tool scheduling, reference
-helpers and further node kinds in this table still require their own
+implemented and its verification limits. Effectful/MCP/process tool scheduling,
+reference helpers and further node kinds in this table still require their own
 implementation and acceptance; the design itself supplies no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget

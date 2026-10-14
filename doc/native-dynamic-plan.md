@@ -4,20 +4,22 @@
 
 Dynamic plans now admit native `tool` nodes for the fixed read-only workspace
 aliases `read_repository_instructions`, `read_file`, `list_files`,
-`search_files` and `glob_files`. Arguments are checked against the sealed native
-tool schema and the frozen `workspace.inspect` capability before admission.
+`search_files`, `find_files` and `glob_files`. Arguments are checked against the
+sealed native tool schema and the frozen `workspace.inspect` capability before admission.
 Execution uses the admitted workspace in a separate owned child, makes no model
 request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
 reopen/recovery verifies those receipts against the immutable node definition.
 The repository schema migration is now v23.
 
-The pure plan, repository and actual native engine contracts passed locally on
-the working tree. The engine fixture executes a deterministic `read_file` node
-after an approved coding child and checks its actual bytes, child ownership,
-receipts and model-free budget accounting. Provider replies and credentials are
-synthetic. This is scoped native acceptance, not a complete CTest/hosted gate,
-live-provider run or rendered browser/VS Code acceptance. MCP and process nodes,
-dynamic-node UI, recursive planning and full coding/provider parity remain work.
+The pure plan, repository and actual native engine contracts pass; the full
+fresh native Release CTest suite passes 144/144. The engine fixture executes a
+deterministic `read_file` node after an approved coding child and checks its
+actual bytes, child ownership, receipts and model-free budget accounting. The
+shared browser/VS Code client and renderer validate and display tool nodes; the
+full extension and browser suites pass 343/343 and 109/109. Provider replies
+and credentials are synthetic. External-browser and installed VS Code
+acceptance remain open. MCP and process nodes, recursive planning and full
+coding/provider parity remain work.
 
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78-contract native gate in 145.17 seconds**, with the exact complete manifest
@@ -169,9 +171,9 @@ acceptance, dynamic MCP/process nodes, recursive planning,
 full coding/provider parity or private Nexus execution. The separate
 browser/native integration uses disposable model-free state to check graph,
 human, authentication, durable cookie and reconnect boundaries; it does not
-establish end-to-end dynamic planning through a rendered view. The actual
-modern/legacy MCP registry checks and SQLite binding negatives do not establish
-a real dynamic coding-child MCP peer effect on their own. The later local 78-contract
+establish end-to-end dynamic planning in a live webpage or installed VS Code.
+The actual modern/legacy MCP registry checks and SQLite binding negatives do
+not establish a real dynamic coding-child MCP peer effect on their own. The later local 78-contract
 contract does: its coding child rediscovers the exact nine-field private MCP
 binding, proposes a child-owned journal operation and waits for actual controller
 approval before the peer appends bytes. A dependent inspect child reads those
