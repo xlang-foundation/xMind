@@ -31,6 +31,7 @@ export function allowedApiRoute(path,method){
  if(/^\/v1\/operations\/[A-Za-z0-9_-]+\/a2a\/follow-up$/.test(path))return method==='POST';
  if(path==='/v1/agents')return method==='GET';
  if(/^\/v1\/agents\/[A-Za-z0-9_.-]{1,64}$/.test(path))return method==='GET';
+ if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/skills$/.test(path))return method==='GET'||method==='POST';
  if(['/v1/workspace/files','/v1/workspace/file','/v1/workspace/find','/v1/workspace/folders/files','/v1/workspace/folders/file','/v1/workspace/folders/find'].includes(path))return method==='GET';
  if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/agent$/.test(path))return method==='GET'||method==='POST';
  if(/^\/v1\/workspace(?:\/skills)?$/.test(path))return method==='GET';
