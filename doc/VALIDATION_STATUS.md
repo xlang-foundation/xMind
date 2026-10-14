@@ -12,6 +12,8 @@ HTTP header. The native client and A2A registry contracts passed **2/2** in
 Release, including an actual two-subscription peer exchange and durable cursor
 recovery through the repository. A2A peers may omit or ignore SSE IDs, so this
 supports resumable peers without claiming protocol-wide exactly-once delivery.
+The exact Release output is recorded in
+[the focused CTest log](evidence/native-a2a-sse-cursor-ctest-20261014.log).
 
 ## Explicit outbound A2A task resubscription — 2026-10-13
 

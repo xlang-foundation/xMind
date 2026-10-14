@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## Durable outbound A2A SSE cursor checkpoint (2026-10-14)
+
+The native A2A client now preserves peer-issued SSE `id` values from both the
+initial streamed send and later task resubscriptions. xMind commits each
+non-empty cursor alongside its event in the owning run's SQLite journal, then
+sends the latest committed cursor as `Last-Event-ID` on the next manual
+resubscription. Cursor values are validated before entering the trusted native
+HTTP transport. The native client and agent-registry Release contracts pass
+2/2, including a two-subscription exchange that resumes from the cursor
+persisted during the initial send. This is best-effort peer resumption; A2A
+does not require a peer to issue or honor event IDs, and this does not establish
+automatic recovery or exactly-once delivery. No xlang3 change was needed. See
+[validation evidence](evidence/native-a2a-sse-cursor-ctest-20261014.log) and
+[A2A limitations](native-a2a-client.md).
+
 ## Model-free run admission and managed local view verification (2026-10-13)
 
 The console no longer sends an empty provider-profile binding when no provider

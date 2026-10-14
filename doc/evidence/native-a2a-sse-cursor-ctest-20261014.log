@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/native
+    Start 6: native_a2a_client_contract
+1/2 Test #6: native_a2a_client_contract ...........   Passed    0.19 sec
+    Start 8: native_a2a_agent_registry_contract
+2/2 Test #8: native_a2a_agent_registry_contract ...   Passed    1.76 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   1.97 sec
