@@ -213,15 +213,23 @@ void skill_acknowledgement(const nlohmann::json& value,const std::string& sessio
 void agent_catalogue(const nlohmann::json& value){
     if(!value.is_object()||value.size()!=1||!value.contains("agents")||!value["agents"].is_array()||value["agents"].size()>64)throw std::runtime_error("Invalid native agent catalogue");
     std::set<std::string> ids;for(const auto& item:value["agents"]){
-        if(!item.is_object()||item.size()!=3||!item.contains("id")||!item["id"].is_string()||!item.contains("revision")||!item["revision"].is_number_integer()||!item.contains("model_id")||!item["model_id"].is_string())throw std::runtime_error("Invalid native agent metadata");
+        const bool legacy=item.is_object()&&item.size()==3&&item.contains("id")&&item.contains("revision")&&item.contains("model_id");
+        const bool named=item.is_object()&&item.size()==5&&item.contains("id")&&item.contains("revision")&&item.contains("model_id")&&item.contains("name")&&item.contains("description");
+        if((!legacy&&!named)||!item["id"].is_string()||!item["revision"].is_number_integer()||!item["model_id"].is_string()||
+           (named&&(!item["name"].is_string()||!item["description"].is_string())))throw std::runtime_error("Invalid native agent metadata");
         const auto id=item["id"].get<std::string>(),model=item["model_id"].get<std::string>();if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||!ids.insert(id).second||item["revision"]<1||item["revision"]>9007199254740991LL||model.size()>256||model.starts_with("sk-")||model.find('\0')!=std::string::npos)throw std::runtime_error("Invalid native agent metadata");
+        if(named){const auto& name=item["name"].get_ref<const std::string&>();const auto& description=item["description"].get_ref<const std::string&>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||description.size()>2048||description.find('\0')!=std::string::npos)throw std::runtime_error("Invalid native agent display metadata");}
     }
 }
 void session_agent_snapshot(const nlohmann::json& value,const std::string& session){
     if(!value.is_object()||value.size()!=4||!value.contains("session_id")||value["session_id"]!=session||!value.contains("revision")||!value["revision"].is_number_integer()||value["revision"]<0||value["revision"]>9007199254740991LL||!value.contains("editable")||!value["editable"].is_boolean()||!value.contains("selected"))throw std::runtime_error("Invalid conversation agent selection");
     if(value["selected"].is_null())return;const auto& selected=value["selected"];
-    if(!selected.is_object()||selected.size()!=3||!selected.contains("id")||!selected["id"].is_string()||!selected.contains("revision")||!selected["revision"].is_number_integer()||!selected.contains("model_id")||!selected["model_id"].is_string())throw std::runtime_error("Invalid selected agent metadata");
+    const bool legacy=selected.is_object()&&selected.size()==3&&selected.contains("id")&&selected.contains("revision")&&selected.contains("model_id");
+    const bool named=selected.is_object()&&selected.size()==5&&selected.contains("id")&&selected.contains("revision")&&selected.contains("model_id")&&selected.contains("name")&&selected.contains("description");
+    if((!legacy&&!named)||!selected["id"].is_string()||!selected["revision"].is_number_integer()||!selected["model_id"].is_string()||
+       (named&&(!selected["name"].is_string()||!selected["description"].is_string())))throw std::runtime_error("Invalid selected agent metadata");
     const auto id=selected["id"].get<std::string>(),model=selected["model_id"].get<std::string>();if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||selected["revision"]<1||selected["revision"]>9007199254740991LL||model.size()>256||model.starts_with("sk-")||model.find('\0')!=std::string::npos)throw std::runtime_error("Invalid selected agent metadata");
+    if(named){const auto& name=selected["name"].get_ref<const std::string&>();const auto& description=selected["description"].get_ref<const std::string&>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||description.size()>2048||description.find('\0')!=std::string::npos)throw std::runtime_error("Invalid selected agent display metadata");}
 }
 nlohmann::json read_skill_snapshot(const std::string& filename){
     std::ifstream file(std::filesystem::u8path(filename),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read session skill snapshot file");std::string source;char byte;while(file.get(byte)){if(source.size()>=8192)throw std::invalid_argument("Session skill snapshot exceeds 8 KiB");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read session skill snapshot file");
