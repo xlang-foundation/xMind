@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-14",
+  "baseRevision": "bfee79ea8192d1ea39afc720b64666bee4970913",
+  "testedWorkingTree": true,
+  "configuration": "Release",
+  "buildTree": "build/native-verify",
+  "buildExitCode": 0,
+  "testCommand": "ctest --test-dir build/native-verify -C Release --output-on-failure --parallel 4 --output-log build/native-verify/Testing/Temporary/native-v26-full-release.log",
+  "testExitCode": 0,
+  "passed": 144,
+  "failed": 0,
+  "skipped": 0,
+  "elapsedSeconds": 209.21,
+  "log": "native-full-release-ctest-v26-20261014.log",
+  "logSha256": "b1861ee51b9620b970de8889775c7800adffe8b7131b1c8f647210e412b623f5",
+  "providerAndPeerScope": "Synthetic/local contract fixtures; no live provider or external peer claim"
+}

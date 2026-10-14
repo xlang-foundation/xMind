@@ -237,7 +237,7 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
         // Runtime/settlement failures below retain their typed owner retirement.
         (void)parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
         const auto existing=store_.dynamic_plan_for_root(parent).get();
-        DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=parent;spec.provider_tool_call_id=call.id;
+        DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=parent;spec.owner_run_id=parent;spec.provider_tool_call_id=call.id;
         spec.origin_attempt_id=origin;spec.arguments_json=call.arguments_json;spec.parent_assistant_json=assistant;spec.backend_identity=caps.backend_identity;spec.expected_budget_revision=budget->snapshot().revision;
         accepted=store_.accept_dynamic_plan_change(std::move(spec)).get();
     }catch(const DynamicPlanChanged&){throw DynamicPlanRejected("plan_changed");}

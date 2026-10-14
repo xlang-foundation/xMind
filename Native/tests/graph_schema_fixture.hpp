@@ -8,7 +8,40 @@
 // be discarded.
 inline void remove_dynamic_plan_multiplicity_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
-    if(scalar("PRAGMA user_version")<25)return;
+    if(scalar("PRAGMA user_version")<26)return;
+    if(scalar("SELECT count(*) FROM dynamic_plan_calls WHERE owner_run_id!=root_run_id")!=0)
+        throw std::runtime_error("Legacy fixture cannot discard non-root dynamic call owners");
+    std::string call_stage="defer foreign keys";
+    database.execute("SAVEPOINT downgrade_dynamic_call_owner");
+    try{
+        database.execute("PRAGMA defer_foreign_keys=ON");
+        std::vector<std::pair<std::string,std::string>> call_triggers;
+        call_stage="collect call triggers";
+        for(const auto& row:database.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND (tbl_name='dynamic_plan_calls' OR instr(sql,'dynamic_plan_calls')>0) ORDER BY name").rows){
+            const auto name=std::get<std::string>(row[0]);if(name.empty()||name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos)throw std::runtime_error("Legacy fixture found an invalid dynamic call trigger identity");
+            call_triggers.emplace_back(name,std::get<std::string>(row[1]));database.execute("DROP TRIGGER \""+name+"\"");
+        }
+        call_stage="preserve v26 calls";
+        database.execute("CREATE TABLE dynamic_call_fixture_v25 AS SELECT id,plan_id,root_run_id,provider_tool_call_id,origin_attempt_id,arguments_json,parent_assistant_json,state,accepted_revision,accepted_event_seq,result_json,result_event_seq,conversation_commit_seq,continuation_attempt_id FROM dynamic_plan_calls");
+        call_stage="replace call relation";database.execute("DROP TABLE dynamic_plan_calls");
+        database.execute("CREATE TABLE dynamic_plan_calls(id TEXT PRIMARY KEY NOT NULL,plan_id TEXT NOT NULL REFERENCES dynamic_plans(id),root_run_id TEXT NOT NULL REFERENCES dynamic_capabilities(root_run_id),provider_tool_call_id TEXT NOT NULL,origin_attempt_id TEXT NOT NULL,arguments_json TEXT NOT NULL CHECK(json_valid(arguments_json) AND json_type(arguments_json)='object'),parent_assistant_json TEXT NOT NULL CHECK(json_valid(parent_assistant_json) AND json_type(parent_assistant_json)='object'),state TEXT NOT NULL CHECK(state IN ('accepted','report_ready','turn_committed','interrupted','cancelled')),accepted_revision INTEGER NOT NULL,accepted_event_seq INTEGER NOT NULL REFERENCES events(seq),result_json TEXT CHECK(result_json IS NULL OR (json_valid(result_json) AND json_type(result_json)='object')),result_event_seq INTEGER REFERENCES events(seq),conversation_commit_seq INTEGER REFERENCES events(seq),continuation_attempt_id TEXT,UNIQUE(root_run_id,provider_tool_call_id),UNIQUE(root_run_id,continuation_attempt_id),FOREIGN KEY(root_run_id,origin_attempt_id) REFERENCES agent_model_call_reservations(root_run_id,attempt_id),FOREIGN KEY(root_run_id,continuation_attempt_id) REFERENCES agent_model_call_reservations(root_run_id,attempt_id),CHECK((result_json IS NULL)=(result_event_seq IS NULL)),CHECK(conversation_commit_seq IS NULL OR result_event_seq IS NOT NULL))");
+        database.execute("INSERT INTO dynamic_plan_calls SELECT * FROM dynamic_call_fixture_v25");database.execute("DROP TABLE dynamic_call_fixture_v25");
+        database.execute("CREATE UNIQUE INDEX dynamic_one_pending_call ON dynamic_plan_calls(root_run_id) WHERE state IN ('accepted','report_ready')");
+        call_stage="restore v25 call triggers";
+        for(const auto& trigger:call_triggers){
+            auto sql=trigger.second;const auto replace_all=[&](const std::string& from,const std::string& to){std::size_t at=0;while((at=sql.find(from,at))!=std::string::npos){sql.replace(at,from.size(),to);at+=to.size();}};
+            if(trigger.first=="dynamic_call_identity")sql="CREATE TRIGGER dynamic_call_identity BEFORE UPDATE OF id,plan_id,root_run_id,provider_tool_call_id,origin_attempt_id,arguments_json,parent_assistant_json,accepted_revision,accepted_event_seq ON dynamic_plan_calls BEGIN SELECT RAISE(ABORT,'signed dynamic call is immutable'); END";
+            else if(trigger.first=="dynamic_call_result"||trigger.first=="dynamic_call_commit"||trigger.first=="dynamic_call_tool_completion"||trigger.first=="dynamic_call_continuation")replace_all("owner_run_id", "root_run_id");
+            if(trigger.first=="dynamic_signed_call_boundary"){
+                // The v25 boundary binds all calls to the ordinary root. The
+                // exact historical definition is restored below.
+                sql="CREATE TRIGGER dynamic_signed_call_boundary BEFORE INSERT ON dynamic_plan_calls BEGIN SELECT CASE WHEN NEW.state!='accepted' OR NEW.result_json IS NOT NULL OR NEW.result_event_seq IS NOT NULL OR NEW.conversation_commit_seq IS NOT NULL OR NEW.continuation_attempt_id IS NOT NULL OR json_array_length(NEW.parent_assistant_json,'$.tool_calls')!=1 OR json_extract(NEW.parent_assistant_json,'$.tool_calls[0].id')!=NEW.provider_tool_call_id OR json_extract(NEW.parent_assistant_json,'$.tool_calls[0].arguments')!=NEW.arguments_json OR json_extract(NEW.parent_assistant_json,'$.tool_calls[0].name')!=CASE WHEN NEW.accepted_revision=1 THEN 'plan_tasks' ELSE 'revise_plan' END OR NOT EXISTS(SELECT 1 FROM dynamic_plans p JOIN runs r ON r.id=p.root_run_id JOIN dynamic_capabilities a ON a.root_run_id=r.id JOIN agent_model_call_reservations m ON m.root_run_id=r.id JOIN events e ON e.seq=NEW.accepted_event_seq WHERE p.id=NEW.plan_id AND p.root_run_id=NEW.root_run_id AND p.revision=NEW.accepted_revision AND r.state='running' AND a.catalogue_finalized=1 AND m.attempt_id=NEW.origin_attempt_id AND m.owner_run_id=r.id AND m.role='parent' AND m.state='finished' AND m.actual_assistant_json=NEW.parent_assistant_json AND e.run_id=r.id AND e.kind='plan.call.accepted' AND json_extract(e.payload,'$.plan_call_id')=NEW.id AND EXISTS(SELECT 1 FROM events t WHERE t.run_id=r.id AND t.kind='budget.model_call.finished' AND json_extract(t.payload,'$.attempt_id')=m.attempt_id AND json_extract(t.payload,'$.was_started')=1)) THEN RAISE(ABORT,'invalid signed dynamic call boundary') END; END";
+            }
+            database.execute(sql);
+        }
+        call_stage="check call foreign keys";if(!database.execute("PRAGMA foreign_key_check").rows.empty())throw std::runtime_error("Legacy fixture call downgrade violated foreign-key ownership");
+        database.execute("PRAGMA defer_foreign_keys=OFF");database.execute("PRAGMA user_version=25");database.execute("RELEASE downgrade_dynamic_call_owner");
+    }catch(const std::exception& error){database.execute("ROLLBACK TO downgrade_dynamic_call_owner");database.execute("RELEASE downgrade_dynamic_call_owner");throw std::runtime_error("Legacy fixture v26 downgrade failed at "+call_stage+": "+error.what());}
     if(scalar("SELECT count(*) FROM (SELECT root_run_id FROM dynamic_plans GROUP BY root_run_id HAVING count(*)>1)")!=0)
         throw std::runtime_error("Legacy fixture cannot discard multiple dynamic plans for one root");
     std::string stage="defer foreign keys";
@@ -138,12 +171,12 @@ inline void remove_dynamic_schema_fixture(agentflow::XlangSqlite& database){
     // Remove this reference before dropping tables: SQLite reparses the whole
     // schema when the two additive v11 columns are removed below.
     database.execute("DROP TRIGGER owned_child_boundary");
-    for(const auto* trigger:{"actual_model_response_once","dynamic_capability_identity","dynamic_revision_immutable","dynamic_revision_node_immutable","dynamic_edge_immutable","dynamic_definition_protected","dynamic_claim_immutable","dynamic_child_settlement","dynamic_call_identity","dynamic_call_result","dynamic_call_commit","dynamic_call_tool_completion","dynamic_call_continuation","dynamic_human_identity","dynamic_human_input","dynamic_human_settlement","dynamic_plan_identity","dynamic_initial_node","dynamic_claim_boundary","dynamic_capability_admission","dynamic_signed_call_boundary"})
-        database.execute(std::string("DROP TRIGGER ")+trigger);
-    for(const auto* table:{"dynamic_capabilities","dynamic_plans","dynamic_plan_calls","dynamic_plan_revisions","dynamic_plan_nodes","dynamic_revision_nodes","dynamic_plan_edges","dynamic_human_requests","agent_budget_segments","dynamic_owner_pauses"})
-        database.execute(std::string("DROP TRIGGER retain_")+table);
-    for(const auto* table:{"dynamic_owner_pauses","dynamic_plan_edges","dynamic_revision_nodes","dynamic_human_requests","dynamic_plan_nodes","dynamic_plan_revisions","dynamic_plan_calls","dynamic_plans","agent_budget_segments","dynamic_capabilities"})
-        database.execute(std::string("DROP TABLE ")+table);
+    for(const auto* trigger:{"actual_model_response_once","dynamic_capability_identity","dynamic_revision_immutable","dynamic_revision_node_immutable","dynamic_edge_immutable","dynamic_definition_protected","dynamic_claim_immutable","dynamic_child_settlement","dynamic_call_identity","dynamic_call_result","dynamic_call_commit","dynamic_call_tool_completion","dynamic_call_continuation","dynamic_human_identity","dynamic_human_input","dynamic_human_settlement","dynamic_plan_identity","dynamic_initial_node","dynamic_claim_boundary","dynamic_capability_admission","dynamic_signed_call_boundary","dynamic_plan_owner_admission","dynamic_plan_owner_identity","retain_dynamic_plan_owners"})
+        database.execute(std::string("DROP TRIGGER IF EXISTS ")+trigger);
+    for(const auto* table:{"dynamic_capabilities","dynamic_plans","dynamic_plan_calls","dynamic_plan_revisions","dynamic_plan_nodes","dynamic_revision_nodes","dynamic_plan_edges","dynamic_human_requests","agent_budget_segments","dynamic_owner_pauses","dynamic_plan_owners"})
+        database.execute(std::string("DROP TRIGGER IF EXISTS retain_")+table);
+    for(const auto* table:{"dynamic_owner_pauses","dynamic_plan_edges","dynamic_revision_nodes","dynamic_human_requests","dynamic_plan_nodes","dynamic_plan_revisions","dynamic_plan_calls","dynamic_plan_owners","dynamic_plans","agent_budget_segments","dynamic_capabilities"})
+        database.execute(std::string("DROP TABLE IF EXISTS ")+table);
     database.execute("ALTER TABLE agent_model_call_reservations DROP COLUMN actual_assistant_json");
     database.execute("ALTER TABLE agent_execution_budgets DROP COLUMN planned_children_reserved");
     database.execute("CREATE TRIGGER owned_child_boundary BEFORE INSERT ON runs WHEN NEW.parent_run_id IS NOT NULL BEGIN SELECT CASE WHEN NEW.node_id IS NULL OR NOT (EXISTS(SELECT 1 FROM runs p JOIN graph_roots g ON g.run_id=p.id WHERE p.id=NEW.parent_run_id AND p.parent_run_id IS NULL AND p.session_id=NEW.session_id AND p.state='running') OR EXISTS(SELECT 1 FROM delegation_tasks t JOIN delegation_batches b ON b.id=t.batch_id JOIN agent_execution_budgets e ON e.root_run_id=b.root_run_id JOIN runs p ON p.id=b.parent_run_id WHERE t.child_run_id=NEW.id AND t.node_id=NEW.node_id AND b.parent_run_id=NEW.parent_run_id AND b.root_run_id=b.parent_run_id AND b.state IN ('accepted','working') AND p.parent_run_id IS NULL AND p.state='running' AND p.session_id=NEW.session_id AND NEW.state='queued' AND NOT EXISTS(SELECT 1 FROM graph_roots g WHERE g.run_id=p.id))) THEN RAISE(ABORT,'invalid owned child boundary') END; END");

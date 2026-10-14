@@ -99,12 +99,12 @@ struct DynamicPlanCandidate {
 // the exact actual call, then derives candidates/outcomes from owned ledgers.
 // These records are not public spawn/state/outcome mutation APIs.
 struct DynamicPlanChangeSpec {
-    std::string id,plan_id,root_run_id,provider_tool_call_id,origin_attempt_id;
+    std::string id,plan_id,root_run_id,owner_run_id,provider_tool_call_id,origin_attempt_id;
     std::string arguments_json,parent_assistant_json,backend_identity;
     std::int64_t expected_budget_revision=0;
 };
 struct DynamicPlanCallRecord {
-    std::string id,plan_id,root_run_id,provider_tool_call_id,origin_attempt_id;
+    std::string id,plan_id,root_run_id,owner_run_id,provider_tool_call_id,origin_attempt_id;
     std::string arguments_json,parent_assistant_json,state,result_json;
     std::int64_t accepted_revision=0,accepted_event_seq=0;
     std::optional<std::int64_t> result_event_seq,conversation_commit_seq;

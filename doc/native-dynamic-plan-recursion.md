@@ -3,17 +3,17 @@
 Status: **not implemented**. This contract is based on the current native
 schema and execution paths. Schema v24 records immutable plan ownership and
 backfills existing plans to their ordinary Agent roots; schema v25 removes
-the one-plan-per-root table constraint. The runtime still does not admit
-nested plans or give dynamic child agents planning tools.
+the one-plan-per-root table constraint; schema v26 stores owner-scoped signed
+calls and pending-call admission. The runtime still does not admit nested
+plans or give dynamic child agents planning tools.
 
 ## Current boundary
 
 One `dynamic_capabilities` row is admitted for an ordinary Agent root. Schema
-v25 permits multiple `dynamic_plans` rows under that root, but the runtime
-still creates and resumes only the ordinary root's plan.
-`dynamic_plan_calls` idempotency and pending-call constraints remain keyed at
-the root; signed-call triggers require a finished `parent` reservation owned
-by the root. `DynamicPlanExecutor::invoke` and `resume` reject child owners.
+v25 permits multiple `dynamic_plans` rows under that root, and v26 stores
+owner-scoped signed calls. The runtime still creates and resumes only the
+ordinary root's plan. The repository currently rejects a non-root call owner;
+`DynamicPlanExecutor::invoke` and `resume` also reject child owners.
 `AgentRunner` only exposes plan tools to an ordinary dynamic root, and
 `dynamic_child_settings` clears planning and delegation. These are enforced
 source boundaries, not just documentation policy.
@@ -47,16 +47,13 @@ Plan labels and revisions remain local to their owning plan. All topology,
 claims, children, human requests, results and history links retain both owner
 and root identity.
 
-Schema v24 is only the ownership foundation: the existing
-`dynamic_plans.root_run_id` constraint still permits one plan per root, while
-`dynamic_plan_calls` idempotency and pending-call constraints are also keyed by
-root. The next migration must remove the one-plan-per-root constraint and move
-those call constraints to `owner_run_id`, while preserving root-wide budget
-accounting and every existing plan/call/event identity. It must rebuild or
-replace the affected SQLite relations transactionally and pass
-`PRAGMA foreign_key_check` before commit; changing only the owner lookup would
-leave nested plan admission impossible and would incorrectly serialize sibling
-owners' planning turns.
+Schemas v24-v26 provide the durable ownership foundation: plans carry an
+immutable owner, multiple plans may share a root, and signed calls carry the
+same owner with per-owner idempotency and pending-call constraints. The v26
+migration preserves existing call, event and plan identities transactionally
+and validates foreign keys. Runtime admission and execution still need to
+prove the owner is a live claimed child and carry ownership through model
+turns, scheduling, recovery and presentation.
 
 Capabilities remain derived from the root's immutable admitted settings and
 the exact coding preset. Nested plans may select only registered presets and
@@ -96,15 +93,13 @@ inspectable; it cannot be converted into an ordinary tool error.
 1. **Implemented in schema v24:** add an immutable SQLite plan-owner relation
    with `owner_run_id`, parent-plan/node linkage and depth. Backfill every
    existing plan to `owner_run_id = root_run_id`; reopen and integrity-check
-   populated v23 databases. Nested owner admission and owner-scoped pending
-   call constraints remain unimplemented.
-2. **Partially implemented:** repository and persistence service expose
-   owner-scoped plan lookup, and schema v25 permits multiple plans per root.
-   Move signed-call idempotency and pending-call constraints to
-   `owner_run_id`, bind each accepted call to that owner's exact finished
-   inference receipt, then add nested admission tests for forged owner,
-   sibling owner, mismatched root, stale admission, duplicate calls and
-   root-wide shared budget accounting.
+   populated v23 databases.
+2. **Persistence implemented; nested admission pending:** repository and
+   persistence service expose owner-scoped plan lookup, schema v25 permits
+   multiple plans per root, and schema v26 persists owner-scoped signed-call
+   identity, pending-call admission and owner-bound receipts/continuations.
+   Add nested admission tests for forged owner, sibling owner, mismatched root,
+   stale admission, duplicate calls and root-wide shared budget accounting.
 3. Admit a nested plan only from a claimed coding-agent child. Route its tools
    through the same executor and child pool, preserving root budget ownership
    and per-owner continuation receipts. Verify a two-level plan with actual

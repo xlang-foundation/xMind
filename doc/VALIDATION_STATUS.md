@@ -1,5 +1,25 @@
 # Current native validation
 
+## Owner-scoped signed dynamic-plan calls — 2026-10-14
+
+Schema v26 adds `owner_run_id` to each durable signed planning call and
+backfills it from immutable plan ownership. Provider-call idempotency and the
+single-pending-call constraint now use the plan owner, while reservations,
+limits and consumed budget remain charged to the shared root. Signed-call,
+result, conversation-commit and continuation triggers bind their receipts to
+that owner. Existing plans and call/event identities survive a transactional
+SQLite relation rebuild with foreign-key validation. Legacy handoff snapshots
+continue to validate through this additive schema change.
+
+The populated v23 migration contract now checks the backfilled owner and the
+owner-scoped indexes. The migration-sensitive native contracts passed **9/9**;
+the full Release build completed and the full native CTest inventory passed
+**144/144** in 209.21 seconds. The retained CTest log and machine-readable
+result are [`native-full-release-ctest-v26-20261014.log`](evidence/native-full-release-ctest-v26-20261014.log)
+and [`native-full-release-ctest-v26-20261014.json`](evidence/native-full-release-ctest-v26-20261014.json).
+These contracts use local/synthetic peers and providers. Nested planning is
+still not admitted by the runtime; see the [recursion contract](native-dynamic-plan-recursion.md).
+
 ## Full native Release gate — 2026-10-14
 
 A fresh Release build in the dedicated `build/native-verify` tree completed,
