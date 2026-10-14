@@ -237,6 +237,10 @@ class BackendClient {
     if(!value||typeof value.id!=='string'||!value.id||value.parent_id!==id||!value.fork||value.fork.session_id!==id||value.fork.boundary_type!==(before==null?'through':'before')||value.fork.message_id!==(before??null))throw new Error('Invalid native fork session receipt');
     return value;
   }
+  async exportSession(id) { executionIdentity(id);return validateSessionArchive(await this.request(`/v1/sessions/${encodeURIComponent(id)}/export`)); }
+  async importSession(archive) {
+    validateSessionArchive(archive);const value=await this.request('/v1/sessions/import',{archive});exactFields(value,['id','title']);executionIdentity(value.id);if(typeof value.title!=='string'||!value.title)throw new Error('Invalid imported session receipt');return value;
+  }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   async historyPage(id,limit=40,before) {
     executionIdentity(id);if(!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history page size');
@@ -711,6 +715,12 @@ class McpAuthorizationController {
   open(serverId,link){mcpServerIdentity(serverId);const value=this.attempts.get(serverId)?.value;if(!this.active()||!value||value.state!=='awaiting_callback'||value.cancellation_requested||Date.now()>=value.expires_unix_ms)throw new Error('Wait for the current MCP authorization link.');validateMcpAuthorizationAttempt(value);return link(value.authorization_url);}
 }
 function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid provider profile metadata');}
+function validateSessionArchive(value){
+  exactFields(value,['format','version','session','messages']);if(value.format!=='xmind.session'||![1,2].includes(value.version)||!value.session||typeof value.session!=='object'||Array.isArray(value.session)||!Array.isArray(value.messages)||value.messages.length>1000)throw new Error('Invalid xMind session archive');
+  exactFields(value.session,value.version===1?['title']:['title','agent']);if(typeof value.session.title!=='string'||!value.session.title||value.session.title.length>512)throw new Error('Invalid xMind session title');
+  if(value.version===2&&value.session.agent!==null){const agent=value.session.agent;exactFields(agent,agent?.tools===undefined?['id','revision','model_id','instructions']:['id','revision','model_id','instructions','tools']);if(typeof agent.id!=='string'||!agent.id||!Number.isSafeInteger(agent.revision)||agent.revision<1||typeof agent.model_id!=='string'||agent.model_id.length>256||typeof agent.instructions!=='string'||!agent.instructions||agent.instructions.length>32768||(agent.tools!==undefined&&(!Array.isArray(agent.tools)||agent.tools.length>64||agent.tools.some(tool=>typeof tool!=='string'||!tool||tool.length>128))))throw new Error('Invalid archived agent selection');}
+  let total=0;const encoder=new TextEncoder();for(const message of value.messages){exactFields(message,['role','data']);if(!['user','assistant','tool'].includes(message.role)||!message.data||typeof message.data!=='object'||Array.isArray(message.data))throw new Error('Invalid archived conversation message');const size=encoder.encode(JSON.stringify(message.data)).length;if(size>262144||total>4194304-size)throw new Error('Session archive exceeds limits');total+=size;}return value;
+}
 function connectionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid connection profile identity.');return value;}
 function connectionName(value){if(typeof value!=='string'||!value.trim()||value.length>128||/[\r\n\0]/.test(value))throw new Error('Enter a connection name (up to 128 characters).');return value;}
 function connectionOrigin(value){if(typeof value!=='string'||value.length>8192||!value.startsWith('https://')||/[\\?#@\s\0-\x1f]/.test(value))throw new Error('Enter an HTTPS server URL without credentials, query or fragment.');return value;}

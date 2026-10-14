@@ -515,6 +515,10 @@ function graphEvent(message){
 byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});refreshSendControl();};
 function send(){if((activeRun||sessionBusy?!!byId('sessions').value:canExecute())&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
+const archiveExport=byId('session-export'),archiveImport=byId('session-import'),archiveFile=byId('session-archive-file');
+function refreshArchiveControls(){if(archiveExport)archiveExport.disabled=!byId('sessions').value||sessionBusy||activeRun;if(archiveImport)archiveImport.disabled=false;}
+if(archiveExport)archiveExport.onclick=()=>{if(!archiveExport.disabled)api.postMessage({type:'export-session',id:byId('sessions').value});};
+if(archiveImport&&archiveFile){archiveImport.onclick=()=>archiveFile.click();archiveFile.onchange=async()=>{const file=archiveFile.files?.[0];archiveFile.value='';if(!file)return;if(file.size>4*1024*1024){byId('status').textContent='Session archive exceeds the 4 MiB limit.';return;}try{const archive=JSON.parse(await file.text());api.postMessage({type:'import-session',archive});}catch(error){byId('status').textContent='Could not read session archive: '+error.message;}};}
 byId('terminal').onclick=()=>api.postMessage({type:'open-terminal'});
 byId('git').onclick=()=>api.postMessage({type:'git-menu'});
 byId('sessions').onchange=()=>{refreshRename();forkPending=false;refreshForkControls();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
@@ -525,7 +529,7 @@ byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.
 function resizePrompt(){const prompt=byId('prompt');prompt.style.height='auto';prompt.style.height=prompt.value?Math.min(180,prompt.scrollHeight)+'px':'';}
 byId('prompt').oninput=()=>{resizePrompt();refreshSendControl();};
 const renameDialog=byId('rename-dialog');
-function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();}
+function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();refreshArchiveControls();}
 byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!renameCapability||!selected?.dataset.sessionId)return;renameSnapshot={id:selected.value,title:selected.textContent};byId('conversation-title').value=renameSnapshot.title;byId('rename-status').textContent='';byId('rename-save').disabled=false;renameDialog.showModal();byId('conversation-title').focus();};
 for(const id of ['rename-close','rename-cancel'])byId(id).onclick=()=>renameDialog.close();
 renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conversation-title').value='';byId('rename-save').disabled=false;if(!byId('rename').hidden)byId('rename').focus();});
@@ -621,6 +625,9 @@ window.addEventListener('message',event=>{
   else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories);}
   else if(m.type==='graph-event')graphEvent(m);
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;refreshRename();refreshForkControls();}
+  else if(m.type==='session-exported'){if(!m.archive||m.archive.format!=='xmind.session'){byId('status').textContent='The backend returned an invalid session archive.';return;}const blob=new Blob([JSON.stringify(m.archive,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),link=node('a');link.href=url;link.download='xmind-session-'+byId('sessions').value+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);byId('status').textContent='Conversation archive downloaded.';}
+  else if(m.type==='session-imported'){byId('status').textContent='Imported conversation · '+m.title;}
+  else if(m.type==='session-transfer-error'){byId('status').textContent='Session transfer failed · '+m.text;}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='fork-result'){forkPending=false;refreshForkControls();if(!m.success)byId('status').textContent=m.text||'Fork was not created.';else byId('status').textContent='Fork created. The new conversation is selected.';}
   else if(m.type==='inbox'){const label=byId('inbox-status'),items=Array.isArray(m.items)?m.items:[],queued=items.filter(item=>item?.state==='queued');label.hidden=!queued.length;label.replaceChildren();if(queued.length){label.append(node('div',`${queued.length} queued prompt${queued.length===1?'':'s'}`,'inbox-summary'));for(const item of queued){const row=node('div',undefined,'inbox-row'),text=node('span',String(item.content||'').slice(0,180)+(item.content?.length>180?'…':''),'inbox-text'),cancel=node('button','Cancel','inbox-cancel');cancel.type='button';cancel.dataset.inboxId=item.id;cancel.setAttribute('aria-label','Cancel queued prompt');row.append(text,cancel);label.append(row);}}}
@@ -628,7 +635,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='queued-input-cancelled'){byId('status').textContent='Queued prompt cancelled.';}
   else if(m.type==='queued-started'){byId('status').textContent='Queued prompt started';}
   else if(m.type==='runs'){
-    sessionBusy=m.busy;refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
+    sessionBusy=m.busy;refreshArchiveControls();refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();

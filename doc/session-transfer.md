@@ -17,6 +17,10 @@ xmind_cli PORT export-session SESSION_ID FILE
 xmind_cli PORT import-session FILE
 ```
 
+The browser session selector also has Export and Import controls. Export
+downloads the selected idle conversation as a JSON archive; Import asks you to
+choose an archive, creates a new local conversation and selects it.
+
 The equivalent native API is `GET /v1/sessions/{id}/export` and
 `POST /v1/sessions/import` with `{ "archive": ARCHIVE }`. Import creates a
 fresh session ID and returns it. The source ID, fork ancestry, workspace,

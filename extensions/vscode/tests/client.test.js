@@ -34,6 +34,15 @@ test('session history page client validates bounded chronological pages and curs
  await assert.rejects(client.historyPage('session',0),/page size/);await assert.rejects(client.historyPage('session',1001),/page size/);await assert.rejects(client.historyPage('session',10,'msg_bad'),/cursor/);
  page.next_before='msg_7';await assert.rejects(client.historyPage('session',2),/history page/);
 });
+test('session archive client validates portable v1/v2 records and uses native import/export routes',async()=>{
+ const requests=[],archive={format:'xmind.session',version:2,session:{title:'Portable session',agent:{id:'reviewer',revision:2,model_id:'openai/gpt-5.6',instructions:'Review carefully',tools:['read_file']}},messages:[{role:'user',data:{content:'Inspect the project'}},{role:'assistant',data:{content:'Ready'}}]};
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>new URL(url).pathname.endsWith('/export')?archive:{id:'imported-1',title:'Portable session'}};});
+ assert.deepEqual(await client.exportSession('session-1'),archive);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/session-1/export');assert.equal(requests[0].options.method,'GET');
+ assert.deepEqual(await client.importSession(archive),{id:'imported-1',title:'Portable session'});assert.equal(new URL(requests[1].url).pathname,'/v1/sessions/import');assert.equal(requests[1].options.method,'POST');assert.deepEqual(JSON.parse(requests[1].options.body),{archive});
+ const legacy={format:'xmind.session',version:1,session:{title:'Old archive'},messages:[]};assert.deepEqual(await client.importSession(legacy),{id:'imported-1',title:'Portable session'});
+ const count=requests.length;for(const invalid of [{...archive,extra:true},{...archive,messages:[{role:'system',data:{content:'not an allowed imported role'}}]},{...archive,messages:[{role:'user',data:{content:'x'.repeat(262145)}}]},{...legacy,session:{title:'Old archive',agent:null}},{...archive,session:{...archive.session,agent:{...archive.session.agent,tools:Array(65).fill('read_file')}}}])await assert.rejects(client.importSession(invalid));assert.equal(requests.length,count,'Malformed archives are rejected before they reach the backend');
+ const malformed=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>({...archive,version:3})}));await assert.rejects(malformed.exportSession('session-1'),/archive/i);
+});
 test('default session history load is bounded to forty recent messages',async()=>{
  const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push(url);return{ok:true,json:async()=>({messages:[],has_more:false,next_before:null})};});
  await client.historyPage('session');assert.equal(new URL(requests[0]).search,'?limit=40');
