@@ -1,5 +1,18 @@
 # Native dependency plans in ordinary Agent mode
 
+## Registered MCP resource and prompt nodes — 2026-10-14
+
+Dynamic plans now admit exact-bound `mcp_*` aliases for registered MCP
+resources and prompts in the coding preset. Each model-free child opens a fresh
+peer connection, rediscovers the full catalog, compares the frozen server
+revision and binding, and routes the read through the existing controller
+approval and durable operation journal. Resource URIs and prompt arguments
+come only from that sealed binding and schema. A native subprocess contract
+executes an approved resource read followed by a dependent prompt retrieval,
+checks both actual responses and confirms that the fixture's effectful tool
+was never called. No xlang3 source change was required. See
+[validation status](VALIDATION_STATUS.md).
+
 ## Dynamic deterministic workspace tools — 2026-10-14
 
 Dynamic plans admit native `tool` nodes for the fixed read-only workspace
@@ -27,8 +40,8 @@ admitted primary workspace folder; background jobs are refused because their
 lifetime cannot be joined to a terminal plan child. A native process contract
 approved a real Node process in a nested workspace directory, verified its
 actual file write through a dependent native read, and verified denial before
-dispatch. MCP resources/prompts, recursive plans and replay of uncertain
-effects remain unavailable as plan nodes.
+dispatch. Recursive plans and replay of uncertain effects remain unavailable
+as plan nodes.
 
 The dynamic-plan pure, repository, engine and MCP/process contracts pass 4/4
 locally after the process-node change. The actual direct process/MCP contract
@@ -38,8 +51,8 @@ are native and actual. The full native Release suite completed at 143/144
 before process nodes were added; the single Rust Analyzer call-site-definition
 failure passed its immediate isolated rerun. VS Code and browser suites passed
 343/343 and 109/109 at the preceding MCP checkpoint. External-browser and
-installed VS Code acceptance remain open. MCP resources/prompts, recursive
-planning and full coding/provider parity remain work.
+installed VS Code acceptance remain open. Recursive planning and full
+coding/provider parity remain work.
 
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78-contract native gate in 145.17 seconds**, with the exact complete manifest

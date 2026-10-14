@@ -1,5 +1,28 @@
 # Current native validation
 
+## Dynamic-plan MCP resource and prompt reads — 2026-10-14
+
+Dynamic-plan schemas now offer registration-bound MCP resource and prompt
+aliases from the coding preset. At execution, each model-free child opens a
+fresh MCP subprocess, compares its full rediscovered binding with the sealed
+catalog, and obtains the usual controller approval before reading. Resource
+URIs and prompt arguments are validated by the exact captured schemas; reads
+do not require effect-only repository guidance, but still use one durable
+operation record and return the peer's actual response to the owned child.
+
+The synthetic peer contract runs a resource read followed by a success-dependent
+prompt retrieval through actual xMind AgentService, subprocess clients,
+approval journal, and embedded xlang3 SQLite. It verifies the exact resource
+URI and prompt arguments, actual returned bytes, dependency ordering, separate
+child receipts, and zero effect-tool calls. The focused Release CTest set
+passes **6/6** including dynamic-plan schema/repository/engine, the expanded
+MCP contract and A2A client/registry. The freshly rebuilt full native Release
+inventory completed **143/144** in 779.88 seconds; its sole failure was the
+Rust Analyzer call-site-definition contract. An immediate isolated rerun,
+including the fixture check, passed **2/2** in 21.57 seconds. `node --check`
+and `git diff --check` pass. Live MCP interoperability and rendered/installed
+clients remain outside this synthetic peer result.
+
 ## Dynamic-child A2A resubscription after SQLite reopen — 2026-10-14
 
 An approved A2A node in a dynamic plan now has an end-to-end restart contract

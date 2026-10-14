@@ -88,14 +88,16 @@ Run execute_mcp_tool(PersistenceService& store,const std::string& child,const Dy
     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_mcp_tool");
     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
     try{
-        if(!settings.workspace||!guidance.verify)throw ToolAccessDenied("Dynamic MCP effects require the admitted repository instruction precondition");
+        if(!settings.workspace)throw ToolAccessDenied("Dynamic MCP nodes require the admitted workspace");
         WorkspaceTools workspace(*settings.workspace);
         if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic MCP workspace identity changed");
         const auto catalogue=Json::parse(mcp_compact_object(caps.tool_catalog_json));
         const auto& definition=prepared.node.definition;
         const auto frozen_tool=std::find_if(catalogue.at("tools").begin(),catalogue.at("tools").end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==definition.tool;});
         if(frozen_tool==catalogue.at("tools").end()||!frozen_tool->contains("mcp_binding"))throw ToolAccessDenied("Dynamic MCP binding is no longer registered");
-        const auto binding=frozen_tool->at("mcp_binding");const auto server_id=binding.at("server_config_id").get<std::string>();const auto revision=binding.at("config_revision").get<std::int64_t>();
+        const auto binding=frozen_tool->at("mcp_binding");const bool readonly=binding.contains("kind")&&(binding.at("kind")=="resource"||binding.at("kind")=="prompt");
+        if(!readonly&&!guidance.verify)throw ToolAccessDenied("Dynamic MCP effects require the admitted repository instruction precondition");
+        const auto server_id=binding.at("server_config_id").get<std::string>();const auto revision=binding.at("config_revision").get<std::int64_t>();
         const auto server=std::find_if(settings.mcp_servers.begin(),settings.mcp_servers.end(),[&](const auto& item){return item.id==server_id&&item.revision==revision&&item.enabled;});
         if(server==settings.mcp_servers.end())throw ToolAccessDenied("Dynamic MCP server configuration changed");
         budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
@@ -105,14 +107,15 @@ Run execute_mcp_tool(PersistenceService& store,const std::string& child,const Dy
         McpToolRegistry registry(*client,store,workspace,server_id,revision,budget->deadline(),cancel,&private_credentials);
         const auto bindings=Json::parse(registry.approval_bindings_json());const auto actual=std::find_if(bindings.begin(),bindings.end(),[&](const auto& item){return item.is_object()&&item.value("alias",std::string{})==definition.tool;});
         if(actual==bindings.end()||*actual!=binding)throw McpCatalogueChanged("Dynamic MCP catalogue differs from its accepted binding");
-        guidance.validate();
+        if(!readonly)guidance.validate();
         const auto expiry=now_ms()+settings.run_timeout.count();
         const auto operation=identity();
-        const auto result=Json::parse(registry.invoke(operation,child,definition.tool,definition.arguments_json,expiry,budget->deadline(),cancel,std::move(guidance)));
+        const auto result=Json::parse(registry.invoke(operation,child,definition.tool,definition.arguments_json,expiry,budget->deadline(),cancel,readonly?InstructionPrecondition{}:std::move(guidance)));
         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
     }catch(const McpOutcomeUnrecorded&){throw;}
      catch(const McpEffectUncertain&){return retire(RunState::failed,"mcp_effect_uncertain");}
+     catch(const McpReadFailed&){return retire(RunState::failed,"mcp_read_failed");}
      catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
      catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
      catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}

@@ -26,8 +26,11 @@ recovery is still open. The existing explicit resubscription route is now
 verified after SQLite reopen for a succeeded dynamic-child-owned operation:
 it resumes with that child's saved cursor, appends to the child journal, and
 does not repeat the initial send. See [validation status](VALIDATION_STATUS.md).
-Background process jobs, MCP resources/prompts in plans, recursive planning,
-live provider and external-browser/installed VS Code acceptance remain open.
+Background process jobs, recursive planning, live provider and
+external-browser/installed VS Code acceptance remain open. Registered MCP
+resource and prompt reads now run as dependent model-free nodes through the
+same frozen binding, controller approval and durable journal; see
+[validation status](VALIDATION_STATUS.md).
 
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
@@ -600,10 +603,10 @@ The original proposed production ownership split is retained for comparison:
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
 The [implementation guide](native-dynamic-plan.md) identifies the subset now
-implemented and its verification limits. Background process scheduling, MCP
-resources/prompts, reference helpers and further node kinds in this table still
-require their own implementation and acceptance; the design itself supplies
-no execution evidence.
+implemented and its verification limits. Background process scheduling,
+reference helpers and further node kinds in this table still require their own
+implementation and acceptance; the design itself supplies no execution
+evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget
 integration, broader bounded recursion, automatic streamed A2A plan-event

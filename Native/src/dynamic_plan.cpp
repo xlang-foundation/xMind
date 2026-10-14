@@ -147,9 +147,15 @@ void definition(const DynamicNodeDefinition& value,const DynamicPlanCapabilities
             if(binding.at("kind")!="a2a_remote_agent"||binding.at("alias")!=value.tool||binding.at("input_schema_json")!=found->at("input_schema_json")||binding.at("agent_id").get<std::string>().empty()||!binding.at("agent_revision").is_number_integer()||binding.at("agent_revision").get<std::int64_t>()<1||!binding.at("has_bearer").is_boolean())throw std::invalid_argument("Dynamic A2A binding differs from its sealed tool schema");
         }else{
             const auto coding=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.coding"&&preset.revision==1&&!preset.readonly;});
-            if(coding==frozen.presets.end()||std::find(coding->tools.begin(),coding->tools.end(),value.tool)==coding->tools.end()||!value.tool.starts_with("mcp_")||!found->contains("mcp_binding")||!found->at("mcp_binding").is_object()||found->at("mcp_binding").contains("kind"))throw std::invalid_argument("Dynamic effect tool must be a sealed registered MCP tool in the coding preset");
-            const auto& binding=found->at("mcp_binding");for(const auto* key:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","annotations_json"})if(!binding.contains(key))throw std::invalid_argument("Dynamic MCP tool lacks its complete sealed binding");
+            if(coding==frozen.presets.end()||std::find(coding->tools.begin(),coding->tools.end(),value.tool)==coding->tools.end()||!value.tool.starts_with("mcp_")||!found->contains("mcp_binding")||!found->at("mcp_binding").is_object())throw std::invalid_argument("Dynamic MCP node must be sealed in the coding preset");
+            const auto& binding=found->at("mcp_binding");
+            for(const auto* key:{"server_config_id","config_revision","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})if(!binding.contains(key))throw std::invalid_argument("Dynamic MCP tool lacks its complete sealed binding");
             if(binding.at("alias")!=value.tool||binding.at("input_schema_json")!=found->at("input_schema_json"))throw std::invalid_argument("Dynamic MCP binding differs from its sealed tool schema");
+            if(binding.contains("kind")){
+                const auto kind=binding.at("kind");if(!kind.is_string()||(kind!="resource"&&kind!="prompt")||!binding.contains("peer_name")||!binding.at("peer_name").is_string()||!binding.contains("metadata_json")||!binding.at("metadata_json").is_string())throw std::invalid_argument("Dynamic MCP read binding is incomplete or unsupported");
+                if(kind=="resource"&&(!binding.contains("resource_uri")||!binding.at("resource_uri").is_string()))throw std::invalid_argument("Dynamic MCP resource binding lacks its exact URI");
+                if(kind=="prompt"&&binding.contains("resource_uri"))throw std::invalid_argument("Dynamic MCP prompt binding cannot contain a resource URI");
+            }else if(!binding.contains("peer_tool")||!binding.at("peer_tool").is_string())throw std::invalid_argument("Dynamic MCP effect binding lacks its exact peer tool");
         }
         JsonSchema schema(found->at("input_schema_json").get<std::string>());schema.validate_object(value.arguments_json);
     }
@@ -350,7 +356,8 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     const auto catalog=object(frozen.tool_catalog_json,change_limit);
     if(catalog.is_object()&&catalog.contains("tools")&&catalog["tools"].is_array())for(const auto& policy:frozen.presets)if(policy.id=="workspace.coding"&&!policy.readonly)for(const auto& name:policy.tools)if(name.starts_with("mcp_")){
         const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==name;});
-        if(found!=catalog["tools"].end()&&found->contains("mcp_binding")&&found->at("mcp_binding").is_object()&&!found->at("mcp_binding").contains("kind"))read_tools.push_back(name);
+        if(found!=catalog["tools"].end()&&found->contains("mcp_binding")&&found->at("mcp_binding").is_object()&&
+            (!found->at("mcp_binding").contains("kind")||found->at("mcp_binding").value("kind",std::string{})=="resource"||found->at("mcp_binding").value("kind",std::string{})=="prompt"))read_tools.push_back(name);
     }
     if(catalog.is_object()&&catalog.contains("tools")&&catalog["tools"].is_array())for(const auto& policy:frozen.presets)if(policy.id=="workspace.coding"&&!policy.readonly)for(const auto& name:policy.tools)if(name.starts_with("a2a_delegate_")){
         const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==name;});
@@ -371,7 +378,7 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     for(const auto* field:{"expected_revision","expected_state_sequence"})revised["properties"][field]={{"type","integer"},{"minimum",1},{"maximum",safe_integer}};
     revised["properties"]["add"]=definitions;revised["properties"]["replace"]=definitions;
     revised["properties"]["skip"]={{"type","array"},{"maxItems",32},{"items",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}}};
-    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, read-only tool tasks for deterministic workspace reads, MCP and registered A2A tool tasks for external actions, run_process tool tasks for synchronous commands through registered profiles, and human tasks for authenticated input. Effects keep their usual exact controller approval and journal; human answers are data. This must be the sole tool call in the assistant turn.",initial.dump()},
+    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, read-only tool tasks for deterministic workspace reads and registered MCP resource/prompt reads, MCP and registered A2A tool tasks for external actions, run_process tool tasks for synchronous commands through registered profiles, and human tasks for authenticated input. MCP resource and prompt reads still require their registered controller approval and journal; effects keep their usual exact approval. Human answers are data. This must be the sole tool call in the assistant turn.",initial.dump()},
         {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. MCP, A2A and process tool tasks keep their frozen bindings and require the usual controller approval. This must be the sole tool call in the assistant turn.",revised.dump()},
         {"inspect_plan","Read this Agent's actual owned dependency plan, revisions and bounded outcomes. This does not dispatch work or grant effect authority.",R"({"type":"object","properties":{},"additionalProperties":false})"}};
 }

@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## MCP resources and prompts as dependency-plan nodes (2026-10-14)
+
+Dynamic plans can now select registered MCP resource and prompt aliases from
+the sealed coding-preset catalog. Each read executes in its own model-free
+child through a fresh native peer connection, exact catalog revalidation,
+controller approval and the durable operation journal. A native synthetic
+subprocess contract reads a resource, then retrieves a dependent prompt and
+checks both actual replies and that no effect tool ran. The focused Release
+contracts pass **6/6**. No xlang3 source change was needed. The rebuilt full
+native suite passed 143/144; the single Rust Analyzer call-site-definition
+failure passed its immediate isolated rerun with the fixture check (2/2). See
+[validation status](VALIDATION_STATUS.md).
+
 ## Fresh native Release validation (2026-10-14)
 
 A clean Visual Studio 18 Release build in `build/native-verify` passed all
