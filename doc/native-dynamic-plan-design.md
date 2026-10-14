@@ -21,9 +21,12 @@ agent binding, uses the usual local approval, and journals streamed task events
 and explicit event cursors to its owned child. The Release dynamic-plan fixture
 uses the actual native AgentService and approval journal with a synthetic local
 A2A 1.0 streaming peer; approved dispatch records both actual stream events and
-returns the peer's task ID, while denial produces no send. Automatic stream
-recovery is still open. The existing explicit resubscription route is now
-verified after SQLite reopen for a succeeded dynamic-child-owned operation:
+returns the peer's task ID, while denial produces no send. The shared A2A tool
+path now automatically resubscribes up to twice after a transport interruption
+only when the same operation has both a discovered task ID and a committed
+explicit event cursor; it never repeats the send. Missing cursors and exhausted
+retries remain uncertain for inspection. The existing explicit resubscription
+route is also verified after SQLite reopen for a succeeded dynamic-child-owned operation:
 it resumes with that child's saved cursor, appends to the child journal, and
 does not repeat the initial send. See [validation status](VALIDATION_STATUS.md).
 Background process jobs, recursive planning, live provider and

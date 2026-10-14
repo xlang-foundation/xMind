@@ -13,6 +13,24 @@ checks both actual responses and confirms that the fixture's effectful tool
 was never called. No xlang3 source change was required. See
 [validation status](VALIDATION_STATUS.md).
 
+## Automatic A2A stream recovery — 2026-10-14
+
+The shared native A2A tool path now handles a bounded transport interruption
+after a streamed send has revealed a remote task ID and the owning run has
+committed an explicit peer event cursor. It resubscribes to that same task from
+the latest durable cursor, up to two times within the existing run deadline;
+it never repeats the initial send. If the task ID/cursor is missing, the run is
+cancelled or out of time, or resubscription fails, the effect remains uncertain
+for the existing inspection and recovery path.
+
+The actual AgentService contract forces a synthetic A2A 1.0 peer to drop the
+initial stream after its first committed task event. It verifies one send,
+automatic resubscription from event 1, the final event 2, durable child-owned
+event history, and a later SQLite-reopen resubscription from event 2 without
+another send. The focused Release CTest passes; the peer and provider are
+synthetic, while the native transport, approval, SQLite journal and restart
+path are actual. Live external-peer behavior remains unverified.
+
 ## Dynamic deterministic workspace tools — 2026-10-14
 
 Dynamic plans admit native `tool` nodes for the fixed read-only workspace

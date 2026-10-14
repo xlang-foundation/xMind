@@ -1,5 +1,25 @@
 # Current native validation
 
+## Automatic outbound A2A stream reconnect — 2026-10-14
+
+The shared native A2A tool registry now handles a bounded stream transport
+failure after task identity and an explicit event cursor are durably recorded.
+It resumes the same remote task from the latest committed cursor, at most twice
+within the existing run deadline, and never sends the task a second time. If
+there is no durable cursor, cancellation/deadline occurs, or reconnect fails,
+the operation remains uncertain for inspection.
+
+The Release build passed. Focused CTest passed **3/3** for the A2A client,
+A2A tool registry and actual dynamic-plan integration. The integration peer
+intentionally disconnects after event 1, observes one `SendStreamingMessage`
+and an automatic `SubscribeToTask` with `Last-Event-ID: event 1`, returns the
+terminal event 2, then verifies an explicit SQLite-reopen subscription starts
+at event 2 and does not resend. The complete log is
+[`native-a2a-auto-resubscribe-focused-ctest-20261014.log`](evidence/native-a2a-auto-resubscribe-focused-ctest-20261014.log).
+Provider/peer responses are synthetic. This validates the registered native
+tool path, not live external-agent interoperability or automatic recovery when
+the remote task ID or explicit cursor was never observed.
+
 ## Dynamic-plan MCP resource and prompt reads — 2026-10-14
 
 Dynamic-plan schemas now offer registration-bound MCP resource and prompt

@@ -105,7 +105,7 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
         if(remaining.count()<=0)throw TransportTimeout("A2A deadline elapsed before dispatch");
         const auto request=params.dump();
         if(entry.peer.streaming){
-            entry.client->stream_message(request,remaining,[&](const A2aStreamEvent& stream_event){
+            const auto observe=[&](const A2aStreamEvent& stream_event){
                 Json event;try{event=Json::parse(stream_event.result_json);}catch(...){throw A2aOutcomeUnrecorded("A2A stream event could not be decoded");}
                 const Json* value=&event;for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})if(event.contains(field)&&event[field].is_object()){value=&event[field];break;}
                 if(value->contains("id")&&(*value)["id"].is_string())streamed_task_id=(*value)["id"].get<std::string>();
@@ -114,7 +114,31 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
                 response=stream_event.result_json;
                 if(on_task_event){Json observed={{"operation_id",id},{"agent_id",entry.registration.id},
                     {"event_sequence",++event_sequence},{"event",std::move(event)}};if(!stream_event.event_id.empty())observed["event_id"]=stream_event.event_id;on_task_event(observed.dump());}
-            },cancel,[&]{validate_registration();dispatched=true;});
+            };
+            try{entry.client->stream_message(request,remaining,observe,cancel,[&]{validate_registration();dispatched=true;});}
+            catch(const TransportCancelled&){throw;}
+            catch(const TransportTimeout&){throw;}
+            catch(const TransportError&){
+                // A streamed send is never repeated. Recover only after an event
+                // has established the remote task identity and its explicit SSE
+                // cursor has been committed by the owning run callback.
+                if(streamed_task_id.empty())throw;
+                bool resumed=false;
+                for(int attempt=0;attempt<2&&!cancel.stop_requested();++attempt){
+                    const auto cursor=state.persistence_.latest_a2a_event_id(run,id).get();
+                    if(!cursor||cursor->empty())break;
+                    const auto left=std::chrono::ceil<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
+                    if(left.count()<=0)break;
+                    validate_registration();
+                    const auto task=Json{{"id",streamed_task_id}}.dump();
+                    try{
+                        entry.client->resubscribe_to_task(task,std::min(left,std::chrono::milliseconds(5000)),observe,*cursor,cancel);
+                        resumed=true;break;
+                    }catch(const TransportCancelled&){throw;}
+                     catch(const TransportError&){if(attempt==1)throw;}
+                }
+                if(!resumed)throw TransportError("A2A stream recovery requires a task ID, durable event cursor and remaining run time");
+            }
         }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();dispatched=true;});
     }catch(...){
         const auto failure=std::current_exception();
