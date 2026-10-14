@@ -74,6 +74,17 @@ contract passes **1/1** with assertions for this guidance. Persistent
 model-managed service lifecycle is still a product gap.
 [Validation evidence](evidence/background-process-tool-guidance-20261014.json).
 
+## Managed unified CLI workspace acceptance — 2026-10-14
+
+The profile-managed unified `xmind.exe` connected to the existing TestProj
+backend with `started=false`, then `workspace info` returned the registered
+TestProj root, workspace/folder identity and revision 1. The packaged runtime's
+xMind and xlang3 DLL hashes match the previously verified staged artifact.
+This confirms the local CLI uses the same managed profile and workspace as the
+browser without launching a duplicate owner. Running the unstaged build-tree
+binary is not equivalent because it lacks adjacent packaged xlang3 modules.
+[Sanitized evidence](evidence/managed-cli-workspace-testproj-20261014.json).
+
 ## Fresh full native Release gate — 2026-10-14
 
 The current native source rebuilt in the dedicated `build/native-verify` tree

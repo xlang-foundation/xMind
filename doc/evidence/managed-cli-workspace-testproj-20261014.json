@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-14",
+  "result": "passed",
+  "xmind_source_main": "960f23bc665c93805575cb6641ef1e03938c1e78",
+  "xmind_profile_runtime": "f82e79c643b5c99bc3b99d7e230f8ff5485451bb",
+  "xlang3_profile_runtime": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "profile_root": "C:\\Users\\shaw9\\.xMind\\GoalBrowserProfiles",
+  "runtime_executable": "runtime-573be138ce36ddcce3220ed550c428540b2898a3535fb7d0ce1a3a158f3070ea/xmind.exe",
+  "runtime_hashes": {
+    "xmind.exe": "ef035986fac8b38737c21d12f8d60ee6dd4a2585ec830f4e9b593c52f4e64906",
+    "xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
+  },
+  "profile_info": {
+    "origin": "http://127.0.0.1:50663",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "process_id": 29464,
+    "started": false
+  },
+  "workspace_info": {
+    "command": "xmind.exe --workspace D:\\CantorAI2026\\TestProj --profile-root C:\\Users\\shaw9\\.xMind\\GoalBrowserProfiles workspace info",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000",
+    "name": "TestProj",
+    "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000",
+    "folders": ["D:\\CantorAI2026\\TestProj"],
+    "revision": 1
+  },
+  "side_effects": "Read-only profile/workspace inspection; no profile owner was started, no files were changed, and no process-quarantine record was modified.",
+  "limitations": [
+    "This verifies managed CLI profile/workspace routing, not a full interactive CLI coding edit/build workflow.",
+    "The isolated CMake build output lacks adjacent staged xlang3 modules and is not a valid packaged-runtime target for this command."
+  ]
+}
