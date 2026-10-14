@@ -13,6 +13,9 @@ The command, return codes, test counts and log digest are recorded in the
 [machine-readable result](evidence/native-full-release-ctest-20261014.json).
 This is native contract coverage; synthetic peers/providers and local test
 fixtures do not establish live-provider or installed-client acceptance.
+The current shared browser and VS Code suites also pass **452/452** on the
+same source checkpoint; their exact output and command are recorded in
+[`browser-vscode-contracts-20261014.json`](evidence/browser-vscode-contracts-20261014.json).
 
 ## Automatic outbound A2A stream reconnect — 2026-10-14
 

@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-14",
+  "sourceRevision": "a508e27",
+  "command": "node --test extensions/vscode/tests/*.test.js views/browser/tests/*.test.cjs",
+  "exitCode": 0,
+  "passed": 452,
+  "failed": 0,
+  "skipped": 0,
+  "elapsedMilliseconds": 15388.4613,
+  "log": "browser-vscode-contracts-20261014.log",
+  "logSha256": "e185454cfbeeb05dad6e857de569aae37c856c2a1f0c35f80418bea7e46fbe65",
+  "scope": "Automated browser adapter and VS Code extension contracts; no rendered/live acceptance claim"
+}

@@ -10,6 +10,8 @@ xlang3 SQLite. The complete CTest output is recorded in
 [validation status](VALIDATION_STATUS.md#full-native-release-gate--2026-10-14).
 The exact command and result metadata are also available in the
 [evidence record](evidence/native-full-release-ctest-20261014.json).
+The shared browser and VS Code client contracts pass **452/452** on the same
+source checkpoint; see the [client evidence record](evidence/browser-vscode-contracts-20261014.json).
 Synthetic peers and providers remain contract fixtures, not live interoperability
 or installed-client evidence.
 
