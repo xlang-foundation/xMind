@@ -277,6 +277,9 @@ std::future<SessionInboxItem> PersistenceService::enqueue_session_input(std::str
 std::future<std::vector<SessionInboxItem>> PersistenceService::session_inbox(std::string session_id) {
     return impl_->submit([session_id=std::move(session_id)](Repository& repository){return repository.session_inbox(session_id);});
 }
+std::future<void> PersistenceService::cancel_session_input(std::string session_id,std::string input_id) {
+    return impl_->submit([session_id=std::move(session_id),input_id=std::move(input_id)](Repository& repository){repository.cancel_session_input(session_id,input_id);});
+}
 std::future<std::vector<Message>> PersistenceService::history(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.history(id);});
 }

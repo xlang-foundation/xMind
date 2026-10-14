@@ -518,6 +518,7 @@ for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMess
 byId('terminal').onclick=()=>api.postMessage({type:'open-terminal'});
 byId('git').onclick=()=>api.postMessage({type:'git-menu'});
 byId('sessions').onchange=()=>{refreshRename();forkPending=false;refreshForkControls();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
+byId('inbox-status').addEventListener('click',event=>{const button=event.target.closest?.('button.inbox-cancel');if(!button||!button.dataset.inboxId)return;button.disabled=true;api.postMessage({type:'cancel-inbox',id:button.dataset.inboxId});});
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
 byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}};
@@ -622,8 +623,9 @@ window.addEventListener('message',event=>{
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;refreshRename();refreshForkControls();}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='fork-result'){forkPending=false;refreshForkControls();if(!m.success)byId('status').textContent=m.text||'Fork was not created.';else byId('status').textContent='Fork created. The new conversation is selected.';}
-  else if(m.type==='inbox'){const label=byId('inbox-status'),items=Array.isArray(m.items)?m.items:[],queued=items.filter(item=>item?.state==='queued');label.hidden=!queued.length;label.textContent=queued.length?`${queued.length} queued prompt${queued.length===1?'':'s'} · next: ${String(queued[0].content||'').slice(0,180)}${queued[0].content?.length>180?'…':''}`:'';}
+  else if(m.type==='inbox'){const label=byId('inbox-status'),items=Array.isArray(m.items)?m.items:[],queued=items.filter(item=>item?.state==='queued');label.hidden=!queued.length;label.replaceChildren();if(queued.length){label.append(node('div',`${queued.length} queued prompt${queued.length===1?'':'s'}`,'inbox-summary'));for(const item of queued){const row=node('div',undefined,'inbox-row'),text=node('span',String(item.content||'').slice(0,180)+(item.content?.length>180?'…':''),'inbox-text'),cancel=node('button','Cancel','inbox-cancel');cancel.type='button';cancel.dataset.inboxId=item.id;cancel.setAttribute('aria-label','Cancel queued prompt');row.append(text,cancel);label.append(row);}}}
   else if(m.type==='queued-input'){byId('prompt').value='';resizePrompt();byId('status').textContent='Prompt saved. It will run after the active turn finishes.';}
+  else if(m.type==='queued-input-cancelled'){byId('status').textContent='Queued prompt cancelled.';}
   else if(m.type==='queued-started'){byId('status').textContent='Queued prompt started';}
   else if(m.type==='runs'){
     sessionBusy=m.busy;refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();

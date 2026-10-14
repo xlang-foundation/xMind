@@ -94,11 +94,11 @@ async function stop() {
   // Windows kill is abrupt: recovery assertions below test that actual failure.
   child.kill();await exiting;child=null;
 }
-async function api(path,body) {
+async function api(path,body,method) {
   const response=await fetch(`http://127.0.0.1:${port}${path}`,{
-    method:body===undefined?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(body===undefined?{}:{'Content-Type':'application/json'})},
+    method:method|| (body===undefined?'GET':'POST'),headers:{Authorization:`Bearer ${token}`,...(body===undefined?{}:{'Content-Type':'application/json'})},
     body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000),redirect:'error'});
-  return {status:response.status,data:await response.json()};
+  return {status:response.status,data:response.status===204?{}:await response.json()};
 }
 function cli(...args) {
   const result=spawnSync(cliExe,[String(port),...args],{env:baseEnv,encoding:'utf8',windowsHide:true,timeout:15000});
@@ -251,6 +251,12 @@ try {
   assert.equal((await api('/v1/runs',{id:'replacement-run',session_id:'overflow',prompt:'Read README again'})).status,202);
   cli('cancel','held-run');await terminal('held-run','cancelled');
   await session('durable-inbox');
+  await session('cancel-inbox');const cancellableInput=await api('/v1/sessions/cancel-inbox/inbox',{id:'cancel-before-run',content:'Remove this queued prompt'});assert.equal(cancellableInput.status,202);
+  assert.equal((await api('/v1/sessions/cancel-inbox/inbox/cancel-before-run',undefined,'DELETE')).status,204);
+  assert.deepEqual((await api('/v1/sessions/cancel-inbox/inbox')).data.items,[],'Cancellation must remove an unclaimed inbox row');
+  assert.equal((await api('/v1/sessions/cancel-inbox/inbox/cancel-before-run',undefined,'DELETE')).status,204,'Cancelling the same queued item twice is idempotent');
+  assert.equal((await api('/v1/sessions/cancel-inbox/inbox',{id:'cancel-before-run',content:'Remove this queued prompt'})).status,409,'Cancelled input identity cannot be reused');
+  assert.equal((await api('/v1/sessions/cancel-inbox/inbox/missing-input',undefined,'DELETE')).status,404,'Unknown input identity remains not found');
   assert.equal((await api('/v1/runs',{id:'inbox-active-run',session_id:'durable-inbox',prompt:'hold-stream'})).status,202);await streaming('inbox-active-run');
   const queuedInput=await api('/v1/sessions/durable-inbox/inbox',{id:'durable-input-1',content:'Run this after the active turn'});assert.equal(queuedInput.status,202);assert.equal(queuedInput.data.state,'queued');
   assert.deepEqual((await api('/v1/sessions/durable-inbox/inbox')).data.items.map(item=>({id:item.id,state:item.state,run_id:item.run_id})),[{id:'durable-input-1',state:'queued',run_id:undefined}]);
@@ -259,6 +265,8 @@ try {
   cli('cancel','inbox-active-run');await terminal('inbox-active-run','cancelled');
   const inboxRun=await api('/v1/runs',{id:'inbox-follow-up-run',session_id:'durable-inbox',prompt:queuedInput.data.content,inbox_id:queuedInput.data.id});assert.equal(inboxRun.status,202,JSON.stringify(inboxRun.data));await terminal(inboxRun.data.id,'completed');
   const claimedInput=(await api('/v1/sessions/durable-inbox/inbox')).data.items.find(item=>item.id==='durable-input-1');assert.equal(claimedInput.state,'claimed');assert.equal(claimedInput.run_id,inboxRun.data.id);
+  assert.equal((await api('/v1/sessions/durable-inbox/inbox/durable-input-1',undefined,'DELETE')).status,204,'Cancelling a claimed item is idempotent and must preserve its run link');
+  assert.equal((await api('/v1/sessions/durable-inbox/inbox')).data.items[0].run_id,inboxRun.data.id);
   assert.equal(cli('history','durable-inbox').filter(message=>message.role==='user'&&message.data.content==='Run this after the active turn').length,1,'Claimed input must enter conversation history exactly once');
   await session('http-interrupt');
   assert.equal((await api('/v1/runs',{id:'http-interrupt-run',session_id:'http-interrupt',prompt:'hold-stream'})).status,202);

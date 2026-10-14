@@ -164,6 +164,7 @@ public:
     void append_message(const std::string& id,const std::string& role,const std::string& json);
     SessionInboxItem enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content);
     std::vector<SessionInboxItem> session_inbox(const std::string& session_id);
+    void cancel_session_input(const std::string& session_id,const std::string& input_id);
     Message message(const std::string& id,std::int64_t sequence);
     std::vector<Message> history(const std::string& id);
     MessagePage history_page(const std::string& id,std::optional<std::int64_t> before_sequence,std::size_t count);

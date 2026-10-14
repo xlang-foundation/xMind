@@ -19,6 +19,7 @@ function harness(options={}) {
   let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
   const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
+  const inboxItems=options.inboxItems||[];
   const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
@@ -39,6 +40,13 @@ function harness(options={}) {
     if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     if(target.pathname==='/v1/mcp/resources')return {ok:true,json:async()=>options.mcpResources||{servers:[],resources:[],templates:[]}};
+    const inboxRoute=target.pathname.match(/^\/v1\/sessions\/([A-Za-z0-9_-]+)\/inbox(?:\/([A-Za-z0-9_-]+))?$/);
+    if(inboxRoute){
+      const session=inboxRoute[1],id=inboxRoute[2];
+      if(requestOptions.method==='GET')return {ok:true,json:async()=>({items:inboxItems.filter(item=>item.session_id===session)})};
+      if(requestOptions.method==='POST'){const body=JSON.parse(requestOptions.body),item={id:body.id||'inbox-fixture',session_id:session,content:body.content,state:'queued',created_ms:Date.now()};inboxItems.push(item);return {ok:true,status:202,json:async()=>item};}
+      if(requestOptions.method==='DELETE'){const index=inboxItems.findIndex(item=>item.id===id&&item.session_id===session&&item.state==='queued');if(index>=0)inboxItems.splice(index,1);return {ok:true,status:204,json:async()=>({})};}
+    }
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
     else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
@@ -229,6 +237,24 @@ test('sidebar selection retires its feed, delayed events and queued metadata ref
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const old=h.streams[0];await old.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Before selection'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);
   view.receive({type:'select',id:'saved'});assert.equal(old.options.signal.aborted,true);await until(()=>h.streams.length===2);await new Promise(resolve=>setImmediate(resolve));const requests=h.requests.length,count=view.posted.length;task.callback();await assert.rejects(old.options.onEvent({seq:3,run_id:'finished',kind:'model.text',data:{text:'Retired fixture'}}),/retired/);old.resolve({reason:'terminal',cursor:2});await new Promise(resolve=>setImmediate(resolve));assert.equal(h.requests.length,requests);assert.equal(view.posted.length,count);assert.equal(h.intervals.size,0);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
  }finally{view.close();}
+});
+
+test('VS Code saves follow-ups to SQLite, cancels pending entries, and starts persisted entries when idle',async()=>{
+ const activeRun={id:'active',session_id:'saved',state:'running',graph_root:false,parent_id:'',node_id:''},activeOptions={running:true,runs:[activeRun],inboxItems:[]},active=harness(activeOptions);
+ await active.commands.get('agentflow.open')();const activeView=active.views[0];
+ try{
+  activeView.receive({type:'ready'});await until(()=>active.streams.length===1&&activeView.posted.some(message=>message.type==='inbox'));
+  activeView.receive({type:'send',prompt:'Queue from the VS Code sidebar'});
+  await until(()=>activeOptions.inboxItems.length===1&&activeView.posted.some(message=>message.type==='queued-input'));
+  const queued=activeOptions.inboxItems[0];assert.equal(queued.session_id,'saved');assert.equal(queued.content,'Queue from the VS Code sidebar');assert.equal(queued.state,'queued');assert.ok(!active.requests.includes('/v1/runs'));
+  activeView.receive({type:'cancel-inbox',id:queued.id});await until(()=>activeOptions.inboxItems.length===0&&activeView.posted.some(message=>message.type==='queued-input-cancelled'));
+ }finally{activeView.close();}
+ let admission;const pending={id:'inbox-restart',session_id:'saved',content:'Recover queued VS Code prompt',state:'queued',created_ms:1};
+ const recoveredOptions={runs:[],inboxItems:[pending],onAdmission:body=>{admission=body;return {ok:true,status:202,json:async()=>({id:'recovered-queued-run',session_id:'saved',state:'queued',graph_root:false,parent_id:'',node_id:''})};}},recovered=harness(recoveredOptions);
+ await recovered.commands.get('agentflow.open')();const recoveredView=recovered.views[0];
+ try{recoveredView.receive({type:'ready'});await until(()=>admission&&recoveredView.posted.some(message=>message.type==='queued-started'));
+  assert.equal(admission.inbox_id,pending.id);assert.equal(admission.prompt,pending.content);assert.ok(recovered.requests.includes('/v1/runs'));assert.ok(!recovered.errors.length);
+ }finally{recoveredView.close();}
 });
 
 test('sidebar graph stream refreshes child transcript after direct committed delivery',async()=>{

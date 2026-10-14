@@ -19,6 +19,14 @@ contains its stable `id`, `session_id`, exact `content`, `state` (`queued` or
 and content returns the original record; reusing it with different content or
 another session is a conflict.
 
+`DELETE /v1/sessions/{id}/inbox/{item-id}` cancels an item only while it remains
+queued. The canceled row is retained internally to reserve its stable ID, but
+is omitted from inbox listings. If a concurrent run already claimed the item,
+cancellation succeeds without changing its audit link. Repeating cancellation
+is idempotent; reusing a canceled ID conflicts. Browser and VS Code show a
+Cancel control for each pending item; the CLI can inspect the same inbox and
+resumes queued entries when the conversation is opened or its active run ends.
+
 Run admission accepts `inbox_id` alongside the regular `/v1/runs` fields. In
 one SQLite transaction, the repository verifies that the queued item belongs
 to that session and that the admitted prompt exactly matches its content, then
@@ -28,11 +36,14 @@ in the inbox as an audit link to their run. The input is written to conversation
 history once by ordinary run admission.
 
 Release verification covers repository reopen/idempotency, exact prompt
-claiming and duplicate-claim rejection, the real HTTP run path during an active
-synthetic-provider turn, queue retention after a rejected admission, subsequent
-dispatch after cancellation, and exactly one user-history record. The browser
-classic-script contract checks the rendered Queue button, prompt submission and
-visible pending item. The actual-server CLI contract queues a prompt during a
-held inference stream, cancels the held run, observes automatic admission of
-the queued prompt, and confirms exactly one history record and its claimed run
-link. Provider inference in these contracts is synthetic.
+claiming and duplicate-claim rejection, queued-item cancellation across two
+repository connections, ID reservation and repeated cancellation, missing and
+already-claimed cancellation, the real HTTP
+run path during an active synthetic-provider turn, queue retention after a
+rejected admission, subsequent dispatch after cancellation, and exactly one
+user-history record. Browser contracts exercise the rendered Queue and Cancel
+controls. VS Code host contracts verify queuing while active, cancellation and
+dispatch of a persisted item when idle. The actual-server CLI contract queues a
+prompt during a held inference stream, cancels the held run, observes automatic
+admission of the queued prompt, and confirms exactly one history record and its
+claimed run link. Provider inference in these contracts is synthetic.

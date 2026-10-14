@@ -30,7 +30,7 @@ class BackendClient {
     this.#workspaceGuard=guard;return this;
   }
 
-  async request(path, body, timeoutMs=15000) {
+  async request(path, body, timeoutMs=15000, method) {
     const ticket=body!==undefined&&this.#workspaceGuard?await this.#workspaceGuard.prepare():undefined;
     const token = validateToken(await this.#tokenProvider());
     if(ticket){
@@ -39,7 +39,7 @@ class BackendClient {
       if(path==='/v1/runs'||path==='/v1/graph-runs')body={...body,...ticket.fields};
     }
     const response = await this.fetch(this.baseUrl + path, {
-      method: body === undefined ? 'GET' : 'POST',
+      method: method || (body === undefined ? 'GET' : 'POST'),
       headers: { Authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(timeoutMs),
@@ -198,6 +198,7 @@ class BackendClient {
   createSession(title) { return this.request('/v1/sessions', { title }); }
   sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
   enqueueSessionInput(session_id,content,id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,{...(id?{id}:{}),content}); }
+  cancelSessionInput(session_id,input_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox/${encodeURIComponent(input_id)}`,undefined,15000,'DELETE'); }
   async terminals(session) {
     executionIdentity(session);
     const value=await this.request(`/v1/sessions/${encodeURIComponent(session)}/terminals`);

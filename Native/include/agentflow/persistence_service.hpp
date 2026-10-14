@@ -149,6 +149,7 @@ public:
     std::future<void> append_message(std::string id,std::string role,std::string json);
     std::future<SessionInboxItem> enqueue_session_input(std::string id,std::string session_id,std::string content);
     std::future<std::vector<SessionInboxItem>> session_inbox(std::string session_id);
+    std::future<void> cancel_session_input(std::string session_id,std::string input_id);
     std::future<Message> message(std::string id,std::int64_t sequence);
     std::future<std::vector<Message>> history(std::string id);
     std::future<MessagePage> history_page(std::string id,std::optional<std::int64_t> before_sequence,std::size_t count);

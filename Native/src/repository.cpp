@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>19)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>20)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>19) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>20) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -798,6 +798,15 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL)))");
         db.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");db.execute("PRAGMA user_version=19");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session inbox migration did not preserve foreign key ownership");
+    }
+    if(version<20){
+        db.execute("DROP INDEX session_inbox_order");
+        db.execute("ALTER TABLE session_inbox RENAME TO session_inbox_v19");
+        db.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed','cancelled')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL) OR (state='cancelled' AND run_id IS NULL)))");
+        db.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms,run_id) SELECT id,session_id,content,state,created_ms,run_id FROM session_inbox_v19");
+        db.execute("DROP TABLE session_inbox_v19");
+        db.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");db.execute("PRAGMA user_version=20");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session inbox cancellation migration did not preserve foreign key ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -1977,6 +1986,7 @@ SessionInboxItem Repository::enqueue_session_input(const std::string& id,const s
     const auto existing=db.execute("SELECT session_id,content,state,created_ms,run_id FROM session_inbox WHERE id=?",{id}).rows;
     if(!existing.empty()){
         if(text(existing[0][0])!=session_id||text(existing[0][1])!=content)throw Conflict("Queued session input identity was reused with different content");
+        if(text(existing[0][2])=="cancelled")throw Conflict("Cancelled session input identity cannot be reused");
         SessionInboxItem item{id,session_id,content,text(existing[0][2]),{},integer(existing[0][3])};if(!std::holds_alternative<std::nullptr_t>(existing[0][4]))item.run_id=text(existing[0][4]);transaction.commit();return item;
     }
     const auto pending=db.execute("SELECT count(*),coalesce(sum(length(content)),0) FROM session_inbox WHERE session_id=? AND state='queued'",{session_id}).rows;
@@ -1985,8 +1995,15 @@ SessionInboxItem Repository::enqueue_session_input(const std::string& id,const s
 }
 std::vector<SessionInboxItem> Repository::session_inbox(const std::string& session_id) {
     bounded_identity(session_id,128);session(session_id);std::vector<SessionInboxItem> items;
-    for(const auto& row:impl_->database.execute("SELECT id,content,state,created_ms,run_id FROM session_inbox WHERE session_id=? ORDER BY created_ms,id LIMIT 128",{session_id}).rows){SessionInboxItem item{text(row[0]),session_id,text(row[1]),text(row[2]),{},integer(row[3])};if(!std::holds_alternative<std::nullptr_t>(row[4]))item.run_id=text(row[4]);items.push_back(std::move(item));}
+    for(const auto& row:impl_->database.execute("SELECT id,content,state,created_ms,run_id FROM session_inbox WHERE session_id=? AND state!='cancelled' ORDER BY created_ms,id LIMIT 128",{session_id}).rows){SessionInboxItem item{text(row[0]),session_id,text(row[1]),text(row[2]),{},integer(row[3])};if(!std::holds_alternative<std::nullptr_t>(row[4]))item.run_id=text(row[4]);items.push_back(std::move(item));}
     return items;
+}
+void Repository::cancel_session_input(const std::string& session_id,const std::string& input_id) {
+    bounded_identity(session_id,128);identifier(input_id);auto& db=impl_->database;Transaction transaction(db);session(session_id);
+    const auto existing=db.execute("SELECT state FROM session_inbox WHERE id=? AND session_id=?",{input_id,session_id}).rows;
+    if(existing.empty())throw NotFound("Queued session input not found");
+    const auto state=text(existing[0][0]);if(state=="cancelled"||state=="claimed"){transaction.commit();return;}
+    changed_one(db.execute("UPDATE session_inbox SET state='cancelled' WHERE id=? AND session_id=? AND state='queued'",{input_id,session_id}));transaction.commit();
 }
 Message Repository::message(const std::string& id,std::int64_t sequence) {
     if(sequence<1||sequence>9007199254740991LL)throw std::invalid_argument("Invalid message sequence");

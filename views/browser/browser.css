@@ -20,3 +20,4 @@ body{background:#10141a}.browser-bar{height:52px;display:flex;align-items:center
    component rules above. Earlier mobile declarations were overridden by the
    later .runtime-pane and #agent-sidebar defaults. */
 @media(max-width:760px){.browser-layout>.runtime-pane{display:none}#agent-sidebar{width:100%;min-width:0;max-width:none;border-left:0}#sidebar-divider{display:none}}
+.inbox-status{padding:7px 12px;border-bottom:1px solid #303947;color:#aeb9c9;font:11px/1.45 system-ui,sans-serif;overflow-wrap:anywhere}.inbox-status[hidden]{display:none}.inbox-summary{font-weight:600;margin-bottom:4px}.inbox-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0}.inbox-text{min-width:0;flex:1;overflow-wrap:anywhere}.inbox-cancel{flex:none;padding:2px 7px;font-size:10px}

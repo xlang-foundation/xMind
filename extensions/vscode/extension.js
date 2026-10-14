@@ -113,6 +113,44 @@ async function activate(context) {
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
   const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
+  let inboxDispatching=false;
+  async function refreshInbox(target=client,session=sessionId,version=generation){
+    if(!target||!session)return [];
+    const observed=await target.sessionInbox(session);if(target!==client||session!==sessionId||version!==generation||!panel)return [];
+    if(!observed||!Array.isArray(observed.items)||observed.items.length>128||observed.items.some(item=>!item||item.session_id!==session||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.content!=='string'||!['queued','claimed'].includes(item.state)))throw new Error('Invalid native session inbox.');
+    post({type:'inbox',items:observed.items});return observed.items;
+  }
+  async function queuePrompt(prompt){
+    const target=client,session=sessionId,version=generation;if(!target||!session)throw new Error('Select a conversation before queuing a prompt.');
+    const id='inbox_'+crypto.randomBytes(16).toString('hex'),item=await target.enqueueSessionInput(session,prompt,id);
+    if(target!==client||session!==sessionId||version!==generation||!panel)return;
+    if(!item||item.id!==id||item.session_id!==session||item.content!==prompt||!['queued','claimed'].includes(item.state))throw new Error('Native inbox acknowledgement changed.');
+    await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||!panel)return;
+    post({type:'queued-input',item});if(!busySession())await drainInbox();
+  }
+  async function cancelQueuedPrompt(id){
+    const target=client,session=sessionId,version=generation;if(!target||!session||typeof id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw new Error('Select a queued prompt in this conversation.');
+    const items=await refreshInbox(target,session,version);if(!items.some(item=>item.id===id&&item.state==='queued'))throw new Error('This prompt is no longer queued.');
+    await target.cancelSessionInput(session,id);if(target!==client||session!==sessionId||version!==generation||!panel)return;
+    await refreshInbox(target,session,version);post({type:'queued-input-cancelled',id});
+  }
+  async function drainInbox(){
+    if(inboxDispatching||!panel||!client||!sessionId||busySession()||health?.agent_execution!==true)return;
+    inboxDispatching=true;const target=client,session=sessionId,version=generation;
+    try{
+      const items=await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+      const item=items.find(value=>value.state==='queued');if(!item)return;
+      const binding=health.provider_profile_admission===true?await profileController.admission():undefined;
+      if(target!==client||session!==sessionId||version!==generation||busySession())return;
+      const run=await target.run(session,item.content,selectedModel,binding,item.id);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+      stop();clearGraph();runId=run.id;cursor=0;sessionRuns=[...sessionRuns.filter(value=>value.id!==run.id),run];presentRuns();
+      await context.workspaceState.update(runStateKey,{...connectionState(),session_id:session,id:run.id});
+      if(!panel||target!==client||session!==sessionId)return;
+      reviewed.clear();post({type:'operations',operations:[]});post({type:'user',text:item.content});post({type:'queued-started',item,run});
+      await refreshInbox(target,session,generation);watch();
+    }catch(error){if(target===client&&session===sessionId&&panel){if(error.status===409)await refreshInbox(target,session,generation).catch(()=>{});else post({type:'error',text:`Queued prompt is still saved. ${error.message}`});}}
+    finally{inboxDispatching=false;}
+  }
   const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
@@ -209,7 +247,7 @@ async function activate(context) {
 
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { if(version===generation&&panel){if(!busySession())await readSkills();await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
+    finally { if(version===generation&&panel){if(!busySession()){await readSkills();await drainInbox();}await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
   }
 
   async function pollOwned(id,version){
@@ -274,6 +312,8 @@ async function activate(context) {
     const history = await historyPager.select(id);
     if (version !== generation || !panel) return;
     post({ type: 'history', ...history });
+    await refreshInbox(client,id,version);
+    if(version!==generation||!panel)return;
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
     const previousProfile=profileController?.state;await profileController?.refresh();
@@ -299,7 +339,7 @@ async function activate(context) {
       // History already includes completed messages; replay events in a separate log.
       watch();
       await poll();
-    } else {presentRuns();post({ type: 'status', text: 'Ready' });}
+    } else {presentRuns();post({ type: 'status', text: 'Ready' });await drainInbox();}
     await readSkills();await readAgentSelection();
   }
 
@@ -592,7 +632,14 @@ async function activate(context) {
           }catch(error){if(panel===view&&version===generation)post({type:'fork-result',id:message.id,before:message.before,success:false,text:error.status===409?'This conversation changed or has an active run. Refresh it before forking.':error.message});}
         } else if (message.type === 'select-run' && typeof message.id === 'string') {
           await selectRun(message.id);
+        } else if(message.type==='cancel-inbox'){
+          await cancelQueuedPrompt(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
+          if(sessionId&&busySession()){
+            const selected=sessionRuns.find(run=>run.id===runId);
+            if(selected&&!['queued','running','paused'].includes(selected.state))throw new Error('Select the active run before queuing another prompt.');
+            await queuePrompt(message.prompt);return;
+          }
           const graph=selectedGraph?graphCatalogue.find(g=>g.id===selectedGraph&&g.executable):undefined;
           if(selectedGraph&&!graph)throw new Error('Graph is not executable on this backend.');
           if (!graph&&!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
@@ -608,7 +655,6 @@ async function activate(context) {
             if(panel!==view||client!==submissionClient)return;
           }
           if (panel !== view) return;
-          if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
           const admissionClient=client,runVersion=generation;let run;
           try{run=graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding);}
           catch(error){

@@ -1,6 +1,7 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/backend_lease.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <random>
@@ -65,6 +66,27 @@ int main(int argc,char** argv) {
     try {
         Directory directory; const auto path=(directory.path/"state.sqlite").string();
         const std::vector<std::string> roots{argv[1],argv[2]};
+        const auto migration_path=(directory.path/"v19-inbox.sqlite").string();
+        {
+            BackendLease owner(migration_path);Repository legacy(migration_path,roots);
+            legacy.create_session("migrated","v19 inbox");
+            legacy.enqueue_session_input("migrated-queued","migrated","Pending before migration");
+            legacy.enqueue_session_input("migrated-claimed","migrated","Claimed before migration");
+            legacy.start_prompt_run("migrated-run","migrated",R"({"content":"Claimed before migration"})",{},{},"migrated-claimed");
+        }
+        {
+            XlangSqlite legacy(migration_path,roots);
+            legacy.execute("DROP INDEX session_inbox_order");legacy.execute("ALTER TABLE session_inbox RENAME TO session_inbox_v20");
+            legacy.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL)))");
+            legacy.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms,run_id) SELECT id,session_id,content,state,created_ms,run_id FROM session_inbox_v20");
+            legacy.execute("DROP TABLE session_inbox_v20");legacy.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");legacy.execute("PRAGMA user_version=19");
+        }
+        {
+            BackendLease owner(migration_path);Repository migrated(migration_path,roots);
+            const auto before=migrated.session_inbox("migrated");const auto claimed=std::find_if(before.begin(),before.end(),[](const auto& item){return item.id=="migrated-claimed";});require(before.size()==2&&claimed!=before.end()&&claimed->state=="claimed"&&claimed->run_id=="migrated-run","v19 migration must preserve existing claimed input and its run link");
+            migrated.cancel_session_input("migrated","migrated-queued");
+            const auto after=migrated.session_inbox("migrated");require(after.size()==1&&after[0].id=="migrated-claimed","v19 migration must retain queued data and allow cancellation without exposing tombstones");
+        }
 #if defined(_WIN32)
         long_backend_lease(directory,roots);
 #endif
@@ -75,12 +97,18 @@ int main(int argc,char** argv) {
             first.create_session("inbox","durable inbox fixture");
             const auto queued=first.enqueue_session_input("queued-input-1","inbox","Persisted prompt survives refresh and backend reopen");
             require(queued.state=="queued"&&queued.run_id.empty(),"New session input must enter the durable queue");
+            const auto removable=first.enqueue_session_input("queued-input-remove","inbox","This prompt can still be cancelled");
+            second.cancel_session_input("inbox",removable.id);
+            require(second.session_inbox("inbox").size()==1,"Cancellation must remove a still-queued item across repository connections");
+            second.cancel_session_input("inbox","queued-input-remove");
+            rejects<Conflict>([&]{second.enqueue_session_input("queued-input-remove","inbox","This prompt can still be cancelled");});
             const auto replay=second.enqueue_session_input("queued-input-1","inbox","Persisted prompt survives refresh and backend reopen");
             require(replay.id==queued.id&&second.session_inbox("inbox").size()==1,"Queue admission must be idempotent and visible across repository connections");
             const auto claimed=first.start_prompt_run("inbox-run","inbox",R"({"content":"Persisted prompt survives refresh and backend reopen"})",{}, {},queued.id);
             const auto inbox_after_claim=second.session_inbox("inbox");
             require(claimed.state==RunState::queued&&inbox_after_claim.size()==1&&inbox_after_claim[0].state=="claimed"&&inbox_after_claim[0].run_id==claimed.id,"Run admission must atomically claim its exact queued input");
             rejects<Conflict>([&]{second.start_prompt_run("inbox-replay-run","inbox",R"({"content":"Persisted prompt survives refresh and backend reopen"})",{}, {},queued.id);});
+            second.cancel_session_input("inbox",queued.id);
             first.transition("inbox-run",RunState::queued,RunState::cancelled,R"({"reason":"contract_cleanup"})");
             first.put_information("agents","coding",R"({"model":"test"})");
             require(second.information("agents","coding")==R"({"model":"test"})","Information must be shared");

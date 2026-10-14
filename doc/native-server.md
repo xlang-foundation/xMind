@@ -31,7 +31,7 @@ The Release build and eighteen native contracts passed, including configured run
 | GET / POST | /v1/sessions | List/create durable sessions |
 | GET | /v1/sessions/{id}/history | Read conversation history |
 | POST | /v1/sessions/{id}/messages | Persist `{role:"user",data:{content:"nonempty text"}}`; rejects other roles, fields, NUL and non-text content |
-| GET / POST | /v1/sessions/{id}/inbox | Inspect or durably queue prompt input while a run is active; see [session inbox](native-session-inbox.md) |
+| GET / POST / DELETE | /v1/sessions/{id}/inbox[/item-id] | Inspect, queue or cancel durable prompt input; see [session inbox](native-session-inbox.md) |
 | GET | /v1/sessions/{id}/runs | Read persisted run history |
 | GET | /v1/runs/{id} | Read persisted run state |
 | GET | /v1/runs/{id}/events?after=N | Read ordered events after a validated cursor |

@@ -10,6 +10,14 @@ and claiming the inbox item are atomic. The admitted prompt must exactly match
 the queued content. This is part of xMind's backend/UI path; it required no
 general xlang3 optimization.
 
+Queued items can now be canceled from the browser and VS Code. Native
+cancellation is transactional and idempotent; canceled IDs remain reserved in
+SQLite while canceled rows stay hidden from inbox listings. The v19→v20
+migration contract verifies queued and claimed items, including the claimed
+run link, survive upgrade. Release `xlang_repository_contract` and
+`native_agent_http_contract` pass **2/2**; browser and VS Code contracts pass
+**98/98**.
+
 The real native HTTP/CLI contract now also verifies queued prompt admission,
 exactly-once history and the claimed run link. It passed on Release; the browser
 classic-script and HTTP-adapter suites previously passed **14/14**. See

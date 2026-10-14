@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+## Durable prompt cancellation in Browser and VS Code — 2026-10-13
+
+Queued prompts can be canceled from either UI. SQLite keeps canceled IDs
+reserved so retries are idempotent and an old ID cannot accidentally create a
+new prompt. The v19→v20 schema migration preserves pending and claimed input,
+including claimed run links. Release native repository and HTTP contracts pass
+2/2; browser and VS Code contracts pass 98/98. This closes an xMind inbox
+behavior gap and required no general xlang3 optimization.
+
 ## Ordered cross-folder `apply_patch` for ordinary agents — 2026-10-13
 
 An ordinary AgentRunner can now accept one ordered `patches` array spanning
