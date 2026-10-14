@@ -14,10 +14,13 @@ under that node.
 Release native repository and planning HTTP contracts passed **2/2**, including
 the root/child ownership tree and actual nested-plan HTTP projection. The VS
 Code/shared renderer suite passed **345/345** and the browser suite passed
-**109/109**. Client and renderer fixtures are synthetic; the HTTP contract
-uses actual xlang3-backed persistence with synthetic provider receipts. Nested
-owner histories, completed-response metrics and CLI presentation remain
-unimplemented.
+**109/109**. Follow-up renderer coverage also verifies owner and descendant
+transcripts with their per-response metrics. Client and renderer fixtures are
+synthetic; the HTTP contract uses actual xlang3-backed persistence with
+synthetic provider receipts. The native CLI prints the same complete plan
+observation as formatted JSON through its existing `inspect-plan` route.
+Nested pause/restart recovery, depth/total-work exhaustion and parallel sibling
+plans remain incomplete.
 
 ## Nested dynamic-agent planning runtime — 2026-10-14
 

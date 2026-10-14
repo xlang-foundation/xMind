@@ -118,22 +118,26 @@ inspectable; it cannot be converted into an ordinary tool error.
 4. Add durable pause/resume and crash-recovery for nested human waits and
    unresolved effects. Verify root restart drains or preserves every nested
    owner without duplicate provider dispatch or effect replay.
-5. **Partly implemented:** `/v1/runs/{root}/plan` now returns depth-one owner
+5. **Partly implemented:** `/v1/runs/{root}/plan` returns depth-one owner
    bindings, each child run, its current plan topology, accepted revisions and
-   call receipts/available held-response metrics. The strict shared browser/
-   VS Code view renders each nested plan under the exact admitting parent task.
-   Repository and HTTP contracts verify the owner link and projection. Nested
-   owner histories, completed-response metrics, CLI rendering, depth/total-
-   work exhaustion and parallel sibling plans remain pending.
+   call receipts/available held-response metrics. The shared browser/VS Code
+   view renders each nested plan and its actual owner/child transcripts under
+   the admitting parent task, retaining each response's supplied metrics. The
+   native `inspect-plan` command prints this same authenticated observation as
+   formatted JSON. Repository, HTTP, client and renderer contracts verify the
+   owner links and projection. Depth/total-work exhaustion and parallel sibling
+   plans remain pending.
 
 The executor, owner lifecycle and nested-provider acceptance stages passed
 the focused Release set **3/3** (`native_dynamic_plan_contract`,
 `native_dynamic_plan_repository_contract`, and
 `native_dynamic_plan_engine_contract`). The engine peer is synthetic; this
 does not prove live-provider behavior. Nested-plan HTTP and shared client
-presentation are now implemented with synthetic DTO/HTTP contracts. Durable
-nested pause/restart recovery, nested owner histories, completed-response
-metrics, CLI presentation and live-provider behavior remain incomplete.
+presentation, including actual descendant transcripts and response metrics,
+are implemented and tested. The CLI uses the same JSON endpoint/output path;
+its presentation remains structured JSON rather than a dedicated tree view.
+Durable nested pause/restart recovery, depth/total-work exhaustion, parallel
+sibling plans and live-provider behavior remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).

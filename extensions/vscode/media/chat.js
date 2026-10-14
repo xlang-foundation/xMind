@@ -373,10 +373,11 @@ function operationExtras(section,item,reviewable=true){
   }
 }
 const graphRows=new Map();let observedGraph,displayedGraph,workflowExecutable=false;
-const ownedRows=new Map();let observedParent;
-function clearOwned(){ownedRows.clear();observedParent=undefined;byId('owned-view').replaceChildren();byId('owned-view').hidden=true;}
+const ownedRows=new Map();let observedParent,ownedObservation;
+function clearOwned(){ownedRows.clear();observedParent=undefined;ownedObservation=undefined;byId('owned-view').replaceChildren();byId('owned-view').hidden=true;}
 function ownedView(parent,children,histories){
    if(observedParent!==parent.id){clearOwned();observedParent=parent.id;byId('owned-view').append(node('h3','Owned task runs'));}
+  ownedObservation={parent_id:parent.id,children,histories};
   byId('owned-view').hidden=children.length===0;if(children.length)byId('empty').hidden=true;
   for(const child of children){
     const run=child.run;let row=ownedRows.get(run.id);
@@ -468,9 +469,11 @@ function planView(value){
     row.body.querySelector('.plan-observation')?.remove();if(task.outcome_json){const detail=node('details',undefined,'plan-observation');detail.append(node('summary','Recorded outcome · '+task.effect_state),node('pre',task.outcome_json));row.body.append(detail);}
     row.body.querySelector('.nested-plan')?.remove();const nested=value.nested_plans.filter(owner=>owner.parent_node_label===task.id);
     for(const owner of nested){const detail=node('details',undefined,'nested-plan');detail.open=true;detail.append(node('summary','Nested plan · '+owner.plan.state+' · revision '+owner.plan.revision));detail.append(node('p','Owner '+owner.owner_run_id+' · run '+owner.run.state+' · plan '+owner.plan.id+' · depth '+owner.depth,'inspection-note'));
-      const nodes=node('ul');for(const child of owner.plan.nodes){const item=node('li',child.id+' · '+child.type+' · '+child.state+(child.child_state?' / '+child.child_state:''));if(child.type==='agent')item.append(node('span',' · '+child.preset+' · '+child.objective,'inspection-note'));else if(child.type==='tool')item.append(node('span',' · '+child.tool,'inspection-note'));else item.append(node('span',' · '+child.question,'inspection-note'));nodes.append(item);}detail.append(nodes);
+      const appendChildHistory=(container,childId,label)=>{if(!ownedObservation||ownedObservation.parent_id!==value.run.id)return;const child=ownedObservation.children.find(item=>item.run.id===childId),history=ownedObservation.histories[childId];if(!child||!Array.isArray(history)||!history.length)return;const transcript=node('details',undefined,'nested-owner-history');transcript.append(node('summary',label+' · '+child.run.state+' · '+history.length+' saved messages'));for(const message of history)if(message.role!=='user')entry(message.role,message.data,transcript);container.append(transcript);};
+      appendChildHistory(detail,owner.owner_run_id,'Nested owner history');
+      const nodes=node('ul');for(const child of owner.plan.nodes){const item=node('li',child.id+' · '+child.type+' · '+child.state+(child.child_state?' / '+child.child_state:''));if(child.type==='agent')item.append(node('span',' · '+child.preset+' · '+child.objective,'inspection-note'));else if(child.type==='tool')item.append(node('span',' · '+child.tool,'inspection-note'));else item.append(node('span',' · '+child.question,'inspection-note'));nodes.append(item);if(child.type==='agent'&&child.child_run_id)appendChildHistory(item,child.child_run_id,'Agent history · '+child.id);}detail.append(nodes);
       if(owner.plan.halted)detail.append(node('p','Nested work has an uncertain outcome and is halted for inspection.','inspection-note'));
-      for(const call of owner.calls){const entry=node('p',call.name+' · '+call.state+' · '+call.id,'inspection-note');detail.append(entry);if(call.pending&&call.response){const info=node('div',undefined,'metrics');planResponseMetrics(info,call.response);detail.append(info);}}
+      for(const call of owner.calls){const entry=node('p',call.name+' · '+call.state+' · '+call.id,'inspection-note');detail.append(entry);if(call.pending&&call.response){const info=node('div',undefined,'metrics nested-call-metrics');planResponseMetrics(info,call.response);detail.append(info);}}
       row.body.append(detail);
     }
   }

@@ -210,6 +210,13 @@ observation continues to the actual terminal event; an acknowledgement is not
 a completed cancellation. EOF or `/exit` at either prompt detaches without
 approval, human input or cancellation. No approval is automatic.
 
+`planning` reports the authenticated backend's current AgentFlow planning
+capability. `inspect-plan RUN` prints the same formatted JSON observation used
+by the browser and VS Code clients, including nested plan owners, topology,
+accepted call/revision ledgers and any available held-response metrics.
+Provider receipts and private capability material remain filtered by the
+native endpoint.
+
 File approvals now render bounded unified diffs; the focused native agent HTTP
 contract also exercises live-process cancellation and detach against an active
 synthetic stream. Interactive diff navigation, attachment/context controls
