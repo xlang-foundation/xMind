@@ -1,5 +1,19 @@
 # Current native validation
 
+## Full native Release suite — 2026-10-14
+
+A clean Visual Studio 18 Release build in `build/native-verify` passed the full
+native CTest inventory **144/144**. This includes the three optional Rust
+Analyzer and multi-folder LSP contracts, configured explicitly for the fresh
+build. The separate build tree was necessary because the TestProj server the
+user is testing still had the regular `build/native/contract-bin/Release/xmind.exe`
+open. A first run against those stale in-place binaries produced four stale
+contract mismatches and one transient local-view fixture failure; all five
+passed with freshly built binaries, and the full clean run passed. The
+provider CLI expectation now includes the already-supported `mistral.chat`
+route. This is the native Release gate, not hosted CI, live-provider acceptance
+or installed-client acceptance.
+
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 
 The working tree adds an explicit dynamic-plan `tool` node for six fixed

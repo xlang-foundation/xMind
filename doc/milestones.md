@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Fresh native Release validation (2026-10-14)
+
+A clean Visual Studio 18 Release build in `build/native-verify` passed all
+**144 native CTest contracts**, including the optional Rust Analyzer and
+multi-folder language-server tests. The new tree avoided replacing the xMind
+binary still serving the user's TestProj workspace. Four contract mismatches
+from older in-place binaries disappeared after rebuilding; the local-view
+contract also passed on retry and in the complete run. The provider CLI
+contract was updated to expect the native `mistral.chat` route already
+advertised by the product. This checkpoint verifies the complete local native
+Release suite, not hosted CI or live-provider/editor acceptance.
+
 ## Dynamic plan tool nodes in the shared Browser/VS Code view (2026-10-14)
 
 The shared client accepts the six native deterministic read-only workspace
