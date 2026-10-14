@@ -72,7 +72,7 @@ public:
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
-        const std::optional<AgentDefinition>& selected_agent={});
+        const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
         std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={},
         std::optional<std::vector<std::string>> tool_allowlist={});

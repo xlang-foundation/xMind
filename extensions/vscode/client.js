@@ -196,6 +196,8 @@ class BackendClient {
     return validateSessionAgent(result,id,catalogue);
   }
   createSession(title) { return this.request('/v1/sessions', { title }); }
+  sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
+  enqueueSessionInput(session_id,content,id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,{...(id?{id}:{}),content}); }
   async terminals(session) {
     executionIdentity(session);
     const value=await this.request(`/v1/sessions/${encodeURIComponent(session)}/terminals`);
@@ -251,7 +253,7 @@ class BackendClient {
     return value;
   }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
-  run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
+  run(session_id, prompt, model_id,binding,inbox_id) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   async openEventStream(path,signal){
     signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();

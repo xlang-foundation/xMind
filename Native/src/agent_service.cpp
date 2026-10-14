@@ -418,6 +418,18 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
+Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){
+    if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(workspace||profile)throw RunUnavailable("Queued input authority must be validated by its backend profile");
+    auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
+    const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> agent=selected.selected;
+    if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
+    if(!model.empty()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
+    job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
+    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id);}
+    catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
+    lock.unlock();impl_->changed.notify_one();return result;
+}
 Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;

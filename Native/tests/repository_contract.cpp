@@ -72,6 +72,16 @@ int main(int argc,char** argv) {
         {
             BackendLease owner(path); Repository first(path,roots),second(path,roots);
             first.create_session("session","shared");
+            first.create_session("inbox","durable inbox fixture");
+            const auto queued=first.enqueue_session_input("queued-input-1","inbox","Persisted prompt survives refresh and backend reopen");
+            require(queued.state=="queued"&&queued.run_id.empty(),"New session input must enter the durable queue");
+            const auto replay=second.enqueue_session_input("queued-input-1","inbox","Persisted prompt survives refresh and backend reopen");
+            require(replay.id==queued.id&&second.session_inbox("inbox").size()==1,"Queue admission must be idempotent and visible across repository connections");
+            const auto claimed=first.start_prompt_run("inbox-run","inbox",R"({"content":"Persisted prompt survives refresh and backend reopen"})",{}, {},queued.id);
+            const auto inbox_after_claim=second.session_inbox("inbox");
+            require(claimed.state==RunState::queued&&inbox_after_claim.size()==1&&inbox_after_claim[0].state=="claimed"&&inbox_after_claim[0].run_id==claimed.id,"Run admission must atomically claim its exact queued input");
+            rejects<Conflict>([&]{second.start_prompt_run("inbox-replay-run","inbox",R"({"content":"Persisted prompt survives refresh and backend reopen"})",{}, {},queued.id);});
+            first.transition("inbox-run",RunState::queued,RunState::cancelled,R"({"reason":"contract_cleanup"})");
             first.put_information("agents","coding",R"({"model":"test"})");
             require(second.information("agents","coding")==R"({"model":"test"})","Information must be shared");
             rejects<DatabaseError>([&]{first.put_information("agents","coding","invalid JSON");});

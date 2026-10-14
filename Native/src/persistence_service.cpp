@@ -180,8 +180,8 @@ std::future<std::optional<std::vector<Message>>> PersistenceService::task_histor
 std::future<std::optional<std::string>> PersistenceService::incoming_message_payload(std::string id,std::string message){return impl_->observe([id=std::move(id),message=std::move(message)](Repository& repository){return repository.incoming_message_payload(id,message);});}
 std::future<std::vector<Event>> PersistenceService::event_batch(std::string id,std::int64_t after,std::size_t count){return impl_->observe([id=std::move(id),after,count](Repository& repository){return repository.event_batch(id,after,count);});}
 std::future<RootRunPage> PersistenceService::list_root_runs(std::string context,std::string state,std::optional<std::int64_t> since,std::size_t count,std::int64_t watermark,std::optional<std::int64_t> cursor_ms,std::int64_t cursor_sequence){return impl_->observe([context=std::move(context),state=std::move(state),since,count,watermark,cursor_ms,cursor_sequence](Repository& repository){return repository.list_root_runs(context,state,since,count,watermark,cursor_ms,cursor_sequence);});}
-std::future<Run> PersistenceService::start_prompt_run(std::string id,std::string session_id,std::string json,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic) {
-    return impl_->submit([id=std::move(id),session_id=std::move(session_id),json=std::move(json),budget=std::move(budget),dynamic=std::move(dynamic)](Repository& repository){return repository.start_prompt_run(id,session_id,json,std::move(budget),std::move(dynamic));});
+std::future<Run> PersistenceService::start_prompt_run(std::string id,std::string session_id,std::string json,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic,std::string inbox_id) {
+    return impl_->submit([id=std::move(id),session_id=std::move(session_id),json=std::move(json),budget=std::move(budget),dynamic=std::move(dynamic),inbox_id=std::move(inbox_id)](Repository& repository){return repository.start_prompt_run(id,session_id,json,std::move(budget),std::move(dynamic),inbox_id);});
 }
 std::future<RootBudgetRecord> PersistenceService::root_budget(std::string id){return impl_->observe([id=std::move(id)](Repository& repository){return repository.root_budget(id);});}
 std::future<ModelCallReservation> PersistenceService::reserve_model_call(std::string root,std::string owner,std::string attempt,ModelCallRole role){return impl_->submit([root=std::move(root),owner=std::move(owner),attempt=std::move(attempt),role](Repository& repository){return repository.reserve_model_call(root,owner,attempt,role);});}
@@ -270,6 +270,12 @@ std::future<ProcessOutputArtifact> PersistenceService::finish_process_output(std
 std::future<ProcessOutputPage> PersistenceService::read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit){return impl_->observe([operation_id=std::move(operation_id),channel=std::move(channel),offset,limit](Repository& repository){return repository.read_process_output(operation_id,channel,offset,limit);});}
 std::future<void> PersistenceService::append_message(std::string id,std::string role,std::string json) {
     return impl_->submit([id=std::move(id),role=std::move(role),json=std::move(json)](Repository& repository){repository.append_message(id,role,json);});
+}
+std::future<SessionInboxItem> PersistenceService::enqueue_session_input(std::string id,std::string session_id,std::string content) {
+    return impl_->submit([id=std::move(id),session_id=std::move(session_id),content=std::move(content)](Repository& repository){return repository.enqueue_session_input(id,session_id,content);});
+}
+std::future<std::vector<SessionInboxItem>> PersistenceService::session_inbox(std::string session_id) {
+    return impl_->submit([session_id=std::move(session_id)](Repository& repository){return repository.session_inbox(session_id);});
 }
 std::future<std::vector<Message>> PersistenceService::history(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.history(id);});

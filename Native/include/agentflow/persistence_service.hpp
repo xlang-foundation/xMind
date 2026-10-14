@@ -46,7 +46,7 @@ public:
     std::future<std::vector<Event>> event_batch(std::string id,std::int64_t after,std::size_t count);
     std::future<RootRunPage> list_root_runs(std::string context,std::string state,std::optional<std::int64_t> since,std::size_t count,
         std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
-    std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
+    std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={});
     std::future<DynamicPlanCapabilities> dynamic_capabilities(std::string root);
     std::future<DynamicPlanCapabilities> finalize_dynamic_capabilities(std::string root,std::string backend_identity,std::string catalogue_json,std::vector<DynamicPresetCapability> presets);
     std::future<DynamicPlanRecord> dynamic_plan(std::string plan);
@@ -147,6 +147,8 @@ public:
     std::future<ProcessOutputArtifact> finish_process_output(std::string operation_id,std::string run_id,bool complete);
     std::future<ProcessOutputPage> read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit);
     std::future<void> append_message(std::string id,std::string role,std::string json);
+    std::future<SessionInboxItem> enqueue_session_input(std::string id,std::string session_id,std::string content);
+    std::future<std::vector<SessionInboxItem>> session_inbox(std::string session_id);
     std::future<Message> message(std::string id,std::int64_t sequence);
     std::future<std::vector<Message>> history(std::string id);
     std::future<MessagePage> history_page(std::string id,std::optional<std::int64_t> before_sequence,std::size_t count);

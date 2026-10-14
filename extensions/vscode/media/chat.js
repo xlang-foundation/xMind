@@ -467,6 +467,7 @@ function planView(value){
   const resume=byId('plan-resume');resume.hidden=!planCanResume(value);delete resume.dataset.submitting;planControls();
 }
 const canExecute=()=>byId('workflow').value?workflowExecutable:execution;
+const refreshSendControl=()=>{const button=byId('send'),queueing=activeRun||sessionBusy;button.disabled=queueing?!byId('sessions').value:!canExecute();button.textContent=queueing?'Queue ↑':'Send ↑';button.title=queueing?'Queue this prompt after the active turn':'Send · Enter';};
 function clearGraph(){clearPlan();clearOwned();graphRows.clear();observedGraph=undefined;displayedGraph=undefined;byId('graph-view').replaceChildren();byId('graph-view').hidden=true;}
 function graphView(record,children,histories){
   const root=record.run.id;if(observedGraph!==root){clearGraph();observedGraph=root;const heading=node('h3',record.graph_id+' · revision '+record.graph_revision);byId('graph-view').append(heading);}
@@ -511,8 +512,8 @@ function graphEvent(message){
   if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · '+message.node_id),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
   markdown(row.stream.querySelector('.message-body'),row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done')row.stream.firstChild.classList.remove('streaming');
 }
-byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});byId('send').disabled=!canExecute()||activeRun||sessionBusy;};
-function send(){if(canExecute()&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
+byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});refreshSendControl();};
+function send(){if((activeRun||sessionBusy?!!byId('sessions').value:canExecute())&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
 byId('terminal').onclick=()=>api.postMessage({type:'open-terminal'});
 byId('git').onclick=()=>api.postMessage({type:'git-menu'});
@@ -521,7 +522,7 @@ byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').val
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
 byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}};
 function resizePrompt(){const prompt=byId('prompt');prompt.style.height='auto';prompt.style.height=prompt.value?Math.min(180,prompt.scrollHeight)+'px':'';}
-byId('prompt').oninput=resizePrompt;
+byId('prompt').oninput=()=>{resizePrompt();refreshSendControl();};
 const renameDialog=byId('rename-dialog');
 function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();}
 byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!renameCapability||!selected?.dataset.sessionId)return;renameSnapshot={id:selected.value,title:selected.textContent};byId('conversation-title').value=renameSnapshot.title;byId('rename-status').textContent='';byId('rename-save').disabled=false;renameDialog.showModal();byId('conversation-title').focus();};
@@ -601,7 +602,7 @@ window.addEventListener('message',event=>{
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80,priorHeight=scroll.scrollHeight,priorTop=scroll.scrollTop;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
   else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
-  else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
+  else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;refreshSendControl();}
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='skills')renderSkills(m);
   else if(m.type==='skills-clear')clearSkills();
@@ -621,12 +622,15 @@ window.addEventListener('message',event=>{
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;refreshRename();refreshForkControls();}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='fork-result'){forkPending=false;refreshForkControls();if(!m.success)byId('status').textContent=m.text||'Fork was not created.';else byId('status').textContent='Fork created. The new conversation is selected.';}
+  else if(m.type==='inbox'){const label=byId('inbox-status'),items=Array.isArray(m.items)?m.items:[],queued=items.filter(item=>item?.state==='queued');label.hidden=!queued.length;label.textContent=queued.length?`${queued.length} queued prompt${queued.length===1?'':'s'} · next: ${String(queued[0].content||'').slice(0,180)}${queued[0].content?.length>180?'…':''}`:'';}
+  else if(m.type==='queued-input'){byId('prompt').value='';resizePrompt();byId('status').textContent='Prompt saved. It will run after the active turn finishes.';}
+  else if(m.type==='queued-started'){byId('status').textContent='Queued prompt started';}
   else if(m.type==='runs'){
     sessionBusy=m.busy;refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
-    byId('send').disabled=!canExecute()||activeRun||sessionBusy;
+    refreshSendControl();
   }
   else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);}
@@ -647,7 +651,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
   else if(m.type==='mcp-resources'){renderMcpResources(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
-  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
@@ -682,7 +686,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='a2a-task-follow-up'){
     const item=currentOperations.find(operation=>operation.id===m.id),followUp=m.followUp;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&followUp?.operation_id===item.id&&Number.isSafeInteger(followUp.sequence)&&followUp.follow_up_state==='acknowledged'){byId('status').textContent='Remote agent acknowledged your follow-up · '+followUp.task_id;}
   }
-  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
+  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
   else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.

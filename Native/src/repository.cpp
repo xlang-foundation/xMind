@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>18)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>19)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>18) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>19) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -793,6 +793,11 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TABLE a2a_continuation_messages(message_id TEXT PRIMARY KEY NOT NULL,run_id TEXT NOT NULL REFERENCES runs(id),context_id TEXT NOT NULL REFERENCES sessions(id),identity TEXT NOT NULL CHECK(json_valid(identity) AND json_type(identity)='object'),content TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload) AND json_type(payload)='object'),human_request_id TEXT NOT NULL REFERENCES dynamic_human_requests(id),event_seq INTEGER NOT NULL REFERENCES events(seq),UNIQUE(run_id,human_request_id))");
         db.execute("CREATE INDEX a2a_continuation_task_history ON a2a_continuation_messages(run_id,event_seq)");db.execute("PRAGMA user_version=18");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("A2A continuation migration did not preserve foreign key ownership");
+    }
+    if(version<19){
+        db.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL)))");
+        db.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");db.execute("PRAGMA user_version=19");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session inbox migration did not preserve foreign key ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -1185,15 +1190,21 @@ std::optional<std::string> Repository::incoming_message_payload(const std::strin
     run(id);if(!message.empty()){const auto continuation=impl_->database.execute("SELECT payload FROM a2a_continuation_messages WHERE run_id=? AND message_id=?",{id,message}).rows;if(!continuation.empty())return text(continuation[0][0]);const auto incoming=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=? AND message_id=?",{id,message}).rows;if(!incoming.empty())return text(incoming[0][0]);return {};}
     const auto rows=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=?",{id}).rows;if(rows.empty())return {};return text(rows[0][0]);
 }
-Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic) {
+Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget,std::optional<DynamicPlanCapabilities> dynamic,const std::string& inbox_id) {
     identifier(id);const auto provider=prompt_context(prompt_json);auto& db=impl_->database;Transaction transaction(db);session(session_id);refresh_admission(db);
     if(!db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active'",{session_id}).rows.empty())throw Conflict("Session has an exclusive maintenance owner");
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
+    if(!inbox_id.empty()){
+        identifier(inbox_id);const auto queued=db.execute("SELECT content FROM session_inbox WHERE id=? AND session_id=? AND state='queued' AND run_id IS NULL",{inbox_id,session_id}).rows;
+        if(queued.size()!=1)throw Conflict("Queued session input is no longer available");
+        Json prompt;try{prompt=Json::parse(prompt_json);}catch(...){throw std::invalid_argument("Invalid queued session prompt");}
+        if(!prompt.is_object()||!prompt.contains("content")||!prompt["content"].is_string()||prompt["content"].get<std::string>()!=text(queued[0][0]))throw Conflict("Queued session input differs from the admitted prompt");
+    }
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt_json}));
     changed_one(db.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{id}));
-    changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));if(budget)impl_->initialize_budget(id,prompt_json,*budget);impl_->initialize_dynamic(id,budget,dynamic);impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued,{},{},false,provider};
+    changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));if(!inbox_id.empty())changed_one(db.execute("UPDATE session_inbox SET state='claimed',run_id=? WHERE id=? AND session_id=? AND state='queued'",{id,inbox_id,session_id}));if(budget)impl_->initialize_budget(id,prompt_json,*budget);impl_->initialize_dynamic(id,budget,dynamic);impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued,{},{},false,provider};
 }
 ContextSnapshot Repository::context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound){Transaction tx(impl_->database);auto result=read_context_snapshot(impl_->database,scope,binding,bound);tx.commit();return result;}
 ContextStatusObservation Repository::context_status_observation(const ContextScope& scope,const ContextBinding& binding){
@@ -1958,6 +1969,24 @@ void Repository::append_message(const std::string& id,const std::string& role,co
     if(!impl_->database.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active'",{id}).rows.empty())throw Conflict("Session has an exclusive maintenance owner");
     changed_one(impl_->database.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,?,?)",{id,role,json}));
     transaction.commit();
+}
+SessionInboxItem Repository::enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content) {
+    identifier(id);bounded_identity(session_id,128);if(content.empty()||content.size()>1024*1024||content.find('\0')!=std::string::npos)throw std::invalid_argument("Queued session input must contain 1-1048576 UTF-8 bytes");
+    auto& db=impl_->database;Transaction transaction(db);session(session_id);
+    if(!db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active'",{session_id}).rows.empty())throw Conflict("Session has an exclusive maintenance owner");
+    const auto existing=db.execute("SELECT session_id,content,state,created_ms,run_id FROM session_inbox WHERE id=?",{id}).rows;
+    if(!existing.empty()){
+        if(text(existing[0][0])!=session_id||text(existing[0][1])!=content)throw Conflict("Queued session input identity was reused with different content");
+        SessionInboxItem item{id,session_id,content,text(existing[0][2]),{},integer(existing[0][3])};if(!std::holds_alternative<std::nullptr_t>(existing[0][4]))item.run_id=text(existing[0][4]);transaction.commit();return item;
+    }
+    const auto pending=db.execute("SELECT count(*),coalesce(sum(length(content)),0) FROM session_inbox WHERE session_id=? AND state='queued'",{session_id}).rows;
+    if(integer(pending[0][0])>=32||integer(pending[0][1])+static_cast<std::int64_t>(content.size())>4*1024*1024)throw RunBusy("Session input queue is full");
+    const auto created=now_ms();changed_one(db.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms) VALUES(?,?,?,'queued',?)",{id,session_id,content,created}));transaction.commit();return {id,session_id,content,"queued",{},created};
+}
+std::vector<SessionInboxItem> Repository::session_inbox(const std::string& session_id) {
+    bounded_identity(session_id,128);session(session_id);std::vector<SessionInboxItem> items;
+    for(const auto& row:impl_->database.execute("SELECT id,content,state,created_ms,run_id FROM session_inbox WHERE session_id=? ORDER BY created_ms,id LIMIT 128",{session_id}).rows){SessionInboxItem item{text(row[0]),session_id,text(row[1]),text(row[2]),{},integer(row[3])};if(!std::holds_alternative<std::nullptr_t>(row[4]))item.run_id=text(row[4]);items.push_back(std::move(item));}
+    return items;
 }
 Message Repository::message(const std::string& id,std::int64_t sequence) {
     if(sequence<1||sequence>9007199254740991LL)throw std::invalid_argument("Invalid message sequence");

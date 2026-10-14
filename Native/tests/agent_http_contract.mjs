@@ -240,6 +240,16 @@ try {
   // Queued cancellation frees bounded admission capacity before the worker exits.
   assert.equal((await api('/v1/runs',{id:'replacement-run',session_id:'overflow',prompt:'Read README again'})).status,202);
   cli('cancel','held-run');await terminal('held-run','cancelled');
+  await session('durable-inbox');
+  assert.equal((await api('/v1/runs',{id:'inbox-active-run',session_id:'durable-inbox',prompt:'hold-stream'})).status,202);await streaming('inbox-active-run');
+  const queuedInput=await api('/v1/sessions/durable-inbox/inbox',{id:'durable-input-1',content:'Run this after the active turn'});assert.equal(queuedInput.status,202);assert.equal(queuedInput.data.state,'queued');
+  assert.deepEqual((await api('/v1/sessions/durable-inbox/inbox')).data.items.map(item=>({id:item.id,state:item.state,run_id:item.run_id})),[{id:'durable-input-1',state:'queued',run_id:undefined}]);
+  assert.equal((await api('/v1/runs',{id:'inbox-too-early',session_id:'durable-inbox',prompt:queuedInput.data.content,inbox_id:queuedInput.data.id})).status,409,'A queued input cannot violate per-session single-root admission');
+  assert.equal((await api('/v1/sessions/durable-inbox/inbox')).data.items[0].state,'queued','Failed admission must leave the durable item available');
+  cli('cancel','inbox-active-run');await terminal('inbox-active-run','cancelled');
+  const inboxRun=await api('/v1/runs',{id:'inbox-follow-up-run',session_id:'durable-inbox',prompt:queuedInput.data.content,inbox_id:queuedInput.data.id});assert.equal(inboxRun.status,202,JSON.stringify(inboxRun.data));await terminal(inboxRun.data.id,'completed');
+  const claimedInput=(await api('/v1/sessions/durable-inbox/inbox')).data.items.find(item=>item.id==='durable-input-1');assert.equal(claimedInput.state,'claimed');assert.equal(claimedInput.run_id,inboxRun.data.id);
+  assert.equal(cli('history','durable-inbox').filter(message=>message.role==='user'&&message.data.content==='Run this after the active turn').length,1,'Claimed input must enter conversation history exactly once');
   await session('http-interrupt');
   assert.equal((await api('/v1/runs',{id:'http-interrupt-run',session_id:'http-interrupt',prompt:'hold-stream'})).status,202);
   await streaming('http-interrupt-run');

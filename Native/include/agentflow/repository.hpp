@@ -56,7 +56,7 @@ public:
     Run continue_a2a_message(const std::string& task,const DynamicHumanInputSpec& answer,const std::string& message,const std::string& context,const std::string& identity,const std::string& content,const std::string& payload);
     std::optional<std::vector<Message>> task_history(const std::string& id);
     std::optional<std::string> incoming_message_payload(const std::string& run_id,const std::string& message_id={});
-    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
+    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},const std::string& inbox_id={});
     DynamicPlanCapabilities dynamic_capabilities(const std::string& root);
     DynamicPlanCapabilities finalize_dynamic_capabilities(const std::string& root,const std::string& backend_identity,const std::string& catalogue_json,const std::vector<DynamicPresetCapability>& presets);
     DynamicPlanRecord dynamic_plan(const std::string& plan);
@@ -162,6 +162,8 @@ public:
     ProcessOutputArtifact finish_process_output(const std::string& operation_id,const std::string& run_id,bool complete);
     ProcessOutputPage read_process_output(const std::string& operation_id,const std::string& channel,std::uint64_t offset,std::size_t limit);
     void append_message(const std::string& id,const std::string& role,const std::string& json);
+    SessionInboxItem enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content);
+    std::vector<SessionInboxItem> session_inbox(const std::string& session_id);
     Message message(const std::string& id,std::int64_t sequence);
     std::vector<Message> history(const std::string& id);
     MessagePage history_page(const std::string& id,std::optional<std::int64_t> before_sequence,std::size_t count);
