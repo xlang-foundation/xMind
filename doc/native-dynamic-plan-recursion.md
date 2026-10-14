@@ -45,6 +45,17 @@ Plan labels and revisions remain local to their owning plan. All topology,
 claims, children, human requests, results and history links retain both owner
 and root identity.
 
+Schema v24 is only the ownership foundation: the existing
+`dynamic_plans.root_run_id` constraint still permits one plan per root, while
+`dynamic_plan_calls` idempotency and pending-call constraints are also keyed by
+root. The next migration must remove the one-plan-per-root constraint and move
+those call constraints to `owner_run_id`, while preserving root-wide budget
+accounting and every existing plan/call/event identity. It must rebuild or
+replace the affected SQLite relations transactionally and pass
+`PRAGMA foreign_key_check` before commit; changing only the owner lookup would
+leave nested plan admission impossible and would incorrectly serialize sibling
+owners' planning turns.
+
 Capabilities remain derived from the root's immutable admitted settings and
 the exact coding preset. Nested plans may select only registered presets and
 tools already within that authority. They cannot introduce provider routes,
@@ -86,9 +97,10 @@ inspectable; it cannot be converted into an ordinary tool error.
    populated v23 databases. Nested owner admission and owner-scoped pending
    call constraints remain unimplemented.
 2. **Partially implemented:** repository and persistence service expose
-   owner-scoped plan lookup. Add nested admission and test forged owner,
-   sibling owner, mismatched root, stale
-   admission, duplicate calls and a second root budget.
+   owner-scoped plan lookup. Remove the remaining root-scoped uniqueness and
+   pending-call constraints described above, then add nested admission tests
+   for forged owner, sibling owner, mismatched root, stale admission,
+   duplicate calls and root-wide shared budget accounting.
 3. Admit a nested plan only from a claimed coding-agent child. Route its tools
    through the same executor and child pool, preserving root budget ownership
    and per-owner continuation receipts. Verify a two-level plan with actual
