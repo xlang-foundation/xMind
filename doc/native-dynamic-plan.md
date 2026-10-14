@@ -42,9 +42,10 @@ sealed native tool schema and the frozen `workspace.inspect` capability before a
 Execution uses the admitted workspace in a separate owned child, makes no model
 request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
 reopen/recovery verifies those receipts against the immutable node definition.
-The repository schema migration is now v24. It records immutable plan-owner
-scope separately from the shared root budget and backfills existing v23 plans
-to their original ordinary Agent root. Nested plan execution remains disabled;
+The repository schema migration is now v25. Schema v24 records immutable
+plan-owner scope separately from the shared root budget and backfills existing
+v23 plans to their original ordinary Agent root. Schema v25 removes the
+one-plan-per-root constraint while preserving dependent rows. Nested plan execution remains disabled;
 this migration is its ownership foundation, not recursive runtime support.
 
 The same node type accepts an exact MCP tool alias only when its complete tool

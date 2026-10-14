@@ -6,8 +6,42 @@
 // Only initial EMPTY skill and agent selections can be removed from these
 // disposable legacy fixtures. Activated or later-revised guidance must never
 // be discarded.
+inline void remove_dynamic_plan_multiplicity_fixture(agentflow::XlangSqlite& database){
+    const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
+    if(scalar("PRAGMA user_version")<25)return;
+    if(scalar("SELECT count(*) FROM (SELECT root_run_id FROM dynamic_plans GROUP BY root_run_id HAVING count(*)>1)")!=0)
+        throw std::runtime_error("Legacy fixture cannot discard multiple dynamic plans for one root");
+    std::string stage="defer foreign keys";
+    database.execute("SAVEPOINT downgrade_dynamic_plan_multiplicity");
+    try{
+        database.execute("PRAGMA defer_foreign_keys=ON");
+        std::vector<std::pair<std::string,std::string>> plan_triggers;
+        stage="collect dependent triggers";
+        for(const auto& row:database.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND (tbl_name='dynamic_plans' OR instr(sql,'dynamic_plans')>0) ORDER BY name").rows){
+            const auto name=std::get<std::string>(row[0]);if(name.empty()||name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos)throw std::runtime_error("Legacy fixture found an invalid dynamic plan trigger identity");
+            plan_triggers.emplace_back(name,std::get<std::string>(row[1]));database.execute("DROP TRIGGER \""+name+"\"");
+        }
+        stage="preserve v25 plans";
+        database.execute("CREATE TABLE dynamic_plan_fixture_v24 AS SELECT id,root_run_id,revision,state_sequence,state,retired_labels_json,planned_children_reserved,planned_humans_reserved,humans_published FROM dynamic_plans");
+        stage="drop v25 plan table";
+        database.execute("DROP TABLE dynamic_plans");
+        stage="restore v24 plan table";
+        database.execute("CREATE TABLE dynamic_plans(id TEXT PRIMARY KEY NOT NULL,root_run_id TEXT NOT NULL UNIQUE REFERENCES dynamic_capabilities(root_run_id),revision INTEGER NOT NULL CHECK(revision>0),state_sequence INTEGER NOT NULL CHECK(state_sequence>0),state TEXT NOT NULL CHECK(state IN ('active','waiting_human','completed','failed','cancelled','uncertain','interrupted')),retired_labels_json TEXT NOT NULL CHECK(json_valid(retired_labels_json) AND json_type(retired_labels_json)='array'),planned_children_reserved INTEGER NOT NULL CHECK(planned_children_reserved>=0),planned_humans_reserved INTEGER NOT NULL CHECK(planned_humans_reserved>=0),humans_published INTEGER NOT NULL DEFAULT 0 CHECK(humans_published>=0))");
+        stage="copy v24 plans";
+        database.execute("INSERT INTO dynamic_plans SELECT id,root_run_id,revision,state_sequence,state,retired_labels_json,planned_children_reserved,planned_humans_reserved,humans_published FROM dynamic_plan_fixture_v24");
+        database.execute("DROP TABLE dynamic_plan_fixture_v24");
+        stage="restore triggers";
+        for(const auto& trigger:plan_triggers)database.execute(trigger.second);
+        stage="check foreign keys";
+        if(!database.execute("PRAGMA foreign_key_check").rows.empty())throw std::runtime_error("Legacy fixture multiplicity downgrade violated foreign-key ownership");
+        database.execute("PRAGMA defer_foreign_keys=OFF");
+        database.execute("PRAGMA user_version=24");
+        database.execute("RELEASE downgrade_dynamic_plan_multiplicity");
+    }catch(const std::exception& error){database.execute("ROLLBACK TO downgrade_dynamic_plan_multiplicity");database.execute("RELEASE downgrade_dynamic_plan_multiplicity");throw std::runtime_error("Legacy fixture v25 downgrade failed at "+stage+": "+error.what());}
+}
 inline void remove_dynamic_plan_owner_scope_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
+    remove_dynamic_plan_multiplicity_fixture(database);
     if(scalar("PRAGMA user_version")<24)return;
     const auto owners=scalar("SELECT count(*) FROM dynamic_plan_owners");
     const auto root_owners=scalar("SELECT count(*) FROM dynamic_plan_owners WHERE owner_run_id=root_run_id AND parent_plan_id IS NULL AND parent_node_label IS NULL AND depth=0");

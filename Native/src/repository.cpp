@@ -526,7 +526,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>24)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>25)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -555,7 +555,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>24) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>25) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -849,6 +849,39 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE INDEX dynamic_plan_owner_root_order ON dynamic_plan_owners(root_run_id,depth,plan_id)");
         db.execute("PRAGMA user_version=24");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Dynamic plan owner-scope migration did not preserve foreign key ownership");
+    }
+    if(version<25){
+        // Existing plans are retained while removing the old one-plan-per-root
+        // constraint. Child relations continue to reference the stable table
+        // name; deferred checks cover the short replacement interval.
+        std::string migration_step="defer foreign keys";
+        try{
+            db.execute("PRAGMA defer_foreign_keys=ON");
+            std::vector<std::pair<std::string,std::string>> plan_triggers;
+            migration_step="collect dependent triggers";
+            for(const auto& row:db.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND (tbl_name='dynamic_plans' OR instr(sql,'dynamic_plans')>0) ORDER BY name").rows){
+                const auto name=text(row[0]);if(name.empty()||name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos)throw DatabaseError("Dynamic plan migration found an invalid trigger identity");
+                plan_triggers.emplace_back(name,text(row[1]));db.execute("DROP TRIGGER \""+name+"\"");
+            }
+            migration_step="preserve current plans";
+            db.execute("CREATE TABLE dynamic_plan_replacement AS SELECT id,root_run_id,revision,state_sequence,state,retired_labels_json,planned_children_reserved,planned_humans_reserved,humans_published FROM dynamic_plans");
+            migration_step="drop old plan table";
+            db.execute("DROP TABLE dynamic_plans");
+            migration_step="create owner-scoped plan table";
+            db.execute("CREATE TABLE dynamic_plans(id TEXT PRIMARY KEY NOT NULL,root_run_id TEXT NOT NULL REFERENCES dynamic_capabilities(root_run_id),revision INTEGER NOT NULL CHECK(revision>0),state_sequence INTEGER NOT NULL CHECK(state_sequence>0),state TEXT NOT NULL CHECK(state IN ('active','waiting_human','completed','failed','cancelled','uncertain','interrupted')),retired_labels_json TEXT NOT NULL CHECK(json_valid(retired_labels_json) AND json_type(retired_labels_json)='array'),planned_children_reserved INTEGER NOT NULL CHECK(planned_children_reserved>=0),planned_humans_reserved INTEGER NOT NULL CHECK(planned_humans_reserved>=0),humans_published INTEGER NOT NULL DEFAULT 0 CHECK(humans_published>=0))");
+            migration_step="restore plans";
+            db.execute("INSERT INTO dynamic_plans SELECT id,root_run_id,revision,state_sequence,state,retired_labels_json,planned_children_reserved,planned_humans_reserved,humans_published FROM dynamic_plan_replacement");
+            db.execute("DROP TABLE dynamic_plan_replacement");
+            migration_step="restore root index";
+            db.execute("CREATE INDEX dynamic_plans_root ON dynamic_plans(root_run_id,id)");
+            migration_step="restore dependent triggers";
+            for(const auto& trigger:plan_triggers)db.execute(trigger.second);
+            db.execute("PRAGMA user_version=25");
+            migration_step="validate foreign keys";
+            if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Dynamic plan multiplicity migration did not preserve foreign key ownership");
+            db.execute("PRAGMA defer_foreign_keys=OFF");
+            if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Dynamic plan multiplicity migration lost foreign key enforcement");
+        }catch(const DatabaseError& error){throw DatabaseError("Dynamic plan schema v25 migration failed at "+migration_step+": "+error.what());}
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.

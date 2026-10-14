@@ -1,17 +1,19 @@
 # Nested dynamic planning contract
 
 Status: **not implemented**. This contract is based on the current native
-schema and execution paths. Schema v24 now records immutable plan ownership
-and backfills existing plans to their ordinary Agent roots; the runtime still
-does not admit nested plans or give dynamic child agents planning tools.
+schema and execution paths. Schema v24 records immutable plan ownership and
+backfills existing plans to their ordinary Agent roots; schema v25 removes
+the one-plan-per-root table constraint. The runtime still does not admit
+nested plans or give dynamic child agents planning tools.
 
 ## Current boundary
 
-One `dynamic_capabilities` row and one `dynamic_plans` row are admitted for an
-ordinary Agent root. `dynamic_plans.root_run_id` is unique;
-`dynamic_plan_calls` and the pending-call index are keyed at that root;
-signed-call triggers require a finished `parent` reservation owned by the
-root. `DynamicPlanExecutor::invoke` and `resume` reject child owners.
+One `dynamic_capabilities` row is admitted for an ordinary Agent root. Schema
+v25 permits multiple `dynamic_plans` rows under that root, but the runtime
+still creates and resumes only the ordinary root's plan.
+`dynamic_plan_calls` idempotency and pending-call constraints remain keyed at
+the root; signed-call triggers require a finished `parent` reservation owned
+by the root. `DynamicPlanExecutor::invoke` and `resume` reject child owners.
 `AgentRunner` only exposes plan tools to an ordinary dynamic root, and
 `dynamic_child_settings` clears planning and delegation. These are enforced
 source boundaries, not just documentation policy.
@@ -97,10 +99,12 @@ inspectable; it cannot be converted into an ordinary tool error.
    populated v23 databases. Nested owner admission and owner-scoped pending
    call constraints remain unimplemented.
 2. **Partially implemented:** repository and persistence service expose
-   owner-scoped plan lookup. Remove the remaining root-scoped uniqueness and
-   pending-call constraints described above, then add nested admission tests
-   for forged owner, sibling owner, mismatched root, stale admission,
-   duplicate calls and root-wide shared budget accounting.
+   owner-scoped plan lookup, and schema v25 permits multiple plans per root.
+   Move signed-call idempotency and pending-call constraints to
+   `owner_run_id`, bind each accepted call to that owner's exact finished
+   inference receipt, then add nested admission tests for forged owner,
+   sibling owner, mismatched root, stale admission, duplicate calls and
+   root-wide shared budget accounting.
 3. Admit a nested plan only from a claimed coding-agent child. Route its tools
    through the same executor and child pool, preserving root budget ownership
    and per-owner continuation receipts. Verify a two-level plan with actual

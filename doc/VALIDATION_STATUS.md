@@ -171,8 +171,8 @@ against the sealed tool schema and frozen inspect capability, executes under
 the admitted workspace as a model-free owned child, and verifies ordered
 start/completion receipts during settlement and recovery. SQLite schema v23
 stores node-kind-specific definitions; schema v24 adds immutable plan-owner
-scope. Agent and human definition decoding remains compatible with earlier
-saved rows.
+scope, and schema v25 removes one-plan-per-root uniqueness. Agent and human
+definition decoding remains compatible with earlier saved rows.
 
 The pure dynamic-plan, repository and actual native engine contracts pass on
 this working tree. The engine fixture executes `read_file` after a dependent
