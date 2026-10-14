@@ -201,10 +201,16 @@ installed or exercised with a native model-generated patch.
 
 The source now advertises `apply_patch` for approval-enabled ordinary agents and
 the sealed `workspace.coding` preset. Read-only agents/inspection children do not
-receive it. Its strict arguments are `patch_text` and optional `create_parents`;
-model-supplied authority fields and duplicate JSON fields are rejected. The
-adapter discovers every source/destination guidance scope before planning an
-approval. Undelivered guidance returns the existing
+receive it. Single-folder calls use `patch_text`, optional `folder_id` and
+optional `create_parents`. Multi-folder AgentRunner calls can instead supply an
+ordered `patches` array (up to 16 folder groups, 128 files total), with each
+group naming an admitted `folder_id`, its `patch_text` and optional
+`create_parents`. The groups run in order and are not atomic: each file has a
+separate durable approval, and a denial reports earlier approved effects.
+Graph patch nodes remain single-folder. Model-supplied authority fields and
+duplicate JSON fields are rejected. The adapter discovers every
+source/destination guidance scope before planning an approval. Undelivered
+guidance returns the existing
 `repository_instructions_required` result without a proposal or requested effect.
 
 Before each file, including files sharing newly created parent folders, the

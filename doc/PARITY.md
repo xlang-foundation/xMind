@@ -122,8 +122,10 @@ Single-agent and graph runs now route reads, process execution, file creation,
 file edits and `apply_patch` through the exact multi-folder workspace snapshot
 captured at admission. Graph `create_file`, `edit_file` and each patch-file
 proposal are still approved by the controller; their durable journals bind
-the workspace revision, selected folder and native root identity. Each patch
-call targets one selected folder and cannot span roots. Process profiles can
+the workspace revision, selected folder and native root identity. An ordinary
+agent patch call can sequence folder groups across admitted roots with separate
+per-file approvals and an explicit non-atomic partial report. Graph patch nodes
+remain single-folder. Process profiles can
 be explicitly marked trusted to record a durable profile-scoped grant instead
 of prompting for each process. The child receives the ordinary Windows
 toolchain environment needed to resolve `node`/`npm`, while unrelated inherited
@@ -217,9 +219,9 @@ The OpenCode inventory was regenerated from the unchanged pinned
 `v2.0.26` source commit after these changes: **141 operations, 31 native source
 candidates, 110 unmapped, and zero verified operation-level parity**. This
 checkpoint does not establish rendered multi-folder acceptance in the browser
-or VS Code. Cross-root `apply_patch`, graph write nodes, process execution,
-client-visible Git folder selection, language-server routing and complete
-CLI/VS Code coding workflows remain incomplete. The source hash inventory is in
+or VS Code. Graph write nodes, process execution, client-visible Git folder
+selection, language-server routing and complete CLI/VS Code coding workflows
+remain incomplete. The source hash inventory is in
 [`OPENCODE_API_INVENTORY.json`](OPENCODE_API_INVENTORY.json).
 
 ## Latest native coding/runtime checkpoint (2026-10-11, VS Code package `0.1.8`)

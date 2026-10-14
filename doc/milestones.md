@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## Ordered cross-folder `apply_patch` for ordinary agents — 2026-10-13
+
+An ordinary AgentRunner can now accept one ordered `patches` array spanning
+registered workspace folders captured at run admission. The backend validates
+every folder and prepares every patch group before effects begin, then applies
+groups in order with an independent durable approval for each file. Its
+aggregate receipt records requested and processed folders, per-folder outcomes,
+file counts and partial stops. A denied second-folder edit leaves an already
+approved first-folder edit intact and reports `partial`; it never describes the
+batch as atomic. Graph patch nodes remain single-folder. The native
+AgentRunner/provider-peer contract passes both successful and denied cross-root
+flows with real filesystem effects. This feature used the existing xMind
+runtime interfaces and required no xlang3 change. Rendered browser/VS Code
+acceptance and complete coding parity remain open.
+
 ## Bounded recent conversation history in Browser and VS Code — 2026-10-13
 
 Opening a long conversation now fetches and renders at most the 40 newest
