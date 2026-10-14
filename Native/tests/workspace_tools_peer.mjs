@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 const execute=promisify(execFile),folder=await mkdtemp(join(tmpdir(),'xmind-workspace-'));
 const root=join(folder,'workspace'),outside=join(folder,'workspace-other'),attached=join(folder,'workspace-attached');
 try {
-  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.agentflow'),{recursive:true}),mkdir(join(root,'sub','.AgEnTfLoW'),{recursive:true}),mkdir(join(root,'.agentflow-guide'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true}),mkdir(attached,{recursive:true})]);
+  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.agentflow'),{recursive:true}),mkdir(join(root,'sub','.AgEnTfLoW'),{recursive:true}),mkdir(join(root,'.agentflow-guide'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'.xlang3-site','site-packages'),{recursive:true}),mkdir(join(root,'__pycache__'),{recursive:true}),mkdir(join(root,'node_modules','fixture-package'),{recursive:true}),mkdir(join(root,'.venv','Lib','site-packages'),{recursive:true}),mkdir(join(root,'venv','Lib','site-packages'),{recursive:true}),mkdir(join(root,'.pytest_cache','v'),{recursive:true}),mkdir(join(root,'.mypy_cache','3.14'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true}),mkdir(attached,{recursive:true})]);
   // Only disposable synthetic secret/guidance markers. No user configuration
   // is read, copied or passed to the native fixture.
   const privateRoot='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private root\n';
@@ -56,6 +56,13 @@ try {
     writeFile(join(root,'sub','.CoNfIg','AGENTS.md'),'SyntheticPrivateConfigValue-workspace-only nested private guidance\n'),
     writeFile(join(root,'.configurable','visible.txt'),'Ordinary configuration documentation\n'),
     writeFile(join(root,'.agentflow','owner.token'),privateState),
+    writeFile(join(root,'.xlang3-site','site-packages','dependency.py'),'dependency source must not enter model search\n'),
+    writeFile(join(root,'__pycache__','module.pyc'),'bytecode must not enter model search\n'),
+    writeFile(join(root,'node_modules','fixture-package','index.js'),'installed package must not enter model search\n'),
+    writeFile(join(root,'.venv','Lib','site-packages','virtual.py'),'virtual environment must not enter model search\n'),
+    writeFile(join(root,'venv','Lib','site-packages','virtual.py'),'virtual environment must not enter model search\n'),
+    writeFile(join(root,'.pytest_cache','v','cache'),'pytest cache must not enter model search\n'),
+    writeFile(join(root,'.mypy_cache','3.14','cache'),'mypy cache must not enter model search\n'),
     writeFile(join(root,'.agentflow','AGENTS.md'),'SyntheticBackendStateValue-workspace-only private state guidance\n'),
     writeFile(join(root,'sub','.AgEnTfLoW','owner.token'),privateState),
     writeFile(join(root,'sub','.AgEnTfLoW','AGENTS.md'),'SyntheticBackendStateValue-workspace-only nested state guidance\n'),
