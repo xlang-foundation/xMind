@@ -1,5 +1,24 @@
 # Current native validation
 
+## Nested plan owner repository admission — 2026-10-14
+
+Repository acceptance now admits a signed plan for a running dynamic-agent
+child only when it re-derives that child's active claimed node from the same
+ordinary root. The nested plan stores its immutable parent plan/node/depth,
+uses the exact finished leaf-model receipt, and adds child/continuation holds to
+the shared root counters. The contract verifies valid admission, mismatched-root
+rejection, owner lookup, root-wide signed-call enumeration, and aggregate
+reservation totals through real xlang3-backed SQLite.
+
+The focused Release build completed and the dynamic-plan schema/repository,
+HTTP planning, and engine contracts passed **4/4**. The repository contract
+also drives a nested human node through report creation, owner-bound
+conversation commit, and a leaf-role continuation reservation against the
+shared root budget. Child model runners still do not receive planning tools;
+runtime scheduling, descendant draining, and restart recovery remain
+incomplete. Assistant/model receipts and human input in this contract are
+synthetic fixtures; it does not claim live provider execution.
+
 ## Owner-scoped signed dynamic-plan calls — 2026-10-14
 
 Schema v26 adds `owner_run_id` to each durable signed planning call and

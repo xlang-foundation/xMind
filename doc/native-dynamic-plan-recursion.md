@@ -11,10 +11,13 @@ plans or give dynamic child agents planning tools.
 
 One `dynamic_capabilities` row is admitted for an ordinary Agent root. Schema
 v25 permits multiple `dynamic_plans` rows under that root, and v26 stores
-owner-scoped signed calls. The runtime still creates and resumes only the
-ordinary root's plan. The repository currently rejects a non-root call owner;
-`DynamicPlanExecutor::invoke` and `resume` also reject child owners.
-`AgentRunner` only exposes plan tools to an ordinary dynamic root, and
+owner-scoped signed calls. The repository now admits a nested signed plan only
+for the exact running dynamic-agent child claimed by its active parent plan;
+it records the parent plan/node/depth and preserves aggregate root child and
+continuation reservations. The repository contract verifies one actual nested
+owner on xlang3-backed SQLite. The runtime still creates and resumes only the
+ordinary root's plan. `DynamicPlanExecutor::invoke` and `resume` reject child
+owners. `AgentRunner` only exposes plan tools to an ordinary dynamic root, and
 `dynamic_child_settings` clears planning and delegation. These are enforced
 source boundaries, not just documentation policy.
 
@@ -94,12 +97,16 @@ inspectable; it cannot be converted into an ordinary tool error.
    with `owner_run_id`, parent-plan/node linkage and depth. Backfill every
    existing plan to `owner_run_id = root_run_id`; reopen and integrity-check
    populated v23 databases.
-2. **Persistence implemented; nested admission pending:** repository and
-   persistence service expose owner-scoped plan lookup, schema v25 permits
-   multiple plans per root, and schema v26 persists owner-scoped signed-call
-   identity, pending-call admission and owner-bound receipts/continuations.
-   Add nested admission tests for forged owner, sibling owner, mismatched root,
-   stale admission, duplicate calls and root-wide shared budget accounting.
+2. **Partly implemented:** repository and persistence service expose
+   owner-scoped plan lookup, schema v25 permits multiple plans per root, and
+   schema v26 persists owner-scoped signed-call identity, pending-call
+   admission and owner-bound receipts/continuations. Repository acceptance
+   validates a live claimed dynamic-agent owner, binds the nested plan to its
+   immutable parent node/depth, and adds reservations to the shared root
+   totals. The focused contract covers a valid nested owner, mismatched-root
+   rejection, root-wide call enumeration and aggregate child/continuation
+   reservations. Forged/stale owner cases and runtime invocation are still
+   pending.
 3. Admit a nested plan only from a claimed coding-agent child. Route its tools
    through the same executor and child pool, preserving root budget ownership
    and per-owner continuation receipts. Verify a two-level plan with actual
