@@ -33,8 +33,9 @@ private:
 DynamicPlanDecision inspect_dynamic_plan(const DynamicPlanRecord& observed);
 DynamicPreparedNode prepare_dynamic_node(const DynamicPlanRecord& observed,const std::string& label);
 std::string dynamic_plan_report(const DynamicPlanRecord& observed);
-// Only agent/human tasks and backend-registered presets are offered. Dynamic
-// deterministic tools remain absent until their real native owner exists.
+// Model-visible definitions expose registered agent/human tasks and exact
+// schema-bound deterministic, MCP and synchronous process tool nodes. This
+// function grants no authority; execution rechecks the frozen root bindings.
 std::vector<ModelToolDefinition> dynamic_plan_tool_definitions(const DynamicPlanCapabilities& frozen);
 // Exact registered schema for idle context measurement; this does not finalize
 // a catalogue, create a plan or grant an execution capability.

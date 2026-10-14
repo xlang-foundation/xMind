@@ -3,6 +3,7 @@
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/native_child_executor.hpp"
 #include "agentflow/instruction_precondition.hpp"
+#include <functional>
 
 namespace agentflow {
 // Shared by capability finalization and actual child construction. Preset
@@ -14,6 +15,7 @@ struct DynamicExecutionResult {
     std::string call_id,result_json;
     bool paused=false;
 };
+using DynamicInstructionPrecondition = std::function<InstructionPrecondition(const std::string&,std::stop_token)>;
 // Executes only durable dependency-ready agent/human frontiers under the
 // ordinary root's shared budget. Provider continuation belongs to AgentRunner.
 class DynamicPlanExecutor {
@@ -22,15 +24,15 @@ public:
     DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},InstructionPrecondition guidance={});
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={});
     DynamicExecutionResult resume(const std::string& parent,const std::string& accepted_call_id,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},InstructionPrecondition guidance={});
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={});
     bool healthy() const;
 private:
     DynamicExecutionResult execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,
         const DynamicPlanCapabilities& capabilities,std::shared_ptr<RootExecutionBudget> budget,
-        std::stop_token cancel,InstructionPrecondition guidance);
+        std::stop_token cancel,DynamicInstructionPrecondition guidance);
     PersistenceService& store_;
     std::shared_ptr<NativeChildExecutor> children_;
 };

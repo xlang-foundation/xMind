@@ -33,8 +33,29 @@ renderer contracts for exact tool arguments and an explicit “controller
 approval required” MCP label. Browser unit/controller tests pass **109/109**;
 the native browser harness requires its server/assets arguments and is not
 covered by that unit-test count.
-Browser/VS Code installed acceptance, live external providers/peers, process
-nodes and recursive planning remain unverified or incomplete.
+Browser/VS Code installed acceptance, live external providers/peers, background
+jobs inside plans and recursive planning remain unverified or incomplete.
+
+## Synchronous process nodes in dynamic plans — 2026-10-14
+
+Dynamic `tool` nodes can now select the registered `run_process` profile from
+the frozen coding preset. Native C++ validates against the sealed process
+schema, restricts execution to the primary workspace folder, rejects
+background mode, and dispatches through `ProcessExecutor` so the usual exact
+approval, operation ledger, process output artifact and uncertain-outcome
+behavior remain authoritative. The process instruction precondition is scoped
+to its selected workdir. A focused fixture approved a real Node process in a
+nested workspace directory, verified its actual file write with a dependent
+native read, and separately denied a launch while asserting no output or file
+effect.
+
+The dynamic-plan pure, repository, engine, and MCP/process contracts pass
+**4/4**. The full native suite completed **143/144 before this change**; the
+single Rust Analyzer call-site-definition failure passed its immediate
+isolated rerun with the fixture check (**2/2**). The VS Code and browser
+results above are from the preceding MCP checkpoint; this change did not
+modify either client. Background jobs inside plans, rendered/installed
+acceptance and recursive planning remain open.
 
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 
@@ -55,8 +76,8 @@ arguments and actual model-free output. The full VS Code suite passes 343/343;
 provider responses and keys remain synthetic. Hosted CI, live-provider use,
 rendered external-browser UI and installed VS Code were not run for this
 checkpoint. MCP/process plan nodes and recursive planning were incomplete at
-that checkpoint; direct MCP tool nodes are now covered above. Process nodes and
-recursive planning remain incomplete.
+that checkpoint; direct MCP and synchronous process nodes are covered in the
+current sections above. Recursive planning remains incomplete.
 
 ## Empty provider admission and unified browser acceptance — 2026-10-14
 

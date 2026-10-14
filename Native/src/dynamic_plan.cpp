@@ -135,6 +135,11 @@ void definition(const DynamicNodeDefinition& value,const DynamicPlanCapabilities
         if(deterministic_reads.contains(value.tool)){
             const auto inspector=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.inspect"&&preset.revision==1;});
             if(inspector==frozen.presets.end()||!inspector->readonly||std::find(inspector->tools.begin(),inspector->tools.end(),value.tool)==inspector->tools.end())throw std::invalid_argument("Dynamic deterministic tool is outside the admitted read-only preset");
+        }else if(value.tool=="run_process"){
+            const auto coding=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.coding"&&preset.revision==1&&!preset.readonly;});
+            if(coding==frozen.presets.end()||std::find(coding->tools.begin(),coding->tools.end(),value.tool)==coding->tools.end()||found->contains("mcp_binding"))throw std::invalid_argument("Dynamic process tool is outside the admitted coding preset");
+            const auto arguments=object(value.arguments_json,65536);if(arguments.contains("background")&&(!arguments["background"].is_boolean()||arguments["background"].get<bool>()))throw std::invalid_argument("Dynamic process nodes must finish within their owned child");
+            if(arguments.contains("folder_id")&&(!arguments["folder_id"].is_string()||arguments["folder_id"]!=frozen.workspace_identity))throw std::invalid_argument("Dynamic process nodes are restricted to the admitted primary workspace folder");
         }else{
             const auto coding=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.coding"&&preset.revision==1&&!preset.readonly;});
             if(coding==frozen.presets.end()||std::find(coding->tools.begin(),coding->tools.end(),value.tool)==coding->tools.end()||!value.tool.starts_with("mcp_")||!found->contains("mcp_binding")||!found->at("mcp_binding").is_object()||found->at("mcp_binding").contains("kind"))throw std::invalid_argument("Dynamic effect tool must be a sealed registered MCP tool in the coding preset");
@@ -342,6 +347,10 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
         const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==name;});
         if(found!=catalog["tools"].end()&&found->contains("mcp_binding")&&found->at("mcp_binding").is_object()&&!found->at("mcp_binding").contains("kind"))read_tools.push_back(name);
     }
+    if(catalog.is_object()&&catalog.contains("tools")&&catalog["tools"].is_array())for(const auto& policy:frozen.presets)if(policy.id=="workspace.coding"&&!policy.readonly&&std::find(policy.tools.begin(),policy.tools.end(),"run_process")!=policy.tools.end()){
+        const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[](const auto& item){return item.is_object()&&item.value("name",std::string{})=="run_process";});
+        if(found!=catalog["tools"].end()&&!found->contains("mcp_binding"))read_tools.push_back("run_process");
+    }
     auto tool_properties=common;tool_properties["type"]={{"const","tool"}};tool_properties.erase("objective");tool_properties.erase("preset");
     tool_properties["tool"]={{"enum",read_tools}};tool_properties["arguments_json"]={{"type","string"},{"minLength",2},{"maxLength",65536}};
     const auto tool=Json{{"type","object"},{"properties",tool_properties},{"required",{"id","type","tool","arguments_json","depends_on"}},{"additionalProperties",false}};
@@ -353,8 +362,8 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     for(const auto* field:{"expected_revision","expected_state_sequence"})revised["properties"][field]={{"type","integer"},{"minimum",1},{"maximum",safe_integer}};
     revised["properties"]["add"]=definitions;revised["properties"]["replace"]=definitions;
     revised["properties"]["skip"]={{"type","array"},{"maxItems",32},{"items",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}}};
-    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, read-only tool tasks for deterministic workspace reads, MCP tool tasks for registered MCP actions (which pause for the usual exact controller approval), and human tasks for authenticated input. Human answers are data and every effect retains its exact approval. This must be the sole tool call in the assistant turn.",initial.dump()},
-        {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. MCP tool tasks retain the frozen server binding and require the usual controller approval. This must be the sole tool call in the assistant turn.",revised.dump()},
+    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, read-only tool tasks for deterministic workspace reads, MCP tool tasks for registered MCP actions, run_process tool tasks for synchronous commands through registered profiles, and human tasks for authenticated input. Effects keep their usual exact controller approval and journal; human answers are data. This must be the sole tool call in the assistant turn.",initial.dump()},
+        {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. MCP and process tool tasks keep their frozen bindings and require the usual controller approval. This must be the sole tool call in the assistant turn.",revised.dump()},
         {"inspect_plan","Read this Agent's actual owned dependency plan, revisions and bounded outcomes. This does not dispatch work or grant effect authority.",R"({"type":"object","properties":{},"additionalProperties":false})"}};
 }
 }

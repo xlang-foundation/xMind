@@ -11,27 +11,35 @@ request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
 reopen/recovery verifies those receipts against the immutable node definition.
 The repository schema migration is now v23.
 
-The same node type now accepts an exact MCP tool alias only when its complete
-tool binding and input schema are sealed in the finalized root catalogue and
-the tool belongs to `workspace.coding`. Execution launches a fresh client from
-the frozen server configuration, rediscovers and compares the peer binding,
-then invokes the shared MCP registry. The registry still owns the approval
-request, operation journal, secret-reflection checks and uncertain-outcome
-quarantine. A direct-node fixture approved one MCP write and then verified its
-actual bytes with a dependent model-free workspace read. MCP resources and
-prompts, process nodes, recursive plans and replay of uncertain effects are not
-enabled as plan nodes.
+The same node type accepts an exact MCP tool alias only when its complete tool
+binding and input schema are sealed in the finalized root catalogue and the
+tool belongs to `workspace.coding`. Execution launches a fresh client from the
+frozen server configuration, rediscovers and compares the peer binding, then
+invokes the shared MCP registry. The registry owns approval, operation
+journaling, secret-reflection checks and uncertain-outcome quarantine.
 
-The pure plan, repository and actual native engine contracts pass; the full
-fresh native Release CTest suite passes 144/144. The engine fixture executes a
-deterministic `read_file` node after an approved coding child and checks its
-actual bytes, child ownership, receipts and model-free budget accounting. The
-shared browser/VS Code client and renderer validate and display tool nodes; the
-full extension and browser suites pass 343/343 and 109/109 at that checkpoint.
-The focused dynamic-plan engine and MCP contracts now pass 2/2 locally, with a
-direct approved MCP node added to the latter. Provider replies and credentials
-are synthetic. External-browser and installed VS Code acceptance remain open.
-Process nodes, recursive planning and full coding/provider parity remain work.
+The node type also accepts `run_process` through the registered coding
+preset's sealed profile schema. It uses the existing native `ProcessExecutor`,
+requires the usual exact controller approval, captures guidance for its
+selected working directory, retains output in the process artifact journal and
+must finish within the owned child. Process nodes are restricted to the
+admitted primary workspace folder; background jobs are refused because their
+lifetime cannot be joined to a terminal plan child. A native process contract
+approved a real Node process in a nested workspace directory, verified its
+actual file write through a dependent native read, and verified denial before
+dispatch. MCP resources/prompts, recursive plans and replay of uncertain
+effects remain unavailable as plan nodes.
+
+The dynamic-plan pure, repository, engine and MCP/process contracts pass 4/4
+locally after the process-node change. The actual direct process/MCP contract
+uses synthetic provider replies and credentials; process launch, MCP peer,
+approval decisions, output artifacts, file effects, and embedded xlang3 SQLite
+are native and actual. The full native Release suite completed at 143/144
+before process nodes were added; the single Rust Analyzer call-site-definition
+failure passed its immediate isolated rerun. VS Code and browser suites passed
+343/343 and 109/109 at the preceding MCP checkpoint. External-browser and
+installed VS Code acceptance remain open. MCP resources/prompts, recursive
+planning and full coding/provider parity remain work.
 
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78-contract native gate in 145.17 seconds**, with the exact complete manifest
@@ -179,7 +187,7 @@ The registered contracts cover distinct boundaries:
   escaping and supplied metrics; they do not establish an installed IDE result.
 
 None of these fixtures establishes live-provider planning, installed VS Code
-acceptance, dynamic process nodes, recursive planning,
+acceptance, rendered process-plan acceptance, recursive planning,
 full coding/provider parity or private Nexus execution. The separate
 browser/native integration uses disposable model-free state to check graph,
 human, authentication, durable cookie and reconnect boundaries; it does not

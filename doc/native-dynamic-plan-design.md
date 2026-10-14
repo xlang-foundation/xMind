@@ -14,20 +14,23 @@ VSIX assets** also passed, without rendered dynamic-planning or installed-editor
 acceptance. [Initial implemented boundary](native-dynamic-plan.md),
 [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
 
-Current source extends the `tool` node with exact-bound MCP tools in the
-registered coding preset. Focused Release engine/MCP contracts pass 2/2,
-including controller approval, actual peer dispatch, durable outcome, a
-dependent workspace read and uncertainty handling through the shared MCP
-registry. This does not establish process nodes, MCP resources/prompts in
-plans, live provider or external-browser/installed VS Code acceptance.
+Current source extends the `tool` node with exact-bound MCP tools and a
+synchronous `run_process` node in the registered coding preset. Focused Release
+dynamic-plan pure/repository/engine/MCP-process contracts pass 4/4. They verify
+MCP approval, actual peer dispatch, durable outcome and uncertainty handling;
+the process scenario verifies an approved native launch and dependent read,
+plus denial before process dispatch. Background process jobs, MCP
+resources/prompts in plans, recursive planning, live provider and
+external-browser/installed VS Code acceptance remain open.
 
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
-workspace reads and exact-bound MCP tool nodes. Process nodes, recursive
-planning, skills, compaction and outbound A2A remain future work. The installed
-preview and historical acceptance boundaries below remain separate. Schema-v11
-installation, live planning and installed VS Code acceptance remain pending. The installed ace/schema-v10
-scope below is separate from the new local planning result.
+workspace reads, exact-bound MCP tool nodes and synchronous registered process
+nodes. Background process nodes, recursive planning, skills, compaction and
+outbound A2A remain future work. The installed preview and historical
+acceptance boundaries below remain separate. Schema-v11 installation, live
+planning and installed VS Code acceptance remain pending. The installed
+ace/schema-v10 scope below is separate from the new local planning result.
 
 [Bounded native delegation](native-delegation.md) was introduced at historical
 revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a`, with scoped local and exact
@@ -150,8 +153,10 @@ nodes use the exact alias and server revision captured from actual root
 discovery. A child privately resolves credentials, freshly rediscovers and
 compares the alias and schema, then proposes the call through the common
 approval/effect registry. Metadata and plan admission do not launch a peer. A
-changed connector or schema cannot silently rebind old work. Direct MCP resource
-and prompt operations and process nodes remain future additions.
+changed connector or schema cannot silently rebind old work. Synchronous
+`run_process` nodes use the frozen coding preset's process profile schema and
+the existing native approval/effect journal; they cannot request background
+execution. Direct MCP resource and prompt operations remain future additions.
 
 Human nodes require an implemented authenticated controller-input capability.
 The model selects a bounded question, not its answering actor, route or

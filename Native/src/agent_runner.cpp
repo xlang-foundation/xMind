@@ -606,11 +606,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             persistence_.commit_dynamic_tool_turn(id,actual.call_id).get();
             reload_history();planning_continuation=actual.call_id;
         };
-        auto planning_guidance=[&]{InstructionPrecondition guidance;if(repository_context&&repository_context->ready(".",token))guidance=repository_context->precondition(".");return guidance;};
+        std::mutex planning_guidance_mutex;
+        auto planning_guidance=[&](const std::string& directory,std::stop_token stop){
+            std::lock_guard lock(planning_guidance_mutex);
+            InstructionPrecondition guidance;
+            if(repository_context&&repository_context->ready(directory,stop))guidance=repository_context->precondition(directory);
+            return guidance;
+        };
         if(resume){
             // Idle MCP peers retire before a clean pause closes active time.
             close_mcp();stop_mcp_observers();
-            const auto actual=planning_->resume(id,resume->pending_call.id,settings_,*root_caps,budget,token,planning_guidance());
+            const auto actual=planning_->resume(id,resume->pending_call.id,settings_,*root_caps,budget,token,planning_guidance);
             if(actual.paused)return actual.root;
             commit_plan_result(actual);refresh_tools();
         }
@@ -733,7 +739,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 const auto& call=response.tool_calls.front();const auto activity=id+":plan:"+call.id;
                 persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)},{"arguments_json",call.arguments_json}}.dump()).get();
                 close_mcp();stop_mcp_observers();DynamicExecutionResult actual;
-                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,*root_caps,budget,token,planning_guidance());}
+                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,*root_caps,budget,token,planning_guidance);}
                 catch(const DynamicPlanRejected& error){
                     persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
                     reload_history();refresh_tools();continue;
