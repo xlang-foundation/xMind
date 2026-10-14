@@ -1,6 +1,9 @@
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_authority.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/mcp_client_factory.hpp"
+#include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
@@ -75,6 +78,44 @@ Run execute_readonly_tool(PersistenceService& store,const std::string& child,con
      catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
      catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
 }
+Run execute_mcp_tool(PersistenceService& store,const std::string& child,const DynamicPreparedNode& prepared,
+    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,
+    std::stop_token cancel,InstructionPrecondition guidance){
+    auto phase=RunState::queued;const auto retire=[&](RunState to,const char* reason){return store.transition(child,phase,to,Json{{"reason",reason}}.dump()).get();};
+    if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_mcp_tool");
+    if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
+    try{
+        if(!settings.workspace||!guidance.verify)throw ToolAccessDenied("Dynamic MCP effects require the admitted repository instruction precondition");
+        WorkspaceTools workspace(*settings.workspace);
+        if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic MCP workspace identity changed");
+        const auto catalogue=Json::parse(mcp_compact_object(caps.tool_catalog_json));
+        const auto& definition=prepared.node.definition;
+        const auto frozen_tool=std::find_if(catalogue.at("tools").begin(),catalogue.at("tools").end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==definition.tool;});
+        if(frozen_tool==catalogue.at("tools").end()||!frozen_tool->contains("mcp_binding"))throw ToolAccessDenied("Dynamic MCP binding is no longer registered");
+        const auto binding=frozen_tool->at("mcp_binding");const auto server_id=binding.at("server_config_id").get<std::string>();const auto revision=binding.at("config_revision").get<std::int64_t>();
+        const auto server=std::find_if(settings.mcp_servers.begin(),settings.mcp_servers.end(),[&](const auto& item){return item.id==server_id&&item.revision==revision&&item.enabled;});
+        if(server==settings.mcp_servers.end())throw ToolAccessDenied("Dynamic MCP server configuration changed");
+        budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
+        store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
+        std::vector<SecretBytes> private_credentials;
+        auto client=connect_mcp_client(*server,store,budget->deadline(),cancel,&private_credentials);
+        McpToolRegistry registry(*client,store,workspace,server_id,revision,budget->deadline(),cancel,&private_credentials);
+        const auto bindings=Json::parse(registry.approval_bindings_json());const auto actual=std::find_if(bindings.begin(),bindings.end(),[&](const auto& item){return item.is_object()&&item.value("alias",std::string{})==definition.tool;});
+        if(actual==bindings.end()||*actual!=binding)throw McpCatalogueChanged("Dynamic MCP catalogue differs from its accepted binding");
+        guidance.validate();
+        const auto expiry=now_ms()+settings.run_timeout.count();
+        const auto operation=identity();
+        const auto result=Json::parse(registry.invoke(operation,child,definition.tool,definition.arguments_json,expiry,budget->deadline(),cancel,std::move(guidance)));
+        store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
+        return store.complete_run(child,result.dump()).get();
+    }catch(const McpOutcomeUnrecorded&){throw;}
+     catch(const McpEffectUncertain&){return retire(RunState::failed,"mcp_effect_uncertain");}
+     catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
+     catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
+     catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
+     catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+     catch(const std::exception&){return retire(RunState::failed,"dynamic_mcp_tool_execution_failed");}
+}
 struct ActiveBatch {
     std::unique_ptr<NativeChildExecutor::Batch> work;
     std::vector<std::string> children;
@@ -96,7 +137,7 @@ DynamicPlanExecutor::DynamicPlanExecutor(PersistenceService& store,std::shared_p
 }
 bool DynamicPlanExecutor::healthy()const{return children_->healthy();}
 DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,const ModelToolCall& call,const std::string& assistant,const std::string& origin,
-    const AgentSettings& frozen,const DynamicPlanCapabilities& caps,std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel){
+    const AgentSettings& frozen,const DynamicPlanCapabilities& caps,std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,InstructionPrecondition guidance){
     generation(store_,parent,frozen,caps,budget,cancel);if(!healthy())throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");
     const auto root=store_.run(parent).get();if(root.graph_root||!root.parent_id.empty()||root.state!=RunState::running)throw DynamicPlanUnavailable("Only the owning ordinary Agent can execute a dynamic plan");
     if(call.name=="inspect_plan"){
@@ -121,16 +162,16 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
      catch(const RootBudgetExhausted&){throw DynamicPlanRejected("planning_budget_exhausted");}
      catch(const std::invalid_argument&){throw DynamicPlanRejected("invalid_plan_arguments");}
     if(!accepted.created){if(!accepted.result_json.empty())return {root,accepted.id,accepted.result_json,false};throw DynamicOutcomeUnrecorded("An incomplete planning call cannot be replayed");}
-    return execute(accepted,frozen,caps,std::move(budget),cancel);
+    return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
 DynamicExecutionResult DynamicPlanExecutor::resume(const std::string& parent,const std::string& id,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
-    std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel){
+    std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,InstructionPrecondition guidance){
     generation(store_,parent,frozen,caps,budget,cancel);const auto accepted=store_.dynamic_plan_call(id).get();
     const auto root=store_.run(parent).get();if(accepted.root_run_id!=parent||accepted.state!="accepted"||root.state!=RunState::running||root.graph_root||!root.parent_id.empty())throw DynamicPlanUnavailable("Dynamic continuation does not own its exact resumed ordinary root");
-    return execute(accepted,frozen,caps,std::move(budget),cancel);
+    return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
 DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
-    std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel){
+    std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,InstructionPrecondition guidance){
     std::vector<ActiveBatch> active;active.reserve(8);
     auto settle=[&](bool wait){
         for(auto& batch:active)for(std::size_t i=0;i<batch.children.size();++i){if(batch.settled[i])continue;const auto& result=batch.work->results()[i];
@@ -187,8 +228,12 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     if(prepared.node.definition.kind==DynamicNodeKind::agent){policy=preset(caps,prepared.node.definition);settings=dynamic_child_settings(frozen,policy,selected_model(caps));}
                     else settings=frozen;
                     DynamicTaskClaimSpec task;task.label=prepared.node.definition.label;task.claim_id=identity();task.child_run_id=child_id;task.prompt_json=(prepared.node.definition.kind==DynamicNodeKind::tool?deterministic_prompt(prepared):prompt(prepared,caps)).dump();task.resolved_input_json=prepared.dependency_outputs_json;task.definition_revision=prepared.node.definition_revision;claim.tasks.push_back(std::move(task));staged.children.push_back(child_id);
-                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared](std::stop_token stop)mutable{
-                        if(prepared.node.definition.kind==DynamicNodeKind::tool)return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop);
+                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
+                        if(prepared.node.definition.kind==DynamicNodeKind::tool){
+                            static const std::set<std::string> readonly={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
+                            if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop);
+                            return execute_mcp_tool(store_,child_id,prepared,settings,caps,budget,stop,guidance);
+                        }
                         const auto retire_before_launch=[&]()->std::optional<Run>{
                             if(stop.stop_requested())return store_.transition(child_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_dynamic_child"})").get();
                             if(std::chrono::steady_clock::now()>=budget->deadline())return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"agent_timeout"})").get();return {};};

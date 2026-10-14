@@ -2,6 +2,7 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/native_child_executor.hpp"
+#include "agentflow/instruction_precondition.hpp"
 
 namespace agentflow {
 // Shared by capability finalization and actual child construction. Preset
@@ -21,15 +22,15 @@ public:
     DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={});
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},InstructionPrecondition guidance={});
     DynamicExecutionResult resume(const std::string& parent,const std::string& accepted_call_id,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={});
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},InstructionPrecondition guidance={});
     bool healthy() const;
 private:
     DynamicExecutionResult execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,
         const DynamicPlanCapabilities& capabilities,std::shared_ptr<RootExecutionBudget> budget,
-        std::stop_token cancel);
+        std::stop_token cancel,InstructionPrecondition guidance);
     PersistenceService& store_;
     std::shared_ptr<NativeChildExecutor> children_;
 };

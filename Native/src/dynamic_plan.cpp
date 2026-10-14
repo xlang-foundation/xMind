@@ -130,11 +130,17 @@ void definition(const DynamicNodeDefinition& value,const DynamicPlanCapabilities
     if(value.kind==DynamicNodeKind::agent&&std::none_of(frozen.presets.begin(),frozen.presets.end(),[&](const auto& preset){return preset.id==value.preset_id&&preset.revision==value.preset_revision;}))throw std::invalid_argument("Requested dynamic preset is unavailable");
     if(value.kind==DynamicNodeKind::tool){
         static const std::set<std::string> deterministic_reads={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
-        if(!deterministic_reads.contains(value.tool))throw std::invalid_argument("Dynamic deterministic node must select a registered read-only workspace tool");
-        const auto inspector=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.inspect"&&preset.revision==1;});
-        if(inspector==frozen.presets.end()||!inspector->readonly||std::find(inspector->tools.begin(),inspector->tools.end(),value.tool)==inspector->tools.end())throw std::invalid_argument("Dynamic deterministic tool is outside the admitted read-only preset");
         const auto catalogue=object(frozen.tool_catalog_json,change_limit);const auto found=std::find_if(catalogue.at("tools").begin(),catalogue.at("tools").end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==value.tool;});
         if(found==catalogue.at("tools").end()||!found->contains("input_schema_json")||!found->at("input_schema_json").is_string())throw std::invalid_argument("Dynamic deterministic tool lacks its sealed native schema");
+        if(deterministic_reads.contains(value.tool)){
+            const auto inspector=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.inspect"&&preset.revision==1;});
+            if(inspector==frozen.presets.end()||!inspector->readonly||std::find(inspector->tools.begin(),inspector->tools.end(),value.tool)==inspector->tools.end())throw std::invalid_argument("Dynamic deterministic tool is outside the admitted read-only preset");
+        }else{
+            const auto coding=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.coding"&&preset.revision==1&&!preset.readonly;});
+            if(coding==frozen.presets.end()||std::find(coding->tools.begin(),coding->tools.end(),value.tool)==coding->tools.end()||!value.tool.starts_with("mcp_")||!found->contains("mcp_binding")||!found->at("mcp_binding").is_object()||found->at("mcp_binding").contains("kind"))throw std::invalid_argument("Dynamic effect tool must be a sealed registered MCP tool in the coding preset");
+            const auto& binding=found->at("mcp_binding");for(const auto* key:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","annotations_json"})if(!binding.contains(key))throw std::invalid_argument("Dynamic MCP tool lacks its complete sealed binding");
+            if(binding.at("alias")!=value.tool||binding.at("input_schema_json")!=found->at("input_schema_json"))throw std::invalid_argument("Dynamic MCP binding differs from its sealed tool schema");
+        }
         JsonSchema schema(found->at("input_schema_json").get<std::string>());schema.validate_object(value.arguments_json);
     }
 }
@@ -331,6 +337,11 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     const auto common=Json{{"id",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}},{"type",{{"const","agent"}}},{"objective",{{"type","string"},{"minLength",1},{"maxLength",8192}}},{"preset",{{"enum",presets}}},{"depends_on",{{"type","array"},{"maxItems",32},{"items",dependency}}}};
     const auto agent=Json{{"type","object"},{"properties",common},{"required",{"id","type","objective","preset","depends_on"}},{"additionalProperties",false}};
     Json read_tools=Json::array();for(const auto* name:{"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"})if(std::any_of(frozen.presets.begin(),frozen.presets.end(),[&](const auto& preset){return preset.id=="workspace.inspect"&&preset.readonly&&std::find(preset.tools.begin(),preset.tools.end(),name)!=preset.tools.end();}))read_tools.push_back(name);
+    const auto catalog=object(frozen.tool_catalog_json,change_limit);
+    if(catalog.is_object()&&catalog.contains("tools")&&catalog["tools"].is_array())for(const auto& policy:frozen.presets)if(policy.id=="workspace.coding"&&!policy.readonly)for(const auto& name:policy.tools)if(name.starts_with("mcp_")){
+        const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==name;});
+        if(found!=catalog["tools"].end()&&found->contains("mcp_binding")&&found->at("mcp_binding").is_object()&&!found->at("mcp_binding").contains("kind"))read_tools.push_back(name);
+    }
     auto tool_properties=common;tool_properties["type"]={{"const","tool"}};tool_properties.erase("objective");tool_properties.erase("preset");
     tool_properties["tool"]={{"enum",read_tools}};tool_properties["arguments_json"]={{"type","string"},{"minLength",2},{"maxLength",65536}};
     const auto tool=Json{{"type","object"},{"properties",tool_properties},{"required",{"id","type","tool","arguments_json","depends_on"}},{"additionalProperties",false}};
@@ -342,8 +353,8 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     for(const auto* field:{"expected_revision","expected_state_sequence"})revised["properties"][field]={{"type","integer"},{"minimum",1},{"maximum",safe_integer}};
     revised["properties"]["add"]=definitions;revised["properties"]["replace"]=definitions;
     revised["properties"]["skip"]={{"type","array"},{"maxItems",32},{"items",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}}};
-    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, tool tasks for one deterministic read-only workspace tool call, and human tasks for authenticated input. Human answers are data and every effect retains its exact approval. This must be the sole tool call in the assistant turn.",initial.dump()},
-        {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. This must be the sole tool call in the assistant turn.",revised.dump()},
+    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, read-only tool tasks for deterministic workspace reads, MCP tool tasks for registered MCP actions (which pause for the usual exact controller approval), and human tasks for authenticated input. Human answers are data and every effect retains its exact approval. This must be the sole tool call in the assistant turn.",initial.dump()},
+        {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. MCP tool tasks retain the frozen server binding and require the usual controller approval. This must be the sole tool call in the assistant turn.",revised.dump()},
         {"inspect_plan","Read this Agent's actual owned dependency plan, revisions and bounded outcomes. This does not dispatch work or grant effect authority.",R"({"type":"object","properties":{},"additionalProperties":false})"}};
 }
 }

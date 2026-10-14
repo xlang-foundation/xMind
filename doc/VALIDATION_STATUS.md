@@ -14,6 +14,28 @@ provider CLI expectation now includes the already-supported `mistral.chat`
 route. This is the native Release gate, not hosted CI, live-provider acceptance
 or installed-client acceptance.
 
+## Direct MCP nodes in dynamic plans — 2026-10-14
+
+Release builds of `xmind` and the dynamic-plan contracts pass. Focused CTest
+passes **2/2** for the native dynamic-plan engine and MCP contracts. The MCP
+contract now includes a model-selected direct MCP `tool` node: the actual
+peer is rediscovered from the frozen server revision, the existing controller
+approval is required before dispatch, one operation outcome is journaled, and
+a dependent native read observes the actual written bytes. Synthetic provider
+replies and credentials are used; the MCP subprocess, native approval/effect
+path and embedded-xlang3 SQLite are actual. The full native Release CTest
+inventory completed with **143/144** passing; the sole failure was the
+Rust Analyzer call-site-definition contract. An immediate isolated rerun,
+including its Cargo fixture check, passed **2/2**, so the integration failure
+did not reproduce. The dynamic-plan/MCP contract passed in the full run. The
+VS Code suite passes **343/343**, including the 87
+renderer contracts for exact tool arguments and an explicit “controller
+approval required” MCP label. Browser unit/controller tests pass **109/109**;
+the native browser harness requires its server/assets arguments and is not
+covered by that unit-test count.
+Browser/VS Code installed acceptance, live external providers/peers, process
+nodes and recursive planning remain unverified or incomplete.
+
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 
 The working tree adds an explicit dynamic-plan `tool` node for six fixed
@@ -32,7 +54,9 @@ tool definitions and child claims, and the shared renderer displays exact
 arguments and actual model-free output. The full VS Code suite passes 343/343;
 provider responses and keys remain synthetic. Hosted CI, live-provider use,
 rendered external-browser UI and installed VS Code were not run for this
-checkpoint. MCP/process plan nodes and recursive planning remain incomplete.
+checkpoint. MCP/process plan nodes and recursive planning were incomplete at
+that checkpoint; direct MCP tool nodes are now covered above. Process nodes and
+recursive planning remain incomplete.
 
 ## Empty provider admission and unified browser acceptance — 2026-10-14
 
@@ -1675,7 +1699,10 @@ Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its 
 The initial native dependency-planning checkpoint (schema v11) passed the complete guarded local **77-contract gate in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen native source hashes** verified. Native contracts cover model-selected agent/human dependencies, an actual failed investigation, same-plan revision, clean pause/reopen, authenticated same-owner input, a separately approved coding-child edit and a dependent verification read. Provider replies, signatures and keys are synthetic; execution, files, permissions, transport and embedded-xlang3 SQLite are real. **119 extension and 26 browser contracts** passed at their separate renderer/controller scope. The earlier **68/77** and **76/77** gate failures remain separate retained attempts. [Initial implementation and limits](native-dynamic-plan.md), [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
 
 Model-free browser/native graph/human/auth/cookie/reconnect integration passed against the rebuilt server and matching assets; all **18 required VSIX assets** were packaged and verified. These checks establish neither rendered dynamic-planning nor installed-editor acceptance. The installed preview remains **ace2460/schema v10** with the retained repaired browser view and its separately recorded live read-only join. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. The initial 77-contract gates do not establish dynamic coding-child MCP peer effects; the
-later local 78-contract contract above supplies that bounded actual-peer scope. Deterministic dynamic tool/MCP/process nodes, recursive planning, skills, context compaction, outbound A2A and complete coding/provider parity remain required.
+later local 78-contract contract above supplies that bounded actual-peer scope.
+Direct MCP dynamic tool nodes now have a focused native approval/uncertainty
+contract; process nodes, recursive planning, skills, context compaction,
+outbound A2A and complete coding/provider parity remain required.
 
 Native Responses reasoning continuation passed the exact ace2460 hosted gate: **71 native contracts in 171.52 seconds, 103 extension and 20 browser contracts**, with all 16 job steps, native/browser integration and 18 VSIX assets passing. Verified sources and artifact maps bind the completed-item continuation fix and its real native two-child read/join with synthetic provider replies. The local build was deferred by the benchmark guard. The exact native bundle is installed. One real OpenAI browser prompt completed two read-only native children and a joined parent response, with six owned model attempts, separate per-response metrics and zero effect operations. Immediate refresh retained the connection and selection. Upgrade and rollback checks passed at their separately documented scopes. [Compatibility and scope](native-responses-reasoning.md), [exact hosted evidence](evidence/native-responses-reasoning-hosted-provenance.json).
 

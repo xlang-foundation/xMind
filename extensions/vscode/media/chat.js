@@ -382,7 +382,7 @@ function ownedView(parent,children,histories){
     const run=child.run;let row=ownedRows.get(run.id);
     if(!row){const card=node('details',undefined,'graph-node');card.open=true;const heading=node('summary'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};ownedRows.set(run.id,row);byId('owned-view').append(card);}
      row.state=run.state;row.heading.textContent=(child.node_label||child.task_id)+' · '+run.state;
-     row.body.replaceChildren(node('p',child.kind==='dynamic_tool'?'Read-only workspace tool · model-free':child.preset_id==='workspace.coding'?'Coding agent · effects require their own approval':'Read-only investigation','inspection-note'));
+     row.body.replaceChildren(node('p',child.kind==='dynamic_tool'?'Dynamic tool · model-free':child.preset_id==='workspace.coding'?'Coding agent · effects require their own approval':'Read-only investigation','inspection-note'));
      const identity=node('details');identity.append(node('summary','Run details'),node('p',run.id+(child.kind==='dynamic_tool'?' · deterministic tool claim':' · '+child.preset_id+' · version '+child.preset_revision)));row.body.append(identity);
     const history=histories[run.id]||[],signature=JSON.stringify(history);
     if(row.historySignature!==signature){row.responses.replaceChildren();for(const item of history)if(item.role!=='user')entry(item.role,item.data,row.responses);row.historySignature=signature;row.stream.replaceChildren();row.text='';row.usage=undefined;}
@@ -445,7 +445,8 @@ function planView(value){
     const question=value.questions.find(question=>question.id===task.human_request_id);
      const definitionSignature=JSON.stringify([task.type,task.definition_revision,task.claim_id,task.objective,task.question,task.preset,task.tool,task.arguments_json,task.depends_on]);
     if(!row.rendered||row.request!==question?.id||row.definitionSignature!==definitionSignature){row.body.replaceChildren();row.form=undefined;row.button=undefined;row.request=question?.id;row.submitting=false;row.rendered=true;row.definitionSignature=definitionSignature;
-       row.body.append(node('p',task.type==='human'?task.question:task.type==='tool'?'Read-only workspace tool · '+task.tool+' · no model call':task.objective,'plan-objective'));
+       const toolDescription=task.type==='tool'?(task.tool?.startsWith('mcp_')?'MCP action · '+task.tool+' · controller approval required':'Read-only workspace tool · '+task.tool+' · no model call'):'';
+       row.body.append(node('p',task.type==='human'?task.question:task.type==='tool'?toolDescription:task.objective,'plan-objective'));
        if(task.type==='tool'){const args=node('details');args.append(node('summary','Tool arguments'),node('pre',task.arguments_json));row.body.append(args);}
       const edges=node('div',undefined,'plan-dependencies');edges.append(node('span',task.depends_on.length?'Depends on: ':'No dependencies'));
       for(const edge of task.depends_on){const link=node('button',edge.task+' → '+task.id+' · '+edge.require,'plan-edge');link.type='button';link.onclick=()=>{const target=[...planRows.values()].find(row=>row.card.dataset.node===edge.task);target?.card.scrollIntoView?.({block:'nearest'});};edges.append(link);}row.body.append(edges);

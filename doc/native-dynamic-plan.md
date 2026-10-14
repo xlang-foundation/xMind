@@ -2,7 +2,7 @@
 
 ## Dynamic deterministic workspace tools — 2026-10-14
 
-Dynamic plans now admit native `tool` nodes for the fixed read-only workspace
+Dynamic plans admit native `tool` nodes for the fixed read-only workspace
 aliases `read_repository_instructions`, `read_file`, `list_files`,
 `search_files`, `find_files` and `glob_files`. Arguments are checked against the
 sealed native tool schema and the frozen `workspace.inspect` capability before admission.
@@ -11,15 +11,27 @@ request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
 reopen/recovery verifies those receipts against the immutable node definition.
 The repository schema migration is now v23.
 
+The same node type now accepts an exact MCP tool alias only when its complete
+tool binding and input schema are sealed in the finalized root catalogue and
+the tool belongs to `workspace.coding`. Execution launches a fresh client from
+the frozen server configuration, rediscovers and compares the peer binding,
+then invokes the shared MCP registry. The registry still owns the approval
+request, operation journal, secret-reflection checks and uncertain-outcome
+quarantine. A direct-node fixture approved one MCP write and then verified its
+actual bytes with a dependent model-free workspace read. MCP resources and
+prompts, process nodes, recursive plans and replay of uncertain effects are not
+enabled as plan nodes.
+
 The pure plan, repository and actual native engine contracts pass; the full
 fresh native Release CTest suite passes 144/144. The engine fixture executes a
 deterministic `read_file` node after an approved coding child and checks its
 actual bytes, child ownership, receipts and model-free budget accounting. The
 shared browser/VS Code client and renderer validate and display tool nodes; the
-full extension and browser suites pass 343/343 and 109/109. Provider replies
-and credentials are synthetic. External-browser and installed VS Code
-acceptance remain open. MCP and process nodes, recursive planning and full
-coding/provider parity remain work.
+full extension and browser suites pass 343/343 and 109/109 at that checkpoint.
+The focused dynamic-plan engine and MCP contracts now pass 2/2 locally, with a
+direct approved MCP node added to the latter. Provider replies and credentials
+are synthetic. External-browser and installed VS Code acceptance remain open.
+Process nodes, recursive planning and full coding/provider parity remain work.
 
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78-contract native gate in 145.17 seconds**, with the exact complete manifest
@@ -78,7 +90,7 @@ for additional deterministic tools, other node kinds and recursive execution.
 | --- | --- |
 | `workspace.inspect` revision 1 | Native read-only child AgentRunner, at most four model turns |
 | `workspace.coding` revision 1 | Child AgentRunner inheriting the root's enabled edit/create/process/MCP authority and existing exact approvals; bounded by the admitted policy |
-| `tool` | Native model-free read-only workspace aliases validated against their frozen input schemas |
+| `tool` | Native model-free workspace reads, plus exact-bound MCP tools dispatched through the normal controller approval and operation journal |
 | `human` | Backend-published question answered through the authenticated controller, with a fixed native expiration policy |
 
 The coding preset is offered only when the root has an enabled coding/effect
@@ -167,7 +179,7 @@ The registered contracts cover distinct boundaries:
   escaping and supplied metrics; they do not establish an installed IDE result.
 
 None of these fixtures establishes live-provider planning, installed VS Code
-acceptance, dynamic MCP/process nodes, recursive planning,
+acceptance, dynamic process nodes, recursive planning,
 full coding/provider parity or private Nexus execution. The separate
 browser/native integration uses disposable model-free state to check graph,
 human, authentication, durable cookie and reconnect boundaries; it does not

@@ -14,10 +14,19 @@ VSIX assets** also passed, without rendered dynamic-planning or installed-editor
 acceptance. [Initial implemented boundary](native-dynamic-plan.md),
 [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
 
-This document retains the broader design. Only agent and human nodes are
-accepted in the initial model-selected schema; deterministic tool/MCP/process
-nodes, recursive planning, skills, compaction and outbound A2A remain future
-work. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. The installed ace/schema-v10
+Current source extends the `tool` node with exact-bound MCP tools in the
+registered coding preset. Focused Release engine/MCP contracts pass 2/2,
+including controller approval, actual peer dispatch, durable outcome, a
+dependent workspace read and uncertainty handling through the shared MCP
+registry. This does not establish process nodes, MCP resources/prompts in
+plans, live provider or external-browser/installed VS Code acceptance.
+
+This document retains the broader design. The initial model-selected schema
+accepted only agent and human nodes; current source also supports deterministic
+workspace reads and exact-bound MCP tool nodes. Process nodes, recursive
+planning, skills, compaction and outbound A2A remain future work. The installed
+preview and historical acceptance boundaries below remain separate. Schema-v11
+installation, live planning and installed VS Code acceptance remain pending. The installed ace/schema-v10
 scope below is separate from the new local planning result.
 
 [Bounded native delegation](native-delegation.md) was introduced at historical
@@ -55,19 +64,21 @@ unverified. The initial local planning milestone above does not redefine the
 broader [dynamic Agent target](dynamic-agent-execution.md).
 
 The implemented behavior is a normal Agent selecting a dependency plan,
-observing agent and deterministic read-only workspace-tool children plus human
-input, then revising undispatched tasks, with authorized coding work as well as
-investigation. The native backend owns the plan, capabilities, budgets and
+observing agent, deterministic workspace-tool and exact-bound MCP-tool children
+plus human input, then revising undispatched tasks, with authorized coding work
+as well as investigation. MCP plan nodes use the same approval and operation
+journal as ordinary Agent calls; a peer acknowledgement with uncertain effects
+halts the plan. The native backend owns the plan, capabilities, budgets and
 effect journals; thin clients observe those records and submit authenticated
-input. MCP/process tool nodes, other node kinds and recursion must preserve these
-same boundaries.
+input. Process nodes, other effect kinds and recursion must preserve these same
+boundaries.
 
 ## Existing foundations and missing boundaries
 
 The table preserves the original delivery boundaries. The implementation guide
-describes the current agent/human and bounded deterministic read-only workspace
-tool nodes. Broader deterministic tool and graph integration remain design
-requirements.
+describes the current agent/human, bounded deterministic workspace reads and
+exact-bound MCP tool nodes. Broader effect kinds and graph integration remain
+design requirements.
 
 | Existing contract | Reuse | Required addition |
 | --- | --- | --- |
@@ -132,15 +143,15 @@ downgraded to investigation. Child recursion is initially disabled for both
 presets. Broader presets and bounded recursive execution remain future native
 work with the same root budget.
 
-Deterministic workspace-tool nodes currently select only the fixed read-only
-aliases in the frozen `workspace.inspect` preset, and validate exact arguments
-against the sealed native schemas. They run as native child records without a
-model request. MCP and process nodes remain future additions: for MCP, the
-backend must derive the server ID/revision from the trusted alias binding
-obtained by actual root discovery, and a child must privately resolve
-credentials and freshly rediscover the exact alias before proposing or
-dispatching an effect. Metadata and plan admission must not launch a peer. A
-changed connector or schema cannot silently rebind old work.
+Workspace read nodes select only the fixed read-only aliases in the frozen
+`workspace.inspect` preset and validate exact arguments against sealed native
+schemas. They run as native child records without a model request. MCP tool
+nodes use the exact alias and server revision captured from actual root
+discovery. A child privately resolves credentials, freshly rediscovers and
+compares the alias and schema, then proposes the call through the common
+approval/effect registry. Metadata and plan admission do not launch a peer. A
+changed connector or schema cannot silently rebind old work. Direct MCP resource
+and prompt operations and process nodes remain future additions.
 
 Human nodes require an implemented authenticated controller-input capability.
 The model selects a bounded question, not its answering actor, route or
@@ -575,9 +586,10 @@ The original proposed production ownership split is retained for comparison:
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
 The [implementation guide](native-dynamic-plan.md) identifies the subset now
-implemented and its verification limits. Effectful/MCP/process tool scheduling,
-reference helpers and further node kinds in this table still require their own
-implementation and acceptance; the design itself supplies no execution evidence.
+implemented and its verification limits. Process and remaining effectful-tool
+scheduling, MCP resources/prompts, reference helpers and further node kinds in
+this table still require their own implementation and acceptance; the design
+itself supplies no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget
 integration, broader bounded recursion, outbound A2A peer/task ownership and
