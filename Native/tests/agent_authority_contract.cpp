@@ -57,6 +57,10 @@ int main(){try{
     require(agent_authority_identity(base,"","synthetic-workspace-object",metadata)==bound,"Default model admission changed authority");
     auto alternative=base;alternative.selectable_models.push_back("synthetic-alternate");
     require(agent_authority_identity(alternative,"synthetic-alternate","synthetic-workspace-object",metadata)!=identity(alternative,metadata),"Selected alternate model was not bound");
+    auto profile_selected=base;profile_selected.selectable_models.clear();
+    require(context_authority_identity(profile_selected,"session-selected-profile-model","synthetic-workspace-object",metadata)!=
+        context_authority_identity(profile_selected,profile_selected.provider.model,"synthetic-workspace-object",metadata),
+        "A provider-bound context run must bind its validated session model without requiring a global default catalogue");
     auto reordered=metadata;std::reverse(reordered.begin(),reordered.end());require(identity(base,reordered)==bound,"Metadata order changed authority");
     auto different=base;different.instructions+=" changed";require(identity(different,metadata)!=bound,"Instructions were not bound");
     different=base;different.instruction_policy.instructions+=" changed";require(identity(different,metadata)!=bound,"Revision-zero policy content was not bound");

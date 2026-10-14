@@ -131,7 +131,8 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
     }
     if((!for_context&&settings.provider.tools!=Capability::supported)||settings.max_turns<1||settings.max_turns>128||
         settings.run_timeout.count()<1||settings.run_timeout.count()>3600000||
-        (model!=settings.provider.model&&std::find(settings.selectable_models.begin(),settings.selectable_models.end(),model)==settings.selectable_models.end()))
+        (model!=settings.provider.model&&std::find(settings.selectable_models.begin(),settings.selectable_models.end(),model)==settings.selectable_models.end()&&
+            (!for_context||!settings.provider_identity)))
         throw std::invalid_argument("Invalid admitted planning execution policy");
     if(settings.workspace)text(*settings.workspace,32768);
     const auto expected=references(settings);std::map<Reference,std::int64_t> versions;
