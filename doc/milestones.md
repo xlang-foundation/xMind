@@ -205,10 +205,12 @@ the clean full rerun. Rebuilding also exercised the separate configured
 [failure/fix history](evidence/native-144-ctest-20261013.log).
 
 The source-generated OpenCode V2.0.26 inventory was refreshed against its
-pinned commit: **141 operations, 32 partial native source candidates, 109
-unmapped, and zero verified operation-level parity**. OpenCode and LiteLLM
-remain references; no foreign implementation was added. The broader coding,
-CLI/editor and endpoint parity gaps remain open in [PARITY.md](PARITY.md).
+pinned commit: **141 operations, 36 partial native source candidates, 105
+unmapped, and zero verified operation-level parity**. The inventory generator
+was rerun on 2026-10-14 and confirmed all mapped source anchors and hashes.
+OpenCode and LiteLLM remain references; no foreign implementation was added.
+The broader coding, CLI/editor and endpoint parity gaps remain open in
+[PARITY.md](PARITY.md).
 
 ## CMake-paired xlang3 selection for the TestProj development host — 2026-10-13
 

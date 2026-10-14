@@ -234,9 +234,9 @@ The preceding exact e353 backend, separate local browser repair and failed first
 live delegation attempt have their own [acceptance scopes](native-delegation-acceptance.md)
 and [current validation](VALIDATION_STATUS.md).
 
-[OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json) records **136** pinned
+[OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json) records **141** pinned
 operations with acceptance requirements, **zero** removed-prototype mappings,
-**23** partial native source candidates and **113** unmapped operations. No
+**36** partial native source candidates and **105** unmapped operations. No
 operation is claimed as verified parity. Tools, plugins, context management,
 providers and editor workflows require additional source/behavior comparison.
 [Parity scope](PARITY.md).
