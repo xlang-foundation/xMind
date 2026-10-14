@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Model-free run admission and managed local view verification (2026-10-13)
+
+The console no longer sends an empty provider-profile binding when no provider
+is selected, so model-free single-agent and graph runs can be admitted. The
+native API rejects a supplied empty profile identity before creating a run,
+and CLI admission errors now include the backend's actionable detail. Fresh
+Visual Studio 18 Release binaries passed the graph-service, unified graph,
+unified program, console workspace, provider-profile runtime and provider-profile
+CLI contracts. The managed local-profile and browser-view contracts also passed
+with a Unicode workspace, as did the backend handoff contract. The xlang3
+SQLite contract passed; no xlang3 source change was needed. These tests exercise
+native browser controllers and APIs, not rendered-page or installed-IDE
+acceptance.
+
 ## Durable CLI conversation model selection (2026-10-13)
 
 The console chat now reads the selected model for an opened session from the

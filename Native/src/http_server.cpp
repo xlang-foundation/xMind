@@ -101,7 +101,7 @@ std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     if(!named)return {};
     if(!value["provider_profile_id"].is_string()||!value["expected_provider_revision"].is_number_integer()||value["expected_provider_revision"]<0||value["expected_provider_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider profile admission binding");
     const auto id=value["provider_profile_id"].get<std::string>();
-    if(id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile admission identity");
+    if(id.empty()||id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile admission identity");
     return ProviderProfileAdmission{id,value["expected_provider_revision"].get<std::int64_t>()};
 }
 std::optional<WorkspaceAdmission> workspace_admission(const Json& value){

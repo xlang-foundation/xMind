@@ -689,7 +689,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             }
             if(!next)return false;
             const auto inbox_id=next->at("id").get<std::string>(),queued_prompt=next->at("content").get<std::string>();
-            Json body={{"session_id",session},{"prompt",queued_prompt},{"inbox_id",inbox_id}};if(!model.empty())body["model_id"]=model;if(provider_profile_admission)body.update(provider_binding);
+            Json body={{"session_id",session},{"prompt",queued_prompt},{"inbox_id",inbox_id}};if(!model.empty())body["model_id"]=model;if(provider_profile_admission&&!provider_binding.value("provider_profile_id",std::string{}).empty())body.update(provider_binding);
             const auto response=client.Post("/v1/runs",headers,body.dump(),"application/json");
             if(!response||response->status!=202){
                 const auto code=response?response->status:0;
@@ -1007,12 +1007,13 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         }
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
         if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
-        if(health.value(graphSubmission?"graph_provider_profile_admission":"provider_profile_admission",false))body.update(provider_binding);
+        if(health.value(graphSubmission?"graph_provider_profile_admission":"provider_profile_admission",false)&&!provider_binding.value("provider_profile_id",std::string{}).empty())body.update(provider_binding);
         const auto admitted=client.Post(graphSubmission?"/v1/graph-runs":"/v1/runs",headers,body.dump(),"application/json");
         if(!admitted)throw std::runtime_error("Cannot reach xMind Server during run admission; admission outcome is unknown. Inspect /runs before resubmitting.");
         if(admitted->status==400||admitted->status==404||admitted->status==409||admitted->status==429||admitted->status==503){
             std::cout<<Json{{"type","run_rejected"},{"session_id",session},{"http_status",admitted->status},{"prompt",prompt},{"graph_id",graphSubmission?graphId:std::string{}}}.dump()<<'\n'<<std::flush;
-            std::cerr<<"Backend rejected run admission (HTTP "<<admitted->status<<"). Request retained above; no automatic retry. Use /runs to inspect existing work.\n";
+            const auto diagnostic=provider_rejection(admitted->body);const auto detail=diagnostic.value("detail",std::string{});
+            std::cerr<<"Backend rejected run admission (HTTP "<<admitted->status<<")"<<(detail.empty()?std::string{}:": "+detail)<<". Request retained above; no automatic retry. Use /runs to inspect existing work.\n";
             last_result=1;continue;
         }
         if(admitted->status!=202)throw std::runtime_error("Unexpected run admission response; inspect /runs before resubmitting");
@@ -1433,7 +1434,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(post&&(path=="/v1/runs"||path=="/v1/graph-runs"||command=="compact-context")){
             const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend admission capabilities");
             const auto capability=Json::parse(current->body);if(command=="compact-context"&&!capability.value("context_controls",false))throw std::runtime_error("This backend has no registered context controls");if(capability.value(path=="/v1/graph-runs"?"graph_provider_profile_admission":"provider_profile_admission",false)){
-                const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profile");body.update(provider_admission_binding(Json::parse(metadata->body)));
+                const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profile");const auto binding=provider_admission_binding(Json::parse(metadata->body));if(!binding.at("provider_profile_id").get<std::string>().empty())body.update(binding);
             }
         }
         auto response=post?((path=="/v1/provider/profiles/models"||path=="/v1/provider/models")?provider_discovery_request(client,headers,path,body):client.Post(path,headers,body.dump(),"application/json")):client.Get(path,headers);
