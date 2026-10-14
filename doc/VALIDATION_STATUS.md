@@ -29,6 +29,24 @@ the wheel download succeeded. The backend pytest suite remains blocked by
 xlang3's `PathAwareHookProxy` missing `pytest_cmdline_main`; the UI/API and
 frontend build acceptance above passed independently.
 
+### Follow-up with current xlang3 branch build
+
+The failures above came from the stale `build/Release/xlang3.exe` dated
+2026-10-12, not the current `fix/pytest-pathaware-hook-proxy` source. Building
+that branch into its separate `build-pytest-pathaware/Release` directory made
+the existing descriptor/pytest compatibility fixes available without stopping
+the xMind UI or replacing the other runtime. With the current interpreter,
+`pip install --target <temp> --no-deps pydantic==2.14.1` installed the
+pure-Python wheel successfully and paired it with xlang3's built-in
+`pydantic-core 2.50.1`. The TestProj FastAPI backend suite then passed **9/9**
+with one deprecation warning. The API was restarted on port 8000 using this
+current branch build; health, catalog stats, the three-result detection query,
+and the browser's 12-model catalog all passed. The temporary runtime path puts
+the branch's native `modules` directory ahead of the project package target so
+the xlang3-provided Pydantic Core facade and `_schema_gather` source resolve as
+a matched package. Exact results are in
+[current xlang3 TestProj acceptance](evidence/testproj-xlang3-current-branch-acceptance-20261014.json).
+
 ## Current-source browser profile and model catalogue — 2026-10-14
 
 The current native Release executable was paired with the verified xlang3

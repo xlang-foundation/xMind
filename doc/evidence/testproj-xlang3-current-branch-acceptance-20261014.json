@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-14",
+  "scope": "Follow-up TestProj backend and package-install checks using the current xlang3 pytest compatibility branch build.",
+  "xlang3": {
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "source_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+    "release_executable": "D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release\\xlang3.exe",
+    "separate_build_directory": true,
+    "pure_python_pip_install": {
+      "command": "xlang3 -m pip install --target <temp> --no-deps --upgrade pydantic==2.14.1",
+      "status": "passed",
+      "wheel_tag": "py3-none-any",
+      "pydantic_version": "2.14.1",
+      "xlang3_builtin_pydantic_core_version": "2.50.1"
+    }
+  },
+  "testproj_backend": {
+    "runtime": "xlang3 branch build",
+    "pytest": {
+      "status": "passed",
+      "passed": 9,
+      "failed": 0,
+      "warnings": 1,
+      "warning": "Starlette uses deprecated anyio.abc.BlockingPortal alias"
+    },
+    "api": {
+      "health": "passed",
+      "catalog_stats": "passed; 12 seeded models",
+      "search_detection": "passed; 3 matches; demo_data=true",
+      "browser_catalog": "passed; 12 models rendered at http://127.0.0.1:4174/"
+    },
+    "python_path_order": [
+      "temporary pure-Python Pydantic overlay",
+      "TestProj backend source",
+      "current xlang3 branch Release/modules",
+      "TestProj backend .xlang3-site"
+    ]
+  },
+  "limits": [
+    "The default build/Release executable was stale relative to this branch; it was not overwritten because the branch was built separately.",
+    "The native pydantic-core package is supplied by xlang3; no CPython native wheel was installed.",
+    "The TestProj source tree was not modified by the runtime compatibility check."
+  ]
+}
