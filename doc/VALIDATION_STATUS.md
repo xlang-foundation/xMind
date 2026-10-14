@@ -1,5 +1,17 @@
 # Current native validation
 
+## Rebuilt native Release gate — 2026-10-14
+
+The current checkout was rebuilt with
+`cmake --build build/native --config Release --parallel 4`, then the complete
+native CTest inventory passed **144/144** with four-way parallelism in 208.09
+seconds using
+`ctest --test-dir build/native -C Release -j 4 --output-on-failure`. Six tests
+that failed against stale binaries passed after the rebuild, including both
+nested dynamic-plan contracts, graph HTTP, patch HTTP, and local-view browser
+contracts. This is contract coverage with synthetic provider/peer fixtures;
+it does not establish live-provider or installed-client acceptance.
+
 ## Nested dynamic-plan observation and shared UI — 2026-10-14
 
 The root plan endpoint now enumerates durable plan-owner relations and returns
