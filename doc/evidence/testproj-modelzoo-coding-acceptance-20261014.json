@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-14",
+  "scope": "Live xMind browser coding run and ModelZoo frontend/API acceptance on TestProj.",
+  "xmind": {
+    "browser_url": "http://127.0.0.1:60415/ui/",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "run_id": "7c5e3d4e54c17e71aca6f2c2e94330fc",
+    "provider_profile": "openai",
+    "route": "openai.responses",
+    "model": "gpt-5.6-luna",
+    "run_state": "completed",
+    "changed_files": [
+      "model-zoo/frontend/src/App.vue",
+      "model-zoo/frontend/src/components/ModelCard.vue"
+    ],
+    "change_summary": "Clarified that demo metrics are illustrative sample values and added visible demo labels beside card metrics."
+  },
+  "frontend": {
+    "url": "http://127.0.0.1:4174/",
+    "build": "npm run build",
+    "build_exit_code": 0,
+    "independent_build_exit_code": 0,
+    "modules_transformed": 37,
+    "browser_checks": {
+      "catalog_loaded": true,
+      "seeded_models": 12,
+      "search_detection_results": 3,
+      "resnet_50_detail_route": true,
+      "demo_disclosure_visible": true
+    }
+  },
+  "backend": {
+    "runtime": "D:\\CantorAI2026\\xlang3\\build\\Release\\xlang3.exe",
+    "provider_core_binding": "xlang3 built-in pydantic-core 2.46.5",
+    "temporary_pydantic_overlay": "2.13.5 pure-Python wheel under OS temp; no TestProj backend source changed",
+    "checks": {
+      "health": "passed",
+      "catalog_stats": "passed; 12 seeded demo models",
+      "filtered_models": "passed; 3 detection matches; demo_data=true"
+    },
+    "pytest": {
+      "status": "blocked",
+      "reason": "xlang3 PathAwareHookProxy lacks pytest_cmdline_main"
+    },
+    "pip_install": {
+      "status": "failed",
+      "reason": "xlang3 pip --target install raised TypeError while iterating wheel entry points; pip download succeeded"
+    }
+  },
+  "limits": [
+    "The coding run changed only two frontend files; broader redesign components were already present in TestProj.",
+    "Browser and API acceptance used seeded demo data, not live model registry metrics.",
+    "The browser coding run and production build are verified; the TestProj backend pytest suite did not pass."
+  ]
+}

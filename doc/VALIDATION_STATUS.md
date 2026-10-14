@@ -1,5 +1,34 @@
 # Current native validation
 
+## Live TestProj coding acceptance — 2026-10-14
+
+The current xMind browser backend admitted and completed a real coding run on
+the `D:\CantorAI2026\TestProj` workspace using the saved OpenAI Responses
+profile and `gpt-5.6-luna`. The run updated only
+`model-zoo/frontend/src/App.vue` and
+`model-zoo/frontend/src/components/ModelCard.vue`, strengthening the demo-data
+disclosure and labelling illustrative card values. The generated production
+build passed, and an independent `npm run build` also passed (37 modules).
+
+For browser acceptance, the ModelZoo frontend was served at
+`http://127.0.0.1:4174/` and its FastAPI backend was started with the xlang3
+interpreter. Health, catalog statistics, and a filtered model query returned
+success. The browser rendered all 12 seeded models, searched for “detection”
+and showed the matching three, and opened the ResNet-50 detail route with the
+demo-metric disclosure intact. The dev server and API remain available for
+manual review. Exact sanitized run details are in
+[TestProj coding acceptance](evidence/testproj-modelzoo-coding-acceptance-20261014.json).
+
+The existing local dependency target had Pydantic 2.14.1 paired with xlang3's
+built-in `pydantic-core` 2.46.5, so FastAPI could not import. A temporary
+Pydantic 2.13.5 pure-Python wheel overlay in the OS temp directory restored a
+compatible pairing without changing TestProj backend source or installing a
+CPython native extension. xlang3 pip's `--target` install path failed while
+iterating package entry points (`TypeError: 'object' object is not iterable`);
+the wheel download succeeded. The backend pytest suite remains blocked by
+xlang3's `PathAwareHookProxy` missing `pytest_cmdline_main`; the UI/API and
+frontend build acceptance above passed independently.
+
 ## Current-source browser profile and model catalogue — 2026-10-14
 
 The current native Release executable was paired with the verified xlang3
