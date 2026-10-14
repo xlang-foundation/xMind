@@ -235,14 +235,16 @@ try{
  assert.equal((await invoke(['provider-profiles'])).active,'openai');await control({command:'check',revision:5,credentials:5,sessions:0});assert.deepEqual(await invoke(['sessions']),[],'Setup commands cannot fabricate chat sessions');
  const session=await invoke(['create-session','Actual CLI profile acceptance with synthetic provider responses']);
  const firstAudit=audit.length;
- const selected=await chat(session.id,'/profiles\n/profile gemini bad-revision\n/profile gemini 4\n/models\n/profile gemini 5\n/models\n/provider-models\nSelected Gemini CLI request\n/history\n/exit\n',{modelOverride:'fixture-openai'});
+ const selected=await chat(session.id,'/profiles\n/profile gemini bad-revision\n/profile gemini 4\n/models\n/profile gemini 5\n/models\n/provider-models\n/model models/fixture-gemini\nSelected Gemini CLI request\n/history\n/exit\n',{modelOverride:'fixture-openai'});
  assert.equal(selected.records.find(value=>value.type==='provider_profile_rejected').http_status,409);
  assert.match(selected.stderr,/No selection sent/);
  assert.deepEqual(audit.slice(firstAudit).filter(value=>value.path==='/v1/provider/profiles/select').map(value=>value.body.expected_revision),[4,5],'Malformed interactive revision must not reach the native selection API');
  const cataloguesInChat=selected.records.filter(value=>value.type==='models');assert.equal(cataloguesInChat[0].selected_model,'fixture-openai');assert.equal(cataloguesInChat[1].selected_model,'');
  const binding=selected.records.find(value=>value.type==='provider_profile');assert.equal(binding.provider_profile_id,'gemini');assert.equal(binding.expected_provider_revision,6);assert.equal(binding.selected_model,'');assert.equal(binding.metadata.active,'gemini');
  assert.deepEqual(selected.records.find(value=>value.type==='provider_models').catalogue,listed.gemini);
- const firstAdmissions=audit.slice(firstAudit).filter(value=>value.path==='/v1/runs'&&value.method==='POST');assert.equal(firstAdmissions.length,1);assert.equal(firstAdmissions[0].body.provider_profile_id,'gemini');assert.equal(firstAdmissions[0].body.expected_provider_revision,6);assert.equal(Object.hasOwn(firstAdmissions[0].body,'model_id'),false,'Explicit selection must clear the old OpenAI model override before Gemini admission');
+ const modelWrite=audit.slice(firstAudit).find(value=>value.path==='/v1/sessions/'+session.id+'/model'&&value.method==='POST');assert.deepEqual(modelWrite.body,{expected_provider_revision:6,expected_revision:0,model_id:model,provider_profile_id:'gemini'});assert.equal(modelWrite.status,200,'Interactive model selection must persist through the native session API');
+ const modelEvent=selected.records.find(value=>value.type==='model');assert.equal(modelEvent.model_id,model);assert.equal(modelEvent.saved,true);assert.equal(modelEvent.revision,1);
+ const firstAdmissions=audit.slice(firstAudit).filter(value=>value.path==='/v1/runs'&&value.method==='POST');assert.equal(firstAdmissions.length,1);assert.equal(firstAdmissions[0].body.provider_profile_id,'gemini');assert.equal(firstAdmissions[0].body.expected_provider_revision,6);assert.equal(firstAdmissions[0].body.model_id,model,'Selected conversation model must be explicit and match the durable setting');
  assert.deepEqual(selected.records.filter(value=>value.type==='turn_finished').map(value=>value.exit_status),[0]);
  const saved=await invoke(['history',session.id]);assert.equal(saved.length,2);const answer=receipt(saved);assert.equal(answer.usage.prompt_tokens,7);assert.equal(answer.usage.completion_tokens,3);assert.equal(answer.usage.total_tokens,83);assert.equal(answer.usage.prompt_tokens_details.cached_tokens,2);assert.equal(answer.usage.completion_tokens_details.reasoning_tokens,5);
  assert.deepEqual(await invoke(['provider-models']),listed.gemini,'Default one-shot discovery must use the active saved Gemini profile');
@@ -259,7 +261,8 @@ try{
  await stop({revision:8,credentials:5,sessions:1,session_id:session.id,messages:2,runs:1});
  const reopened=await start();assert.equal(reopened.reopened,true);assert.equal(reopened.revision,8);assert.deepEqual(await invoke(['history',session.id]),saved);
  assert.deepEqual(await invoke(['provider-models']),listed.gemini,'SQLite reopen must resolve the original saved Gemini credential');
- const continuation=await chat(session.id,'/profiles\nContinue signed CLI after reopen\n/history\n/exit\n');
+ const continuation=await chat(session.id,'/profiles\n/models\nContinue signed CLI after reopen\n/history\n/exit\n');
+ assert.equal(continuation.records.find(value=>value.type==='models').selected_model,model,'Reopening a conversation must restore its durable model selection');
  assert.deepEqual(continuation.records.filter(value=>value.type==='turn_finished').map(value=>value.exit_status),[0]);
  const resumed=await invoke(['history',session.id]);assert.equal(resumed.length,4);assert.deepEqual(resumed.slice(0,2),saved);const reopenedAnswer=receipt(resumed,3);assert.equal(reopenedAnswer.usage.prompt_tokens,13);assert.equal(reopenedAnswer.usage.completion_tokens,4);assert.equal(Object.hasOwn(reopenedAnswer.usage,'total_tokens'),false);
  const blocked=await chat(session.id,'Synthetic blocked CLI turn\n/provider-models\n/profiles\n/profile gemini 8\n/exit\n',{exit:1});

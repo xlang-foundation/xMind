@@ -629,7 +629,34 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     const bool agent_selection=health.value("agent_selection",false);
     const bool provider_profile_admission=health.value("provider_profile_admission",false);
     const bool profile_admission=provider_profile_admission||health.value("graph_provider_profile_admission",false);
+    const bool session_model_selection=health.value("session_model_selection",false);
     auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
+    auto active_provider_route=[&](const Json& metadata){
+        const auto binding=provider_admission_binding(metadata);if(binding.at("provider_profile_id").get<std::string>().empty())return std::string{};
+        const auto active_id=binding.at("provider_profile_id").get<std::string>();for(const auto& profile:metadata.at("profiles"))if(profile.is_object()&&profile.value("id",std::string{})==active_id){
+            if(!profile.contains("route_id")||!profile.at("route_id").is_string())throw std::runtime_error("Invalid active provider route metadata");
+            return provider_profile_identity(profile.at("route_id").get<std::string>());
+        }
+        throw std::runtime_error("Active provider route is missing");
+    };
+    auto validate_session_model=[&](const Json& value,const std::string& expected_session){
+        if(!value.is_object()||value.size()!=4||value.value("session_id",std::string{})!=expected_session||!value.contains("revision")||!value.at("revision").is_number_integer()||value.at("revision")<0||value.at("revision")>9007199254740991LL||!value.contains("editable")||!value.at("editable").is_boolean()||!value.contains("selected"))throw std::runtime_error("Invalid backend session model state");
+        if(!value.at("selected").is_null()){
+            const auto& selected=value.at("selected");if(!selected.is_object()||selected.size()!=3||!selected.contains("model_id")||!selected.at("model_id").is_string()||!selected.contains("provider_profile_id")||!selected.at("provider_profile_id").is_string()||!selected.contains("provider_route_id")||!selected.at("provider_route_id").is_string())throw std::runtime_error("Invalid backend session model selection");
+            provider_profile_identity(selected.at("model_id").get<std::string>());provider_profile_identity(selected.at("provider_profile_id").get<std::string>());provider_profile_identity(selected.at("provider_route_id").get<std::string>());
+        }
+        return value;
+    };
+    auto read_session_model=[&](const std::string& selected_session){
+        if(!session_model_selection||selected_session.empty())return Json();
+        return validate_session_model(request("/v1/sessions/"+selected_session+"/model"),selected_session);
+    };
+    auto model_for_active_profile=[&](const Json& state){
+        if(state.is_null()||!state.contains("selected")||state.at("selected").is_null()||provider_binding.value("provider_profile_id",std::string{}).empty())return std::string{};
+        const auto& selected=state.at("selected");const auto metadata=request("/v1/provider/profiles");
+        if(selected.at("provider_profile_id").get<std::string>()==provider_binding.at("provider_profile_id").get<std::string>()&&selected.at("provider_route_id").get<std::string>()==active_provider_route(metadata))return selected.at("model_id").get<std::string>();
+        return std::string{};
+    };
     if(!model.empty()){
         const auto catalogue=request("/v1/models");
         if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid backend model catalogue");
@@ -640,6 +667,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     // Validate a supplied session without starting work or creating a duplicate.
     Json history;
     if(!session.empty()){history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
+    auto session_model_state=read_session_model(session);if(model.empty())model=model_for_active_profile(session_model_state);
     ChatInput input;
     std::cerr<<"xMind chat: enter a request, /help for commands, /exit to leave. Backend runs survive disconnect.\n";
     if(!session.empty()){
@@ -691,7 +719,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
             std::cerr<<"/agents lists named agent definitions; /agent shows this conversation's selection; /agent ID selects one and /agent default clears it. Selection is revision-checked and locked while a run is active.\n";
-            std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/session-skills inspects current attachments; /attach-skill ID and /remove-skill ID change exact catalogue ids (spaces are part of the id); /clear-skills clears the observed selection. Native revisions prevent stale writes.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/session-skills inspects current attachments; /attach-skill ID and /remove-skill ID change exact catalogue ids (spaces are part of the id); /clear-skills clears the observed selection. Native revisions prevent stale writes.\n/models lists backend-enabled models; /provider-models discovers account models using the saved provider key; /model ID saves a model for this conversation. /model selects the active provider profile's configured model.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
         if(prompt=="/agents"||prompt=="/agent"||prompt.starts_with("/agent ")){
             if(!agent_selection){agent_result=1;std::cerr<<"This backend does not support named agent selection. Update the native backend.\n";continue;}
@@ -775,7 +803,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cout<<Json{{"type","sessions"},{"sessions",saved},{"selected_session",session}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt=="/new"){
-            session.clear();std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",Json::array()}}.dump()<<'\n'<<std::flush;continue;
+            session.clear();model.clear();session_model_state=Json();std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",Json::array()}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt.starts_with("/title ")){
             if(session.empty()){std::cerr<<"Select a saved conversation before renaming it.\n";continue;}
@@ -797,7 +825,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             for(const auto& item:saved)if(item.is_object()&&item.value("id",std::string{})==selected)found=true;
             if(!found){std::cerr<<"Session was not found. Use /sessions to see saved conversations.\n";continue;}
             const auto selectedHistory=request("/v1/sessions/"+selected+"/history");if(!selectedHistory.is_array())throw std::runtime_error("Invalid session history");
-            session=selected;std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",selectedHistory}}.dump()<<'\n'<<std::flush;continue;
+            session=selected;session_model_state=read_session_model(session);model=model_for_active_profile(session_model_state);std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",selectedHistory}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt=="/profiles"){
             if(!profile_admission){std::cerr<<"This backend does not support provider profile admission.\n";profile_result=1;continue;}
@@ -884,12 +912,34 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array() || !catalogue.contains("default_model") || !catalogue["default_model"].is_string())throw std::runtime_error("Invalid backend model catalogue");
             if(prompt=="/models")std::cout<<Json{{"type","models"},{"catalogue",catalogue},{"selected_model",model}}.dump()<<'\n'<<std::flush;
             else {
-                const auto selected=prompt=="/model"?std::string{}:prompt.substr(7);
-                bool available=selected.empty();
-                for(const auto& item:catalogue["models"])if(item.is_object() && item.value("id",std::string{})==selected)available=true;
-                if(!available){std::cerr<<"Model is not enabled by this backend. Use /models to see available IDs.\n";continue;}
-                model=selected;
-                std::cout<<Json{{"type","model"},{"model_id",model},{"default_model",catalogue["default_model"]}}.dump()<<'\n'<<std::flush;
+                if(!session_model_selection){
+                    const auto selected=prompt=="/model"?std::string{}:prompt.substr(7);bool available=selected.empty();for(const auto& item:catalogue["models"])if(item.is_object()&&item.value("id",std::string{})==selected)available=true;
+                    if(!available){std::cerr<<"Model is not enabled by this backend. Use /models to see available IDs.\n";continue;}model=selected;
+                    std::cout<<Json{{"type","model"},{"model_id",model},{"default_model",catalogue["default_model"]}}.dump()<<'\n'<<std::flush;continue;
+                }
+                if(!profile_admission||provider_binding.value("provider_profile_id",std::string{}).empty()){std::cerr<<"Select an active provider profile before choosing a conversation model. Use /profiles and /profile ID REVISION.\n";profile_result=1;continue;}
+                if(session.empty()){
+                    const Json create_body={{"title","New conversation"}};const auto created=request("/v1/sessions",&create_body);
+                    if(!created.is_object()||!created.contains("id")||!created.at("id").is_string())throw std::runtime_error("Invalid created model-selection conversation");session=created.at("id").get<std::string>();
+                    if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created conversation identity");
+                    std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;session_model_state=read_session_model(session);
+                }
+                std::string selected=prompt=="/model"?std::string{}:prompt.substr(7);
+                const auto metadata=request("/v1/provider/profiles");(void)provider_admission_binding(metadata);
+                std::string route_id,default_model;for(const auto& profile:metadata.at("profiles"))if(profile.is_object()&&profile.value("id",std::string{})==provider_binding.at("provider_profile_id").get<std::string>()){
+                    if(!profile.contains("route_id")||!profile.at("route_id").is_string()||!profile.contains("model")||!profile.at("model").is_string())throw std::runtime_error("Invalid active provider model metadata");route_id=provider_profile_identity(profile.at("route_id").get<std::string>());default_model=provider_profile_identity(profile.at("model").get<std::string>());break;
+                }
+                if(route_id.empty()||route_id!=active_provider_route(metadata)||default_model.empty())throw std::runtime_error("Active provider profile has no configured model");if(selected.empty())selected=default_model;
+                if(!session_model_state.is_object())session_model_state=read_session_model(session);
+                if(!session_model_state.at("editable").get<bool>()){std::cerr<<"Conversation model is locked while a run is active. Wait for it to finish and retry.\n";profile_result=1;continue;}
+                const auto revision=session_model_state.at("revision").get<std::int64_t>();if(revision>=9007199254740991LL)throw std::runtime_error("Conversation model revision is exhausted");
+                const Json body={{"model_id",selected},{"provider_profile_id",provider_binding.at("provider_profile_id")},{"expected_provider_revision",provider_binding.at("expected_provider_revision")},{"expected_revision",revision}};
+                const auto response=client.Post("/v1/sessions/"+session+"/model",headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server during model selection; outcome is unknown. Refresh /session ID before selecting again.");
+                if(response->status==409){profile_result=1;session_model_state=read_session_model(session);std::cerr<<"Conversation model changed or is locked (HTTP 409). Refresh the session and provider profile before retrying; no model write was replayed.\n";continue;}
+                if(response->status==400){profile_result=1;std::cerr<<"Backend rejected this model for the active provider route. Use /provider-models to inspect account models.\n";continue;}
+                if(response->status!=200)throw std::runtime_error("Server rejected conversation model selection (HTTP "+std::to_string(response->status)+")");
+                session_model_state=validate_session_model(Json::parse(response->body),session);if(session_model_state.at("revision")!=revision+1||!session_model_state.at("selected").is_object()||session_model_state.at("selected").at("model_id")!=selected||session_model_state.at("selected").at("provider_profile_id")!=provider_binding.at("provider_profile_id")||session_model_state.at("selected").at("provider_route_id")!=route_id)throw std::runtime_error("Invalid acknowledged conversation model selection");
+                model=selected;profile_result=0;std::cout<<Json{{"type","model"},{"session_id",session},{"model_id",model},{"default_model",default_model},{"revision",revision+1},{"saved",true}}.dump()<<'\n'<<std::flush;
             }
             continue;
         }

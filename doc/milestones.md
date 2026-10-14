@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Durable CLI conversation model selection (2026-10-13)
+
+The console chat now reads the selected model for an opened session from the
+native API and restores it only when its provider profile and route are
+active. `/model ID` persists a selection with the provider and session
+revisions; `/model` saves the active profile's configured model. The command
+can start a conversation when none is selected. The actual compiled CLI
+acceptance test selects a model, verifies the revision-checked native write,
+uses that model for inference, restarts the xlang3-backed SQLite runtime and
+confirms the next CLI session restores it. The focused Release CTest passes.
+No xlang3 source change was needed.
+
 ## Portable local session archives (2026-10-13)
 
 Added a versioned xMind conversation archive through the native HTTP backend
