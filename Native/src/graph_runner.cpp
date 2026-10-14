@@ -81,7 +81,7 @@ GraphRunner::~GraphRunner()=default;
 std::string GraphRunner::provider_context(const std::string& model_id)const{return provider_context_json(settings_,model_id);}
 std::vector<std::string> GraphRunner::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const{
-    const auto configured=models();if(!model.empty() && std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Graph model is not configured");
+    const auto configured=models();if(!model.empty()&&!settings_.provider_identity&&std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Graph model is not configured");
     const std::vector<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions"};
     std::size_t agent_count=0;
     for(const auto& node:plan.nodes()){

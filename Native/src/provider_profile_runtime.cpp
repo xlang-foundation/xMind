@@ -188,6 +188,27 @@ struct ProviderProfileRuntime::Impl {
     void admission(const ProviderProfileAdmission& expected)const{
         if(expected.revision<0||expected.revision>9007199254740991||expected.revision!=state.revision||expected.id!=state.active)throw Conflict("Provider profile changed before run admission");
     }
+    void validate_profile_model(const SavedProviderProfile& profile,const std::string& model)const{
+        if(model.empty())return;
+        const auto& allowed=route(profile.route_id);validate_execution(allowed,base,model);
+        auto credential=profiles.credential(profile.id);validate_public_identity(profile.id,model,credential);
+    }
+    std::string run_model(const std::string& session,std::string model,const ProviderProfileAdmission& expected)const{
+        const auto profile=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==expected.id;});
+        if(profile==state.profiles.end())throw Conflict("Active provider profile disappeared");
+        const auto saved=store.session_model(session).get();
+        if(!saved.selected||saved.selected->provider_profile_id!=profile->id||saved.selected->provider_route_id!=profile->route_id){validate_profile_model(*profile,model);return model;}
+        if(!model.empty()&&model!=saved.selected->model_id)throw Conflict("Conversation model changed; refresh before run admission");
+        model=saved.selected->model_id;validate_profile_model(*profile,model);return model;
+    }
+    void validate_unbound_model(const std::string& session,const std::string& model)const{
+        if(state.active.empty())return;
+        if(store.session_model(session).get().selected)throw Conflict("Conversation model selection requires provider-bound run admission");
+        if(!model.empty()){
+            const auto active=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
+            if(active==state.profiles.end())throw Conflict("Active provider profile disappeared");validate_profile_model(*active,model);
+        }
+    }
     ProviderProfileRuntimeMetadata metadata()const{
         ProviderProfileRuntimeMetadata result{state.revision,state.active,{}};
         for(const auto& value:state.profiles)result.profiles.push_back({value.id,value.route_id,route(value.route_id).route.provider,value.model,value.revision});
@@ -352,10 +373,10 @@ bool ProviderProfileRuntime::import_legacy_configuration(std::string id){
     return true;
 }
 Run ProviderProfileRuntime::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
-Run ProviderProfileRuntime::submit_model(std::string id,std::string session,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
-Run ProviderProfileRuntime::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){std::lock_guard lock(impl_->mutex);if(!profile)throw Conflict("Capture the active provider profile before queued-run admission");impl_->admission(*profile);return impl_->service->submit_queued(std::move(id),std::move(session),std::move(prompt),std::move(model),std::move(inbox_id),workspace);}
-Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
-Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_model(std::string id,std::string session,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);impl_->validate_unbound_model(session,model);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){std::lock_guard lock(impl_->mutex);if(!profile)throw Conflict("Capture the active provider profile before queued-run admission");impl_->admission(*profile);model=impl_->run_model(session,std::move(model),*profile);return impl_->service->submit_queued(std::move(id),std::move(session),std::move(prompt),std::move(model),std::move(inbox_id),workspace);}
+Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);model=impl_->run_model(session,std::move(model),expected);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);model=impl_->run_model(session,std::move(model),expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 Run ProviderProfileRuntime::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input){std::lock_guard lock(impl_->mutex);return impl_->service->continue_a2a_task(std::move(task),std::move(message),std::move(context),std::move(identity),std::move(content),std::move(payload),std::move(input));}
 ExecutionWorkspaceMetadata ProviderProfileRuntime::execution_workspace()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_metadata();}
@@ -399,10 +420,12 @@ WorkspaceSessionSkills ProviderProfileRuntime::replace_session_skills(const std:
 }
 Run ProviderProfileRuntime::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
+    if(profile)model=impl_->run_model(session,std::move(model),*profile);else impl_->validate_unbound_model(session,model);
     return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
 }
 Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
+    if(profile)model=impl_->run_model(session,std::move(model),*profile);else impl_->validate_unbound_model(session,model);
     return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
@@ -411,7 +434,7 @@ AgentDefinition ProviderProfileRuntime::agent_definition(const std::string& id)c
 SessionAgentState ProviderProfileRuntime::session_agent(const std::string& session)const{std::lock_guard lock(impl_->mutex);return impl_->service->session_agent(session);}
 SessionAgentState ProviderProfileRuntime::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->select_session_agent(session,std::move(selected),revision);}
 SessionModelState ProviderProfileRuntime::session_model(const std::string& session)const{std::lock_guard lock(impl_->mutex);return impl_->store.session_model(session).get();}
-SessionModelState ProviderProfileRuntime::select_session_model(const std::string& session,std::string model,std::int64_t revision,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);const auto active=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),[&](const auto& profile){return profile.id==expected.id;});if(active==impl_->state.profiles.end())throw Conflict("Active provider profile disappeared");return impl_->store.replace_session_model(session,{std::move(model),active->id,active->route_id},revision).get();}
+SessionModelState ProviderProfileRuntime::select_session_model(const std::string& session,std::string model,std::int64_t revision,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);const auto active=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),[&](const auto& profile){return profile.id==expected.id;});if(active==impl_->state.profiles.end())throw Conflict("Active provider profile disappeared");impl_->validate_profile_model(*active,model);return impl_->store.replace_session_model(session,{std::move(model),active->id,active->route_id},revision).get();}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}
 bool ProviderProfileRuntime::idle()const{std::lock_guard lock(impl_->mutex);return impl_->service->idle();}
@@ -420,22 +443,22 @@ bool ProviderProfileRuntime::supports_delegation()const{std::lock_guard lock(imp
 bool ProviderProfileRuntime::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_dynamic_planning();}
 bool ProviderProfileRuntime::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_context();}
 ContextControlSnapshot ProviderProfileRuntime::context_status(const std::string& session,const std::string& model)const{
-    std::lock_guard lock(impl_->mutex);return impl_->service->context_status(session,model);
+    std::lock_guard lock(impl_->mutex);if(impl_->state.active.empty())return impl_->service->context_status(session,model);const auto selected=impl_->run_model(session,model,{impl_->state.active,impl_->state.revision});return impl_->service->context_status(session,selected);
 }
 ContextManualStatus ProviderProfileRuntime::context_request(const std::string& session,const std::string& request,const std::string& model)const{
-    std::lock_guard lock(impl_->mutex);return impl_->service->context_request(session,request,model);
+    std::lock_guard lock(impl_->mutex);if(impl_->state.active.empty())return impl_->service->context_request(session,request,model);const auto selected=impl_->run_model(session,model,{impl_->state.active,impl_->state.revision});return impl_->service->context_request(session,request,selected);
 }
 ContextManualStatus ProviderProfileRuntime::request_context(const std::string& session,const std::string& request,const std::string& actor,std::int64_t revision,const std::string& model){
-    std::lock_guard lock(impl_->mutex);return impl_->service->request_context(session,request,actor,revision,model);
+    std::lock_guard lock(impl_->mutex);if(impl_->state.active.empty())return impl_->service->request_context(session,request,actor,revision,model);const auto selected=impl_->run_model(session,model,{impl_->state.active,impl_->state.revision});return impl_->service->request_context(session,request,actor,revision,selected);
 }
 ContextManualStatus ProviderProfileRuntime::request_context_profile(const std::string& session,const std::string& request,const std::string& actor,std::int64_t revision,const std::string& model,ProviderProfileAdmission expected){
-    std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->request_context(session,request,actor,revision,model);
+    std::lock_guard lock(impl_->mutex);impl_->admission(expected);const auto selected=impl_->run_model(session,model,expected);return impl_->service->request_context(session,request,actor,revision,selected);
 }
 Run ProviderProfileRuntime::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->plan_input(root,request,std::move(input),actor,revision,sequence);}
 Run ProviderProfileRuntime::resume_plan(const std::string& root,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->resume_plan(root,actor,revision,sequence);}
 bool ProviderProfileRuntime::available()const{std::lock_guard lock(impl_->mutex);return impl_->service->available();}
 std::vector<GraphExecutionMetadata> ProviderProfileRuntime::graphs()const{std::lock_guard lock(impl_->mutex);return impl_->service->graphs();}
-Run ProviderProfileRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);impl_->validate_unbound_model(session,model);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 GraphRootRecord ProviderProfileRuntime::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->human_input(root,node,input,actor,revision);}
 Run ProviderProfileRuntime::resume_graph(const std::string& root,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->resume_graph(root,actor,revision);}
 GraphContextMetadata ProviderProfileRuntime::graph_context(const std::string& root)const{std::lock_guard lock(impl_->mutex);return impl_->service->graph_context(root);}

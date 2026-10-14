@@ -260,7 +260,7 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,
 ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
     if(!settings_.context)throw RunUnavailable("This provider has no registered context strategy");
     const auto& selected=model_id.empty()?settings_.provider.model:model_id;
-    const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),selected)==allowed.end())throw std::invalid_argument("Context model is not configured");
+    const auto allowed=models();if(!settings_.provider_identity&&std::find(allowed.begin(),allowed.end(),selected)==allowed.end())throw std::invalid_argument("Context model is not configured");
     const auto& policy=settings_.context->compaction;
     return {execution_identity(settings_,selected),context_authority_identity(settings_,selected,
         workspace_?workspace_->identity():"workspace:none",agent_authority_credentials(persistence_,settings_)),
@@ -375,7 +375,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     const bool resumed=dynamic_root&&admitted.state==RunState::paused;
     auto provider=settings_.provider;
     const auto selected=resumed&&model_id.empty()?admitted_dynamic_model(id):model_id;
-    if(!selected.empty()) {const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),selected)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=selected;}
+    if(!selected.empty()) {const auto allowed=models();if(!settings_.provider_identity&&std::find(allowed.begin(),allowed.end(),selected)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=selected;}
     if(graph_agent&&settings_.context){
         if(!budget)throw std::invalid_argument("Context graph agent requires its owning shared budget");
         const auto captured=persistence_.graph_context_owner(budget->root_id()).get();

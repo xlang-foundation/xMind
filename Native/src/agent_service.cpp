@@ -411,7 +411,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     std::unique_lock lock(impl_->mutex);impl_->require_admission();
     const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> profile=selected.selected;
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
-    if(!model.empty()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
+    if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile);}
@@ -423,7 +423,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
     const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> agent=selected.selected;
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
-    if(!model.empty()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
+    if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id);}

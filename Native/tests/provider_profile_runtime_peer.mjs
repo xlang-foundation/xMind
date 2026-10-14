@@ -69,7 +69,7 @@ const server=createServer((request,response)=>{
     }
     if(request.url==='/chat'){
       assert.equal(request.headers.authorization,'Bearer runtime-openai-fixture-key');assert.equal(request.headers['x-api-key'],undefined);
-      assert.ok(['fixture-openai','fixture-openai-updated'].includes(body.model));assert.equal(body.max_completion_tokens,64);assert.ok(body.messages.some(message=>message.role==='user'));
+      assert.ok(['fixture-openai','fixture-openai-updated','fixture-openai-alternate'].includes(body.model));assert.equal(body.max_completion_tokens,64);assert.ok(body.messages.some(message=>message.role==='user'));
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       const completion=`data: ${JSON.stringify({choices:[{index:0,delta:{content:'Actual OpenAI fixture reply'},finish_reason:'stop'}],usage:{prompt_tokens:3,completion_tokens:4,total_tokens:7}})}\n\ndata: [DONE]\n\n`;
       // Keep the first real native request in flight for the ownership assertion.
@@ -107,7 +107,7 @@ try{
   });
   const result=await running;
   if(failure)throw failure;
-  assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'claude-sonnet-5-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'}]);
+  assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/messages',model:'claude-sonnet-5-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'}]);
   assert.deepEqual([...workspaceTurns],[['left',2],['right',2]]);assert.equal(aliasRetargeted,true);
   assert.equal(openaiDiscoveries,5);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
   await startup('startup-valid.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.active,'openai');assert.equal(profiles.profiles[0].model,'gpt-4.1');assert.equal((await api('/v1/health')).agent_execution,true);});

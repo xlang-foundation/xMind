@@ -82,6 +82,7 @@ public:
     void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={}) const;
     std::string admitted_dynamic_model(const std::string& root_id) const;
     std::vector<std::string> models() const;
+    bool provider_bound_model_overrides()const{return settings_.provider_identity.has_value();}
     bool supports_context()const{return settings_.context.has_value();}
     ContextBinding context_binding(const std::string& model_id={})const;
     ContextControlSnapshot context_status(const std::string& session,const std::string& model_id={})const;
