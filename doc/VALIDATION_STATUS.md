@@ -1,5 +1,20 @@
 # Current native validation
 
+## Rendered TestProj Saved Models acceptance — 2026-10-13
+
+The live Model Zoo page at `http://127.0.0.1:5173/` passed a browser-level
+Saved Models check. Saving BERT on catalog page 1 changed its accessible
+control to a checked “Unsave” state; enabling Saved models wrote `?saved=1`,
+showed one result and survived reload. After removing that temporary save, a
+model saved from catalog page 2 (EfficientNet-B0) appeared as the sole result
+on the Saved view's page 1 and remained selected after reload. This exercises
+the actual rendered Vue page and its localStorage/query behavior, beyond the
+successful Vite build and source contracts.
+
+Both temporary saved IDs were removed through the UI; the filter was disabled
+and the page returned to `/`. Search/facet combinations beyond this cross-page
+case and broader xMind/OpenCode parity remain open. See [live browser evidence](evidence/testproj-saved-models-live-20261013.json).
+
 ## Durable session prompt inbox — 2026-10-13
 
 The browser and VS Code sidebar can now queue prompt input during an active

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-13",
+  "scope": "Rendered Model Zoo Saved Models acceptance in the local TestProj workspace",
+  "workspace": "D:/CantorAI2026/TestProj/model-zoo",
+  "page": {
+    "url": "http://127.0.0.1:5173/",
+    "http_status": 200,
+    "client": "Codex in-app browser, live DOM/accessibility tree"
+  },
+  "checks": [
+    {
+      "action": "Save BERT Base (uncased) from catalog page 1",
+      "result": "Save control changed to Unsave with checked state"
+    },
+    {
+      "action": "Enable Saved models",
+      "result": "URL became /?saved=1; one saved model was shown"
+    },
+    {
+      "action": "Reload with Saved models active",
+      "result": "Saved filter and BERT selection were restored from URL and localStorage"
+    },
+    {
+      "action": "Unsave BERT, open API page 2, save EfficientNet-B0, enable Saved models",
+      "result": "The Saved view returned EfficientNet-B0 as its single result on page 1, although the model is on catalog page 2"
+    },
+    {
+      "action": "Reload the cross-page Saved view",
+      "result": "EfficientNet-B0 remained visible, selected and persisted; URL remained /?saved=1"
+    }
+  ],
+  "restoration": {
+    "result": "Both temporary saved IDs were removed through the UI; Saved models was disabled and URL returned to /"
+  },
+  "limitations": [
+    "This verifies save/unsave, localStorage reload persistence, URL state and cross-page lookup for the seeded local catalog.",
+    "It does not establish saved-filter composition with every search/facet combination or full xMind/OpenCode parity."
+  ]
+}
