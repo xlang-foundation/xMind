@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-13",
+  "scope": "Provider-backed xMind AgentRunner process execution against TestProj using the current unified xMind executable",
+  "xmind": {
+    "revision": "fe62935e7539e496f73c2f21bafe031888abb63e",
+    "binary": "build/native/contract-bin/Release/xmind.exe",
+    "sha256": "c9fb7bdb80a0e0cc80ee2f3b09b77eef152e6a86f435be81f1f7078f72479458",
+    "working_tree_clean": true
+  },
+  "xlang3": {
+    "revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe",
+    "executable_sha256": "1d78fbf391214691db92b80b9939697cc4cfbebd1dcb6f40842cea81341cfcc5",
+    "runtime_dll_sha256": "88c109a947e5e085e99cb58be52ba7b1a3fe07ab9dcd2c3d20b469fc285bb068",
+    "source_changes_for_this_check": false
+  },
+  "workspace": "D:/CantorAI2026/TestProj",
+  "backend": {
+    "storage": "isolated local xlang3 SQLite database",
+    "provider_configuration": ".config/providers.yaml",
+    "provider_profile": "deepseek",
+    "route": "deepseek.chat",
+    "model": "deepseek-flash",
+    "discovered_models": ["deepseek-flash", "deepseek-v4-pro"],
+    "credentials_or_provider_configuration_values_recorded": false
+  },
+  "agent_run": {
+    "session_id": "3db8b7630db0bee73fbd86b004789fa5",
+    "run_id": "0bd773547ac17897461108d2345dbe24",
+    "state": "completed",
+    "provider_calls": 3,
+    "provider_reported_tokens": {
+      "input": 9873,
+      "output": 963,
+      "total": 10836
+    }
+  },
+  "process_operation": {
+    "operation_id": "6a42c32c50a8bc0b5fd1e8b93d3814be",
+    "profile": "xlang3",
+    "command_arguments": ["-B", "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+    "working_directory": "model-zoo/backend",
+    "runtime_path": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe",
+    "pythonpath_sources": [
+      "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/modules",
+      "D:/CantorAI2026/TestProj/model-zoo/backend/.xlang3-site"
+    ],
+    "profile_environment_injection": true,
+    "state": "succeeded",
+    "exit_code": 0,
+    "process_tree_retired": true,
+    "stdout_bytes": 600,
+    "stderr_bytes": 0,
+    "pytest_summary": "9 passed, 1 warning in 1.83s",
+    "warning": "Starlette AnyIO BlockingPortal deprecation"
+  },
+  "side_effects": {
+    "workspace_edit_tool_used": false,
+    "server_started_in_workspace": false,
+    "xlang3_bytecode_writing_disabled": true,
+    "pytest_cache_provider_disabled": true,
+    "post_run_recent_backend_file_mtime_scan": "No files under model-zoo/backend had a modification time in the 12 minutes before the post-run observation. TestProj is not a Git repository, so a Git diff check is unavailable."
+  },
+  "browser": {
+    "adapter_url": "http://127.0.0.1:51935/ui/",
+    "backend_origin": "http://127.0.0.1:51929",
+    "provider_key_prompt_required": false,
+    "rendered_external_browser_acceptance": false,
+    "limitation": "Chrome and Edge were unavailable through browser control, and the OS policy rejected launching Chrome from PowerShell. The local page remains available at the adapter URL."
+  },
+  "native_local_view_contract": {
+    "result": "passed",
+    "passed": 1,
+    "failed": 0,
+    "duration_seconds": 91.08,
+    "coverage_note": "The contract verifies actual native local-view startup and that fresh local profiles expose the paired xlang3 process profile."
+  }
+}

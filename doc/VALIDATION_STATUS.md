@@ -1,5 +1,29 @@
 # Current native validation
 
+## Current xMind AgentRunner xlang3 process acceptance — 2026-10-13
+
+The current unified `xmind.exe` backend loaded the saved local provider
+profiles, discovered the DeepSeek catalogue without asking for a new key, and
+ran a provider-backed TestProj request through the native `run_process` tool.
+The persisted process record independently confirms profile `xlang3`, the
+paired xlang3 executable, the automatically supplied runtime `modules` and
+workspace `.xlang3-site` import roots, process exit code **0**, and a retired
+process tree. Pytest reported **9 passed, 1 warning in 1.83s**. `-B` and
+`-p no:cacheprovider` prevented bytecode and pytest-cache writes; the post-run
+file-time scan found no recently modified backend files. TestProj is not a Git
+repository, so this check cannot produce a Git diff.
+
+The isolated browser adapter is live at `http://127.0.0.1:51935/ui/` and is
+bound to that same backend and workspace. Its local enrollment uses the
+backend configuration directly; the UI does not need a server-token prompt.
+This is backend and API evidence, not rendered external-browser acceptance:
+Chrome/Edge control was unavailable in this environment. The earlier page at
+60420 was launched from an older staged xMind runtime, which lacked the paired
+xlang3 profile; no xlang3 source change was needed for the current run.
+
+The exact executable identities, operation record and provider usage counters are in
+[provider-backed run evidence](evidence/testproj-xmind-agent-xlang3-web-live-20261013.json).
+
 ## Bounded native and rendered session history — 2026-10-13
 
 The native server now exposes SQL-bounded `GET /v1/sessions/{id}/messages`
@@ -58,9 +82,11 @@ PowerShell contract covers configured-cache selection, explicit override,
 missing paired executable and fresh-checkout fallback. A fresh VS Code
 development host opened TestProj using the CMake-paired
 `build-pytest-pathaware/Release` runtime; the staged executable and DLL hashes
-matched their sources, and xlang3 started successfully. This verifies default
-runtime selection and host startup only: the fresh preview has no active model,
-and an agent-issued TestProj pytest run remains to be verified.
+matched their sources, and xlang3 started successfully. That VS Code preview
+still has no active model. A separate current unified backend was configured
+from the saved provider YAML and completed the agent-issued TestProj pytest
+run using the paired xlang3 process profile; this does not establish rendered
+VS Code or external-browser acceptance.
 [Acceptance record](evidence/start-ui-xlang3-runtime-pair-20261013.json).
 
 Fresh native CMake configurations now prefer the paired
