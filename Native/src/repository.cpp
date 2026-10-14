@@ -910,8 +910,9 @@ Session Repository::create_session(const std::string& id,const std::string& titl
     changed_one(impl_->database.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
     transaction.commit(); return {id,title,{},{},{}};
 }
-Session Repository::import_session(const std::string& id,const std::string& title,const std::vector<Message>& messages) {
+Session Repository::import_session(const std::string& id,const std::string& title,const std::vector<Message>& messages,std::optional<AgentDefinition> agent) {
     identifier(id);if(title.empty()||title.size()>512||title.find('\0')!=std::string::npos||messages.size()>1000)throw std::invalid_argument("Invalid session archive");
+    if(agent){validate_agent_tool_allowlist(agent->tools);if(agent->id.empty()||agent->id.size()>64||agent->id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent->revision<1||agent->revision>9007199254740991LL||agent->model_id.size()>256||agent->model_id.find('\0')!=std::string::npos||agent->instructions.empty()||agent->instructions.size()>32768||agent->instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid archived agent selection");}
     std::size_t total=0;
     for(const auto& message:messages){
         if(message.role!="user"&&message.role!="assistant"&&message.role!="tool")throw std::invalid_argument("Session archive contains an unsupported message role");
@@ -922,10 +923,11 @@ Session Repository::import_session(const std::string& id,const std::string& titl
     if(!db.execute("SELECT id FROM sessions WHERE id=?",{id}).rows.empty())throw Conflict("Imported session identity already exists");
     changed_one(db.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
     for(const auto& message:messages)changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,?,?)",{id,message.role,message.json}));
+    if(agent){Json selected={{"id",agent->id},{"revision",agent->revision},{"model_id",agent->model_id},{"instructions",agent->instructions}};if(agent->tools)selected["tools"]=*agent->tools;changed_one(db.execute("INSERT INTO session_agents(session_id,selection_json,revision) VALUES(?,?,1)",{id,Json{{"version",1},{"agent",std::move(selected)}}.dump()}));}
     tx.commit();return {id,title,{},{},{}};
 }
 SessionArchive Repository::export_session(const std::string& id) {
-    auto& db=impl_->database;Transaction tx(db);SessionArchive archive;archive.session=session(id);
+    auto& db=impl_->database;Transaction tx(db);SessionArchive archive;archive.session=session(id);archive.agent=session_agent(id).selected;
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{id}).rows.empty())throw Conflict("Wait for the session to become idle before exporting it");
     for(const auto& row:db.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL ORDER BY seq LIMIT 1001",{id}).rows){
         if(archive.messages.size()==1000)throw std::invalid_argument("Session exceeds the 1000-message export limit");

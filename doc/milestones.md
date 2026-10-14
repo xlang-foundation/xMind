@@ -3,11 +3,13 @@
 ## Portable local session archives (2026-10-13)
 
 Added a versioned xMind conversation archive through the native HTTP backend
-and console client. `export-session` writes without overwriting an existing
-file; `import-session` creates a fresh session and new local message sequence
-IDs. Export refuses active runs. The importer validates message roles and
-limits, and stores the session plus all messages atomically through the
-xlang3-backed SQLite repository. The focused HTTP/CLI contract passed. No
+and console client. Version 2 carries the selected agent snapshot, and version
+1 archives remain importable. `export-session` writes without overwriting an
+existing file; `import-session` creates a fresh session and new local message
+sequence IDs. Export refuses active runs. The importer validates message roles
+and limits, and stores session, agent selection and transcript atomically
+through the xlang3-backed SQLite repository. The focused HTTP/CLI contract
+passed, including both archive versions and an agent-settings round trip. No
 xlang3 changes were required; the change uses existing SQLite capabilities.
 
 ## Durable prompt cancellation in Browser and VS Code — 2026-10-13

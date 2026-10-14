@@ -23,10 +23,11 @@ source-defined API contracts take precedence for this inventory.
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind
-conversation archives. Import uses a fresh session ID and destination-local
-message sequences; workspace/provider/agent/fork configuration is intentionally
-not included. Export requires an idle session and includes only user-visible
-settled history. Format and limits are documented in
+conversation archives. Version 2 carries the selected agent snapshot and
+version 1 remains importable. Import uses a fresh session ID and destination-
+local message sequences; workspace, provider profile, workspace-bound skills,
+fork ancestry and other full-session metadata still are not represented. Export
+requires an idle session and includes only user-visible settled history. Format and limits are documented in
 [local session archives](session-transfer.md). HTTP/CLI round-trip and invalid
 archive contracts pass in `native_http_cli_contract`.
 
@@ -47,7 +48,7 @@ call/cancellation contract. This is local package evidence, not an accepted
 hosted bundle or installed VSIX test; see
 [staged-runtime evidence](evidence/native-worker-staged-runtime-local-20261013.json).
 The operation inventory was regenerated from the pinned OpenCode `v2.0.26`
-source after these changes. It still counts **141 operations, 34 reviewed
+source after these changes. It still counts **141 operations, 36 reviewed
 native source candidates, and zero verified operation-level parity**. Worker
 placement for a full agent, a reusable worker pool, resource limits and OS
 sandboxing remain open; this checkpoint does not establish broad coding parity.
@@ -164,7 +165,7 @@ admitted secondary root and rejects a folder attached during the run. Rendered
 multi-folder VS Code acceptance remains open.
 
 The pinned source inventory has been regenerated from the exact v2.0.26
-schema: **141 operations, 34 native source candidates, 107 unmapped, and zero
+schema: **141 operations, 36 native source candidates, 105 unmapped, and zero
 verified operation-level parity**. A source candidate means reviewed code
 exists; it is not feature parity. Remaining work includes end-to-end
 multi-folder CLI and installed VS Code acceptance, broader provider/model
@@ -591,7 +592,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. MCP `2026-07-28` list-change subscriptions are validated on both transports; AgentRunner fixtures and direct graph MCP fixtures over stdio and HTTP verify bounded sanitized events and listener shutdown before terminal state. Crash recovery/reconnect, OAuth renewal, other HTTP/SSE behavior, plugin lifecycle and complete command parity remain incomplete. AgentRunner refreshes a changed catalogue within the active run; a direct graph MCP node fails closed because its alias is pinned. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 34 have reviewed native source candidates, 107 are unmapped, and none has verified operation-level parity. Native full/before-message session forking has HTTP, CLI, browser and VS Code contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 36 have reviewed native source candidates, 105 are unmapped, and none has verified operation-level parity. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,
@@ -1161,8 +1162,8 @@ operations**, with upstream parameters/body/responses and acceptance requirement
 Earlier upstream audit snapshots counted 139; the pinned schema count is
 authoritative.
 
-Removed-prototype mappings are absent. The native mapping identifies **34
-partial C++ source candidates and 107 unmapped operations**. Each candidate
+Removed-prototype mappings are absent. The native mapping identifies **36
+partial C++ source candidates and 105 unmapped operations**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed

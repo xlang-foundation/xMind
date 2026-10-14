@@ -45,7 +45,7 @@ public:
     BackendOwnerState request_backend_retirement(const BackendLease&,const BackendOwnerReceipt&,std::optional<BackendOwnerTarget> target={});
     BackendOwnerState activate_backend_replacement(const BackendLease&,const BackendOwnerReceipt&,const BackendOwnerTarget&);
     Session create_session(const std::string& id,const std::string& title);
-    Session import_session(const std::string& id,const std::string& title,const std::vector<Message>& messages);
+    Session import_session(const std::string& id,const std::string& title,const std::vector<Message>& messages,std::optional<AgentDefinition> agent={});
     SessionArchive export_session(const std::string& id);
     Session fork_session(const std::string& id,const std::string& source_id,std::optional<std::int64_t> before_sequence={});
     Session rename_session(const std::string& id,const std::string& title,const std::string& expected_title);

@@ -154,8 +154,8 @@ std::future<Run> PersistenceService::complete_dynamic_owner(std::string root,std
 std::future<Session> PersistenceService::create_session(std::string id,std::string title) {
     return impl_->submit([id=std::move(id),title=std::move(title)](Repository& repository){return repository.create_session(id,title);});
 }
-std::future<Session> PersistenceService::import_session(std::string id,std::string title,std::vector<Message> messages) {
-    return impl_->submit([id=std::move(id),title=std::move(title),messages=std::move(messages)](Repository& repository){return repository.import_session(id,title,messages);});
+std::future<Session> PersistenceService::import_session(std::string id,std::string title,std::vector<Message> messages,std::optional<AgentDefinition> agent) {
+    return impl_->submit([id=std::move(id),title=std::move(title),messages=std::move(messages),agent=std::move(agent)](Repository& repository){return repository.import_session(id,title,messages,agent);});
 }
 std::future<SessionArchive> PersistenceService::export_session(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.export_session(id);});

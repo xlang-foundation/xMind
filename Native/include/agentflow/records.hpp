@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "agent_definition_records.hpp"
 
 namespace agentflow {
 enum class RunState { queued, running, paused, completed, failed, cancelled };
@@ -28,7 +29,7 @@ struct Session {
 struct Run { std::string id, session_id; RunState state; std::string parent_id,node_id;bool graph_root=false;std::string provider_context_json; };
 struct Event { std::int64_t sequence; std::string run_id, kind, json; };
 struct Message { std::int64_t sequence; std::string role, json; };
-struct SessionArchive { Session session; std::vector<Message> messages; };
+struct SessionArchive { Session session; std::vector<Message> messages; std::optional<AgentDefinition> agent; };
 struct MessagePage { std::vector<Message> messages; std::optional<std::int64_t> next_before_sequence; };
 struct SessionInboxItem {std::string id,session_id,content,state,run_id;std::int64_t created_ms=0;};
 struct ProcessOutputArtifact {

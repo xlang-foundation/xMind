@@ -1039,7 +1039,8 @@ struct HttpServer::Impl {
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/export)",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Session export does not accept query parameters");
             const auto snapshot=persistence.export_session(identifier(request.matches[1])).get();
-            Json archive={{"format","xmind.session"},{"version",1},{"session",{{"title",snapshot.session.title}}},{"messages",Json::array()}};
+            Json agent=nullptr;if(snapshot.agent){agent={{"id",snapshot.agent->id},{"revision",snapshot.agent->revision},{"model_id",snapshot.agent->model_id},{"instructions",snapshot.agent->instructions}};if(snapshot.agent->tools)agent["tools"]=*snapshot.agent->tools;}
+            Json archive={{"format","xmind.session"},{"version",2},{"session",{{"title",snapshot.session.title},{"agent",std::move(agent)}}},{"messages",Json::array()}};
             for(const auto& message:snapshot.messages)archive["messages"].push_back({{"role",message.role},{"data",Json::parse(message.json)}});
             if(archive.dump().size()>4*1024*1024)throw std::invalid_argument("Session archive exceeds the 4 MiB export limit");
             reply(response,archive);
@@ -1047,13 +1048,18 @@ struct HttpServer::Impl {
         server.Post("/v1/sessions/import",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4*1024*1024)throw std::invalid_argument("Session archive exceeds the 4 MiB import limit");
             const auto value=body(request,{"archive"});if(!value.contains("archive")||!value["archive"].is_object())throw std::invalid_argument("Expected a session archive");const auto& archive=value["archive"];
-            if(archive.size()!=4||archive.value("format",std::string{})!="xmind.session"||!archive.contains("version")||!archive["version"].is_number_integer()||archive["version"]!=1||!archive.contains("session")||!archive["session"].is_object()||archive["session"].size()!=1||!archive.contains("messages")||!archive["messages"].is_array()||archive["messages"].size()>1000)throw std::invalid_argument("Unsupported or malformed xMind session archive");
-            const auto title=string_field(archive["session"],"title",512);std::vector<Message> messages;messages.reserve(archive["messages"].size());
+            if(archive.size()!=4||archive.value("format",std::string{})!="xmind.session"||!archive.contains("version")||!archive["version"].is_number_integer()||(archive["version"]!=1&&archive["version"]!=2)||!archive.contains("session")||!archive["session"].is_object()||archive["session"].size()!=(archive["version"]==1?1u:2u)||!archive.contains("messages")||!archive["messages"].is_array()||archive["messages"].size()>1000)throw std::invalid_argument("Unsupported or malformed xMind session archive");
+            const auto title=string_field(archive["session"],"title",512);std::optional<AgentDefinition> agent;
+            if(archive["version"]==2&&!archive["session"]["agent"].is_null()){
+                const auto& saved=archive["session"]["agent"];if(!saved.is_object()||(saved.size()!=4&&saved.size()!=5)||!saved.contains("id")||!saved["id"].is_string()||!saved.contains("revision")||!saved["revision"].is_number_integer()||!saved.contains("model_id")||!saved["model_id"].is_string()||!saved.contains("instructions")||!saved["instructions"].is_string()||(saved.size()==5&&!saved.contains("tools")))throw std::invalid_argument("Malformed archived agent selection");
+                AgentDefinition value{saved["id"].get<std::string>(),saved["revision"].get<std::int64_t>(),saved["model_id"].get<std::string>(),saved["instructions"].get<std::string>()};if(saved.contains("tools")){if(!saved["tools"].is_array())throw std::invalid_argument("Malformed archived agent tools");value.tools.emplace();for(const auto& tool:saved["tools"])if(!tool.is_string())throw std::invalid_argument("Malformed archived agent tool");else value.tools->push_back(tool.get<std::string>());}agent=std::move(value);
+            }
+            std::vector<Message> messages;messages.reserve(archive["messages"].size());
             for(const auto& item:archive["messages"]){
                 if(!item.is_object()||item.size()!=2||!item.contains("role")||!item["role"].is_string()||!item.contains("data")||!item["data"].is_object())throw std::invalid_argument("Malformed session archive message");
                 messages.push_back({0,item["role"].get<std::string>(),item["data"].dump()});
             }
-            reply(response,encode(persistence.import_session(new_id(),title,std::move(messages)).get()),201);
+            reply(response,encode(persistence.import_session(new_id(),title,std::move(messages),std::move(agent)).get()),201);
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/context)",guarded([this](const Request& request,Response& response){
             const auto model=strict_context_model_query(request);
