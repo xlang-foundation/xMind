@@ -22,6 +22,9 @@ const provider=createServer((request,response)=>{let raw='';request.on('data',ch
   const tools=body.tools.map(tool=>tool.function.name);assert.ok(tools.includes('run_process'));
   const processTool=body.tools.find(tool=>tool.function.name==='run_process').function;
   assert.ok(processTool.description.includes('Use the xlang3 profile'));
+  assert.ok(processTool.description.includes('never invoke python or python.exe'));
+  assert.ok(processTool.description.includes("['-m','pip','install','-r','requirements.txt']"));
+  assert.ok(processTool.description.includes("['-m','pytest','-q']"));
   assert.ok(processTool.parameters.properties.profile.enum.includes('xlang3'));
   const result=body.messages.findLast(message=>message.role==='tool');
   let delta,finish;
