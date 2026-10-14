@@ -41,6 +41,21 @@ returned model choices. The combined browser and VS Code client suites pass
 not a live model-generated edit/build or visual browser review.
 [Sanitized evidence](evidence/provider-profile-discovery-live-20261014.json).
 
+## Current-runtime TestProj coding and build — 2026-10-14
+
+The pushed xMind `9261b67` runtime paired with xlang3 `f6bbc561` completed a
+real saved-OpenAI-profile run in the native TestProj backend using
+`gpt-5.6-luna`. After review, the run applied one CSS declaration to
+`model-zoo/frontend/src/style.css`, adding a faint amber top gradient to model
+cards. Its native PowerShell process tool ran `npm.cmd run build` in the
+frontend folder; Vite 6.4.4 transformed 37 modules, exited 0, and completed in
+597 ms. The emitted production CSS contains the new gradient, and run history
+records 33,519 input and 212 output tokens. This exercises the current
+provider-bound model/tool/edit/build path. External visual page review remains
+unverified: a subsequent preview-server operation became uncertain, port 4173
+had no listener, and its quarantine was preserved without replay or reset.
+[Sanitized evidence](evidence/testproj-current-runtime-coding-20261014.json).
+
 ## Fresh full native Release gate — 2026-10-14
 
 The current native source rebuilt in the dedicated `build/native-verify` tree
