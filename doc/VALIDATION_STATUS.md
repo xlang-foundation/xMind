@@ -3,17 +3,18 @@
 ## Nested dynamic-plan observation and shared UI — 2026-10-14
 
 The root plan endpoint now enumerates durable plan-owner relations and returns
-depth-one child run state, topology, accepted revisions, and signed call
+descendant run state, topology, accepted revisions, and signed call
 receipts with available held-response usage. Root-scoped lookup remains bound
 to the depth-zero root owner even when child plans share its `root_run_id`.
 Plan and call revisions are rechecked before the HTTP snapshot is returned.
 The strict shared client binds each nested owner to the exact admitted parent
 agent node, and the shared browser/VS Code renderer displays the nested plan
-under that node.
+recursively under its exact admitting node through the supported depth of
+eight.
 
 Release native repository and planning HTTP contracts passed **2/2**, including
 the root/child ownership tree and actual nested-plan HTTP projection. The VS
-Code/shared renderer suite passed **345/345** and the browser suite passed
+Code/shared renderer suite passed **346/346** and the browser suite passed
 **109/109**. Follow-up renderer coverage also verifies owner and descendant
 transcripts with their per-response metrics. Client and renderer fixtures are
 synthetic; the HTTP contract uses actual xlang3-backed persistence with
@@ -24,21 +25,28 @@ plans remain incomplete.
 
 ## Nested dynamic-agent planning runtime — 2026-10-14
 
-An admitted dynamic-agent child can now own and execute one nested plan under
-the same root budget and native child pool. Owner-scoped tool calls,
+Schema v27 extends owner admission to descendant plans through depth eight.
+An admitted dynamic-agent child can own and execute nested plans under the
+same root budget and native child pool. Owner-scoped tool calls,
 continuations and child histories remain bound to the exact claimed parent
 node. Repository completion refuses an unfinished child plan and marks a
-finished child plan complete in the same transaction as its run. A nested
-human node is rejected with `nested_human_wait_unsupported`; planning deeper
-than the supported nested level is rejected with `planning_depth_exhausted`.
+finished child plan complete in the same transaction as its run. A child yields
+its active leaf slot while scheduling descendants, preserving root-wide
+parallelism for actual leaf work. A nested human node is rejected with
+`nested_human_wait_unsupported`; planning beyond depth eight is rejected with
+`planning_depth_exhausted`.
 
 The Release build completed and the focused dynamic-plan contracts passed
-**3/3**: schema/policy, repository ownership/lifecycle, and an actual
-AgentService provider-peer run from root agent through outer agent, nested
-plan, and inner workspace reader. The engine test also exercises nested-human
-rejection. Provider responses and credentials are synthetic. This does not
-validate live-provider interoperability, nested pause/restart recovery, or
-presentation through the CLI, browser and VS Code clients.
+**3/3**: repository ownership/lifecycle, nested-plan HTTP projection, and an
+actual AgentService provider-peer run from root agent through two planning
+owners to a depth-two workspace reader. The engine test also exercises
+nested-human rejection and shared root-budget accounting. The extension suite
+passed **346/346**; the dynamic MCP and both A2A graph-task integration contracts
+passed serially after a full parallel run exposed test-fixture assumptions and
+a paused-graph plan-lookup bug. Provider responses and credentials are
+synthetic. Depth-eight exhaustion, total-work bounds, nested pause/restart
+recovery, live-provider interoperability and external-client acceptance remain
+open.
 
 ## Nested plan owner repository admission — 2026-10-14
 
@@ -50,13 +58,12 @@ the shared root counters. The contract verifies valid admission, mismatched-root
 rejection, owner lookup, root-wide signed-call enumeration, and aggregate
 reservation totals through real xlang3-backed SQLite.
 
-The focused Release build completed and the dynamic-plan schema/repository,
-HTTP planning, and engine contracts passed **4/4**. The repository contract
+The focused Release build completed and the dynamic-plan repository, HTTP
+planning, and engine contracts passed **3/3**. The repository contract
 also drives a nested human node through report creation, owner-bound
 conversation commit, and a leaf-role continuation reservation against the
-shared root budget. Child model runners still do not receive planning tools;
-runtime scheduling, descendant draining, and restart recovery remain
-incomplete. Assistant/model receipts and human input in this contract are
+shared root budget. Dynamic Agent children receive owner-scoped planning tools;
+nested pause/restart recovery remains incomplete. Assistant/model receipts and human input in this contract are
 synthetic fixtures; it does not claim live provider execution.
 
 ## Owner-scoped signed dynamic-plan calls — 2026-10-14

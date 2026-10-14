@@ -2,7 +2,7 @@
 // Synthetic public DTOs test the thin client boundary, not native execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {BackendClient,validatePlanning,validatePlanObservation,observeOwnedRun,validatePlanInputText}=require('../client');
-const {planFixture,nestedPlanFixture}=require('./plan-fixture');
+const {planFixture,nestedPlanFixture,nestedDepthTwoPlanFixture}=require('./plan-fixture');
 const token='synthetic-planning-access-'.padEnd(64,'x');
 function snapshot(){
  const definition={id:'coding',type:'agent',objective:'Synthetic coding objective',preset:'workspace.coding',depends_on:[]};
@@ -53,6 +53,10 @@ test('provider call correlation retains the exact native 256-byte dotted/colon i
 test('nested plan observations bind the actual child owner and expose its call/revision ledger',()=>{
  const value=planFixture();value.nested_plans.push(nestedPlanFixture(value));assert.equal(validatePlanObservation(value,'plan-root').nested_plans[0].plan.nodes[0].backend_node_id,'nested-node-inner');
  for(const change of [v=>v.nested_plans[0].owner_run_id='foreign',v=>v.nested_plans[0].parent_node_label='gate',v=>v.nested_plans[0].plan.root_run_id='foreign',v=>v.nested_plans[0].calls[0].parent_assistant_json='private',v=>v.nested_plans[0].revisions[0].spec.nodes[0].backend_node_id='private']){const invalid=planFixture();invalid.nested_plans.push(nestedPlanFixture(invalid));change(invalid);assert.throws(()=>validatePlanObservation(invalid,'plan-root'));}
+});
+test('recursive plan observations accept only exact parent-linked depth-two owners',()=>{
+ const value=planFixture(),parent=nestedPlanFixture(value),node=parent.plan.nodes[0];Object.assign(node,{state:'claimed',protected:true,claim_revision:1,claim_id:'nested-claim',child_run_id:'inner-leaf',child_state:'running'});parent.plan.ready=[];parent.plan.claimed=['inner'];value.nested_plans.push(parent,nestedDepthTwoPlanFixture(value));assert.equal(validatePlanObservation(value,'plan-root').nested_plans[1].depth,2);
+ for(const change of [v=>v.nested_plans[1].parent_plan_id='plan-owned',v=>v.nested_plans[1].parent_node_label='missing',v=>v.nested_plans[1].depth=3,v=>v.nested_plans[1].owner_run_id='leaf-read']){const invalid=planFixture(),first=nestedPlanFixture(invalid);Object.assign(first.plan.nodes[0],{state:'claimed',protected:true,claim_revision:1,claim_id:'nested-claim',child_run_id:'inner-leaf',child_state:'running'});first.plan.ready=[];first.plan.claimed=['inner'];invalid.nested_plans.push(first,nestedDepthTwoPlanFixture(invalid));change(invalid);assert.throws(()=>validatePlanObservation(invalid,'plan-root'));}
 });
 test('coding children are observed through actual dynamic ownership without a read-only label',async()=>{
  const run=snapshot().run,child={run:{id:'coding_child',parent_id:'owner',session_id:'session',node_id:'node_coding',graph_root:false,state:'completed'},kind:'dynamic_agent',batch_id:'',task_id:'',preset_id:'workspace.coding',preset_revision:1,plan_id:'plan',node_label:'coding',claim_id:'claim',definition_revision:1,claim_revision:1};let histories=0;

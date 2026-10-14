@@ -32,7 +32,7 @@ public:
         explicit Batch(std::unique_ptr<State> state);
         std::unique_ptr<State> state_;
     };
-    explicit NativeChildExecutor(std::size_t workers=4,std::size_t capacity=64);
+    explicit NativeChildExecutor(std::size_t workers=8,std::size_t capacity=64);
     ~NativeChildExecutor();
     NativeChildExecutor(const NativeChildExecutor&)=delete;
     NativeChildExecutor& operator=(const NativeChildExecutor&)=delete;

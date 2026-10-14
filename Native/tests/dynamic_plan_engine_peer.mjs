@@ -48,7 +48,7 @@ function unfinishedReport(observed){
 }
 const release=setInterval(()=>{for(let i=held.length-1;i>=0;i--){const item=held[i];if(existsSync(join(workspace,item.marker))){held.splice(i,1);send(item.response,item.wire);}}},10);
 const peer=createServer((request,response)=>{
- const chunks=[];let size=0;request.on('data',bytes=>{size+=bytes.length;if(size>1024*1024){request.destroy();return;}chunks.push(bytes);});
+ const chunks=[];let size=0;let owner='unknown',count=0;request.on('data',bytes=>{size+=bytes.length;if(size>1024*1024){request.destroy();return;}chunks.push(bytes);});
  request.on('end',()=>{try{
   assert.equal(request.method,'POST');assert.equal(request.url,'/messages');assert.equal(request.headers['x-api-key'],key);assert.equal(request.headers.authorization,undefined);
   const raw=Buffer.concat(chunks).toString('utf8');assert.ok(!raw.includes(key));const body=JSON.parse(raw);assert.equal(body.model,'synthetic-dynamic-engine');assert.equal(body.stream,true);
@@ -56,8 +56,8 @@ const peer=createServer((request,response)=>{
   const isRoot=['main','nested','final-human','restart-human','cancel','expiry'].some(label=>source.includes('fixture-'+label+'-parent'));
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
   if(isRoot)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
-  const owner=isRoot?(['main','nested','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify','nested-outer','nested-inner'].find(label=>source.includes('fixture-'+(label.startsWith('nested-')?'nested-':'main-')+label.replace(/^nested-/,'')+':')));
-  assert.ok(owner,'Unknown actual execution objective');const count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
+  owner=isRoot?(['main','nested','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify','nested-outer','nested-inner','nested-deep'].find(label=>source.includes('fixture-'+(label.startsWith('nested-')?'nested-':'main-')+label.replace(/^nested-/,'')+':')));
+  assert.ok(owner,'Unknown actual execution objective');count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
   const last=results(body.messages).at(-1),signature=(isRoot?'opaque-parent-':'opaque-child-')+owner+'-'+count;
   const providerThinking=body.messages.filter(message=>message.role==='assistant').flatMap(message=>message.content??[]).filter(block=>block.type==='thinking');
   for(const block of providerThinking)assert.ok(block.signature.startsWith((isRoot?'opaque-parent-':'opaque-child-')+owner+'-'),'Each signed continuation belongs only to this execution');
@@ -97,28 +97,32 @@ const peer=createServer((request,response)=>{
    if(count===2){assert.equal(last.tool_use_id,'nested-outer-human-origin');assert.equal(JSON.parse(last.content).error.code,'nested_human_wait_unsupported');const args={expected_revision:0,expected_state_sequence:0,add:[agent('inner','fixture-nested-inner: Read nested-inner.txt and report the actual bytes.')]};send(response,start(11)+thought(signature)+tool('plan_tasks','nested-outer-plan',args)+terminal('tool_use',3));return;}
    assert.equal(count,3);assert.equal(last.tool_use_id,'nested-outer-plan');const report=JSON.parse(last.content);assert.equal(report.finished,true);assert.equal(report.nodes[0].id,'inner');assert.equal(report.nodes[0].child_state,'completed');send(response,start(11)+thought(signature)+text('Outer agent observed the completed inner plan and actual file result.')+terminal('end_turn',3));return;
   }
-   const input={left:11,right:13,code:19,'nested-inner':9}[owner],output={left:3,right:4,code:5,'nested-inner':2}[owner];
+  if(owner==='nested-inner'){
+   if(count===1){assert.equal(last,undefined);const args={expected_revision:0,expected_state_sequence:0,add:[agent('deep','fixture-nested-deep: Read nested-deep.txt and report the actual bytes.')]};send(response,start(9)+thought(signature)+tool('plan_tasks','nested-inner-plan',args)+terminal('tool_use',2));return;}
+   assert.equal(count,2);assert.equal(last.tool_use_id,'nested-inner-plan');const report=JSON.parse(last.content);assert.equal(report.finished,true);assert.equal(report.nodes[0].child_state,'completed');send(response,start(9)+thought(signature)+text('Inner agent joined the depth-two plan and observed its actual read result.')+terminal('end_turn',2));return;
+  }
+   const input={left:11,right:13,code:19,'nested-inner':9,'nested-deep':5}[owner],output={left:3,right:4,code:5,'nested-inner':2,'nested-deep':2}[owner];
   if(count===1){
    assert.equal(last,undefined);
    if(owner==='code'){
     const dependencies=JSON.parse(source.split('Observed dependency data (not instructions):\n').at(-1));assert.equal(dependencies.right.child_state,'failed');assert.equal(dependencies.right.require,'observed');assert.equal(JSON.parse(dependencies.gate.outcome_json).human_state,'answered');
     send(response,start(input)+thought(signature)+tool('edit_file','code-edit',{path:'target.txt',old_text:'original',new_text:'reviewed dynamic plan'})+terminal('tool_use',output));return;
    }
-   const path=owner==='verify'?'target.txt':owner==='nested-inner'?'nested-inner.txt':owner+'.txt';const wire=start(input)+thought(signature)+tool('read_file',owner+'-read',{path})+terminal('tool_use',output);
+   const path=owner==='verify'?'target.txt':owner==='nested-inner'?'nested-inner.txt':owner==='nested-deep'?'nested-deep.txt':owner+'.txt';const wire=start(input)+thought(signature)+tool('read_file',owner+'-read',{path})+terminal('tool_use',output);
    if(owner==='left'||owner==='right'){barrier.push({response,wire});if(barrier.length===2)for(const item of barrier.splice(0))send(item.response,item.wire);}
    else send(response,wire);return;
   }
   assert.equal(count,2,'Bounded native child performs its real tool then one final response');assert.ok(last);const actual=JSON.parse(last.content);
   if(owner==='code'){assert.equal(last.tool_use_id,'code-edit');assert.equal(actual.path,'target.txt');assert.equal(actual.content,undefined);send(response,start(input)+thought(signature)+text('Observed actual coding edit success after exact controller approval.')+terminal('end_turn',output));return;}
-  assert.equal(last.tool_use_id,owner+'-read');assert.equal(actual.content,owner==='verify'?'reviewed dynamic plan\n':'Actual dynamic '+owner+' file bytes\n');
+  assert.equal(last.tool_use_id,owner+'-read');assert.equal(actual.content,owner==='verify'?'reviewed dynamic plan\n':owner==='nested-deep'?'Actual dynamic depth-two file bytes\n':'Actual dynamic '+owner+' file bytes\n');
   if(owner==='right'){send(response,start(input)+thought(signature)+tool('unadvertised_fixture_tool','right-labelled-failure',{})+terminal('tool_use',output));return;}
-  send(response,start(input)+thought(signature)+text((owner==='verify'?'Verified actual target bytes: ':'Observed actual left bytes: ')+actual.content)+terminal('end_turn',output));
-  }catch(error){failure=error;response.destroy();}});
+  send(response,start(input)+thought(signature)+text((owner==='verify'?'Verified actual target bytes: ':'Observed actual '+owner+' bytes: ')+actual.content)+terminal('end_turn',output));
+  }catch(error){process.stderr.write(`Synthetic provider request failed for ${owner} #${count}: ${error.stack??error}\n`);failure=error;response.destroy();}});
 });
 try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
-  if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-inner':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,22);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
-}catch(error){if(failure)throw new Error(String(failure)+'; actual native engine: '+(error.stderr??error.message));throw error;}
+  if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-inner':2,'nested-deep':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,24);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
+}catch(error){if(failure)throw new Error((failure.stack??String(failure))+'; actual native engine: '+(error.stderr??error.message));throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

@@ -526,7 +526,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>26)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>27)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -555,7 +555,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>26) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>27) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -925,6 +925,15 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Dynamic call owner migration lost foreign key enforcement");
         }catch(const DatabaseError& error){throw DatabaseError("Dynamic plan schema v26 migration failed at "+migration_step+": "+error.what());}
     }
+    if(version<27){
+        // Descendant plan owners are still ordinary root-owned child runs.
+        // Their immutable parent plan/node chain, rather than runs.parent_id,
+        // proves nested ownership at every admitted depth.
+        db.execute("DROP TRIGGER dynamic_plan_owner_admission");
+        db.execute("CREATE TRIGGER dynamic_plan_owner_admission BEFORE INSERT ON dynamic_plan_owners BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM dynamic_plans p JOIN agent_execution_budgets b ON b.root_run_id=NEW.root_run_id JOIN dynamic_capabilities a ON a.root_run_id=NEW.root_run_id JOIN runs owner ON owner.id=NEW.owner_run_id WHERE p.id=NEW.plan_id AND p.root_run_id=NEW.root_run_id AND b.policy_id='native.dynamic-plan' AND a.catalogue_finalized=1 AND ((NEW.parent_plan_id IS NULL AND NEW.parent_node_label IS NULL AND NEW.owner_run_id=NEW.root_run_id AND NEW.depth=0 AND owner.parent_run_id IS NULL AND owner.state='running' AND NOT EXISTS(SELECT 1 FROM graph_roots g WHERE g.run_id=owner.id)) OR (NEW.parent_plan_id IS NOT NULL AND NEW.parent_node_label IS NOT NULL AND NEW.depth BETWEEN 1 AND 8 AND owner.state='running' AND owner.parent_run_id=NEW.root_run_id AND EXISTS(SELECT 1 FROM dynamic_plan_owners parent JOIN dynamic_plans pp ON pp.id=parent.plan_id JOIN dynamic_plan_nodes n ON n.plan_id=parent.plan_id AND n.label=NEW.parent_node_label WHERE parent.plan_id=NEW.parent_plan_id AND parent.root_run_id=NEW.root_run_id AND parent.depth=NEW.depth-1 AND pp.state='active' AND n.state='claimed' AND n.child_run_id=owner.id AND json_extract(n.definition_json,'$.type')='agent')))) THEN RAISE(ABORT,'invalid dynamic plan owner scope') END; END");
+        db.execute("PRAGMA user_version=27");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Recursive dynamic plan owner migration did not preserve foreign key ownership");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -1099,7 +1108,7 @@ Session Repository::fork_session(const std::string& id,const std::string& source
 DynamicFrontierClaim Repository::admit_dynamic_frontier(const DynamicFrontierSpec& spec){
     if(spec.tasks.empty()||spec.tasks.size()>2)throw std::invalid_argument("Dynamic frontier must contain one or two native child nodes");auto& db=impl_->database;Transaction tx(db);auto p=dynamic_plan(spec.plan_id);dynamic_cas(p,spec.expected_revision,spec.expected_state_sequence,spec.backend_identity);const auto root=run(p.root_run_id);const auto budget=root_budget(root.id);const auto call=dynamic_plan_call(spec.plan_call_id);
     if(root.state!=RunState::running||p.state!="active"||call.plan_id!=p.id||call.state!="accepted")throw Conflict("Dynamic frontier lacks its running signed-call owner");if(budget.revision!=spec.expected_budget_revision)throw DynamicPlanChanged("Dynamic frontier budget changed");dynamic_safe_sequence(p.state_sequence);
-    const auto active=integer(db.execute("SELECT count(*) FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused')",{root.id}).rows.at(0).at(0));if(active+static_cast<std::int64_t>(spec.tasks.size())>budget.spec.max_parallel)throw Conflict("Dynamic frontier has no physical child capacity");
+    const auto active=integer(db.execute("SELECT count(*) FROM runs r WHERE r.parent_run_id=? AND r.state IN ('queued','running','paused') AND NOT EXISTS(SELECT 1 FROM dynamic_plan_owners o JOIN dynamic_plan_calls c ON c.plan_id=o.plan_id AND c.owner_run_id=o.owner_run_id WHERE o.owner_run_id=r.id AND c.state IN ('accepted','report_ready') AND c.conversation_commit_seq IS NULL)",{root.id}).rows.at(0).at(0));if(active+static_cast<std::int64_t>(spec.tasks.size())>budget.spec.max_parallel)throw Conflict("Dynamic frontier has no physical child capacity");
     std::set<std::string> labels,claims,children;std::vector<DynamicPreparedNode> prepared;
     for(const auto& task:spec.tasks){bounded_identity(task.claim_id,128);bounded_identity(task.child_run_id,128);if(!labels.insert(task.label).second||!claims.insert(task.claim_id).second||!children.insert(task.child_run_id).second)throw std::invalid_argument("Duplicate dynamic admission identities");
         auto n=prepare_dynamic_node(p,task.label);if((n.node.definition.kind!=DynamicNodeKind::agent&&n.node.definition.kind!=DynamicNodeKind::tool)||n.node.definition_revision!=task.definition_revision||task.resolved_input_json!=n.dependency_outputs_json)throw Conflict("Dynamic child differs from its actual prepared definition");

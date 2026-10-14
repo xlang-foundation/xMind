@@ -30,6 +30,8 @@ public:
     const std::string& segment_id() const;
     bool segment_open() const noexcept{return segment_&&segment_->state=="open";}
     bool try_acquire_leaf() noexcept;
+    bool yield_leaf() noexcept;
+    void reacquire_leaf(std::stop_token cancel={});
     void release_leaf() noexcept;
 private:
     PersistenceService& store_;

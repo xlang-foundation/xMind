@@ -49,6 +49,13 @@ void stopped_without_slot(PersistenceService& store,bool elapsed){
     const auto actual=batch->results()[0].get();require(actual.id==id+"-child"&&actual.state==(elapsed?RunState::failed:RunState::cancelled),"Before-launch retirement must be the actual owned child");
     pool.close();store.settle_delegation_child(actual.id).get();store.settle_delegation_batch(spec.id).get();store.transition(id,RunState::running,RunState::cancelled,R"({"reason":"synthetic_pool_fixture_complete"})").get();
 }
+void yielded_slot_retirement(PersistenceService& store){
+    const std::string id="pool-yielded";auto budget=root(store,id);require(budget->try_acquire_leaf()&&budget->yield_leaf(),"Nested scheduling must yield the caller's actual leaf slot");
+    std::promise<void> slot_ready,release_signal;auto released=release_signal.get_future();std::thread blocker([&]{if(!budget->try_acquire_leaf()){slot_ready.set_exception(std::make_exception_ptr(std::runtime_error("Sibling could not acquire the yielded slot")));return;}slot_ready.set_value();released.wait();budget->release_leaf();});slot_ready.get_future().get();
+    std::stop_source cancel;cancel.request_stop();rejects<TransportCancelled>([&]{budget->reacquire_leaf(cancel.get_token());},"A cancelled nested scheduler must not reacquire a leaf slot");release_signal.set_value();blocker.join();
+    budget->release_leaf();require(budget->try_acquire_leaf(),"The child executor's retirement must consume a still-yielded lease without decrementing another leaf");budget->release_leaf();
+    store.transition(id,RunState::running,RunState::cancelled,R"({"reason":"synthetic_pool_fixture_complete"})").get();
+}
 bool fail_dispatch_race(PersistenceService& store){
     const std::string id="pool-race";auto budget=root(store,id);NativeChildExecutor pool(1,4);
     auto batch=pool.stage({NativeChildWork{budget,[&](std::stop_token stop){
@@ -112,7 +119,7 @@ int main(int argc,char** argv){
         folder=std::filesystem::temp_directory_path()/("xmind-child-pool-"+suffix.str());
         if(!std::filesystem::create_directory(folder))throw std::runtime_error("Native pool fixture directory already exists");
         bool recovery=false;{PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});
-            staged_retirement(store,false);staged_retirement(store,true);callback_reentry(store);stopped_without_slot(store,false);stopped_without_slot(store,true);recovery=fail_dispatch_race(store);store.close();}
+            staged_retirement(store,false);staged_retirement(store,true);callback_reentry(store);stopped_without_slot(store,false);stopped_without_slot(store,true);yielded_slot_retirement(store);recovery=fail_dispatch_race(store);store.close();}
         if(recovery){PersistenceService reopened((folder/"state.sqlite").string(),{argv[1],argv[2]});require(reopened.run("pool-race").get().state==RunState::failed&&reopened.run("pool-race-child").get().state==RunState::failed,"Actual reopen retires undispached accepted ownership without replay");reopened.close();}
         std::filesystem::remove_all(folder);
         std::cout<<"Native child pool contract passed: staged close/fault, synchronous stop callback re-entry, concurrent fail/dispatch ownership, stopped/deadline retirement without a leaf slot, actual SQLite cancellation/recovery. No provider was used.\n";return 0;

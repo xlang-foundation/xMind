@@ -29,7 +29,7 @@ struct NativeChildExecutor::Impl {
     std::size_t capacity,reserved=0;
     bool accepting=true,faulted=false;
     Impl(std::size_t count,std::size_t limit):capacity(limit){
-        if(count<1||count>4||limit<4||limit>64)throw std::invalid_argument("Invalid native child executor capacity");
+        if(count<1||count>8||limit<4||limit>64)throw std::invalid_argument("Invalid native child executor capacity");
         try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});}catch(...){close();throw;}
     }
     ~Impl(){close();}

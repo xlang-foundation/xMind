@@ -744,11 +744,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)},{"arguments_json",call.arguments_json}}.dump()).get();
                 close_mcp();stop_mcp_observers();DynamicExecutionResult actual;
                 const auto& capabilities=dynamic_root?*root_caps:*child_caps;
+                const bool yielded_leaf=dynamic_child&&budget->yield_leaf();
                 try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,capabilities,budget,token,planning_guidance);}
                 catch(const DynamicPlanRejected& error){
+                    if(yielded_leaf)budget->reacquire_leaf(token);
                     persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
                     reload_history();refresh_tools();continue;
-                }
+                }catch(...){if(yielded_leaf)budget->reacquire_leaf(token);throw;}
+                if(yielded_leaf)budget->reacquire_leaf(token);
                 if(actual.paused)return actual.root;
                 if(!actual.call_id.empty())commit_plan_result(actual);
                 else{

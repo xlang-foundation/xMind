@@ -4,10 +4,12 @@
 #include <random>
 #include <sstream>
 #include <iomanip>
+#include <thread>
 
 namespace agentflow {
 namespace {
 std::string attempt_id(){std::random_device source;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<source();return out.str();}
+thread_local const RootExecutionBudget* yielded_leaf=nullptr;
 }
 RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRecord record,
     std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
@@ -96,5 +98,7 @@ bool RootExecutionBudget::try_acquire_leaf()noexcept{
     if(segment_&&segment_->state!="open")return false;
     auto count=active_leaves_.load();while(count<parallel_)if(active_leaves_.compare_exchange_weak(count,count+1))return true;return false;
 }
-void RootExecutionBudget::release_leaf()noexcept{active_leaves_.fetch_sub(1);}
+bool RootExecutionBudget::yield_leaf()noexcept{if(yielded_leaf)return false;auto count=active_leaves_.load();while(count)if(active_leaves_.compare_exchange_weak(count,count-1)){yielded_leaf=this;return true;}return false;}
+void RootExecutionBudget::reacquire_leaf(std::stop_token cancel){if(yielded_leaf!=this)throw std::logic_error("Current worker has no yielded leaf slot");while(!try_acquire_leaf()){check(cancel);std::this_thread::sleep_for(std::chrono::milliseconds(1));}yielded_leaf=nullptr;}
+void RootExecutionBudget::release_leaf()noexcept{if(yielded_leaf==this){yielded_leaf=nullptr;return;}active_leaves_.fetch_sub(1);}
 }

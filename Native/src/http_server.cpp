@@ -1166,7 +1166,7 @@ struct HttpServer::Impl {
                 }
             }
             for(const auto& nested:plans)if(nested.owner_run_id!=root){
-                if(nested.depth!=1||nested.parent_plan_id.empty()||nested.parent_node_label.empty())throw DatabaseError("Nested plan has an unsupported or incomplete owner link");
+                if(nested.depth<1||nested.depth>8||nested.parent_plan_id.empty()||nested.parent_node_label.empty())throw DatabaseError("Nested plan has an unsupported or incomplete owner link");
                 Json owner={{"owner_run_id",nested.owner_run_id},{"parent_plan_id",nested.parent_plan_id},{"parent_node_label",nested.parent_node_label},{"depth",nested.depth},{"run",encode(persistence.run(nested.owner_run_id).get())},{"plan",public_plan(nested)},{"questions",Json::array()},{"revisions",Json::array()},{"calls",Json::array()}};
                 for(const auto& h:persistence.dynamic_human_requests(nested.id).get())owner["questions"].push_back(public_plan_question(h));
                 for(const auto& revision:persistence.dynamic_plan_revisions(nested.id).get())owner["revisions"].push_back({{"plan_id",revision.plan_id},{"revision",revision.revision},{"accepted_event_seq",revision.accepted_event_seq},{"call_id",revision.call_id},{"spec",Json::parse(revision.canonical_spec_json)}});

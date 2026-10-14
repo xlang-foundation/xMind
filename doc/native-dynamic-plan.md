@@ -1,5 +1,24 @@
 # Native dependency plans in ordinary Agent mode
 
+## Bounded nested Agent planning — 2026-10-14
+
+Schema v27 permits an admitted dynamic Agent to own a descendant plan through
+depth eight. Each descendant remains tied to the exact claimed parent plan
+node and the ordinary root; all provider calls, child admissions, parallelism,
+deadline and cancellation continue to use the root's single durable budget.
+While an Agent schedules its own child frontier, it yields its active leaf
+slot, then reacquires one before continuing.
+
+The Release engine contract executes root → outer planner → inner planner →
+depth-two file reader and checks the actual SQLite owner chain, saved tool
+history and shared budget. The planning HTTP DTO validates arbitrary parent
+order and the shared browser/VS Code renderer recursively shows descendant
+plans, owner/child transcripts and actual response metrics. Depth-eight
+exhaustion, total-work bounds, parallel nested frontiers, and durable nested
+pause/restart recovery remain pending. Nested human nodes are rejected with
+`nested_human_wait_unsupported`. See the [recursion contract](native-dynamic-plan-recursion.md)
+and [current validation](VALIDATION_STATUS.md).
+
 ## Registered MCP resource and prompt nodes — 2026-10-14
 
 Dynamic plans now admit exact-bound `mcp_*` aliases for registered MCP
@@ -42,14 +61,15 @@ sealed native tool schema and the frozen `workspace.inspect` capability before a
 Execution uses the admitted workspace in a separate owned child, makes no model
 request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
 reopen/recovery verifies those receipts against the immutable node definition.
-The repository schema migration is now v26. Schema v24 records immutable
+The repository schema migration is now v27. Schema v24 records immutable
 plan-owner scope separately from the shared root budget and backfills existing
 v23 plans to their original ordinary Agent root. Schema v25 removes the
 one-plan-per-root constraint while preserving dependent rows. Schema v26 binds
 signed planning calls to the exact owner, scopes idempotency and pending-call
-admission per owner, and keeps budgets charged to the common root. Nested plan
-execution remains disabled; this migration is its persistence foundation, not
-recursive runtime support.
+admission per owner, and keeps budgets charged to the common root. Schema v27
+validates descendant owner links through depth eight. Nested plans are
+supported for dynamic Agent nodes; model-free dynamic tool nodes remain leaf
+operations and cannot initiate a plan.
 
 The same node type accepts an exact MCP tool alias only when its complete tool
 binding and input schema are sealed in the finalized root catalogue and the
