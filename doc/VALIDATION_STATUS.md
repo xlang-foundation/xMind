@@ -63,6 +63,15 @@ runtime selection and host startup only: the fresh preview has no active model,
 and an agent-issued TestProj pytest run remains to be verified.
 [Acceptance record](evidence/start-ui-xlang3-runtime-pair-20261013.json).
 
+Fresh native CMake configurations now prefer the paired
+`build-pytest-pathaware/Release` xlang3 runtime when both its Windows DLL and
+import library exist, and fall back to `build/Release` otherwise. A clean
+configure smoke selected the paired directory. After reconfiguring the focused
+Release build against it, the actual AgentService, AgentRunner and backend-owner
+HTTP contracts passed **3/3**. Browser and VS Code client suites passed
+**107/107** and **334/334**. This fixes a stale-build false failure and keeps
+xlang3 work scoped to runtime compatibility needed by xMind.
+
 ## Packaged xlang3 plugin integration — 2026-10-13
 
 xMind main `9caef7c` now pins xlang3 compatibility branch commit `f6bbc56` and
