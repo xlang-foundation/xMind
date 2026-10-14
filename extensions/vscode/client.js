@@ -244,6 +244,12 @@ class BackendClient {
     let prior=0;for(const item of value.messages){if(!item||typeof item!=='object'||!Number.isSafeInteger(item.seq)||item.seq<=prior||item.id!==`msg_${item.seq}`||typeof item.role!=='string'||!item.data||typeof item.data!=='object'||Array.isArray(item.data))throw new Error('Invalid session history message');prior=item.seq;}
     return value;
   }
+  async sessionMessage(id,messageId) {
+    executionIdentity(id);if(typeof messageId!=='string'||!/^msg_[1-9][0-9]*$/.test(messageId)||!Number.isSafeInteger(Number(messageId.slice(4))))throw new Error('Invalid session message ID');
+    const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/messages/${messageId}`),sequence=Number(messageId.slice(4));
+    if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).sort().join(',')!=='data,id,role,seq'||value.id!==messageId||value.seq!==sequence||typeof value.role!=='string'||!value.data||typeof value.data!=='object'||Array.isArray(value.data))throw new Error('Invalid native session message');
+    return value;
+  }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }

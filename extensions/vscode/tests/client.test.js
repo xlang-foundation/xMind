@@ -63,6 +63,12 @@ test('session fork client binds the selected source and exact before-message bou
  await assert.rejects(client.forkSession('saved','foreign'),/fork boundary/i);assert.equal(requests.length,1);
  const malformed=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>({...receipt,parent_id:'other'})}));await assert.rejects(malformed.forkSession('saved','msg_9'),/fork session receipt/i);
 });
+test('single-message lookup is session-scoped, validated and uses the read-only browser route',async()=>{
+ const requests=[],message={id:'msg_9',seq:9,role:'assistant',data:{content:'Saved answer'}},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>message};});
+ assert.deepEqual(await client.sessionMessage('saved','msg_9'),message);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/saved/messages/msg_9');assert.equal(requests[0].options.method,'GET');
+ await assert.rejects(client.sessionMessage('saved','msg_0'),/message ID/i);await assert.rejects(client.sessionMessage('saved','msg_9007199254740992'),/message ID/i);assert.equal(requests.length,1);
+ const malformed=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>({...message,seq:8})}));await assert.rejects(malformed.sessionMessage('saved','msg_9'),/native session message/i);
+});
 test('language-server formatting carries bounded options and workspace authority',async()=>{
  const requests=[],binding={expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'formatting',result:[],diagnostics:[]})};});
  await client.languageServerQuery({path:'src/lib.rs',method:'formatting',documentText:'fn main(){}',formattingOptions:{tabSize:2,insertSpaces:true}},binding);
