@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "sourceCommit": "b238fdd7976c4df5b1dac5c385653145b073cb99",
+  "branch": "main",
+  "scope": "Local Windows source acceptance; provider requests and model inference were not used",
+  "changes": [
+    "When no provider profile is active, Browser and VS Code omit provider admission fields instead of submitting an empty provider identity.",
+    "The native browser acceptance harness now launches the unified executable with the serve subcommand and checks graph availability and admitted run identity."
+  ],
+  "tests": [
+    {
+      "name": "VS Code extension unit/contract suite",
+      "result": "341 passed, 0 failed",
+      "command": "npm test --prefix extensions/vscode"
+    },
+    {
+      "name": "Browser adapter and unified native backend contract",
+      "result": "passed: auth/cookie lifecycle, model-free graph run, human pause/input, real workspace read, reconnect and persisted history",
+      "command": "node views/browser/build.mjs build/mistral-verification/browser-assets; node views/browser/tests/native-contract.mjs build/mistral-verification/xmind.exe build/mistral-verification/modules C:/Python/Python314/Lib build/mistral-verification/browser-assets"
+    },
+    {
+      "name": "Managed local-profile lifecycle contract",
+      "result": "passed: managed startup/owner checks, graph pause/resume, refused and successful runtime upgrade, stable owner port, restart history; providerRequests=0; installedIde=false",
+      "command": "node Native/tests/local_profile_contract.mjs build/mistral-verification/xmind.exe build/mistral-verification/xlang3_runtime.dll ../xlang3/build-pytest-pathaware/Release/modules C:/Python/Python314/Lib"
+    },
+    {
+      "name": "xlang3 SQLite compatibility",
+      "result": "passed: direct xlang3 isolation/text and SQLite API cases; embedded xlang3 SQLite contract",
+      "command": "xlang3.exe tests/native/sqlite/isolation_and_text.py modules; xlang3.exe tests/native/sqlite/python_sqlite3_api.py modules; agentflow_xlang_sqlite_contract.exe modules C:/Python/Python314/Lib"
+    }
+  ],
+  "runtime": {
+    "sqliteModuleSha256": "bf992f27190db9a1af8c45db4744ca8a3de62db1b93dcdd1998683c145273a01",
+    "pairedRuntime": "build/mistral-verification/xlang3_runtime.dll",
+    "pairedRuntimeSha256": "88c109a947e5e085e99cb58be52ba7b1a3fe07ab9dcd2c3d20b469fc285bb068",
+    "xmindSha256": "409c140ef9674eb0ccb87a8018a4313248ab9256e066571e79fca1b3c937e809",
+    "xmind": "build/mistral-verification/xmind.exe",
+    "sqliteModule": "build/mistral-verification/modules/xlang_sqlite3.x3pkg.dll",
+    "xlang3SourceChanges": 0
+  },
+  "evidence": {
+    "browserNativeLog": "checkpoint-b238fdd-browser-native-20261014.log",
+    "extensionLog": "checkpoint-b238fdd-extension-tests-20261014.log",
+    "localProfileLog": "checkpoint-b238fdd-local-profile-20261014.log",
+    "extensionLogSha256": "8099de65cc17e9045d803b4e588618ffd6a0198f0e468ec3d535462351ba1426",
+    "localProfileLogSha256": "360efb09b36b9283883f50d09a3ddcbce669021cdf8b0d0970ee78a80c9ee5e9",
+    "sqliteRuntimeLogSha256": "581443ab1a129c75ce1079af696ec81aa0fbe5cda67d954f9282dbd0117ab635",
+    "browserNativeLogSha256": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56",
+    "sqliteRuntimeLog": "checkpoint-b238fdd-sqlite-runtime-20261014.log"
+  },
+  "limits": [
+    "No actual provider request or inference was made; providerRequests=0.",
+    "Rendered external-browser and VS Code extension-host acceptance were not verified. Computer-use app launch returned GetCursorPos failed: Access is denied for Edge and Chrome; VS Code window activation reported its returned window ID no longer belonged to the app after refreshing the window list.",
+    "The full OpenCode operation and LiteLLM provider parity goals remain incomplete."
+  ]
+}

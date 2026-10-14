@@ -1,0 +1,36 @@
+sqlite isolation and binary text contracts passed
+manual sqlite error
+<sqlite3.Cursor object>
+<sqlite3.Cursor object>
+<sqlite3.Cursor object>
+None
+<sqlite3.Cursor object>
+1
+Ada
+98.5
+None
+<sqlite3.Cursor object>
+2
+Ada
+kernel
+<sqlite3.Cursor object>
+1
+Ada
+None
+<sqlite3.Cursor object>
+None
+<sqlite3.Cursor object>
+None
+None
+None
+<sqlite3.Cursor object>
+<sqlite3.Cursor object>
+<sqlite3.Cursor object>
+7
+None
+None
+sqlite error caught
+prepare failed: no such table: missing_table
+sqlite base error caught
+prepare failed: no such table: another_missing_table
+Embedded xlang3 SQLite contracts passed

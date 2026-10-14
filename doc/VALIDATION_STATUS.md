@@ -1,5 +1,37 @@
 # Current native validation
 
+## Empty provider admission and unified browser acceptance — 2026-10-14
+
+The browser and VS Code clients now omit provider-profile admission when no
+profile is active. This keeps an empty provider ID out of the native admission
+request, allowing a model-free graph to run; configured profiles still use the
+existing revision-bound admission. The browser-native test harness now invokes
+the unified `xmind.exe serve` entry point and asserts both the loaded graph and
+the admitted run identity.
+
+Commit `b238fdd` passed all **341 VS Code extension tests** and the actual
+unified native/browser contract. That contract verified local view-session
+authentication and revocation, a human-paused graph, controller input, a real
+workspace file read, gateway disconnect/reconnect, and durable history without
+replaying the run. The managed local-profile lifecycle contract also passed:
+owner verification, graph pause/resume, blocked and successful runtime
+replacement, stable owner port, and history after restart. It made **zero
+provider requests** and explicitly did not claim installed-IDE acceptance.
+
+An isolated executable initially failed during SQLite startup because its
+paired `xlang3_runtime.dll` had not been staged beside it. Staging the matching
+DLL and rebuilding the test's browser assets resolved the harness failures.
+The xlang3 `isolation_level` and Python SQLite API tests plus the embedded
+xlang3 SQLite contract pass. No xlang3 source change was required or made.
+This acceptance used synthetic/model-free flows; no provider inference ran.
+
+The rendered external browser and VS Code host remain unverified in this
+checkpoint. The computer-use controller returned `GetCursorPos failed: Access
+is denied` when launching Edge and Chrome; VS Code window activation failed
+even after refreshing the returned window list. Exact commands, result logs,
+binary/module hashes and these limits are in the
+[checkpoint evidence](evidence/checkpoint-b238fdd-20261014.json).
+
 ## Durable A2A SSE resume cursor — 2026-10-13
 
 Resubscription now parses bounded SSE `id` fields and journals a non-empty
