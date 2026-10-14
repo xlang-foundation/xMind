@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-14",
+  "result": "passed",
+  "xmind_revision": "f82e79c643b5c99bc3b99d7e230f8ff5485451bb",
+  "xlang3_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "profile_root": "C:\\Users\\shaw9\\.xMind\\GoalBrowserProfiles",
+  "adapter_origin": "http://127.0.0.1:60417",
+  "native_view_origin": "http://127.0.0.1:61359",
+  "profile_backend_executable_sha256": "EF035986FAC8B38737C21D12F8D60EE6DD4A2585EC830F4E9B593C52F4E64906",
+  "staged_backend_executable_sha256": "ef035986fac8b38737c21d12f8d60ee6dd4a2585ec830f4e9b593c52f4e64906",
+  "owner_upgrade_elapsed_seconds": 72,
+  "launcher_wait_before_ms": 60000,
+  "launcher_wait_after_ms": 120000,
+  "browser_page": { "path": "/ui/", "status": 200, "title": "xMind · Browser" },
+  "assets": {
+    "/ui/browser.js": 200,
+    "/ui/browser.css": 200,
+    "/ui/chat.js": 200,
+    "/ui/chat.css": 200,
+    "/ui/client.js": 200,
+    "/ui/marked.js": 200,
+    "/ui/purify.js": 200
+  },
+  "local_session": { "connected": true, "disconnected": true },
+  "health": { "status": "ok", "agent_execution": true },
+  "workspace_catalogue_count": 1,
+  "selected_workspace": "D:\\CantorAI2026\\TestProj",
+  "provider_profile_count": 4,
+  "provider_keys_returned": false,
+  "limitations": "External-browser visual acceptance and a new model-driven write/build run were not performed."
+}

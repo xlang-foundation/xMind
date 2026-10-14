@@ -80,7 +80,9 @@ if(!backend){
   child.stderr.on('data',bytes=>{if(nativeError.length<8192)nativeError+=bytes.toString('utf8').slice(0,8192-nativeError.length);});
   child.once('error',error=>{failed=error;});
   child.once('exit',(code,signal)=>{failed=new Error(`Native view exited before readiness (${code??signal??'unknown'}).`);});
-  const deadline=Date.now()+60000;
+  // A profile-preserving backend upgrade can take longer than ordinary view
+  // startup while the previous owner quiesces and the replacement is verified.
+  const deadline=Date.now()+120000;
   let metadata;
   while(Date.now()<deadline&&!metadata&&!failed){
     try{

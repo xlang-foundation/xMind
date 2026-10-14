@@ -12,6 +12,21 @@ approved shell commands still work. The focused Release CTest passes **1/1**.
 This is a policy guard for direct launcher forms, not an OS sandbox against
 arbitrary shell obfuscation. [Focused validation record](evidence/native-cpython-launch-guard-ctest-20261014.json).
 
+## Profile-preserving browser runtime upgrade — 2026-10-14
+
+The managed TestProj profile upgraded in place to the pushed xMind `f82e79c`
+runtime paired with xlang3 `f6bbc561`; the backend executable hash matches the
+staged artifact, and the existing profile/database remained selected. The
+owner handoff took about 72 seconds, exceeding the browser launcher’s old
+60-second wait and leaving the native view ready after its adapter had timed
+out. The launcher now waits 120 seconds. A browser adapter attached to that
+same native view at `127.0.0.1:60417`; the page and all seven JS/CSS assets
+returned HTTP 200. Its local session connected and disconnected, `/v1/health`
+reported `ok` with agent execution enabled, TestProj remained selected, and
+the provider catalogue returned four saved profiles without keys. This is
+local HTTP/client-route acceptance; external-browser rendering and a new model
+write/build run are still open. [Sanitized evidence](evidence/browser-profile-upgrade-live-20261014.json).
+
 ## Fresh full native Release gate — 2026-10-14
 
 The current native source rebuilt in the dedicated `build/native-verify` tree
