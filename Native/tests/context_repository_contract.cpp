@@ -156,7 +156,7 @@ void successful_install(Repository& r,const ContextCompactionSpec& spec){
     result.before_measure_id=before.id;result.after_measure_id=after.id;result.prospective_input_binding=after.payload_binding;result.measured_preparation_elapsed_ms=19;
     diagnostic_boundary(first?"first_install.commit":"repeated_install.commit","commit_context_compaction");r.commit_context_compaction(result);
 }
-void projection_and_recovery(const std::string& database,const std::vector<std::string>& imports){std::string exact_response;{
+void projection_and_recovery(const std::string& database,const std::vector<std::string>& imports){std::string exact_response;std::vector<Message> history_before_recovery;{
     diagnostic_boundary("initial_repository","Repository");Repository r(database,imports);
     diagnostic_boundary("initial_seed","seed");seed(r,"owner");
     diagnostic_boundary("initial_capture","compaction");auto spec=compaction(r,"owner","first");
@@ -188,13 +188,14 @@ void projection_and_recovery(const std::string& database,const std::vector<std::
     diagnostic_boundary("repeated_projection","context_projection");const auto retained=*r.context_projection(next.snapshot.head.scope,binding());
     diagnostic_boundary("repeated_projection_assertion","require");require(retained.head.revision==2&&retained.protected_user_ordinals.size()>=5,"Repeated later-root compaction must retain all prior canonical original users and latest objective");
     diagnostic_boundary("installed_retirement_rejection","retire_context_compaction");rejects<Conflict>([&]{r.retire_context_compaction({"second","second_maintenance",ContextFailureCode::cancelled,0});},"Installed checkpoint cannot be retired");
+    diagnostic_boundary("pre_recovery_history_assertion","history");history_before_recovery=r.history("s_owner");require(history_before_recovery.size()==21,"Original transcript contains 13 messages before inference, one final answer, one follow-up prompt, and three assistant/tool pairs");
 }
     {
         diagnostic_boundary("recovery_lease","BackendLease");BackendLease lease(database);
         diagnostic_boundary("recovery_repository","Repository");Repository r(database,imports);
         diagnostic_boundary("recovery_retirement_assertion","recover_interrupted_run_and_inference_step");require(r.recover_interrupted(lease)==1&&r.run("next").state==RunState::failed&&r.inference_step("second_step").state=="interrupted","Restart retires real reserved follow-up without replay or fake assistant");
         diagnostic_boundary("recovery_projection","context_projection");const auto head=*r.context_projection({ContextScopeKind::session,"s_owner"},binding());
-        diagnostic_boundary("recovery_history_assertion","history");require(head.head.revision==2&&r.history("s_owner").size()==22,"Restart preserves installed checkpoint and complete original transcript");
+        diagnostic_boundary("recovery_history_assertion","history");const auto recovered_history=r.history("s_owner");const bool transcript_preserved=history_before_recovery.size()==recovered_history.size()&&std::equal(history_before_recovery.begin(),history_before_recovery.end(),recovered_history.begin(),[](const auto& before,const auto& after){return before.sequence==after.sequence&&before.role==after.role&&before.json==after.json;});require(head.head.revision==2&&transcript_preserved,"Restart preserves the installed checkpoint and every original transcript message byte-for-byte");
         diagnostic_boundary("recovery_receipt_connection","XlangSqlite");XlangSqlite sql(database,imports);
         diagnostic_boundary("recovery_receipt_assertion","execute");require(std::get<std::string>(sql.execute("SELECT actual_response_json FROM context_checkpoints WHERE compaction_id='first'").rows[0][0])==exact_response,"Older observed receipt remains byte exact after later checkpoint/recovery");
         diagnostic_boundary("recovery_fixed_point","recover_interrupted");require(r.recover_interrupted(lease)==0,"Second recovery is a fixed point");

@@ -14,6 +14,11 @@ SQLite contract passed; no xlang3 source change was needed. These tests exercise
 native browser controllers and APIs, not rendered-page or installed-IDE
 acceptance.
 
+The context-recovery contract also now compares every message field and payload
+byte-for-byte across restart. Its former 22-message expectation counted one
+message that the fixture never creates; the setup produces 21, and the rebuilt
+Release contract passes.
+
 ## Durable CLI conversation model selection (2026-10-13)
 
 The console chat now reads the selected model for an opened session from the
