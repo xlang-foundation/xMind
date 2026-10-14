@@ -29,7 +29,9 @@ automatic resubscription from event 1, the final event 2, durable child-owned
 event history, and a later SQLite-reopen resubscription from event 2 without
 another send. The focused Release CTest passes; the peer and provider are
 synthetic, while the native transport, approval, SQLite journal and restart
-path are actual. Live external-peer behavior remains unverified.
+path are actual. A second case omits the explicit cursor before disconnecting
+and verifies the operation remains uncertain and no resubscription occurs.
+Live external-peer behavior remains unverified.
 
 ## Dynamic deterministic workspace tools — 2026-10-14
 

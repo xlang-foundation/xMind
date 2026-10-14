@@ -14,11 +14,14 @@ A2A tool registry and actual dynamic-plan integration. The integration peer
 intentionally disconnects after event 1, observes one `SendStreamingMessage`
 and an automatic `SubscribeToTask` with `Last-Event-ID: event 1`, returns the
 terminal event 2, then verifies an explicit SQLite-reopen subscription starts
-at event 2 and does not resend. The complete log is
+at event 2 and does not resend. A second peer case sends the task ID without
+an SSE cursor and disconnects; the operation and child remain uncertain, the
+plan halts for inspection, and no subscription or second send occurs. The
+complete log is
 [`native-a2a-auto-resubscribe-focused-ctest-20261014.log`](evidence/native-a2a-auto-resubscribe-focused-ctest-20261014.log).
 Provider/peer responses are synthetic. This validates the registered native
-tool path, not live external-agent interoperability or automatic recovery when
-the remote task ID or explicit cursor was never observed.
+tool path, not live external-agent interoperability or recovery when the
+remote task ID was never observed.
 
 ## Dynamic-plan MCP resource and prompt reads — 2026-10-14
 
