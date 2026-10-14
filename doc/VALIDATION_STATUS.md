@@ -85,6 +85,22 @@ observations owned by a succeeded or uncertain A2A operation. A mismatched
 remote task is rejected. The client, registry and SQLite repository Release
 contracts pass **3/3**; see the [restart CTest log](evidence/native-a2a-sse-restart-ctest-20261014.log).
 
+## Durable A2A peer-event deduplication — 2026-10-14
+
+Initial streamed sends and manual resubscriptions now append through one
+serialized xlang3/SQLite operation. For an A2A operation, an explicit peer SSE
+ID can be journaled once; a replay with identical task-event content is
+ignored, while reuse of that cursor for different content is rejected. A
+replayed older event does not move the saved `Last-Event-ID` backwards.
+`A2aStreamEvent.event_id` identifies only an ID explicitly present on that
+frame, rather than inheriting a prior frame's cursor and accidentally
+deduplicating a distinct frame without an `id` field. The Release A2A client
+and agent-registry contracts pass **2/2**, covering explicit versus inherited
+frame IDs, replay from a resubscription, cursor retention and cursor/content
+conflict. Events without an explicit SSE ID remain at-least-once observations;
+this does not establish exactly-once delivery across peers or automatic stream
+recovery.
+
 ## Explicit outbound A2A task resubscription — 2026-10-13
 
 The owner API and shared Browser/VS Code operation panel can explicitly

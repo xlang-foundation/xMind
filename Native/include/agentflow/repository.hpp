@@ -160,6 +160,7 @@ public:
         std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
     Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
+    bool append_a2a_task_event(const std::string& run_id,const std::string& operation_id,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);
     std::optional<std::string> latest_a2a_event_id(const std::string& run_id,const std::string& operation_id);
     std::vector<Event> event_batch(const std::string& id,std::int64_t after,std::size_t count);

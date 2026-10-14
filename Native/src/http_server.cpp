@@ -1277,7 +1277,8 @@ struct HttpServer::Impl {
                 const auto size=event.dump().size();if(size>512*1024||encoded_bytes>512*1024-size)throw TransportError("A2A resubscription exceeds the local observation limit");encoded_bytes+=size;
                 Json journal={{"operation_id",operation.id},{"agent_id",agent_id},{"subscription_id",subscription_id},{"event_sequence",events.size()+1},{"resubscribed",true},{"event",event}};
                 if(!stream_event.event_id.empty())journal["event_id"]=stream_event.event_id;
-                persistence.append_event(operation.spec.run_id,"a2a.task_event",journal.dump()).get();if(!stream_event.event_id.empty())last_event_id=stream_event.event_id;events.push_back(std::move(event));
+                if(!persistence.append_a2a_task_event(operation.spec.run_id,operation.id,journal.dump()).get())return;
+                if(!stream_event.event_id.empty())last_event_id=stream_event.event_id;events.push_back(std::move(event));
             },last_event_id);
             reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"subscription_id",subscription_id},{"subscription_state","closed"},{"last_event_id",last_event_id},{"events",std::move(events)}});
         }));

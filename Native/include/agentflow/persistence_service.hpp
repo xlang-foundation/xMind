@@ -145,6 +145,7 @@ public:
     std::future<std::vector<Run>> runs(std::string session_id);
     std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}");
     std::future<Event> append_event(std::string id,std::string kind,std::string json);
+    std::future<bool> append_a2a_task_event(std::string run_id,std::string operation_id,std::string json);
     std::future<std::vector<Event>> events(std::string id,std::int64_t after=0);
     std::future<std::optional<std::string>> latest_a2a_event_id(std::string run_id,std::string operation_id);
     std::future<ProcessOutputArtifact> begin_process_output(std::string operation_id,std::string run_id);

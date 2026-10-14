@@ -269,6 +269,9 @@ std::future<Run> PersistenceService::transition(std::string id,RunState expected
 std::future<Event> PersistenceService::append_event(std::string id,std::string kind,std::string json) {
     return impl_->submit([id=std::move(id),kind=std::move(kind),json=std::move(json)](Repository& repository){return repository.append_event(id,kind,json);});
 }
+std::future<bool> PersistenceService::append_a2a_task_event(std::string run_id,std::string operation_id,std::string json) {
+    return impl_->submit([run_id=std::move(run_id),operation_id=std::move(operation_id),json=std::move(json)](Repository& repository){return repository.append_a2a_task_event(run_id,operation_id,json);});
+}
 std::future<std::vector<Event>> PersistenceService::events(std::string id,std::int64_t after) {
     return impl_->observe([id=std::move(id),after](Repository& repository){return repository.events(id,after);});
 }

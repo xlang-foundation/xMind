@@ -2067,6 +2067,57 @@ Event Repository::append_event(const std::string& id,const std::string& kind,con
     }
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;
 }
+bool Repository::append_a2a_task_event(const std::string& run_id,const std::string& operation_id,const std::string& json) {
+    identifier(run_id);identifier(operation_id);
+    Json payload;try{payload=Json::parse(object_json(json));}catch(...){throw std::invalid_argument("Invalid A2A task event");}
+    if(!payload.is_object()||payload.value("operation_id",std::string{})!=operation_id||!payload.contains("agent_id")||!payload["agent_id"].is_string()||
+       ((!payload.contains("event")||!payload["event"].is_object())&&(!payload.contains("data")||!payload["data"].is_object()))||
+       (payload.contains("event")&&payload.contains("data")&&payload["event"]!=payload["data"]))
+        throw std::invalid_argument("A2A task event does not identify its owner and event");
+    const Json& task_event=payload.contains("event")?payload["event"]:payload["data"];
+    std::string event_id;
+    if(payload.contains("event_id")){
+        if(!payload["event_id"].is_string())throw std::invalid_argument("A2A peer event cursor must be text");
+        event_id=payload["event_id"].get<std::string>();
+        if(event_id.empty()||event_id.size()>1024||event_id.find_first_of("\r\n")!=std::string::npos||event_id.find('\0')!=std::string::npos)
+            throw std::invalid_argument("A2A peer event cursor is invalid");
+    }
+    auto& db=impl_->database;Transaction transaction(db);
+    const auto op=operation(operation_id);
+    if(op.spec.run_id!=run_id||op.spec.tool!="a2a_delegate"||
+       (op.state!=OperationState::executing&&op.state!=OperationState::succeeded&&op.state!=OperationState::uncertain))
+        throw Conflict("A2A task event is not owned by an active or acknowledged delegation");
+    Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Stored A2A task binding is invalid");}
+    if(!binding.is_object()||!binding.contains("agent_id")||!binding["agent_id"].is_string()||binding["agent_id"]!=payload["agent_id"])
+        throw Conflict("A2A task event does not match its registered peer");
+    const auto owner=run(run_id);
+    if(terminal(owner.state)&&op.state!=OperationState::succeeded&&op.state!=OperationState::uncertain)
+        throw Conflict("Terminal A2A observations require an acknowledged or uncertain task");
+    std::string task_id;
+    if(op.state==OperationState::succeeded||op.state==OperationState::uncertain){
+        Json receipt;try{receipt=Json::parse(op.result_json);}catch(...){throw DatabaseError("Stored A2A task receipt is invalid");}
+        if(!receipt.is_object()||!receipt.contains("task_id")||!receipt["task_id"].is_string())throw Conflict("A2A task event has no recorded task identity");
+        task_id=receipt["task_id"].get<std::string>();
+    }
+    const Json* observed=&task_event;
+    for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})
+        if(observed->contains(field)&&(*observed)[field].is_object()){observed=&(*observed)[field];break;}
+    std::string observed_task;
+    if(observed->contains("id")&&(*observed)["id"].is_string())observed_task=(*observed)["id"].get<std::string>();
+    if(observed->contains("taskId")&&(*observed)["taskId"].is_string())observed_task=(*observed)["taskId"].get<std::string>();
+    if(!task_id.empty()&&(observed_task.empty()||observed_task!=task_id))throw Conflict("A2A task event does not match its recorded task");
+    if(!event_id.empty()){
+        const auto rows=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='a2a.task_event' AND json_extract(payload,'$.operation_id')=? AND json_extract(payload,'$.event_id')=? ORDER BY seq LIMIT 1",{run_id,operation_id,event_id}).rows;
+        if(!rows.empty()){
+            Json prior;try{prior=Json::parse(text(rows.front()[0]));}catch(...){throw DatabaseError("Stored A2A task event is invalid");}
+            if(!prior.is_object())throw DatabaseError("Stored A2A task event is invalid");
+            const Json* prior_event=prior.contains("event")?&prior["event"]:(prior.contains("data")?&prior["data"]:nullptr);
+            if(!prior_event||*prior_event!=task_event)throw Conflict("A2A peer reused an event cursor for different task content");
+            transaction.commit();return false;
+        }
+    }
+    impl_->event(run_id,"a2a.task_event",json);transaction.commit();return true;
+}
 std::vector<Event> Repository::event_batch(const std::string& id,std::int64_t after,std::size_t count){
     if(after<0||count<1||count>256)throw std::invalid_argument("Invalid event batch");run(id);std::vector<Event> result;
     for(const auto& row:impl_->database.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND seq>? ORDER BY seq LIMIT ?",{id,after,static_cast<std::int64_t>(count)}).rows)

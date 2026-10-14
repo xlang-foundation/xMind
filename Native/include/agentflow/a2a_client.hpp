@@ -14,6 +14,7 @@ struct A2aRemoteAgentInfo {
     bool streaming=false;
 };
 struct A2aStreamEvent {
+    // Non-empty only when this SSE frame explicitly carries an id field.
     std::string event_id;
     std::string result_json;
 };

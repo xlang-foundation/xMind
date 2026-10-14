@@ -841,7 +841,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         const auto a2a_operation=operation_id();
                         output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
-                            cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];persistence_.append_event(id,"a2a.task_event",journal.dump()).get();
+                            cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];persistence_.append_a2a_task_event(id,a2a_operation,journal.dump()).get();
                         }));
                     } else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
