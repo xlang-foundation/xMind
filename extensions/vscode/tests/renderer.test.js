@@ -19,6 +19,9 @@ function renderer(){
   for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('named agent picker renders authored display names and descriptions',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{r.send({type:'agent-selection',catalogue:{agents:[{id:'reviewer.v1',revision:2,model_id:'claude-sonnet',name:'Repository Reviewer',description:'Reviews changes with source evidence.'}]},selection:{session_id:'session-1',revision:3,editable:true,selected:{id:'reviewer.v1',revision:2,model_id:'claude-sonnet',name:'Repository Reviewer',description:'Reviews changes with source evidence.'}}});const option=doc.querySelector('#agent option[value="reviewer.v1"]');assert.equal(option.textContent,'Repository Reviewer · claude-sonnet');assert.equal(option.title,'Repository Reviewer — Reviews changes with source evidence.');assert.equal(doc.getElementById('agent-status').textContent,'Conversation agent · Repository Reviewer');}finally{r.dom.window.close();}
+});
 test('workspace Git has an accessible SVG toolbar entry that opens the native action menu',()=>{
  const r=renderer(),doc=r.dom.window.document;try{const button=doc.getElementById('git');assert.equal(button.getAttribute('aria-label'),'Workspace Git');assert.ok(button.querySelector('svg'));button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'git-menu'});}finally{r.dom.window.close();}
 });

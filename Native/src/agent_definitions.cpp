@@ -70,8 +70,8 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 
     std::set<std::string> ids;
     for (const auto& record : value.at("agents")) {
-        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools"});
-        else fields(record, {"id", "model_id", "instructions", "tools"});
+        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description"});
+        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description"});
         const auto key = text(record, "id", 64);
         if (!identifier(key) || !ids.insert(key).second) throw std::invalid_argument("Invalid or duplicate agent definition ID");
         const auto model = record.contains("model_id") ? text(record, "model_id", 256, true) : std::string{};
@@ -88,7 +88,10 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
             }
             validate_agent_tool_allowlist(tools);
         }
-        result.entries.push_back({key, rev, model, guidance, std::move(tools)});
+        AgentDefinition agent{key, rev, model, guidance, std::move(tools)};
+        agent.name = record.contains("name") ? text(record, "name", 128) : key;
+        agent.description = record.contains("description") ? text(record, "description", 2048, true) : std::string{};
+        result.entries.push_back(std::move(agent));
     }
 
     if (stored) {
@@ -107,7 +110,7 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 std::string encode(const AgentDefinitionCatalog& catalog) {
     auto entries = Json::array();
     for (const auto& agent : catalog.entries) {
-        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}};
+        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}};
         if (agent.tools) entry["tools"] = *agent.tools;
         entries.push_back(std::move(entry));
     }
@@ -133,7 +136,7 @@ AgentDefinitionCatalog AgentDefinitionStore::apply(const std::string& source) {
             throw std::invalid_argument("Retired agent definition IDs cannot be reused");
         const auto found = std::find_if(previous.entries.begin(), previous.entries.end(), [&](const auto& old) { return old.id == entry.id; });
         if (found == previous.entries.end()) { entry.revision = 1; changed = true; }
-        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools) entry.revision = found->revision;
+        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description) entry.revision = found->revision;
         else {
             if (found->revision == maximum_revision) throw std::overflow_error("Agent definition revision exhausted");
             entry.revision = found->revision + 1;

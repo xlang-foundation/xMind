@@ -15,6 +15,8 @@ struct AgentDefinition {
     // Optional allowlist narrows the backend's already-authorized tool registry.
     // An absent list keeps backend defaults; an empty list offers no tools.
     std::optional<std::vector<std::string>> tools;
+    std::string name;
+    std::string description;
 };
 
 inline void validate_agent_tool_allowlist(const std::optional<std::vector<std::string>>& tools) {
@@ -33,6 +35,8 @@ struct AgentDefinitionMetadata {
     std::string id;
     std::int64_t revision = 0;
     std::string model_id;
+    std::string name;
+    std::string description;
 };
 
 struct AgentDefinitionCatalog {

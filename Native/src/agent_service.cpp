@@ -351,7 +351,7 @@ Run AgentService::submit(std::string id,std::string session,std::string prompt){
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
 std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
-    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id});return result;
+    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description});return result;
 }
 AgentDefinition AgentService::agent_definition(const std::string& id)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();const auto catalog=AgentDefinitionStore(impl_->persistence).load();

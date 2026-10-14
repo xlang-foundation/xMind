@@ -2,8 +2,8 @@
 const http = 'Native/src/http_server.cpp';
 const workspace = 'Native/src/workspace_tools.cpp';
 export const nativePartial = {
-  'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'Only persisted ID/revision/model metadata is returned; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
-  'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'Persisted model and instructions are readable; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
+  'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'Persisted ID, display name, description, revision and model metadata are returned; OpenCode mode, permission, hidden/default and source metadata remain incomplete.'],
+  'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'Persisted display name, description, model, instructions and tool allowlist are readable; OpenCode mode, permission, hidden/default and source metadata remain incomplete.'],
   'session.list': [http, 'GET /v1/sessions', '"/v1/sessions"', 'Location/project scoping, filters and pagination remain to be compared.'],
   'session.get': [http, 'GET /v1/sessions/{id}', 'persistence.session', 'The native single-record endpoint returns ID, title and fork ancestry; full OpenCode session metadata and response parity remain incomplete.'],
   'session.message.get': ['Native/src/repository.cpp', 'GET /v1/sessions/{id}/messages/{message_id}', 'Repository::message', 'A single stored typed history entry is addressable by its durable sequence; upstream message part types and complete response parity remain incomplete.'],

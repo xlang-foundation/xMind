@@ -56,6 +56,8 @@ Import the definitions before importing graphs that reference them:
 ```yaml
 agents:
   - id: security_reviewer
+    name: Security Reviewer
+    description: Reviews assigned work for security issues.
     model_id: claude-sonnet
     tools:
       - read_file
@@ -65,8 +67,10 @@ agents:
 ```
 
 `xmind admin ... import-agents FILE` stores at most 64 definitions through
-xlang3-backed SQLite. A definition supplies bounded instructions, an optional
-model ID, and an optional tool allowlist. Graph import resolves the ID and
+xlang3-backed SQLite. A definition supplies a stable ID, a display name, a
+description, bounded instructions, an optional model ID, and an optional tool
+allowlist. Older definitions default the name to their ID and the description
+to empty text. Graph import resolves the ID and
 copies its revision, instructions, model, and tool binding into the immutable
 graph plan. Updating an
 agent and reimporting a graph creates a new graph revision; existing runs keep

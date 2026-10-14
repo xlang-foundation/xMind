@@ -30,7 +30,7 @@ const peer=createServer((request,response)=>{
       assert.ok(!source.includes(key));
       const body=JSON.parse(source);
       assert.equal(body.model,'synthetic-protocol-model');assert.equal(body.stream,true);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','run_process','wait_process','delegate_tasks']);
+      const toolNames=body.tools.map(tool=>tool.function.name),expectedTools=toolNames.length===1&&toolNames[0]==='read_file'?['read_file']:['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','run_process','wait_process','delegate_tasks'];assert.deepEqual(toolNames,expectedTools);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       requestsByPrompt.set(prompt,(requestsByPrompt.get(prompt)??0)+1);
       if(prompt==='provider-error') {
@@ -129,7 +129,7 @@ function liveChat(sessionId){
 const chat=(input,...args)=>chatResult(0,input,...args);
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
-  const agentSource=join(folder,'agents.yaml');await writeFile(agentSource,'agents:\n  - id: reviewer.v1\n    model_id: synthetic-protocol-model\n    instructions: Preserve the exact persisted reviewer guidance marker.\n    tools:\n      - read_file\n');
+  const agentSource=join(folder,'agents.yaml');await writeFile(agentSource,'agents:\n  - id: reviewer.v1\n    name: Repository Reviewer\n    description: Reviews workspace changes with source evidence.\n    model_id: synthetic-protocol-model\n    instructions: Preserve the exact persisted reviewer guidance marker.\n    tools:\n      - read_file\n');
   const imported=spawnSync(adminExe,['--db',join(folder,'state.sqlite'),'--modules',modules,'--stdlib',stdlib,'import-agents',agentSource],{encoding:'utf8',windowsHide:true,timeout:15000});assert.equal(imported.status,0,imported.stderr);assert.equal(JSON.parse(imported.stdout).agents[0].id,'reviewer.v1');
   await mkdir(join(workspace,'.config'));await writeFile(join(workspace,'.config','providers.yaml'),'private provider configuration\n');
   await mkdir(join(workspace,'.agentflow'));await writeFile(join(workspace,'.agentflow','state.sqlite'),'private AgentFlow state\n');
@@ -140,8 +140,8 @@ try {
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
   assert.equal(cli('health').agent_execution,true);
-  const agentDetail={agent:{id:'reviewer.v1',revision:1,model_id:'synthetic-protocol-model',instructions:'Preserve the exact persisted reviewer guidance marker.',tools:['read_file']}};
-  assert.deepEqual((await api('/v1/agents/reviewer.v1')).data,agentDetail);assert.deepEqual(cli('agent-definition','reviewer.v1'),agentDetail);
+  const agentDetail={agent:{id:'reviewer.v1',name:'Repository Reviewer',description:'Reviews workspace changes with source evidence.',revision:1,model_id:'synthetic-protocol-model',instructions:'Preserve the exact persisted reviewer guidance marker.',tools:['read_file']}};
+  assert.deepEqual((await api('/v1/agents/reviewer.v1')).data,agentDetail);assert.deepEqual(cli('agent-definition','reviewer.v1'),agentDetail);assert.deepEqual((await api('/v1/agents')).data.agents,[{id:'reviewer.v1',revision:1,model_id:'synthetic-protocol-model',name:'Repository Reviewer',description:'Reviews workspace changes with source evidence.'}]);
   assert.equal((await api('/v1/agents/missing-agent')).status,404);assert.equal((await api('/v1/agents/reviewer.v1?include=all')).status,400);
   const directory=await api('/v1/workspace/files?path=.');assert.equal(directory.status,200);assert.deepEqual(directory.data.path,'.');assert.equal(directory.data.workspace_id,(await api('/v1/workspace')).data.workspace_id);assert.equal(directory.data.truncated,false);const names=directory.data.entries.map(entry=>entry.name);assert.ok(names.includes('README.md'));assert.ok(!names.includes('.config'));assert.ok(!names.includes('.agentflow'));
   const fuzzyFiles=await api('/v1/workspace/find?query=MAIN&path=ignore-http&type=file');assert.equal(fuzzyFiles.status,200);assert.deepEqual(fuzzyFiles.data.entries,[{path:'ignore-http/main.cpp',type:'file'}]);const fuzzyDirectories=await api('/v1/workspace/find?query=ignore-http&type=directory');assert.deepEqual(fuzzyDirectories.data.entries,[{path:'ignore-http',type:'directory'}]);const ignoredFind=await api('/v1/workspace/find?query=skip&path=ignore-http');assert.deepEqual(ignoredFind.data.entries,[]);assert.equal((await api('/v1/workspace/find?query=main&type=other')).status,400);assert.equal((await api('/v1/workspace/find?query=main&hidden=yes')).status,400);assert.equal((await api('/v1/workspace/find?query=main&query=again')).status,400);
@@ -153,7 +153,7 @@ try {
   const viewPreview=await fetch(`http://127.0.0.1:${port}/v1/workspace/file?path=README.md`,{headers:viewHeaders});assert.equal(viewPreview.status,200,'The local browser session can preview workspace files');assert.equal((await viewPreview.json()).content,'Actual workspace content\n');
   for(const path of ['ignore-http/.git/config','.config/providers.yaml','.agentflow/state.sqlite','../outside'])assert.equal((await api('/v1/workspace/file?path='+encodeURIComponent(path))).status,403,`Browser workspace preview must reject ${path}`);
   assert.equal((await api('/v1/workspace/files?path=.&path=.')).status,400,'Duplicate browser browsing paths are rejected');
-  await session('coding');
+  await session('coding');const selectedAgent=await api('/v1/sessions/coding/agent',{agent_id:'reviewer.v1',agent_revision:1,expected_revision:0});assert.deepEqual(selectedAgent.data,{session_id:'coding',revision:1,editable:true,selected:{id:'reviewer.v1',revision:1,model_id:'synthetic-protocol-model',name:'Repository Reviewer',description:'Reviews workspace changes with source evidence.'}});const agentArchive=await api('/v1/sessions/coding/export');assert.deepEqual(agentArchive.data.session.agent,{id:'reviewer.v1',name:'Repository Reviewer',description:'Reviews workspace changes with source evidence.',revision:1,model_id:'synthetic-protocol-model',instructions:'Preserve the exact persisted reviewer guidance marker.',tools:['read_file']});const oldAgentArchive={format:'xmind.session',version:2,session:{title:'Legacy agent archive',agent:{id:'old.reviewer',revision:1,model_id:'',instructions:'Keep the old snapshot readable.'}},messages:[]};const importedOldAgent=await api('/v1/sessions/import',{archive:oldAgentArchive});assert.equal(importedOldAgent.status,201);assert.deepEqual((await api(`/v1/sessions/${importedOldAgent.data.id}/export`)).data.session.agent,{id:'old.reviewer',name:'old.reviewer',description:'',revision:1,model_id:'',instructions:'Keep the old snapshot readable.'});assert.equal((await api('/v1/sessions/import',{archive:{...oldAgentArchive,session:{...oldAgentArchive.session,agent:{...oldAgentArchive.session.agent,unexpected:'field'}}}})).status,400,'Archived agent snapshots reject unknown fields');
   const run=cli('run','coding','Read the actual README.md');
   assert.equal(run.state,'queued');await terminal(run.id,'completed');
   const history=cli('history','coding');
