@@ -296,8 +296,8 @@ are covered by the host suite. The rebuilt 0.1.8 VSIX was installed locally;
 invoking the command against a real backend and reviewing its rendered prompt
 remain unverified.
 
-The pinned OpenCode inventory remains **141 operations**, with **31** mapped
-native source candidates, **110** unmapped, and **zero** operations with
+The pinned OpenCode inventory remains **141 operations**, with **36** mapped
+native source candidates, **105** unmapped, and **zero** operations with
 verified parity. Earlier full native, browser and VS Code gates remain scoped
 to their cited revisions; they do not establish full parity or current
 installed acceptance.
@@ -398,8 +398,8 @@ provider-reported usage/backend timings appeared in the sidebar in both the
 in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
-The current OpenAPI audit contains **141 operations**: **31** have a mapped C++
-source candidate, **110** remain unmapped, and **zero** are verified parity.
+The current OpenAPI audit contains **141 operations**: **36** have a mapped C++
+source candidate, **105** remain unmapped, and **zero** are verified parity.
 Native Git initialization, status, branch metadata/listing, review base and diff add six source candidates; they
 do not establish full VCS or operation-level parity.
 Compared with v2.0.16, v2.0.26 adds five operations: credential creation/listing,

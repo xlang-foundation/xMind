@@ -71,4 +71,10 @@ const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.26'
   operationCount: operations.length, operations };
 const target = resolve(root, 'doc/OPENCODE_API_INVENTORY.json');
 writeFileSync(target, JSON.stringify(inventory, null, 2) + '\n');
-console.log(`Audited ${operations.length} pinned OpenCode operations: ${operations.filter(x => x.agentflowEvidence).length} historical prototype and ${operations.filter(x => x.nativeEvidence).length} native source candidates; no verified parity claims`);
+const nativeCandidates = operations.filter(x => x.nativeEvidence).length;
+const unmapped = operations.length - nativeCandidates;
+const verifiedParity = operations.filter(x => x.nativeEvidence?.verifiedParity === true).length;
+if (operations.some(x => x.nativeEvidence && x.nativeEvidence.verifiedParity !== false)) {
+  throw new Error('Native operation parity must remain explicitly unverified until operation-level acceptance is recorded');
+}
+console.log(`Audited ${operations.length} pinned OpenCode operations: ${nativeCandidates} reviewed native source candidates, ${unmapped} unmapped, ${verifiedParity} operation-level parity verified; ${operations.filter(x => x.agentflowEvidence).length} historical prototype mappings`);
