@@ -8,6 +8,8 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <cctype>
+#include <string_view>
 
 namespace agentflow {
 namespace {
@@ -16,6 +18,41 @@ bool text(const std::string& value,std::size_t limit=4096) {
     return value.size()<=limit && value.find('\0')==std::string::npos && (value.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0)>0);
 }
 std::string utf8(const std::filesystem::path& path){const auto value=path.u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
+bool cpython_leaf(std::string token) {
+    while(!token.empty() && (token.front()=='\'' || token.front()=='"' || token.front()=='`'))token.erase(token.begin());
+    while(!token.empty() && (token.back()=='\'' || token.back()=='"' || token.back()=='`' || token.back()==',' || token.back()=='.'))token.pop_back();
+    const auto separator=token.find_last_of("/\\");if(separator!=std::string::npos)token.erase(0,separator+1);
+    std::transform(token.begin(),token.end(),token.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});
+    const auto extension=token.find('.');if(extension!=std::string::npos)token.resize(extension);
+    if(token=="py" || token=="python" || token=="pythonw")return true;
+    if(!token.starts_with("python") && !token.starts_with("pythonw"))return false;
+    const auto prefix=token.starts_with("pythonw")?7u:6u;
+    if(token.size()==prefix)return true;
+    if(token[prefix]<'0'||token[prefix]>'9')return false;
+    for(std::size_t i=prefix+1;i<token.size();++i)if((token[i]<'0'||token[i]>'9')&&token[i]!='.')return false;
+    return true;
+}
+bool shell_executable(const std::string& executable) {
+    auto name=std::filesystem::u8path(executable).filename().u8string();
+    std::string leaf(reinterpret_cast<const char*>(name.data()),name.size());
+    std::transform(leaf.begin(),leaf.end(),leaf.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});
+    return leaf=="powershell.exe" || leaf=="pwsh.exe" || leaf=="cmd.exe" || leaf=="bash.exe" || leaf=="sh.exe";
+}
+bool invokes_cpython(const std::string& executable,const std::vector<std::string>& arguments) {
+    if(cpython_leaf(std::filesystem::u8path(executable).filename().string()))return true;
+    if(!shell_executable(executable))return false;
+    for(const auto& argument:arguments) {
+        std::string token;
+        auto inspect=[&]{if(!token.empty() && cpython_leaf(token))return true;token.clear();return false;};
+        for(unsigned char c:argument) {
+            if(std::isspace(c)||c=='\''||c=='"'||c=='`'||c==';'||c=='&'||c=='|'||c=='('||c==')'||c=='='||c==',') {
+                if(inspect())return true;
+            } else token.push_back(static_cast<char>(c));
+        }
+        if(inspect())return true;
+    }
+    return false;
+}
 std::string hex_bytes(std::string_view bytes) {
     constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(bytes.size()*2);
     for(unsigned char b:bytes){encoded.push_back(digits[b>>4]);encoded.push_back(digits[b&15]);}
@@ -92,6 +129,7 @@ ModelToolDefinition ProcessExecutor::definition() const {
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="powershell";}))description+=" For the powershell profile, pass one complete PowerShell script as arguments[0]; it uses a no-profile, noninteractive PowerShell process and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="cmd";}))description+=" For the cmd profile, pass one complete Windows command as arguments[0]; it uses the system command processor and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile for Python-compatible workspace scripts, tests and package commands; never invoke python or python.exe. xMind already prepends -B to this profile, so do not pass -B or a python launcher name. Pass module commands directly, for example ['-m','pip','install','-r','requirements.txt'], ['-m','pytest','-q'] or ['-c','print(1 + 1)']. Its executable is pinned to the xlang3 runtime paired with this xMind backend, so it does not depend on whichever xlang3.exe happens to appear first on machine PATH. xMind adds the paired runtime modules and a .xlang3-site directory in the selected working directory to PYTHONPATH when those directories exist.";
+    description+=" The native executor rejects direct CPython executable profiles and common python/python3.x/pythonw/py launcher names in registered shell commands before dispatch; use the xlang3 profile for Python-compatible work.";
     return {"run_process",std::move(description),
         schema};
 }
@@ -157,6 +195,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(found->id=="xlang3"&&std::find(launch.arguments.begin(),launch.arguments.end(),"-B")==launch.arguments.end())launch.arguments.insert(launch.arguments.begin(),"-B");
     launch.executable_id=found->executable_id;
     for(const auto& arg:args["arguments"]){if(!arg.is_string() || !text(arg.get<std::string>()))throw std::invalid_argument("Invalid literal process argument");launch.arguments.push_back(arg.get<std::string>());}
+    if(invokes_cpython(launch.executable,launch.arguments))throw ToolAccessDenied("CPython execution is disabled; use the registered xlang3 profile for Python-compatible commands.");
     if(args.contains("timeout_ms")){if(!args["timeout_ms"].is_number_integer() || args["timeout_ms"]<1 || args["timeout_ms"]>found->max_timeout.count())throw std::invalid_argument("Process timeout exceeds profile budget");launch.timeout=std::chrono::milliseconds(args["timeout_ms"].get<std::int64_t>());}
     std::string relative=".";if(args.contains("workdir")){if(!args["workdir"].is_string() || !text(args["workdir"].get<std::string>()))throw std::invalid_argument("Invalid process workdir");relative=args["workdir"].get<std::string>();}
     const auto path=std::filesystem::u8path(relative);

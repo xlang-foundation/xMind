@@ -126,6 +126,19 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         if(!SetEnvironmentVariableW(L"XMIND_PROCESS_SECRET_SENTINEL",L"must-not-reach-child"))throw std::runtime_error("Cannot set process-environment isolation fixture");
         const auto shell_script="[IO.File]::WriteAllText('"+shell_effect.string()+"','actual approved shell effect'); [Console]::Out.Write(\"$([bool]$env:PATH)|$([bool]$env:XMIND_PROCESS_SECRET_SENTINEL)|\"); node --version";
         ProcessExecutor shell_executor(store,workspace,root.string(),{{"powershell",argv[6],1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},10s}});
+        phase("block-cpython-launches");
+        const std::vector<std::string> blocked_scripts{"python.exe -m pip install pytest; python.exe -m pytest -q","& 'C:\\Python314\\python.exe' -m pytest -q","py -3.14 -m pip install pytest"};
+        for(std::size_t i=0;i<blocked_scripts.size();++i) {
+            const auto& script=blocked_scripts[i];const auto blocked_id="blocked-cpython-"+std::to_string(i);
+            const auto request=Json{{"profile","powershell"},{"arguments",Json::array({"-NoLogo","-NoProfile","-NonInteractive","-Command",script})},{"workdir","."}}.dump();
+            rejects<ToolAccessDenied>([&]{shell_executor.invoke(blocked_id,"run",request,now()+600000);});
+            rejects<NotFound>([&]{store.operation(blocked_id).get();});
+        }
+        const auto direct_python=root/"python.exe";std::filesystem::copy_file(argv[1],direct_python);
+        ProcessExecutor direct_python_executor(store,workspace,root.string(),{{"direct-python",direct_python.string(),1,{},10s}});
+        const auto direct_request=Json{{"profile","direct-python"},{"arguments",Json::array()},{"workdir","."}}.dump();
+        rejects<ToolAccessDenied>([&]{direct_python_executor.invoke("blocked-direct-cpython","run",direct_request,now()+600000);});
+        rejects<NotFound>([&]{store.operation("blocked-direct-cpython").get();});
         const auto shell_request=Json{{"profile","powershell"},{"arguments",Json::array({shell_script})},{"workdir","."}}.dump();
         Task shell(shell_executor,"powershell-shell",shell_request);const auto shell_proposal=proposed(store,"powershell-shell");const auto shell_payload=Json::parse(shell_proposal.spec.arguments_json);
         require(shell_payload["profile_id"]=="powershell"&&shell_payload["executable"]==argv[6]&&shell_payload["arguments"]==Json::array({"-NoLogo","-NoProfile","-NonInteractive","-Command",shell_script})&&shell_payload["workdir"]==".","Shell approval must bind the trusted PowerShell executable, fixed parser flags and exact reviewed command text");

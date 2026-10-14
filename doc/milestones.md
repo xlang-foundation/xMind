@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Reject direct CPython process launches — 2026-10-14
+
+The native process executor now rejects direct CPython executable profiles and
+common `python`, versioned `python3.x`, `pythonw`, and `py` launcher tokens in
+the registered PowerShell, cmd, bash, and sh profiles before an operation is
+proposed or dispatched. The diagnostic directs Python-compatible commands to
+the paired xlang3 profile. Its actual process contract verifies rejected
+commands leave no operation record and that xlang3 package imports and normal
+approved shell commands still work. The focused Release CTest passes **1/1**.
+This is a policy guard for direct launcher forms, not an OS sandbox against
+arbitrary shell obfuscation. [Focused validation record](evidence/native-cpython-launch-guard-ctest-20261014.json).
+
 ## Fresh full native Release gate — 2026-10-14
 
 The current native source rebuilt in the dedicated `build/native-verify` tree

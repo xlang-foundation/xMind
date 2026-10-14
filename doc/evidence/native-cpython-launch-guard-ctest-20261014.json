@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-14",
+  "source_revision_before_change": "65c17afa18ef39fd65d8d0093ade8511d3e4cb35",
+  "configuration": "Visual Studio 18 Release",
+  "build_target": "agentflow_process_executor_contract",
+  "product_target": "xmind",
+  "build_directory": "build/native-verify",
+  "test": "native_process_executor_contract",
+  "result": "passed",
+  "tests_passed": 1,
+  "tests_failed": 0,
+  "test_elapsed_seconds": 14.96,
+  "product_build": "passed",
+  "verified": [
+    "Direct python.exe profile, shell python.exe command, absolute Python 3.14 interpreter, and py -3.14 launch requests are rejected before an operation record is created.",
+    "The existing paired xlang3 import-path execution still succeeds.",
+    "A normal approved PowerShell command still executes and records its result."
+  ],
+  "limitations": "This rejects common direct launcher forms in standard shell profiles; it is not an OS sandbox against arbitrary shell obfuscation."
+}
