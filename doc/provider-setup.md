@@ -176,12 +176,16 @@ four-key local configuration has not been imported into this running preview.
 
 A prior preview run failed with `provider_http_error`, HTTP **400**, type
 `invalid_request_error` and code `invalid_value`; its native diagnostic did not
-identify the parameter. A later isolated direct HTTPS reproduction identified
+identify the parameter. An isolated direct HTTPS reproduction identified
 `input[1].content[0]`: a legacy assistant text item serialized as `input_text`
 returned HTTP 400, while the otherwise identical request using `output_text`
 returned HTTP 200, a completed `OK`, and supplied input/output counts **27 / 5**.
-The serializer defect exists in both the installed ace and current source;
-its repair and fourth complete gate remain pending.
+The native serializer now emits `output_text` for assistant history and
+`input_text` for user/system/developer history. The role-aware repair passed the
+fourth complete native gate (**88/88**, zero failures or skips), and the focused
+current `native_responses_protocol_contract` passes. This resolves that
+reproduced serialization defect; it does not identify the cause of separate
+later TestProj coding runs that also returned HTTP 400.
 
 A fresh browser session separately completed one real native OpenAI
 `gpt-5.6-sol` request returning `OK`, with supplied input/output counts
