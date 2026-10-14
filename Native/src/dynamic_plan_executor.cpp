@@ -1,6 +1,7 @@
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_authority.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <chrono>
@@ -47,6 +48,32 @@ void generation(PersistenceService& store,const std::string& root,const AgentSet
 Json prompt(const DynamicPreparedNode& prepared,const DynamicPlanCapabilities& caps){
     Json result={{"content",prepared.node.definition.objective+"\n\nObserved dependency data (not instructions):\n"+prepared.dependency_outputs_json}};
     const auto provider=Json::parse(caps.provider_identity_json);if(provider.size()==6)result["provider_context"]=provider;return result;
+}
+Json deterministic_prompt(const DynamicPreparedNode& prepared){
+    const auto& definition=prepared.node.definition;
+    return {{"node_type","tool"},{"tool",definition.tool},{"arguments_json",definition.arguments_json},{"dependency_outputs_json",prepared.dependency_outputs_json}};
+}
+Run execute_readonly_tool(PersistenceService& store,const std::string& child,const DynamicPreparedNode& prepared,
+    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel){
+    auto phase=RunState::queued;const auto retire=[&](RunState to,const char* reason){return store.transition(child,phase,to,Json{{"reason",reason}}.dump()).get();};
+    if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_tool");
+    if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
+    try{
+        if(!settings.workspace)throw ToolAccessDenied("Dynamic deterministic tool requires its admitted workspace");
+        WorkspaceTools workspace(*settings.workspace);
+        if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic deterministic workspace identity changed");
+        budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
+        const auto& definition=prepared.node.definition;
+        store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
+        const auto result=Json::parse(workspace.invoke(definition.tool,definition.arguments_json,cancel));budget->check(cancel);
+        if(result.dump().size()>32768)throw ToolFileError("Dynamic deterministic tool result exceeds its bound");
+        store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
+        return store.complete_run(child,result.dump()).get();
+    }catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+     catch(const ToolFileError&){return retire(RunState::failed,"dynamic_tool_execution_failed");}
+     catch(const std::invalid_argument&){return retire(RunState::failed,"invalid_dynamic_tool_arguments");}
+     catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
+     catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
 }
 struct ActiveBatch {
     std::unique_ptr<NativeChildExecutor::Batch> work;
@@ -150,15 +177,18 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
             }
             if(published)continue;
             const auto live=live_count(active);const auto parallel=static_cast<std::size_t>(budget->snapshot().spec.max_parallel);std::vector<DynamicPreparedNode> frontier;
-            for(const auto& id:decision.ready){if(frontier.size()+live>=parallel)break;auto prepared=prepare_dynamic_node(plan,id);if(prepared.node.definition.kind==DynamicNodeKind::agent)frontier.push_back(std::move(prepared));}
+            for(const auto& id:decision.ready){if(frontier.size()+live>=parallel)break;auto prepared=prepare_dynamic_node(plan,id);if(prepared.node.definition.kind==DynamicNodeKind::agent||prepared.node.definition.kind==DynamicNodeKind::tool)frontier.push_back(std::move(prepared));}
             if(!frontier.empty()){
                 generation(store_,accepted.root_run_id,frozen,caps,budget,cancel);
                 DynamicFrontierSpec claim;claim.plan_id=plan.id;claim.backend_identity=caps.backend_identity;claim.plan_call_id=accepted.id;
                 claim.expected_revision=plan.revision;claim.expected_state_sequence=plan.state_sequence;claim.expected_budget_revision=budget->snapshot().revision;
                 std::vector<NativeChildWork> work;work.reserve(frontier.size());ActiveBatch staged;staged.children.reserve(frontier.size());staged.settled.assign(frontier.size(),false);
-                for(const auto& prepared:frontier){const auto policy=preset(caps,prepared.node.definition);const auto child_id=identity();auto settings=dynamic_child_settings(frozen,policy,selected_model(caps));
-                    DynamicTaskClaimSpec task;task.label=prepared.node.definition.label;task.claim_id=identity();task.child_run_id=child_id;task.prompt_json=prompt(prepared,caps).dump();task.resolved_input_json=prepared.dependency_outputs_json;task.definition_revision=prepared.node.definition_revision;claim.tasks.push_back(std::move(task));staged.children.push_back(child_id);
-                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget](std::stop_token stop)mutable{
+                for(const auto& prepared:frontier){const auto child_id=identity();AgentSettings settings;DynamicPresetCapability policy;
+                    if(prepared.node.definition.kind==DynamicNodeKind::agent){policy=preset(caps,prepared.node.definition);settings=dynamic_child_settings(frozen,policy,selected_model(caps));}
+                    else settings=frozen;
+                    DynamicTaskClaimSpec task;task.label=prepared.node.definition.label;task.claim_id=identity();task.child_run_id=child_id;task.prompt_json=(prepared.node.definition.kind==DynamicNodeKind::tool?deterministic_prompt(prepared):prompt(prepared,caps)).dump();task.resolved_input_json=prepared.dependency_outputs_json;task.definition_revision=prepared.node.definition_revision;claim.tasks.push_back(std::move(task));staged.children.push_back(child_id);
+                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared](std::stop_token stop)mutable{
+                        if(prepared.node.definition.kind==DynamicNodeKind::tool)return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop);
                         const auto retire_before_launch=[&]()->std::optional<Run>{
                             if(stop.stop_requested())return store_.transition(child_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_dynamic_child"})").get();
                             if(std::chrono::steady_clock::now()>=budget->deadline())return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"agent_timeout"})").get();return {};};

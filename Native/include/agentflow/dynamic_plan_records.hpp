@@ -48,7 +48,7 @@ struct DynamicPlanCapabilities : DynamicPlanningPolicy {
     bool catalogue_finalized=false;
 };
 
-enum class DynamicNodeKind {agent,human};
+enum class DynamicNodeKind {agent,tool,human};
 enum class DynamicDependencyRequirement {success,observed};
 enum class DynamicNodeState {pending,blocked,claimed,waiting_human,settled,skipped,cancelled,uncertain};
 struct DynamicDependency {
@@ -58,7 +58,7 @@ struct DynamicDependency {
 struct DynamicNodeDefinition {
     std::string label;
     DynamicNodeKind kind=DynamicNodeKind::agent;
-    std::string objective,question,preset_id;
+    std::string objective,question,preset_id,tool,arguments_json;
     std::int64_t preset_revision=1;
     std::vector<DynamicDependency> dependencies;
 };

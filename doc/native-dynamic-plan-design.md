@@ -54,19 +54,20 @@ or installed planning acceptance. Installed VS Code delegation remains
 unverified. The initial local planning milestone above does not redefine the
 broader [dynamic Agent target](dynamic-agent-execution.md).
 
-The initial implemented behavior is a normal Agent selecting a dependency
-plan, observing child work and human input, then revising undispatched tasks,
-with authorized coding work as well as investigation. The native backend owns
-the plan, capabilities, budgets and effect journals; thin clients observe those
-records and submit authenticated input. Later node kinds and recursion must
-preserve these same boundaries.
+The implemented behavior is a normal Agent selecting a dependency plan,
+observing agent and deterministic read-only workspace-tool children plus human
+input, then revising undispatched tasks, with authorized coding work as well as
+investigation. The native backend owns the plan, capabilities, budgets and
+effect journals; thin clients observe those records and submit authenticated
+input. MCP/process tool nodes, other node kinds and recursion must preserve these
+same boundaries.
 
 ## Existing foundations and missing boundaries
 
-The table preserves the original delivery boundaries. The initial v11 slice
-now implements their agent/human subset; the implementation guide describes
-its actual classes and APIs. Direct deterministic nodes and broader graph
-integration remain design requirements.
+The table preserves the original delivery boundaries. The implementation guide
+describes the current agent/human and bounded deterministic read-only workspace
+tool nodes. Broader deterministic tool and graph integration remain design
+requirements.
 
 | Existing contract | Reuse | Required addition |
 | --- | --- | --- |
@@ -131,12 +132,15 @@ downgraded to investigation. Child recursion is initially disabled for both
 presets. Broader presets and bounded recursive execution remain future native
 work with the same root budget.
 
-Deterministic tool nodes select only aliases in the root's current native tool
-catalogue. For MCP, the backend derives the server ID/revision from the trusted
-alias binding obtained by actual root discovery. A child still privately
-resolves credentials and freshly rediscovers the exact alias before proposing
-or dispatching an effect. Metadata, plan validation and plan admission do not
-launch a peer. A changed connector or schema cannot silently rebind old work.
+Deterministic workspace-tool nodes currently select only the fixed read-only
+aliases in the frozen `workspace.inspect` preset, and validate exact arguments
+against the sealed native schemas. They run as native child records without a
+model request. MCP and process nodes remain future additions: for MCP, the
+backend must derive the server ID/revision from the trusted alias binding
+obtained by actual root discovery, and a child must privately resolve
+credentials and freshly rediscover the exact alias before proposing or
+dispatching an effect. Metadata and plan admission must not launch a peer. A
+changed connector or schema cannot silently rebind old work.
 
 Human nodes require an implemented authenticated controller-input capability.
 The model selects a bounded question, not its answering actor, route or
@@ -549,11 +553,12 @@ clearly labelled synthetic provider replies and real storage/tools/effects:
    continuation. An expiry/failure path likewise wakes typed retirement rather
    than leaving a root paused merely because no child frontier exists.
 
-The initial agent/human implementation now includes v11 ownership/revision
+The native dependency-plan implementation includes durable ownership/revision
 transactions, the ordinary-Agent scheduler, pause/continuation protocol and
-thin interfaces. Its local native contract includes a dependency DAG, actual
-replanning after failure, a human check and an exact approved coding-child
-effect. This scoped result does not establish acceptance for the whole target.
+thin interfaces. Its contracts cover a dependency DAG, actual replanning after
+failure, human input, an exact approved coding-child effect and a model-free
+read-only workspace-tool child. This scoped result does not establish
+acceptance for the whole target.
 
 The original proposed production ownership split is retained for comparison:
 
@@ -569,9 +574,9 @@ The original proposed production ownership split is retained for comparison:
 | HTTP/CLI, shared client/controller/renderer | Owned plan and human interfaces, child effects, cursor-safe revision presentation and exact controller review |
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
-The [initial implementation guide](native-dynamic-plan.md) identifies the subset
-now implemented and its verification limits. Broader agent/tool scheduling,
-reference helpers and further node kinds in this table still require their own
+The [implementation guide](native-dynamic-plan.md) identifies the subset now
+implemented and its verification limits. Broader tool scheduling, reference
+helpers and further node kinds in this table still require their own
 implementation and acceptance; the design itself supplies no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget

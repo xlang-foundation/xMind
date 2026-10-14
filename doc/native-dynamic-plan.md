@@ -1,5 +1,24 @@
 # Native dependency plans in ordinary Agent mode
 
+## Dynamic deterministic workspace tools — 2026-10-14
+
+Dynamic plans now admit native `tool` nodes for the fixed read-only workspace
+aliases `read_repository_instructions`, `read_file`, `list_files`,
+`search_files` and `glob_files`. Arguments are checked against the sealed native
+tool schema and the frozen `workspace.inspect` capability before admission.
+Execution uses the admitted workspace in a separate owned child, makes no model
+request, and records ordered `tool.started`/`tool.completed` receipts. SQLite
+reopen/recovery verifies those receipts against the immutable node definition.
+The repository schema migration is now v23.
+
+The pure plan, repository and actual native engine contracts passed locally on
+the working tree. The engine fixture executes a deterministic `read_file` node
+after an approved coding child and checks its actual bytes, child ownership,
+receipts and model-free budget accounting. Provider replies and credentials are
+synthetic. This is scoped native acceptance, not a complete CTest/hosted gate,
+live-provider run or rendered browser/VS Code acceptance. MCP and process nodes,
+dynamic-node UI, recursive planning and full coding/provider parity remain work.
+
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78-contract native gate in 145.17 seconds**, with the exact complete manifest
 and all **427 frozen native/build-source input hashes** verified. The new
@@ -49,7 +68,7 @@ Native C++ owns scheduling, authority, budgets, effects and run lifecycle.
 Repository transactions use embedded xlang3 SQLite. CLI, browser and VS Code
 observe the same committed records and submit authenticated controller input.
 The broader [planning design](native-dynamic-plan-design.md) remains the target
-for later node kinds and recursive execution.
+for additional deterministic tools, other node kinds and recursive execution.
 
 ## Tasks, dependencies and revisions
 
@@ -57,6 +76,7 @@ for later node kinds and recursive execution.
 | --- | --- |
 | `workspace.inspect` revision 1 | Native read-only child AgentRunner, at most four model turns |
 | `workspace.coding` revision 1 | Child AgentRunner inheriting the root's enabled edit/create/process/MCP authority and existing exact approvals; bounded by the admitted policy |
+| `tool` | Native model-free read-only workspace aliases validated against their frozen input schemas |
 | `human` | Backend-published question answered through the authenticated controller, with a fixed native expiration policy |
 
 The coding preset is offered only when the root has an enabled coding/effect
@@ -145,7 +165,7 @@ The registered contracts cover distinct boundaries:
   escaping and supplied metrics; they do not establish an installed IDE result.
 
 None of these fixtures establishes live-provider planning, installed VS Code
-acceptance, dynamic deterministic tool/MCP/process nodes, recursive planning,
+acceptance, dynamic MCP/process nodes, recursive planning,
 full coding/provider parity or private Nexus execution. The separate
 browser/native integration uses disposable model-free state to check graph,
 human, authentication, durable cookie and reconnect boundaries; it does not

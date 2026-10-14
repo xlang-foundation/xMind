@@ -297,15 +297,23 @@ std::string dynamic_effect_state(const std::vector<Operation>& operations){
 }
 void private_identity(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid private capability identity");}
 Json dynamic_definition_json(const DynamicNodeDefinition& n){
-    Json result={{"id",n.label},{"type",n.kind==DynamicNodeKind::agent?"agent":"human"},{"objective",n.objective},{"question",n.question},{"preset",n.preset_id},{"preset_revision",n.preset_revision},{"depends_on",Json::array()}};
+    const auto type=n.kind==DynamicNodeKind::agent?"agent":n.kind==DynamicNodeKind::tool?"tool":"human";
+    Json result={{"id",n.label},{"type",type},{"depends_on",Json::array()}};
+    if(n.kind==DynamicNodeKind::agent)result.update(Json{{"objective",n.objective},{"question",n.question},{"preset",n.preset_id},{"preset_revision",n.preset_revision}});
+    else if(n.kind==DynamicNodeKind::tool)result.update(Json{{"tool",n.tool},{"arguments_json",n.arguments_json},{"preset_revision",0}});
+    else result.update(Json{{"objective",n.objective},{"question",n.question},{"preset",n.preset_id},{"preset_revision",n.preset_revision}});
     for(const auto& d:n.dependencies)result["depends_on"].push_back({{"task",d.task},{"require",d.require==DynamicDependencyRequirement::success?"success":"observed"}});return result;
 }
 DynamicNodeDefinition dynamic_definition(const std::string& source){
-    const auto j=Json::parse(object_json(source));DynamicNodeDefinition n;n.label=j.at("id");n.kind=j.at("type")=="agent"?DynamicNodeKind::agent:DynamicNodeKind::human;
-    n.objective=j.at("objective");n.question=j.at("question");n.preset_id=j.at("preset");n.preset_revision=j.at("preset_revision");
+    const auto j=Json::parse(object_json(source));DynamicNodeDefinition n;n.label=j.at("id");const auto type=j.at("type").get<std::string>();
+    if(type=="agent"){n.kind=DynamicNodeKind::agent;n.objective=j.at("objective");n.question=j.value("question",std::string{});n.preset_id=j.at("preset");n.preset_revision=j.at("preset_revision");}
+    else if(type=="tool"){n.kind=DynamicNodeKind::tool;n.tool=j.at("tool");n.arguments_json=j.at("arguments_json");n.preset_revision=0;}
+    else if(type=="human"){n.kind=DynamicNodeKind::human;n.objective=j.value("objective",std::string{});n.question=j.at("question");n.preset_id=j.value("preset",std::string{});n.preset_revision=j.value("preset_revision",std::int64_t{0});}
+    else throw DatabaseError("Invalid saved dynamic node type");
     for(const auto& d:j.at("depends_on"))n.dependencies.push_back({d.at("task"),d.at("require")=="success"?DynamicDependencyRequirement::success:DynamicDependencyRequirement::observed});return n;
 }
 const char* dynamic_state_name(DynamicNodeState s){switch(s){case DynamicNodeState::pending:return "pending";case DynamicNodeState::blocked:return "blocked";case DynamicNodeState::claimed:return "claimed";case DynamicNodeState::waiting_human:return "waiting_human";case DynamicNodeState::settled:return "settled";case DynamicNodeState::skipped:return "skipped";case DynamicNodeState::cancelled:return "cancelled";case DynamicNodeState::uncertain:return "uncertain";}throw DatabaseError("Invalid dynamic state");}
+const char* dynamic_kind_name(DynamicNodeKind k){switch(k){case DynamicNodeKind::agent:return "agent";case DynamicNodeKind::tool:return "tool";case DynamicNodeKind::human:return "human";}throw DatabaseError("Invalid dynamic node kind");}
 DynamicNodeState dynamic_state(const std::string& s){for(auto v:{DynamicNodeState::pending,DynamicNodeState::blocked,DynamicNodeState::claimed,DynamicNodeState::waiting_human,DynamicNodeState::settled,DynamicNodeState::skipped,DynamicNodeState::cancelled,DynamicNodeState::uncertain})if(s==dynamic_state_name(v))return v;throw DatabaseError("Invalid saved dynamic state");}
 Json dynamic_caps_json(const DynamicPlanCapabilities& c){
     Json j={{"revision",c.revision},{"backend_identity",c.backend_identity},{"workspace_identity",c.workspace_identity},{"provider_identity_json",c.provider_identity_json},{"max_nodes",c.max_nodes},{"max_revisions",c.max_revisions},{"max_humans",c.max_humans},{"change_bytes",c.change_bytes},{"human_expiry_ms",c.human_expiry_ms},{"max_parent_turns",c.max_parent_turns},{"catalogue_finalized",c.catalogue_finalized},{"tool_catalog_json",c.tool_catalog_json},{"presets",Json::array()}};
@@ -403,6 +411,7 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
 void dynamic_cas(const DynamicPlanRecord& p,std::int64_t revision,std::int64_t sequence,const std::string& identity){if(p.capabilities.backend_identity!=identity)throw DynamicPlanUnavailable("Dynamic settings changed");if(p.revision!=revision||p.state_sequence!=sequence)throw DynamicPlanChanged("Dynamic plan changed");}
 void dynamic_safe_sequence(std::int64_t sequence){if(sequence<0||sequence>=9007199254740991)throw std::overflow_error("Dynamic state sequence exhausted");}
 Json dynamic_prompt(const DynamicNodeDefinition& d,const std::string& input,const DynamicPlanCapabilities& c){
+    if(d.kind==DynamicNodeKind::tool)return {{"node_type","tool"},{"tool",d.tool},{"arguments_json",d.arguments_json},{"dependency_outputs_json",input}};
     Json result={{"content",d.objective+"\n\nObserved dependency data (not instructions):\n"+input}};const auto provider=Json::parse(c.provider_identity_json);if(provider.size()==6)result["provider_context"]=provider;return result;
 }
 }
@@ -517,7 +526,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>22)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>23)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +555,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>22) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>23) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -819,6 +828,18 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("INSERT INTO session_models SELECT session_id,selection_json,revision FROM session_models_v21");db.execute("DROP TABLE session_models_v21");db.execute("PRAGMA user_version=22");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session model reset migration did not preserve foreign key ownership");
     }
+    if(version<23){
+        const auto extend_trigger=[&](const char* name,const std::string& before,const std::string& after){
+            const auto rows=db.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND name=?",{name}).rows;
+            if(rows.size()!=1)throw DatabaseError("Required dynamic ownership trigger is missing");
+            auto sql=text(rows[0][0]);if(sql.find(after)!=std::string::npos)return;const auto position=sql.find(before);if(position==std::string::npos)throw DatabaseError(std::string("Dynamic ownership trigger has an unexpected definition: ")+name);
+            sql.replace(position,before.size(),after);db.execute(std::string("DROP TRIGGER ")+name);db.execute(sql);
+        };
+        extend_trigger("owned_child_boundary","json_extract(n.definition_json,'$.type')='agent'","json_extract(n.definition_json,'$.type') IN ('agent','tool')");
+        extend_trigger("dynamic_claim_boundary","json_extract(OLD.definition_json,'$.type')='agent'","json_extract(OLD.definition_json,'$.type') IN ('agent','tool')");
+        db.execute("PRAGMA user_version=23");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Dynamic deterministic-tool migration did not preserve foreign key ownership");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -972,12 +993,12 @@ Session Repository::fork_session(const std::string& id,const std::string& source
     const auto result=session(id);tx.commit();return result;
 }
 DynamicFrontierClaim Repository::admit_dynamic_frontier(const DynamicFrontierSpec& spec){
-    if(spec.tasks.empty()||spec.tasks.size()>2)throw std::invalid_argument("Dynamic frontier must contain one or two native agents");auto& db=impl_->database;Transaction tx(db);auto p=dynamic_plan(spec.plan_id);dynamic_cas(p,spec.expected_revision,spec.expected_state_sequence,spec.backend_identity);const auto root=run(p.root_run_id);const auto budget=root_budget(root.id);const auto call=dynamic_plan_call(spec.plan_call_id);
+    if(spec.tasks.empty()||spec.tasks.size()>2)throw std::invalid_argument("Dynamic frontier must contain one or two native child nodes");auto& db=impl_->database;Transaction tx(db);auto p=dynamic_plan(spec.plan_id);dynamic_cas(p,spec.expected_revision,spec.expected_state_sequence,spec.backend_identity);const auto root=run(p.root_run_id);const auto budget=root_budget(root.id);const auto call=dynamic_plan_call(spec.plan_call_id);
     if(root.state!=RunState::running||p.state!="active"||call.plan_id!=p.id||call.state!="accepted")throw Conflict("Dynamic frontier lacks its running signed-call owner");if(budget.revision!=spec.expected_budget_revision)throw DynamicPlanChanged("Dynamic frontier budget changed");dynamic_safe_sequence(p.state_sequence);
     const auto active=integer(db.execute("SELECT count(*) FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused')",{root.id}).rows.at(0).at(0));if(active+static_cast<std::int64_t>(spec.tasks.size())>budget.spec.max_parallel)throw Conflict("Dynamic frontier has no physical child capacity");
     std::set<std::string> labels,claims,children;std::vector<DynamicPreparedNode> prepared;
     for(const auto& task:spec.tasks){bounded_identity(task.claim_id,128);bounded_identity(task.child_run_id,128);if(!labels.insert(task.label).second||!claims.insert(task.claim_id).second||!children.insert(task.child_run_id).second)throw std::invalid_argument("Duplicate dynamic admission identities");
-        auto n=prepare_dynamic_node(p,task.label);if(n.node.definition.kind!=DynamicNodeKind::agent||n.node.definition_revision!=task.definition_revision||task.resolved_input_json!=n.dependency_outputs_json)throw Conflict("Dynamic child differs from its actual prepared definition");
+        auto n=prepare_dynamic_node(p,task.label);if((n.node.definition.kind!=DynamicNodeKind::agent&&n.node.definition.kind!=DynamicNodeKind::tool)||n.node.definition_revision!=task.definition_revision||task.resolved_input_json!=n.dependency_outputs_json)throw Conflict("Dynamic child differs from its actual prepared definition");
         const auto prompt=dynamic_prompt(n.node.definition,n.dependency_outputs_json,p.capabilities).dump();if(!task.prompt_json.empty()&&task.prompt_json!=prompt)throw Conflict("Dynamic child prompt is not derived from actual observations");prepared.push_back(std::move(n));}
     const auto count=static_cast<std::int64_t>(prepared.size());if(budget.planned_children_reserved<count||p.planned_children_reserved<count||budget.children_admitted+budget.planned_children_reserved>budget.spec.max_children)throw RootBudgetExhausted("Dynamic planned child capacity changed");
     changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=planned_children_reserved-?,children_admitted=children_admitted+?,revision=revision+1 WHERE root_run_id=? AND revision=?",{count,count,root.id,budget.revision}));
@@ -986,19 +1007,32 @@ DynamicFrontierClaim Repository::admit_dynamic_frontier(const DynamicFrontierSpe
         changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='claimed',claim_revision=definition_revision,claim_id=?,child_run_id=?,resolved_input_json=?,protected_definition=1 WHERE plan_id=? AND label=? AND definition_revision=? AND state IN ('pending','blocked') AND claim_revision=0",{task.claim_id,task.child_run_id,prepared[i].dependency_outputs_json,p.id,task.label,task.definition_revision}));
         changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{task.child_run_id,root.session_id,root.id,n.backend_node_id}));changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{task.child_run_id}));
         const Run child{task.child_run_id,root.session_id,RunState::queued,root.id,n.backend_node_id,false,root.provider_context_json};impl_->message(child,"user",dynamic_prompt(n.definition,prepared[i].dependency_outputs_json,p.capabilities).dump());impl_->event(child.id,"run.queued","{}");
-        impl_->event(child.id,"plan.child.admitted",Json{{"plan_id",p.id},{"plan_call_id",call.id},{"label",task.label},{"claim_id",task.claim_id},{"child_run_id",child.id},{"definition_revision",n.definition_revision},{"preset_id",n.definition.preset_id},{"preset_revision",n.definition.preset_revision}}.dump());
+        Json admission={{"plan_id",p.id},{"plan_call_id",call.id},{"label",task.label},{"claim_id",task.claim_id},{"child_run_id",child.id},{"definition_revision",n.definition_revision},{"node_type",dynamic_kind_name(n.definition.kind)}};
+        if(n.definition.kind==DynamicNodeKind::agent){admission["preset_id"]=n.definition.preset_id;admission["preset_revision"]=n.definition.preset_revision;}
+        else{admission["tool"]=n.definition.tool;admission["arguments_json"]=n.definition.arguments_json;}
+        impl_->event(child.id,"plan.child.admitted",admission.dump());
     }
     DynamicFrontierClaim result;result.plan=dynamic_plan(p.id);result.budget=root_budget(root.id);for(const auto& task:spec.tasks)result.nodes.push_back(*std::find_if(result.plan.nodes.begin(),result.plan.nodes.end(),[&](const auto& n){return n.definition.label==task.label;}));result.created=true;tx.commit();return result;
 }
 DynamicNodeRecord Repository::settle_dynamic_child(const std::string& child_id) try {
     auto& db=impl_->database;Transaction tx(db);const auto rows=db.execute("SELECT plan_id,label FROM dynamic_plan_nodes WHERE child_run_id=?",{child_id}).rows;if(rows.empty())throw NotFound("Dynamic child not found");
     auto p=dynamic_plan(text(rows[0][0]));auto found=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& n){return n.child_run_id==child_id;});if(found==p.nodes.end())throw DatabaseError("Dynamic child ownership differs");auto n=*found;const auto child=run(child_id);const auto admitted=child_admission(child_id);
-    if(admitted.kind!=ChildAdmissionKind::dynamic_agent||admitted.plan_id!=p.id||child.parent_id!=p.root_run_id||child.node_id!=n.backend_node_id)throw Conflict("Dynamic child is not its exact claimed execution");
+    const auto expected_admission=n.definition.kind==DynamicNodeKind::tool?ChildAdmissionKind::dynamic_tool:ChildAdmissionKind::dynamic_agent;
+    if(admitted.kind!=expected_admission||admitted.plan_id!=p.id||child.parent_id!=p.root_run_id||child.node_id!=n.backend_node_id)throw Conflict("Dynamic child is not its exact claimed execution");
     if(n.settled_event_seq){tx.commit();return n;}if(n.state!=DynamicNodeState::claimed||!terminal(child.state))throw Conflict("Dynamic child has not physically retired");
     if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE owner_run_id=? AND state IN ('reserved','started')",{child_id}).rows.empty())throw Conflict("Dynamic child still owns model transport");
     const auto effect=dynamic_effect_state(operations(child_id));
-    Json outcome={{"child_run_id",child_id},{"label",n.definition.label},{"child_state",state_name(child.state)},{"preset_id",n.definition.preset_id},{"preset_revision",n.definition.preset_revision},{"effect_state",effect}};
-    if(child.state==RunState::completed){const auto h=run_history(child_id);if(h.empty()||h.back().role!="assistant")throw DatabaseError("Completed dynamic child lacks actual output");const auto answer=Json::parse(h.back().json);if(!answer.contains("content")||!answer["content"].is_string())throw DatabaseError("Invalid dynamic child output");
+    Json outcome={{"child_run_id",child_id},{"label",n.definition.label},{"child_state",state_name(child.state)},{"effect_state",effect}};
+    if(n.definition.kind==DynamicNodeKind::agent){outcome["preset_id"]=n.definition.preset_id;outcome["preset_revision"]=n.definition.preset_revision;}
+    if(child.state==RunState::completed&&n.definition.kind==DynamicNodeKind::tool){
+        const auto started=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.started' ORDER BY seq",{child_id}).rows;
+        const auto completed=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.completed' ORDER BY seq",{child_id}).rows;
+        if(started.size()!=1||completed.size()!=1||integer(completed[0][0])<=integer(started[0][0]))throw DatabaseError("Completed dynamic tool lacks its single ordered actual receipt");
+        const auto before=Json::parse(text(started[0][1])),after=Json::parse(text(completed[0][1]));
+        if(before.value("name",std::string{})!=n.definition.tool||before.value("source",std::string{})!="dynamic_plan"||before.value("plan_node_id",std::string{})!=n.backend_node_id||before.value("arguments_json",std::string{})!=n.definition.arguments_json||
+           after.value("name",std::string{})!=n.definition.tool||after.value("source",std::string{})!="dynamic_plan"||after.value("plan_node_id",std::string{})!=n.backend_node_id||!after.contains("data")||!after["data"].is_object())throw DatabaseError("Dynamic tool receipt differs from its immutable admitted definition");
+        outcome["tool"]=n.definition.tool;outcome["data"]=after["data"];
+    }else if(child.state==RunState::completed){const auto h=run_history(child_id);if(h.empty()||h.back().role!="assistant")throw DatabaseError("Completed dynamic agent lacks actual output");const auto answer=Json::parse(h.back().json);if(!answer.contains("content")||!answer["content"].is_string())throw DatabaseError("Invalid dynamic agent output");
         for(const auto* key:{"content","model","usage","elapsed_ms","first_token_ms"})if(answer.contains(key))outcome[key]=answer[key];
     }else {Json error=Json::object();const auto failure=db.execute("SELECT payload FROM events WHERE run_id=? AND kind=? ORDER BY seq DESC LIMIT 1",{child_id,"run."+state_name(child.state)}).rows;if(!failure.empty()){const auto source=Json::parse(text(failure[0][0]));for(const auto* key:{"reason","code","protocol_error_code"})if(source.contains(key)&&source[key].is_string()&&source[key].get<std::string>().size()<=256)error[key]=source[key];}outcome["error"]=error;}
     if(outcome.dump().size()>32768)outcome={{"child_run_id",child_id},{"label",n.definition.label},{"child_state",state_name(child.state)},{"preset_id",n.definition.preset_id},{"preset_revision",n.definition.preset_revision},{"effect_state",effect},{"error",{{"code","result_limit_exceeded"}}},{"history_ref","/v1/runs/"+p.root_run_id+"/children/"+child_id+"/history"}};
@@ -1147,7 +1181,7 @@ Run Repository::retire_dynamic_owner(const std::string& root_id,RunState next,co
     if(next!=RunState::failed&&next!=RunState::cancelled)throw std::invalid_argument("Dynamic retirement requires failure or cancellation");(void)object_json(reason);
     // Settlements remain separate typed, once-only transactions. A journal
     // failure aborts retirement; an actual result is never fabricated.
-    (void)dynamic_capabilities(root_id);for(const auto& c:owned_children(root_id)){if(!terminal(c.run.state))throw Conflict("Dynamic owner still has a physical child");if(c.kind=="dynamic_agent")settle_dynamic_child(c.run.id);else if(c.kind=="delegated_leaf")settle_delegation_child(c.run.id);}
+    (void)dynamic_capabilities(root_id);for(const auto& c:owned_children(root_id)){if(!terminal(c.run.state))throw Conflict("Dynamic owner still has a physical child");if(c.kind=="dynamic_agent"||c.kind=="dynamic_tool")settle_dynamic_child(c.run.id);else if(c.kind=="delegated_leaf")settle_delegation_child(c.run.id);}
     for(const auto& b:delegation_batches(root_id))if(b.state=="accepted"||b.state=="working")settle_delegation_batch(b.id);
     auto& db=impl_->database;Transaction tx(db);auto root=run(root_id);if(terminal(root.state)){if(root.state!=next)throw Conflict("Dynamic terminal state differs");tx.commit();return root;}
     if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root.id}).rows.empty()||!db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE (r.id=? OR r.parent_run_id=?) AND o.state='executing'",{root.id,root.id}).rows.empty())throw Conflict("Dynamic owner still has a physical transport or effect");
@@ -1657,8 +1691,10 @@ ChildAdmissionRecord Repository::child_admission(const std::string& id){
         }throw Conflict("Graph child is not its declared executable node");
     }
     const auto dynamic=impl_->database.execute("SELECT n.plan_id,n.label,n.claim_id,n.definition_revision,n.claim_revision,n.backend_node_id FROM dynamic_plan_nodes n JOIN dynamic_plans p ON p.id=n.plan_id WHERE n.child_run_id=? AND p.root_run_id=?",{id,parent.id}).rows;
-    if(!dynamic.empty()){const auto& r=dynamic[0];auto p=dynamic_plan(text(r[0]));const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==id;});if(n==p.nodes.end()||n->definition.kind!=DynamicNodeKind::agent||n->backend_node_id!=child.node_id||n->claim_revision!=n->definition_revision||n->claim_id.empty()||text(r[5])!=child.node_id)throw Conflict("Dynamic child differs from its accepted claim");
-        const auto& preset=dynamic_preset(p.capabilities,n->definition);private_identity(preset.backend_identity);(void)root_budget(parent.id);ChildAdmissionRecord a;a.kind=ChildAdmissionKind::dynamic_agent;a.root_run_id=parent.id;a.preset_id=preset.id;a.preset_revision=preset.revision;a.plan_id=p.id;a.node_label=n->definition.label;a.claim_id=n->claim_id;a.definition_revision=n->definition_revision;a.claim_revision=n->claim_revision;a.backend_identity=preset.backend_identity;return a;}
+    if(!dynamic.empty()){const auto& r=dynamic[0];auto p=dynamic_plan(text(r[0]));const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==id;});if(n==p.nodes.end()||(n->definition.kind!=DynamicNodeKind::agent&&n->definition.kind!=DynamicNodeKind::tool)||n->backend_node_id!=child.node_id||n->claim_revision!=n->definition_revision||n->claim_id.empty()||text(r[5])!=child.node_id)throw Conflict("Dynamic child differs from its accepted claim");
+        (void)root_budget(parent.id);ChildAdmissionRecord a;a.kind=n->definition.kind==DynamicNodeKind::tool?ChildAdmissionKind::dynamic_tool:ChildAdmissionKind::dynamic_agent;a.root_run_id=parent.id;a.plan_id=p.id;a.node_label=n->definition.label;a.claim_id=n->claim_id;a.definition_revision=n->definition_revision;a.claim_revision=n->claim_revision;
+        if(n->definition.kind==DynamicNodeKind::agent){const auto& preset=dynamic_preset(p.capabilities,n->definition);private_identity(preset.backend_identity);a.preset_id=preset.id;a.preset_revision=preset.revision;a.backend_identity=preset.backend_identity;}
+        return a;}
     const auto rows=impl_->database.execute("SELECT b.id,b.root_run_id,b.preset_id,b.preset_revision,b.state,t.node_id FROM delegation_tasks t JOIN delegation_batches b ON b.id=t.batch_id WHERE t.child_run_id=? AND b.parent_run_id=?",{id,parent.id}).rows;
     if(rows.empty())throw Conflict("Child has no accepted native delegation");const auto& r=rows[0];
     if(text(r[1])!=parent.id||text(r[5])!=child.node_id||text(r[2])!="workspace.inspect"||integer(r[3])!=1)throw Conflict("Delegated child ownership or preset differs");
@@ -1668,7 +1704,8 @@ std::vector<OwnedChildRecord> Repository::owned_children(const std::string& id){
     const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Owned child observation requires a root parent");std::vector<OwnedChildRecord> result;
     for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows){const auto child=run(text(row[0]));const auto admission=child_admission(child.id);std::string label;
         if(admission.kind==ChildAdmissionKind::delegated_leaf){const auto task=impl_->database.execute("SELECT task_id FROM delegation_tasks WHERE child_run_id=?",{child.id}).rows;label=text(task.at(0).at(0));}
-        result.push_back({child,admission.kind==ChildAdmissionKind::dynamic_agent?"dynamic_agent":admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":"graph_tool",admission.batch_id,label,admission.preset_id,admission.preset_revision,admission.plan_id,admission.node_label,admission.claim_id,admission.definition_revision,admission.claim_revision});
+        const auto kind=admission.kind==ChildAdmissionKind::dynamic_agent?"dynamic_agent":admission.kind==ChildAdmissionKind::dynamic_tool?"dynamic_tool":admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":"graph_tool";
+        result.push_back({child,kind,admission.batch_id,label,admission.preset_id,admission.preset_revision,admission.plan_id,admission.node_label,admission.claim_id,admission.definition_revision,admission.claim_revision});
     }return result;
 }
 std::vector<Message> Repository::owned_child_history(const std::string& parent,const std::string& child){
@@ -2490,11 +2527,17 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     for(const auto& row:db.execute("SELECT s.root_run_id,s.id FROM agent_budget_segments s JOIN runs r ON r.id=s.root_run_id WHERE s.state='open'").rows){const auto e=impl_->event(text(row[0]),"budget.segment.interrupted",Json{{"segment_id",text(row[1])},{"reason","server_restart"},{"elapsed_known",false}}.dump());changed_one(db.execute("UPDATE agent_budget_segments SET state='interrupted',closed_event_seq=? WHERE id=? AND state='open'",{e.sequence,text(row[1])}));}
     for(const auto& row:db.execute("SELECT p.id,p.root_run_id FROM dynamic_plans p JOIN runs r ON r.id=p.root_run_id WHERE r.state='failed' AND (p.state IN ('active','waiting_human') OR (p.state='uncertain' AND (p.planned_children_reserved>0 OR p.planned_humans_reserved>0 OR EXISTS(SELECT 1 FROM dynamic_plan_nodes n WHERE n.plan_id=p.id AND n.state IN ('pending','blocked','claimed','waiting_human')) OR EXISTS(SELECT 1 FROM dynamic_plan_calls c WHERE c.plan_id=p.id AND c.state IN ('accepted','report_ready','turn_committed') AND c.continuation_attempt_id IS NULL))))").rows){
         const auto plan=text(row[0]),root=text(row[1]);bool uncertain=!db.execute("SELECT label FROM dynamic_plan_nodes WHERE plan_id=? AND (state='uncertain' OR effect_state='uncertain')",{plan}).rows.empty();
-        for(const auto& n:db.execute("SELECT label,child_run_id FROM dynamic_plan_nodes WHERE plan_id=? AND state='claimed'",{plan}).rows){
-            const auto child=text(n[1]);const auto actual=run(child);if(!terminal(actual.state))throw DatabaseError("Recovered dynamic child remains active");const auto effect=dynamic_effect_state(operations(child));uncertain|=effect=="uncertain";
-            Json observed={{"child_run_id",child},{"label",text(n[0])},{"child_state",state_name(actual.state)},{"effect_state",effect},{"error",{{"code","server_restart"}}}};
-            if(actual.state==RunState::completed){const auto history=run_history(child);if(history.empty()||history.back().role!="assistant")throw DatabaseError("Recovered completed dynamic child lacks actual history");const auto answer=Json::parse(history.back().json);for(const auto* key:{"content","model","usage","elapsed_ms","first_token_ms"})if(answer.contains(key))observed[key]=answer[key];}
-            if(observed.dump().size()>32768)observed={{"child_run_id",child},{"label",text(n[0])},{"child_state",state_name(actual.state)},{"effect_state",effect},{"error",{{"code","result_limit_exceeded"}}},{"history_ref","/v1/runs/"+root+"/children/"+child+"/history"}};
+         for(const auto& n:db.execute("SELECT label,child_run_id,definition_json,backend_node_id FROM dynamic_plan_nodes WHERE plan_id=? AND state='claimed'",{plan}).rows){
+             const auto child=text(n[1]);const auto actual=run(child);if(!terminal(actual.state))throw DatabaseError("Recovered dynamic child remains active");const auto effect=dynamic_effect_state(operations(child));uncertain|=effect=="uncertain";const auto definition=Json::parse(text(n[2]));const bool deterministic=definition.value("type",std::string{})=="tool";
+             Json observed={{"child_run_id",child},{"label",text(n[0])},{"child_state",state_name(actual.state)},{"effect_state",effect},{"error",{{"code","server_restart"}}}};
+             if(actual.state==RunState::completed&&deterministic){
+                 const auto started=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.started' ORDER BY seq",{child}).rows;const auto completed=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.completed' ORDER BY seq",{child}).rows;
+                 if(started.size()!=1||completed.size()!=1||integer(completed[0][0])<=integer(started[0][0]))throw DatabaseError("Recovered dynamic tool lacks its ordered actual receipt");
+                 const auto before=Json::parse(text(started[0][1])),after=Json::parse(text(completed[0][1]));const auto tool=definition.at("tool").get<std::string>();
+                 if(before.value("name",std::string{})!=tool||before.value("source",std::string{})!="dynamic_plan"||before.value("plan_node_id",std::string{})!=text(n[3])||before.value("arguments_json",std::string{})!=definition.at("arguments_json").get<std::string>()||after.value("name",std::string{})!=tool||after.value("source",std::string{})!="dynamic_plan"||after.value("plan_node_id",std::string{})!=text(n[3])||!after.contains("data"))throw DatabaseError("Recovered dynamic tool receipt differs from its immutable definition");
+                 observed.erase("error");observed["tool"]=tool;observed["data"]=after["data"];
+             }else if(actual.state==RunState::completed){const auto history=run_history(child);if(history.empty()||history.back().role!="assistant")throw DatabaseError("Recovered completed dynamic agent lacks actual history");const auto answer=Json::parse(history.back().json);for(const auto* key:{"content","model","usage","elapsed_ms","first_token_ms"})if(answer.contains(key))observed[key]=answer[key];}
+             if(observed.dump().size()>32768){observed={{"child_run_id",child},{"label",text(n[0])},{"child_state",state_name(actual.state)},{"effect_state",effect},{"error",{{"code","result_limit_exceeded"}}},{"history_ref","/v1/runs/"+root+"/children/"+child+"/history"}};if(deterministic)observed["tool"]=definition.value("tool",std::string{});}
             const auto outcome=observed.dump();const auto e=impl_->event(child,"plan.child.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state=?,child_state=?,effect_state=?,outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='claimed'",{std::string(effect)=="uncertain"?"uncertain":"settled",state_name(actual.state),effect,outcome,e.sequence,plan,text(n[0])}));
         }
         for(const auto& h:db.execute("SELECT id,label FROM dynamic_human_requests WHERE plan_id=? AND state='waiting'",{plan}).rows){const auto event=impl_->event(root,"plan.human.cancelled",Json{{"request_id",text(h[0])},{"reason","server_restart"}}.dump());changed_one(db.execute("UPDATE dynamic_human_requests SET state='cancelled',input_event_seq=? WHERE id=? AND state='waiting'",{event.sequence,text(h[0])}));const auto outcome=Json{{"human_state","cancelled"},{"request_id",text(h[0])}}.dump();const auto settled=impl_->event(root,"plan.human.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='waiting_human'",{outcome,settled.sequence,plan,text(h[1])}));}

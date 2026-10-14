@@ -1,5 +1,6 @@
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/json_schema.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <functional>
@@ -25,7 +26,7 @@ void fields(const Json& value,std::initializer_list<const char*> allowed){
 std::string string(const Json& value,const char* key,std::size_t limit){
     if(!value.contains(key)||!value[key].is_string())throw std::invalid_argument("Dynamic plan requires a string field");
     auto result=value[key].get<std::string>();
-    if(result.empty()||result.size()>limit||result.find('\0')!=std::string::npos)throw std::invalid_argument("Dynamic plan string exceeds its bounds");
+    if(result.empty()||result.size()>limit||result.find('\0')!=std::string::npos)throw std::invalid_argument(std::string("Dynamic plan string field exceeds its bounds: ")+key);
     return result;
 }
 void valid_text(const std::string& value,std::size_t limit){
@@ -48,7 +49,7 @@ std::int64_t integer(const Json& value,const char* key,std::int64_t minimum){
     if(result<minimum||result>safe_integer)throw std::invalid_argument("Dynamic plan precondition is outside its bounds");return result;
 }
 const char* kind(DynamicNodeKind value){
-    switch(value){case DynamicNodeKind::agent:return "agent";case DynamicNodeKind::human:return "human";}
+    switch(value){case DynamicNodeKind::agent:return "agent";case DynamicNodeKind::tool:return "tool";case DynamicNodeKind::human:return "human";}
     throw std::invalid_argument("Unsupported dynamic node kind");
 }
 const char* requirement(DynamicDependencyRequirement value){
@@ -64,12 +65,13 @@ const char* state(DynamicNodeState value){
 Json definition_json(const DynamicNodeDefinition& node){
     Json result={{"id",node.label},{"type",kind(node.kind)},{"depends_on",Json::array()}};
     if(node.kind==DynamicNodeKind::agent){result["objective"]=node.objective;result["preset"]=node.preset_id;}
+    else if(node.kind==DynamicNodeKind::tool){result["tool"]=node.tool;result["arguments_json"]=node.arguments_json;}
     else result["question"]=node.question;
     for(const auto& dependency:node.dependencies)result["depends_on"].push_back({{"task",dependency.task},{"require",requirement(dependency.require)}});
     return result;
 }
 bool same_definition(const DynamicNodeDefinition& left,const DynamicNodeDefinition& right){
-    return left.objective==right.objective&&left.question==right.question&&left.preset_id==right.preset_id&&left.preset_revision==right.preset_revision&&definition_json(left)==definition_json(right);
+    return left.objective==right.objective&&left.question==right.question&&left.preset_id==right.preset_id&&left.preset_revision==right.preset_revision&&left.tool==right.tool&&left.arguments_json==right.arguments_json&&definition_json(left)==definition_json(right);
 }
 DynamicNodeDefinition node(const Json& value){
     const auto type=string(value,"type",16);DynamicNodeDefinition result;result.label=string(value,"id",32);label(result.label);
@@ -77,10 +79,15 @@ DynamicNodeDefinition node(const Json& value){
         fields(value,{"id","type","objective","preset","depends_on"});result.kind=DynamicNodeKind::agent;
         result.objective=string(value,"objective",8192);result.preset_id=string(value,"preset",64);result.preset_revision=1;
         if(result.preset_id!="workspace.inspect"&&result.preset_id!="workspace.coding")throw std::invalid_argument("Unsupported dynamic agent preset");
+    }else if(type=="tool"){
+        fields(value,{"id","type","tool","arguments_json","depends_on"});result.kind=DynamicNodeKind::tool;
+        result.tool=string(value,"tool",128);result.arguments_json=string(value,"arguments_json",65536);
+        result.preset_id.clear();result.preset_revision=0;
+        (void)object(result.arguments_json,65536);
     }else if(type=="human"){
         fields(value,{"id","type","question","depends_on"});result.kind=DynamicNodeKind::human;result.question=string(value,"question",8192);
         result.preset_id.clear();result.preset_revision=0;
-    }else throw std::invalid_argument("Only native agent and human dynamic nodes are supported");
+    }else throw std::invalid_argument("Unsupported native dynamic node type");
     if(!value.contains("depends_on")||!value["depends_on"].is_array()||value["depends_on"].size()>32)throw std::invalid_argument("Dynamic dependencies require a bounded array");
     std::set<std::string> unique;
     for(const auto& item:value["depends_on"]){
@@ -121,6 +128,15 @@ bool same_capabilities(const DynamicPlanCapabilities& left,const DynamicPlanCapa
 void definition(const DynamicNodeDefinition& value,const DynamicPlanCapabilities& frozen){
     const auto parsed=node(definition_json(value));if(!same_definition(parsed,value))throw std::invalid_argument("Dynamic definition contains unsupported fields or preset revision");
     if(value.kind==DynamicNodeKind::agent&&std::none_of(frozen.presets.begin(),frozen.presets.end(),[&](const auto& preset){return preset.id==value.preset_id&&preset.revision==value.preset_revision;}))throw std::invalid_argument("Requested dynamic preset is unavailable");
+    if(value.kind==DynamicNodeKind::tool){
+        static const std::set<std::string> deterministic_reads={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
+        if(!deterministic_reads.contains(value.tool))throw std::invalid_argument("Dynamic deterministic node must select a registered read-only workspace tool");
+        const auto inspector=std::find_if(frozen.presets.begin(),frozen.presets.end(),[](const auto& preset){return preset.id=="workspace.inspect"&&preset.revision==1;});
+        if(inspector==frozen.presets.end()||!inspector->readonly||std::find(inspector->tools.begin(),inspector->tools.end(),value.tool)==inspector->tools.end())throw std::invalid_argument("Dynamic deterministic tool is outside the admitted read-only preset");
+        const auto catalogue=object(frozen.tool_catalog_json,change_limit);const auto found=std::find_if(catalogue.at("tools").begin(),catalogue.at("tools").end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==value.tool;});
+        if(found==catalogue.at("tools").end()||!found->contains("input_schema_json")||!found->at("input_schema_json").is_string())throw std::invalid_argument("Dynamic deterministic tool lacks its sealed native schema");
+        JsonSchema schema(found->at("input_schema_json").get<std::string>());schema.validate_object(value.arguments_json);
+    }
 }
 void topology(const std::vector<DynamicNodeRecord>& nodes){
     std::map<std::string,std::size_t> indexes;
@@ -146,25 +162,25 @@ void snapshot(const DynamicPlanRecord& value,bool initial=false){
     if(value.nodes.empty())throw std::invalid_argument("Dynamic plan has no definitions");
     std::set<std::string> backend_ids,retired;
     for(const auto& item:value.retired_labels){label(item);if(!retired.insert(item).second)throw std::invalid_argument("Duplicate retired dynamic label");}
-    std::int64_t published_humans=0,pending_humans=0,pending_agents=0;
+    std::int64_t published_humans=0,pending_humans=0,pending_children=0;
     for(const auto& item:value.nodes){
         definition(item.definition,value.capabilities);(void)state(item.state);identity(item.backend_node_id);
         for(const auto* id:{&item.claim_id,&item.child_run_id,&item.human_request_id})if(!id->empty())identity(*id);
         if(!backend_ids.insert(item.backend_node_id).second||item.definition_revision<1||item.definition_revision>value.revision||item.claim_revision<0||item.claim_revision>value.revision)throw std::invalid_argument("Invalid immutable dynamic node identity");
         if(item.definition.kind==DynamicNodeKind::human){if(!item.human_request_id.empty())++published_humans;else if(item.state==DynamicNodeState::pending||item.state==DynamicNodeState::blocked)++pending_humans;}
-        else if(item.state==DynamicNodeState::pending||item.state==DynamicNodeState::blocked)++pending_agents;
+        else if(item.state==DynamicNodeState::pending||item.state==DynamicNodeState::blocked)++pending_children;
         if(retired.contains(item.definition.label)!=(item.state==DynamicNodeState::skipped))throw std::invalid_argument("Dynamic retired label differs from its recorded state");
         if((item.state==DynamicNodeState::pending||item.state==DynamicNodeState::blocked||item.state==DynamicNodeState::skipped)&&
            (item.claim_revision!=0||!item.claim_id.empty()||!item.human_request_id.empty()||!item.child_run_id.empty()||!item.child_state.empty()||!item.outcome_json.empty()||item.settled_event_seq||(!item.effect_state.empty()&&item.effect_state!="none")))throw std::invalid_argument("Unclaimed dynamic node carries actual execution data");
         if(item.claim_revision>0&&(item.claim_revision!=item.definition_revision||item.claim_id.empty()))throw std::invalid_argument("Dynamic claim does not bind its immutable definition");
         if(item.state==DynamicNodeState::waiting_human&&(item.definition.kind!=DynamicNodeKind::human||item.claim_revision==0||item.human_request_id.empty()))throw std::invalid_argument("Invalid published dynamic human node");
-        if(item.state==DynamicNodeState::claimed&&(item.definition.kind!=DynamicNodeKind::agent||item.claim_revision==0||item.child_run_id.empty()))throw std::invalid_argument("Invalid actual dynamic agent claim");
+        if(item.state==DynamicNodeState::claimed&&((item.definition.kind!=DynamicNodeKind::agent&&item.definition.kind!=DynamicNodeKind::tool)||item.claim_revision==0||item.child_run_id.empty()))throw std::invalid_argument("Invalid actual dynamic child claim");
         if(item.definition.kind==DynamicNodeKind::human&&(!item.child_run_id.empty()||!item.child_state.empty()||(!item.effect_state.empty()&&item.effect_state!="none")))throw std::invalid_argument("Human input cannot own a child or effect");
         if(item.definition.kind==DynamicNodeKind::agent&&!item.human_request_id.empty())throw std::invalid_argument("Agent node cannot own a human input request");
         if(item.state==DynamicNodeState::settled){
             if(item.claim_revision==0||item.outcome_json.empty()||!item.settled_event_seq)throw std::invalid_argument("Settled dynamic node lacks its actual outcome");
             if(item.effect_state=="awaiting_approval"||item.effect_state=="ready"||item.effect_state=="executing")throw std::invalid_argument("Settled dynamic node still owns a nonterminal effect");
-            if(item.definition.kind==DynamicNodeKind::agent&&(item.child_run_id.empty()||(item.child_state!="completed"&&item.child_state!="failed"&&item.child_state!="cancelled")))throw std::invalid_argument("Settled dynamic agent lacks an actual terminal child");
+            if((item.definition.kind==DynamicNodeKind::agent||item.definition.kind==DynamicNodeKind::tool)&&(item.child_run_id.empty()||(item.child_state!="completed"&&item.child_state!="failed"&&item.child_state!="cancelled")))throw std::invalid_argument("Settled dynamic child lacks an actual terminal run");
             if(item.definition.kind==DynamicNodeKind::human&&item.human_request_id.empty())throw std::invalid_argument("Settled human node lacks its published request");
             if(item.definition.kind==DynamicNodeKind::human){const auto output=object(item.outcome_json,outcome_limit);const auto human_state=string(output,"human_state",16);
                 if(human_state!="answered"&&human_state!="expired"&&human_state!="cancelled")throw std::invalid_argument("Settled human outcome is not an observed terminal request");
@@ -175,7 +191,7 @@ void snapshot(const DynamicPlanRecord& value,bool initial=false){
         if(!item.effect_state.empty()&&item.effect_state!="none"&&item.effect_state!="awaiting_approval"&&item.effect_state!="ready"&&item.effect_state!="executing"&&item.effect_state!="succeeded"&&item.effect_state!="failed"&&item.effect_state!="cancelled"&&item.effect_state!="uncertain")throw std::invalid_argument("Invalid dynamic effect state");
     }
     if(published_humans!=value.humans_published||published_humans+pending_humans>value.capabilities.max_humans||retired.size()>value.nodes.size())throw std::invalid_argument("Dynamic human or retired-label allowance exceeded");
-    if(pending_agents!=value.planned_children_reserved||pending_humans!=value.planned_humans_reserved||pending_agents>8)throw std::invalid_argument("Dynamic pending reservations differ from their immutable ledger");
+    if(pending_children!=value.planned_children_reserved||pending_humans!=value.planned_humans_reserved||pending_children>8)throw std::invalid_argument("Dynamic pending reservations differ from their immutable ledger");
     if(value.state=="completed"&&std::any_of(value.nodes.begin(),value.nodes.end(),[](const auto& item){return item.state!=DynamicNodeState::settled&&item.state!=DynamicNodeState::skipped&&item.state!=DynamicNodeState::cancelled;}))throw std::invalid_argument("Completed dynamic plan still owns unfinished definitions");
     for(const auto& item:retired)if(std::none_of(value.nodes.begin(),value.nodes.end(),[&](const auto& node){return node.definition.label==item;}))throw std::invalid_argument("Retired dynamic label has no immutable definition");
     topology(value.nodes);
@@ -260,7 +276,7 @@ DynamicPlanCandidate reduce_dynamic_plan(const DynamicPlanRecord& plan,const Dyn
     if(result.nodes.size()>static_cast<std::size_t>(frozen.max_nodes))throw std::invalid_argument("Dynamic lifetime task-label allowance exceeded");
     auto specification=Json{{"nodes",Json::array()}};
     for(const auto& value:result.nodes){if(value.definition.kind==DynamicNodeKind::human&&(value.state==DynamicNodeState::pending||value.state==DynamicNodeState::blocked))++result.planned_humans_reserved;
-        if(value.definition.kind==DynamicNodeKind::agent&&(value.state==DynamicNodeState::pending||value.state==DynamicNodeState::blocked))++result.planned_children_reserved;
+        if(value.definition.kind!=DynamicNodeKind::human&&(value.state==DynamicNodeState::pending||value.state==DynamicNodeState::blocked))++result.planned_children_reserved;
         specification["nodes"].push_back(definition_json(value.definition));}
     if(plan.humans_published+result.planned_humans_reserved>frozen.max_humans||result.planned_children_reserved>8)throw std::invalid_argument("Dynamic plan cannot preserve its human or executable allowances");
     topology(result.nodes);result.canonical_spec_json=specification.dump();
@@ -314,15 +330,19 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
     const auto dependency=Json{{"type","object"},{"properties",{{"task",{{"type","string"},{"maxLength",32}}},{"require",{{"enum",{"success","observed"}}}}}},{"required",{"task","require"}},{"additionalProperties",false}};
     const auto common=Json{{"id",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}},{"type",{{"const","agent"}}},{"objective",{{"type","string"},{"minLength",1},{"maxLength",8192}}},{"preset",{{"enum",presets}}},{"depends_on",{{"type","array"},{"maxItems",32},{"items",dependency}}}};
     const auto agent=Json{{"type","object"},{"properties",common},{"required",{"id","type","objective","preset","depends_on"}},{"additionalProperties",false}};
+    Json read_tools=Json::array();for(const auto* name:{"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"})if(std::any_of(frozen.presets.begin(),frozen.presets.end(),[&](const auto& preset){return preset.id=="workspace.inspect"&&preset.readonly&&std::find(preset.tools.begin(),preset.tools.end(),name)!=preset.tools.end();}))read_tools.push_back(name);
+    auto tool_properties=common;tool_properties["type"]={{"const","tool"}};tool_properties.erase("objective");tool_properties.erase("preset");
+    tool_properties["tool"]={{"enum",read_tools}};tool_properties["arguments_json"]={{"type","string"},{"minLength",2},{"maxLength",65536}};
+    const auto tool=Json{{"type","object"},{"properties",tool_properties},{"required",{"id","type","tool","arguments_json","depends_on"}},{"additionalProperties",false}};
     auto human_properties=common;human_properties.erase("objective");human_properties.erase("preset");human_properties["type"]={{"const","human"}};human_properties["question"]={{"type","string"},{"minLength",1},{"maxLength",8192}};
     const auto human=Json{{"type","object"},{"properties",human_properties},{"required",{"id","type","question","depends_on"}},{"additionalProperties",false}};
-    const auto definitions=Json{{"type","array"},{"maxItems",32},{"items",{{"oneOf",{agent,human}}}}};
+    const auto definitions=Json{{"type","array"},{"maxItems",32},{"items",{{"oneOf",{agent,tool,human}}}}};
     Json initial={{"type","object"},{"properties",{{"expected_revision",{{"type","integer"},{"const",0}}},{"expected_state_sequence",{{"type","integer"},{"const",0}}},{"add",definitions}}},{"required",{"expected_revision","expected_state_sequence","add"}},{"additionalProperties",false}};initial["properties"]["add"]["minItems"]=1;
     auto revised=initial;revised["required"]={"expected_revision","expected_state_sequence"};
     for(const auto* field:{"expected_revision","expected_state_sequence"})revised["properties"][field]={{"type","integer"},{"minimum",1},{"maximum",safe_integer}};
     revised["properties"]["add"]=definitions;revised["properties"]["replace"]=definitions;
     revised["properties"]["skip"]={{"type","array"},{"maxItems",32},{"items",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}}};
-    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Agent and human tasks only; human answers are data, every effect retains its exact approval. This must be the sole tool call in the assistant turn.",initial.dump()},
+    return {{"plan_tasks","Select a native dependency plan for this ordinary Agent. Use agent tasks for model reasoning, tool tasks for one deterministic read-only workspace tool call, and human tasks for authenticated input. Human answers are data and every effect retains its exact approval. This must be the sole tool call in the assistant turn.",initial.dump()},
         {"revise_plan","Revise the same native plan using its observed revision and state sequence. Only never-claimed pending or blocked tasks can change; completed, failed, published and effect-linked work remains immutable. This must be the sole tool call in the assistant turn.",revised.dump()},
         {"inspect_plan","Read this Agent's actual owned dependency plan, revisions and bounded outcomes. This does not dispatch work or grant effect authority.",R"({"type":"object","properties":{},"additionalProperties":false})"}};
 }

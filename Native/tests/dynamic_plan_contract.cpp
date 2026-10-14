@@ -13,7 +13,7 @@ template<class Error,class Action>void rejects(Action action){try{action();}catc
 DynamicPlanCapabilities capabilities(){
     DynamicPlanCapabilities result;result.backend_identity=std::string(64,'a');result.workspace_identity="PRIVATE_WORKSPACE_BINDING";
     result.provider_identity_json=R"({"wire":"responses","model_id":"synthetic-dynamic-fixture"})";
-    result.tool_catalog_json=R"({"tools":[],"private_marker":"PRIVATE_CATALOG_BINDING"})";result.catalogue_finalized=true;
+    result.tool_catalog_json=R"({"tools":[{"name":"read_file","input_schema_json":"{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"string\"}},\"required\":[\"path\"],\"additionalProperties\":false}"}],"private_marker":"PRIVATE_CATALOG_BINDING"})";result.catalogue_finalized=true;
     DynamicPresetCapability inspect;inspect.id="workspace.inspect";inspect.backend_identity=std::string(64,'b');inspect.tools={"read_repository_instructions","read_file","list_files","search_files"};
     DynamicPresetCapability coding=inspect;coding.id="workspace.coding";coding.backend_identity=std::string(64,'c');coding.readonly=false;coding.tools.push_back("edit_file");coding.tools.push_back("create_file");
     result.presets={inspect,coding};return result;
@@ -65,7 +65,7 @@ int main(){try{
         R"({"expected_revision":18446744073709551615,"expected_state_sequence":0,"add":[]})",
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[]})",
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[],"replace":[]})",
-        R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","type":"tool","tool":"read_file","arguments_json":"{}","depends_on":[]}]})",
+        R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","type":"tool","tool":"read_file","arguments_json":"{","depends_on":[]}]})",
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","type":"agent","objective":"x","preset":"workspace.inspect","depends_on":[],"permissions":"allow"}]})",
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","type":"human","question":"x","depends_on":[],"actor":"local-owner"}]})",
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","type":"agent","objective":"x","preset":"workspace.inspect","depends_on":[{"task":"a","require":"success"}]}]})",
@@ -75,6 +75,11 @@ int main(){try{
         R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"a","i\u0064":"b","type":"agent","objective":"x","preset":"workspace.inspect","depends_on":[]}]})"
     };
     for(const auto& value:invalid)rejects<std::invalid_argument>([&]{parse_dynamic_plan_change(value,true);});
+    const auto raw_arguments=R"({"pa\u0074h":"file.txt"})";
+    const auto deterministic=Json{{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments_json",raw_arguments},{"depends_on",Json::array()}};
+    auto deterministic_plan=initial_fixture(Json::array({deterministic}));
+    require(deterministic_plan.planned_children_reserved==1&&inspect_dynamic_plan(deterministic_plan).ready==std::vector<std::string>({"read"}),"A deterministic read node must reserve and expose one dependency-ready child slot");
+    require(at(deterministic_plan,"read").definition.arguments_json==raw_arguments,"Deterministic tool argument JSON must preserve escaped key spellings exactly");
     for(const auto* field:{"workspace","endpoint","credential","model_id","approval","server_id","config_revision","child_run_id"}){auto value=initial;value["add"][0][field]="injected";rejects<std::invalid_argument>([&]{parse_dynamic_plan_change(value.dump(),true);});rejects<SchemaArgumentsInvalid>([&]{initial_schema.validate_object(value.dump());});}
     std::string bad_utf8=initial.dump();bad_utf8.insert(bad_utf8.find("Synthetic"),1,static_cast<char>(0xff));rejects<std::invalid_argument>([&]{parse_dynamic_plan_change(bad_utf8,true);});
     rejects<std::invalid_argument>([&]{parse_dynamic_plan_change(std::string(262145,' ')+initial.dump(),true);});

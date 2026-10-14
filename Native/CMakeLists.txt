@@ -111,6 +111,7 @@ target_include_directories(agentflow_mcp_wire PUBLIC include PRIVATE third_party
 add_library(agentflow_json_schema STATIC src/json_schema.cpp)
 target_include_directories(agentflow_json_schema PUBLIC include PRIVATE third_party/jsoncons/include)
 target_link_libraries(agentflow_json_schema PRIVATE agentflow_mcp_wire)
+target_link_libraries(agentflow_core PRIVATE agentflow_json_schema)
 add_executable(xmind_schema_worker apps/schema_worker_main.cpp)
 target_include_directories(xmind_schema_worker PRIVATE third_party)
 target_link_libraries(xmind_schema_worker PRIVATE agentflow_json_schema agentflow_mcp_wire)

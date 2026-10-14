@@ -1,5 +1,24 @@
 # Current native validation
 
+## Dynamic deterministic workspace-tool nodes — 2026-10-14
+
+The working tree adds an explicit dynamic-plan `tool` node for five fixed
+read-only workspace aliases. Native C++ validates the exact argument JSON
+against the sealed tool schema and frozen inspect capability, executes under
+the admitted workspace as a model-free owned child, and verifies ordered
+start/completion receipts during settlement and recovery. SQLite schema v23
+stores node-kind-specific definitions; agent and human definition decoding
+remains compatible with earlier saved rows.
+
+The pure dynamic-plan, repository and actual native engine contracts pass on
+this working tree. The engine fixture executes `read_file` after a dependent
+coding child and checks the real returned bytes, separate child ownership and
+model-free budget accounting. Provider responses and keys are synthetic. These
+are scoped contract results: the full native CTest gate, extension/browser
+suites, hosted CI, live-provider use, rendered UI and installed VS Code were not
+run for this change. MCP/process plan nodes, dynamic-plan UI and recursive
+planning remain incomplete.
+
 ## Empty provider admission and unified browser acceptance — 2026-10-14
 
 The browser and VS Code clients now omit provider-profile admission when no
