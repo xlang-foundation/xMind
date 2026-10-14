@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Bounded unified diffs for console approvals
+
+The interactive console continues to emit its exact JSON `operation_review`
+record and now renders file proposals as bounded unified diffs with before/
+after paths, hunk counts and unchanged context. Lines and paths remain JSON-
+escaped so file content cannot inject terminal control sequences. Each side is
+limited to 40 lines and 8 KiB of encoded preview text; truncation is explicit,
+and the exact operation record remains the approval authority. The native edit
+and patch HTTP contracts verify updates, additions, moves and deletions before
+the same explicit approval flow. Full-screen TUI parity remains open.
+
 ## Durable outbound A2A SSE cursor checkpoint (2026-10-14)
 
 The native A2A client now preserves peer-issued SSE `id` values from both the

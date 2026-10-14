@@ -98,7 +98,7 @@ async function approvedChat(name,decision,attachedRun){
   });
   const timer=setTimeout(()=>process.kill(),12000);
   const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.write(attachedRun?'/watch '+attachedRun+'\n':(name==='allowed'?'/model synthetic-edit-alternate\n':'')+name+'\n');});
-  if(failure)throw failure;assert.equal(result.signal,null,stderr);assert.equal(result.code,decision==='detach'?0:decision==='cancel'?2:0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));if(name==='allowed')assert.match(stderr,/File change preview · "allowed\.txt" · update[\s\S]*- "original"[\s\S]*\+ "changed allowed"/,'Interactive coding approval must show a bounded, readable before/after preview');
+  if(failure)throw failure;assert.equal(result.signal,null,stderr);assert.equal(result.code,decision==='detach'?0:decision==='cancel'?2:0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));if(name==='allowed'){assert.match(stderr,/File change preview · "allowed\.txt" · update[\s\S]*@@ -1,1 \+1,1 @@[\s\S]*- "original"[\s\S]*\+ "changed allowed"/,'Interactive coding approval must show a bounded unified diff with exact changed lines');}
   if(decision!=='detach')assert.ok(records.some(record=>record.kind===(decision==='cancel'?'run.cancelled':'run.completed')));
   if(decision==='allow-foreign'){assert.equal(reviews,2);assert.match(stderr,/No decision sent/);}
   return records;

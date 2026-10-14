@@ -210,10 +210,10 @@ observation continues to the actual terminal event; an acknowledgement is not
 a completed cancellation. EOF or `/exit` at either prompt detaches without
 approval, human input or cancellation. No approval is automatic.
 
-The focused native agent HTTP contract exercises live-process cancellation and
-detach against an active synthetic stream. Rich terminal diffs,
-attachment/context controls during streaming and full TUI/OpenCode CLI parity
-remain required.
+File approvals now render bounded unified diffs; the focused native agent HTTP
+contract also exercises live-process cancellation and detach against an active
+synthetic stream. Interactive diff navigation, attachment/context controls
+during streaming and full TUI/OpenCode CLI parity remain required.
 
 ## Workspace shell attachment
 

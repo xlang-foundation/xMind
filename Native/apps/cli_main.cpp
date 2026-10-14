@@ -320,21 +320,39 @@ nlohmann::json provider_rejection(const std::string& source){
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
-void print_preview_side(const char* marker,const std::string& content){
+struct PreviewLines { std::vector<std::string> lines; bool truncated{}; };
+PreviewLines preview_lines(const std::string& content){
     constexpr std::size_t max_lines=40,max_bytes=8192,max_line_bytes=1024;
-    std::size_t offset=0,lines=0,bytes=0;bool truncated=false;
-    if(content.empty()){std::cerr<<"  "<<marker<<" (empty)\n";return;}
+    PreviewLines result;std::size_t offset=0,bytes=0;
     while(offset<content.size()){
-        if(lines>=max_lines||bytes>=max_bytes){truncated=true;break;}
+        if(result.lines.size()>=max_lines||bytes>=max_bytes){result.truncated=true;break;}
         const auto end=content.find('\n',offset);const auto length=(end==std::string::npos?content.size():end)-offset;
         const auto take=std::min(length,max_line_bytes);const auto line=content.substr(offset,take);
         const auto encoded=nlohmann::json(line).dump(-1,' ',false,nlohmann::json::error_handler_t::replace);
-        if(bytes+encoded.size()>max_bytes){truncated=true;break;}
-        std::cerr<<"  "<<marker<<" "<<encoded<<'\n';bytes+=encoded.size();++lines;
-        if(take<length){truncated=true;break;}
+        if(bytes+encoded.size()>max_bytes){result.truncated=true;break;}
+        result.lines.push_back(line);bytes+=encoded.size();
+        if(take<length){result.truncated=true;break;}
         if(end==std::string::npos)break;offset=end+1;
     }
-    if(truncated)std::cerr<<"  … preview truncated; the operation record above retains the exact approved bytes\n";
+    return result;
+}
+void print_unified_preview(const std::string& path,const std::string& before,const std::string& after,bool before_exists,bool after_exists){
+    constexpr std::size_t max_cells=41*41;const auto old_lines=preview_lines(before),new_lines=preview_lines(after);
+    const auto n=old_lines.lines.size(),m=new_lines.lines.size();if((n+1)*(m+1)>max_cells)throw std::runtime_error("File preview exceeds the bounded diff size");
+    std::vector<std::size_t> lcs((n+1)*(m+1));const auto at=[&](std::size_t i,std::size_t j)->std::size_t&{return lcs[i*(m+1)+j];};
+    for(std::size_t i=n;i-->0;)for(std::size_t j=m;j-->0;)at(i,j)=old_lines.lines[i]==new_lines.lines[j]?1+at(i+1,j+1):std::max(at(i+1,j),at(i,j+1));
+    const auto encoded_path=nlohmann::json(path).dump(-1,' ',false,nlohmann::json::error_handler_t::replace);
+    std::cerr<<"  --- "<<(before_exists?"a/":"")<<encoded_path<<(before_exists?"":" (new file)")<<'\n';
+    std::cerr<<"  +++ "<<(after_exists?"b/":"")<<encoded_path<<(after_exists?"":" (file deleted)")<<'\n';
+    if(n||m)std::cerr<<"  @@ -"<<(n?"1":"0")<<","<<n<<" +"<<(m?"1":"0")<<","<<m<<" @@\n";
+    std::size_t i=0,j=0;const auto print=[&](char marker,const std::string& line){std::cerr<<"  "<<marker<<" "<<nlohmann::json(line).dump(-1,' ',false,nlohmann::json::error_handler_t::replace)<<'\n';};
+    while(i<n||j<m){
+        if(i<n&&j<m&&old_lines.lines[i]==new_lines.lines[j]){print(' ',old_lines.lines[i]);++i;++j;}
+        else if(i<n&&(j==m||at(i+1,j)>=at(i,j+1))){print('-',old_lines.lines[i]);++i;}
+        else{print('+',new_lines.lines[j]);++j;}
+    }
+    if(!n&&!m)std::cerr<<"  (empty file)\n";
+    if(old_lines.truncated||new_lines.truncated)std::cerr<<"  … diff preview truncated; the operation record above retains the exact approved bytes\n";
 }
 void print_operation_preview(const nlohmann::json& operation)noexcept{
     using Json=nlohmann::json;
@@ -347,12 +365,9 @@ void print_operation_preview(const nlohmann::json& operation)noexcept{
         if(plan.contains("patch_index")&&plan.contains("patch_file_count")&&plan["patch_index"].is_number_unsigned()&&plan["patch_file_count"].is_number_unsigned())std::cerr<<" · file "<<(plan["patch_index"].get<std::size_t>()+1)<<" of "<<plan["patch_file_count"].get<std::size_t>();
         if(action=="move"&&plan.contains("destination_path")&&plan["destination_path"].is_string())std::cerr<<" → "<<Json(plan["destination_path"].get<std::string>()).dump();
         std::cerr<<"\n";
-        if(plan.value("before_exists",tool=="replace_file"||action!="add")){
-            const auto before=plan.value("before_content",std::string{});if(before.empty())std::cerr<<"  --- before (empty)\n";else print_preview_side("-",before);
-        }else std::cerr<<"  --- before (new file)\n";
-        if(plan.value("after_exists",action!="delete")){
-            const auto after=plan.value("after_content",std::string{});if(after.empty())std::cerr<<"  +++ after (empty)\n";else print_preview_side("+",after);
-        }else std::cerr<<"  +++ after (file deleted)\n";
+        const bool before_exists=plan.value("before_exists",tool=="replace_file"||action!="add"),after_exists=plan.value("after_exists",action!="delete");
+        const auto before=plan.value("before_content",std::string{}),after=plan.value("after_content",std::string{});
+        print_unified_preview(plan["path"].get<std::string>(),before,after,before_exists,after_exists);
     }catch(...){std::cerr<<"\nFile change preview unavailable; inspect the exact operation record before deciding.\n";}
 }
 class ChatInput {
