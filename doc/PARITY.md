@@ -601,6 +601,11 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
 | HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 36 have reviewed native source candidates, 105 are unmapped, and none has verified operation-level parity. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
+Current-source live browser coverage now verifies local automatic connection,
+workspace catalogue access, and actual Claude/Gemini/DeepSeek/OpenAI model
+catalogue discovery against saved profiles. The broader provider parity row
+above remains incomplete. [Exact sanitized browser evidence](evidence/browser-current-source-acceptance-20261014.json).
+
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,
 the tag's committed OpenAPI schema is the exact contract; for client behavior,

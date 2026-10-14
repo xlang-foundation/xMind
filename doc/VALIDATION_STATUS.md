@@ -1,5 +1,21 @@
 # Current native validation
 
+## Current-source browser profile and model catalogue — 2026-10-14
+
+The current native Release executable was paired with the verified xlang3
+runtime DLL and staged as a hash-verified, local-only browser development
+overlay. The browser opened at `http://127.0.0.1:60415/ui/` on the TestProj
+workspace. Its same-origin adapter created a local view session without
+requesting a server token; the workspace catalogue returned TestProj and
+allowed workspace addition. The browser received the four saved provider
+profiles. Native account-model discovery returned 13 Claude, 11 Gemini, 2
+DeepSeek and 20 OpenAI model IDs in 0.21–0.90 seconds per provider. The test
+made no inference request and edited no workspace file. Exact sanitized
+results are in
+[browser acceptance](evidence/browser-current-source-acceptance-20261014.json).
+This verifies the live page and authenticated APIs, not rendered visual
+acceptance or a release package.
+
 ## Concurrent sibling nested plans — 2026-10-14
 
 Independent dynamic-agent siblings can now accept nested plans while sharing

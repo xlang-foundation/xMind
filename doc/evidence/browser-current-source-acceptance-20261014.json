@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-14",
+  "scope": "Live local browser and provider-catalogue acceptance against the current xMind native source build.",
+  "browser_url": "http://127.0.0.1:60415/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "runtime": {
+    "kind": "local development runtime overlay",
+    "xmind_revision": "ee6712be57cd066376af3835bb58a87c25ca54a1",
+    "xlang3_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+    "verified_file_count": 1900,
+    "native_executable_hash_verified": true,
+    "xlang3_runtime_dll_matches_verified_package": true,
+    "release_accepted": false
+  },
+  "checks": {
+    "page_http_200_ms": 32,
+    "local_browser_session_http_200_ms": 38,
+    "browser_server_token_prompt": false,
+    "workspace_catalogue_http_200_ms": 20,
+    "selected_workspace": "TestProj",
+    "workspace_add_supported": true,
+    "provider_profiles": ["claude", "gemini", "deepseek", "openai"],
+    "provider_model_discovery": [
+      { "profile": "claude", "route": "anthropic.messages", "http_status": 200, "model_count": 13, "elapsed_ms": 688 },
+      { "profile": "gemini", "route": "gemini.generate-content", "http_status": 200, "model_count": 11, "elapsed_ms": 210 },
+      { "profile": "deepseek", "route": "deepseek.chat", "http_status": 200, "model_count": 2, "elapsed_ms": 327 },
+      { "profile": "openai", "route": "openai.responses", "http_status": 200, "model_count": 20, "elapsed_ms": 902 }
+    ]
+  },
+  "limits": [
+    "Provider model-catalogue calls used the saved local credentials; no credentials were returned to the browser or recorded here.",
+    "No inference request or workspace file edit was made in this acceptance.",
+    "The verified development overlay packages the current xMind executable with the matching xlang3 runtime DLL; it is not a release or full-test-suite claim.",
+    "The page was checked through its live HTTP and same-origin adapter APIs; this record does not claim a screenshot-based visual review."
+  ]
+}
