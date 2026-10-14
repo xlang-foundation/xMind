@@ -1,5 +1,25 @@
 # Current native validation
 
+## Explicit outbound A2A task resubscription — 2026-10-13
+
+The owner API and shared Browser/VS Code operation panel can explicitly
+resubscribe to a saved remote A2A task after its original streaming send is
+interrupted. Resubscription pins the saved peer revision and task identity,
+never repeats the original send, accepts at most 64 events/512 KiB, and appends
+each received event to the original run's durable SQLite journal. The peer
+stream has a 20-second bound; already committed events remain visible if the
+request times out. Repeated attempts may show replayed remote events because
+the protocol client does not yet persist a peer-issued cursor or deduplication
+key. Terminal tasks or peers without streaming return an error; the read-only
+task inspection path remains available.
+
+Release build of `agentflow_a2a_agent_registry_contract` passed, and its CTest
+passed **1/1**. The full browser suite passes **109/109** and the full VS Code
+suite passes **340/340**. These contracts verify the endpoint and rendering
+messages, not rendered/installed browser/VS Code acceptance or
+automatic stream recovery after backend restart. See
+[outbound A2A limits](native-a2a-client.md).
+
 ## Rendered TestProj Saved Models acceptance — 2026-10-13
 
 The live Model Zoo page at `http://127.0.0.1:5173/` passed a browser-level

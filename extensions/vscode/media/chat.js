@@ -8,6 +8,7 @@ let currentWorkspaceRoot;
 const operationSections=new Map();
 const operationRows=new Map();
 const a2aTaskInspections=new Map();
+const a2aTaskResubscriptions=new Map();
 const a2aTaskCancellations=new Map();
 const RUN_ACTIVITY_MAX_LINES=240,RUN_ACTIVITY_MAX_CHARS=128*1024,RUN_ACTIVITY_MAX_LINE_CHARS=4096;
 const RUN_ACTIVITY_STREAM_KINDS=new Set(['model.reasoning','model.text','model.refusal','model.tool_delta','model.usage','model.done','process.output']);
@@ -260,7 +261,7 @@ function operations(items){
   const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
   for(const [id,row] of operationRows)if(!ids.has(id)){row.section.remove();operationRows.delete(id);operationSections.delete(id);}
   for(const item of items){
-    const signature=JSON.stringify([item,a2aTaskInspections.get(item.id)||null,a2aTaskCancellations.get(item.id)||null]),previous=operationRows.get(item.id);
+    const signature=JSON.stringify([item,a2aTaskInspections.get(item.id)||null,a2aTaskResubscriptions.get(item.id)||null,a2aTaskCancellations.get(item.id)||null]),previous=operationRows.get(item.id);
     if(previous?.signature===signature){
       if(Date.now()>=item.expires_unix_ms)for(const button of previous.section.querySelectorAll('button'))button.disabled=true;
       sections.push(previous.section);continue;
@@ -327,7 +328,7 @@ function operationExtras(section,item,reviewable=true){
       const latest=a2aTaskInspections.get(item.id);
       if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; the original send remains uncertain.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
       const button=node('button','Inspect known remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
-      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);
+      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);const reconnect=node('button','Resume remote task stream','a2a-resubscribe');reconnect.onclick=()=>{reconnect.disabled=true;api.postMessage({type:'resubscribe-a2a-task',id:item.id});};section.append(reconnect);const resumed=a2aTaskResubscriptions.get(item.id);if(resumed){const detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Resubscribed remote events · '+resumed.events.length),node('p','These events were received from the registered peer and committed to the owning run history. They do not replay the delegation.','inspection-note'),node('pre',JSON.stringify(resumed.events,null,2)));section.append(detail);}
     }
   }
   if(item.tool==='a2a_delegate'&&item.state==='succeeded'){
@@ -337,7 +338,7 @@ function operationExtras(section,item,reviewable=true){
       const latest=a2aTaskInspections.get(item.id);
       if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; xMind does not infer or change the remote task state.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
       const button=node('button','Refresh remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
-      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);
+      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);const reconnect=node('button','Resume remote task stream','a2a-resubscribe');reconnect.onclick=()=>{reconnect.disabled=true;api.postMessage({type:'resubscribe-a2a-task',id:item.id});};section.append(reconnect);const resumed=a2aTaskResubscriptions.get(item.id);if(resumed){const detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Resubscribed remote events · '+resumed.events.length),node('p','These events were received from the registered peer and committed to the owning run history. They do not replay the delegation.','inspection-note'),node('pre',JSON.stringify(resumed.events,null,2)));section.append(detail);}
       const remoteState=latest?.task?.status?.state,inputRequired=remoteState==='TASK_STATE_INPUT_REQUIRED'||remoteState==='input-required',followState=latest?.follow_up_state;
       if(inputRequired&&['outcome_unknown','ready','not_dispatched'].includes(followState)&&followState==='outcome_unknown')section.append(node('p','The last remote reply may have been delivered. xMind will not replay it; inspect the task or contact the peer owner.','inspection-note'));
       else if(inputRequired&&Number.isSafeInteger(latest?.follow_up_sequence)&&latest.follow_up_sequence<64){
@@ -689,6 +690,9 @@ window.addEventListener('message',event=>{
     const item=currentOperations.find(value=>value.id===m.id),inspection=m.inspection;
     if(item?.tool==='a2a_delegate'&&['succeeded','uncertain'].includes(item.state)&&inspection&&inspection.operation_id===item.id&&typeof inspection.agent_id==='string'&&typeof inspection.task_id==='string'&&inspection.task&&typeof inspection.task==='object'&&!Array.isArray(inspection.task)&&JSON.stringify(inspection.task).length<=524288&&['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)&&Number.isSafeInteger(inspection.inspected_unix_ms)&&inspection.inspected_unix_ms>0&&inspection.inspected_unix_ms<=8640000000000000){a2aTaskInspections.set(item.id,inspection);operations(currentOperations);}
   }
+  else if(m.type==='a2a-task-resubscription'){
+    const item=currentOperations.find(operation=>operation.id===m.id),subscription=m.subscription;if(item?.tool==='a2a_delegate'&&['succeeded','uncertain'].includes(item.state)&&subscription&&subscription.operation_id===item.id&&typeof subscription.agent_id==='string'&&typeof subscription.task_id==='string'&&typeof subscription.subscription_id==='string'&&subscription.subscription_id&&subscription.subscription_state==='closed'&&Array.isArray(subscription.events)&&subscription.events.length<=64&&JSON.stringify(subscription.events).length<=524288){a2aTaskResubscriptions.set(item.id,subscription);operations(currentOperations);}
+  }
   else if(m.type==='a2a-task-cancellation'){
     const item=currentOperations.find(operation=>operation.id===m.id),cancellation=m.cancellation;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&cancellation&&cancellation.operation_id===item.id&&typeof cancellation.agent_id==='string'&&typeof cancellation.task_id==='string'&&cancellation.cancel_state==='acknowledged'&&cancellation.task&&typeof cancellation.task==='object'&&!Array.isArray(cancellation.task)&&cancellation.task.id===cancellation.task_id&&Number.isSafeInteger(cancellation.requested_unix_ms)&&cancellation.requested_unix_ms>0&&cancellation.requested_unix_ms<=8640000000000000){a2aTaskCancellations.set(item.id,cancellation);operations(currentOperations);}
   }
@@ -696,7 +700,7 @@ window.addEventListener('message',event=>{
     const item=currentOperations.find(operation=>operation.id===m.id),followUp=m.followUp;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&followUp?.operation_id===item.id&&Number.isSafeInteger(followUp.sequence)&&followUp.follow_up_state==='acknowledged'){byId('status').textContent='Remote agent acknowledged your follow-up · '+followUp.task_id;}
   }
   else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
-  else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
+  else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-resubscribe,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.
   if(follow&&!m.preserveOlder&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;

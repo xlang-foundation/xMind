@@ -84,8 +84,34 @@ check owner authentication, same-origin browser forwarding, exact saved task
 ID, durable inspection, CLI routing, client identity checks, and that uncertain
 dispatches do not issue a second remote effect. This is explicit polling;
 initial task events now stream for peers that advertise the capability, while
-resubscription/recovery and cross-client rendered acceptance remain open. These are required
-before claiming full outbound A2A parity.
+manual resubscription is available through a bounded owner route described
+below; automatic recovery and cross-client rendered acceptance remain open.
+These are required before claiming full outbound A2A parity.
+
+The shared Browser/VS Code operation panel and authenticated local HTTP API now
+also expose an explicit `POST /v1/operations/{id}/a2a/resubscribe` operation.
+It accepts only a succeeded delegation or an uncertain send whose recorded
+stream already exposed a task ID. The backend resolves the same enabled peer,
+checks its saved registration revision, card URL, protocol version and
+interface, then calls A2A `SubscribeToTask`/`tasks/resubscribe` with that saved
+task ID. It never repeats `SendMessage` or `SendStreamingMessage`. Each
+identity-matching event is capped at 64 events and 512 KiB total, appended to
+the original run's durable `a2a.task_event` journal, and returned to the
+client. The request waits up to 20 seconds for the peer stream to close; events
+received before a timeout remain in run history even when the request returns
+an error. A peer that does not advertise streaming or refuses a subscription
+(for example, because its task is terminal) returns an explicit error, and
+read-only task inspection remains available.
+
+The protocol client does not yet have a peer-issued resumable event cursor or
+deduplication key. Repeating this manual subscription can therefore append
+events the peer replays again; each local batch is marked with a distinct
+subscription ID and per-batch sequence rather than pretending those frames are
+new remote effects. Native, browser-adapter/controller and VS Code
+host/renderer contracts cover the saved identity, authenticated local view,
+bounded response, durable run journal and no-send-replay behavior. These
+contracts do not establish rendered/installed-client acceptance or automatic
+stream resumption after backend restart.
 
 An explicit outbound cancellation route is now also wired to acknowledged
 operation IDs. The owner or enrolled same-origin browser view must send a
@@ -99,8 +125,9 @@ response, or persistence failure after the one-shot record leaves the outcome
 unknown and requires inspection; it is never replayed. The webpage asks for
 browser confirmation and VS Code asks through its modal confirmation before
 sending. This path currently exercises v1 JSON-RPC `CancelTask`; independent
-SDK cancellation, post-restart rendering of the durable control outcome, stream
-resumption, artifacts and complete peer acceptance remain open.
+SDK cancellation, post-restart rendering of the durable control outcome,
+automatic stream resumption, artifacts and complete peer acceptance remain
+open.
 
 An input-required remote task can now receive a sequenced follow-up through
 `POST /v1/operations/{id}/a2a/follow-up`, the `a2a-follow-up` CLI command, and

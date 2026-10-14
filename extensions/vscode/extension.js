@@ -732,6 +732,17 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||JSON.stringify(inspection.task).length>524288||!['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)||!Number.isSafeInteger(inspection.inspected_unix_ms)||inspection.inspected_unix_ms<=0||inspection.inspected_unix_ms>8640000000000000)throw new Error('The remote task snapshot does not match the saved A2A operation.');
           post({type:'a2a-task-inspection',id:proposal.id,inspection});
+        } else if (message.type === 'resubscribe-a2a-task' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before reconnecting to a registered A2A peer.');
+          const proposal=reviewed.get(message.id);
+          if(!proposal || !observedOperation(proposal.run_id) || !['succeeded','uncertain'].includes(proposal.state) || proposal.tool!=='a2a_delegate') throw new Error('Select an acknowledged A2A task or interrupted send in the selected run before reconnecting.');
+          let receipt;try{receipt=JSON.parse(proposal.result_json);}catch{throw new Error('The saved A2A task receipt is invalid.');}
+          const acknowledged=proposal.state==='succeeded'&&receipt?.acknowledged_by_peer===true,observedBeforeFailure=proposal.state==='uncertain'&&receipt?.reason==='a2a_dispatch_outcome_unknown';
+          if((!acknowledged&&!observedBeforeFailure)||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no resumable remote task ID.');
+          const version=generation,subscription=await client.resubscribeA2aTask(proposal.id);
+          if(panel!==view || version!==generation) return;
+          if(!subscription||subscription.operation_id!==proposal.id||subscription.agent_id!==receipt.agent_id||subscription.task_id!==receipt.task_id||typeof subscription.subscription_id!=='string'||!subscription.subscription_id||subscription.subscription_state!=='closed'||!Array.isArray(subscription.events)||subscription.events.length>64||JSON.stringify(subscription.events).length>524288)throw new Error('The resubscribed events do not match the saved A2A operation.');
+          post({type:'a2a-task-resubscription',id:proposal.id,subscription});
         } else if (message.type === 'cancel-a2a-task' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before cancelling a registered A2A task.');
           const proposal=reviewed.get(message.id);
