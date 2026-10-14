@@ -33,7 +33,9 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
         };
     }
     file_edit_proposals_=workspace_binding_&&settings.approved_edits;
-    if(!settings.provider.model.empty())agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
+    // A provider-bound profile may intentionally have no default model yet:
+    // browser/VS Code sessions supply their selected model at run admission.
+    if(!settings.provider.model.empty()||settings.provider_identity)agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
     graphs_=std::make_unique<GraphService>(store,std::move(settings),std::min<std::size_t>(workers,8),capacity);
 }
 ExecutionPlatform::~ExecutionPlatform()=default;

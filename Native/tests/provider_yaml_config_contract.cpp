@@ -118,7 +118,7 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         PersistenceService store(database,imports);ProviderProfiles profiles(store,policy(origin));
         const auto restored=profiles.snapshot();require(restored.revision==1&&profile(restored,"claude").model.empty()&&profile(restored,"claude").credential_id==profile(saved,"claude").credential_id&&same(profiles.credential("claude"),claude_key),"Restart preserves actual encrypted key-only profile/reference without rotation");
         AgentSettings base;ProviderProfileRuntime runtime(store,base,runtime_policy(origin),1,8);
-        require(!runtime.available()&&runtime.models().empty()&&runtime.configuration().active=="claude","Key-only active runtime stays visibly unconfigured without a fictional model");
+        require(runtime.available()&&runtime.models().empty()&&runtime.configuration().active=="claude","Key-only active runtime retains its authenticated route without publishing a fictional model");
         auto discovered=runtime.discover_models("claude","anthropic.messages",secret(""),1);
         require(discovered==std::vector<std::string>{"claude-synthetic-a","claude-synthetic-b"},"Existing native catalogue can use the actual encrypted key-only profile");
         require(profile(profiles.snapshot(),"claude").model.empty(),"Discovery does not secretly select or invent a model");
@@ -146,7 +146,7 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         auto observed=runtime.import_yaml_configuration(file,0);
         require(observed.revision==0&&observed.active.empty()&&observed.profiles.empty()&&!runtime.available()&&store.credentials("server").get().empty(),"Real startup importer keeps a fresh empty template unconfigured without fake key/model/active selection");
         write(document());observed=runtime.import_yaml_configuration(file,0);
-        require(observed.revision==1&&observed.active=="claude"&&observed.profiles.size()==2&&observed.profiles[0].model.empty()&&!runtime.available()&&runtime.models().empty(),"Real startup importer publishes encrypted key-only active profile without inferring a model");
+        require(observed.revision==1&&observed.active=="claude"&&observed.profiles.size()==2&&observed.profiles[0].model.empty()&&runtime.available()&&runtime.models().empty(),"Real startup importer retains the authenticated key-only route without inferring or publishing a model");
         const auto registry_bytes=store.information("native-provider-profiles","registry").get();const auto credentials=store.credentials("server").get().size();
         observed=runtime.import_yaml_configuration(file,1);
         require(observed.revision==1&&store.information("native-provider-profiles","registry").get()==registry_bytes&&store.credentials("server").get().size()==credentials,"Real repeated startup import cannot rotate encrypted references/revisions");

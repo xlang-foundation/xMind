@@ -153,7 +153,21 @@ struct ProviderProfileRuntime::Impl {
         auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
         validate_public_identity(profile.id,profile.model,owned);
         if(profile.model.empty()){
-            auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();settings.provider_identity.reset();
+            auto settings=base;settings.provider=allowed.provider;settings.provider.model.clear();
+            // Keep the authenticated route available while each session chooses
+            // a model. Admission validates the actual model before dispatch.
+            if(base.workspace)settings.provider.tools=Capability::supported;
+            settings.context=allowed.context;settings.selectable_models.clear();
+            settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
+            settings.provider_identity=ProviderExecutionIdentity{profile.id,profile.route_id,allowed.route.provider,profile.revision};
+            if(settings.context){
+                for(auto& [model,capacity]:settings.context->model_capacities){
+                    if(capacity.model_id!=model||capacity.wire!="responses")throw std::invalid_argument("Context capacity model binding differs");
+                    capacity.provider_identity_json=provider_context_json(settings,model);
+                    auto destination=settings.provider;destination.model=model;
+                    capacity.route_identity=context_route_identity(destination,capacity.provider_identity_json);
+                }
+            }
             return platform(std::move(settings));
         }
         auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
@@ -197,15 +211,16 @@ struct ProviderProfileRuntime::Impl {
         const auto profile=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==expected.id;});
         if(profile==state.profiles.end())throw Conflict("Active provider profile disappeared");
         const auto saved=store.session_model(session).get();
-        if(!saved.selected||saved.selected->provider_profile_id!=profile->id||saved.selected->provider_route_id!=profile->route_id){validate_profile_model(*profile,model);return model;}
+        if(!saved.selected||saved.selected->provider_profile_id!=profile->id||saved.selected->provider_route_id!=profile->route_id){validate_profile_model(*profile,model);if(profile->model.empty()&&model.empty())throw std::invalid_argument("Select a model before running this provider profile");return model;}
         if(!model.empty()&&model!=saved.selected->model_id)throw Conflict("Conversation model changed; refresh before run admission");
         model=saved.selected->model_id;validate_profile_model(*profile,model);return model;
     }
     void validate_unbound_model(const std::string& session,const std::string& model)const{
         if(state.active.empty())return;
         if(store.session_model(session).get().selected)throw Conflict("Conversation model selection requires provider-bound run admission");
+        const auto active=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
+        if(active!=state.profiles.end()&&active->model.empty()&&model.empty())throw std::invalid_argument("Select a model before running this provider profile");
         if(!model.empty()){
-            const auto active=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
             if(active==state.profiles.end())throw Conflict("Active provider profile disappeared");validate_profile_model(*active,model);
         }
     }

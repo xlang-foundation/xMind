@@ -142,7 +142,7 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
-    if(settings_.provider.model.empty() || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
+    if((settings_.provider.model.empty()&&!settings_.provider_identity) || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
         throw std::invalid_argument("Invalid agent configuration");
     if(settings_.workspace) {
         if(settings_.provider.tools!=Capability::supported) throw std::invalid_argument("Workspace agent requires declared model tool capability");
@@ -173,14 +173,15 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
         // This allowance is inherited from the native agent configuration.
         if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
     }
-    if(settings_.context){
+    if(settings_.context&&!settings_.provider.model.empty()){
         if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
         ContextManager validate(persistence_,settings_.provider,*settings_.context,message);
     }
 }
 AgentRunner::~AgentRunner()=default;
 std::vector<std::string> AgentRunner::models() const {
-    std::vector<std::string> result{settings_.provider.model};
+    std::vector<std::string> result;
+    if(!settings_.provider.model.empty())result.push_back(settings_.provider.model);
     for(const auto& model:settings_.selectable_models) if(std::find(result.begin(),result.end(),model)==result.end()) result.push_back(model);
     return result;
 }

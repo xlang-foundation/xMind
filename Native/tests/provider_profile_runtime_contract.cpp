@@ -203,7 +203,13 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto legacy=Json{{"provider","openai"},{"endpoint",origin+"/chat"},{"model",legacy_model},{"credential_id","legacy-repair-key"},{"revision",9}}.dump();
         store.put_information("native-provider","active",legacy).get();
         {ProviderProfileRuntime runtime(store,base,policy(origin),1,8);require(runtime.import_legacy_configuration(),"Credential-shaped legacy model must migrate to a key-only profile");
-            require(!runtime.available()&&runtime.models().empty()&&runtime.configuration().profiles[0].model.empty(),"Key-only profile cannot expose a secret as a model or execute inference");
+            require(runtime.available()&&runtime.models().empty()&&runtime.configuration().profiles[0].model.empty(),"Key-only profile must retain authenticated execution without exposing a placeholder model");
+            store.create_session("legacy-key-only-run","Selected model for repaired saved key").get();
+            rejects<std::invalid_argument>([&]{runtime.submit("legacy-key-only-unselected","legacy-key-only-run","Must select a model");});
+            const auto admitted=runtime.submit_model("legacy-key-only-run-id","legacy-key-only-run","Key-only saved profile selected model fixture","fixture-openai");
+            require(admitted.state==RunState::queued,"Key-only profile must admit the explicitly selected session model");
+            wait(store,"legacy-key-only-run-id",RunState::completed);reply(store,"legacy-key-only-run","Actual OpenAI fixture reply");
+            provenance(store,"legacy-key-only-run","openai",9,"fixture-openai");
             require(store.credentials("server").get().size()==1&&store.information("native-provider","active").get()==legacy,"Key-only migration must preserve original key and source");}
         ProviderProfileRuntime runtime(store,base,policy(origin),1,8);std::vector<ProviderProfileRoute> allowed;for(const auto& entry:policy(origin))allowed.push_back(entry.route);
         ProviderProfileLegacySetup compatibility(runtime,std::move(allowed),"openai","openai.chat","");Access access(store,runtime,&compatibility);
@@ -212,6 +218,23 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto discovered=client.Post("/v1/provider/models",auth,R"({"expected_revision":9})","application/json");require(discovered&&discovered->status==200,"Legacy saved-key discovery must repair without asking for the key again");
         const auto repaired=client.Post("/v1/provider/configuration",auth,R"({"model":"fixture-openai","expected_revision":9})","application/json");require(repaired&&repaired->status==200&&Json::parse(repaired->body).at("revision")==10&&runtime.available(),"Legacy setup must publish the same profile runtime after repair");
         require(store.information("native-provider","active").get()==legacy,"Repair must not rewrite historical legacy source");
+    }
+    {
+        PersistenceService store((std::filesystem::u8path(argv[1])/"key-only-claude.sqlite").string(),imports);
+        store.put_credential("server","key-only-claude","fixture:anthropic","Key-only Claude fixture",key("runtime-claude-fixture-key"),0).get();
+        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
+        runtime.import_existing_profile("claude","anthropic.messages","","key-only-claude",1);
+        require(runtime.available()&&runtime.models().empty(),"Key-only Claude profile must be executable without publishing a placeholder model");
+        store.create_session("key-only-claude-session","Choose Claude model per session").get();
+        Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);
+        const httplib::Headers authorized{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto selected=client.Post("/v1/sessions/key-only-claude-session/model",authorized,R"({"model_id":"fixture-claude","provider_profile_id":"claude","expected_provider_revision":1,"expected_revision":0})","application/json");
+        require(selected&&selected->status==200,"Browser/IDE session model selection must persist against the active key-only provider");
+        const auto admitted=client.Post("/v1/runs",authorized,R"({"id":"key-only-claude-run","session_id":"key-only-claude-session","prompt":"Key-only Claude selected model fixture","model_id":"fixture-claude","provider_profile_id":"claude","expected_provider_revision":1})","application/json");
+        require(admitted&&admitted->status==202,"Browser/IDE run admission must execute the selected model with the active key-only provider");
+        wait(store,"key-only-claude-run",RunState::completed);reply(store,"key-only-claude-session","Actual Claude fixture reply");
+        provenance(store,"key-only-claude-session","claude",1,"fixture-claude");
+        require(store.credentials("server").get().size()==1,"Key-only Claude execution must retain the owned key without rotation");
     }
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"discovery-race.sqlite").string(),imports);ProviderProfileRuntime runtime(store,base,policy(origin),1,8);

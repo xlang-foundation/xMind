@@ -60,6 +60,9 @@ const peer=createServer((request,response)=>{
   assert.equal(request.url,'/v1beta/models/fixture-gemini:streamGenerateContent?alt=sse');
   assert.deepEqual(Object.keys(body).sort(),['contents','generationConfig','systemInstruction','tools']);
   assert.deepEqual(body.tools[0].functionDeclarations.map(tool=>tool.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill']);
+  if(prompt==='Selected model in key-only Gemini profile'){
+   assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);reply(response,[{text:'Synthetic key-only Gemini selected-model reply.'}],5,2,'synthetic-key-only-selected-model');return;
+  }
   if(prompt==='Read the enrolled fixture file'){
    assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);reply(response,callParts,7,2,'synthetic-profile-read');return;
   }
@@ -83,7 +86,7 @@ try{
  let result;try{result=await running;}catch(error){if(failure)throw failure;throw error;}if(failure)throw failure;
  assert.equal(discoveryReleased,true);assert.equal(heldRequestClosed,true,'Actual native cancellation must close the held provider socket');
  assert.deepEqual(catalogues,[...Array.from({length:5},()=>[{key,next:false},{key,next:true}]).flat(),{key:raceKey,next:false},{key:raceKey,next:true}]);
- assert.deepEqual(modelRequests,[...Array(4).fill('/v1beta/models/fixture-gemini:streamGenerateContent?alt=sse'),'/v1beta/models/fixture-unknown-tools:streamGenerateContent?alt=sse']);
+ assert.deepEqual(modelRequests,[...Array(5).fill('/v1beta/models/fixture-gemini:streamGenerateContent?alt=sse'),'/v1beta/models/fixture-unknown-tools:streamGenerateContent?alt=sse']);
  assert.equal(await readFile(join(workspace,'README.md'),'utf8'),fileText,'The real read tool must retain the original file bytes');
  for(const entry of await readdir(root,{withFileTypes:true}))if(entry.isFile()&&/\.sqlite(?:-wal|-shm)?$/.test(entry.name)){
   // This hostile-input fixture deliberately writes a reflected credential into
