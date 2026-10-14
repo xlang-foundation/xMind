@@ -52,16 +52,18 @@ AgentService and xlang3-backed SQLite repository, reopens the database, and
 resubscribes through the authenticated native HTTP route. The synthetic peer
 receives the saved cursor and returns event 3. The contract verifies event 3
 is appended to the original child run, the completed plan remains unchanged,
-and the audit contains one initial send and one resubscription. This proves
-explicit recovery for a dynamic child-owned operation, not automatic recovery
-or live external-peer interoperability.
+and the audit contains one initial send and one resubscription. At that
+checkpoint this proved explicit recovery for a dynamic child-owned operation,
+not automatic recovery. The later bounded automatic reconnect is covered in
+the current section above. Live external-peer interoperability remains
+unverified.
 
 The focused Release CTest set passes **6/6** across the A2A client and registry
 contracts plus dynamic-plan schema, repository, engine, and MCP/process/A2A
 contracts. `node --check` and `git diff --check` also pass. The full native
 inventory last passed **144/144** before this checkpoint and was not rerun.
-Recursive planning, automatic recovery, live external providers/peers and
-rendered/installed planner acceptance remain open.
+Recursive planning, live external providers/peers and rendered/installed
+planner acceptance remain open.
 
 ## Full native Release suite — 2026-10-14
 
