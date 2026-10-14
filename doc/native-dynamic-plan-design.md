@@ -14,20 +14,21 @@ VSIX assets** also passed, without rendered dynamic-planning or installed-editor
 acceptance. [Initial implemented boundary](native-dynamic-plan.md),
 [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
 
-Current source extends the `tool` node with exact-bound MCP tools and a
-synchronous `run_process` node in the registered coding preset. Focused Release
-dynamic-plan pure/repository/engine/MCP-process contracts pass 4/4. They verify
-MCP approval, actual peer dispatch, durable outcome and uncertainty handling;
-the process scenario verifies an approved native launch and dependent read,
-plus denial before process dispatch. Background process jobs, MCP
-resources/prompts in plans, recursive planning, live provider and
-external-browser/installed VS Code acceptance remain open.
+Current source extends the `tool` node with exact-bound MCP tools, synchronous
+registered `run_process` nodes, and registration-pinned outbound A2A nodes in
+the coding preset. A2A execution re-discovers and compares the accepted remote
+agent binding, uses the usual local approval, and journals streamed task events
+to its owned child. The Release dynamic-plan fixture now uses the actual native
+AgentService and approval journal with a synthetic local A2A 1.0 peer; approved
+dispatch returns the peer's actual task ID, and denial produces no send.
+Background process jobs, MCP resources/prompts in plans, recursive planning,
+live provider and external-browser/installed VS Code acceptance remain open.
 
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
-workspace reads, exact-bound MCP tool nodes and synchronous registered process
-nodes. Background process nodes, recursive planning, skills, compaction and
-outbound A2A remain future work. The installed preview and historical
+workspace reads, exact-bound MCP and registered A2A tool nodes, and synchronous
+registered process nodes. Background process nodes, recursive planning, skills
+and compaction remain future work. The installed preview and historical
 acceptance boundaries below remain separate. Schema-v11 installation, live
 planning and installed VS Code acceptance remain pending. The installed
 ace/schema-v10 scope below is separate from the new local planning result.
@@ -156,7 +157,10 @@ approval/effect registry. Metadata and plan admission do not launch a peer. A
 changed connector or schema cannot silently rebind old work. Synchronous
 `run_process` nodes use the frozen coding preset's process profile schema and
 the existing native approval/effect journal; they cannot request background
-execution. Direct MCP resource and prompt operations remain future additions.
+execution. Registered A2A nodes pin the discovered agent-card binding, request
+the same explicit approval as ordinary delegation, revalidate registration
+before send, and journal observed task events to the dynamic child. Direct MCP
+resource and prompt operations remain future additions.
 
 Human nodes require an implemented authenticated controller-input capability.
 The model selects a bounded question, not its answering actor, route or
@@ -591,13 +595,13 @@ The original proposed production ownership split is retained for comparison:
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
 The [implementation guide](native-dynamic-plan.md) identifies the subset now
-implemented and its verification limits. Process and remaining effectful-tool
-scheduling, MCP resources/prompts, reference helpers and further node kinds in
-this table still require their own implementation and acceptance; the design
-itself supplies no execution evidence.
+implemented and its verification limits. Background process scheduling, MCP
+resources/prompts, reference helpers and further node kinds in this table still
+require their own implementation and acceptance; the design itself supplies
+no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget
-integration, broader bounded recursion, outbound A2A peer/task ownership and
+integration, broader bounded recursion, streamed A2A plan-event recovery and
 the complete coding/provider parity matrix remain required work. These use
 the same durable observed-results and capability rules. Private Nexus team
 coordination, PostgreSQL, WebRTC and Electron remain outside this OSS design.

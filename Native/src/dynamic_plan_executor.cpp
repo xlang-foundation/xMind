@@ -1,5 +1,7 @@
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_authority.hpp"
+#include "agentflow/a2a_agent_registry.hpp"
+#include "agentflow/a2a_tool_registry.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
@@ -150,6 +152,49 @@ Run execute_process_tool(PersistenceService& store,const std::string& child,cons
      catch(const std::filesystem::filesystem_error&){return retire(RunState::failed,"dynamic_process_precondition_unavailable");}
      catch(const std::exception&){return retire(RunState::failed,"dynamic_process_execution_failed");}
 }
+Run execute_a2a_tool(PersistenceService& store,const std::string& child,const DynamicPreparedNode& prepared,
+    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,
+    std::stop_token cancel,InstructionPrecondition guidance){
+    auto phase=RunState::queued;const auto retire=[&](RunState to,const char* reason){return store.transition(child,phase,to,Json{{"reason",reason}}.dump()).get();};
+    if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_a2a_tool");
+    if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
+    try{
+        if(!settings.workspace||!settings.a2a_enabled||!guidance.verify)throw ToolAccessDenied("Dynamic A2A effects require the admitted workspace, enabled registration and repository instruction precondition");
+        WorkspaceTools workspace(*settings.workspace);
+        if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic A2A workspace identity changed");
+        const auto& definition=prepared.node.definition;
+        const auto catalogue=Json::parse(mcp_compact_object(caps.tool_catalog_json));
+        const auto frozen_tool=std::find_if(catalogue.at("tools").begin(),catalogue.at("tools").end(),[&](const auto& item){return item.is_object()&&item.value("name",std::string{})==definition.tool;});
+        if(frozen_tool==catalogue.at("tools").end()||!frozen_tool->contains("a2a_binding"))throw ToolAccessDenied("Dynamic A2A binding is no longer registered");
+        budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
+        store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
+        A2aRemoteAgentRegistry registrations(store);
+        const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(budget->deadline()-std::chrono::steady_clock::now());
+        if(remaining.count()<=0)throw RootBudgetDeadlineExceeded("Root deadline elapsed before dynamic A2A discovery");
+        A2aAgentToolRegistry registry(registrations,store,workspace,std::min(remaining,std::chrono::milliseconds(5000)),cancel);
+        const auto bindings=Json::parse(registry.approval_bindings_json());
+        const auto actual=std::find_if(bindings.begin(),bindings.end(),[&](const auto& item){return item.is_object()&&item.value("alias",std::string{})==definition.tool;});
+        if(actual==bindings.end()||*actual!=frozen_tool->at("a2a_binding"))throw A2aEffectNotDispatched("Dynamic A2A discovery differs from the accepted registration binding");
+        guidance.validate();
+        const auto expiry=now_ms()+settings.run_timeout.count();const auto operation=identity();
+        const auto result=Json::parse(registry.invoke(operation,child,definition.tool,definition.arguments_json,expiry,budget->deadline(),cancel,std::move(guidance),[&](const std::string& event){
+            budget->check(cancel);const auto observed=Json::parse(event);Json journal={{"operation_id",operation},{"plan_node_id",prepared.node.backend_node_id},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};
+            if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];
+            store.append_a2a_task_event(child,operation,journal.dump()).get();
+        }));
+        budget->check(cancel);store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
+        return store.complete_run(child,result.dump()).get();
+    }catch(const A2aOutcomeUnrecorded&){throw;}
+     catch(const A2aEffectUncertain&){return retire(RunState::failed,"a2a_effect_uncertain");}
+     catch(const A2aEffectNotDispatched&){return retire(RunState::failed,"a2a_not_dispatched");}
+     catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
+     catch(const PermissionDenied&){return retire(RunState::failed,"a2a_denied");}
+     catch(const PermissionExpired&){return retire(RunState::failed,"a2a_approval_expired");}
+     catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
+     catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+     catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
+     catch(const std::exception&){return retire(RunState::failed,"dynamic_a2a_tool_execution_failed");}
+}
 struct ActiveBatch {
     std::unique_ptr<NativeChildExecutor::Batch> work;
     std::vector<std::string> children;
@@ -272,6 +317,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                                 return execute_process_tool(store_,child_id,prepared,settings,caps,budget,stop,std::move(precondition));
                             }
                             auto precondition=guidance?guidance(".",stop):InstructionPrecondition{};
+                            if(prepared.node.definition.tool.starts_with("a2a_delegate_"))return execute_a2a_tool(store_,child_id,prepared,settings,caps,budget,stop,std::move(precondition));
                             return execute_mcp_tool(store_,child_id,prepared,settings,caps,budget,stop,std::move(precondition));
                         }
                         const auto retire_before_launch=[&]()->std::optional<Run>{

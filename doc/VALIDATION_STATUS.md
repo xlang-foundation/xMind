@@ -49,13 +49,32 @@ nested workspace directory, verified its actual file write with a dependent
 native read, and separately denied a launch while asserting no output or file
 effect.
 
-The dynamic-plan pure, repository, engine, and MCP/process contracts pass
-**4/4**. The full native suite completed **143/144 before this change**; the
-single Rust Analyzer call-site-definition failure passed its immediate
-isolated rerun with the fixture check (**2/2**). The VS Code and browser
-results above are from the preceding MCP checkpoint; this change did not
-modify either client. Background jobs inside plans, rendered/installed
-acceptance and recursive planning remain open.
+The dynamic-plan pure, repository, engine, and MCP/process/A2A contracts pass
+**4/4**. The clean full native Release suite recorded above passed **144/144**
+after the earlier 143/144 run's Rust Analyzer failure passed its isolated
+rerun. The full suite has not been rerun for the process/A2A additions. The VS
+Code and browser results above are from the preceding MCP checkpoint; these
+backend changes did not modify either client. Background jobs inside plans,
+rendered/installed acceptance and recursive planning remain open.
+
+## Registered A2A nodes in dynamic plans — 2026-10-14
+
+Dynamic `tool` nodes can now select an exact registration-pinned
+`a2a_delegate_*` binding from the frozen coding preset. The child performs a
+fresh AgentCard discovery and rejects any registration/card drift before it
+offers the usual native controller approval. After approval, the registered
+A2A client sends once and stores the actual task ID/result; denial completes
+the plan report without sending. The contract uses actual native AgentService,
+registration, operation approval/effect persistence and embedded xlang3 SQLite
+against a synthetic local A2A 1.0 peer and synthetic provider response. It
+does not claim live external-peer interoperability.
+
+The focused dynamic-plan Release CTest set passes **4/4**, including both
+approved and denied direct A2A scenarios, MCP/process effects, pure schema
+admission and repository/engine contracts. The full native inventory last
+passed **144/144** before this checkpoint; it has not been rerun here.
+Streaming event recovery within an A2A plan child, recursive planning, live
+external providers/peers and rendered/installed planner acceptance remain open.
 
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 
