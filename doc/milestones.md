@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Dynamic plan tool nodes in the shared Browser/VS Code view (2026-10-14)
+
+The shared client accepts the six native deterministic read-only workspace
+aliases as dynamic-plan `tool` nodes and validates their preserved argument
+JSON. It validates model-free owned-child claims without assigning an agent
+preset or fabricated provider metadata. The shared renderer labels the tool and
+its arguments, then displays the actual child result without invented model
+metrics. The full VS Code extension suite passes **343/343**, including client
+boundary and rendered-view coverage. This covers the shared renderer used by
+the browser and VS Code; external-browser and installed-extension acceptance
+remain open. See [validation status](VALIDATION_STATUS.md).
+
 ## Bounded unified diffs for console approvals
 
 The interactive console continues to emit its exact JSON `operation_review`

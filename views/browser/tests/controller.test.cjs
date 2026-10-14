@@ -213,7 +213,7 @@ test('profile conflicts refresh the displayed account and model without replayin
 });
 test('browser sends its known profile revision and retains the prompt when native admission rejects a stale view',async()=>{
  const posted=[],calls=[];const client={run:async(...args)=>{calls.push(args);throw Object.assign(new Error('Provider profile changed before run admission'),{status:409});}};
- const view=new BrowserController(client,value=>posted.push(value));view.health={agent_execution:true,provider_profile_admission:true};view.session='session';view.model='same-model';view.profileController={state:undefined,refresh:async()=>false,admission:async()=>({provider_profile_id:'saved-account',expected_provider_revision:4}),reconcileAdmission:async()=>false,dispose(){},invalidate(){}};
+ const view=new BrowserController(client,value=>posted.push(value));view.health={agent_execution:true,provider_profile_admission:true};view.session='session';view.model='same-model';view.profileController={state:{active:'saved-account',revision:4},refresh:async()=>false,admission:async()=>({provider_profile_id:'saved-account',expected_provider_revision:4}),reconcileAdmission:async()=>false,dispose(){},invalidate(){}};
  try{await view.handle({type:'send',prompt:'Keep this task'});assert.deepEqual(calls[0],['session','Keep this task','same-model',{provider_profile_id:'saved-account',expected_provider_revision:4}]);assert.ok(posted.some(value=>value.type==='error'&&value.text.includes('profile changed')));assert.ok(!posted.some(value=>value.type==='user'));assert.equal(view.runId,undefined);}finally{view.dispose();}
 });
 test('browser Settings preserves the selected profile route through private discovery and footer enrollment',async()=>{

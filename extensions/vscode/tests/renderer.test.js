@@ -151,6 +151,16 @@ test('Agent plan renders actual dependencies/correlations/held response metrics 
   const owned=doc.getElementById('owned-view');assert.match(owned.textContent,/Coding agent · effects require their own approval/);assert.ok(!owned.textContent.includes('Read-only investigation'));assert.match(owned.querySelector('.metrics').textContent,/Input 19Output 5Total —/);
  }finally{r.dom.window.close();}
 });
+test('deterministic tool plan nodes render their arguments and model-free child output without fabricated metrics',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture(),definition={id:'read-bytes',type:'tool',tool:'read_file',arguments_json:' {"path":"README.md"} ',depends_on:[{task:'read',require:'success'}]};
+ const runtime={...definition,backend_node_id:'node-read-bytes',definition_revision:2,state:'settled',protected:true,effect_state:'none',claim_revision:2,claim_id:'tool-claim',child_run_id:'tool-child',child_state:'completed',outcome_json:'{"content":"actual bytes"}',settled_event_seq:25};
+ record.plan.nodes.push(runtime);record.revisions[1].spec.nodes.push(definition);
+ try{r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});const task=[...doc.querySelectorAll('.plan-node')].find(item=>item.dataset.node==='read-bytes');
+  assert.match(task.textContent,/Read-only workspace tool · read_file · no model call/);assert.equal(task.querySelector('pre').textContent,definition.arguments_json);assert.ok(!/Input tokens|Output tokens|First token/.test(task.textContent));
+  const child={run:{id:'tool-child',parent_id:record.run.id,state:'completed'},kind:'dynamic_tool',node_label:'read-bytes',preset_id:'',preset_revision:0};r.send({type:'owned-children',parent:record.run,children:[child],histories:{'tool-child':[{role:'assistant',data:{content:'Observed README bytes'}}]}});
+  const owned=doc.getElementById('owned-view');assert.match(owned.textContent,/Read-only workspace tool · model-free/);assert.match(owned.textContent,/deterministic tool claim/);assert.match(owned.textContent,/Observed README bytes/);assert.ok(!/Input tokens|Output tokens|First token/.test(owned.textContent));
+ }finally{r.dom.window.close();}
+});
 test('human answer keeps raw numeric lexemes and draft across observations, binds current identities/CAS and rejects detached form sends',()=>{
  const r=renderer(),doc=r.dom.window.document,record=planFixture();try{
   r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});const form=doc.querySelector('.plan-input'),input=form.querySelector('textarea'),raw='{"quantity":1.00000000000000000001,"answer":"<img src=x onerror=fixtureAttack()>"}';form.querySelector('select').value='json';input.value=raw;

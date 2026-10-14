@@ -638,13 +638,22 @@ function validatePlanning(value){planFields(value,['enabled','tools']);if(typeof
 function validateOwnedChild(child,root,session){
   const value=child?.run;
   if(!value||value.parent_id!==root||value.session_id!==session||value.graph_root||typeof value.id!=='string'||typeof child.batch_id!=='string'||typeof child.task_id!=='string'||typeof child.preset_id!=='string')throw new Error('Owned child identity changed');
-  executionIdentity(value.id);planInteger(child.preset_revision,1);
-  if(child.kind==='delegated_leaf'){if(!child.batch_id||!child.task_id||child.preset_id!=='workspace.inspect')throw new Error('Owned child identity changed');}
+  executionIdentity(value.id);
+  if(child.kind==='delegated_leaf'){planInteger(child.preset_revision,1);if(!child.batch_id||!child.task_id||child.preset_id!=='workspace.inspect')throw new Error('Owned child identity changed');}
   else if(child.kind==='dynamic_agent'){
-    planFields(child,['run','kind','batch_id','task_id','preset_id','preset_revision','plan_id','node_label','claim_id','definition_revision','claim_revision']);validateRunDTO(value);executionIdentity(child.plan_id);executionIdentity(child.claim_id);executionIdentity(value.node_id);planLabel(child.node_label);planInteger(child.definition_revision,1);
-    if(child.claim_revision!==child.definition_revision||child.batch_id!==''||child.task_id!==''||!['workspace.inspect','workspace.coding'].includes(child.preset_id))throw new Error('Owned dynamic child claim changed');
+    validateDynamicOwnedChild(child,value);
+    if(!['workspace.inspect','workspace.coding'].includes(child.preset_id))throw new Error('Owned dynamic child claim changed');
+  }else if(child.kind==='dynamic_tool'){
+    validateDynamicOwnedChild(child,value);
+    if(child.preset_id!==''||child.preset_revision!==0)throw new Error('Owned dynamic tool claim changed');
   }else throw new Error('Owned child identity changed');
   return child;
+}
+function validateDynamicOwnedChild(child,value){
+  planFields(child,['run','kind','batch_id','task_id','preset_id','preset_revision','plan_id','node_label','claim_id','definition_revision','claim_revision']);validateRunDTO(value);executionIdentity(child.plan_id);executionIdentity(child.claim_id);executionIdentity(value.node_id);planLabel(child.node_label);planInteger(child.definition_revision,1);
+  if(child.claim_revision!==child.definition_revision||child.batch_id!==''||child.task_id!=='')throw new Error('Owned dynamic child claim changed');
+  if(child.kind==='dynamic_agent')planInteger(child.preset_revision,1);
+  else if(child.preset_revision!==0)throw new Error('Owned dynamic tool claim changed');
 }
 function planUsage(value){
   const numbers=['input_tokens','output_tokens','total_tokens','prompt_tokens','completion_tokens','cached_tokens','reasoning_tokens','cache_read_input_tokens','cache_creation_input_tokens','promptTokenCount','candidatesTokenCount','totalTokenCount','thoughtsTokenCount','cachedContentTokenCount'];
@@ -653,10 +662,12 @@ function planUsage(value){
 }
 function planResponse(value){planFields(value,[],['model','usage','elapsed_ms','first_token_ms']);if(value.model!==undefined)planText(value.model,256,true);if(value.usage!==undefined)planUsage(value.usage);for(const key of ['elapsed_ms','first_token_ms'])if(value[key]!==undefined)planInteger(value[key]);}
 function planDefinition(value,runtime=false){
-  const fields=['id','type','depends_on'];if(value?.type==='agent')fields.push('objective','preset');else if(value?.type==='human')fields.push('question');else throw new Error('Invalid planning node type');
+  const fields=['id','type','depends_on'];if(value?.type==='agent')fields.push('objective','preset');else if(value?.type==='human')fields.push('question');else if(value?.type==='tool')fields.push('tool','arguments_json');else throw new Error('Invalid planning node type');
   if(runtime)fields.push('backend_node_id','definition_revision','state','protected','effect_state',...(value.type==='agent'?['preset_revision']:[]));
   planFields(value,fields,runtime?['claim_revision','claim_id','child_run_id','child_state','human_request_id','outcome_json','settled_event_seq']:[]);planLabel(value.id);
-  if(value.type==='agent'){planText(value.objective,8192);if(!['workspace.inspect','workspace.coding'].includes(value.preset))throw new Error('Invalid planning preset');}else planText(value.question,8192);
+  if(value.type==='agent'){planText(value.objective,8192);if(!['workspace.inspect','workspace.coding'].includes(value.preset))throw new Error('Invalid planning preset');}
+  else if(value.type==='human')planText(value.question,8192);
+  else {if(!['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files'].includes(value.tool))throw new Error('Invalid deterministic planning tool');planText(value.arguments_json,65536);const args=JSON.parse(value.arguments_json);if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Invalid deterministic planning arguments');}
   if(!Array.isArray(value.depends_on)||value.depends_on.length>32)throw new Error('Invalid planning dependencies');const unique=new Set();for(const edge of value.depends_on){planFields(edge,['task','require']);planLabel(edge.task);if(unique.has(edge.task)||edge.task===value.id||!['success','observed'].includes(edge.require))throw new Error('Invalid planning dependency');unique.add(edge.task);}
   if(runtime){executionIdentity(value.backend_node_id);planInteger(value.definition_revision,1);if(typeof value.protected!=='boolean'||!['pending','blocked','claimed','waiting_human','settled','skipped','cancelled','uncertain'].includes(value.state)||!['none','succeeded','failed','cancelled','uncertain'].includes(value.effect_state))throw new Error('Invalid actual planning node state');if(value.type==='agent')planInteger(value.preset_revision,1);
     if(value.claim_revision!==undefined){if(value.claim_revision!==value.definition_revision)throw new Error('Planning claim revision changed');executionIdentity(value.claim_id);}else if(value.claim_id!==undefined)throw new Error('Planning claim is unbound');

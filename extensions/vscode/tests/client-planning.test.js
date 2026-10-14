@@ -57,3 +57,14 @@ test('coding children are observed through actual dynamic ownership without a re
  const context={profile_id:'public_profile',route_id:'openai.responses',provider:'openai',wire:'responses',model_id:'synthetic-model',profile_revision:1};const profileChild={...child,run:{...child.run,provider_context:context}};await observeOwnedRun({...client,ownedChildren:async()=>[profileChild]},run,'session',0);assert.equal(histories,2);
  await assert.rejects(observeOwnedRun({...client,ownedChildren:async()=>[{...profileChild,run:{...profileChild.run,provider_context:{...context,credential_id:'private'}}}]},run,'session',0));assert.equal(histories,2);
 });
+test('deterministic dynamic tool nodes and owned runs keep exact model-free metadata',async()=>{
+ const record=snapshot(),definition={id:'read-bytes',type:'tool',tool:'read_file',arguments_json:' {"path":"README.md"} ',depends_on:[]};
+ const runtime={...definition,backend_node_id:'node-read-bytes',definition_revision:1,state:'settled',protected:true,effect_state:'none',claim_revision:1,claim_id:'tool-claim',child_run_id:'tool-child',child_state:'completed',outcome_json:'{"content":"actual bytes"}',settled_event_seq:13};
+ record.plan.nodes.push(runtime);record.revisions[0].spec.nodes.push(definition);
+ assert.equal(validatePlanObservation(record,'owner').plan.nodes.at(-1).arguments_json,definition.arguments_json,'Argument JSON is preserved byte for byte');
+ const child={run:{id:'tool-child',parent_id:'owner',session_id:'session',node_id:'node-read-bytes',graph_root:false,state:'completed'},kind:'dynamic_tool',batch_id:'',task_id:'',preset_id:'',preset_revision:0,plan_id:'plan',node_label:'read-bytes',claim_id:'tool-claim',definition_revision:1,claim_revision:1};
+ const client={treeEvents:async()=>[{seq:1,run_id:'tool-child',kind:'tool.completed',data:{}}],ownedChildren:async()=>[child],ownedChildHistory:async()=>[{role:'assistant',data:{content:'actual bytes'}}],operations:async()=>[]};
+ const observed=await observeOwnedRun(client,record.run,'session',0);assert.equal(observed.children[0].kind,'dynamic_tool');assert.equal(observed.histories['tool-child'][0].data.content,'actual bytes');
+ for(const changed of [{preset_id:'workspace.inspect'},{preset_revision:1},{claim_revision:2},{node_label:'../foreign'}])await assert.rejects(observeOwnedRun({...client,ownedChildren:async()=>[{...child,...changed}]},record.run,'session',0));
+ for(const tool of ['run_process','mcp_tool','edit_file']){const invalid=snapshot(),bad={...definition,tool};invalid.plan.nodes.push({...runtime,tool});invalid.revisions[0].spec.nodes.push(bad);assert.throws(()=>validatePlanObservation(invalid,'owner'));}
+});

@@ -376,14 +376,14 @@ const graphRows=new Map();let observedGraph,displayedGraph,workflowExecutable=fa
 const ownedRows=new Map();let observedParent;
 function clearOwned(){ownedRows.clear();observedParent=undefined;byId('owned-view').replaceChildren();byId('owned-view').hidden=true;}
 function ownedView(parent,children,histories){
-  if(observedParent!==parent.id){clearOwned();observedParent=parent.id;byId('owned-view').append(node('h3','Owned agent responses'));}
+   if(observedParent!==parent.id){clearOwned();observedParent=parent.id;byId('owned-view').append(node('h3','Owned task runs'));}
   byId('owned-view').hidden=children.length===0;if(children.length)byId('empty').hidden=true;
   for(const child of children){
     const run=child.run;let row=ownedRows.get(run.id);
     if(!row){const card=node('details',undefined,'graph-node');card.open=true;const heading=node('summary'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};ownedRows.set(run.id,row);byId('owned-view').append(card);}
-    row.state=run.state;row.heading.textContent=(child.node_label||child.task_id)+' · '+run.state;
-    row.body.replaceChildren(node('p',child.preset_id==='workspace.coding'?'Coding agent · effects require their own approval':'Read-only investigation','inspection-note'));
-    const identity=node('details');identity.append(node('summary','Run details'),node('p',run.id+' · '+child.preset_id+' · version '+child.preset_revision));row.body.append(identity);
+     row.state=run.state;row.heading.textContent=(child.node_label||child.task_id)+' · '+run.state;
+     row.body.replaceChildren(node('p',child.kind==='dynamic_tool'?'Read-only workspace tool · model-free':child.preset_id==='workspace.coding'?'Coding agent · effects require their own approval':'Read-only investigation','inspection-note'));
+     const identity=node('details');identity.append(node('summary','Run details'),node('p',run.id+(child.kind==='dynamic_tool'?' · deterministic tool claim':' · '+child.preset_id+' · version '+child.preset_revision)));row.body.append(identity);
     const history=histories[run.id]||[],signature=JSON.stringify(history);
     if(row.historySignature!==signature){row.responses.replaceChildren();for(const item of history)if(item.role!=='user')entry(item.role,item.data,row.responses);row.historySignature=signature;row.stream.replaceChildren();row.text='';row.usage=undefined;}
     if(['completed','failed','cancelled'].includes(run.state))row.stream.replaceChildren();
@@ -443,12 +443,13 @@ function planView(value){
     if(!row){const card=node('details',undefined,'graph-node plan-node');card.open=true;card.dataset.node=task.id;const heading=node('summary'),body=node('div');card.append(heading,body);row={card,heading,body};planRows.set(task.backend_node_id,row);byId('plan-tasks').append(card);}
     row.heading.textContent=task.id+' · '+task.type+' · '+task.state+(task.child_state?' / '+task.child_state:'');
     const question=value.questions.find(question=>question.id===task.human_request_id);
-    const definitionSignature=JSON.stringify([task.type,task.definition_revision,task.claim_id,task.objective,task.question,task.preset,task.depends_on]);
+     const definitionSignature=JSON.stringify([task.type,task.definition_revision,task.claim_id,task.objective,task.question,task.preset,task.tool,task.arguments_json,task.depends_on]);
     if(!row.rendered||row.request!==question?.id||row.definitionSignature!==definitionSignature){row.body.replaceChildren();row.form=undefined;row.button=undefined;row.request=question?.id;row.submitting=false;row.rendered=true;row.definitionSignature=definitionSignature;
-      row.body.append(node('p',task.type==='human'?task.question:task.objective,'plan-objective'));
+       row.body.append(node('p',task.type==='human'?task.question:task.type==='tool'?'Read-only workspace tool · '+task.tool+' · no model call':task.objective,'plan-objective'));
+       if(task.type==='tool'){const args=node('details');args.append(node('summary','Tool arguments'),node('pre',task.arguments_json));row.body.append(args);}
       const edges=node('div',undefined,'plan-dependencies');edges.append(node('span',task.depends_on.length?'Depends on: ':'No dependencies'));
       for(const edge of task.depends_on){const link=node('button',edge.task+' → '+task.id+' · '+edge.require,'plan-edge');link.type='button';link.onclick=()=>{const target=[...planRows.values()].find(row=>row.card.dataset.node===edge.task);target?.card.scrollIntoView?.({block:'nearest'});};edges.append(link);}row.body.append(edges);
-      if(task.type==='agent')row.body.append(node('p',task.preset+' · version '+task.preset_revision+(task.preset==='workspace.coding'?' · effects keep their own approvals':' · read-only'),'inspection-note'));
+       if(task.type==='agent')row.body.append(node('p',task.preset+' · version '+task.preset_revision+(task.preset==='workspace.coding'?' · effects keep their own approvals':' · read-only'),'inspection-note'));
       const identity=node('details');identity.append(node('summary','Actual task identity'),node('p','Node '+task.backend_node_id+' · definition '+task.definition_revision+(task.claim_id?' · claim '+task.claim_id+' / '+task.claim_revision:''),'inspection-note'));row.body.append(identity);
     }
     const waiting=question?.state==='waiting'&&['paused','running'].includes(value.run.state);
