@@ -1993,12 +1993,40 @@ Event Repository::append_event(const std::string& id,const std::string& kind,con
     Transaction transaction(impl_->database);
     const auto owner_run=run(id);
     if(terminal(owner_run.state)) {
-        if(kind!="process.output")throw Conflict("Run is terminal");
-        Json payload;try{payload=Json::parse(object_json(json));}catch(...){throw std::invalid_argument("Invalid terminal process output event");}
-        if(!payload.contains("operation_id")||!payload["operation_id"].is_string())throw std::invalid_argument("Terminal process output must name its operation");
-        const auto operation=Repository::operation(payload["operation_id"].get<std::string>());
-        if(operation.spec.run_id!=id||operation.spec.tool!="run_process"||operation.state!=OperationState::executing)
-            throw Conflict("Terminal output is not owned by an executing process operation");
+        Json payload;
+        try{payload=Json::parse(object_json(json));}
+        catch(...){throw std::invalid_argument("Invalid terminal run event");}
+        if(kind=="process.output") {
+            if(!payload.contains("operation_id")||!payload["operation_id"].is_string())throw std::invalid_argument("Terminal process output must name its operation");
+            const auto operation=Repository::operation(payload["operation_id"].get<std::string>());
+            if(operation.spec.run_id!=id||operation.spec.tool!="run_process"||operation.state!=OperationState::executing)
+                throw Conflict("Terminal output is not owned by an executing process operation");
+        } else if(kind=="a2a.task_event") {
+            if(!payload.contains("operation_id")||!payload["operation_id"].is_string()||!payload.contains("event")||!payload["event"].is_object())
+                throw std::invalid_argument("A terminal A2A observation must identify its task operation and event");
+            const auto operation=Repository::operation(payload["operation_id"].get<std::string>());
+            if(operation.spec.run_id!=id||operation.spec.tool!="a2a_delegate"||
+               (operation.state!=OperationState::succeeded&&operation.state!=OperationState::uncertain))
+                throw Conflict("Terminal A2A observation is not owned by an acknowledged or uncertain task");
+            Json binding;try{binding=Json::parse(operation.spec.arguments_json);}catch(...){throw DatabaseError("Stored A2A task binding is invalid");}
+            if(!binding.is_object()||!binding.contains("agent_id")||!binding["agent_id"].is_string()||
+               !payload.contains("agent_id")||!payload["agent_id"].is_string()||payload["agent_id"].get<std::string>()!=binding["agent_id"].get<std::string>())
+                throw Conflict("Terminal A2A observation does not match its registered task owner");
+            Json receipt;try{receipt=Json::parse(operation.result_json);}catch(...){throw DatabaseError("Stored A2A task receipt is invalid");}
+            if(!receipt.is_object()||!receipt.contains("task_id")||!receipt["task_id"].is_string()||receipt["task_id"].get_ref<const std::string&>().empty())
+                throw Conflict("Terminal A2A observation has no recorded task identity");
+            const Json* task_event=&payload["event"];
+            for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})
+                if(task_event->contains(field)&&(*task_event)[field].is_object()){task_event=&(*task_event)[field];break;}
+            std::string observed_task_id;
+            if(task_event->contains("id")&&(*task_event)["id"].is_string())observed_task_id=(*task_event)["id"].get<std::string>();
+            if(task_event->contains("taskId")&&(*task_event)["taskId"].is_string())observed_task_id=(*task_event)["taskId"].get<std::string>();
+            if(observed_task_id.empty()||observed_task_id!=receipt["task_id"].get<std::string>())
+                throw Conflict("Terminal A2A observation does not match its recorded task");
+            if(payload.contains("event_id")&&(!payload["event_id"].is_string()||payload["event_id"].get_ref<const std::string&>().size()>1024||
+               payload["event_id"].get_ref<const std::string&>().find_first_of("\r\n")!=std::string::npos||payload["event_id"].get_ref<const std::string&>().find('\0')!=std::string::npos))
+                throw std::invalid_argument("Terminal A2A observation has an invalid event cursor");
+        } else throw Conflict("Run is terminal");
     }
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;
 }

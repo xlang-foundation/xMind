@@ -12,8 +12,12 @@ HTTP header. The native client and A2A registry contracts passed **2/2** in
 Release, including an actual two-subscription peer exchange and durable cursor
 recovery through the repository. A2A peers may omit or ignore SSE IDs, so this
 supports resumable peers without claiming protocol-wide exactly-once delivery.
-The exact Release output is recorded in
-[the focused CTest log](evidence/native-a2a-sse-cursor-ctest-20261014.log).
+After backend reopen, the contract resumes an uncertain task using its saved
+cursor and appends the observation to the terminal run journal without
+replaying the initial send. Terminal-run appends are limited to task-matching
+observations owned by a succeeded or uncertain A2A operation. A mismatched
+remote task is rejected. The client, registry and SQLite repository Release
+contracts pass **3/3**; see the [restart CTest log](evidence/native-a2a-sse-restart-ctest-20261014.log).
 
 ## Explicit outbound A2A task resubscription — 2026-10-13
 
