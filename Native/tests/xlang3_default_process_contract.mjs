@@ -19,6 +19,10 @@ const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN
 const marker='XMIND_XLANG3_RUNTIME_PROFILE_OK';let requests=0,providerError,serverProcess,origin;
 const provider=createServer((request,response)=>{let raw='';request.on('data',chunk=>raw+=chunk);request.on('end',()=>{try{
   const body=JSON.parse(raw);++requests;assert.equal(body.model,'synthetic-xmind-runtime-profile');
+  const system=body.messages.find(message=>message.role==='system')?.content||'';
+  assert.ok(system.includes('inspect only relevant files'));
+  assert.ok(system.includes('avoid repeated listings and reads'));
+  assert.ok(system.includes('never invoke python or python.exe'));
   const tools=body.tools.map(tool=>tool.function.name);assert.ok(tools.includes('run_process'));
   const processTool=body.tools.find(tool=>tool.function.name==='run_process').function;
   assert.ok(processTool.description.includes('Use the xlang3 profile'));
