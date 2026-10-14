@@ -124,6 +124,9 @@ Repository transactions use embedded xlang3 SQLite. CLI, browser and VS Code
 observe the same committed records and submit authenticated controller input.
 The broader [planning design](native-dynamic-plan-design.md) remains the target
 for additional deterministic tools, other node kinds and recursive execution.
+The separately documented [nested planning contract](native-dynamic-plan-recursion.md)
+specifies the current root-only ownership boundary and the required migration,
+shared-budget, recovery and client acceptance work.
 
 ## Tasks, dependencies and revisions
 

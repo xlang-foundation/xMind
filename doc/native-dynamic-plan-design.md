@@ -35,6 +35,11 @@ resource and prompt reads now run as dependent model-free nodes through the
 same frozen binding, controller approval and durable journal; see
 [validation status](VALIDATION_STATUS.md).
 
+The exact ownership, persistence, budget and recovery boundary required for
+nested planning is tracked in the
+[nested planning contract](native-dynamic-plan-recursion.md). Child planning
+remains disabled until that contract is implemented and accepted.
+
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
 workspace reads, exact-bound MCP and registered A2A tool nodes, and synchronous
