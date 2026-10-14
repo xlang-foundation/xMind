@@ -1,5 +1,25 @@
 # Current native validation
 
+## Dynamic-child A2A resubscription after SQLite reopen — 2026-10-14
+
+An approved A2A node in a dynamic plan now has an end-to-end restart contract
+for the existing explicit resubscription route. After the child run stores two
+stream events and cursor `dynamic-a2a-event-2`, the fixture closes the original
+AgentService and xlang3-backed SQLite repository, reopens the database, and
+resubscribes through the authenticated native HTTP route. The synthetic peer
+receives the saved cursor and returns event 3. The contract verifies event 3
+is appended to the original child run, the completed plan remains unchanged,
+and the audit contains one initial send and one resubscription. This proves
+explicit recovery for a dynamic child-owned operation, not automatic recovery
+or live external-peer interoperability.
+
+The focused Release CTest set passes **6/6** across the A2A client and registry
+contracts plus dynamic-plan schema, repository, engine, and MCP/process/A2A
+contracts. `node --check` and `git diff --check` also pass. The full native
+inventory last passed **144/144** before this checkpoint and was not rerun.
+Recursive planning, automatic recovery, live external providers/peers and
+rendered/installed planner acceptance remain open.
+
 ## Full native Release suite — 2026-10-14
 
 A clean Visual Studio 18 Release build in `build/native-verify` passed the full
@@ -73,11 +93,10 @@ interoperability.
 
 The focused dynamic-plan Release CTest set passes **4/4**, including both
 approved and denied direct A2A scenarios, MCP/process effects, pure schema
-admission and repository/engine contracts. The full native inventory last
-passed **144/144** before this checkpoint; it has not been rerun here.
-Automatic A2A stream resubscription/recovery after interruption within a plan
-child, recursive planning, live external providers/peers and rendered/installed
-planner acceptance remain open.
+admission and repository/engine contracts. The later child-owned explicit
+resubscription restart contract is recorded above. Recursive planning, live
+external providers/peers and rendered/installed planner acceptance remain
+open.
 
 ## Dynamic deterministic workspace-tool nodes — 2026-10-14
 

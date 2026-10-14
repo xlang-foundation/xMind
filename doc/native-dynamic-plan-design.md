@@ -22,7 +22,10 @@ and explicit event cursors to its owned child. The Release dynamic-plan fixture
 uses the actual native AgentService and approval journal with a synthetic local
 A2A 1.0 streaming peer; approved dispatch records both actual stream events and
 returns the peer's task ID, while denial produces no send. Automatic stream
-resubscription after interruption is still open.
+recovery is still open. The existing explicit resubscription route is now
+verified after SQLite reopen for a succeeded dynamic-child-owned operation:
+it resumes with that child's saved cursor, appends to the child journal, and
+does not repeat the initial send. See [validation status](VALIDATION_STATUS.md).
 Background process jobs, MCP resources/prompts in plans, recursive planning,
 live provider and external-browser/installed VS Code acceptance remain open.
 
@@ -603,7 +606,7 @@ require their own implementation and acceptance; the design itself supplies
 no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget
-integration, broader bounded recursion, streamed A2A plan-event recovery and
-the complete coding/provider parity matrix remain required work. These use
+integration, broader bounded recursion, automatic streamed A2A plan-event
+recovery and the complete coding/provider parity matrix remain required work. These use
 the same durable observed-results and capability rules. Private Nexus team
 coordination, PostgreSQL, WebRTC and Electron remain outside this OSS design.
