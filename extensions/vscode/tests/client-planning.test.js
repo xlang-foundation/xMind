@@ -2,6 +2,7 @@
 // Synthetic public DTOs test the thin client boundary, not native execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {BackendClient,validatePlanning,validatePlanObservation,observeOwnedRun,validatePlanInputText}=require('../client');
+const {planFixture,nestedPlanFixture}=require('./plan-fixture');
 const token='synthetic-planning-access-'.padEnd(64,'x');
 function snapshot(){
  const definition={id:'coding',type:'agent',objective:'Synthetic coding objective',preset:'workspace.coding',depends_on:[]};
@@ -11,7 +12,7 @@ function snapshot(){
    {id:'answer',type:'human',question:'Synthetic question',depends_on:[{task:'coding',require:'success'}],backend_node_id:'node_answer',definition_revision:1,state:'waiting_human',protected:true,effect_state:'none',claim_revision:1,claim_id:'question_claim',human_request_id:'question'}]},
   questions:[{id:'question',plan_id:'plan',root_run_id:'owner',label:'answer',backend_node_id:'node_answer',question:'Synthetic question',state:'waiting',definition_revision:1,published_event_seq:12,expires_unix_ms:9999999999999,input_json:'',input_event_seq:null}],
   revisions:[{plan_id:'plan',revision:1,accepted_event_seq:7,call_id:'call',spec:{nodes:[definition,{id:'answer',type:'human',question:'Synthetic question',depends_on:[{task:'coding',require:'success'}]}]}}],
-  calls:[{id:'call',plan_id:'plan',root_run_id:'owner',provider_tool_call_id:'provider_call',origin_attempt_id:'attempt',name:'plan_tasks',state:'accepted',accepted_revision:1,accepted_event_seq:7,result_event_seq:null,conversation_commit_seq:null,continuation_attempt_id:'',pending:true,response:{model:'synthetic-model',usage:{input_tokens:17,output_tokens:3,output_tokens_details:{reasoning_tokens:0}},elapsed_ms:29,first_token_ms:11}}],
+  calls:[{id:'call',plan_id:'plan',root_run_id:'owner',provider_tool_call_id:'provider_call',origin_attempt_id:'attempt',name:'plan_tasks',state:'accepted',accepted_revision:1,accepted_event_seq:7,result_event_seq:null,conversation_commit_seq:null,continuation_attempt_id:'',pending:true,response:{model:'synthetic-model',usage:{input_tokens:17,output_tokens:3,output_tokens_details:{reasoning_tokens:0}},elapsed_ms:29,first_token_ms:11}}],nested_plans:[],
   policy:{revision:1,catalogue_finalized:true,limits:{max_nodes:32,max_revisions:16,max_humans:8,change_bytes:262144,human_expiry_ms:900000,max_parent_turns:16},presets:[{id:'workspace.inspect',revision:1,readonly:true,turn_limit:4},{id:'workspace.coding',revision:1,readonly:false,turn_limit:16}]},
   budget:{policy_id:'native.dynamic-plan',policy_revision:1,revision:7,max_children:8,max_parallel:2,max_model_calls:32,wall_limit_ms:600000,children_admitted:1,planned_children_reserved:0,model_calls_reserved:3,parent_calls_held:1,parent_model_calls_reserved:1}};
 }
@@ -48,6 +49,10 @@ test('strict public planning DTOs reject foreign ownership, stale claims and pri
 test('provider call correlation retains the exact native 256-byte dotted/colon identity domain',()=>{
  const value=snapshot();value.calls[0].provider_tool_call_id='provider.call:'.padEnd(256,'x');assert.equal(validatePlanObservation(value,'owner').calls[0].provider_tool_call_id.length,256);
  for(const id of ['', 'x'.repeat(257),'provider/call','provider call']){const changed=snapshot();changed.calls[0].provider_tool_call_id=id;assert.throws(()=>validatePlanObservation(changed,'owner'));}
+});
+test('nested plan observations bind the actual child owner and expose its call/revision ledger',()=>{
+ const value=planFixture();value.nested_plans.push(nestedPlanFixture(value));assert.equal(validatePlanObservation(value,'plan-root').nested_plans[0].plan.nodes[0].backend_node_id,'nested-node-inner');
+ for(const change of [v=>v.nested_plans[0].owner_run_id='foreign',v=>v.nested_plans[0].parent_node_label='gate',v=>v.nested_plans[0].plan.root_run_id='foreign',v=>v.nested_plans[0].calls[0].parent_assistant_json='private',v=>v.nested_plans[0].revisions[0].spec.nodes[0].backend_node_id='private']){const invalid=planFixture();invalid.nested_plans.push(nestedPlanFixture(invalid));change(invalid);assert.throws(()=>validatePlanObservation(invalid,'plan-root'));}
 });
 test('coding children are observed through actual dynamic ownership without a read-only label',async()=>{
  const run=snapshot().run,child={run:{id:'coding_child',parent_id:'owner',session_id:'session',node_id:'node_coding',graph_root:false,state:'completed'},kind:'dynamic_agent',batch_id:'',task_id:'',preset_id:'workspace.coding',preset_revision:1,plan_id:'plan',node_label:'coding',claim_id:'claim',definition_revision:1,claim_revision:1};let histories=0;

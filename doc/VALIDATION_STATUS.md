@@ -1,5 +1,24 @@
 # Current native validation
 
+## Nested dynamic-plan observation and shared UI — 2026-10-14
+
+The root plan endpoint now enumerates durable plan-owner relations and returns
+depth-one child run state, topology, accepted revisions, and signed call
+receipts with available held-response usage. Root-scoped lookup remains bound
+to the depth-zero root owner even when child plans share its `root_run_id`.
+Plan and call revisions are rechecked before the HTTP snapshot is returned.
+The strict shared client binds each nested owner to the exact admitted parent
+agent node, and the shared browser/VS Code renderer displays the nested plan
+under that node.
+
+Release native repository and planning HTTP contracts passed **2/2**, including
+the root/child ownership tree and actual nested-plan HTTP projection. The VS
+Code/shared renderer suite passed **345/345** and the browser suite passed
+**109/109**. Client and renderer fixtures are synthetic; the HTTP contract
+uses actual xlang3-backed persistence with synthetic provider receipts. Nested
+owner histories, completed-response metrics and CLI presentation remain
+unimplemented.
+
 ## Nested dynamic-agent planning runtime — 2026-10-14
 
 An admitted dynamic-agent child can now own and execute one nested plan under

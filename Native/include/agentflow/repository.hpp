@@ -65,6 +65,7 @@ public:
     DynamicPlanRecord dynamic_plan(const std::string& plan);
     std::optional<DynamicPlanRecord> dynamic_plan_for_root(const std::string& root);
     std::optional<DynamicPlanRecord> dynamic_plan_for_owner(const std::string& owner);
+    std::vector<DynamicPlanRecord> dynamic_plans_for_root(const std::string& root);
     DynamicPlanCallRecord dynamic_plan_call(const std::string& call);
     // Backend-only call records contain exact private provider receipts.
     // HTTP/CLI observation must project a fixed public field whitelist.

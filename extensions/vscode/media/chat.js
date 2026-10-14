@@ -466,6 +466,13 @@ function planView(value){
         }catch(error){row.error.textContent=error instanceof SyntaxError?'Enter a valid JSON object.':error.message;}};
     }else if(!waiting&&row.form){row.form.remove();row.form=undefined;row.button=undefined;row.submitting=false;}
     row.body.querySelector('.plan-observation')?.remove();if(task.outcome_json){const detail=node('details',undefined,'plan-observation');detail.append(node('summary','Recorded outcome · '+task.effect_state),node('pre',task.outcome_json));row.body.append(detail);}
+    row.body.querySelector('.nested-plan')?.remove();const nested=value.nested_plans.filter(owner=>owner.parent_node_label===task.id);
+    for(const owner of nested){const detail=node('details',undefined,'nested-plan');detail.open=true;detail.append(node('summary','Nested plan · '+owner.plan.state+' · revision '+owner.plan.revision));detail.append(node('p','Owner '+owner.owner_run_id+' · run '+owner.run.state+' · plan '+owner.plan.id+' · depth '+owner.depth,'inspection-note'));
+      const nodes=node('ul');for(const child of owner.plan.nodes){const item=node('li',child.id+' · '+child.type+' · '+child.state+(child.child_state?' / '+child.child_state:''));if(child.type==='agent')item.append(node('span',' · '+child.preset+' · '+child.objective,'inspection-note'));else if(child.type==='tool')item.append(node('span',' · '+child.tool,'inspection-note'));else item.append(node('span',' · '+child.question,'inspection-note'));nodes.append(item);}detail.append(nodes);
+      if(owner.plan.halted)detail.append(node('p','Nested work has an uncertain outcome and is halted for inspection.','inspection-note'));
+      for(const call of owner.calls){const entry=node('p',call.name+' · '+call.state+' · '+call.id,'inspection-note');detail.append(entry);if(call.pending&&call.response){const info=node('div',undefined,'metrics');planResponseMetrics(info,call.response);detail.append(info);}}
+      row.body.append(detail);
+    }
   }
   const resume=byId('plan-resume');resume.hidden=!planCanResume(value);delete resume.dataset.submitting;planControls();
 }

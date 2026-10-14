@@ -214,6 +214,12 @@ Json public_plan(const DynamicPlanRecord& value){
         if(n.claim_revision){node["claim_revision"]=n.claim_revision;node["claim_id"]=n.claim_id;}if(!n.child_run_id.empty())node["child_run_id"]=n.child_run_id;if(!n.child_state.empty())node["child_state"]=n.child_state;if(!n.human_request_id.empty())node["human_request_id"]=n.human_request_id;if(!n.outcome_json.empty())node["outcome_json"]=n.outcome_json;if(n.settled_event_seq)node["settled_event_seq"]=*n.settled_event_seq;result["nodes"].push_back(std::move(node));
     }return result;
 }
+Json public_plan_question(const DynamicHumanRequest& h){return {{"id",h.id},{"plan_id",h.plan_id},{"root_run_id",h.root_run_id},{"label",h.label},{"backend_node_id",h.backend_node_id},{"question",h.question},{"state",h.state},{"definition_revision",h.definition_revision},{"published_event_seq",h.published_event_seq},{"expires_unix_ms",h.expires_unix_ms},{"input_json",h.input_json},{"input_event_seq",h.input_event_seq?Json(*h.input_event_seq):Json(nullptr)}};}
+Json public_plan_call(const DynamicPlanCallRecord& call){
+    const bool pending=!call.conversation_commit_seq&&(call.state=="accepted"||call.state=="report_ready");const auto actual=Json::parse(call.parent_assistant_json);
+    Json value={{"id",call.id},{"plan_id",call.plan_id},{"root_run_id",call.root_run_id},{"provider_tool_call_id",call.provider_tool_call_id},{"origin_attempt_id",call.origin_attempt_id},{"name",actual.at("tool_calls").at(0).at("name")},{"state",call.state},{"accepted_revision",call.accepted_revision},{"accepted_event_seq",call.accepted_event_seq},{"result_event_seq",call.result_event_seq?Json(*call.result_event_seq):Json(nullptr)},{"conversation_commit_seq",call.conversation_commit_seq?Json(*call.conversation_commit_seq):Json(nullptr)},{"continuation_attempt_id",call.continuation_attempt_id},{"pending",pending}};
+    if(pending)value["response"]=public_response(call.parent_assistant_json);return value;
+}
 Json public_plan_policy(const DynamicPlanCapabilities& c){
     auto presets=Json::array();for(const auto& p:c.presets)presets.push_back({{"id",p.id},{"revision",p.revision},{"readonly",p.readonly},{"turn_limit",p.turn_limit}});
     return {{"revision",c.revision},{"catalogue_finalized",c.catalogue_finalized},{"limits",{{"max_nodes",c.max_nodes},{"max_revisions",c.max_revisions},{"max_humans",c.max_humans},{"change_bytes",c.change_bytes},{"human_expiry_ms",c.human_expiry_ms},{"max_parent_turns",c.max_parent_turns}}},{"presets",std::move(presets)}};
@@ -1143,30 +1149,38 @@ struct HttpServer::Impl {
             if(!request.params.empty())throw std::invalid_argument("Plan detail does not accept query parameters");
             const auto root=identifier(request.matches[1]);const auto run=persistence.run(root).get();
             if(!run.parent_id.empty()||run.graph_root)throw NotFound("Select an ordinary owning root");
-            Json result={{"run",encode(run)},{"enabled",executor&&executor->supports_dynamic_planning()},{"plan",nullptr},{"questions",Json::array()},{"revisions",Json::array()},{"calls",Json::array()},{"policy",nullptr},{"budget",nullptr}};
+            Json result={{"run",encode(run)},{"enabled",executor&&executor->supports_dynamic_planning()},{"plan",nullptr},{"questions",Json::array()},{"revisions",Json::array()},{"calls",Json::array()},{"nested_plans",Json::array()},{"policy",nullptr},{"budget",nullptr}};
             std::optional<RootBudgetRecord> budget;std::optional<DynamicPlanCapabilities> captured;
             try{captured=persistence.dynamic_capabilities(root).get();}catch(const NotFound&){}
             if(captured){result["policy"]=public_plan_policy(*captured);budget=persistence.root_budget(root).get();result["budget"]=public_plan_budget(*budget);}
-            const auto plan=persistence.dynamic_plan_for_root(root).get();
+            const auto plans=persistence.dynamic_plans_for_root(root).get();std::optional<DynamicPlanRecord> plan;for(const auto& candidate:plans)if(candidate.owner_run_id==root){if(plan)throw DatabaseError("Ordinary root has multiple plan owners");plan=candidate;}
+            const auto all_plan_calls=plan?persistence.dynamic_plan_calls(root).get():std::vector<DynamicPlanCallRecord>{};
             if(plan){
                 result["plan"]=public_plan(*plan);
                 for(const auto& h:persistence.dynamic_human_requests(plan->id).get()){
-                    Json question={{"id",h.id},{"plan_id",h.plan_id},{"root_run_id",h.root_run_id},{"label",h.label},{"backend_node_id",h.backend_node_id},{"question",h.question},{"state",h.state},{"definition_revision",h.definition_revision},{"published_event_seq",h.published_event_seq},{"expires_unix_ms",h.expires_unix_ms},{"input_json",h.input_json},{"input_event_seq",h.input_event_seq?Json(*h.input_event_seq):Json(nullptr)}};
-                    result["questions"].push_back(std::move(question));
+                    result["questions"].push_back(public_plan_question(h));
                 }
                 for(const auto& revision:persistence.dynamic_plan_revisions(plan->id).get())result["revisions"].push_back({{"plan_id",revision.plan_id},{"revision",revision.revision},{"accepted_event_seq",revision.accepted_event_seq},{"call_id",revision.call_id},{"spec",Json::parse(revision.canonical_spec_json)}});
-                for(const auto& call:persistence.dynamic_plan_calls(root).get()){
-                    const bool pending=!call.conversation_commit_seq&&(call.state=="accepted"||call.state=="report_ready");
-                    const auto actual=Json::parse(call.parent_assistant_json);
-                    Json value={{"id",call.id},{"plan_id",call.plan_id},{"root_run_id",call.root_run_id},{"provider_tool_call_id",call.provider_tool_call_id},{"origin_attempt_id",call.origin_attempt_id},{"name",actual.at("tool_calls").at(0).at("name")},{"state",call.state},{"accepted_revision",call.accepted_revision},{"accepted_event_seq",call.accepted_event_seq},{"result_event_seq",call.result_event_seq?Json(*call.result_event_seq):Json(nullptr)},{"conversation_commit_seq",call.conversation_commit_seq?Json(*call.conversation_commit_seq):Json(nullptr)},{"continuation_attempt_id",call.continuation_attempt_id},{"pending",pending}};
-                    if(pending)value["response"]=public_response(call.parent_assistant_json);
-                    result["calls"].push_back(std::move(value));
+                for(const auto& call:all_plan_calls){
+                    if(call.plan_id==plan->id)result["calls"].push_back(public_plan_call(call));
                 }
+            }
+            for(const auto& nested:plans)if(nested.owner_run_id!=root){
+                if(nested.depth!=1||nested.parent_plan_id.empty()||nested.parent_node_label.empty())throw DatabaseError("Nested plan has an unsupported or incomplete owner link");
+                Json owner={{"owner_run_id",nested.owner_run_id},{"parent_plan_id",nested.parent_plan_id},{"parent_node_label",nested.parent_node_label},{"depth",nested.depth},{"run",encode(persistence.run(nested.owner_run_id).get())},{"plan",public_plan(nested)},{"questions",Json::array()},{"revisions",Json::array()},{"calls",Json::array()}};
+                for(const auto& h:persistence.dynamic_human_requests(nested.id).get())owner["questions"].push_back(public_plan_question(h));
+                for(const auto& revision:persistence.dynamic_plan_revisions(nested.id).get())owner["revisions"].push_back({{"plan_id",revision.plan_id},{"revision",revision.revision},{"accepted_event_seq",revision.accepted_event_seq},{"call_id",revision.call_id},{"spec",Json::parse(revision.canonical_spec_json)}});
+                for(const auto& call:all_plan_calls)if(call.plan_id==nested.id)owner["calls"].push_back(public_plan_call(call));
+                result["nested_plans"].push_back(std::move(owner));
             }
             // Separate typed reads are never presented as one revision when an
             // owner concurrently changes topology, questions, budget or state.
-            const auto fresh=persistence.dynamic_plan_for_root(root).get();
-            if(plan.has_value()!=fresh.has_value()||(plan&&(plan->id!=fresh->id||plan->revision!=fresh->revision||plan->state_sequence!=fresh->state_sequence||plan->state!=fresh->state))||persistence.run(root).get().state!=run.state||(budget&&persistence.root_budget(root).get().revision!=budget->revision)||(captured&&persistence.dynamic_capabilities(root).get().catalogue_finalized!=captured->catalogue_finalized))throw Conflict("Plan changed during inspection; refresh recorded state");
+            const auto fresh_plans=persistence.dynamic_plans_for_root(root).get();
+            if(plans.size()!=fresh_plans.size()||persistence.run(root).get().state!=run.state||(budget&&persistence.root_budget(root).get().revision!=budget->revision)||(captured&&persistence.dynamic_capabilities(root).get().catalogue_finalized!=captured->catalogue_finalized))throw Conflict("Plan changed during inspection; refresh recorded state");
+            if(!plans.empty()&&!plan)throw DatabaseError("Nested plan tree has no depth-zero root owner");
+            for(std::size_t i=0;i<plans.size();++i)if(plans[i].id!=fresh_plans[i].id||plans[i].owner_run_id!=fresh_plans[i].owner_run_id||plans[i].parent_plan_id!=fresh_plans[i].parent_plan_id||plans[i].parent_node_label!=fresh_plans[i].parent_node_label||plans[i].depth!=fresh_plans[i].depth||plans[i].revision!=fresh_plans[i].revision||plans[i].state_sequence!=fresh_plans[i].state_sequence||plans[i].state!=fresh_plans[i].state)throw Conflict("Plan changed during inspection; refresh recorded state");
+            const auto fresh_calls=plan?persistence.dynamic_plan_calls(root).get():std::vector<DynamicPlanCallRecord>{};if(all_plan_calls.size()!=fresh_calls.size())throw Conflict("Plan calls changed during inspection; refresh recorded state");
+            for(std::size_t i=0;i<all_plan_calls.size();++i)if(all_plan_calls[i].id!=fresh_calls[i].id||all_plan_calls[i].plan_id!=fresh_calls[i].plan_id||all_plan_calls[i].owner_run_id!=fresh_calls[i].owner_run_id||all_plan_calls[i].provider_tool_call_id!=fresh_calls[i].provider_tool_call_id||all_plan_calls[i].origin_attempt_id!=fresh_calls[i].origin_attempt_id||all_plan_calls[i].state!=fresh_calls[i].state||all_plan_calls[i].accepted_revision!=fresh_calls[i].accepted_revision||all_plan_calls[i].accepted_event_seq!=fresh_calls[i].accepted_event_seq||all_plan_calls[i].result_event_seq!=fresh_calls[i].result_event_seq||all_plan_calls[i].conversation_commit_seq!=fresh_calls[i].conversation_commit_seq||all_plan_calls[i].continuation_attempt_id!=fresh_calls[i].continuation_attempt_id)throw Conflict("Plan calls changed during inspection; refresh recorded state");
             reply(response,result);
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));

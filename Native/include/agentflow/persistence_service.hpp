@@ -54,6 +54,7 @@ public:
     std::future<DynamicPlanRecord> dynamic_plan(std::string plan);
     std::future<std::optional<DynamicPlanRecord>> dynamic_plan_for_root(std::string root);
     std::future<std::optional<DynamicPlanRecord>> dynamic_plan_for_owner(std::string owner);
+    std::future<std::vector<DynamicPlanRecord>> dynamic_plans_for_root(std::string root);
     std::future<DynamicPlanCallRecord> dynamic_plan_call(std::string call);
     std::future<std::vector<DynamicPlanCallRecord>> dynamic_plan_calls(std::string root);
     std::future<std::vector<DynamicPlanRevisionRecord>> dynamic_plan_revisions(std::string plan);

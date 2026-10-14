@@ -126,7 +126,7 @@ test('DeepSeek Settings enrollment uses the footer model chooser and saved respo
     doc.getElementById('settings').click();assert.equal(input.value,'');
   }finally{r.dom.window.close();}
 });
-const {planFixture,inputMessage}=require('./plan-fixture');
+const {planFixture,inputMessage,nestedPlanFixture}=require('./plan-fixture');
 test('context control stays beside the bottom composer, shows actual counters and submits only the displayed session/model/head',()=>{
  const r=renderer(),doc=r.dom.window.document,record={session_id:'session',model_id:'synthetic-model',enabled:true,automatic:false,head_revision:4,source_watermark:9,manual:null,checkpoint:{id:'checkpoint',provider_elapsed_ms:12,preparation_elapsed_ms:14,usage:{input_tokens:41,output_tokens:9}}};
  try{r.send({type:'sessions',sessions:[{id:'session',title:'Synthetic conversation'}],selected:'session'});r.send({type:'capabilities',execution:true,models:[{id:'synthetic-model'}],model:'synthetic-model'});r.send({type:'context',record});
@@ -149,6 +149,11 @@ test('Agent plan renders actual dependencies/correlations/held response metrics 
   assert.equal(area.querySelectorAll('script').length,0);assert.ok(area.textContent.includes('<script>fixtureAttack()</script>'));assert.equal(area.querySelectorAll('.metrics').length,2);assert.match(area.querySelector('.plan-call .metrics').textContent,/Input tokens 7Output tokens 3/);assert.ok(!area.querySelector('.plan-call .metrics').textContent.includes('Total'),'Missing held-response total is not inferred');assert.ok(doc.querySelector('footer #model'));assert.equal(doc.querySelector('#plan-view #model'),null);assert.equal(doc.getElementById('plan-resume').hidden,true);assert.equal(r.posted.length,1,'Plan observation cannot submit actions');
   const child={run:{id:'coding-child',parent_id:record.run.id,state:'completed'},kind:'dynamic_agent',node_label:'code',preset_id:'workspace.coding',preset_revision:1};r.send({type:'owned-children',parent:record.run,children:[child],histories:{'coding-child':[{role:'assistant',data:{content:'Synthetic observed coding response',usage:{prompt_tokens:19,completion_tokens:5}}}]}});
   const owned=doc.getElementById('owned-view');assert.match(owned.textContent,/Coding agent · effects require their own approval/);assert.ok(!owned.textContent.includes('Read-only investigation'));assert.match(owned.querySelector('.metrics').textContent,/Input 19Output 5Total —/);
+ }finally{r.dom.window.close();}
+});
+test('nested dynamic plans render under their admitting parent agent with actual owner state and metrics',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture();record.nested_plans.push(nestedPlanFixture(record));try{r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});const parent=[...doc.querySelectorAll('.plan-node')].find(item=>item.dataset.node==='read');const nested=parent.querySelector('.nested-plan');assert.ok(nested);assert.match(nested.textContent,/Nested plan · active · revision 1/);assert.match(nested.textContent,/Owner leaf-read · run running/);assert.match(nested.textContent,/inner · agent · pending/);assert.match(nested.textContent,/plan-nested/);assert.match(nested.querySelector('.metrics').textContent,/Input tokens 13Output tokens 4/);
+  const owner=record.nested_plans[0];owner.plan.state_sequence++;owner.plan.ready=[];owner.plan.claimed=['inner'];owner.plan.nodes[0].state='claimed';r.send({type:'plan',record});assert.match(parent.textContent,/Nested plan · active · revision 1/);assert.match(parent.textContent,/inner · agent · claimed/);
  }finally{r.dom.window.close();}
 });
 test('read-only and MCP plan tool nodes render their arguments and real approval status',()=>{

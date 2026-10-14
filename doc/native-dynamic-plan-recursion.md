@@ -118,16 +118,22 @@ inspectable; it cannot be converted into an ordinary tool error.
 4. Add durable pause/resume and crash-recovery for nested human waits and
    unresolved effects. Verify root restart drains or preserves every nested
    owner without duplicate provider dispatch or effect replay.
-5. Render the plan tree, nested owner histories, metrics, human waits and
-   uncertainty through the shared browser/VS Code view and inspect the actual
-   CLI output. Test depth/total-work exhaustion and parallel sibling plans.
+5. **Partly implemented:** `/v1/runs/{root}/plan` now returns depth-one owner
+   bindings, each child run, its current plan topology, accepted revisions and
+   call receipts/available held-response metrics. The strict shared browser/
+   VS Code view renders each nested plan under the exact admitting parent task.
+   Repository and HTTP contracts verify the owner link and projection. Nested
+   owner histories, completed-response metrics, CLI rendering, depth/total-
+   work exhaustion and parallel sibling plans remain pending.
 
-The executor, owner lifecycle and nested-provider acceptance stages now pass
+The executor, owner lifecycle and nested-provider acceptance stages passed
 the focused Release set **3/3** (`native_dynamic_plan_contract`,
 `native_dynamic_plan_repository_contract`, and
 `native_dynamic_plan_engine_contract`). The engine peer is synthetic; this
-does not prove live-provider behavior. Durable nested pause/restart recovery
-and browser, VS Code and CLI presentation remain incomplete.
+does not prove live-provider behavior. Nested-plan HTTP and shared client
+presentation are now implemented with synthetic DTO/HTTP contracts. Durable
+nested pause/restart recovery, nested owner histories, completed-response
+metrics, CLI presentation and live-provider behavior remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).
