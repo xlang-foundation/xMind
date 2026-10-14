@@ -300,7 +300,7 @@ async function activate(context) {
 
   async function persistSessionModel(model) {
     if(!sessionId||health?.session_model_selection!==true||typeof client.sessionModel!=='function'||!profileController)return;
-    const binding=await profileController.admission();if(!binding.provider_profile_id)return;
+    const binding=await profileController.admission();if(!binding?.provider_profile_id)return;
     const observed=sessionModelState||await client.sessionModel(sessionId);
     const saved=await client.replaceSessionModel(sessionId,model,binding,observed);
     if(saved.session_id!==sessionId||saved.revision!==observed.revision+1||saved.selected?.model_id!==model||saved.selected.provider_profile_id!==binding.provider_profile_id)throw new Error('Backend conversation model acknowledgement changed.');

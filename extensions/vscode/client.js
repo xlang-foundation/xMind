@@ -851,7 +851,7 @@ class ProviderProfileController {
   wire(id){const profile=this.state?.profiles.find(value=>value.id===id);return this.state?.routes.find(value=>value.id===profile?.route_id)?.wire;}
   choice(){if(this.bound(this.draft))return this.draft;if(this.bound(this.savedCatalogue))return this.savedCatalogue;return undefined;}
   models(selected){const choice=this.choice();if(!choice||!this.current(this.epoch))return false;const profile=this.state.profiles.find(value=>value.id===choice.id);this.post({type:'model-list',models:choice.ids.map(id=>({id})),model:selected??profile?.model});return true;}
-  async admission(){if(!this.state&&!await this.refresh())throw new Error('Provider profile admission requires profile metadata');if(this.disposed||!this.state||!this.guard())throw new Error('Backend changed before run admission');return {provider_profile_id:this.state.active,expected_provider_revision:this.state.revision};}
+  async admission(){if(!this.state&&!await this.refresh())throw new Error('Provider profile admission requires profile metadata');if(this.disposed||!this.state||!this.guard())throw new Error('Backend changed before run admission');if(!this.state.active)return undefined;return {provider_profile_id:this.state.active,expected_provider_revision:this.state.revision};}
   async reconcileAdmission(binding,error){
     if(error?.status!==409||!binding)return false;
     const epoch=this.epoch;if(!await this.refresh()||!this.current(epoch))return false;

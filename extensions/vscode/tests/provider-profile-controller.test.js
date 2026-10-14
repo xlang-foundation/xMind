@@ -13,6 +13,11 @@ test('new workspace with imported keys asks for a saved provider without discove
  }finally{controller.dispose();}
 });
 
+test('an unconfigured backend omits provider admission until a profile is selected',async()=>{
+ const state={revision:0,active:'',profiles:[],routes:registry().routes},controller=new ProviderProfileController({providerProfiles:async()=>state},()=>{});
+ try{await controller.refresh();assert.equal(await controller.admission(),undefined);}finally{controller.dispose();}
+});
+
 test('saved-provider guidance cannot publish after its workspace attachment is retired',async()=>{
  let current=true;const posted=[],state={...registry(),active:''};
  const controller=new ProviderProfileController({providerProfiles:async()=>state},value=>posted.push(value),()=>current);
