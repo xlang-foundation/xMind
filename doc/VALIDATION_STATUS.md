@@ -1,5 +1,20 @@
 # Current native validation
 
+## Durable session prompt inbox — 2026-10-13
+
+The browser and VS Code sidebar can now queue prompt input during an active
+session run. SQLite retains pending input across page/backend reconnects, the
+sidebar shows queued text, and the oldest item is submitted through ordinary
+run admission once the current turn is idle. Run creation and claiming the
+inbox item are atomic, and the admitted prompt must exactly match the queued
+content. This is part of xMind's backend/UI path; it required no general xlang3
+optimization.
+
+The real native HTTP contract and repository contract passed **2/2**; the
+browser classic-script and HTTP-adapter suites passed **14/14**. See
+[durable inbox behavior and limits](native-session-inbox.md) and checkpoint
+`75a1d54`.
+
 ## Current xMind AgentRunner xlang3 process acceptance — 2026-10-13
 
 The current unified `xmind.exe` backend loaded the saved local provider
