@@ -75,7 +75,7 @@ public:
     SessionAgentState session_agent(const std::string& session)const override;
     SessionAgentState select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected_revision)override;
     SessionModelState session_model(const std::string& session)const override;
-    SessionModelState select_session_model(const std::string& session,std::string model,std::int64_t expected_revision,ProviderProfileAdmission expected)override;
+    SessionModelState select_session_model(const std::string& session,std::optional<std::string> model,std::int64_t expected_revision,ProviderProfileAdmission expected)override;
     WorkspaceSkillCatalogue workspace_skills()const override;
     WorkspaceSessionSkills session_skills(const std::string& session)const override;
     WorkspaceSessionSkills replace_session_skills(const std::string& session,std::vector<std::string> ids,std::int64_t revision,WorkspaceAdmission expected)override;

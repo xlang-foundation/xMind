@@ -33,6 +33,11 @@ int main(int argc,char** argv) {
     try {
         Directory directory;const auto path=(directory.path/"state.sqlite").string();
         const std::vector<std::string> roots{argv[1],argv[2]};
+        const auto model_migration_path=(directory.path/"session-model-v21.sqlite").string();
+        {Repository old_schema(model_migration_path,roots);old_schema.create_session("saved","Schema 21 model selection");old_schema.replace_session_model("saved",SessionModelSelection{"fixture-model","saved-profile","openai.chat"},0);}
+        {XlangSqlite previous(model_migration_path,roots);previous.execute("DROP TABLE session_models");previous.execute("CREATE TABLE session_models(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),selection_json TEXT NOT NULL CHECK(length(CAST(selection_json AS BLOB))<=2048 AND json_valid(selection_json) AND json_type(selection_json)='object' AND json_type(selection_json,'$.version')='integer' AND json_extract(selection_json,'$.version')=1 AND json_type(selection_json,'$.model_id')='text' AND length(json_extract(selection_json,'$.model_id')) BETWEEN 1 AND 256 AND json_type(selection_json,'$.provider_profile_id')='text' AND length(json_extract(selection_json,'$.provider_profile_id')) BETWEEN 1 AND 256 AND json_type(selection_json,'$.provider_route_id')='text' AND length(json_extract(selection_json,'$.provider_route_id')) BETWEEN 1 AND 256),revision INTEGER NOT NULL CHECK(revision>0))");previous.execute("INSERT INTO session_models VALUES('saved','{\"version\":1,\"model_id\":\"fixture-model\",\"provider_profile_id\":\"saved-profile\",\"provider_route_id\":\"openai.chat\"}',1)");previous.execute("PRAGMA user_version=21");}
+        {Repository upgraded(model_migration_path,roots);const auto selected=upgraded.session_model("saved");require(selected.revision==1&&selected.selected&&selected.selected->model_id=="fixture-model"&&selected.selected->provider_profile_id=="saved-profile","Schema 22 migration must preserve the revisioned provider-bound model selection");}
+        {XlangSqlite current(model_migration_path,roots);require(std::get<std::int64_t>(current.execute("PRAGMA user_version").rows.at(0).at(0))==22&&current.execute("PRAGMA foreign_key_check").rows.empty(),"Schema 21 model selection must migrate to schema 22 with valid ownership");}
 #if defined(_WIN32)
         const auto viewPath=(directory.path/"views.sqlite").string();const std::string authority(64,'a'),origin="http://127.0.0.1:60405";std::string cookie;
         {
@@ -100,6 +105,9 @@ int main(int argc,char** argv) {
             const auto model_state=service.session_model("shared").get();require(model_state.revision==0&&model_state.editable&&!model_state.selected,"New conversations have no implicit session model override");
             const auto selected_model=service.replace_session_model("shared",SessionModelSelection{"claude-sonnet-4-5","claude-team","anthropic.messages"},model_state.revision).get();require(selected_model.revision==1&&selected_model.selected&&selected_model.selected->model_id=="claude-sonnet-4-5"&&selected_model.selected->provider_profile_id=="claude-team"&&selected_model.selected->provider_route_id=="anthropic.messages","Session model selection must pin the model to its provider profile and route");
             rejects<Conflict>([&]{service.replace_session_model("shared",SessionModelSelection{"other-model","claude-team","anthropic.messages"},0).get();});
+            const auto reset_model=service.replace_session_model("shared",std::nullopt,selected_model.revision).get();require(reset_model.revision==2&&!reset_model.selected,"Clearing the model override must leave a revisioned default-profile selection");
+            rejects<Conflict>([&]{service.replace_session_model("shared",std::nullopt,selected_model.revision).get();});
+            const auto restored_model=service.replace_session_model("shared",SessionModelSelection{"claude-sonnet-4-5","claude-team","anthropic.messages"},reset_model.revision).get();require(restored_model.revision==3&&restored_model.selected,"Selecting again after reset must preserve monotonic compare-and-swap revisions");
             const auto before_fork_history=service.history("shared").get();
             const auto forked=service.fork_session("forked","shared",message_boundary).get();
             require(forked.id=="forked"&&forked.parent_id=="shared"&&forked.fork_boundary_sequence==message_boundary&&forked.fork_boundary_type=="before"&&forked.title=="Owned request (fork #1)","Fork must persist source lineage, exclusive boundary and derived title");
@@ -108,7 +116,7 @@ int main(int argc,char** argv) {
             require(service.history("shared").get().size()==100,"Fork cannot mutate source history");
             const auto fork_agent=service.session_agent("forked").get();require(fork_agent.selected&&fork_agent.selected->id=="fork-reviewer","Fork must copy the session agent selection");
             const auto fork_skills=service.session_skills("forked","workspace-scope").get();require(fork_skills.revision==1&&fork_skills.selections.ids==std::vector<std::string>{"review-skill"},"Fork must copy workspace-scoped skill selections");
-            const auto fork_model=service.session_model("forked").get();require(fork_model.selected&&fork_model.revision==1&&fork_model.selected->model_id=="claude-sonnet-4-5"&&fork_model.selected->provider_route_id=="anthropic.messages","Fork must copy the session's provider-bound model selection");
+            const auto fork_model=service.session_model("forked").get();require(fork_model.selected&&fork_model.revision==3&&fork_model.selected->model_id=="claude-sonnet-4-5"&&fork_model.selected->provider_route_id=="anthropic.messages","Fork must copy the session's provider-bound model selection and revision");
             const auto full_fork=service.fork_session("forked-full","shared").get();require(service.history("forked-full").get().size()==100&&full_fork.fork_boundary_type=="through","Fork without a boundary must include the complete settled transcript");
             rejects<NotFound>([&]{service.fork_session("fork-missing","shared",999999).get();});
             service.create_run("race","shared").get();
@@ -135,6 +143,7 @@ int main(int argc,char** argv) {
         {
             PersistenceService reopened(path,roots);
             require(reopened.history("shared").get().size()==125,"Drained requests must survive restart");
+            const auto resumed_model=reopened.session_model("shared").get();require(resumed_model.revision==3&&resumed_model.selected&&resumed_model.selected->model_id=="claude-sonnet-4-5","Session model reset and reselection revisions must survive repository restart");
             const auto restored_fork=reopened.session("forked").get();require(restored_fork.parent_id=="shared"&&restored_fork.fork_boundary_type=="before"&&reopened.history("forked").get().size()==49,"Fork lineage and transcript must survive xlang3 repository restart");
             require(reopened.session_agent("forked").get().selected->id=="fork-reviewer"&&reopened.session_skills("forked","workspace-scope").get().selections.ids==std::vector<std::string>{"review-skill"},"Forked conversation configuration must survive restart");
             require(reopened.history("forked-full").get().size()==100,"Full branch history must survive restart");

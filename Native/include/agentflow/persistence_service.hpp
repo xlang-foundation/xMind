@@ -138,7 +138,7 @@ public:
     std::future<SessionAgentState> session_agent(std::string session);
     std::future<SessionAgentState> replace_session_agent(std::string session,std::optional<AgentDefinition> selected,std::int64_t expected_revision);
     std::future<SessionModelState> session_model(std::string session);
-    std::future<SessionModelState> replace_session_model(std::string session,SessionModelSelection selected,std::int64_t expected_revision);
+    std::future<SessionModelState> replace_session_model(std::string session,std::optional<SessionModelSelection> selected,std::int64_t expected_revision);
     std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json,std::optional<SkillSelections> skills={});
     std::future<Run> complete_run(std::string id,std::string assistant_json);
     std::future<Run> run(std::string id);

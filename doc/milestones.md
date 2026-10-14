@@ -5,12 +5,14 @@
 The console chat now reads the selected model for an opened session from the
 native API and restores it only when its provider profile and route are
 active. `/model ID` persists a selection with the provider and session
-revisions; `/model` saves the active profile's configured model. The command
-can start a conversation when none is selected. The actual compiled CLI
-acceptance test selects a model, verifies the revision-checked native write,
-uses that model for inference, restarts the xlang3-backed SQLite runtime and
-confirms the next CLI session restores it. The focused Release CTest passes.
-No xlang3 source change was needed.
+revisions; `/model` clears the override so run admission resolves the provider's
+current default. A nullable SQLite selection with a monotonic revision
+preserves compare-and-swap safety, and the v21→v22 migration keeps existing
+provider-bound choices. The command can start a conversation when none is
+selected. The actual compiled CLI acceptance test selects a model, verifies its
+native write, restarts the SQLite runtime and confirms restoration, then clears
+the choice and verifies the next inference uses the profile default. The
+focused Release CTests pass. No xlang3 source change was needed.
 
 ## Portable local session archives (2026-10-13)
 

@@ -9,7 +9,7 @@
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     auto version=scalar("PRAGMA user_version");if(version==12)return;
-    if(version==21){if(scalar("SELECT count(*) FROM session_models")!=0)throw std::runtime_error("Legacy fixture cannot discard actual session model selection");database.execute("DROP TABLE session_models");database.execute("PRAGMA user_version=20");version=20;}
+    if(version>=21){if(scalar("SELECT count(*) FROM session_models")!=0)throw std::runtime_error("Legacy fixture cannot discard actual session model selection");database.execute("DROP TABLE session_models");database.execute("PRAGMA user_version=20");version=20;}
     if(version==20){if(scalar("SELECT count(*) FROM session_inbox")!=0)throw std::runtime_error("Legacy fixture cannot discard actual session inbox state");database.execute("DROP INDEX session_inbox_order");database.execute("DROP TABLE session_inbox");database.execute("PRAGMA user_version=18");version=18;}
     if(version==18){if(scalar("SELECT count(*) FROM a2a_continuation_messages")!=0)throw std::runtime_error("Legacy fixture cannot discard actual A2A continuation history");database.execute("DROP TABLE a2a_continuation_messages");database.execute("PRAGMA user_version=17");version=17;}
     // Schema 17 only widens the direct-agent budget CHECK. These fixtures

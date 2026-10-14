@@ -261,8 +261,12 @@ try{
  await stop({revision:8,credentials:5,sessions:1,session_id:session.id,messages:2,runs:1});
  const reopened=await start();assert.equal(reopened.reopened,true);assert.equal(reopened.revision,8);assert.deepEqual(await invoke(['history',session.id]),saved);
  assert.deepEqual(await invoke(['provider-models']),listed.gemini,'SQLite reopen must resolve the original saved Gemini credential');
- const continuation=await chat(session.id,'/profiles\n/models\nContinue signed CLI after reopen\n/history\n/exit\n');
+ const continuationAudit=audit.length,continuation=await chat(session.id,'/profiles\n/models\n/model\n/models\nContinue signed CLI after reopen\n/history\n/exit\n');
  assert.equal(continuation.records.find(value=>value.type==='models').selected_model,model,'Reopening a conversation must restore its durable model selection');
+ const clearedModels=continuation.records.filter(value=>value.type==='models');assert.equal(clearedModels.length,2);assert.equal(clearedModels[1].selected_model,'','/model must clear the durable override and restore provider default behavior');
+ const clearWrite=audit.slice(continuationAudit).find(value=>value.path==='/v1/sessions/'+session.id+'/model'&&value.method==='POST');assert.deepEqual(clearWrite.body,{expected_provider_revision:8,expected_revision:1,model_id:null,provider_profile_id:'gemini'});assert.equal(clearWrite.status,200);
+ const clearEvent=continuation.records.find(value=>value.type==='model');assert.equal(clearEvent.model_id,null);assert.equal(clearEvent.revision,2);
+ const continuationAdmission=audit.slice(continuationAudit).find(value=>value.path==='/v1/runs'&&value.method==='POST');assert.equal(Object.hasOwn(continuationAdmission.body,'model_id'),false,'Reset selection must let native profile defaults choose the inference model');
  assert.deepEqual(continuation.records.filter(value=>value.type==='turn_finished').map(value=>value.exit_status),[0]);
  const resumed=await invoke(['history',session.id]);assert.equal(resumed.length,4);assert.deepEqual(resumed.slice(0,2),saved);const reopenedAnswer=receipt(resumed,3);assert.equal(reopenedAnswer.usage.prompt_tokens,13);assert.equal(reopenedAnswer.usage.completion_tokens,4);assert.equal(Object.hasOwn(reopenedAnswer.usage,'total_tokens'),false);
  const blocked=await chat(session.id,'Synthetic blocked CLI turn\n/provider-models\n/profiles\n/profile gemini 8\n/exit\n',{exit:1});
