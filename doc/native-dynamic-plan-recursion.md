@@ -86,6 +86,32 @@ child context pins and the root's remaining active-time segment. Restart
 recovery must settle from actual child/event/effect evidence and must never
 reconstruct or replay a model plan from a prompt.
 
+The current synchronous call stack makes this a root-wide pause, not an
+independent child pause. A nested `DynamicPlanExecutor` runs inside its admitted
+agent child's `AgentRunner`, which in turn is a future owned by its parent
+executor. Returning a paused child directly currently fails the parent's
+terminal-child settlement check; after restart, the in-memory future and active
+batch no longer exist, and the executor deliberately refuses to adopt that
+claimed node. A correct implementation therefore has to persist the complete
+owner chain from the ordinary root plan to the waiting plan, then update the
+child executor's join rules so only a database-proven terminal child outcome
+can be settled after restart.
+
+The durable pause must bind the waiting plan and accepted call to each ancestor
+plan node and its claimed child run. The pause transaction must close the one
+root budget segment, preserve the exact context snapshot used by the waiting
+owner, and ensure every owner in the continuation chain is paused with no live
+child work, model attempt, or unresolved effect. Independent sibling work must
+either reach a journaled terminal result before that transaction commits or
+prevent the pause; it cannot be silently abandoned. On restart, the service
+must validate the whole chain against plan ownership, claim receipts, run
+states, human answers, context bindings, budget segments and effect journals.
+Resume proceeds from the deepest waiting plan outward, using the already
+accepted call and actual child results. It must never reissue an accepted
+planning call, recreate a child, or redispatch an uncertain effect. If any
+binding is stale or incomplete, retain the paused run for inspection and
+cancellation rather than guessing at a continuation.
+
 Bounds are root-wide as well as per-plan: nested depth, total planned
 nodes/revisions/human questions, model turns, active descendants and
 wall/active time must be checked transactionally against the one root budget.
