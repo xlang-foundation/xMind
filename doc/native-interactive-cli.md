@@ -195,9 +195,12 @@ requires inspecting recorded runs before an explicit resubmission.
 Chat keeps a bounded input queue active while a run streams. `/cancel` sends one
 backend cancellation request and continues observing until the server records a
 terminal state. `/exit` detaches immediately and leaves the server-owned run
-untouched. Other lines entered during a run remain queued for normal processing
-after that turn. Closed scripted input is drained as commands instead of being
-interpreted as a live cancellation or detach request.
+untouched. Ordinary prompt lines entered during an active run are saved to the
+durable session inbox. Once the run ends, the CLI admits queued prompts in order
+through the regular run API; SQLite atomically claims each prompt with the run
+and writes it to conversation history exactly once. Slash commands remain queued
+for normal processing after the active turn. Closed scripted input is drained as
+commands instead of being interpreted as a live cancellation or detach request.
 
 At an actual approval prompt, `/allow ID` and `/deny ID` use only the displayed
 owned operation; the backend revalidates its exact plan, arguments and expiry.

@@ -426,12 +426,22 @@ public:
         if(line=="/cancel"||line=="/exit"){
             state->queued_bytes-=line.size();--state->queued_lines;state->changed.notify_all();return line;
         }
-        state->deferred.push_back(std::move(line));state->changed.notify_all();return std::nullopt;
+        if(!line.empty()&&line.front()=='/'&&!line.starts_with("//")){
+            state->deferred.push_back(std::move(line));state->changed.notify_all();return std::nullopt;
+        }
+        state->queued_bytes-=line.size();--state->queued_lines;state->changed.notify_all();
+        if(line.starts_with("//"))line.erase(0,1);
+        return line;
     }
 private:
     std::shared_ptr<State> state_;
     std::thread reader_;
 };
+std::string queued_input_id(){
+    static constexpr char digits[]="0123456789abcdef";std::random_device random;std::string result="inbox_";result.reserve(38);
+    for(int i=0;i<16;++i){const auto byte=static_cast<unsigned char>(random());result.push_back(digits[byte>>4]);result.push_back(digits[byte&15]);}
+    return result;
+}
 constexpr int run_detached=3;
 int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false,ChatInput* input=nullptr) {
     using Json=nlohmann::json;const auto path="/v1/runs/"+run;
@@ -486,12 +496,27 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                     std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";
                     return run_detached;
                 }
-                if(control&&*control=="/cancel"&&!cancellation_requested){
-                    const auto response=client.Post(path+"/cancel",headers,Json::object().dump(),"application/json");
-                    if(!response)throw std::runtime_error("Cannot reach xMind Server to cancel the active run");
-                    if(response->status<200||response->status>=300)std::cerr<<"Backend rejected cancellation (HTTP "<<response->status<<"). Refreshing run state.\n";
-                    else {std::cout<<Json{{"type","run_cancel_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Cancellation result output is unavailable");cancellation_requested=true;}
+                if(control&&*control=="/cancel"){
+                    if(!cancellation_requested){
+                        const auto response=client.Post(path+"/cancel",headers,Json::object().dump(),"application/json");
+                        if(!response)throw std::runtime_error("Cannot reach xMind Server to cancel the active run");
+                        if(response->status<200||response->status>=300)std::cerr<<"Backend rejected cancellation (HTTP "<<response->status<<"). Refreshing run state.\n";
+                        else {std::cout<<Json{{"type","run_cancel_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Cancellation result output is unavailable");cancellation_requested=true;}
+                    }
                     continue; // Re-read durable state; never ask for new approval after cancellation.
+                }
+                if(control&&!control->empty()&&control->find_first_not_of(" \t\r\n")!=std::string::npos){
+                    const auto inbox_id=queued_input_id();const Json queued={{"id",inbox_id},{"content",*control}};
+                    const auto response=client.Post("/v1/sessions/"+session+"/inbox",headers,queued.dump(),"application/json");
+                    if(!response)throw std::runtime_error("Cannot reach xMind Server while saving queued chat input; inspect the session inbox before resubmitting");
+                    if(response->status==202){
+                        const auto item=Json::parse(response->body);if(!item.is_object()||item.value("id",std::string{})!=inbox_id||item.value("session_id",std::string{})!=session||item.value("content",std::string{})!=*control||!item.contains("state")||!item["state"].is_string()||(item["state"]!="queued"&&item["state"]!="claimed")||!item.contains("created_ms")||!item["created_ms"].is_number_integer())throw std::runtime_error("Invalid durable queued-input acknowledgement");
+                        std::cout<<Json{{"type","prompt_queued"},{"item",item}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued-input output is unavailable");
+                    }else{
+                        std::cout<<Json{{"type","prompt_queue_rejected"},{"session_id",session},{"http_status",response->status},{"content",*control}}.dump()<<'\n'<<std::flush;
+                        std::cerr<<"Backend did not save the queued prompt (HTTP "<<response->status<<"); the prompt is retained above.\n";
+                    }
+                    continue;
                 }
             }
             auto operations=Json::array();const auto owned=owners();
@@ -594,7 +619,8 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     nlohmann::json observed_skills;
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
     const bool agent_selection=health.value("agent_selection",false);
-    const bool profile_admission=health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false);
+    const bool provider_profile_admission=health.value("provider_profile_admission",false);
+    const bool profile_admission=provider_profile_admission||health.value("graph_provider_profile_admission",false);
     auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
     if(!model.empty()){
         const auto catalogue=request("/v1/models");
@@ -615,6 +641,34 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     }
     int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0;std::string prompt;
     const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:agent_result!=0?agent_result:mcp_result;};
+    auto drain_inbox=[&](){
+        if(session.empty())return false;
+        for(;;){
+            const auto snapshot=request("/v1/sessions/"+session+"/inbox");
+            if(!snapshot.is_object()||snapshot.size()!=1||!snapshot.contains("items")||!snapshot["items"].is_array()||snapshot["items"].size()>128)throw std::runtime_error("Invalid session prompt inbox");
+            const Json* next=nullptr;
+            for(const auto& item:snapshot["items"]){
+                if(!item.is_object()||!item.contains("id")||!item["id"].is_string()||item.value("session_id",std::string{})!=session||!item.contains("content")||!item["content"].is_string()||item["content"].get_ref<const std::string&>().empty()||!item.contains("state")||!item["state"].is_string()||(item["state"]!="queued"&&item["state"]!="claimed")||!item.contains("created_ms")||!item["created_ms"].is_number_integer())throw std::runtime_error("Invalid session prompt inbox item");
+                if(item["state"]=="queued"&&!next)next=&item;
+            }
+            if(!next)return false;
+            const auto inbox_id=next->at("id").get<std::string>(),queued_prompt=next->at("content").get<std::string>();
+            Json body={{"session_id",session},{"prompt",queued_prompt},{"inbox_id",inbox_id}};if(!model.empty())body["model_id"]=model;if(provider_profile_admission)body.update(provider_binding);
+            const auto response=client.Post("/v1/runs",headers,body.dump(),"application/json");
+            if(!response||response->status!=202){
+                const auto code=response?response->status:0;
+                std::cout<<Json{{"type","prompt_dispatch_deferred"},{"session_id",session},{"inbox_id",inbox_id},{"http_status",code}}.dump()<<'\n'<<std::flush;
+                std::cerr<<"Queued prompt remains saved; backend admission was not confirmed. Refresh /inbox before retrying.\n";return false;
+            }
+            const auto run=Json::parse(response->body);
+            if(!run.is_object()||run.value("session_id",std::string{})!=session||run.value("graph_root",false)||!run.contains("id")||!run["id"].is_string())throw std::runtime_error("Invalid queued run admission response");
+            const auto id=run["id"].get<std::string>();if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid queued run identity");
+            std::cout<<Json{{"type","queued_run"},{"inbox_id",inbox_id},{"run",run}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued run output is unavailable");
+            const auto watched=watch_run(client,headers,id,0,false,true,&input);if(watched==run_detached)return true;last_result=watched;profile_result=0;
+            std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result},{"queued",true}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued turn output is unavailable");
+        }
+    };
+    if(drain_inbox())return exit_status();
     while(std::cerr<<"xMind > "<<std::flush,input.read_line(prompt)) {
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
@@ -623,7 +677,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
-            std::cerr<<"During an active turn, /cancel requests backend cancellation and /exit detaches while the run continues; other input waits until the turn finishes.\n";
+            std::cerr<<"During an active turn, /cancel requests backend cancellation and /exit detaches while the run continues. Prompt text is saved in the session inbox and starts after the active turn; slash commands wait until it finishes.\n";
             std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
@@ -700,6 +754,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<Json{{"type","run_attached"},{"run",run}}.dump()<<'\n'<<std::flush;
             const auto watched=watch_run(client,headers,id,0,graphAttachment,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
             std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
+            if(drain_inbox())return exit_status();
             continue;
         }
         if(prompt=="/runs"){
@@ -907,6 +962,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
         const auto watched=watch_run(client,headers,id,0,graphSubmission,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
+        if(drain_inbox())return exit_status();
     }
     if(!input.source_closed())throw std::runtime_error("Chat input is unavailable");
     return exit_status();

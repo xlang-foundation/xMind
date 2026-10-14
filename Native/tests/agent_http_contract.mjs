@@ -209,15 +209,25 @@ try {
   const activeRunRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='run'),'CLI active-run admission');
   const activeRunRecord=activeRunRecords.find(record=>record.type==='run');
   const activeRun=activeRunRecord.run;assert.equal(activeRun.session_id,'active-control');await streaming(activeRun.id);
+  activeControl.process.stdin.write('Read README after the active turn\n');
+  const queuedPromptRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='prompt_queued'),'CLI durable prompt queue');
+  const queuedPromptRecord=queuedPromptRecords.find(record=>record.type==='prompt_queued');assert.equal(queuedPromptRecord.item.content,'Read README after the active turn');assert.equal(queuedPromptRecord.item.state,'queued');
+  assert.equal((await api('/v1/sessions/active-control/inbox')).data.items[0].content,'Read README after the active turn');
   activeControl.process.stdin.write('/cancel\n');
   try{await terminal(activeRun.id,'cancelled');}catch(error){throw new Error(error.message+'\n'+activeControl.errors()+'\n'+activeControl.output());}
   const cancelledRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='turn_finished'),'CLI active cancellation result');
   const cancelledTurn=cancelledRecords.find(record=>record.type==='turn_finished');
   assert.equal(cancelledTurn.type,'turn_finished');assert.equal(cancelledTurn.exit_status,2);
   assert.ok(activeControl.records().some(record=>record.type==='run_cancel_result'),'The interactive CLI must send cancellation while it is observing a live turn');
+  const queuedRunRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='queued_run'),'CLI automatic queued-prompt admission');
+  const queuedRun=queuedRunRecords.find(record=>record.type==='queued_run').run;assert.equal(queuedRun.session_id,'active-control');await terminal(queuedRun.id,'completed');
+  const queuedFinishRecords=await activeControl.waitFor(records=>records.filter(record=>record.type==='turn_finished').length===2,'CLI queued turn completion');
+  assert.equal(queuedFinishRecords.filter(record=>record.type==='turn_finished')[1].exit_status,0);
+  const inboxAfterDispatch=(await api('/v1/sessions/active-control/inbox')).data.items;assert.equal(inboxAfterDispatch[0].state,'claimed');assert.equal(inboxAfterDispatch[0].run_id,queuedRun.id);
+  const activeHistory=cli('history','active-control');assert.equal(activeHistory.filter(message=>message.role==='user'&&message.data.content==='Read README after the active turn').length,1,'The queued prompt must be saved exactly once in session history');
   activeControl.process.stdin.write('/exit\n');
   const activeControlExit=await new Promise((yes,no)=>{const timer=setTimeout(()=>activeControl.process.kill(),10000);activeControl.process.once('error',no);activeControl.process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});
-  assert.equal(activeControlExit.signal,null);assert.equal(activeControlExit.code,2,activeControl.errors());assert.ok(!activeControl.output().includes(key));
+  assert.equal(activeControlExit.signal,null);assert.equal(activeControlExit.code,0,activeControl.errors());assert.ok(!activeControl.output().includes(key));
   await session('active-detach');
   const activeDetach=liveChat('active-detach');activeDetach.process.stdin.write('hold-stream\n');
   const detachedRunRecords=await activeDetach.waitFor(records=>records.some(record=>record.type==='run'),'CLI detachable active-run admission');
@@ -296,7 +306,7 @@ try {
   assert.equal(cli('history','crash').length,1);
   assert.equal(cli('health').status,'ok');
   if(peerError) throw peerError;
-  console.log('Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.');
+  console.log('Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, durable prompt queue and automatic dispatch, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.');
 } finally {
   await stop();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));
   await rm(folder,{recursive:true,force:true});

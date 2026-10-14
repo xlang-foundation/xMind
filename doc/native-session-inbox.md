@@ -1,11 +1,11 @@
 # Durable session prompt inbox
 
-The local browser and VS Code sidebar let a user queue another prompt while a
-session has an active run. The prompt is stored in the native SQLite repository
-before the UI reports it as saved. The active run continues; when the session
-becomes idle, the client admits the oldest queued prompt through the ordinary
-native run path. A concurrent admission conflict leaves the prompt queued for a
-later retry.
+The local browser, VS Code sidebar and interactive CLI let a user queue another
+prompt while a session has an active run. The prompt is stored in the native
+SQLite repository before the client reports it as saved. The active run
+continues; when the session becomes idle, the client admits the oldest queued
+prompt through the ordinary native run path. A concurrent admission conflict
+leaves the prompt queued for a later retry.
 
 `GET /v1/sessions/{id}/inbox` returns `{items:[...]}` in enqueue order. Each item
 contains its stable `id`, `session_id`, exact `content`, `state` (`queued` or
@@ -32,4 +32,7 @@ claiming and duplicate-claim rejection, the real HTTP run path during an active
 synthetic-provider turn, queue retention after a rejected admission, subsequent
 dispatch after cancellation, and exactly one user-history record. The browser
 classic-script contract checks the rendered Queue button, prompt submission and
-visible pending item. Provider inference in these contracts is synthetic.
+visible pending item. The actual-server CLI contract queues a prompt during a
+held inference stream, cancels the held run, observes automatic admission of
+the queued prompt, and confirms exactly one history record and its claimed run
+link. Provider inference in these contracts is synthetic.
