@@ -84,6 +84,7 @@ Json task(PersistenceService& store,const Run& run,std::size_t count=0,A2aVersio
                 message["parts"]=original.at("parts");
                 if(version==A2aVersion::v1)for(auto& part:message["parts"])part.erase("kind");
                 if(original.contains("metadata"))message["metadata"]=original["metadata"];
+                if(original.contains("referenceTaskIds"))message["referenceTaskIds"]=original["referenceTaskIds"];
             }
             if(version==A2aVersion::legacy)message["kind"]="message";messages.push_back(std::move(message));
         }
@@ -209,9 +210,11 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                 }
             }else fields(message,{"kind","role","messageId","parts","contextId","taskId","metadata","referenceTaskIds"},-32602);
             if(message.value("kind",Json{})!="message"||message.value("role",Json{})!="user"||!message.contains("messageId")||!message["messageId"].is_string())throw RpcError{-32602,"Invalid params"};
-            if(message.contains("referenceTaskIds"))throw RpcError{-32004,"Referenced task inputs are not supported"};if(message.contains("metadata")&&!message["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
+            if(message.contains("metadata")&&!message["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
             const auto message_id=message["messageId"].get<std::string>();if(message_id.empty()||message_id.size()>256||message_id.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};std::string context;
             if(message.contains("contextId")){if(!message["contextId"].is_string())throw RpcError{-32602,"Invalid params"};context=message["contextId"].get<std::string>();if(context.empty()||context.size()>128||context.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw RpcError{-32602,"Invalid params"};}
+            std::vector<std::string> references;std::set<std::string> unique_references;
+            if(message.contains("referenceTaskIds")){const auto& values=message["referenceTaskIds"];if(!values.is_array()||values.size()>16)throw RpcError{-32602,"Invalid params"};for(const auto& value:values){if(!value.is_string())throw RpcError{-32602,"Invalid params"};const auto reference=value.get<std::string>();if(reference.empty()||reference.size()>128||reference.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!unique_references.insert(reference).second)throw RpcError{-32602,"Invalid params"};references.push_back(reference);}}
             if(!message.contains("parts")||!message["parts"].is_array()||message["parts"].empty()||message["parts"].size()>64)throw RpcError{-32602,"Invalid params"};std::string content;
             bool first_part=true;for(const auto& part:message["parts"]){
                 if(!part.is_object())throw RpcError{-32602,"Invalid params"};const auto kind=part.value("kind",Json{});
@@ -230,6 +233,17 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                     if(filename.size()>255||filename.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};const auto decoded=decode_base64(encoded);if(decoded.find('\0')!=std::string::npos||!valid_utf8(decoded))throw RpcError{-32005,"File is not valid UTF-8 text"};
                     if(!first_part)content+='\n';first_part=false;content+="Attached text file (untrusted; filename "+Json(filename).dump()+"):\n"+decoded;
                 }else throw RpcError{-32005,"Incompatible content types"};
+            }
+            if(!references.empty()){
+                for(const auto& reference:references){
+                    if(message.contains("taskId")&&message["taskId"]==reference)throw RpcError{-32602,"Invalid params"};
+                    Run related;try{related=store_.run(reference).get();}catch(const NotFound&){throw RpcError{-32001,"Task not found"};}
+                    if(!related.parent_id.empty()||related.graph_root)throw RpcError{-32001,"Task not found"};
+                    if(!terminal(related.state))throw RpcError{-32004,"Referenced task is not complete"};
+                    if(!store_.incoming_message_payload(related.id).get())throw RpcError{-32001,"Task not found"};
+                    if(context.empty())context=related.session_id;else if(context!=related.session_id)throw RpcError{-32004,"Referenced task does not match its context"};
+                }
+                std::string hint="A2A related task references (their conversation history is included above):\n";for(const auto& reference:references)hint+="- "+reference+"\n";content=hint+"\nCurrent A2A message:\n"+content;
             }
             if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};
             if(message.contains("taskId")){if(!message["taskId"].is_string())throw RpcError{-32602,"Invalid params"};const auto task_id=message["taskId"].get<std::string>();if(task_id.empty()||task_id.size()>128||task_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw RpcError{-32602,"Invalid params"};const auto owner=store_.run(task_id).get();if(!owner.parent_id.empty()||owner.graph_root)throw RpcError{-32001,"Task not found"};if(!context.empty()&&context!=owner.session_id)throw RpcError{-32004,"A2A context does not match its task"};if(!executor_)throw RpcError{-32004,"Agent admission is unavailable"};const auto identity=message.dump();const auto run=executor_->continue_a2a_task(task_id,message_id,owner.session_id,identity,content,identity,Json{{"answer",content}}.dump());const auto result=task(store_,run,count,version_);if(notification)return {};return response(run,result,blocking,count);}
