@@ -3,6 +3,7 @@
 #include "agentflow/context_control.hpp"
 #include "agentflow/skill_records.hpp"
 #include "agentflow/agent_definition_records.hpp"
+#include "agentflow/session_model_records.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/language_server.hpp"
 #include <cstdint>
@@ -53,10 +54,13 @@ public:
     virtual bool supports_skill_catalogue()const{return false;}
     virtual bool supports_session_skills()const{return false;}
     virtual bool supports_agent_selection()const{return false;}
+    virtual bool supports_session_models()const{return false;}
     virtual std::vector<AgentDefinitionMetadata> agent_definitions()const{throw RunUnavailable("Named agent definitions are unavailable");}
     virtual AgentDefinition agent_definition(const std::string&)const{throw RunUnavailable("Named agent definitions are unavailable");}
     virtual SessionAgentState session_agent(const std::string&)const{throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual SessionAgentState select_session_agent(const std::string&,std::optional<AgentDefinitionMetadata>,std::int64_t){throw RunUnavailable("Conversation agent selection is unavailable");}
+    virtual SessionModelState session_model(const std::string&)const{throw RunUnavailable("Conversation model selection is unavailable");}
+    virtual SessionModelState select_session_model(const std::string&,std::string,std::int64_t,ProviderProfileAdmission){throw RunUnavailable("Conversation model selection is unavailable");}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}
     virtual std::vector<LanguageServerMetadata> language_server_profiles()const{return {};}
     virtual std::string language_server_query(const LanguageServerRequest&){throw RunUnavailable("Language-server queries are unavailable");}

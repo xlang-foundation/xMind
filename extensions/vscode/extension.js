@@ -50,6 +50,7 @@ async function activate(context) {
   let reviewed = new Map();
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
+  let sessionModelState;
   let providerSelection;
   let profileController;
   let mcpController;
@@ -297,11 +298,20 @@ async function activate(context) {
     watch();
   }
 
+  async function persistSessionModel(model) {
+    if(!sessionId||health?.session_model_selection!==true||typeof client.sessionModel!=='function'||!profileController)return;
+    const binding=await profileController.admission();if(!binding.provider_profile_id)return;
+    const observed=sessionModelState||await client.sessionModel(sessionId);
+    const saved=await client.replaceSessionModel(sessionId,model,binding,observed);
+    if(saved.session_id!==sessionId||saved.revision!==observed.revision+1||saved.selected?.model_id!==model||saved.selected.provider_profile_id!==binding.provider_profile_id)throw new Error('Backend conversation model acknowledgement changed.');
+    sessionModelState=saved;
+  }
   async function selectSession(id) {
     stop();
     const version = generation;
     clearGraph();
     sessionId = id;
+    sessionModelState=undefined;
     runId = undefined;
     sessionRuns=[];presentRuns();
     reviewed.clear();
@@ -321,7 +331,9 @@ async function activate(context) {
     if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
       const current=await capabilities();if(version!==generation||!panel)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
     }
+    const activeProfile=profileController?.state?.profiles?.find(profile=>profile.id===profileController.state.active);if(activeProfile?.model)selectedModel=activeProfile.model;
     const retainedCatalogue=profileController?.models(selectedModel);
+    if(health?.session_model_selection===true&&typeof client.sessionModel==='function')try{const state=await client.sessionModel(id);if(version!==generation||!panel)return;sessionModelState=state;if(state.selected&&activeProfile&&state.selected.provider_profile_id===activeProfile.id&&state.selected.provider_route_id===activeProfile.route_id)selectedModel=state.selected.model_id;else if(activeProfile?.model)selectedModel=activeProfile.model;profileController?.models(selectedModel);}catch(error){if(error.status!==404)throw error;}
     sessionRuns=runs;
     presentRuns();
     // Native may have published a provider after its acknowledgement was
@@ -585,6 +597,7 @@ async function activate(context) {
             post({type:'status',text:'Model configured · send a message to verify provider access'});
           }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
+          await persistSessionModel(selectedModel);
           await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});
           await refreshGraphs();
         }

@@ -195,6 +195,13 @@ class BackendClient {
     const result=await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`,{agent_id:selected?.id??null,agent_revision:selected?.revision??0,expected_revision:observed.revision});
     return validateSessionAgent(result,id,catalogue);
   }
+  async sessionModel(id) { executionIdentity(id);return validateSessionModel(await this.request(`/v1/sessions/${encodeURIComponent(id)}/model`),id); }
+  async replaceSessionModel(id,model,providerBinding,observed) {
+    executionIdentity(id);profileIdentity(model);validateSessionModel(observed,id);
+    if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing its model.');
+    if(!providerBinding||typeof providerBinding.provider_profile_id!=='string'||!Number.isSafeInteger(providerBinding.expected_provider_revision)||providerBinding.expected_provider_revision<0)throw new Error('Refresh the provider profile before choosing a conversation model.');
+    return validateSessionModel(await this.request(`/v1/sessions/${encodeURIComponent(id)}/model`,{model_id:model,provider_profile_id:providerBinding.provider_profile_id,expected_provider_revision:providerBinding.expected_provider_revision,expected_revision:observed.revision}),id);
+  }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
   enqueueSessionInput(session_id,content,id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,{...(id?{id}:{}),content}); }
@@ -417,6 +424,11 @@ function validateAgentCatalogue(value){
 function validateSessionAgent(value,session,catalogue){
   if(!value||typeof value!=='object'||Object.keys(value).length!==4||value.session_id!==session||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.editable!=='boolean'||!(value.selected===null||value.selected&&typeof value.selected==='object'&&Object.keys(value.selected).length===5))throw new Error('Invalid backend conversation agent state.');
   if(value.selected){const selected=value.selected;agentIdentity(selected.id);if(typeof selected.name!=='string'||!selected.name.trim()||new TextEncoder().encode(selected.name).length>128||typeof selected.description!=='string'||new TextEncoder().encode(selected.description).length>2048||!Number.isSafeInteger(selected.revision)||selected.revision<1||typeof selected.model_id!=='string'||selected.model_id.length>256||selected.model_id.startsWith('sk-'))throw new Error('Invalid selected backend agent metadata.');if(catalogue&&!catalogue.agents.some(item=>item.id===selected.id&&item.revision===selected.revision&&item.model_id===selected.model_id&&item.name===selected.name&&item.description===selected.description))throw new Error('Selected agent differs from its backend catalogue.');}
+  return value;
+}
+function validateSessionModel(value,session){
+  if(!value||typeof value!=='object'||Object.keys(value).length!==4||value.session_id!==session||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.editable!=='boolean'||!(value.selected===null||value.selected&&typeof value.selected==='object'&&!Array.isArray(value.selected)&&Object.keys(value.selected).length===3))throw new Error('Invalid backend conversation model state.');
+  if(value.selected){profileIdentity(value.selected.model_id);profileIdentity(value.selected.provider_profile_id);if(typeof value.selected.provider_route_id!=='string'||!/^[A-Za-z0-9_.-]{1,256}$/.test(value.selected.provider_route_id))throw new Error('Invalid provider route identity.');}
   return value;
 }
 class AgentSelectionController {
@@ -915,5 +927,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};

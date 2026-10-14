@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>20)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>21)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>20) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>21) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -808,6 +808,11 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");db.execute("PRAGMA user_version=20");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session inbox cancellation migration did not preserve foreign key ownership");
     }
+    if(version<21){
+        db.execute("CREATE TABLE session_models(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),selection_json TEXT NOT NULL CHECK(length(CAST(selection_json AS BLOB))<=2048 AND json_valid(selection_json) AND json_type(selection_json)='object' AND json_type(selection_json,'$.version')='integer' AND json_extract(selection_json,'$.version')=1 AND json_type(selection_json,'$.model_id')='text' AND length(json_extract(selection_json,'$.model_id')) BETWEEN 1 AND 256 AND json_type(selection_json,'$.provider_profile_id')='text' AND length(json_extract(selection_json,'$.provider_profile_id')) BETWEEN 1 AND 256 AND json_type(selection_json,'$.provider_route_id')='text' AND length(json_extract(selection_json,'$.provider_route_id')) BETWEEN 1 AND 256),revision INTEGER NOT NULL CHECK(revision>0))");
+        db.execute("PRAGMA user_version=21");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session model migration did not preserve foreign key ownership");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -956,6 +961,7 @@ Session Repository::fork_session(const std::string& id,const std::string& source
     db.execute(sql,{id,source,boundary});
     db.execute("INSERT INTO session_agents(session_id,selection_json,revision) SELECT ?,selection_json,revision FROM session_agents WHERE session_id=?",{id,source});
     db.execute("INSERT INTO session_skills(session_id,workspace_id,selections_json,revision) SELECT ?,workspace_id,selections_json,revision FROM session_skills WHERE session_id=?",{id,source});
+    db.execute("INSERT INTO session_models(session_id,selection_json,revision) SELECT ?,selection_json,revision FROM session_models WHERE session_id=?",{id,source});
     changed_one(db.execute("INSERT INTO session_forks(session_id,parent_session_id,boundary_sequence,boundary_type) VALUES(?,?,?,?)",{id,source,boundary,boundary_type}));
     const auto result=session(id);tx.commit();return result;
 }
@@ -1843,6 +1849,34 @@ SessionAgentState Repository::replace_session_agent(const std::string& id,std::o
     if(expected==0)db.execute("INSERT INTO session_agents VALUES(?,?,1)",{id,source});
     else changed_one(db.execute("UPDATE session_agents SET selection_json=?,revision=revision+1 WHERE session_id=? AND revision=?",{source,id,expected}));
     auto result=session_agent(id);tx.commit();return result;
+}
+SessionModelState Repository::session_model(const std::string& id){
+    session(id);auto& db=impl_->database;SessionModelState result;
+    const auto rows=db.execute("SELECT selection_json,revision FROM session_models WHERE session_id=?",{id}).rows;
+    if(!rows.empty()){
+        result.revision=integer(rows[0][1]);
+        if(result.revision<1||result.revision>9007199254740991LL)throw DatabaseError("Invalid session model revision");
+        try{
+            const auto value=Json::parse(object_json(text(rows[0][0]),2048));
+            if(value.size()!=4||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("model_id")||!value["model_id"].is_string()||!value.contains("provider_profile_id")||!value["provider_profile_id"].is_string()||!value.contains("provider_route_id")||!value["provider_route_id"].is_string())throw DatabaseError("Invalid saved session model selection");
+            SessionModelSelection selected{value["model_id"].get<std::string>(),value["provider_profile_id"].get<std::string>(),value["provider_route_id"].get<std::string>()};
+            if(selected.model_id.empty()||selected.model_id.size()>256||selected.model_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||selected.provider_profile_id.empty()||selected.provider_profile_id.size()>256||selected.provider_profile_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||selected.provider_route_id.empty()||selected.provider_route_id.size()>256||selected.provider_route_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw DatabaseError("Invalid saved session model selection values");
+            result.selected=std::move(selected);
+        }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Invalid saved session model selection");}
+    }
+    result.editable=db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused') UNION ALL SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{id,id}).rows.empty();
+    return result;
+}
+SessionModelState Repository::replace_session_model(const std::string& id,SessionModelSelection selected,std::int64_t expected){
+    if(expected<0||expected>=9007199254740991LL)throw std::invalid_argument("Invalid session model revision");
+    if(selected.model_id.empty()||selected.model_id.size()>256||selected.model_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||selected.provider_profile_id.empty()||selected.provider_profile_id.size()>256||selected.provider_profile_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||selected.provider_route_id.empty()||selected.provider_route_id.size()>256||selected.provider_route_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid selected session model");
+    auto& db=impl_->database;Transaction tx(db);const auto previous=session_model(id);
+    if(!previous.editable)throw Conflict("Conversation model cannot change while execution or context maintenance owns the session");
+    if(previous.revision!=expected)throw Conflict("Conversation model changed; refresh before editing");
+    const auto source=Json{{"version",1},{"model_id",selected.model_id},{"provider_profile_id",selected.provider_profile_id},{"provider_route_id",selected.provider_route_id}}.dump();
+    if(expected==0)db.execute("INSERT INTO session_models VALUES(?,?,1)",{id,source});
+    else changed_one(db.execute("UPDATE session_models SET selection_json=?,revision=revision+1 WHERE session_id=? AND revision=?",{source,id,expected}));
+    auto result=session_model(id);tx.commit();return result;
 }
 SkillSelections Repository::initialize_run_skills(const std::string& id,const std::string& workspace){
     SkillSelections initial{workspace,{}};validate_skill_selections(initial);auto& db=impl_->database;Transaction tx(db);const auto current=run(id);

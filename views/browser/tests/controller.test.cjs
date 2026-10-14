@@ -142,6 +142,15 @@ test('browser saved catalogue remains usable after settings close, new conversat
  }finally{view.dispose();}
 });
 
+test('browser saves a selected model to the active conversation with provider and revision binding',async()=>{
+ const writes=[],posted=[],observed={session_id:'session',revision:3,editable:true,selected:{model_id:'old-model',provider_profile_id:'saved-profile',provider_route_id:'openai.responses'}};
+ const client={sessionModel:async id=>{assert.equal(id,'session');return observed;},replaceSessionModel:async(...args)=>{writes.push(args);return {...observed,revision:4,selected:{model_id:'new-model',provider_profile_id:'saved-profile',provider_route_id:'openai.responses'}};}};
+ const view=new BrowserController(client,value=>posted.push(value));view.session='session';view.health={session_model_selection:true};view.models={models:[{id:'new-model'}]};view.sessionModel=observed;
+ view.profileController={save:async()=>undefined,admission:async()=>({provider_profile_id:'saved-profile',expected_provider_revision:9}),invalidate(){},dispose(){}};
+ try{await view.handle({type:'model',id:'new-model'});assert.deepEqual(writes,[['session','new-model',{provider_profile_id:'saved-profile',expected_provider_revision:9},observed]]);assert.equal(view.sessionModel.revision,4);assert.equal(view.model,'new-model');}
+ finally{view.dispose();}
+});
+
 test('browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment',async()=>{
  let state={revision:4,active:'first',profiles:[{id:'first',provider:'openai',route_id:'openai.responses',model:'current',revision:1},{id:'claude',provider:'anthropic',route_id:'anthropic.messages',model:'',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};const calls=[],posted=[];
  const client={providerProfiles:async()=>state,selectProviderProfile:async(...args)=>{calls.push(['select',...args]);state={...state,revision:5,active:args[0]};return state;},discoverProfileModels:async(...args)=>{calls.push(['discover',...args]);return {models:[{id:'fixture-claude'},{id:'fixture-claude-next'}]};},saveProviderProfile:async(...args)=>{calls.push(['save',...args]);state={...state,revision:6,profiles:state.profiles.map(profile=>profile.id===args[0]?{...profile,revision:2,model:args[2]}:profile)};return state;},health:async()=>({agent_execution:!!state.profiles.find(value=>value.id===state.active)?.model}),models:async()=>{const model=state.profiles.find(value=>value.id===state.active).model;return {models:model?[{id:model}]:[],default_model:model};},graphs:async()=>({graphs:[]})};

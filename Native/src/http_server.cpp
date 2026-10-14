@@ -91,6 +91,10 @@ Json session_agent_metadata(const std::string& session,const SessionAgentState& 
     const auto selected=value.selected?agent_metadata({value.selected->id,value.selected->revision,value.selected->model_id,value.selected->name,value.selected->description}):Json(nullptr);
     return {{"session_id",session},{"revision",value.revision},{"editable",value.editable},{"selected",selected}};
 }
+Json session_model_metadata(const std::string& session,const SessionModelState& value){
+    const auto selected=value.selected?Json{{"model_id",value.selected->model_id},{"provider_profile_id",value.selected->provider_profile_id},{"provider_route_id",value.selected->provider_route_id}}:Json(nullptr);
+    return {{"session_id",session},{"revision",value.revision},{"editable",value.editable},{"selected",selected}};
+}
 std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     const bool named=value.contains("provider_profile_id"),versioned=value.contains("expected_provider_revision");
     if(named!=versioned)throw std::invalid_argument("Provider profile and revision must be supplied together");
@@ -414,6 +418,7 @@ struct HttpServer::Impl {
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
             static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
@@ -422,7 +427,7 @@ struct HttpServer::Impl {
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
             static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/(attempts(/[A-Za-z0-9_-]+/cancel)?|renewals)$)");
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||mcp_authorized||(stream&&request.method=="GET")||(!stream&&(std::regex_match(request.path,view_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||mcp_authorized||(stream&&request.method=="GET")||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -545,7 +550,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
 #if defined(_WIN32)
         const auto connection_metadata=[](const ConnectionProfileCatalog& catalog){
@@ -643,6 +648,19 @@ struct HttpServer::Impl {
                 if(found==catalogue.end()||found->revision!=revision)throw Conflict("Named agent definition changed; refresh before selecting it");selected=*found;
             } else if(value.at("agent_revision").get<std::int64_t>()!=0)throw std::invalid_argument("Clearing agent selection requires definition revision zero");
             const auto session=request.matches[1].str();reply(response,session_agent_metadata(session,executor->select_session_agent(session,std::move(selected),value.at("expected_revision").get<std::int64_t>())));
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/model)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session model selection does not accept query parameters");
+            if(!executor||!executor->supports_session_models())throw RunUnavailable("Conversation model selection is unavailable");
+            const auto session=request.matches[1].str();reply(response,session_model_metadata(session,executor->session_model(session)));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/model)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Invalid session model request target or size");
+            if(!executor||!executor->supports_session_models())throw RunUnavailable("Conversation model selection is unavailable");
+            const auto value=body(request,{"model_id","provider_profile_id","expected_provider_revision","expected_revision"});
+            if(value.size()!=4||!value.contains("model_id")||!value.contains("provider_profile_id")||!value.contains("expected_provider_revision")||!value.at("expected_provider_revision").is_number_integer()||value.at("expected_provider_revision")<0||value.at("expected_provider_revision")>9007199254740991LL||!value.contains("expected_revision")||!value.at("expected_revision").is_number_integer()||value.at("expected_revision")<0||value.at("expected_revision")>=9007199254740991LL)throw std::invalid_argument("Session model selection requires the model, provider profile binding and expected session revision");
+            const auto profile=profile_admission(value);if(!profile)throw std::invalid_argument("Session model selection requires the active provider profile binding");
+            const auto model=string_field(value,"model_id",256);const auto session=request.matches[1].str();reply(response,session_model_metadata(session,executor->select_session_model(session,model,value.at("expected_revision").get<std::int64_t>(),*profile)));
         }));
         server.Get("/v1/workspace",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace metadata does not accept query parameters");

@@ -79,7 +79,7 @@ int main(int argc,char** argv) {
             legacy.execute("DROP INDEX session_inbox_order");legacy.execute("ALTER TABLE session_inbox RENAME TO session_inbox_v20");
             legacy.execute("CREATE TABLE session_inbox(id TEXT PRIMARY KEY NOT NULL,session_id TEXT NOT NULL REFERENCES sessions(id),content TEXT NOT NULL CHECK(length(content)>0),state TEXT NOT NULL CHECK(state IN ('queued','claimed')),created_ms INTEGER NOT NULL CHECK(created_ms>0),run_id TEXT UNIQUE REFERENCES runs(id),CHECK((state='queued' AND run_id IS NULL) OR (state='claimed' AND run_id IS NOT NULL)))");
             legacy.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms,run_id) SELECT id,session_id,content,state,created_ms,run_id FROM session_inbox_v20");
-            legacy.execute("DROP TABLE session_inbox_v20");legacy.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");legacy.execute("PRAGMA user_version=19");
+            legacy.execute("DROP TABLE session_inbox_v20");legacy.execute("CREATE INDEX session_inbox_order ON session_inbox(session_id,state,created_ms,id)");legacy.execute("DROP TABLE session_models");legacy.execute("PRAGMA user_version=19");
         }
         {
             BackendLease owner(migration_path);Repository migrated(migration_path,roots);
