@@ -1,5 +1,19 @@
 # Current native validation
 
+## Full native Release gate — 2026-10-14
+
+A fresh Release build in the dedicated `build/native-verify` tree completed,
+then the complete **144/144 native CTest contracts passed** in 211.38 seconds
+with four-way parallelism and no failures or skips. This includes the current
+A2A streaming/reconnect, dynamic-plan MCP, graph, CLI, xlang3/SQLite, provider,
+and managed local-view contracts. The Rust Analyzer contract also passed in
+this full run. The exact CTest output, with secret-shaped strings redacted, is
+[`native-full-release-ctest-20261014.log`](evidence/native-full-release-ctest-20261014.log).
+The command, return codes, test counts and log digest are recorded in the
+[machine-readable result](evidence/native-full-release-ctest-20261014.json).
+This is native contract coverage; synthetic peers/providers and local test
+fixtures do not establish live-provider or installed-client acceptance.
+
 ## Automatic outbound A2A stream reconnect — 2026-10-14
 
 The shared native A2A tool registry now handles a bounded stream transport

@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Fresh full native Release gate — 2026-10-14
+
+The current native source rebuilt in the dedicated `build/native-verify` tree
+and passed **144/144 CTest contracts** in 211.38 seconds, with no failures or
+skips. This includes the automatic A2A stream reconnect and missing-cursor
+uncertainty cases, dynamic-plan MCP/process coverage, graph, CLI and embedded
+xlang3 SQLite. The complete CTest output is recorded in
+[validation status](VALIDATION_STATUS.md#full-native-release-gate--2026-10-14).
+The exact command and result metadata are also available in the
+[evidence record](evidence/native-full-release-ctest-20261014.json).
+Synthetic peers and providers remain contract fixtures, not live interoperability
+or installed-client evidence.
+
 ## MCP resources and prompts as dependency-plan nodes (2026-10-14)
 
 Dynamic plans can now select registered MCP resource and prompt aliases from
