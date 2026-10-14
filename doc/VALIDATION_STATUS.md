@@ -56,7 +56,11 @@ nested-human rejection and shared root-budget accounting. The extension suite
 passed **346/346**; the dynamic MCP and both A2A graph-task integration contracts
 passed serially after a full parallel run exposed test-fixture assumptions and
 a paused-graph plan-lookup bug. Provider responses and credentials are
-synthetic. Depth-eight exhaustion, total-work bounds, nested pause/restart
+synthetic. A follow-up repository contract now admits nine plans at depths 0
+through 8, validates their exact owner chain and shared budget, and passes with
+the maximum eight child owners. Runtime rejection from a depth-nine owner is
+still untested; the reachable repository boundary does not admit a ninth child
+under the registered root policy. Total-work bounds, nested pause/restart
 recovery, live-provider interoperability and external-client acceptance remain
 open.
 

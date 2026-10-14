@@ -147,8 +147,11 @@ inspectable; it cannot be converted into an ordinary tool error.
    child pool; preserve root budget ownership and per-owner continuation
    receipts; and verify root → outer planner → inner planner → depth-two reader
    with synthetic provider turns and real SQLite child history. The contract
-   also checks typed rejection of a nested human wait. Explicit depth-eight
-   exhaustion and total-work-bound contracts remain pending.
+   also checks typed rejection of a nested human wait. The repository contract
+   now admits plans through depth eight under the real eight-child shared root
+   budget and checks all nine persisted plan depths plus the eight exact child
+   admissions. Typed runtime rejection from a synthetic depth-nine owner and
+   total-work-bound contracts remain pending.
 4. Add durable pause/resume and crash-recovery for nested human waits and
    unresolved effects. Verify root restart drains or preserves every nested
    owner without duplicate provider dispatch or effect replay.
@@ -160,8 +163,10 @@ inspectable; it cannot be converted into an ordinary tool error.
    the admitting parent task, retaining each response's supplied metrics. The
    native `inspect-plan` command prints this same authenticated observation as
    formatted JSON. Repository, HTTP, client and renderer contracts verify the
-   owner links and projection. Explicit depth-exhaustion and total-work-bound
-   contracts, plus parallel nested-plan scheduling, remain pending.
+   owner links and projection. The repository now exercises the reachable
+   depth-eight boundary under the shared child budget; typed over-depth runtime
+   rejection, total-work-bound contracts and parallel nested-plan scheduling
+   remain pending.
 
 The executor, owner lifecycle and nested-provider acceptance stages passed
 the focused Release set **3/3** (`native_dynamic_plan_repository_contract`,
@@ -171,8 +176,9 @@ does not prove live-provider behavior. Nested-plan HTTP and shared client
 presentation, including actual descendant transcripts and response metrics,
 are implemented and tested. The CLI uses the same JSON endpoint/output path;
 its presentation remains structured JSON rather than a dedicated tree view.
-Durable nested pause/restart recovery, explicit depth/total-work exhaustion,
-parallel nested-plan scheduling and live-provider behavior remain incomplete.
+Durable nested pause/restart recovery, typed over-depth runtime rejection,
+total-work exhaustion, parallel nested-plan scheduling and live-provider
+behavior remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).
