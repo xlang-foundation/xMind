@@ -105,15 +105,15 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
         if(remaining.count()<=0)throw TransportTimeout("A2A deadline elapsed before dispatch");
         const auto request=params.dump();
         if(entry.peer.streaming){
-            entry.client->stream_message(request,remaining,[&](const std::string& event_json){
-                Json event;try{event=Json::parse(event_json);}catch(...){throw A2aOutcomeUnrecorded("A2A stream event could not be decoded");}
+            entry.client->stream_message(request,remaining,[&](const A2aStreamEvent& stream_event){
+                Json event;try{event=Json::parse(stream_event.result_json);}catch(...){throw A2aOutcomeUnrecorded("A2A stream event could not be decoded");}
                 const Json* value=&event;for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})if(event.contains(field)&&event[field].is_object()){value=&event[field];break;}
                 if(value->contains("id")&&(*value)["id"].is_string())streamed_task_id=(*value)["id"].get<std::string>();
                 if(value->contains("taskId")&&(*value)["taskId"].is_string())streamed_task_id=(*value)["taskId"].get<std::string>();
                 if(value->contains("contextId")&&(*value)["contextId"].is_string())streamed_context_id=(*value)["contextId"].get<std::string>();
-                response=event_json;
-                if(on_task_event)on_task_event(Json{{"operation_id",id},{"agent_id",entry.registration.id},
-                    {"event_sequence",++event_sequence},{"event",std::move(event)}}.dump());
+                response=stream_event.result_json;
+                if(on_task_event){Json observed={{"operation_id",id},{"agent_id",entry.registration.id},
+                    {"event_sequence",++event_sequence},{"event",std::move(event)}};if(!stream_event.event_id.empty())observed["event_id"]=stream_event.event_id;on_task_event(observed.dump());}
             },cancel,[&]{validate_registration();dispatched=true;});
         }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();dispatched=true;});
     }catch(...){

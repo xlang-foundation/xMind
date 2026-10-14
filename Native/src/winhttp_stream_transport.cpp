@@ -149,6 +149,9 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         throw std::invalid_argument("Unsupported A2A HTTP protocol version");
     if(input.protocol!=ProviderHttpProtocol::a2a_jsonrpc&&!input.a2a_version.empty())
         throw std::invalid_argument("A2A protocol version requires an A2A request");
+    if(!input.last_event_id.empty()&&(input.protocol!=ProviderHttpProtocol::a2a_jsonrpc||input.last_event_id.size()>1024||
+        std::any_of(input.last_event_id.begin(),input.last_event_id.end(),[](unsigned char c){return c<0x20||c==0x7f;})))
+        throw std::invalid_argument("Invalid A2A event resume cursor");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     const auto deadline=Clock::now()+input.deadline;
     const auto parsed=endpoint(input.url);
@@ -161,6 +164,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     headers.value+=mcp?L"Accept: application/json, text/event-stream\r\n":json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
     if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&!input.a2a_version.empty())headers.value+=L"A2A-Version: "+wide(input.a2a_version)+L"\r\n";
+    if(!input.last_event_id.empty())headers.value+=L"Last-Event-ID: "+wide(input.last_event_id)+L"\r\n";
     if(mcp) {
         auto projected=mcp_http_request_headers(input.body,mcp->era,mcp->legacy_protocol);
         if(mcp->input_schema) {

@@ -2013,6 +2013,12 @@ std::vector<Event> Repository::events(const std::string& id,std::int64_t after) 
         result.push_back({integer(row[0]),id,text(row[1]),text(row[2])});
     return result;
 }
+std::optional<std::string> Repository::latest_a2a_event_id(const std::string& run_id,const std::string& operation_id) {
+    identifier(run_id);identifier(operation_id);const auto op=operation(operation_id);
+    if(op.spec.run_id!=run_id||op.spec.tool!="a2a_delegate")throw NotFound("A2A task operation not found");
+    const auto rows=impl_->database.execute("SELECT json_extract(payload,'$.event_id') FROM events WHERE run_id=? AND kind='a2a.task_event' AND json_extract(payload,'$.operation_id')=? AND json_type(payload,'$.event_id')='text' ORDER BY seq DESC LIMIT 1",{run_id,operation_id}).rows;
+    if(rows.empty())return std::nullopt;const auto value=text(rows.front()[0]);if(value.empty()||value.size()>1024||value.find_first_of("\r\n")!=std::string::npos||value.find('\0')!=std::string::npos)throw DatabaseError("Stored A2A event cursor is invalid");return value;
+}
 ProcessOutputArtifact Repository::begin_process_output(const std::string& operation_id,const std::string& run_id){
     identifier(operation_id);identifier(run_id);auto& db=impl_->database;Transaction transaction(db);const auto op=operation(operation_id);
     if(op.spec.run_id!=run_id||op.spec.tool!="run_process"||op.state!=OperationState::executing)throw Conflict("Process output requires its claimed run_process operation");

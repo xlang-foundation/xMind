@@ -28,6 +28,9 @@ struct HttpStreamRequest {
     CredentialHeader credential_header=CredentialHeader::bearer;
     ProviderHttpProtocol protocol=ProviderHttpProtocol::generic;
     std::string a2a_version;
+    // Optional SSE reconnection cursor, selected by the trusted A2A owner.
+    // It is never populated from arbitrary caller headers.
+    std::string last_event_id;
     std::function<void(int,const std::string&,const std::string&)> observe_response;
     // Runs immediately before the native transport begins a request body send.
     // Effect callers use this boundary to distinguish a known pre-dispatch

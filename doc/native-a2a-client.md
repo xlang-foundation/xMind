@@ -103,12 +103,16 @@ an error. A peer that does not advertise streaming or refuses a subscription
 (for example, because its task is terminal) returns an explicit error, and
 read-only task inspection remains available.
 
-The protocol client does not yet have a peer-issued resumable event cursor or
-deduplication key. Repeating this manual subscription can therefore append
-events the peer replays again; each local batch is marked with a distinct
-subscription ID and per-batch sequence rather than pretending those frames are
-new remote effects. Native, browser-adapter/controller and VS Code
-host/renderer contracts cover the saved identity, authenticated local view,
+When an SSE frame includes a valid `id`, xMind stores that peer cursor in the
+same durable event record and sends the latest stored value as `Last-Event-ID`
+on the next manual resubscription. This survives a backend restart because the
+cursor is recovered from the original run journal. A2A does not require peers
+to emit SSE IDs or define whether resubscription backfills missed events, so
+this remains best-effort: a peer that omits or ignores the cursor may replay
+events. xMind does not claim exactly-once stream delivery. Each local batch is
+marked with a distinct subscription ID and per-batch sequence rather than
+pretending those frames are new remote effects. Native, browser-adapter/controller
+and VS Code host/renderer contracts cover the saved identity, authenticated local view,
 bounded response, durable run journal and no-send-replay behavior. These
 contracts do not establish rendered/installed-client acceptance or automatic
 stream resumption after backend restart.

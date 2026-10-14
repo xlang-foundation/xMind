@@ -1,5 +1,18 @@
 # Current native validation
 
+## Durable A2A SSE resume cursor — 2026-10-13
+
+Resubscription now parses bounded SSE `id` fields and journals a non-empty
+peer cursor together with its task event. Before a later manual resubscription,
+the backend reads the latest cursor for that exact operation from the xlang3
+SQLite-backed run journal and sends it as `Last-Event-ID`. The route returns
+the cursor it most recently committed. Cursors are scoped to the recorded run
+and operation; malformed or oversized values are rejected before becoming an
+HTTP header. The native client and A2A registry contracts passed **2/2** in
+Release, including an actual two-subscription peer exchange and durable cursor
+recovery through the repository. A2A peers may omit or ignore SSE IDs, so this
+supports resumable peers without claiming protocol-wide exactly-once delivery.
+
 ## Explicit outbound A2A task resubscription — 2026-10-13
 
 The owner API and shared Browser/VS Code operation panel can explicitly
@@ -8,10 +21,10 @@ interrupted. Resubscription pins the saved peer revision and task identity,
 never repeats the original send, accepts at most 64 events/512 KiB, and appends
 each received event to the original run's durable SQLite journal. The peer
 stream has a 20-second bound; already committed events remain visible if the
-request times out. Repeated attempts may show replayed remote events because
-the protocol client does not yet persist a peer-issued cursor or deduplication
-key. Terminal tasks or peers without streaming return an error; the read-only
-task inspection path remains available.
+request times out. Where the peer supplies SSE IDs, xMind retains and sends
+the last journaled cursor as `Last-Event-ID`; peers without cursor support may
+replay events. Terminal tasks or peers without streaming return an error; the
+read-only task inspection path remains available.
 
 Release build of `agentflow_a2a_agent_registry_contract` passed, and its CTest
 passed **1/1**. The full browser suite passes **109/109** and the full VS Code

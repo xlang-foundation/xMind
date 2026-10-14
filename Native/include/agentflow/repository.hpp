@@ -161,6 +161,7 @@ public:
     Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);
+    std::optional<std::string> latest_a2a_event_id(const std::string& run_id,const std::string& operation_id);
     std::vector<Event> event_batch(const std::string& id,std::int64_t after,std::size_t count);
     ProcessOutputArtifact begin_process_output(const std::string& operation_id,const std::string& run_id);
     ProcessOutputArtifact append_process_output(const std::string& operation_id,const std::string& run_id,bool stderr_channel,const std::string& bytes);

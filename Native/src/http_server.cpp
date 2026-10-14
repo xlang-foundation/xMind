@@ -1262,10 +1262,11 @@ struct HttpServer::Impl {
             const auto discovered=peer.discover(std::chrono::seconds(5));
             if(discovered.protocol_version!=version||discovered.endpoint!=endpoint)throw Conflict("A2A peer interface changed since task admission");
             if(!discovered.streaming)throw Conflict("Registered A2A peer does not advertise task streaming");
+            auto last_event_id=persistence.latest_a2a_event_id(operation.spec.run_id,operation.id).get().value_or(std::string{});
             Json events=Json::array();std::size_t encoded_bytes=0;const auto subscription_id=new_id();
-            peer.resubscribe_to_task(Json{{"id",task_id}}.dump(),std::chrono::seconds(20),[&](const std::string& event_json){
+            peer.resubscribe_to_task(Json{{"id",task_id}}.dump(),std::chrono::seconds(20),[&](const A2aStreamEvent& stream_event){
                 if(events.size()>=64)throw TransportError("A2A peer exceeded the resubscription event limit");
-                Json event;try{event=Json::parse(event_json);}catch(const Json::exception&){throw TransportError("A2A peer returned invalid resubscription event JSON");}
+                Json event;try{event=Json::parse(stream_event.result_json);}catch(const Json::exception&){throw TransportError("A2A peer returned invalid resubscription event JSON");}
                 std::string event_task_id,event_context_id;
                 const Json* value=&event;for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})if(event.contains(field)&&event[field].is_object()){value=&event[field];break;}
                 if(value->contains("id")&&(*value)["id"].is_string())event_task_id=(*value)["id"].get<std::string>();
@@ -1274,9 +1275,11 @@ struct HttpServer::Impl {
                 if(!event_task_id.empty()&&event_task_id!=task_id)throw TransportError("A2A peer resubscribed a different task");
                 if(result.contains("context_id")&&result["context_id"].is_string()&&!result["context_id"].get<std::string>().empty()&&!event_context_id.empty()&&event_context_id!=result["context_id"].get<std::string>())throw TransportError("A2A peer changed task context during resubscription");
                 const auto size=event.dump().size();if(size>512*1024||encoded_bytes>512*1024-size)throw TransportError("A2A resubscription exceeds the local observation limit");encoded_bytes+=size;
-                persistence.append_event(operation.spec.run_id,"a2a.task_event",Json{{"operation_id",operation.id},{"agent_id",agent_id},{"subscription_id",subscription_id},{"event_sequence",events.size()+1},{"resubscribed",true},{"event",event}}.dump()).get();events.push_back(std::move(event));
-            });
-            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"subscription_id",subscription_id},{"subscription_state","closed"},{"events",std::move(events)}});
+                Json journal={{"operation_id",operation.id},{"agent_id",agent_id},{"subscription_id",subscription_id},{"event_sequence",events.size()+1},{"resubscribed",true},{"event",event}};
+                if(!stream_event.event_id.empty())journal["event_id"]=stream_event.event_id;
+                persistence.append_event(operation.spec.run_id,"a2a.task_event",journal.dump()).get();if(!stream_event.event_id.empty())last_event_id=stream_event.event_id;events.push_back(std::move(event));
+            },last_event_id);
+            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"subscription_id",subscription_id},{"subscription_state","closed"},{"last_event_id",last_event_id},{"events",std::move(events)}});
         }));
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/a2a/cancel)",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("A2A task cancellation request exceeds limits");
