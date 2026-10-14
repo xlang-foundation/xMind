@@ -88,8 +88,9 @@ manual resubscription is available through a bounded owner route described
 below; automatic recovery and cross-client rendered acceptance remain open.
 These are required before claiming full outbound A2A parity.
 
-The shared Browser/VS Code operation panel and authenticated local HTTP API now
-also expose an explicit `POST /v1/operations/{id}/a2a/resubscribe` operation.
+The shared Browser/VS Code operation panel, CLI command a2a-resubscribe
+OPERATION_ID, and authenticated local HTTP API expose an explicit
+POST /v1/operations/{id}/a2a/resubscribe operation.
 It accepts only a succeeded delegation or an uncertain send whose recorded
 stream already exposed a task ID. The backend resolves the same enabled peer,
 checks its saved registration revision, card URL, protocol version and
