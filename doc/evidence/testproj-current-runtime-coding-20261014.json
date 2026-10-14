@@ -45,17 +45,33 @@
     "http_verified": false,
     "visual_inspection": false
   },
+  "existing_dev_server": {
+    "url": "http://127.0.0.1:4174/",
+    "workspace": "D:\\CantorAI2026\\TestProj\\model-zoo\\frontend",
+    "server": "Vite dev server",
+    "page_status": 200,
+    "page_title": "Model Zoo · model registry catalog",
+    "vite_client_present": true,
+    "stylesheet_route": "/src/style.css",
+    "stylesheet_status": 200,
+    "stylesheet_contains_change": true,
+    "visual_inspection": false
+  },
   "preview_attempt": {
     "run_id": "d4bb72bc50183d0d556ae346db2538f4",
     "operation_id": "a93a4d1be4f7ead0841baa8cbbc0ad47",
     "state": "uncertain",
+    "timeout_ms": 1000,
+    "termination": "timed_out",
+    "process_tree_retired": true,
+    "root_cause": "The model chose a 1,000 ms process timeout; Vite was retired before it printed its ready URL.",
     "output_excerpt": "Vite preview command began but printed no ready URL.",
     "port_listener_observed": false,
     "replayed_or_cleared": false
   },
   "limitations": [
     "The real model/tool/edit/build run used the browser-session HTTP adapter; it was not driven by external-browser UI automation.",
-    "The generated page was not visually inspected because no external browser control surface was available.",
+    "The updated page and stylesheet were verified over the existing development server, but were not visually inspected because no external browser control surface was available.",
     "The uncertain preview process operation remains quarantined and was not retried or cleared."
   ]
 }

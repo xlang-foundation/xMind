@@ -52,9 +52,27 @@ frontend folder; Vite 6.4.4 transformed 37 modules, exited 0, and completed in
 597 ms. The emitted production CSS contains the new gradient, and run history
 records 33,519 input and 212 output tokens. This exercises the current
 provider-bound model/tool/edit/build path. External visual page review remains
-unverified: a subsequent preview-server operation became uncertain, port 4173
-had no listener, and its quarantine was preserved without replay or reset.
+unverified: an attempted second preview used a 1,000 ms process timeout and
+became uncertain on port 4173; its quarantine was preserved without replay or
+reset. The existing TestProj Vite dev server on port 4174 remains live, returns
+HTTP 200 for the Model Zoo page, and serves the updated stylesheet containing
+the gradient. This confirms the updated source is reachable, not that its
+rendered appearance was visually reviewed.
 [Sanitized evidence](evidence/testproj-current-runtime-coding-20261014.json).
+
+## Background process timeout and server guidance — 2026-10-14
+
+The TestProj preview attempt exposed a tool-guidance gap: its generated
+`run_process` call set `timeout_ms=1000`, which retired Vite before its ready
+URL appeared. xMind correctly retained the resulting process operation as
+uncertain, and that workspace/profile quarantine remains untouched. The
+AgentRunner joins background jobs before it completes, so this mode cannot
+leave a persistent server behind. The process tool now states the timeout,
+join, and persistent-server semantics explicitly and routes servers that must
+outlive a run to the session Terminal UI. The Release native agent/process HTTP
+contract passes **1/1** with assertions for this guidance. Persistent
+model-managed service lifecycle is still a product gap.
+[Validation evidence](evidence/background-process-tool-guidance-20261014.json).
 
 ## Fresh full native Release gate — 2026-10-14
 

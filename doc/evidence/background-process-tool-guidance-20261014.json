@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-14",
+  "result": "passed",
+  "source_files": [
+    "Native/src/process_executor.cpp",
+    "Native/tests/agent_process_http_contract.mjs"
+  ],
+  "test": {
+    "command": "ctest --test-dir build/native-verify -C Release -R native_agent_process_http_contract --output-on-failure",
+    "passed": 1,
+    "failed": 0
+  },
+  "guidance_added": [
+    "Background run_process jobs are joined before the agent run completes and are not persistent-server mode.",
+    "timeout_ms must cover process startup and execution; a short timeout can retire the process tree and quarantine uncertain effects.",
+    "A server intended to outlive the agent run must be started from the session Terminal UI, and its ready URL must be verified."
+  ],
+  "live_root_cause": {
+    "testproj_workspace": "D:\\CantorAI2026\\TestProj",
+    "operation_id": "a93a4d1be4f7ead0841baa8cbbc0ad47",
+    "process_timeout_ms": 1000,
+    "termination": "timed_out",
+    "process_tree_retired": true,
+    "stdout_bytes": 106,
+    "ready_url_observed": false,
+    "port_4173_listener": false,
+    "quarantine_replayed_or_cleared": false
+  },
+  "existing_preview": {
+    "url": "http://127.0.0.1:4174/",
+    "page_status": 200,
+    "stylesheet_status": 200,
+    "updated_gradient_served": true
+  },
+  "limitations": [
+    "This clarifies existing bounded background-process semantics; it does not add an agent-managed persistent service lifecycle.",
+    "External-browser visual verification remains unavailable."
+  ]
+}
