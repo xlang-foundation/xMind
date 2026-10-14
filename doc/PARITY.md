@@ -27,9 +27,16 @@ conversation archives. Version 2 carries the selected agent snapshot and
 version 1 remains importable. Import uses a fresh session ID and destination-
 local message sequences; workspace, provider profile, workspace-bound skills,
 fork ancestry and other full-session metadata still are not represented. Export
-requires an idle session and includes only user-visible settled history. Format and limits are documented in
-[local session archives](session-transfer.md). HTTP/CLI round-trip and invalid
-archive contracts pass in `native_http_cli_contract`.
+requires an idle session and includes only user-visible settled history. The
+local browser exposes Import/Export in the session header and forwards both
+routes through its HttpOnly view credential; the native Windows view policy
+admits only the intended export and import methods. Format and limits are
+documented in [local session archives](session-transfer.md). HTTP/CLI round-trip
+and invalid archive contracts pass in `native_http_cli_contract`; the actual
+C++ server plus browser gateway round-trip also passes in
+`views/browser/tests/native-contract.mjs`. The full browser suite passes
+107/107 and the VS Code extension suite passes 336/336. These archives still do
+not establish OpenCode's full session export contract.
 
 ## xlang3 tool worker and staged VS Code runtime checkpoint (2026-10-13)
 
