@@ -16,6 +16,25 @@ function validateToken(token) {
   }
   return token;
 }
+function validateEditInspection(proposal,inspection) {
+  let plan;try{plan=JSON.parse(proposal.arguments_json);}catch{throw new Error('The saved file change proposal is invalid.');}
+  const action=proposal.tool==='replace_file'?'update':plan.action;
+  if(!['update','add','delete','move'].includes(action)||typeof plan.path!=='string'||(action==='move'&&typeof plan.destination_path!=='string'))throw new Error('The saved file change does not have a supported recovery shape.');
+  const expectedPaths=action==='move'?[plan.path,plan.destination_path]:[plan.path],targetWorkspace=plan.target_workspace_id||plan.folder_id||proposal.workspace_id;
+  const current=inspection?.operation,observed=inspection?.observed,paths=inspection?.paths;
+  const pathsValid=Array.isArray(paths)&&paths.length===expectedPaths.length&&paths.every((entry,index)=>{
+    if(!entry||entry.path!==expectedPaths[index]||typeof entry.exists!=='boolean')return false;
+    if(!entry.exists)return entry.fingerprint===null;
+    const fingerprint=entry.fingerprint;
+    return !!fingerprint&&fingerprint.workspace_id===targetWorkspace&&typeof fingerprint.file_id==='string'&&fingerprint.file_id.length>0&&/^[a-f0-9]{64}$/.test(fingerprint.content_sha256)&&Number.isSafeInteger(fingerprint.size)&&fingerprint.size>=0&&fingerprint.size<=1048576;
+  });
+  const observedPresent=!!observed&&observed.workspace_id===targetWorkspace&&typeof observed.path==='string'&&typeof observed.file_id==='string'&&observed.file_id.length>0&&/^[a-f0-9]{64}$/.test(observed.content_sha256)&&Number.isSafeInteger(observed.size)&&observed.size>=0&&observed.size<=1048576;
+  const observedAbsent=!!observed&&expectedPaths.includes(observed.path)&&observed.workspace_id===targetWorkspace&&observed.file_id===''&&observed.content_sha256===''&&observed.size===0;
+  if(!current||current.id!==proposal.id||current.state!=='uncertain'||current.run_id!==proposal.run_id||current.workspace_id!==proposal.workspace_id||current.tool!==proposal.tool||current.arguments_json!==proposal.arguments_json||current.expires_unix_ms!==proposal.expires_unix_ms||
+    inspection.action!==action||!pathsValid||(!observedPresent&&!observedAbsent)||!['before','after','different'].includes(inspection.match)||typeof inspection.same_file!=='boolean'||(action==='update'&&inspection.match!=='different'&&!inspection.same_file)||
+    !Number.isSafeInteger(inspection.observed_unix_ms)||inspection.observed_unix_ms<=0||inspection.observed_unix_ms>8640000000000000||inspection.quarantine_released!==false)throw new Error('The inspection does not match the selected uncertain change. Refresh its current state.');
+  return true;
+}
 class BackendClient {
   #tokenProvider;
   #workspaceGuard;
@@ -1009,5 +1028,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
+else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};

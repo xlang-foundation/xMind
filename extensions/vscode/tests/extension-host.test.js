@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -115,7 +115,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname===`/v1/operations/${options.permissionOperation?.id}`)data=options.permissionOperation;
     else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
-    else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
+    else if(/^\/v1\/operations\/[A-Za-z0-9_-]+\/inspection$/.test(target.pathname)) data=await options.inspection;
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/inspect`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),options.includeA2aArtifacts?{include_artifacts:true}:{});data=options.a2aInspection;}
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/resubscribe`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aResubscription;}
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/cancel`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aCancellation;}
@@ -183,7 +183,7 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
@@ -418,7 +418,7 @@ test('native terminal state refreshes transcript and stops polling with durable 
   assert.equal(h.errors.length,0);view.close();
 });
 
-const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
+const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({path:'file.cpp',target_workspace_id:'verified-fixture-root',before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64),file_id:'fixture-file'})};
 test('VS Code refreshes only an acknowledged outbound A2A task from its saved operation',async()=>{
   const operation={id:'a2a-operation',run_id:'finished',workspace_id:'verified-fixture-root',tool:'a2a_delegate',state:'succeeded',expires_unix_ms:0,decision_actor:'local-owner',arguments_json:'{}',result_json:JSON.stringify({acknowledged_by_peer:true,agent_id:'research.peer',task_id:'remote-task'})};
   const inspection={operation_id:operation.id,agent_id:'research.peer',task_id:'remote-task',task:{id:'remote-task',status:{state:'TASK_STATE_COMPLETED'}},inspected_unix_ms:Date.now(),cancel_state:'not_attempted'};
@@ -573,7 +573,9 @@ test('graph catalog allows model-free tool graphs and rejects arbitrary view pla
 test('workflow choice persists for the same backend and restores only an advertised executable graph',async()=>{
  const options=graphFixture();options.runs=[];const h=harness(options);await h.commands.get('agentflow.open')();let view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));view.receive({type:'graph-select',id:'fixture.flow'});await until(()=>h.state.get('xmind.workflow')?.id==='fixture.flow');assert.equal(h.state.get('xmind.workflow').url,'http://127.0.0.1:8765');view.close();await h.commands.get('agentflow.open')();view=h.views[1];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));assert.equal(view.posted.find(m=>m.type==='graphs').selected,'fixture.flow');view.close();
 });
-const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
+const uncertainPlan=JSON.parse(uncertainEdit.arguments_json),uncertainTarget=uncertainPlan.target_workspace_id||uncertainEdit.workspace_id;
+const inspectionFingerprint={workspace_id:uncertainTarget,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12};
+const inspectionFixture={operation:uncertainEdit,observed:{path:uncertainPlan.path,workspace_id:uncertainTarget,...inspectionFingerprint},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false,action:'update',paths:[{path:uncertainPlan.path,exists:true,fingerprint:inspectionFingerprint}]};
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
   const older={...uncertainEdit,run_id:'older'};
   const h=harness({runs:[{id:'older',state:'failed'},{id:'latest',state:'completed'}],operationsByRun:{older:[older]},inspection:{...inspectionFixture,operation:older}});
@@ -615,6 +617,16 @@ test('uncertain edit inspection uses the host-only read endpoint without decidin
   assert.ok(!h.requests.some(route=>route.includes('forged-path')));
   view.receive({type:'inspect-edit',id:'unknown'});await until(()=>view.posted.some(message=>message.type==='error'));
   assert.equal(h.requests.filter(route=>route.endsWith('/inspection')).length,1);view.close();
+});
+test('uncertain patch addition inspection accepts verified absence without proposing an effect',async()=>{
+  const operation={...uncertainEdit,id:'uncertain-patch-add-0',tool:'patch_file',arguments_json:JSON.stringify({action:'add',path:'new.txt',target_workspace_id:'fixture-root',workspace_id:'fixture-root',patch_id:'fixture-patch',patch_index:0,patch_file_count:1,after_sha256:'b'.repeat(64),after_content:'new\n',create_directories:[]})};
+  const inspection={operation,observed:{path:'new.txt',workspace_id:'fixture-root',file_id:'',content_sha256:'',size:0},match:'before',same_file:false,observed_unix_ms:Date.now(),quarantine_released:false,action:'add',paths:[{path:'new.txt',exists:false,fingerprint:null}]};
+  const h=harness({health:{agent_execution:false},operations:[operation],inspection});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  view.receive({type:'inspect-edit',id:operation.id});await until(()=>view.posted.some(message=>message.type==='edit-inspection'||message.type==='error'));
+  assert.ok(view.posted.some(message=>message.type==='edit-inspection'),view.posted.filter(message=>message.type==='error').at(-1)?.text||'Missing patch inspection');
+  assert.deepEqual(view.posted.find(message=>message.type==='edit-inspection').inspection,inspection);
+  assert.ok(h.requests.includes('/v1/operations/uncertain-patch-add-0/inspection'));assert.equal(h.decisions.length,0);assert.ok(!h.requests.includes('/v1/runs'));view.close();
 });
 test('inspection rejects a different backend operation and discards observations after selection changes',async()=>{
   const h=harness({operations:[uncertainEdit],inspection:{...inspectionFixture,operation:{...uncertainEdit,arguments_json:'{}'}}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});

@@ -157,6 +157,41 @@ int main(int argc,char** argv) {
             rejects<Conflict>([&]{reopened.finish_operation("uncertain-patch-0",OperationState::failed,R"({})").get();});
             require(reopened.operation("uncertain-patch-0").get().state==OperationState::uncertain,
                 "Patch inspection must not resolve or release the uncertain operation");
+            auto record_uncertain_patch=[&](const std::string& run_id,const std::string& operation_id,WorkspaceTools& target,WorkspacePatchFilePlan planned,const PatchFileIdentity& identity){
+                reopened.start_prompt_run(run_id,"patch-recovery-session",R"({"content":"patch action recovery"})").get();
+                reopened.transition(run_id,RunState::queued,RunState::running).get();
+                PatchFileExecutor executor(reopened,target);const auto spec=executor.proposal(operation_id,run_id,planned,identity);
+                reopened.request_operation(operation_id,spec,expiry()).get();reopened.decide_operation(operation_id,OperationDecision::allow,"test-controller").get();
+                reopened.claim_operation(operation_id,spec).get();reopened.finish_operation(operation_id,OperationState::uncertain,R"({"reason":"fixture_uncertain_patch_action"})").get();
+                reopened.transition(run_id,RunState::running,RunState::failed).get();return spec;
+            };
+            const auto add_root=root.parent_path()/"patch-add-inspection-workspace";std::filesystem::create_directory(add_root);WorkspaceTools add_workspace(add_root.string());
+            const auto add_plan=add_workspace.plan_patch(parse_file_patch("*** Begin Patch\n*** Add File: added.txt\n+added bytes\n*** End Patch\n")).files.at(0);
+            const auto add_spec=record_uncertain_patch("patch-add-run","uncertain-patch-add-0",add_workspace,add_plan,{"uncertain-patch-add",0,1,{}});
+            auto add_inspection=EditExecutor(reopened,add_workspace).inspect_uncertain("uncertain-patch-add-0");
+            require(add_inspection.match==EditSnapshotMatch::before&&!add_inspection.paths.at(0).file,"Uncertain patch add must recognize a verified absent before image");
+            const auto add_payload=nlohmann::json::parse(add_spec.arguments_json);{std::ofstream output(add_root/"added.txt",std::ios::binary);output<<add_payload["after_content"].get<std::string>();}
+            add_inspection=EditExecutor(reopened,add_workspace).inspect_uncertain("uncertain-patch-add-0");
+            require(add_inspection.match==EditSnapshotMatch::after&&add_inspection.paths.at(0).file.has_value(),"Uncertain patch add must recognize the proposed after image");
+
+            const auto delete_root=root.parent_path()/"patch-delete-inspection-workspace";std::filesystem::create_directory(delete_root);WorkspaceTools delete_workspace(delete_root.string());
+            {std::ofstream output(delete_root/"deleted.txt",std::ios::binary);output<<"remove bytes\n";}
+            const auto delete_plan=delete_workspace.plan_patch(parse_file_patch("*** Begin Patch\n*** Delete File: deleted.txt\n*** End Patch\n")).files.at(0);
+            record_uncertain_patch("patch-delete-run","uncertain-patch-delete-0",delete_workspace,delete_plan,{"uncertain-patch-delete",0,1,{}});
+            require(EditExecutor(reopened,delete_workspace).inspect_uncertain("uncertain-patch-delete-0").match==EditSnapshotMatch::before,"Uncertain patch delete must recognize its exact before image");
+            std::filesystem::remove(delete_root/"deleted.txt");
+            const auto delete_inspection=EditExecutor(reopened,delete_workspace).inspect_uncertain("uncertain-patch-delete-0");
+            require(delete_inspection.match==EditSnapshotMatch::after&&!delete_inspection.paths.at(0).file,"Uncertain patch delete must recognize a verified absent after image");
+
+            const auto move_root=root.parent_path()/"patch-move-inspection-workspace";std::filesystem::create_directory(move_root);WorkspaceTools move_workspace(move_root.string());
+            {std::ofstream output(move_root/"source.txt",std::ios::binary);output<<"move before\n";}
+            const auto move_plan=move_workspace.plan_patch(parse_file_patch("*** Begin Patch\n*** Update File: source.txt\n*** Move to: destination.txt\n@@\n-move before\n+move after\n*** End Patch\n")).files.at(0);
+            const auto move_spec=record_uncertain_patch("patch-move-run","uncertain-patch-move-0",move_workspace,move_plan,{"uncertain-patch-move",0,1,{}});
+            require(EditExecutor(reopened,move_workspace).inspect_uncertain("uncertain-patch-move-0").match==EditSnapshotMatch::before,"Uncertain patch move must recognize its source and absent destination before image");
+            const auto move_payload=nlohmann::json::parse(move_spec.arguments_json);std::filesystem::rename(move_root/"source.txt",move_root/"destination.txt");
+            {std::ofstream output(move_root/"destination.txt",std::ios::binary|std::ios::trunc);output<<move_payload["after_content"].get<std::string>();}
+            const auto move_inspection=EditExecutor(reopened,move_workspace).inspect_uncertain("uncertain-patch-move-0");
+            require(move_inspection.match==EditSnapshotMatch::after&&move_inspection.paths.size()==2&&move_inspection.paths.at(1).file.has_value(),"Uncertain patch move must recognize the same file at its proposed destination");
             reopened.close();
         }
         std::cout<<"Approved native edit executor passed with actual files and embedded xlang3 persistence; no model or public approval route was used\n";return 0;

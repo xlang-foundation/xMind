@@ -15,24 +15,53 @@ EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std
     const auto plan=Json::parse(operation.spec.arguments_json,[](int depth,Json::parse_event_t,Json&) {
         if(depth>64) throw std::invalid_argument("Recovery proposal nesting exceeds limits");return true;
     });
-    // A patch_file update has the same exact single-file before/after
-    // preconditions as edit_file. Other patch actions have absent-path or
-    // two-path semantics and must not be misclassified as an ordinary edit.
-    if(!replacement&&(!plan.contains("action")||!plan["action"].is_string()||plan["action"]!="update"))
-        throw Conflict("Only an uncertain single-file patch update can be inspected as an edit");
-    for(const auto* key:{"path","file_id","before_sha256","after_sha256"})
-        if(!plan.contains(key) || !plan[key].is_string()) throw std::invalid_argument("Recovery proposal has no verified file preconditions");
+    const auto action=replacement?std::string("update"):(plan.contains("action")&&plan["action"].is_string()?plan["action"].get<std::string>():std::string{});
+    if(action!="update"&&action!="add"&&action!="delete"&&action!="move")throw Conflict("Uncertain patch action cannot be inspected");
+    if(!plan.contains("path")||!plan["path"].is_string())throw std::invalid_argument("Recovery proposal has no verified target path");
+    if(action!="add")for(const auto* key:{"file_id","before_sha256"})
+        if(!plan.contains(key)||!plan[key].is_string())throw std::invalid_argument("Recovery proposal has no verified before-image preconditions");
+    if(action!="delete"&&(!plan.contains("after_sha256")||!plan["after_sha256"].is_string()))throw std::invalid_argument("Recovery proposal has no verified after-image hash");
     if(plan.contains("folder_id")&&plan.value("folder_id",std::string{})!=folder_id_)throw ToolAccessDenied("Recovery inspection belongs to another workspace folder");
     if(plan.contains("workspace_id")&&plan.value("workspace_id",std::string{})!=owner_workspace_)throw ToolAccessDenied("Recovery workspace group changed");
     if(plan.contains("workspace_revision")&&(!plan["workspace_revision"].is_number_integer()||plan["workspace_revision"].get<std::int64_t>()!=workspace_revision_))throw ToolAccessDenied("Recovery membership revision changed");
     if(plan.contains("target_workspace_id")&&plan.value("target_workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Recovery folder identity changed");
-    const auto observed=workspace_.fingerprint_file(plan["path"].get<std::string>(),cancel);
-    const bool same_file=observed.file_id==plan["file_id"].get<std::string>();
+    std::vector<WorkspacePathFingerprint> paths;
+    const auto inspect=[&](const std::string& path){auto value=workspace_.fingerprint_optional_file(path,cancel);if(value.workspace_id!=workspace_.identity())throw ToolAccessDenied("Recovery folder identity changed during inspection");paths.push_back(std::move(value));return paths.size()-1;};
+    const auto primary=inspect(plan["path"].get<std::string>());
+    std::optional<std::size_t> secondary;
+    if(action=="move"){
+        if(!plan.contains("destination_path")||!plan["destination_path"].is_string())throw std::invalid_argument("Move recovery has no destination path");
+        secondary=inspect(plan["destination_path"].get<std::string>());
+    }
+    auto matches_created_directories=[&](const char* field,bool expect_absent){
+        if(!plan.contains(field))return true;const auto& values=plan[field];if(!values.is_array()||values.size()>32)return false;
+        for(const auto& item:values){if(!item.is_string())return false;const auto exists=workspace_.instruction_directory_identity(item.get<std::string>(),cancel).has_value();if(exists==expect_absent)return false;}
+        return true;
+    };
+    const auto& target=paths[primary];const auto source_id=plan.value("file_id",std::string{});
+    bool same_file=target.file&&(!source_id.empty()&&target.file->file_id==source_id);
     auto match=EditSnapshotMatch::different;
-    if(same_file && observed.content_sha256==plan["before_sha256"].get<std::string>()) match=EditSnapshotMatch::before;
-    else if(same_file && observed.content_sha256==plan["after_sha256"].get<std::string>()) match=EditSnapshotMatch::after;
+    if(action=="update"){
+        if(target.file&&same_file&&target.file->content_sha256==plan["before_sha256"].get<std::string>())match=EditSnapshotMatch::before;
+        else if(target.file&&same_file&&target.file->content_sha256==plan["after_sha256"].get<std::string>())match=EditSnapshotMatch::after;
+    }else if(action=="add"){
+        if(!target.file&&matches_created_directories("create_directories",true))match=EditSnapshotMatch::before;
+        else if(target.file&&target.file->content_sha256==plan["after_sha256"].get<std::string>())match=EditSnapshotMatch::after;
+    }else if(action=="delete"){
+        if(target.file&&same_file&&target.file->content_sha256==plan["before_sha256"].get<std::string>())match=EditSnapshotMatch::before;
+        else if(!target.file)match=EditSnapshotMatch::after;
+    }else{
+        const auto& destination=paths[*secondary];
+        const bool source_before=target.file&&same_file&&target.file->content_sha256==plan["before_sha256"].get<std::string>();
+        const bool destination_before=!destination.file&&matches_created_directories("create_directories",true);
+        if(source_before&&destination_before)match=EditSnapshotMatch::before;
+        else if(!target.file&&destination.file&&destination.file->file_id==source_id&&destination.file->content_sha256==plan["after_sha256"].get<std::string>()){
+            same_file=true;match=EditSnapshotMatch::after;
+        }
+    }
     const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    return {operation,observed,match,same_file,now};
+    WorkspaceFingerprint observed{};for(const auto& path:paths)if(path.file){observed=*path.file;break;}if(observed.path.empty())observed={target.path,target.workspace_id,{},{},0};
+    return {operation,std::move(observed),match,same_file,now,action,std::move(paths)};
 }
 ModelToolDefinition EditExecutor::definition() {
     return {"edit_file","Propose one focused exact literal replacement in a UTF-8 workspace file. For related changes or multiple hunks, prefer one apply_patch call so the model can review the file once; each affected file still requires its own controller approval. Always waits for controller approval; stale files are rejected without writing. If content_conflict is returned, read the current file with read_file and make a fresh edit_file call from its exact current contents. When the user's requested result remains clear, do not ask them to restate it solely because the old precondition changed; preserve unrelated intervening content. The fresh proposal still waits for normal approval. Stop for clarification only if the new state makes the requested outcome ambiguous. Report only the actual tool outcome.",R"({"type":"object","properties":{"path":{"type":"string"},"old_text":{"type":"string","minLength":1},"new_text":{"type":"string"},"expected_occurrences":{"type":"integer","minimum":1,"maximum":1024},"folder_id":{"type":"string","description":"Optional registered workspace folder ID; omit it to use the primary folder."}},"required":["path","old_text","new_text"],"additionalProperties":false})"};

@@ -8,6 +8,14 @@ test('browser surfaces and replies to a pending approval from another run in the
  const view=new BrowserController(client,message=>posted.push(message));view.session='selected-session';view.runId='newer-run';
  try{await view.refreshSessionPermissions();assert.ok(posted.at(-1).operations.some(item=>item.id===proposal.id));await view.handle({type:'decide',id:proposal.id,decision:'allow'});assert.deepEqual(calls,[['selected-session',proposal.id,'allow']]);assert.equal(view.sessionPermissionRequests.size,0);assert.ok(posted.at(-1).operations.every(item=>item.id!==proposal.id));}finally{view.dispose();}
 });
+test('browser accepts only a path-bound read-only inspection for an uncertain patch addition',async()=>{
+ const id='uncertain-add',plan={action:'add',path:'new.txt',target_workspace_id:'workspace',after_sha256:'b'.repeat(64),after_content:'new\n',create_directories:[]};
+ const operation={id,run_id:'run',workspace_id:'workspace',tool:'patch_file',state:'uncertain',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:'{}'};
+ const inspection={operation,observed:{path:'new.txt',workspace_id:'workspace',file_id:'',content_sha256:'',size:0},match:'before',same_file:false,observed_unix_ms:Date.now(),quarantine_released:false,action:'add',paths:[{path:'new.txt',exists:false,fingerprint:null}]};
+ const posted=[],calls=[],view=new BrowserController({operation:async()=>operation,inspectEdit:async value=>{calls.push(value);return inspection;}},value=>posted.push(value));view.runId='run';view.runs=[{id:'run',state:'failed'}];view.operations.set(id,operation);
+ try{await view.handle({type:'inspect-edit',id});assert.deepEqual(calls,[id]);assert.deepEqual(posted.at(-1),{type:'edit-inspection',id,inspection});}
+ finally{view.dispose();}
+});
 test('browser conversation permission manager lists scoped grants and revokes only the observed revision',async()=>{
  const calls=[],posted=[],grant={id:'grant_a',workspace_id:'workspace',action:'read_file',resource:'src/main.cpp',policy_binding:'policy',created_unix_ms:1234};let snapshot={session_id:'session-a',revision:4,grants:[grant]};
  const client={sessionPermissionGrants:async session=>{calls.push(['list',session]);return snapshot;},revokeSessionPermissionGrant:async(session,id,revision)=>{calls.push(['revoke',session,id,revision]);snapshot={session_id:session,revision:revision+1,grants:[]};return snapshot;}};const view=new BrowserController(client,message=>posted.push(message));view.session='session-a';

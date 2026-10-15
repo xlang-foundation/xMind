@@ -40,6 +40,7 @@ struct WorkspaceRemovalResult {std::string path,workspace_id,file_id,removed_sha
 using WorkspacePatchFilePlan=std::variant<WorkspaceCreatePlan,WorkspaceEditPlan,WorkspaceRemovalPlan,WorkspaceMovePlan>;
 struct WorkspacePatchPlan {std::string workspace_id;std::vector<WorkspacePatchFilePlan> files;};
 struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
+struct WorkspacePathFingerprint {std::string path,workspace_id;std::optional<WorkspaceFingerprint> file;};
 struct WorkspaceEntry {std::string name,kind;};
 struct WorkspaceListing {std::vector<WorkspaceEntry> entries;bool truncated=false;};
 struct WorkspaceMatch {std::string path,text;std::int64_t line;bool text_truncated=false;};
@@ -138,6 +139,10 @@ public:
     // Reconciliation inspection hashes bounded raw bytes, including a partial
     // write that is no longer valid UTF-8. It never exposes those bytes to models.
     WorkspaceFingerprint fingerprint_file(const std::string& path,std::stop_token cancel={}) const;
+    // Handle-relative reconciliation of an optional workspace entry. Missing
+    // entries are reported only after verifying the opened root and every
+    // existing ancestor; present entries are fingerprinted as bounded raw bytes.
+    WorkspacePathFingerprint fingerprint_optional_file(const std::string& path,std::stop_token cancel={}) const;
     WorkspaceListing list_files(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,const WorkspaceSearchOptions& options,std::stop_token cancel={}) const;

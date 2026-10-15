@@ -378,14 +378,13 @@ function operationExtras(section,item,reviewable=true){
     if(item.state==='uncertain')section.append(node('p','The external effect is uncertain. Further effects in this workspace and on this configured server remain blocked.','inspection-note'));
     if(item.state==='succeeded')section.append(node('p','The external server acknowledged this result. xMind has not independently verified its effect.'));
   }
-  if(item.tool==='replace_file'&&item.state==='uncertain'){
-    operationSections.set(item.id,section);section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
+  if(['replace_file','patch_file'].includes(item.tool)&&item.state==='uncertain'){
+    operationSections.set(item.id,section);section.append(node('p','This file change is uncertain. Its original effect will not be replayed, and further workspace effects remain blocked.','inspection-note'));
     const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
   }
   if(['replace_file','create_file','patch_file'].includes(item.tool)&&item.state==='awaiting_approval'){
     const button=node('button','Compare changes');button.disabled=!reviewable||Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});section.append(button);
   }
-  if(item.tool==='patch_file'&&item.state==='uncertain')section.append(node('p','This patch file effect is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
   if(item.tool==='create_file'){
     try{const plan=JSON.parse(item.arguments_json);if(Array.isArray(plan.create_directories)&&plan.create_directories.length){section.append(node('p','This approval also creates these missing parent folders:'));const folders=node('ul');for(const directory of plan.create_directories)if(typeof directory==='string')folders.append(node('li',directory));section.append(folders);}}catch{}
     section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
@@ -721,7 +720,8 @@ window.addEventListener('message',event=>{
       const detail=node('div',undefined,'edit-inspection'),value=m.inspection;
       const labels={before:'Matches recorded before state',after:'Matches recorded after state',different:'Differs from the recorded states'};
       detail.append(node('strong',labels[value.match]||'Inspection unavailable'),node('p','Observation only. The outcome remains uncertain and the workspace stays blocked.','inspection-note'));
-      detail.append(node('pre','Observed: '+new Date(value.observed_unix_ms).toISOString()+'\nPath: '+value.observed.path+'\nSame file identity: '+(value.same_file?'yes':'no')+'\nSize: '+value.observed.size+' bytes\nSHA-256: '+value.observed.content_sha256));
+      const observedPaths=Array.isArray(value.paths)?value.paths.map(entry=>entry.path+' · '+(entry.exists?'present · '+entry.fingerprint.size+' bytes · SHA-256 '+entry.fingerprint.content_sha256:'absent')).join('\n'):'Path: '+value.observed.path+'\nSize: '+value.observed.size+' bytes\nSHA-256: '+value.observed.content_sha256;
+      detail.append(node('pre','Action: '+(value.action||'update')+'\nObserved: '+new Date(value.observed_unix_ms).toISOString()+'\n'+observedPaths+'\nSame file identity: '+(value.same_file?'yes':'no')));
       section.append(detail);
     }
   }

@@ -254,10 +254,11 @@ Json encode(const AgentPermissionGrantSnapshot& value) {
 Json encode(const EditRecoveryInspection& value) {
     const auto& observed=value.observed;
     const char* match=value.match==EditSnapshotMatch::before?"before":(value.match==EditSnapshotMatch::after?"after":"different");
+    Json paths=Json::array();for(const auto& path:value.paths){Json fingerprint=nullptr;if(path.file)fingerprint={{"workspace_id",path.file->workspace_id},{"file_id",path.file->file_id},{"content_sha256",path.file->content_sha256},{"size",path.file->size}};paths.push_back({{"path",path.path},{"exists",path.file.has_value()},{"fingerprint",std::move(fingerprint)}});}
     return {{"operation",encode(value.operation)},{"observed",{{"path",observed.path},{"workspace_id",observed.workspace_id},
         {"file_id",observed.file_id},{"content_sha256",observed.content_sha256},{"size",observed.size}}},
         {"match",match},{"same_file",value.same_file},{"observed_unix_ms",value.observed_unix_ms},
-        {"quarantine_released",false}};
+        {"quarantine_released",false},{"action",value.action},{"paths",std::move(paths)}};
 }
 template<class Values> Json encode_all(const Values& values) {
     auto result=Json::array();for(const auto& value:values) result.push_back(encode(value));return result;

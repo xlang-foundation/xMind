@@ -414,6 +414,28 @@ WorkspaceFingerprint WorkspaceTools::fingerprint_file(const std::string& path,st
     auto value=read_snapshot(path,true,cancel,false);
     return {std::move(value.path),std::move(value.workspace_id),std::move(value.file_id),std::move(value.content_sha256),value.content.size()};
 }
+WorkspacePathFingerprint WorkspaceTools::fingerprint_optional_file(const std::string& input,std::stop_token cancel) const {
+    check_cancel(cancel);const auto workspace=identity();auto parent=impl_->creation_parent(input,cancel,true);
+    const auto relative=parent.relative;
+    if(!parent.missing.empty()){
+        check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during recovery inspection");
+        return {relative,workspace,std::nullopt};
+    }
+    const auto directory=parent.directories.back()->value;impl_->verify_creation_directory(directory);
+    const auto opened=relative_file(directory,parent.leaf,false,false,true,true);
+    if(!opened){
+        check_cancel(cancel);impl_->verify_creation_directory(directory);
+        if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during recovery inspection");
+        return {relative,workspace,std::nullopt};
+    }
+    Handle file(opened);impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(file.value,&info)||GetFileType(file.value)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Recovery target is not a regular file");
+    if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)||info.nNumberOfLinks!=1)throw ToolAccessDenied("Recovery target cannot be a linked file");
+    const auto id=file_identity(file.value);const auto bytes=read_effect_file(file.value,cancel);const auto hash=content_hash(bytes);
+    impl_->verify(file.value);impl_->verify_creation_directory(directory);
+    if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during recovery inspection");
+    return {relative,workspace,WorkspaceFingerprint{relative,workspace,id,hash,bytes.size()}};
+}
 WorkspacePatchPlan WorkspaceTools::plan_patch(const std::vector<FilePatch>& files,std::stop_token cancel,bool create_parents) const {
     check_cancel(cancel);
     if(files.empty()||files.size()>128)throw std::invalid_argument("Invalid patch file count");

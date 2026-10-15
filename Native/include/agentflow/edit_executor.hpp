@@ -12,6 +12,8 @@ struct EditRecoveryInspection {
     EditSnapshotMatch match;
     bool same_file;
     std::int64_t observed_unix_ms;
+    std::string action;
+    std::vector<WorkspacePathFingerprint> paths;
 };
 class EditRecoveryReader {
 public:

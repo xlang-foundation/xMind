@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Action-aware uncertain file recovery inspection — 2026-10-15
+
+Native inspection now classifies uncertain replacement and patch add/update/
+delete/move operations against their approved before and after state. Move
+inspection fingerprints both source and destination; optional paths are
+observed through verified workspace-root and ancestor handles. Responses expose
+path fingerprints and absence only, never file contents. Inspection is read-only
+and leaves the durable operation uncertain and the workspace quarantined.
+Release CTest passes the native edit executor and approved-edit HTTP/CLI
+contracts **2/2**. Browser controller tests pass **63/63**, and the VS Code
+client suite passes **362/362**, including patch-add inspection validation.
+Undo/redo, attributed reconciliation and post-write process-kill recovery remain
+open. [Native recovery contract](../Native/tests/edit_executor_contract.cpp).
+
 ## Saved-provider live browser smoke across four gateways — 2026-10-14
 
 The local xMind browser reused its encrypted saved credentials and completed
