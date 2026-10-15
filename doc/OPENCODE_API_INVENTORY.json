@@ -8377,7 +8377,7 @@
         "sourceSha256": "b8f7e4a8e3e2029c2761beb2621591eb546477ec137e3c6e070e14c7db2f2d53",
         "surface": "GET /v1/agents/{id}",
         "sourceAnchor": "executor->agent_definition",
-        "gap": "Persisted deny rules are returned and enforced from session/graph snapshots; OpenCode allow/ask decisions, source metadata and complete permission lifecycle remain incomplete.",
+        "gap": "Persisted ordered allow/deny rules are returned and enforced from session/graph snapshots; OpenCode interactive asks, saved grants, source metadata and complete permission lifecycle remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -9460,7 +9460,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "e12efd7165feecd3e033b4016030a0083cf58c0417532fd9a8c14bde48abe940",
+        "sourceSha256": "9624f33b8cf775449b12882e9a0d0d316da278bf992a6c3659990bd8d4b5dd85",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",

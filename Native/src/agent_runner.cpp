@@ -333,10 +333,21 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
     auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
-    auto effective_permission_rules=settings_.permission_rules;
-    effective_permission_rules.insert(effective_permission_rules.end(),permission_rules.begin(),permission_rules.end());
-    validate_agent_permission_rules(effective_permission_rules);
-    auto execution_settings=settings_;execution_settings.permission_rules=effective_permission_rules;
+    auto inherited_permission_layers=settings_.inherited_permission_rule_layers;
+    if(!settings_.permission_rules.empty())inherited_permission_layers.push_back(settings_.permission_rules);
+    const auto agent_permission_rules=permission_rules;
+    for(const auto& layer:inherited_permission_layers)validate_agent_permission_rules(layer);
+    validate_agent_permission_rules(agent_permission_rules);
+    const auto permission_denied=[&](const std::string& action,const std::string& resource){
+        for(const auto& layer:inherited_permission_layers)if(agent_permission_denies(layer,action,resource))return true;
+        return agent_permission_denies(agent_permission_rules,action,resource);
+    };
+    const auto directory_enumeration_denied=[&](const std::string& action,const std::string& directory){
+        for(const auto& layer:inherited_permission_layers)if(agent_permission_denies_directory_enumeration(layer,action,directory))return true;
+        return agent_permission_denies_directory_enumeration(agent_permission_rules,action,directory);
+    };
+    auto execution_settings=settings_;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
+    if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_&&settings_.workspace_membership_snapshot){
@@ -821,10 +832,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             if(permission_resource.empty())permission_resource=".";
                         }
                     }
-                    if(agent_permission_denies(effective_permission_rules,call.name,permission_resource))
+                    if(permission_denied(call.name,permission_resource))
                         throw AgentPermissionDenied("Selected agent policy denied this tool resource");
                     if((call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files")&&
-                       agent_permission_denies_directory_enumeration(effective_permission_rules,call.name,permission_resource))
+                       directory_enumeration_denied(call.name,permission_resource))
                         throw AgentPermissionDenied("Selected agent policy denies enumeration of a directory containing restricted resources");
                     if(selected_repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=selected_repository_context->skills().ready(token);
                     if(selected_repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
@@ -857,7 +868,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             guidance_ready=guidance_ready&&!prepared_folder_patches.empty()&&prepared_folder_patches.size()==scoped_args["patches"].size();
                         }else{prepared_patch=PatchTool(persistence_,*selected_workspace,*selected_repository_context,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1,selected_folder_index==0).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
                     }
-                    const auto check_patch_permissions=[&](const PreparedPatch& patch){for(const auto& file:patch.plan.files)std::visit([&](const auto& planned){using T=std::decay_t<decltype(planned)>;if constexpr(std::is_same_v<T,WorkspaceCreatePlan>) {if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if constexpr(std::is_same_v<T,WorkspaceMovePlan>){if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.before.path)||agent_permission_denies(effective_permission_rules,"apply_patch",planned.destination.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.before.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");},file);};
+                    const auto check_patch_permissions=[&](const PreparedPatch& patch){for(const auto& file:patch.plan.files)std::visit([&](const auto& planned){using T=std::decay_t<decltype(planned)>;if constexpr(std::is_same_v<T,WorkspaceCreatePlan>) {if(permission_denied("apply_patch",planned.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if constexpr(std::is_same_v<T,WorkspaceMovePlan>){if(permission_denied("apply_patch",planned.before.path)||permission_denied("apply_patch",planned.destination.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if(permission_denied("apply_patch",planned.before.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");},file);};
                     if(call.name=="apply_patch"){if(prepared_patch)check_patch_permissions(*prepared_patch);for(const auto& prepared:prepared_folder_patches)check_patch_permissions(prepared.patch);}
             if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
@@ -891,7 +902,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto* admitted_folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
                         output=Json::parse(language_servers_->invoke(call.arguments_json,token,admitted_folders,settings_.language_server_dispatch));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
-                        auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.permission_rules=effective_permission_rules;frozen.selectable_models=models();
+                        auto frozen=execution_settings;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.selectable_models=models();
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {
                         JsonSchema schema(registered->second->definition.input_schema_json);schema.validate_object(call.arguments_json);

@@ -59,14 +59,23 @@ inline bool agent_permission_may_cover_directory(const AgentPermissionRule& rule
 }
 }
 
+enum class AgentPermissionEffect { no_match, allow, deny };
+
+inline AgentPermissionEffect agent_permission_effect(const std::vector<AgentPermissionRule>& rules,
+                                                       const std::string& action, const std::string& resource) {
+    const auto normalized_resource=detail::agent_permission_normalize_resource(resource);
+    for (auto it=rules.rbegin();it!=rules.rend();++it) {
+        const auto& rule=*it;
+        if ((rule.action == "*" || rule.action == action) &&
+            detail::agent_permission_glob(rule.resource, normalized_resource))
+            return rule.effect=="allow"?AgentPermissionEffect::allow:AgentPermissionEffect::deny;
+    }
+    return AgentPermissionEffect::no_match;
+}
+
 inline bool agent_permission_denies(const std::vector<AgentPermissionRule>& rules,
                                     const std::string& action, const std::string& resource) {
-    const auto normalized_resource=detail::agent_permission_normalize_resource(resource);
-    for (const auto& rule : rules)
-        if ((rule.action == "*" || rule.action == action) &&
-            detail::agent_permission_glob(rule.resource, normalized_resource) && rule.effect == "deny")
-            return true;
-    return false;
+    return agent_permission_effect(rules,action,resource)==AgentPermissionEffect::deny;
 }
 
 inline bool agent_permission_denies_directory_enumeration(const std::vector<AgentPermissionRule>& rules,

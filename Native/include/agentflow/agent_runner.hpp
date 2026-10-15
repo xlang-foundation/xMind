@@ -60,6 +60,9 @@ struct AgentSettings {
     // Used for trusted delegated leaves and explicit named-agent bindings.
     std::optional<std::vector<std::string>> tool_allowlist;
     std::vector<AgentPermissionRule> permission_rules;
+    // Each inherited policy layer is resolved independently so a child
+    // profile's allow rule cannot erase a denial from its parent.
+    std::vector<std::vector<AgentPermissionRule>> inherited_permission_rule_layers;
     // Explicitly registered trusted, in-process xlang3 callables. These join
     // the backend catalogue and remain subject to the selected agent allowlist.
     std::vector<XlangPythonToolRegistration> xlang_python_tools;

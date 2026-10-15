@@ -89,28 +89,35 @@ agent and reimporting a graph creates a new graph revision; existing runs keep
 their captured plan. A graph node using `agent_id` cannot override the
 definition's model or instructions. A configured model ID must be enabled by
 the backend before the graph can run. Agent IDs remain retired after removal.
-A named definition does not grant tools or permissions: its optional allowlist
-can only narrow the server-registered tools, workspace access and approval
-policy. It can also add hard-deny rules that further narrow the selected
-agent's tool access. Rules use the native tool name (or `*`) and a
-workspace-relative glob. For example:
+A named definition does not grant tools or native authority: its optional
+allowlist can only narrow the server-registered tools, workspace access and
+approval policy. Ordered permission rules can deny a tool/resource or let a
+later `allow` override an earlier agent-level denial. Rules use the native tool
+name (or `*`) and a workspace-relative glob. For example:
 
 ```yaml
 permissions:
   - action: read_file
     resource: "**/.env*"
     effect: deny
+  - action: read_file
+    resource: "config/example.env"
+    effect: allow
   - action: run_process
     resource: "*"
     effect: deny
 ```
 
 The backend checks these rules before dispatch and snapshots them with the
-conversation and graph node. Only `deny` is supported today; `allow` and
-interactive `ask` rules are rejected. A `run_process` rule is conservatively
-matched against `*`, since a process can access files beyond its working
-directory. Existing native effect approvals remain mandatory regardless of
-agent rules.
+conversation and graph node. For direct resources, the last matching agent
+rule wins. `allow` only clears an earlier agent rule; it cannot widen the tool
+allowlist, workspace membership or native authorization, and it never skips an
+effect approval. Inherited policy ceilings are evaluated separately, so a
+child profile cannot clear a restriction inherited from its parent. Directory
+enumeration remains conservative: it is denied if a denied resource could be
+exposed. Interactive `ask` rules are not supported yet. A `run_process` rule
+is conservatively matched against `*`, since a process can access files beyond
+its working directory.
 
 Set `default: true` on one visible `all` or `primary` profile to make new
 conversations use it automatically. The backend pins that agent revision into
