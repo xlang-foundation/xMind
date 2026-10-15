@@ -17,6 +17,10 @@ struct AgentDefinition {
     std::optional<std::vector<std::string>> tools;
     std::string name;
     std::string description;
+    // `all` preserves the original xMind behavior for existing definitions.
+    // `primary` agents own conversations; `subagent` agents are admitted in graphs.
+    std::string mode = "all";
+    bool hidden = false;
 };
 
 inline void validate_agent_tool_allowlist(const std::optional<std::vector<std::string>>& tools) {
@@ -37,6 +41,8 @@ struct AgentDefinitionMetadata {
     std::string model_id;
     std::string name;
     std::string description;
+    std::string mode = "all";
+    bool hidden = false;
 };
 
 struct AgentDefinitionCatalog {

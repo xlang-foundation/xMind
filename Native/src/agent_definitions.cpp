@@ -70,8 +70,8 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 
     std::set<std::string> ids;
     for (const auto& record : value.at("agents")) {
-        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description"});
-        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description"});
+        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description", "mode", "hidden"});
+        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description", "mode", "hidden"});
         const auto key = text(record, "id", 64);
         if (!identifier(key) || !ids.insert(key).second) throw std::invalid_argument("Invalid or duplicate agent definition ID");
         const auto model = record.contains("model_id") ? text(record, "model_id", 256, true) : std::string{};
@@ -91,6 +91,12 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
         AgentDefinition agent{key, rev, model, guidance, std::move(tools)};
         agent.name = record.contains("name") ? text(record, "name", 128) : key;
         agent.description = record.contains("description") ? text(record, "description", 2048, true) : std::string{};
+        agent.mode = record.contains("mode") ? text(record, "mode", 16) : "all";
+        if (agent.mode != "all" && agent.mode != "primary" && agent.mode != "subagent")
+            throw std::invalid_argument("Invalid named agent mode");
+        if (record.contains("hidden") && !record.at("hidden").is_boolean())
+            throw std::invalid_argument("Named agent hidden flag must be boolean");
+        agent.hidden = record.contains("hidden") && record.at("hidden").get<bool>();
         result.entries.push_back(std::move(agent));
     }
 
@@ -110,7 +116,7 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 std::string encode(const AgentDefinitionCatalog& catalog) {
     auto entries = Json::array();
     for (const auto& agent : catalog.entries) {
-        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}};
+        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}, {"mode", agent.mode}, {"hidden", agent.hidden}};
         if (agent.tools) entry["tools"] = *agent.tools;
         entries.push_back(std::move(entry));
     }
@@ -136,7 +142,7 @@ AgentDefinitionCatalog AgentDefinitionStore::apply(const std::string& source) {
             throw std::invalid_argument("Retired agent definition IDs cannot be reused");
         const auto found = std::find_if(previous.entries.begin(), previous.entries.end(), [&](const auto& old) { return old.id == entry.id; });
         if (found == previous.entries.end()) { entry.revision = 1; changed = true; }
-        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description) entry.revision = found->revision;
+        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description && found->mode == entry.mode && found->hidden == entry.hidden) entry.revision = found->revision;
         else {
             if (found->revision == maximum_revision) throw std::overflow_error("Agent definition revision exhausted");
             entry.revision = found->revision + 1;

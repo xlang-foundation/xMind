@@ -206,7 +206,7 @@ Run ExecutionPlatform::submit_graph_workspace(std::string id,std::string session
 }
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{
-    std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description});return result;
+    std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden});return result;
 }
 AgentDefinition ExecutionPlatform::agent_definition(const std::string& id)const{
     const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==id;});
@@ -215,7 +215,8 @@ AgentDefinition ExecutionPlatform::agent_definition(const std::string& id)const{
 SessionAgentState ExecutionPlatform::session_agent(const std::string& session)const{return store_.session_agent(session).get();}
 SessionAgentState ExecutionPlatform::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){
     std::optional<AgentDefinition> pinned;if(selected){if(selected->id.empty()||selected->revision<1)throw std::invalid_argument("Invalid named agent selection");const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==selected->id;});
-        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");pinned=*found;}
+        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");
+        if(found->mode=="subagent")throw std::invalid_argument("Subagent definitions cannot be selected as the conversation's primary agent");pinned=*found;}
     return store_.replace_session_agent(session,std::move(pinned),revision).get();
 }
 bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}

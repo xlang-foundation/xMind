@@ -33,6 +33,7 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
             const auto id=node["agent_id"].get<std::string>();
             const auto found=std::find_if(definitions.entries.begin(),definitions.entries.end(),[&](const auto& item){return item.id==id;});
             if(found==definitions.entries.end())throw std::invalid_argument("Graph references an unknown named agent definition");
+            if(found->mode=="primary")throw std::invalid_argument("Primary-only agent definitions cannot be used as graph subagents");
             node["agent_revision"]=found->revision;
             node["instructions"]=found->instructions;
             if(!found->model_id.empty())node["model_id"]=found->model_id;

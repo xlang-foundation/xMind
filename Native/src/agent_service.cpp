@@ -359,7 +359,7 @@ Run AgentService::submit(std::string id,std::string session,std::string prompt){
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
 std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
-    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description});return result;
+    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden});return result;
 }
 AgentDefinition AgentService::agent_definition(const std::string& id)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();const auto catalog=AgentDefinitionStore(impl_->persistence).load();
@@ -372,7 +372,8 @@ SessionAgentState AgentService::session_agent(const std::string& session)const{
 SessionAgentState AgentService::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected){
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::optional<AgentDefinition> pinned;
     if(selected){if(selected->id.empty()||selected->revision<1)throw std::invalid_argument("Invalid named agent selection");const auto catalog=AgentDefinitionStore(impl_->persistence).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==selected->id;});
-        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");pinned=*found;}
+        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");
+        if(found->mode=="subagent")throw std::invalid_argument("Subagent definitions cannot be selected as the conversation's primary agent");pinned=*found;}
     return impl_->persistence.replace_session_agent(session,std::move(pinned),expected).get();
 }
 bool AgentService::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->delegation&&impl_->children->healthy();}

@@ -4,9 +4,10 @@ const assert=require('node:assert/strict');
 const {AgentSelectionController,validateAgentCatalogue,validateSessionAgent}=require('../client');
 
 test('named agent selection pins public metadata per session, rejects stale replies and locks during a run',async()=>{
- const catalogue={agents:[{id:'review.agent',revision:2,model_id:'claude-sonnet',name:'Code Reviewer',description:'Reviews changes and cites source evidence.'}]};
+ const catalogue={agents:[{id:'review.agent',revision:2,model_id:'claude-sonnet',name:'Code Reviewer',description:'Reviews changes and cites source evidence.',mode:'all',hidden:false}]};
  assert.equal(validateAgentCatalogue(catalogue),catalogue);
  assert.throws(()=>validateAgentCatalogue({agents:[{...catalogue.agents[0],instructions:'private'}]}),/metadata/);
+ assert.throws(()=>validateAgentCatalogue({agents:[{...catalogue.agents[0],mode:'unknown'}]}),/metadata/);
  let selection={session_id:'session-1',revision:4,editable:true,selected:null},writes=0;
  const client={
   async agentDefinitions(){return catalogue;},

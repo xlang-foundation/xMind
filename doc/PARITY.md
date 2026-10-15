@@ -50,6 +50,19 @@ differ from OpenCode's unauthenticated `/api/info`; the shared information
 capability and response fields match the pinned contract. This does not imply
 broader OpenCode API or product parity.
 
+## Native agent modes and visibility — 2026-10-15
+
+Named YAML agents now support OpenCode-style `mode` values (`all`, `primary`,
+`subagent`) and a `hidden` flag. Older definitions default to visible `all`
+mode. The native service blocks subagents from direct conversation selection;
+graph admission blocks primary-only agents. Browser and VS Code omit hidden and
+subagent definitions from the conversation selector. Mode and visibility are
+included in revision comparisons, durable session snapshots, archives, and API
+metadata. The VS Code suite passed 353/353; native graph, agent-service, and
+agent HTTP/CLI contracts passed against xlang3 and SQLite. This implements the
+mode/visibility slice only; named-profile delegation binding and OpenCode
+permission-rule parity remain incomplete.
+
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind

@@ -59,6 +59,8 @@ agents:
     name: Security Reviewer
     description: Reviews assigned work for security issues.
     model_id: claude-sonnet
+    mode: subagent
+    hidden: false
     tools:
       - read_file
       - search_files
@@ -70,7 +72,13 @@ agents:
 xlang3-backed SQLite. A definition supplies a stable ID, a display name, a
 description, bounded instructions, an optional model ID, and an optional tool
 allowlist. Older definitions default the name to their ID and the description
-to empty text. Graph import resolves the ID and
+to empty text. The optional `mode` is `all`, `primary`, or `subagent`; old
+definitions default to `all`. `all` supports conversation and graph use,
+`primary` is restricted to direct conversations, and `subagent` is restricted
+to graph nodes. Named-profile delegation binding remains unimplemented. The
+optional `hidden` flag defaults to `false` and
+removes a definition from the browser and VS Code conversation picker; explicit
+backend selection remains available. Graph import resolves the ID and
 copies its revision, instructions, model, and tool binding into the immutable
 graph plan. Updating an
 agent and reimporting a graph creates a new graph revision; existing runs keep
@@ -86,8 +94,10 @@ policy.
 The xMind backend exposes the current agent catalogue at `GET /v1/agents` and
 persists a revisioned selection per conversation at
 `/v1/sessions/{id}/agent`. Selection snapshots contain public IDs, definition
-revisions and model metadata; instructions stay in the backend and are pinned
-into the run at admission. A conversation must be idle to change selection,
+revisions, model metadata, mode and visibility; instructions stay in the
+backend and are pinned into the run at admission. Subagents cannot be selected
+as conversation agents, and primary-only definitions cannot be admitted as
+graph subagents. A conversation must be idle to change selection,
 and clients send the observed session revision to prevent stale writes.
 
 The VS Code sidebar and browser share the native-backed selector. In the
