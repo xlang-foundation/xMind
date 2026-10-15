@@ -1,0 +1,37 @@
+{
+  "baseRevision": "749ccd6",
+  "sourceState": "Local OpenRouter native-route candidate on xMind main; synthetic provider responses only.",
+  "nativeContractsPassed": 1,
+  "browserNativeContractsPassed": 1,
+  "clientContractsPassed": 495,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "sourceSha256": {
+    "Native/apps/server_main.cpp": "42d3fdb18183894b54562e74d5468dfa06e8220eca56142c55609249be5c2ed4",
+    "Native/src/provider_catalogue.cpp": "5a8be0ade0fc20e6573ec43ad7af8dc07af8ac656b4a1a2843ecfe539b515325",
+    "Native/src/provider_profile_runtime.cpp": "54f31ed3766315f0775db459972cc33c91509a92b497947ae95499b97f371dbb",
+    "Native/include/agentflow/provider_catalogue.hpp": "0b28d74546224d30538ca5f97fd3c33863e26f0b7d6a29675b399264100df528",
+    "Native/tests/provider_model_policy_runtime_contract.cpp": "1707e8023d37334d81f172b701afee5b82d4f07bb9f881ebea28998e6f6610b3",
+    "Native/tests/provider_model_policy_runtime_peer.mjs": "55489ea1d82197ba55d0bac05c84e6b2b333a89eb8797f3e65d81b89cbce4ff0",
+    "views/browser/tests/native-contract.mjs": "681c3965eecef5e4e6f41ca2f73b8d3ef7db7ea59d068cda942b8735a8a5db3d"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "79111f3a3d12b09177bbfbae353220436745408ca2d02ff0059cc181d1865e39",
+    "agentflow_provider_model_policy_runtime_contract.exe": "795ab92e91b6fe2ef0461c7cc81318060fa78c50afc0cf36779525853ad0a5c3"
+  },
+  "testCommands": [
+    "cmake --build build/native-dynamic-plan --config Release --target xmind_server agentflow_provider_model_policy_runtime_contract",
+    "ctest --test-dir build/native-dynamic-plan -C Release --output-on-failure -R ^native_provider_model_policy_runtime_contract$",
+    "node views/browser/build.mjs build/native-dynamic-plan/browser-assets",
+    "node views/browser/tests/native-contract.mjs build/native-dynamic-plan/Release/xmind_server.exe D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/modules C:/Python/Python314/Lib build/native-dynamic-plan/browser-assets",
+    "node --test extensions/vscode/tests/*.test.js views/browser/tests/*.test.cjs"
+  ],
+  "verifiedNewCases": [
+    "Native OpenRouter Chat Completions route and tool-parameter-filtered /models catalogue discovery",
+    "Authenticated native catalogue filtering returns only synthetic models declaring tools and preserves their slash-delimited identities",
+    "Native AgentRunner streams an OpenRouter tool call, reads the actual owned workspace file, records usage and resumes the assistant turn",
+    "Synthetic provider key remains encrypted in xlang3 SQLite and profile/catalogue state reopens consistently",
+    "Native browser contract advertises the OpenRouter route through the real backend/view adapter"
+  ],
+  "scope": "The focused native provider model-policy contract and native browser/backend contract passed locally. Provider sockets and credentials are synthetic. No live OpenRouter account, key, model execution or provider parity is established."
+}

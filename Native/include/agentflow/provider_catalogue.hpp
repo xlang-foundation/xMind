@@ -2,7 +2,7 @@
 #include "agentflow/http_stream_transport.hpp"
 #include <vector>
 namespace agentflow {
-enum class ProviderCatalogueFormat {openai,anthropic,gemini};
+enum class ProviderCatalogueFormat {openai,anthropic,gemini,openrouter};
 struct ProviderCataloguePolicy {
     std::string endpoint;
     ProviderCatalogueFormat format=ProviderCatalogueFormat::openai;

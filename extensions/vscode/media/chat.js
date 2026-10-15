@@ -76,7 +76,7 @@ function markdown(el,text){
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
 const providerWireLabels={'chat-completions':'Chat Completions',responses:'Responses','anthropic-messages':'Messages','gemini-generate-content':'GenerateContent'};
 const providerWireLabel=value=>typeof value==='string'&&Object.hasOwn(providerWireLabels,value)?providerWireLabels[value]:undefined;
-const providerLabel=value=>value==='openai'?'OpenAI':value==='anthropic'?'Claude':value==='gemini'?'Gemini':value==='deepseek'?'DeepSeek':value;
+const providerLabel=value=>value==='openai'?'OpenAI':value==='anthropic'?'Claude':value==='gemini'?'Gemini':value==='deepseek'?'DeepSeek':value==='openrouter'?'OpenRouter':value;
 function profileBadge(value){
   const fields=['profile_id','profile_revision','route_id','provider','wire','model_id'];
   if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.profile_revision)||value.profile_revision<1)return;

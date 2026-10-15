@@ -20,8 +20,8 @@
     "fireworks-ai-up-to-4b"
   ],
   "nativeCoverage": {
-    "partialProviderGroups": 5,
-    "unmappedProviderGroups": 131,
+    "partialProviderGroups": 6,
+    "unmappedProviderGroups": 130,
     "verifiedProviderParity": 0,
     "caveat": "Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified."
   },
@@ -138,7 +138,7 @@
           {
             "path": "Native/src/anthropic_request.cpp",
             "anchor": "serialize_anthropic_request",
-            "sha256": "1055bb7e3b7236c0725874ac1f27c80147b6550b6c8812a9d275afc81390e449"
+            "sha256": "6076386d0dc36dbd05cd60b3508a947f6856b2bf5dbfb33e061f57ed7cff8593"
           },
           {
             "path": "Native/src/anthropic_stream.cpp",
@@ -158,7 +158,7 @@
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "6cc1e5b1b0caab2c491f0621e9a084fd6bf70f071f93ad986b6a50048c5c7710"
+            "sha256": "d780f4325aea9256f1795aeb362d04ee6b13b5d461976aa2eb49c7e9a0795aa4"
           }
         ],
         "artifacts": [
@@ -952,17 +952,17 @@
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "6cc1e5b1b0caab2c491f0621e9a084fd6bf70f071f93ad986b6a50048c5c7710"
+            "sha256": "d780f4325aea9256f1795aeb362d04ee6b13b5d461976aa2eb49c7e9a0795aa4"
           },
           {
             "path": "Native/src/provider_catalogue.cpp",
             "anchor": "ProviderCatalogueFormat::gemini",
-            "sha256": "764013d6293f1ad676da27e8e6eff905890e7f6d2472c2d28ce1e6e9fa658199"
+            "sha256": "5a8be0ade0fc20e6573ec43ad7af8dc07af8ac656b4a1a2843ecfe539b515325"
           },
           {
             "path": "Native/src/provider_profile_runtime.cpp",
             "anchor": "validate_execution",
-            "sha256": "004c38bbffab5bf1a712ce0da716c3f1b904b8df7fe173bab37f0bf9a95902b7"
+            "sha256": "54f31ed3766315f0775db459972cc33c91509a92b497947ae95499b97f371dbb"
           }
         ],
         "artifacts": [
@@ -1342,7 +1342,7 @@
           {
             "path": "Native/apps/server_main.cpp",
             "anchor": "add(\"mistral.chat\"",
-            "sha256": "971937d265023fe6b1a990c1e6a04a18bbf49ffb3ed36ae74e7d98a206328a07"
+            "sha256": "42d3fdb18183894b54562e74d5468dfa06e8220eca56142c55609249be5c2ed4"
           },
           {
             "path": "Native/src/provider_model_policy.cpp",
@@ -1357,7 +1357,7 @@
           {
             "path": "Native/tests/provider_model_policy_runtime_contract.cpp",
             "anchor": "Native Mistral model policy read",
-            "sha256": "7efe376ddb0b46d7cefa5521337e5612f8c76059be1d61c0fd74ac37ab58a8fe"
+            "sha256": "1707e8023d37334d81f172b701afee5b82d4f07bb9f881ebea28998e6f6610b3"
           }
         ],
         "artifacts": [
@@ -1588,7 +1588,7 @@
           {
             "path": "Native/src/provider_setup.cpp",
             "anchor": "ProviderRuntime::configuration",
-            "sha256": "d6dcd1634601ccd17c3b0ab579d6eca4b76d28ac1226f50e878c14a2099b2f33"
+            "sha256": "2c6478686531f1f37c2f55f071963f63bc6469c5bc32b1e671080bc58ae602e7"
           }
         ],
         "artifacts": [
@@ -1653,7 +1653,44 @@
       },
       "agentflowStatus": "unverified",
       "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
-      "nativeStatus": "unmapped"
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/apps/server_main.cpp",
+            "anchor": "add(\"openrouter.chat\"",
+            "sha256": "42d3fdb18183894b54562e74d5468dfa06e8220eca56142c55609249be5c2ed4"
+          },
+          {
+            "path": "Native/src/provider_catalogue.cpp",
+            "anchor": "ProviderCatalogueFormat::openrouter",
+            "sha256": "5a8be0ade0fc20e6573ec43ad7af8dc07af8ac656b4a1a2843ecfe539b515325"
+          },
+          {
+            "path": "Native/src/provider_profile_runtime.cpp",
+            "anchor": "route.provider==\"openrouter\"",
+            "sha256": "54f31ed3766315f0775db459972cc33c91509a92b497947ae95499b97f371dbb"
+          },
+          {
+            "path": "Native/tests/provider_model_policy_runtime_contract.cpp",
+            "anchor": "Native OpenRouter model policy read",
+            "sha256": "1707e8023d37334d81f172b701afee5b82d4f07bb9f881ebea28998e6f6610b3"
+          },
+          {
+            "path": "views/browser/tests/native-contract.mjs",
+            "anchor": "openrouter.chat",
+            "sha256": "681c3965eecef5e4e6f41ca2f73b8d3ef7db7ea59d068cda942b8735a8a5db3d"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/native-openrouter-local.json",
+            "sha256": "46506a0d4a662b353eb92d6014cf092ba42bb4efa372c134852a93d98a2be71e"
+          }
+        ],
+        "scope": "A native OpenRouter Chat Completions route filters the account catalogue to entries declaring the tools parameter. Focused synthetic-socket acceptance exercises authenticated discovery, profile selection, a native AgentRunner workspace read, usage-bearing streaming, encrypted xlang3 SQLite persistence/reopen and browser route exposure. No live OpenRouter account, model, key or inference request was tested.",
+        "gaps": "The 492 pinned OpenRouter entries are not individually accepted. Live account discovery/inference, per-model capabilities and behavior, cancellation/error handling, non-chat modes and complete provider-group parity remain unverified. The API catalogue declaration is a discovery filter, not proof of successful live tool execution."
+      }
     },
     {
       "provider": "ovhcloud",
@@ -2580,7 +2617,7 @@
           {
             "path": "Native/apps/server_main.cpp",
             "anchor": "add(\"xai.responses\"",
-            "sha256": "971937d265023fe6b1a990c1e6a04a18bbf49ffb3ed36ae74e7d98a206328a07"
+            "sha256": "42d3fdb18183894b54562e74d5468dfa06e8220eca56142c55609249be5c2ed4"
           },
           {
             "path": "Native/src/provider_model_policy.cpp",
@@ -2600,7 +2637,7 @@
           {
             "path": "Native/src/provider_profile_runtime.cpp",
             "anchor": "model_capabilities",
-            "sha256": "004c38bbffab5bf1a712ce0da716c3f1b904b8df7fe173bab37f0bf9a95902b7"
+            "sha256": "54f31ed3766315f0775db459972cc33c91509a92b497947ae95499b97f371dbb"
           }
         ],
         "artifacts": [

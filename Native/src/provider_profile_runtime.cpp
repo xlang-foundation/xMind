@@ -12,8 +12,9 @@
 namespace agentflow {
 namespace {
 std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}
-ProviderCatalogueFormat catalogue_format(ProviderWire wire){
-    switch(wire){
+ProviderCatalogueFormat catalogue_format(const ProviderProfileRoute& route){
+    if(route.provider=="openrouter"&&route.wire==ProviderWire::chat_completions)return ProviderCatalogueFormat::openrouter;
+    switch(route.wire){
         case ProviderWire::chat_completions:
         case ProviderWire::responses:return ProviderCatalogueFormat::openai;
         case ProviderWire::anthropic_messages:return ProviderCatalogueFormat::anthropic;
@@ -62,7 +63,7 @@ void validate_public_identity(const std::string& id,const std::string& model,con
 std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecutionPolicy>& policy){
     std::vector<ProviderProfileRoute> result;
     for(const auto& value:policy){
-        const auto format=catalogue_format(value.route.wire);
+        const auto format=catalogue_format(value.route);
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");

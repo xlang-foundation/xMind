@@ -78,4 +78,16 @@ export const nativePartial = {
     scope: 'Native Mistral Chat Completions route and exact function-calling model policy passed focused C++ request/runtime contracts. A synthetic catalogue verifies model filtering; a synthetic SSE peer exercises a native AgentRunner workspace read, usage-bearing continuation, credential encryption and xlang3 SQLite reopen. No live Mistral key or provider request was used.',
     gaps: 'The documented function-capable aliases are not individually accepted on live Mistral accounts. Native request/reasoning, structured output, media, caching, error/timeout/cancellation and full Mistral provider-group parity remain unverified or incomplete.',
   },
+  openrouter: {
+    sources: [
+      ['Native/apps/server_main.cpp', 'add("openrouter.chat"'],
+      ['Native/src/provider_catalogue.cpp', 'ProviderCatalogueFormat::openrouter'],
+      ['Native/src/provider_profile_runtime.cpp', 'route.provider=="openrouter"'],
+      ['Native/tests/provider_model_policy_runtime_contract.cpp', 'Native OpenRouter model policy read'],
+      ['views/browser/tests/native-contract.mjs', 'openrouter.chat'],
+    ],
+    evidenceFiles: ['doc/evidence/native-openrouter-local.json'],
+    scope: 'A native OpenRouter Chat Completions route filters the account catalogue to entries declaring the tools parameter. Focused synthetic-socket acceptance exercises authenticated discovery, profile selection, a native AgentRunner workspace read, usage-bearing streaming, encrypted xlang3 SQLite persistence/reopen and browser route exposure. No live OpenRouter account, model, key or inference request was tested.',
+    gaps: 'The 492 pinned OpenRouter entries are not individually accepted. Live account discovery/inference, per-model capabilities and behavior, cancellation/error handling, non-chat modes and complete provider-group parity remain unverified. The API catalogue declaration is a discovery filter, not proof of successful live tool execution.',
+  },
 };

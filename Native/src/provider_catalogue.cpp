@@ -32,7 +32,7 @@ Json parse(const std::string& source){
 std::vector<std::string> discover_provider_models(const ProviderCataloguePolicy& policy,const SecretBytes& key,std::stop_token cancel){
     if(policy.endpoint.empty()||policy.endpoint.size()>8192||policy.endpoint.find_first_of("?#\r\n")!=std::string::npos||policy.endpoint.find('\0')!=std::string::npos)
         throw std::invalid_argument("Invalid backend catalogue endpoint");
-    if(policy.format!=ProviderCatalogueFormat::openai&&policy.format!=ProviderCatalogueFormat::anthropic&&policy.format!=ProviderCatalogueFormat::gemini)throw std::invalid_argument("Unknown provider catalogue format");
+    if(policy.format!=ProviderCatalogueFormat::openai&&policy.format!=ProviderCatalogueFormat::anthropic&&policy.format!=ProviderCatalogueFormat::gemini&&policy.format!=ProviderCatalogueFormat::openrouter)throw std::invalid_argument("Unknown provider catalogue format");
     if(key.view().empty()||key.view().size()>32768)throw std::invalid_argument("Provider discovery requires a bounded key");
     for(auto byte:key.view())if(byte<33||byte>126)throw std::invalid_argument("Provider discovery key must be printable without spaces");
     const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
@@ -42,7 +42,9 @@ std::vector<std::string> discover_provider_models(const ProviderCataloguePolicy&
         const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
         if(remaining.count()<=0)throw TransportTimeout("Provider model discovery timed out");
         HttpStreamRequest request;request.url=policy.endpoint;request.deadline=std::min(remaining,std::chrono::milliseconds(10000));request.idle_timeout=request.deadline;
-        if(policy.format==ProviderCatalogueFormat::anthropic){
+        if(policy.format==ProviderCatalogueFormat::openrouter){
+            request.url+="?limit=1000&supported_parameters=tools";
+        }else if(policy.format==ProviderCatalogueFormat::anthropic){
             request.credential_header=CredentialHeader::x_api_key;request.protocol=ProviderHttpProtocol::anthropic;
             request.url+="?limit=1000";if(!cursor.empty())request.url+="&after_id="+encode(cursor);
         }else if(policy.format==ProviderCatalogueFormat::gemini){
@@ -59,6 +61,12 @@ std::vector<std::string> discover_provider_models(const ProviderCataloguePolicy&
             if(policy.format==ProviderCatalogueFormat::openai&&value.at("object")!="list")throw TransportError("Invalid provider model catalogue");
             std::string last;
             for(const auto& item:items){
+                if(policy.format==ProviderCatalogueFormat::openrouter){
+                    if(!item.is_object()||!item.contains("id")||!item["id"].is_string()||!item.contains("supported_parameters")||!item["supported_parameters"].is_array()||item["supported_parameters"].size()>128)throw TransportError("Invalid provider model catalogue");
+                    const auto id=item["id"].get<std::string>();if(!identity(id,key))throw TransportError("Invalid provider model catalogue");bool tools=false;
+                    for(const auto& parameter:item["supported_parameters"]){if(!parameter.is_string())throw TransportError("Invalid provider model catalogue");const auto name=parameter.get<std::string>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos)throw TransportError("Invalid provider model catalogue");if(name=="tools")tools=true;}
+                    if(tools&&!models.insert(id).second)throw TransportError("Invalid provider model catalogue");continue;
+                }
                 if(policy.format==ProviderCatalogueFormat::gemini){
                     if(!item.is_object()||!item.contains("name")||!item["name"].is_string())throw TransportError("Invalid provider model catalogue");
                     auto id=item["name"].get<std::string>();if(!gemini_resource(id,key)||!gemini_names.insert(id).second)throw TransportError("Invalid provider model catalogue");bool eligible=false;
