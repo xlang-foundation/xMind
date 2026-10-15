@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-14",
+  "url": "http://127.0.0.1:60417/ui/",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "client": "xMind local browser UI, rendered accessibility tree",
+  "backend_restored": true,
+  "observed": {
+    "workspace_file_browser": true,
+    "workspace_configuration_controls": true,
+    "right_agent_sidebar": true,
+    "conversation_history": true,
+    "saved_provider_profile": "OpenAI",
+    "saved_key_status_visible": true,
+    "saved_key_value_exposed": false,
+    "discovered_models_in_sidebar": 20,
+    "provider_token_metrics_and_timings_visible": true,
+    "file_change_approval_notice_visible": true
+  },
+  "selected_run": "A previously uncertain preview-process run was visible. Its quarantine was preserved.",
+  "prompt_submitted": false,
+  "process_task_submitted": false,
+  "scope": "Read-only rendered browser acceptance. No screenshot-based visual review, new coding turn, or VS Code interaction claimed."
+}

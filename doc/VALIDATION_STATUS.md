@@ -63,6 +63,24 @@ results are in
 This verifies the live page and authenticated APIs, not rendered visual
 acceptance or a release package.
 
+## Rendered TestProj browser UI — 2026-10-14
+
+The local browser page at `http://127.0.0.1:60417/ui/` restored its backend and
+rendered the TestProj workspace. Its accessibility tree showed the file
+browser, workspace configuration, right agent sidebar, conversation history,
+selected OpenAI profile, saved-key status, and 20 discovered OpenAI models in
+the sidebar model picker. Existing assistant messages showed provider-reported
+token counts and measured timings; the composer showed the file-change
+approval policy. No key value was exposed, and this read-only inspection
+submitted no prompt or process task.
+
+The page surfaced a previously uncertain preview-process operation from the
+existing conversation. Its quarantine remains in force, so this check does not
+claim a fresh coding turn or resolved process effect. A separate VS Code
+window handle became stale on two fresh lookups; no interaction was attempted
+from it. This is rendered browser evidence only, not screenshot-based visual
+review or new browser/VS Code coding acceptance. [Sanitized observation](evidence/testproj-rendered-browser-ui-20261014.json).
+
 ## Concurrent sibling nested plans — 2026-10-14
 
 Independent dynamic-agent siblings can now accept nested plans while sharing
