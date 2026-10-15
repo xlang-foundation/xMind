@@ -1458,14 +1458,21 @@ std::vector<Session> Repository::sessions() {
 }
 void Repository::delete_session(const std::string& id) {
     identifier(id);auto& db=impl_->database;Transaction transaction(db);(void)session(id);
-    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{id}).rows.empty()||
-       !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{id}).rows.empty()||
-       !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{id}).rows.empty()||
-       !db.execute("SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{id,id}).rows.empty()||
-       !db.execute("SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{id,id}).rows.empty())
-        throw Conflict("Session has active work or unresolved effects and cannot be deleted");
-    changed_one(db.execute("INSERT INTO deleted_sessions(id,deleted_ms) VALUES(?,?)",{id,now_ms()}));
-    db.execute("DELETE FROM session_forks WHERE session_id=? OR parent_session_id=?",{id,id});
+    std::vector<std::string> removed{id};
+    for(const auto& row:db.execute("SELECT f.session_id FROM session_forks f JOIN sessions child ON child.id=f.session_id WHERE f.parent_session_id=? AND NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=child.id) ORDER BY child.rowid",{id}).rows)
+        removed.push_back(text(row[0]));
+    for(const auto& target:removed){
+        if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{target}).rows.empty()||
+           !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{target}).rows.empty()||
+           !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{target}).rows.empty()||
+           !db.execute("SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{target,target}).rows.empty()||
+           !db.execute("SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{target,target}).rows.empty())
+            throw Conflict("Session or child session has active work or unresolved effects and cannot be deleted");
+    }
+    for(const auto& target:removed){
+        changed_one(db.execute("INSERT INTO deleted_sessions(id,deleted_ms) VALUES(?,?)",{target,now_ms()}));
+        db.execute("DELETE FROM session_forks WHERE session_id=? OR parent_session_id=?",{target,target});
+    }
     transaction.commit();
 }
 Run Repository::run(const std::string& id) {

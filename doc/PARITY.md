@@ -52,22 +52,18 @@ broader OpenCode API or product parity.
 
 ## Native session deletion — 2026-10-15
 
-The native backend and CLI can now delete a settled session from the visible
-catalog. SQLite records a transactional tombstone so immutable context and
-audit records remain intact; normal session/history APIs return it as absent.
-Deletion rejects active runs and unresolved effects/context work, and detaches
-fork ancestry while keeping the child history. The HTTP/CLI, repository and
-local-view contracts exercise deletion, fork retention and the same-machine
-view credential. The browser and VS Code now expose confirmation controls for
-the selected idle conversation, dispatch only its exact session ID, and clear
-the deleted transcript while selecting another conversation or showing the
-empty state. Client controller/renderer and extension-host tests cover
-cancellation, active-run refusal, deletion and last-session cleanup. This is a
-reviewed OpenCode `session.remove` source candidate, not verified operation
-parity yet: xMind now returns the pinned 204 no-content response, but retains
-an audit tombstone and rejects deletion during active effects. Those lifecycle
-semantics still need comparison with upstream, and installed desktop acceptance
-remains unverified.
+The native backend and CLI delete a settled session and its direct child forks
+from the visible catalog. SQLite records transactional tombstones and retains
+immutable context and audit records. The operation is atomic across the parent
+and direct children: active runs, unresolved effects, or context work on any
+affected session reject the full deletion. Focused Release repository and
+HTTP/CLI contracts verify child removal, preserved audit rows, and no partial
+deletion when a child is active. The browser and VS Code confirmation controls
+continue to target only the selected session. This remains a reviewed
+OpenCode `session.remove` source candidate, not verified operation parity:
+upstream interrupts execution and waits for idle, while xMind currently rejects
+active work. xMind also keeps its internal audit tombstones. Full lifecycle
+comparison and installed-client acceptance remain open.
 
 ## Graph coding restore — 2026-10-15
 

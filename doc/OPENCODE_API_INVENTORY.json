@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "1930cd9ee0d9dc3d8e672c9f6d48421a077e72ddd681d6e66dc4cd5a83f38a8a",
+          "evidenceSha256": "b30dae10c38ca010ff83f089dc6003ddcb9a15daadf4a3433e09e1a9b9e08109",
           "tests": [
             {
               "name": "native_http_cli_contract",
@@ -17451,7 +17451,7 @@
         "sourceSha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
         "surface": "DELETE /v1/sessions/{id}; xmind_cli delete-session; browser and VS Code confirmation controls",
         "sourceAnchor": "server.Delete(R\"(/v1/sessions/([A-Za-z0-9_-]+))\"",
-        "gap": "Deletion rejects active work, returns the pinned 204 no-content response, and is available from browser and VS Code controls. xMind retains an audit tombstone and guards active effects; these semantics still need comparison with upstream deletion. Installed desktop acceptance is also pending.",
+        "gap": "Deletion returns the pinned 204 response and removes direct child forks from the visible catalog. xMind retains audit tombstones and rejects active work or unresolved effects instead of interrupting and awaiting idle as upstream does; complete lifecycle parity and installed-client acceptance remain open.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -19862,7 +19862,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/repository.cpp",
-        "sourceSha256": "878265ed5a66c6a92d05a15817f89798a8292acf415725726d388bae86282429",
+        "sourceSha256": "aa8ea489a7799a3d8d922f92e9ea3b6d6a2f9a17328fcc1738a92e8645d3d11f",
         "surface": "GET /v1/sessions/{id}/messages/{message_id}",
         "sourceAnchor": "Repository::message",
         "gap": "A single stored typed history entry is addressable by its durable sequence; upstream message part types and complete response parity remain incomplete.",
