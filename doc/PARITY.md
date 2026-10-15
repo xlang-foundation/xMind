@@ -65,6 +65,26 @@ the captured profile narrows the parent tool allowlist and the native integratio
 contract verifies the resulting request and tool catalogue. Full OpenCode
 permission-rule parity remains incomplete.
 
+## Native per-agent hard-deny rules — 2026-10-15
+
+Agent YAML may attach up to 128 `{action, resource, effect}` rules. The first
+supported effect is `deny`; `allow` and interactive `ask` are rejected rather
+than silently ignored. Actions match native tool names or `*`; resources use
+workspace-relative globs. The native runner checks direct paths before
+dispatch, conservatively blocks directory enumeration that could expose a
+restricted path, and checks every prepared patch target before any patch
+proposal executes. `run_process` requires a broad `resource: "*"` rule because
+its process can access more than its working directory. Rules are included in
+agent revisions, conversation snapshots and archives, named delegated-agent
+snapshots, and resolved graph-agent nodes. Existing backend approval and
+workspace authority remain in force.
+
+Release contracts verify profile parsing and revisioning, persistence,
+delegation/graph snapshots, archive transport, and a real native runner denial
+before a filesystem tool can report success. This is a meaningful deny-only
+policy layer, not OpenCode's ordered allow/deny/ask rules, saved grants or
+permission request APIs; those remain parity work.
+
 ## xlang3 process profile with deep runtime paths — 2026-10-15
 
 The TestProj browser acceptance exposed a Windows native-package loading limit:

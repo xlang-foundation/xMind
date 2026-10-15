@@ -328,10 +328,15 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
     std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions,
-    std::optional<std::vector<std::string>> tool_allowlist,bool resume_dynamic_child) {
+    std::optional<std::vector<std::string>> tool_allowlist,bool resume_dynamic_child,
+    std::vector<AgentPermissionRule> permission_rules) {
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
     auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
+    auto effective_permission_rules=settings_.permission_rules;
+    effective_permission_rules.insert(effective_permission_rules.end(),permission_rules.begin(),permission_rules.end());
+    validate_agent_permission_rules(effective_permission_rules);
+    auto execution_settings=settings_;execution_settings.permission_rules=effective_permission_rules;
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_&&settings_.workspace_membership_snapshot){
@@ -642,7 +647,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 pending_call=found->id;capabilities=&*child_caps;
             }
             const bool yielded_leaf=resumed_dynamic_child&&budget->yield_leaf();DynamicExecutionResult actual;
-            try{actual=planning_->resume(id,pending_call,settings_,*capabilities,budget,token,planning_guidance);}
+            try{actual=planning_->resume(id,pending_call,execution_settings,*capabilities,budget,token,planning_guidance);}
             catch(...){if(yielded_leaf)budget->reacquire_leaf(token);throw;}
             if(yielded_leaf&&!actual.paused)budget->reacquire_leaf(token);if(actual.paused)return actual.root;
             commit_plan_result(actual);refresh_tools();
@@ -770,7 +775,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 close_mcp();stop_mcp_observers();DynamicExecutionResult actual;
                 const auto& capabilities=dynamic_root?*root_caps:*child_caps;
                 const bool yielded_leaf=dynamic_child&&budget->yield_leaf();
-                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,settings_,capabilities,budget,token,planning_guidance);}
+                try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,execution_settings,capabilities,budget,token,planning_guidance);}
                 catch(const DynamicPlanRejected& error){
                     if(yielded_leaf)budget->reacquire_leaf(token);
                     persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
@@ -806,6 +811,21 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             selected_repository_context=repository_context_for_folder(selected_folder_index);
                         }else if(scoped_args.contains("folder_id")&&scoped_args["folder_id"].get<std::string>()!=selected_folder_id)throw ToolAccessDenied("Folder is not a member of the admitted workspace revision");
                     }
+                    std::string permission_resource="*";
+                    if(folder_scoped&&call.name!="run_process"){
+                        const char* resource_field=call.name=="run_process"?"workdir":"path";
+                        if(scoped_args.contains(resource_field)&&scoped_args[resource_field].is_string()){
+                            permission_resource=scoped_args[resource_field].get<std::string>();
+                            std::replace(permission_resource.begin(),permission_resource.end(),'\\','/');
+                            while(permission_resource.starts_with("./"))permission_resource.erase(0,2);
+                            if(permission_resource.empty())permission_resource=".";
+                        }
+                    }
+                    if(agent_permission_denies(effective_permission_rules,call.name,permission_resource))
+                        throw AgentPermissionDenied("Selected agent policy denied this tool resource");
+                    if((call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files")&&
+                       agent_permission_denies_directory_enumeration(effective_permission_rules,call.name,permission_resource))
+                        throw AgentPermissionDenied("Selected agent policy denies enumeration of a directory containing restricted resources");
                     if(selected_repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=selected_repository_context->skills().ready(token);
                     if(selected_repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
                         Json args=folder_scoped?scoped_args:Json{};if(!folder_scoped)try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
@@ -837,6 +857,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             guidance_ready=guidance_ready&&!prepared_folder_patches.empty()&&prepared_folder_patches.size()==scoped_args["patches"].size();
                         }else{prepared_patch=PatchTool(persistence_,*selected_workspace,*selected_repository_context,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1,selected_folder_index==0).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
                     }
+                    const auto check_patch_permissions=[&](const PreparedPatch& patch){for(const auto& file:patch.plan.files)std::visit([&](const auto& planned){using T=std::decay_t<decltype(planned)>;if constexpr(std::is_same_v<T,WorkspaceCreatePlan>) {if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if constexpr(std::is_same_v<T,WorkspaceMovePlan>){if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.before.path)||agent_permission_denies(effective_permission_rules,"apply_patch",planned.destination.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");}else if(agent_permission_denies(effective_permission_rules,"apply_patch",planned.before.path))throw AgentPermissionDenied("Selected agent policy denied this patch path");},file);};
+                    if(call.name=="apply_patch"){if(prepared_patch)check_patch_permissions(*prepared_patch);for(const auto& prepared:prepared_folder_patches)check_patch_permissions(prepared.patch);}
             if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
@@ -869,7 +891,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto* admitted_folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
                         output=Json::parse(language_servers_->invoke(call.arguments_json,token,admitted_folders,settings_.language_server_dispatch));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
-                        auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.selectable_models=models();
+                        auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.permission_rules=effective_permission_rules;frozen.selectable_models=models();
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {
                         JsonSchema schema(registered->second->definition.input_schema_json);schema.validate_object(call.arguments_json);
@@ -904,6 +926,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const ToolCancelled&) {throw;}
                 catch(const XlangPythonCancelled&) {throw ToolCancelled("Trusted xlang3 tool call cancelled");}
                 catch(const XlangPythonExecutionError&) {output={{"error",{{"code","xlang3_tool_failed"},{"message","Trusted xlang3 tool execution failed"}}}};}
+                catch(const AgentPermissionDenied&) {output={{"error",{{"code","agent_permission_denied"},{"message","The selected agent permission rules denied this resource; the tool was not dispatched"}}}};}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}
                 catch(const std::invalid_argument&) {output={{"error",{{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}}}};}

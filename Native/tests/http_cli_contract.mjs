@@ -190,7 +190,7 @@ try {
   const importedCli=spawnSync(cliExe,[String(port),'import-session',archiveFile],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(importedCli.status,0,importedCli.stderr);const importedByCli=JSON.parse(importedCli.stdout);
   assert.equal(importedByCli.title,'HTTP and CLI');assert.deepEqual(cli('history',importedByCli.id).map(({role,data})=>({role,data})),archive.messages,'Console import preserves transcript order and content');
   const legacyArchive={...archive,version:1,session:{title:archive.session.title}};assert.equal((await request('/v1/sessions/import',{archive:legacyArchive})).status,201,'Version 1 archives remain importable');
-  const selectedAgent={id:'portable-agent',name:'portable-agent',description:'',revision:2,model_id:'openai/gpt-5.6-sol',instructions:'Keep changes focused.',tools:['read_file','apply_patch']};
+  const selectedAgent={id:'portable-agent',name:'portable-agent',description:'',revision:2,model_id:'openai/gpt-5.6-sol',instructions:'Keep changes focused.',mode:'all',hidden:false,default:false,tools:['read_file','apply_patch']};
   const agentArchive={...archive,session:{...archive.session,agent:selectedAgent}};const importedAgent=await request('/v1/sessions/import',{archive:agentArchive});assert.equal(importedAgent.status,201);
   const agentExport=await request(`/v1/sessions/${importedAgent.data.id}/export`);assert.equal(agentExport.status,200);assert.deepEqual(agentExport.data.session.agent,selectedAgent,'Agent model, instructions and tool policy survive a transfer round trip');
   const malformedRole=await request('/v1/sessions/import',{archive:{...archive,messages:[{role:'system',data:{content:'must reject'}}]}});assert.equal(malformedRole.status,400,'Unsupported message roles are rejected');

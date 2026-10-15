@@ -71,8 +71,8 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
     std::set<std::string> ids;
     bool has_default = false;
     for (const auto& record : value.at("agents")) {
-        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description", "mode", "hidden", "default"});
-        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description", "mode", "hidden", "default"});
+        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "permissions", "name", "description", "mode", "hidden", "default"});
+        else fields(record, {"id", "model_id", "instructions", "tools", "permissions", "name", "description", "mode", "hidden", "default"});
         const auto key = text(record, "id", 64);
         if (!identifier(key) || !ids.insert(key).second) throw std::invalid_argument("Invalid or duplicate agent definition ID");
         const auto model = record.contains("model_id") ? text(record, "model_id", 256, true) : std::string{};
@@ -90,6 +90,16 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
             validate_agent_tool_allowlist(tools);
         }
         AgentDefinition agent{key, rev, model, guidance, std::move(tools)};
+        if (record.contains("permissions")) {
+            if (!record.at("permissions").is_array()) throw std::invalid_argument("Agent permissions must be an array");
+            for (const auto& item : record.at("permissions")) {
+                fields(item, {"action", "resource", "effect"});
+                if (item.size() != 3 || !item.at("action").is_string() || !item.at("resource").is_string() || !item.at("effect").is_string())
+                    throw std::invalid_argument("Malformed agent permission rule");
+                agent.permissions.push_back({item.at("action").get<std::string>(), item.at("resource").get<std::string>(), item.at("effect").get<std::string>()});
+            }
+            validate_agent_permission_rules(agent.permissions);
+        }
         agent.name = record.contains("name") ? text(record, "name", 128) : key;
         agent.description = record.contains("description") ? text(record, "description", 2048, true) : std::string{};
         agent.mode = record.contains("mode") ? text(record, "mode", 16) : "all";
@@ -128,6 +138,7 @@ std::string encode(const AgentDefinitionCatalog& catalog) {
     for (const auto& agent : catalog.entries) {
         Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}, {"mode", agent.mode}, {"hidden", agent.hidden}, {"default", agent.is_default}};
         if (agent.tools) entry["tools"] = *agent.tools;
+        if (!agent.permissions.empty()) { entry["permissions"] = Json::array(); for (const auto& rule : agent.permissions) entry["permissions"].push_back(Json{{"action", rule.action}, {"resource", rule.resource}, {"effect", rule.effect}}); }
         entries.push_back(std::move(entry));
     }
     return Json{{"version", 1}, {"revision", catalog.revision}, {"agents", std::move(entries)}, {"retired_ids", catalog.retired_ids}}.dump();
@@ -152,7 +163,7 @@ AgentDefinitionCatalog AgentDefinitionStore::apply(const std::string& source) {
             throw std::invalid_argument("Retired agent definition IDs cannot be reused");
         const auto found = std::find_if(previous.entries.begin(), previous.entries.end(), [&](const auto& old) { return old.id == entry.id; });
         if (found == previous.entries.end()) { entry.revision = 1; changed = true; }
-        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description && found->mode == entry.mode && found->hidden == entry.hidden && found->is_default == entry.is_default) entry.revision = found->revision;
+        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->permissions == entry.permissions && found->name == entry.name && found->description == entry.description && found->mode == entry.mode && found->hidden == entry.hidden && found->is_default == entry.is_default) entry.revision = found->revision;
         else {
             if (found->revision == maximum_revision) throw std::overflow_error("Agent definition revision exhausted");
             entry.revision = found->revision + 1;

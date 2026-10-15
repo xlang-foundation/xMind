@@ -7,6 +7,16 @@
 #include <vector>
 
 namespace agentflow {
+struct AgentPermissionRule {
+    // Rules are hard-deny constraints layered on top of backend authorization.
+    // Actions name a native tool or '*'; resources are workspace-relative glob patterns.
+    std::string action;
+    std::string resource;
+    std::string effect = "deny";
+    bool operator==(const AgentPermissionRule&) const = default;
+};
+struct AgentPermissionDenied : std::runtime_error { using std::runtime_error::runtime_error; };
+
 struct AgentDefinition {
     std::string id;
     std::int64_t revision = 0;
@@ -15,6 +25,7 @@ struct AgentDefinition {
     // Optional allowlist narrows the backend's already-authorized tool registry.
     // An absent list keeps backend defaults; an empty list offers no tools.
     std::optional<std::vector<std::string>> tools;
+    std::vector<AgentPermissionRule> permissions;
     std::string name;
     std::string description;
     // `all` preserves the original xMind behavior for existing definitions.
@@ -23,6 +34,27 @@ struct AgentDefinition {
     bool hidden = false;
     bool is_default = false;
 };
+
+inline void validate_agent_permission_rules(const std::vector<AgentPermissionRule>& rules) {
+    if (rules.size() > 128) throw std::invalid_argument("Agent permission rules exceed limits");
+    for (const auto& rule : rules) {
+        bool parent_component = false;
+        std::size_t start = 0;
+        while (start <= rule.resource.size()) {
+            const auto end = rule.resource.find('/', start);
+            if (rule.resource.substr(start, end == std::string::npos ? std::string::npos : end - start) == "..") parent_component = true;
+            if (end == std::string::npos) break;
+            start = end + 1;
+        }
+        if (rule.action.empty() || rule.action.size() > 128 ||
+            (rule.action != "*" && rule.action.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-*") != std::string::npos) ||
+            rule.resource.empty() || rule.resource.size() > 1024 || rule.resource.find('\0') != std::string::npos ||
+            rule.resource.find(':') != std::string::npos || rule.resource.find('\\') != std::string::npos ||
+            rule.resource.front() == '/' || parent_component ||
+            rule.effect != "deny")
+            throw std::invalid_argument("Invalid agent permission rule; only hard-deny rules are currently supported");
+    }
+}
 
 inline void validate_agent_tool_allowlist(const std::optional<std::vector<std::string>>& tools) {
     if (!tools) return;

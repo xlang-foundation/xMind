@@ -91,7 +91,26 @@ definition's model or instructions. A configured model ID must be enabled by
 the backend before the graph can run. Agent IDs remain retired after removal.
 A named definition does not grant tools or permissions: its optional allowlist
 can only narrow the server-registered tools, workspace access and approval
-policy.
+policy. It can also add hard-deny rules that further narrow the selected
+agent's tool access. Rules use the native tool name (or `*`) and a
+workspace-relative glob. For example:
+
+```yaml
+permissions:
+  - action: read_file
+    resource: "**/.env*"
+    effect: deny
+  - action: run_process
+    resource: "*"
+    effect: deny
+```
+
+The backend checks these rules before dispatch and snapshots them with the
+conversation and graph node. Only `deny` is supported today; `allow` and
+interactive `ask` rules are rejected. A `run_process` rule is conservatively
+matched against `*`, since a process can access files beyond its working
+directory. Existing native effect approvals remain mandatory regardless of
+agent rules.
 
 Set `default: true` on one visible `all` or `primary` profile to make new
 conversations use it automatically. The backend pins that agent revision into

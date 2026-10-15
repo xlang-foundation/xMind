@@ -49,7 +49,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -110,7 +110,7 @@ struct AgentService::Impl {
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
-            const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;}
+            const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;}
             active.emplace(run.id,job);
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
@@ -199,7 +199,7 @@ struct AgentService::Impl {
             }
             if(children&&!children->healthy())fail();
             try{
-                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools);std::unique_lock lock(mutex);
+                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
@@ -430,7 +430,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     auto job=std::make_shared<Impl::Job>();job->id=id;
     std::unique_lock lock(impl_->mutex);impl_->require_admission();
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
-    if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
+    if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
@@ -442,7 +442,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(workspace||profile)throw RunUnavailable("Queued input authority must be validated by its backend profile");
     auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
-    if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
+    if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}

@@ -79,6 +79,10 @@ int main(int argc,char** argv) {
         bool started=false,completed=false;
         for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
         require(started && completed,"Actual tool execution events must persist");
+        store.create_session("agent-permission-deny","Native agent permission denial fixture").get();auto permission_denied=settings;permission_denied.provider.endpoint=base+"/agent-permission-deny";permission_denied.permission_rules={{"read_file","README.md","deny"}};
+        AgentRunner denied_runner(store,permission_denied);denied_runner.start("agent-permission-deny","agent-permission-deny","Read the workspace readme");require(denied_runner.execute("agent-permission-deny").state==RunState::completed,"A denied tool result must return to the actual model loop without dispatching the workspace read");
+        const auto denied_history=store.history("agent-permission-deny").get();const auto denied_result=Json::parse(Json::parse(denied_history[2].json).at("content").get<std::string>());require(denied_result.at("error").at("code")=="agent_permission_denied","The native agent policy must reject the matching tool and resource before dispatch");
+        bool policy_failed=false,policy_completed=false;for(const auto& event:store.events("agent-permission-deny").get()){if(event.kind=="tool.failed")policy_failed=true;if(event.kind=="tool.completed")policy_completed=true;}require(policy_failed&&!policy_completed,"A denied policy call must be journaled as failed, never as a successful tool result");
         const auto attached_root=std::filesystem::path(argv[4]).parent_path()/L"attached";
         WorkspaceTools primary(argv[4]),attached(attached_root.string());
         const auto primary_id=primary.identity(),attached_id=attached.identity(),primary_root=primary.root_path(),attached_canonical=attached.root_path();

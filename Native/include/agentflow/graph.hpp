@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/agent_definition_records.hpp"
 #include "agentflow/persistence_service.hpp"
 #include <optional>
 namespace agentflow {
@@ -16,6 +17,7 @@ struct GraphNodeDefinition {
     // round trips retain literal number tokens and escaped property spellings.
     std::string prompt,model_id,instructions,tool,arguments_json,agent_id;
     std::optional<std::vector<std::string>> tools;
+    std::vector<AgentPermissionRule> permissions;
     std::int64_t agent_revision=0;
     std::string condition_json;
     std::optional<GraphMcpBinding> mcp;

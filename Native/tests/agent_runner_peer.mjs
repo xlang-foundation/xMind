@@ -158,6 +158,7 @@ const server=createServer((request,response)=>{
       if(last.role==='tool') {
         const result=JSON.parse(last.content);
         if(request.url==='/denied') assert.equal(result.error.code,'access_denied');
+        else if(request.url==='/agent-permission-deny') assert.equal(result.error.code,'agent_permission_denied');
         else assert.equal(result.content,'Actual file content written by fixture\n');
         response.write('data: '+JSON.stringify({choices:[{index:0,delta:{content:'Synthetic inference peer accepted the actual tool result.'},finish_reason:'stop'}]})+'\n\n');
       } else {
@@ -179,5 +180,5 @@ try {
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   let result;try{result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[]),workerExecutable],{windowsHide:true,timeout:60000});}catch(error){if(failure)throw failure;throw error;}
-  if(failure) throw failure;assert.equal(requests,rustAnalyzer?41:36);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,rustAnalyzer?43:38);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}

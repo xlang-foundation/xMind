@@ -101,13 +101,18 @@ GraphPlan::GraphPlan(const std::string& source){
         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
         if(!identifier(node.id) || !ids.emplace(node.id,nodes_.size()).second)throw std::invalid_argument("Invalid or duplicate graph node ID");
         if(kind=="agent"){
-            node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","instructions","agent_id","agent_revision","tools","when"});node.prompt=text(value,"prompt",32768);
+            node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","instructions","agent_id","agent_revision","tools","permissions","when"});node.prompt=text(value,"prompt",32768);
             if(value.contains("model_id"))node.model_id=text(value,"model_id",256);
             if(value.contains("instructions"))node.instructions=text(value,"instructions",32768);
             if(value.contains("tools")){
                 if(!value["tools"].is_array())throw std::invalid_argument("Graph agent tool bindings must be an array");
                 node.tools.emplace();for(const auto& item:value["tools"]){if(!item.is_string())throw std::invalid_argument("Graph agent tool bindings must contain names");node.tools->push_back(item.get<std::string>());}
                 validate_agent_tool_allowlist(node.tools);
+            }
+            if(value.contains("permissions")){
+                if(!value["permissions"].is_array())throw std::invalid_argument("Graph agent permission rules must be an array");
+                for(const auto& rule:value["permissions"]){if(!rule.is_object()||rule.size()!=3||!rule.contains("action")||!rule["action"].is_string()||!rule.contains("resource")||!rule["resource"].is_string()||!rule.contains("effect")||!rule["effect"].is_string())throw std::invalid_argument("Malformed graph agent permission rule");node.permissions.push_back({rule["action"].get<std::string>(),rule["resource"].get<std::string>(),rule["effect"].get<std::string>()});}
+                validate_agent_permission_rules(node.permissions);
             }
             if(value.contains("agent_id")){
                 node.agent_id=text(value,"agent_id",64);

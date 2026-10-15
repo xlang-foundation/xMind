@@ -5,6 +5,7 @@
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_executor.hpp"
 #include "agentflow/agent_instructions.hpp"
+#include "agentflow/agent_permissions.hpp"
 #include "agentflow/dynamic_plan_records.hpp"
 #include "agentflow/context_manager.hpp"
 #include "agentflow/context_control.hpp"
@@ -58,6 +59,7 @@ struct AgentSettings {
     std::optional<ContextRuntimePolicy> context;
     // Used for trusted delegated leaves and explicit named-agent bindings.
     std::optional<std::vector<std::string>> tool_allowlist;
+    std::vector<AgentPermissionRule> permission_rules;
     // Explicitly registered trusted, in-process xlang3 callables. These join
     // the backend catalogue and remain subject to the selected agent allowlist.
     std::vector<XlangPythonToolRegistration> xlang_python_tools;
@@ -76,7 +78,8 @@ public:
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
         std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={},
-        std::optional<std::vector<std::string>> tool_allowlist={},bool resume_dynamic_child=false);
+        std::optional<std::vector<std::string>> tool_allowlist={},bool resume_dynamic_child=false,
+        std::vector<AgentPermissionRule> permission_rules={});
     std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
     std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={}) const;
     // Metadata-only controller preflight; neither method launches MCP or models.
