@@ -91,6 +91,29 @@ returned HTTP 404 during generation; the newer Gemini 3.8 model worked. This
 does not establish every listed model, VS Code acceptance or the remaining
 AgentFlow feature set.
 
+## Live same-session provider switching — 2026-10-15
+
+A fresh local TestProj browser profile reproduced a failure when an existing
+Claude conversation was switched to OpenAI: context preparation rejected the
+saved Claude receipt before the selected provider could receive the request.
+The native history check now proves the assistant receipt came from a unique,
+completed model call and its captured provider-profile identity. Context-enabled
+calls use their immutable inference binding; provider-profile calls without the
+Responses context manager use the identity captured with the run's original
+user prompt. The request then passes through the existing native history bridge,
+which validates portable canonical content and strips foreign-wire receipts
+from a request-only copy.
+
+The rebuilt xMind runtime passed the actual browser flow in one TestProj
+conversation: Claude `claude-sonnet-4-6` replied first, then OpenAI
+`gpt-5.6-sol` replied after the sidebar provider switch. The second response
+retained Claude's prior text in context, returned the exact requested text, and
+reported 3,545 input and 8 output tokens with 1.05 seconds to first token. The
+provider-history and context-engine native contracts both pass. This verifies
+Claude-to-OpenAI in the local browser; it does not establish every wire pair,
+every listed model, VS Code provider switching, or broader OpenCode parity.
+See [sanitized live evidence](evidence/provider-switch-live-browser-20261015.json).
+
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind
