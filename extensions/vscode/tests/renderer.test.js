@@ -229,6 +229,19 @@ test('closing Settings keeps the saved discovered footer list and sends no model
   doc.getElementById('settings').click();doc.getElementById('provider-key').value='synthetic-discard-only';doc.getElementById('settings-close').click();assert.equal(dialog.open,false);assert.equal(doc.getElementById('provider-key').value,'');assert.equal(doc.querySelector('footer #model').options.length,136);assert.equal(doc.querySelector('footer #model').value,'discovered-0');assert.equal(r.posted.at(-1).type,'discardProviderKey');assert.ok(!r.posted.some(message=>message.type==='model'||message.type==='select-provider'||message.key==='synthetic-discard-only'));
  }finally{r.dom.window.close();}
 });
+test('OpenRouter appears in Settings when advertised by the native backend',()=>{
+ const r=renderer(),doc=r.dom.window.document,key='synthetic-openrouter-renderer-key';
+ try{
+  const routes=[{id:'openrouter.chat',provider:'openrouter',wire:'chat-completions',discovery:true}];
+  r.send({type:'provider-profiles',active:'',profiles:[],routes});
+  doc.getElementById('settings').click();
+  const route=doc.getElementById('provider-name'),input=doc.getElementById('provider-key');
+  assert.deepEqual([...route.options].map(option=>[option.value,option.textContent]),[['openrouter.chat','OpenRouter · Chat Completions']]);
+  input.value=key;doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));
+  assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'saveProviderKey',key,profile:'',route:'openrouter.chat'});
+  assert.equal(input.value,'');assert.ok(!doc.body.textContent.includes(key));
+ }finally{r.dom.window.close();}
+});
 test('GenerateContent labels depend on advertised routes and keep model choice in the footer',()=>{
  const r=renderer(),doc=r.dom.window.document;try{
   r.send({type:'provider-profiles',active:'saved-openai',profiles:[{id:'saved-openai',provider:'openai',model:'fixture-openai',route_id:'openai.responses'}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]});assert.equal([...doc.getElementById('provider-name').options].some(option=>option.textContent.includes('GenerateContent')),false);
