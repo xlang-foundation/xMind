@@ -1,38 +1,49 @@
 {
   "date": "2026-10-15",
-  "xmind_commit": "7bbae8f4f814e449bcd43c9d1f3659ca7b6166dd",
-  "scope": "Current-source Node contracts for the browser UI/controller and VS Code extension host/renderer",
+  "xmind_commit": "c1658922ca53e60cfc4ebbd9fc24fd2b72fa335e",
+  "scope": "Current-source Node contracts for the browser UI/controller and VS Code extension host/renderer, plus read-only rendered workspace configuration inspection",
   "commands": [
     {
       "directory": "extensions/vscode",
       "command": "node --test tests/*.test.js",
-      "tests": 365,
-      "passed": 365,
+      "tests": 367,
+      "passed": 367,
       "failed": 0,
       "cancelled": 0,
       "skipped": 0,
-      "duration_ms": 4041
+      "duration_ms": 3885
     },
     {
       "directory": ".",
       "command": "node --test views/browser/tests/*.test.cjs",
-      "tests": 119,
-      "passed": 119,
+      "tests": 120,
+      "passed": 120,
       "failed": 0,
       "cancelled": 0,
       "skipped": 0,
-      "duration_ms": 15195
+      "duration_ms": 15172
     }
   ],
   "aggregate": {
-    "tests": 484,
-    "passed": 484,
+    "tests": 487,
+    "passed": 487,
     "failed": 0,
     "cancelled": 0,
     "skipped": 0
   },
+  "rendered_workspace_configuration": {
+    "url": "http://127.0.0.1:51433/ui/",
+    "workspace": "TestProj · D:\\CantorAI2026\\TestProj",
+    "observations": [
+      "The connected browser UI rendered the file explorer, conversation sidebar, provider/model selector and current TestProj workspace.",
+      "Workspace settings opened and showed one registered workspace; its switch selector was disabled because no second workspace exists.",
+      "New workspace opened a folder-root form explaining that additional folders can be attached later. The form was canceled without creating a workspace or changing the profile."
+    ],
+    "result": "passed; rendered dialog behavior verified, multiple-workspace switching not exercised live"
+  },
   "limitations": [
     "These contracts use synthetic host/controller and DOM fixtures.",
-    "They do not constitute installed VS Code acceptance or a live rendered browser workflow."
+    "The rendered check did not create a second workspace, so live switching between two registered workspaces remains unverified.",
+    "Installed VS Code coding acceptance remains separate from these source suites."
   ]
 }

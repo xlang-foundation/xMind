@@ -85,12 +85,17 @@ unverified. Exact revisions, binary hashes, test scope and command are in
 ## Current browser and VS Code adapter contracts — 2026-10-15
 
 The current-source VS Code extension host/renderer and browser UI/controller
-Node suites pass **484/484**: 365 VS Code tests and 119 browser tests, with no
+Node suites pass **487/487** on xMind commit `c1658922ca53e60cfc4ebbd9fc24fd2b72fa335e`:
+367 VS Code tests and 120 browser tests, with no
 failures, cancellations or skips. The tests cover the current workspace and
 session workflows, streamed UI state, file approvals, restore requests,
 provider/model selection, graph/planning routes and MCP/A2A client routing.
-They use synthetic host and DOM fixtures; installed VS Code coding and a live
-rendered browser acceptance remain separate required checks. Exact commands
+The live TestProj browser at `http://127.0.0.1:51433/ui/` also rendered the
+workspace settings and new-workspace form. Only one workspace was registered,
+so the switch selector was disabled; the create form was canceled without
+changing the local profile. This verifies the dialog path but not switching
+between two live workspaces. The source suites use synthetic host and DOM
+fixtures; installed VS Code coding acceptance remains separate. Exact commands
 and scope are in
 [`browser-vscode-contracts-20261015.json`](evidence/browser-vscode-contracts-20261015.json).
 
