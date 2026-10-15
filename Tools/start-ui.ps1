@@ -8,6 +8,7 @@ param(
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
     [string]$Workspace,[switch]$ApprovedEdits,
+    [switch]$DisableWorkspaceTrust,
     [ValidatePattern('^[A-Za-z0-9_-]{1,64}$')][string]$PreviewName='ui-host',
     [ValidateRange(1024,65535)][int]$DebugPort=57217,
     [string]$GraphsConfig,
@@ -43,6 +44,8 @@ if(Test-Path -LiteralPath (Join-Path $uiState 'active.json')){
 }
 if(Get-NetTCPConnection -State Listen -LocalPort $DebugPort -ErrorAction SilentlyContinue){throw 'The selected development-host debug port is already in use.'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
+$uiInstaller=@(Get-Process -ErrorAction SilentlyContinue|Where-Object {$_.ProcessName -like 'CodeSetup-*'})
+if($uiInstaller.Count){$uiInstallerNames=($uiInstaller.ProcessName|Sort-Object -Unique)-join ', ';throw ('VS Code setup/update is still running ('+$uiInstallerNames+'). Finish the installer before starting an xMind development host.')}
 $uiServer=if($ServerExecutable){[System.IO.Path]::GetFullPath($ServerExecutable)}else{Join-Path $uiProject 'build\native\contract-bin\Release\xmind.exe'}
 $uiBuildProvenance=$null
 if($BundleDirectory){
@@ -159,8 +162,18 @@ try {
     $env:XMIND_UI_READY_FILE=$uiReady
     # User explicitly requested a visible UI. This is an isolated development
     # host for this known repository, with its own settings/extensions directory.
-    $uiCodeArgs=@('--new-window','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiOpenWorkspace+'"'))
+    $uiCodeArgs=@('--new-window','--skip-welcome','--skip-release-notes',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiOpenWorkspace+'"'))
+    if($DisableWorkspaceTrust){$uiCodeArgs+='--disable-workspace-trust'}
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
+    $uiSidebarDeadline=[DateTime]::UtcNow.AddSeconds(60)
+    while([DateTime]::UtcNow -lt $uiSidebarDeadline -and -not(Test-Path -LiteralPath $uiReady)){
+        Start-Sleep -Milliseconds 100
+    }
+    if(-not(Test-Path -LiteralPath $uiReady)){
+        throw ('VS Code did not report a ready xMind secondary sidebar within 60 seconds. Inspect the Development Host for an activation error or workspace-trust prompt. Isolated smoke tests may use -DisableWorkspaceTrust. Ready marker: '+$uiReady)
+    }
+    $uiSidebar=Get-Content -LiteralPath $uiReady -Raw | ConvertFrom-Json
+    if($uiSidebar.opened -ne $true -or $uiSidebar.location -ne 'secondarySidebar' -or $uiSidebar.origin -ne $uiOrigin){throw 'The VS Code readiness marker did not match the opened native xMind sidebar.'}
     $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;source_server_executable=$uiSourceServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig;language_server_config=$LanguageServerConfig} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
