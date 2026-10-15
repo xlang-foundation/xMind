@@ -76,7 +76,7 @@ public:
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
         std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={},
-        std::optional<std::vector<std::string>> tool_allowlist={});
+        std::optional<std::vector<std::string>> tool_allowlist={},bool resume_dynamic_child=false);
     std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
     std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={}) const;
     // Metadata-only controller preflight; neither method launches MCP or models.

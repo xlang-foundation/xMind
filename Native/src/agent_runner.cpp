@@ -327,7 +327,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
     std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions,
-    std::optional<std::vector<std::string>> tool_allowlist) {
+    std::optional<std::vector<std::string>> tool_allowlist,bool resume_dynamic_child) {
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
     auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
@@ -357,6 +357,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& value){return value.child_run_id==id;});
             const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& value){return value.id==admission.preset_id&&value.revision==admission.preset_revision;});
             if(node==plan.nodes.end()||preset==plan.capabilities.presets.end()||plan.root_run_id!=budget->root_id()||plan.state!="active"||
+                (admitted.state==RunState::paused)||
+                (resume_dynamic_child&&(admitted.state!=RunState::running||!budget->may_resume_owner(id)))||
                 node->state!=DynamicNodeState::claimed||node->claim_id!=admission.claim_id||node->definition_revision!=admission.definition_revision||
                 node->claim_revision!=admission.claim_revision||node->definition.label!=admission.node_label||
                 node->definition.preset_id!=preset->id||node->definition.preset_revision!=preset->revision||
@@ -367,8 +369,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(!workspace_||workspace_->identity()!=child_caps->workspace_identity||
                     agent_authority_identity(settings_,settings_.provider.model,workspace_->identity(),agent_authority_credentials(persistence_,settings_))!=preset->backend_identity)
                     throw DynamicPlanUnavailable("Dynamic child authority changed before execution");
-            }catch(const DynamicPlanUnavailable&){return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
-             catch(const std::invalid_argument&){return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
+            }catch(const DynamicPlanUnavailable&){return persistence_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
+             catch(const std::invalid_argument&){return persistence_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
         }
         if(!leaf&&budget&&(!graph_agent||!settings_.context||budget->root_id()!=admission.root_run_id||
             budget->snapshot().spec.policy_id!="native.graph-context"))
@@ -377,6 +379,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     const bool dynamic_root=admitted.parent_id.empty()&&settings_.planning&&planning_;
     const bool dynamic_plan_owner=dynamic_root||(dynamic_child&&settings_.planning&&planning_);
     const bool resumed=dynamic_root&&admitted.state==RunState::paused;
+    const bool resumed_dynamic_child=dynamic_child&&admitted.state==RunState::running&&resume_dynamic_child&&budget&&budget->may_resume_owner(id);
     auto provider=settings_.provider;
     const auto selected=resumed&&model_id.empty()?admitted_dynamic_model(id):model_id;
     if(!selected.empty()) {const auto allowed=models();if(!settings_.provider_identity&&std::find(allowed.begin(),allowed.end(),selected)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=selected;}
@@ -404,6 +407,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         // The service's owner mutex distinguishes an explicit controller cancel
         // from shutdown/fault stop. A stopped wake has claimed no new segment.
         if(resumed)return admitted;
+        if(resumed_dynamic_child)return persistence_.transition(id,RunState::running,RunState::cancelled,R"({"reason":"cancelled_before_nested_resume"})").get();
         return persistence_.transition(id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
     }
     std::optional<DynamicResumeRecord> resume;std::optional<DynamicPlanCapabilities> root_caps;
@@ -418,10 +422,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         const auto active_started=std::chrono::steady_clock::now();
         resume=persistence_.resume_dynamic_owner(std::move(spec)).get();root_caps=resume->plan.capabilities;
         try{budget=std::make_shared<RootExecutionBudget>(persistence_,persistence_.root_budget(id).get(),
-            active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity);}
+            active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity,resume->owner_runs);}
         catch(...){throw DynamicOutcomeUnrecorded("Resumed dynamic segment lacks its live clock owner; recovery is required");}
         if(resume->context_pin)budget->adopt_context_pin(*resume->context_pin);
-    }else persistence_.transition(id,RunState::queued,RunState::running).get();
+    }else if(!resumed_dynamic_child)persistence_.transition(id,RunState::queued,RunState::running).get();
     std::stop_source linked;
     std::stop_callback external(token,[&]{linked.request_stop();});
     std::atomic<bool> timed_out=false;
@@ -618,10 +622,20 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(repository_context&&repository_context->ready(directory,stop))guidance=repository_context->precondition(directory);
             return guidance;
         };
-        if(resume){
+        if(resume||resumed_dynamic_child){
             // Idle MCP peers retire before a clean pause closes active time.
             close_mcp();stop_mcp_observers();
-            const auto actual=planning_->resume(id,resume->pending_call.id,settings_,*root_caps,budget,token,planning_guidance);
+            std::string pending_call;
+            const DynamicPlanCapabilities* capabilities=nullptr;
+            if(resume){pending_call=resume->pending_call.id;capabilities=&*root_caps;}
+            else{
+                const auto pending=persistence_.dynamic_plan_calls(budget->root_id()).get();
+                const auto found=std::find_if(pending.begin(),pending.end(),[&](const auto& call){return call.owner_run_id==id&&call.state=="accepted";});
+                if(found==pending.end()||std::count_if(pending.begin(),pending.end(),[&](const auto& call){return call.owner_run_id==id&&call.state=="accepted";})!=1)
+                    throw DynamicPlanUnavailable("Resumed dynamic child has no unique accepted continuation");
+                pending_call=found->id;capabilities=&*child_caps;
+            }
+            const auto actual=planning_->resume(id,pending_call,settings_,*capabilities,budget,token,planning_guidance);
             if(actual.paused)return actual.root;
             commit_plan_result(actual);refresh_tools();
         }
@@ -754,7 +768,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
                     reload_history();refresh_tools();continue;
                 }catch(...){if(yielded_leaf)budget->reacquire_leaf(token);throw;}
-                if(yielded_leaf)budget->reacquire_leaf(token);
+                if(yielded_leaf&&!actual.paused)budget->reacquire_leaf(token);
                 if(actual.paused)return actual.root;
                 if(!actual.call_id.empty())commit_plan_result(actual);
                 else{

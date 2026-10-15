@@ -15,12 +15,15 @@ history and shared budget. The planning HTTP DTO validates arbitrary parent
 order and the shared browser/VS Code renderer recursively shows descendant
 plans, owner/child transcripts and actual response metrics. Depth-eight
 boundary coverage reaches the maximum valid owner chain; a ninth child is
-prevented by the root's eight-child budget. Remaining total-work bounds,
-parallel nested frontiers, and durable nested pause/restart recovery remain
-pending. Root-wide node, revision and human-question limits are enforced
-transactionally and covered by repository
-contracts. Nested human nodes are rejected with
-`nested_human_wait_unsupported`. See the [recursion contract](native-dynamic-plan-recursion.md)
+prevented by the root's eight-child budget. A single nested human-wait chain
+can now pause, accept an answer through the root owner, resume after SQLite
+reopen, and complete the original accepted plan calls without replay. Remaining
+total-work bounds, parallel nested frontiers, and simultaneous human waits in
+sibling branches remain pending. Root-wide node, revision and human-question
+limits are enforced transactionally and covered by repository contracts.
+When another root child is still live, a nested human plan receives the typed
+pre-acceptance rejection `nested_human_wait_parallel_unsupported`. See the
+[recursion contract](native-dynamic-plan-recursion.md)
 and [current validation](VALIDATION_STATUS.md).
 
 ## Registered MCP resource and prompt nodes — 2026-10-14

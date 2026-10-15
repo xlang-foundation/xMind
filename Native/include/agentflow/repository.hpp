@@ -83,6 +83,7 @@ public:
     DynamicHumanRequest expire_dynamic_human(const std::string& plan,const std::string& request);
     DynamicBudgetSegment open_dynamic_budget_segment(const DynamicSegmentSpec& spec);
     DynamicBudgetSegment dynamic_budget_segment(const std::string& root);
+    DynamicPauseBinding dynamic_owner_pause(const std::string& root);
     std::optional<ContextPausePin> dynamic_context_pause(const std::string& root);
     Run suspend_dynamic_owner(const DynamicPauseSpec& spec);
     DynamicResumeRecord resume_dynamic_owner(const DynamicResumeSpec& spec);

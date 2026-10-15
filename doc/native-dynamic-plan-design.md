@@ -2,8 +2,9 @@
 
 This design records the original implementation stages. Current source also
 supports bounded nested agent plans through depth eight, with shared root
-budgets and end-to-end execution contracts through depth two. Nested human
-waits and durable nested pause/restart recovery remain unsupported; see the
+budgets and end-to-end execution contracts through depth two. A single nested
+human-wait chain can pause, resume and recover after SQLite reopen; simultaneous
+human waits in sibling branches remain unsupported. See the
 [current nested-planning contract](native-dynamic-plan-recursion.md).
 
 The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
@@ -35,8 +36,8 @@ retries remain uncertain for inspection. The existing explicit resubscription
 route is also verified after SQLite reopen for a succeeded dynamic-child-owned operation:
 it resumes with that child's saved cursor, appends to the child journal, and
 does not repeat the initial send. See [validation status](VALIDATION_STATUS.md).
-Background process jobs, nested human-pause recovery, live provider and
-external-browser/installed VS Code acceptance remain open. Registered MCP
+Background process jobs, live provider and external-browser/installed VS Code
+acceptance remain open. Registered MCP
 resource and prompt reads now run as dependent model-free nodes through the
 same frozen binding, controller approval and durable journal; see
 [validation status](VALIDATION_STATUS.md).
@@ -44,14 +45,15 @@ same frozen binding, controller approval and durable journal; see
 The exact ownership, persistence, budget and recovery boundary for nested
 planning is tracked in the
 [nested planning contract](native-dynamic-plan-recursion.md). Nested agent
-plans are implemented through depth eight; nested human waits still require a
-durable pause, answer and restart-recovery path before they can be enabled.
+plans are implemented through depth eight. Single-chain nested human pauses
+now preserve exact accepted calls through answer, resume and restart recovery;
+simultaneous sibling waiters still need a coordinated continuation model.
 
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
 workspace reads, exact-bound MCP and registered A2A tool nodes, synchronous
 registered process nodes, and bounded nested agent plans. Background process
-nodes, nested human-wait recovery, broader skill planning and full context
+nodes, concurrent nested human waits, broader skill planning and full context
 compaction remain open. The installed preview and historical
 acceptance boundaries below remain separate. Schema-v11 installation, live
 planning and installed VS Code acceptance remain pending. The installed

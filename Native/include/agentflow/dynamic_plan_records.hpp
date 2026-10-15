@@ -18,7 +18,7 @@ struct DynamicHumanExpired : std::runtime_error {using std::runtime_error::runti
 struct DynamicPlanRejected : std::runtime_error {
     std::string code;
     explicit DynamicPlanRejected(std::string value):std::runtime_error("Dynamic plan was not accepted"),code(std::move(value)){
-        if(code!="invalid_plan_arguments"&&code!="plan_changed"&&code!="planning_budget_exhausted"&&code!="nested_human_wait_unsupported"&&code!="planning_depth_exhausted")throw std::invalid_argument("Invalid bounded planning rejection code");
+        if(code!="invalid_plan_arguments"&&code!="plan_changed"&&code!="planning_budget_exhausted"&&code!="nested_human_wait_parallel_unsupported"&&code!="planning_depth_exhausted")throw std::invalid_argument("Invalid bounded planning rejection code");
     }
 };
 
@@ -67,7 +67,7 @@ struct DynamicNodeRecord {
     std::string backend_node_id;
     DynamicNodeState state=DynamicNodeState::pending;
     std::int64_t definition_revision=0,claim_revision=0;
-    std::string claim_id,child_run_id,human_request_id,child_state,outcome_json;
+    std::string claim_id,child_run_id,human_request_id,child_state,outcome_json,resolved_input_json;
     std::optional<std::int64_t> settled_event_seq;
     std::string effect_state="none";
     bool protected_definition=false;
@@ -161,6 +161,13 @@ struct DynamicPauseSpec {
     std::int64_t measured_active_elapsed_ms=0;
     std::optional<ContextPausePin> context_pin;
 };
+struct DynamicPauseBinding {
+    std::string plan_id,plan_call_id;
+    // Dynamic-agent owner run IDs from the root's first claimed child through
+    // the owner of the waiting plan. The chain is re-derived from immutable
+    // plan-owner and claimed-node records whenever it is read.
+    std::vector<std::string> owner_runs;
+};
 struct DynamicResumeSpec {
     std::string plan_id,segment_id,backend_identity;
     std::int64_t expected_revision=0,expected_state_sequence=0,expected_budget_revision=0;
@@ -172,6 +179,7 @@ struct DynamicResumeRecord {
     DynamicBudgetSegment segment;
     DynamicPlanCallRecord pending_call;
     std::optional<ContextPausePin> context_pin;
+    std::vector<std::string> owner_runs;
 };
 struct DynamicPlanStepResult {
     DynamicPlanRecord plan;

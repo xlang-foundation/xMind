@@ -5,7 +5,9 @@ v25 permits multiple plans per root; v26 stores owner-scoped signed calls; and
 v27 admits bounded descendant ownership through depth eight. Dynamic-agent
 children can create nested plans under the same root budget and child pool.
 Depth-two execution is covered end to end. Nested human waits and durable
-nested pause/restart recovery remain unsupported.
+nested pause/restart recovery are implemented for one waiting owner chain and
+covered through a real service close/reopen. Simultaneous nested waits in
+sibling branches remain unsupported and are rejected before plan acceptance.
 
 ## Current boundary
 
@@ -86,12 +88,15 @@ than counting idle planner ancestors as active leaves.
 
 A parent plan node joins its child only after the child-owned plan reaches a
 finished report, and repository completion guards prevent a running child
-from completing around unfinished plan work. Nested human waits are not
-accepted: they need a durable continuation stack identifying every owning
-plan/call/node, plus resume behavior that reopens that exact chain and preserves
-child context pins and the root's remaining active-time segment. Restart
-recovery must settle from actual child/event/effect evidence and must never
-reconstruct or replay a model plan from a prompt.
+from completing around unfinished plan work. For a nested human wait, the
+repository binds the deepest waiting plan/call to the exact root-to-child owner
+chain, pauses each admitted owner and closes the shared active-time segment in
+one transaction. An authenticated answer resumes that same chain and segment;
+after SQLite reopen, recovery preserves the owner chain only when its accepted
+calls, claimed parent nodes, closed segment and effects all validate. No plan
+or child is reconstructed from a prompt, and accepted provider calls are not
+replayed. The current single-chain binding rejects a nested human wait while a
+sibling root child remains live; multi-branch pause coordination is still open.
 
 The current synchronous call stack makes this a root-wide pause, not an
 independent child pause. A nested `DynamicPlanExecutor` runs inside its admitted
@@ -146,8 +151,11 @@ inspectable; it cannot be converted into an ordinary tool error.
    claimed dynamic-agent child; route its tools through the same executor and
    child pool; preserve root budget ownership and per-owner continuation
    receipts; and verify root → outer planner → inner planner → depth-two reader
-   with synthetic provider turns and real SQLite child history. The contract
-   also checks typed rejection of a nested human wait. The repository contract
+   with synthetic provider turns and real SQLite child history. Engine
+   contracts also answer a nested human question, resume its accepted owner
+   call, close/reopen the backend during a nested pause and finish without
+   replay. A nested human wait with another live root child receives the typed
+   pre-acceptance rejection `nested_human_wait_parallel_unsupported`. The repository contract
    now admits plans through depth eight under the real eight-child shared root
    budget and checks all nine persisted plan depths plus the eight exact child
    admissions. Repository acceptance now counts plan nodes, accepted revisions
@@ -160,9 +168,10 @@ inspectable; it cannot be converted into an ordinary tool error.
    of the root's eight child slots; the executor's depth-nine guard therefore
    has no honest end-to-end fixture. Remaining total-work bounds remain
    pending.
-4. Add durable pause/resume and crash-recovery for nested human waits and
-   unresolved effects. Verify root restart drains or preserves every nested
-   owner without duplicate provider dispatch or effect replay.
+4. **Implemented for one nested owner chain:** durable pause/resume and restart
+   recovery preserve the exact waiting plan/call, paused descendant runs and
+   original continuation receipts. Extend this to multiple sibling nested
+   human waits and broader unresolved-effect restart cases.
 5. **Partly implemented:** `/v1/runs/{root}/plan` returns owner bindings for
    nested plans through the supported depth, each child run, its current plan
    topology, accepted revisions and call receipts/available held-response

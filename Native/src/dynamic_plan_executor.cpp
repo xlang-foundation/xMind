@@ -239,7 +239,11 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
         // Only this preacceptance phase may become a normal rejected tool turn.
         // Runtime/settlement failures below retain their typed owner retirement.
         const auto parsed=parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
-        if(parent!=root_id){if(std::any_of(parsed.add.begin(),parsed.add.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;})||std::any_of(parsed.replace.begin(),parsed.replace.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;}))throw DynamicPlanRejected("nested_human_wait_unsupported");}
+        const auto contains_human=[](const auto& nodes){return std::any_of(nodes.begin(),nodes.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;});};
+        if(parent!=root_id&&(contains_human(parsed.add)||contains_human(parsed.replace))){
+            for(const auto& child:store_.owned_children(root_id).get())if(child.run.id!=parent&&!terminal(child.run.state))
+                throw DynamicPlanRejected("nested_human_wait_parallel_unsupported");
+        }
         const auto existing=store_.dynamic_plan_for_owner(parent).get();
         DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=root_id;spec.owner_run_id=parent;spec.provider_tool_call_id=call.id;
         spec.origin_attempt_id=origin;spec.arguments_json=call.arguments_json;spec.parent_assistant_json=assistant;spec.backend_identity=caps.backend_identity;spec.expected_budget_revision=budget->snapshot().revision;
@@ -252,18 +256,31 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
 }
 DynamicExecutionResult DynamicPlanExecutor::resume(const std::string& parent,const std::string& id,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
     std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
-    generation(store_,parent,frozen,caps,budget,cancel);const auto accepted=store_.dynamic_plan_call(id).get();
-    const auto root=store_.run(parent).get();if(accepted.root_run_id!=parent||accepted.owner_run_id!=parent||accepted.state!="accepted"||root.state!=RunState::running||root.graph_root||!root.parent_id.empty())throw DynamicPlanUnavailable("Dynamic continuation does not own its exact resumed ordinary root");
+    if(!budget)throw DynamicPlanUnavailable("Dynamic continuation has no root budget");const auto root_id=budget->root_id();generation(store_,root_id,frozen,caps,budget,cancel,parent!=root_id);const auto accepted=store_.dynamic_plan_call(id).get();
+    const auto owner=store_.run(parent).get();
+    if(accepted.root_run_id!=root_id||accepted.owner_run_id!=parent||accepted.state!="accepted"||owner.state!=RunState::running)
+        throw DynamicPlanUnavailable("Dynamic continuation does not own its exact resumed owner");
+    if(parent==root_id){if(owner.graph_root||!owner.parent_id.empty())throw DynamicPlanUnavailable("Dynamic continuation root is not an ordinary Agent");}
+    else{
+        const auto admission=store_.child_admission(parent).get();const auto plan=store_.dynamic_plan(accepted.plan_id).get();
+        if(!budget->may_resume_owner(parent)||admission.kind!=ChildAdmissionKind::dynamic_agent||admission.root_run_id!=root_id||
+           plan.owner_run_id!=parent||plan.root_run_id!=root_id||plan.state!="active")
+            throw DynamicPlanUnavailable("Nested dynamic continuation is outside the exact paused owner chain");
+    }
     return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
 DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
     std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
     const bool nested_owner=accepted.owner_run_id!=accepted.root_run_id;
     std::vector<ActiveBatch> active;active.reserve(8);
+    bool pause_observed=false;
     auto settle=[&](bool wait){
         for(auto& batch:active)for(std::size_t i=0;i<batch.children.size();++i){if(batch.settled[i])continue;const auto& result=batch.work->results()[i];
             if(!wait&&result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready)continue;
-            const auto actual=result.get();if(actual.id!=batch.children[i]||!terminal(actual.state))throw DynamicOutcomeUnrecorded("Dynamic child returned without its exact owned retirement");
+            const auto actual=result.get();if(actual.id==accepted.root_run_id&&actual.state==RunState::paused){
+                (void)store_.dynamic_owner_pause(accepted.root_run_id).get();pause_observed=true;batch.settled[i]=true;continue;
+            }
+            if(actual.id!=batch.children[i]||!terminal(actual.state))throw DynamicOutcomeUnrecorded("Dynamic child returned without its exact owned retirement");
             try{store_.settle_dynamic_child(actual.id).get();}
             catch(...){children_->fail();throw DynamicOutcomeUnrecorded("Dynamic child outcome could not be journaled; recovery is required");}
             batch.settled[i]=true;
@@ -271,8 +288,9 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
     };
     try{
         for(;;){
+            settle(false);if(pause_observed){settle(true);const auto paused=store_.run(accepted.root_run_id).get();if(paused.state!=RunState::paused)throw DynamicOutcomeUnrecorded("Nested human pause lost its root owner state");return {paused,accepted.id,{},true};}
             budget->check(cancel);if(!healthy())throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");
-            settle(false);auto plan=store_.dynamic_plan(accepted.plan_id).get();
+            auto plan=store_.dynamic_plan(accepted.plan_id).get();
             if(plan.root_run_id!=accepted.root_run_id||plan.revision!=accepted.accepted_revision)throw DynamicOutcomeUnrecorded("Outstanding planning call lost its immutable accepted revision");
             for(const auto& request:store_.dynamic_human_requests(plan.id).get()){
                 if(request.state=="expired")throw DynamicHumanExpired("An owned human question expired; no provider continuation is dispatched");
@@ -284,7 +302,35 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
             }
             const auto decision=inspect_dynamic_plan(plan);
             if(decision.halted)throw WorkspaceEffectUncertain("Dynamic plan retains an uncertain owned outcome");
-            if(decision.claimed.size()>live_count(active))throw DynamicOutcomeUnrecorded("Dynamic plan contains an untracked claim; live work cannot be adopted or replayed");
+            std::vector<DynamicPreparedNode> resumable;
+            for(const auto& label:decision.claimed){const auto found=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& node){return node.definition.label==label;});
+                if(found!=plan.nodes.end()&&found->definition.kind==DynamicNodeKind::agent&&budget->may_resume_owner(found->child_run_id))resumable.push_back({*found,found->resolved_input_json});}
+            if(decision.claimed.size()>live_count(active)+resumable.size())throw DynamicOutcomeUnrecorded("Dynamic plan contains an untracked claim; live work cannot be adopted or replayed");
+            if(!resumable.empty()&&live_count(active)==0){
+                std::vector<NativeChildWork> work;ActiveBatch staged;work.reserve(resumable.size());staged.children.reserve(resumable.size());staged.settled.assign(resumable.size(),false);
+                for(const auto& prepared:resumable){const auto child_id=prepared.node.child_run_id;const auto& policy=preset(plan.capabilities,prepared.node.definition);
+                    auto settings=dynamic_child_settings(frozen,policy,selected_model(plan.capabilities));const auto actual=store_.run(child_id).get();
+                    if(actual.state!=RunState::running||store_.child_admission(child_id).get().claim_id!=prepared.node.claim_id)throw DynamicOutcomeUnrecorded("Paused dynamic child claim is not the exact resumed owner");
+                    staged.children.push_back(child_id);
+                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
+                        bool available=false;try{available=agent_authority_identity(settings,settings.provider.model,caps.workspace_identity,agent_authority_credentials(store_,settings))==policy.backend_identity;}
+                        catch(const Conflict&){}catch(const NotFound&){}
+                        if(!available)return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_preset_unavailable_after_resume"})").get();
+                        std::unique_ptr<AgentRunner> runner;
+                        try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
+                        catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
+                        catch(const ToolAccessDenied&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_workspace_precondition_unavailable"})").get();}
+                        catch(const ToolFileError&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_workspace_precondition_unavailable"})").get();}
+                        catch(const std::filesystem::filesystem_error&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_runtime_path_unavailable"})").get();}
+                        catch(const std::invalid_argument&){if(!changed_process_precondition(settings))throw;return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
+                        return runner->execute(child_id,stop,{},budget,{}, {},true);
+                    },cancel});
+                }
+                try{staged.work=children_->stage(std::move(work));}
+                catch(const NativeChildCapacityUnavailable&){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
+                catch(const NativeChildOutcomeUnrecorded&){throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");}
+                active.push_back(std::move(staged));active.back().work->dispatch();continue;
+            }
             if(decision.report_ready){
                 generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
                 DynamicPlanStepResult result;
@@ -367,7 +413,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
             }
             if(live==0&&!decision.waiting_human.empty()&&decision.ready.empty()){
                 generation(store_,accepted.root_run_id,frozen,caps,budget,cancel,nested_owner);
-                try{const auto paused=budget->suspend_for_human(plan,accepted.id);return {paused,accepted.id,{},true};}
+                try{budget->wait_for_leaves_drained(cancel);const auto paused=budget->suspend_for_human(plan,accepted.id);return {paused,accepted.id,{},true};}
                 catch(const DynamicPlanChanged&){continue;}
             }
             if(live==0&&decision.waiting_human.empty())throw DynamicOutcomeUnrecorded("Dynamic plan has no owned progress, report or human wait");

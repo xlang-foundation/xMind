@@ -1,6 +1,7 @@
 #include "agentflow/root_execution_budget.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/context_selection.hpp"
+#include <algorithm>
 #include <random>
 #include <sstream>
 #include <iomanip>
@@ -13,9 +14,9 @@ thread_local const RootExecutionBudget* yielded_leaf=nullptr;
 }
 RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRecord record,
     std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
-    std::optional<DynamicBudgetSegment> segment,std::string backend_identity)
+    std::optional<DynamicBudgetSegment> segment,std::string backend_identity,std::vector<std::string> resumable_owners)
     :store_(store),root_(std::move(record.root_run_id)),policy_(record.spec.policy_id),deadline_(deadline),cancel_(cancel),parallel_(static_cast<std::size_t>(record.spec.max_parallel)),
-      segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),active_started_(std::chrono::steady_clock::now()){
+      segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),resumable_owners_(std::move(resumable_owners)),active_started_(std::chrono::steady_clock::now()){
     if(root_.empty() || record.spec.max_parallel<0 || record.spec.max_parallel>2||
        (record.spec.max_parallel==0&&record.spec.policy_id!="native.context"&&record.spec.policy_id!="native.direct-agent"))throw std::invalid_argument("Invalid root execution budget");
     if(segment_&&((record.spec.policy_id!="native.dynamic-plan"&&record.spec.policy_id!="native.graph-context")||segment_->root_run_id!=root_||segment_->state!="open"||
@@ -26,6 +27,9 @@ RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRec
         active_started_=deadline_-std::chrono::milliseconds(segment_->remaining_active_ms);
         if(active_started_>std::chrono::steady_clock::now())throw std::invalid_argument("Planning clock starts after actual owner activation");
     }
+}
+bool RootExecutionBudget::may_resume_owner(const std::string& owner)const noexcept{
+    return std::find(resumable_owners_.begin(),resumable_owners_.end(),owner)!=resumable_owners_.end();
 }
 void RootExecutionBudget::check(std::stop_token cancel)const{
     if(cancel_.stop_requested() || cancel.stop_requested())throw TransportCancelled("Root execution cancelled");
@@ -99,6 +103,7 @@ bool RootExecutionBudget::try_acquire_leaf()noexcept{
     auto count=active_leaves_.load();while(count<parallel_)if(active_leaves_.compare_exchange_weak(count,count+1))return true;return false;
 }
 bool RootExecutionBudget::yield_leaf()noexcept{if(yielded_leaf)return false;auto count=active_leaves_.load();while(count)if(active_leaves_.compare_exchange_weak(count,count-1)){yielded_leaf=this;return true;}return false;}
+void RootExecutionBudget::wait_for_leaves_drained(std::stop_token cancel)const{while(active_leaves_.load()!=0){check(cancel);std::this_thread::sleep_for(std::chrono::milliseconds(2));}}
 void RootExecutionBudget::reacquire_leaf(std::stop_token cancel){if(yielded_leaf!=this)throw std::logic_error("Current worker has no yielded leaf slot");while(!try_acquire_leaf()){check(cancel);std::this_thread::sleep_for(std::chrono::milliseconds(1));}yielded_leaf=nullptr;}
 void RootExecutionBudget::release_leaf()noexcept{if(yielded_leaf==this){yielded_leaf=nullptr;return;}active_leaves_.fetch_sub(1);}
 }

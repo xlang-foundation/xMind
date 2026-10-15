@@ -70,6 +70,7 @@ public:
     std::future<DynamicHumanRequest> expire_dynamic_human(std::string plan,std::string request);
     std::future<DynamicBudgetSegment> open_dynamic_budget_segment(DynamicSegmentSpec spec);
     std::future<DynamicBudgetSegment> dynamic_budget_segment(std::string root);
+    std::future<DynamicPauseBinding> dynamic_owner_pause(std::string root);
     std::future<std::optional<ContextPausePin>> dynamic_context_pause(std::string root);
     std::future<Run> suspend_dynamic_owner(DynamicPauseSpec spec);
     std::future<DynamicResumeRecord> resume_dynamic_owner(DynamicResumeSpec spec);

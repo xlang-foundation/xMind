@@ -1,5 +1,21 @@
 # Current native validation
 
+## Nested human pause/resume and restart recovery — 2026-10-14
+
+An ordinary root can now pause on a human node owned by an admitted nested
+Agent, persist the exact waiting plan/call and root-to-child owner chain, and
+pause those owners with the shared active-time segment. The service routes an
+authenticated answer to the deepest waiting plan. Resume continues each
+original accepted call under its original owner run; SQLite reopen preserves
+the clean chain and does not replay provider calls. A synthetic-provider
+AgentService contract verifies nested answer/revision/completion and a second
+scenario closes/reopens the service while paused before answering. The Release
+repository, engine and service contracts pass **3/3**. Provider responses and
+credentials are synthetic. Simultaneous nested human waits in sibling root
+branches remain unsupported; a nested plan receives a typed pre-acceptance
+rejection while another root child is live. [Engine contract](../Native/tests/dynamic_plan_engine_contract.cpp)
+and [owner-chain contract](native-dynamic-plan-recursion.md).
+
 ## Root-wide nested planning limits — 2026-10-14
 
 Plan acceptance now enforces node-label, accepted-revision and human-question
@@ -7,9 +23,10 @@ allowances across all plans owned by one root, inside the serialized SQLite
 transaction. A nested owner cannot reset these allowances by opening another
 plan. The focused Release repository contract passed **1/1** and includes
 separate nested-owner rejection checks for all three limits, verifying that
-rejected work leaves no nested plan or partial reservation. This does not yet
-cover nested pause/restart continuation, depth-nine runtime rejection, or the
-remaining total-work limits. [Contract source](../Native/tests/dynamic_plan_repository_contract.cpp).
+rejected work leaves no nested plan or partial reservation. The engine
+contract separately covers single-chain nested pause/restart; depth-nine
+runtime rejection and remaining total-work limits remain open. [Contract
+source](../Native/tests/dynamic_plan_repository_contract.cpp).
 
 ## Live TestProj coding acceptance — 2026-10-14
 
@@ -200,8 +217,10 @@ planning, and engine contracts passed **3/3**. The repository contract
 also drives a nested human node through report creation, owner-bound
 conversation commit, and a leaf-role continuation reservation against the
 shared root budget. Dynamic Agent children receive owner-scoped planning tools;
-nested pause/restart recovery remains incomplete. Assistant/model receipts and human input in this contract are
-synthetic fixtures; it does not claim live provider execution.
+nested pause/restart recovery was incomplete at this checkpoint. It is covered by
+the later “Nested human pause/resume and restart recovery” contract above. Assistant/model receipts and human
+input in this contract are synthetic fixtures; it does not claim live provider
+execution.
 
 ## Owner-scoped signed dynamic-plan calls — 2026-10-14
 
