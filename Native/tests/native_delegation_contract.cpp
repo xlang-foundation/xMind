@@ -193,7 +193,12 @@ void requested_arguments(DelegationBatchSpec& spec,std::string arguments){
 void repository_contracts(PersistenceService& store,const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
     repository_provider_dialects(store,database,imports,workspace);
     const auto budget=repository_budget(workspace);repository_root(store,"repository-root",budget);auto specification=repository_batch(store,"repository-root","repository-batch",{"left","right"});
-    const auto definition=DelegationExecutor::definition();SchemaWorker().evaluate(definition.input_schema_json,specification.arguments_json,std::chrono::steady_clock::now()+3s);
+    const auto definition=DelegationExecutor::definition();
+    require(definition.description.find("For small or sequential tasks, especially a one-file change, inspect and act directly.")!=std::string::npos&&
+            definition.description.find("request concise findings")!=std::string::npos&&
+            definition.description.find("share the parent's model-call and wall-clock budgets")!=std::string::npos,
+            "The model-facing delegation contract must avoid unnecessary broad child runs and explain their shared limits");
+    SchemaWorker().evaluate(definition.input_schema_json,specification.arguments_json,std::chrono::steady_clock::now()+3s);
     rejects<SchemaArgumentsInvalid>([&]{SchemaWorker().evaluate(definition.input_schema_json,R"({"tasks":[{"id":"one","objective":"inspect","preset":"workspace.inspect","actor":"model-injected-controller"}]})",std::chrono::steady_clock::now()+3s);},"Actual native schema worker must reject injected leaf authority");
     auto invalid=specification;invalid.preset_id="workspace.write";rejects<std::invalid_argument>([&]{store.accept_delegation_batch(invalid).get();},"Unknown execution preset cannot admit a more capable leaf");
     invalid=specification;invalid.preset_revision=2;rejects<std::invalid_argument>([&]{store.accept_delegation_batch(invalid).get();},"An unregistered preset revision cannot silently fall back");

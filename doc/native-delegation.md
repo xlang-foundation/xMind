@@ -41,6 +41,16 @@ existing non-delegating callers.
 `delegate_tasks` is appended after the parent's existing workspace, coding,
 process and MCP tool definitions. Its arguments have this shape:
 
+The model-facing tool guidance keeps parallelism proportional to the task:
+ordinary small or sequential changes, particularly one-file edits, should stay
+in the parent agent's direct tool loop. A delegated investigation should name a
+small file set or a precise question and return concise findings, rather than
+dumping a workspace tree or full source files. Child model calls consume the
+same root call and wall-clock budgets, so unnecessary fan-out can delay the
+parent or leave a child at its turn/transport limit. This is guidance to the
+model; it does not disable real child execution or change the native authority
+and budget checks.
+
 ```json
 {
   "tasks": [

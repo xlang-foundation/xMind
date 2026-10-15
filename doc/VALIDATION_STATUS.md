@@ -2552,3 +2552,14 @@ Complete coding parity, broad native providers, remaining MCP/A2A capabilities
 and Local/Nexus connection profiles remain active requirements. Team-server
 implementation, PostgreSQL, WebRTC and Electron belong to private Nexus.
 [Architecture](architecture.md), [parity baseline](PARITY.md).
+
+The current local delegation-guidance checkpoint (based on `808d515`) built
+`agentflow_native_delegation_contract` and the full `xmind` Debug executable
+with Visual Studio 18 CMake. The focused CTest run passed
+`native_delegation_contract` (1/1). It verifies that model-facing delegation
+guidance recommends direct handling for small/sequential edits, concise scoped
+child findings, and warns that child calls share the parent model-call and
+wall-clock budgets. This checks the native tool contract, not live model
+behavior after installing the rebuilt executable; the previously exercised
+TestProj browser run used the existing runtime and separately verified direct
+coding, approval, and Vite build behavior.
