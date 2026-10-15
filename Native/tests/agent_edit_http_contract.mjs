@@ -170,11 +170,16 @@ try {
     const [proposal]=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
     assert.equal(JSON.parse(proposal.arguments_json).before_content,'original\n');
     assert.equal(await readFile(join(workspace,`${name}.txt`),'utf8'),'original\n');
+    const permissionRequests=await api(`/v1/sessions/${name}/permissions`);assert.equal(permissionRequests.session_id,name);assert.deepEqual(permissionRequests.requests.map(item=>item.id),[proposal.id],'Session permission listing aggregates the exact pending controller request');
     if(name==='stale') await writeFile(join(workspace,'stale.txt'),'outside change\n');
-    if(name==='cancelled') cli('cancel',run.id);else cli('decide',proposal.id,name==='denied'?'deny':'allow');
+    if(name==='cancelled')cli('cancel',run.id);else if(name==='denied'){
+      const foreign=await fetch(`http://127.0.0.1:${port}/v1/sessions/allowed/permissions/${proposal.id}/reply`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'deny'}),signal:AbortSignal.timeout(5000)});assert.equal(foreign.status,404,'A session cannot reply to another session request');
+      const reply=await api(`/v1/sessions/${name}/permissions/${proposal.id}/reply`,{decision:'deny'});assert.equal(reply.state,'denied');
+    }else cli('decide',proposal.id,'allow');
     await until(()=>api(`/v1/runs/${run.id}`),value=>value.state===(name==='cancelled'?'cancelled':'completed'));
     const outcome=await api(`/v1/operations/${proposal.id}`);
     assert.equal(outcome.state,{allowed:'succeeded',denied:'denied',stale:'failed',cancelled:'cancelled'}[name]);
+    if(name==='denied')assert.deepEqual((await api(`/v1/sessions/${name}/permissions`)).requests,[],'Settled requests disappear from the pending session view');
     const inspection=await fetch(`http://127.0.0.1:${port}/v1/operations/${proposal.id}/inspection`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(5000)});
     assert.equal(inspection.status,409,'Product server exposes inspection but rejects edits that are not uncertain');
     const actual=await readFile(join(workspace,`${name}.txt`),'utf8');assert.equal(actual,name==='allowed'?'changed allowed\n':name==='stale'?'outside change\n':'original\n');

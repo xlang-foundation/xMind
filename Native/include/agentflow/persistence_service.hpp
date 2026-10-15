@@ -177,6 +177,7 @@ public:
     std::future<Operation> request_operation(std::string id,OperationSpec spec,std::int64_t expires_unix_ms);
     std::future<Operation> operation(std::string id);
     std::future<std::vector<Operation>> operations(std::string run_id);
+    std::future<std::vector<Operation>> pending_operations_for_session(std::string session_id);
     std::future<Operation> decide_operation(std::string id,OperationDecision decision,std::string actor);
     std::future<Operation> claim_operation(std::string id,OperationSpec actual);
     std::future<Operation> cancel_operation(std::string id,OperationSpec actual);

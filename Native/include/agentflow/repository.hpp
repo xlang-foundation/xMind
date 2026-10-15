@@ -187,6 +187,8 @@ public:
     Operation request_operation(const std::string& id,const OperationSpec& spec,std::int64_t expires_unix_ms);
     Operation operation(const std::string& id);
     std::vector<Operation> operations(const std::string& run_id);
+    // Pending controller requests aggregated over every run owned by a session.
+    std::vector<Operation> pending_operations_for_session(const std::string& session_id);
     // Actor is derived from the backend's authenticated controller context.
     Operation decide_operation(const std::string& id,OperationDecision decision,const std::string& actor);
     Operation claim_operation(const std::string& id,const OperationSpec& actual);

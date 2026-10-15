@@ -2720,6 +2720,13 @@ std::vector<Operation> Repository::operations(const std::string& id) {
         result.push_back(decode_operation(row,impl_->database));
     return result;
 }
+std::vector<Operation> Repository::pending_operations_for_session(const std::string& id) {
+    session(id);std::vector<Operation> result;
+    const auto rows=impl_->database.execute("SELECT o.id,o.run_id,o.workspace,o.tool,o.arguments,o.state,o.expires_ms,o.result,o.decision_actor FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state='awaiting_approval' ORDER BY o.rowid LIMIT 257",{id}).rows;
+    if(rows.size()>256)throw Conflict("Session has too many pending permission requests; resolve requests before listing them");
+    for(const auto& row:rows)result.push_back(decode_operation(row,impl_->database));
+    return result;
+}
 Operation Repository::decide_operation(const std::string& id,OperationDecision decision,const std::string& actor) {
     identifier(actor);if(actor.size()>4096) throw std::invalid_argument("Controller identity exceeds its limit");
     try {(void)Json(actor).dump();} catch(const Json::exception&) {throw std::invalid_argument("Invalid controller identity encoding");}

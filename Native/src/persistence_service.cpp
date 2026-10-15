@@ -368,6 +368,9 @@ std::future<Operation> PersistenceService::operation(std::string id) {
 std::future<std::vector<Operation>> PersistenceService::operations(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.operations(id);});
 }
+std::future<std::vector<Operation>> PersistenceService::pending_operations_for_session(std::string id) {
+    return impl_->observe([id=std::move(id)](Repository& repository){return repository.pending_operations_for_session(id);});
+}
 std::future<Operation> PersistenceService::decide_operation(std::string id,OperationDecision decision,std::string actor) {
     return impl_->submit([id=std::move(id),decision,actor=std::move(actor)](Repository& repository){return repository.decide_operation(id,decision,actor);});
 }

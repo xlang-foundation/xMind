@@ -304,6 +304,17 @@ class BackendClient {
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
   operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
   operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  async sessionPermissions(id) {
+    executionIdentity(id);const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/permissions`);
+    if(!value||value.session_id!==id||!Array.isArray(value.requests)||value.requests.length>256||value.requests.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.run_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.run_id)||typeof item.workspace_id!=='string'||!item.workspace_id||item.workspace_id.length>32768||typeof item.tool!=='string'||!item.tool||item.tool.length>128||typeof item.arguments_json!=='string'||typeof item.expires_unix_ms!=='number'||!Number.isSafeInteger(item.expires_unix_ms)||item.state!=='awaiting_approval'))throw new Error('Invalid pending session permission requests.');
+    return value;
+  }
+  async replySessionPermission(sessionId,requestId,decision) {
+    executionIdentity(sessionId);executionIdentity(requestId);if(decision!=='allow'&&decision!=='deny')throw new Error('Permission decision must be allow or deny.');
+    const result=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permissions/${encodeURIComponent(requestId)}/reply`,{decision});
+    if(!result||result.id!==requestId||!['ready','denied'].includes(result.state)||result.state!==(decision==='allow'?'ready':'denied'))throw new Error('Permission reply did not settle the requested operation.');
+    return result;
+  }
   async processOutput(id,channel,after=0,limit=65536) {
     executionIdentity(id);if(!['stdout','stderr'].includes(channel)||!Number.isSafeInteger(after)||after<0||!Number.isSafeInteger(limit)||limit<1||limit>65536)throw new Error('Invalid process output page request.');
     const value=await this.request(`/v1/operations/${encodeURIComponent(id)}/output?channel=${channel}&after=${after}&limit=${limit}`);
