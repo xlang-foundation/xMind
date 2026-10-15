@@ -2578,3 +2578,16 @@ tool loop for a read-only task and an approved edit with the rebuilt executable;
 they do not prove behavior across larger tasks or other providers. The edit is
 an isolated HTML smoke, not a replacement for the earlier TestProj Vite build
 or broad coding/IDE acceptance.
+
+## Current-source native planning and protocol contract refresh — 2026-10-15
+
+The Release contracts were rebuilt from the current xMind checkout after the
+existing `build/native-dynamic-plan` binaries were found to predate the
+October 15 test sources. The current-source run passed **8/8** focused contracts:
+the native A2A client and pinned official SDK peer, dynamic-plan validation,
+repository/recovery, agent execution, MCP plan tools, graph-service HTTP and
+AgentService lifecycle. This exercises native xlang3/SQLite persistence and
+real local protocol servers with synthetic model/provider responses; it does
+not establish live external A2A/MCP peer behavior, installed VS Code acceptance
+or full feature parity. The reproducible CTest log is
+[`native-planning-mcp-a2a-focused-ctest-20261015.log`](evidence/native-planning-mcp-a2a-focused-ctest-20261015.log).
