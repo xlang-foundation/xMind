@@ -42,7 +42,7 @@
     "Native/apps/xmind_main.cpp": "3c28ea640147cf7ad7cfd8cb61662fe026b6bf3cd147fce196fde9cd7ac50503",
     "Native/tests/http_cli_contract.mjs": "826e1b358ba9562004fb4e65c7a1c3a86c8746eedd0a492674466be6e1c1a8b4",
     "Native/tests/local_profile_contract.mjs": "79cc5c301e5454ef375b7b85503acbe41edc6b38bf56dbc0931d9cf8063a5b61",
-    "Native/CMakeLists.txt": "1a7775d8412fb1a4d9c0bdb3c93109bcb305b321ddebfa826ef4ab9a4a307ba7"
+    "Native/CMakeLists.txt": "577fd92312a7fb6abf7eb55a1d5e7972bc259e705fcb0e520f919fd79e1eb3d0"
   },
   "buildArtifactSha256": {
     "build/native-verify/contract-bin/Release/xmind.exe": "12666ac2991961575c0a7aa3b3bf74abadb20e1fdaba8aaa200f590054c7a9c0",

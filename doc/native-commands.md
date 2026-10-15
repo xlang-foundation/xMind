@@ -39,10 +39,12 @@ under the regular backend runtime.
 Clients use `GET /v1/workspace/commands` to inspect command IDs and public
 metadata, then `POST /v1/sessions/{session_id}/commands` with the selected
 command, arguments, exact workspace authority, and optional provider/graph
-selection. Browser and VS Code composers accept `/command-name arguments` and
-resolve the current command catalogue before submission. The interactive CLI
-does not yet dispatch workspace commands. An absent command directory produces
-an empty catalogue.
+selection. Browser and VS Code composers, plus the interactive CLI, accept
+`/command-name arguments` and resolve the current command catalogue before
+submission. In the CLI, `/commands` lists the opened workspace's current
+commands; invoking one submits the backend-expanded prompt through the ordinary
+session run route with the observed workspace authority. An absent command
+directory produces an empty catalogue.
 
 This is the native Markdown command-template slice. OpenCode plugins, dynamic
 command providers, shell interpolation, command lifecycle events and broader

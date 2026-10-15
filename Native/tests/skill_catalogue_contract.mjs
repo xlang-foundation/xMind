@@ -36,8 +36,8 @@ try{
   // target through raw HTTP so the backend, not the URL serializer, is tested.
   const emptyQueryStatus=await new Promise((yes,no)=>{const request=rawRequest({hostname:'127.0.0.1',port:new URL(origin).port,path:'/v1/workspace/skills?',headers},response=>{response.resume();response.once('end',()=>yes(response.statusCode));});request.once('error',no);request.end();});assert.equal(emptyQueryStatus,400);
   for(const suffix of ['?id=disabled','?path=../.config/providers.yaml'])assert.equal((await fetch(origin+'/v1/workspace/skills'+suffix,{headers})).status,400);
-  const nativeCli=await execute(cli,[new URL(origin).port,'skills'],{env,windowsHide:true,timeout:15000});assert.deepEqual(JSON.parse(nativeCli.stdout),catalogue);
-  const interactive=await new Promise((yes,no)=>{const process=execFile(cli,[new URL(origin).port,'chat'],{env,windowsHide:true,timeout:15000},(error,stdout)=>error?no(error):yes(stdout));process.stdin.end('/skills\n/exit\n');});
+  const nativeCli=await execute(cli,['--port',new URL(origin).port,'skills'],{env,windowsHide:true,timeout:15000});assert.deepEqual(JSON.parse(nativeCli.stdout),catalogue);
+  const interactive=await new Promise((yes,no)=>{const process=execFile(cli,['--port',new URL(origin).port,'chat'],{env,windowsHide:true,timeout:15000},(error,stdout)=>error?no(error):yes(stdout));process.stdin.end('/skills\n/exit\n');});
   const chatRecords=interactive.trim().split(/\r?\n/).map(line=>JSON.parse(line));assert.equal(chatRecords.length,1);assert.equal(chatRecords[0].type,'workspace_skills');assert.deepEqual(chatRecords[0].catalogue,catalogue);
   assert.deepEqual(await client.sessions(),[],'Catalogue inspection and console /skills must not admit a session');
   view=await createBrowserServer({backend:origin,assetRoot:assets});const viewOrigin=await view.listen(),viewHeaders={Origin:viewOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
@@ -62,6 +62,15 @@ try{
    const run=await accepted.json();assert.equal(run.session_id,commandSession.id);assert.equal(run.state,'queued');
    const deadline=Date.now()+5000;let history=[];while(Date.now()<deadline){history=await client.history(commandSession.id);if(history.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')))break;await new Promise(resolve=>setTimeout(resolve,25));}
    assert.ok(history.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')),'Command template expansion must be durably admitted as the ordinary run prompt');
+
+   const cliSession=await client.createSession('Synthetic CLI workspace command');
+   const terminal=spawn(cli,['--port',String(new URL(origin).port),'chat',cliSession.id,'synthetic-catalogue-model'],{env,windowsHide:true,stdio:['pipe','pipe','pipe']});let terminalOutput='',terminalError='';
+   terminal.stdout.on('data',bytes=>terminalOutput+=bytes);terminal.stderr.on('data',bytes=>terminalError+=bytes);
+   const terminalExit=new Promise((resolve,reject)=>{const timer=setTimeout(()=>{terminal.kill();reject(Error('Interactive CLI workspace command deadline'));},12000);terminal.once('error',error=>{clearTimeout(timer);reject(error);});terminal.once('exit',(code,signal)=>{clearTimeout(timer);resolve({code,signal});});});
+   terminal.stdin.end('/commands\n/review inspect src/app.cpp\n/exit\n');
+   const terminalResult=await terminalExit;assert.equal(terminalResult.signal,null,terminalError);assert.match(terminalOutput,/"type":"workspace_commands"/,'The shared native CLI must list the opened workspace command catalogue');assert.match(terminalOutput,/"type":"run"/,'Invoking a workspace command must use ordinary shared-backend run admission');
+   const cliDeadline=Date.now()+5000;let cliHistory=[];while(Date.now()<cliDeadline){cliHistory=await client.history(cliSession.id);if(cliHistory.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')))break;await new Promise(resolve=>setTimeout(resolve,25));}
+   assert.ok(cliHistory.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')),'The CLI must submit the backend-expanded command as the actual persisted run prompt');
   }
   await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit);
   const session=await client.createSession('Synthetic explicit skill controls');const sessionPath='/v1/sessions/'+session.id+'/skills';
@@ -77,7 +86,7 @@ try{
   assert.equal((await fetch(viewOrigin+sessionPath+'?other=scope',{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}})).status,400);
   const recovered=await client.replaceSessionSkills(session.id,['disabled'],await client.sessionSkills(session.id));await fs.writeFile(path.join(skills,'broken.md'),'---\nname: [invalid, shape]\n---\nSynthetic broken guide',{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409);const recoveryClear=await client.replaceSessionSkills(session.id,[],recovered);assert.deepEqual(recoveryClear.ids,[]);assert.equal(recoveryClear.revision,recovered.revision+1,'A broken catalogue cannot trap a session in its saved attachments');await fs.unlink(path.join(skills,'broken.md'));
   const unicodeId='Résumé Review',unicodeGuide=path.join(skills,unicodeId+'.md');await fs.writeFile(unicodeGuide,disabled,{flag:'wx'});
-  const cliArguments=[new URL(origin).port],cliOptions={env,windowsHide:true,timeout:15000};
+  const cliArguments=['--port',new URL(origin).port],cliOptions={env,windowsHide:true,timeout:15000};
   const cliObserved=JSON.parse((await execute(cli,[...cliArguments,'session-skills',session.id],cliOptions)).stdout);assert.deepEqual(cliObserved,await client.sessionSkills(session.id));
   const snapshot=path.join(root,mode+'-observed-Résumé.json');await fs.writeFile(snapshot,JSON.stringify(cliObserved),{flag:'wx'});
   const chosen=JSON.parse((await execute(cli,[...cliArguments,'set-skills',session.id,snapshot,'disabled',unicodeId],cliOptions)).stdout);assert.deepEqual(new Set(chosen.ids),new Set(['disabled',unicodeId]));assert.deepEqual(new Set(chosen.manual_ids),new Set(chosen.ids));assert.equal(chosen.revision,cliObserved.revision+1,'Actual Unicode batch arguments and snapshot paths must preserve exact native ids');
