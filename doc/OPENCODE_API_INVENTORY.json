@@ -14672,7 +14672,7 @@
         "sourceSha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
         "surface": "GET /v1/models; POST /v1/provider/profiles/models",
         "sourceAnchor": "\"/v1/models\"",
-        "gap": "Enabled models and native OpenAI/Claude/Gemini/DeepSeek profile discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
+        "gap": "Native OpenAI Chat/Responses, Anthropic Messages, Gemini GenerateContent, DeepSeek Chat, xAI Responses, Mistral Chat Completions and OpenRouter catalogue discovery exist; broad per-model capability acceptance and upstream catalogue fields remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -15727,7 +15727,7 @@
         "sourceSha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
         "surface": "GET /v1/provider/profiles",
         "sourceAnchor": "\"/v1/provider/profiles\"",
-        "gap": "An encrypted multi-provider profile registry exists; upstream provider fields, broad provider coverage and per-model acceptance remain incomplete.",
+        "gap": "An encrypted multi-provider profile registry exposes OpenAI Chat/Responses, Anthropic, Gemini, DeepSeek, xAI, Mistral and OpenRouter routes; upstream provider fields, broad provider coverage and per-model acceptance remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -19574,9 +19574,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
-        "surface": "POST /v1/runs/{id}/cancel",
+        "surface": "POST /v1/sessions/{id}/interrupt; POST /v1/runs/{id}/cancel; xmind_cli session-interrupt",
         "sourceAnchor": "executor->cancel",
-        "gap": "Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.",
+        "gap": "Session-level cancellation returns {interrupted:boolean} and is covered for active, idle and missing sessions. The pinned upstream resume=true behavior for steering input and queued control items is not implemented; xMind rejects resume=true.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
