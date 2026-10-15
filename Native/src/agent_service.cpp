@@ -81,6 +81,15 @@ struct AgentService::Impl {
     std::size_t limit,owned_limit;
     bool accepting=true,faulted=false;
 
+    std::optional<AgentDefinition> profile_for_new_run(const std::string& session){
+        const auto selected=persistence.session_agent(session).get();
+        if(selected.selected)return selected.selected;
+        const auto catalog=AgentDefinitionStore(persistence).load();
+        const auto configured=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& value){return value.is_default;});
+        if(configured==catalog.entries.end())return {};
+        return persistence.replace_session_agent(session,*configured,selected.revision).get().selected;
+    }
+
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity)
         :Impl(store,ordinary_settings(std::move(settings)),count,capacity,Prepared{}){}
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,Prepared)
@@ -359,7 +368,7 @@ Run AgentService::submit(std::string id,std::string session,std::string prompt){
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
 std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
-    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden});return result;
+    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default});return result;
 }
 AgentDefinition AgentService::agent_definition(const std::string& id)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();const auto catalog=AgentDefinitionStore(impl_->persistence).load();
@@ -367,7 +376,9 @@ AgentDefinition AgentService::agent_definition(const std::string& id)const{
     if(found==catalog.entries.end())throw NotFound("Named agent definition not found");return *found;
 }
 SessionAgentState AgentService::session_agent(const std::string& session)const{
-    std::lock_guard lock(impl_->mutex);impl_->require_available();return impl_->persistence.session_agent(session).get();
+    std::lock_guard lock(impl_->mutex);impl_->require_available();auto state=impl_->persistence.session_agent(session).get();
+    if(!state.selected){const auto catalog=AgentDefinitionStore(impl_->persistence).load();const auto configured=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& value){return value.is_default;});if(configured!=catalog.entries.end())state.selected=*configured;}
+    return state;
 }
 SessionAgentState AgentService::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected){
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::optional<AgentDefinition> pinned;
@@ -418,7 +429,7 @@ ContextManualStatus AgentService::request_context(const std::string& session,con
 Run AgentService::submit_model(std::string id,std::string session,std::string prompt,std::string model){
     auto job=std::make_shared<Impl::Job>();job->id=id;
     std::unique_lock lock(impl_->mutex);impl_->require_admission();
-    const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> profile=selected.selected;
+    std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
@@ -430,7 +441,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
 Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){
     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(workspace||profile)throw RunUnavailable("Queued input authority must be validated by its backend profile");
     auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
-    const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> agent=selected.selected;
+    std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");

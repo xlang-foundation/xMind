@@ -56,6 +56,7 @@ Import the definitions before importing graphs that reference them:
 ```yaml
 agents:
   - id: security_reviewer
+    default: false
     name: Security Reviewer
     description: Reviews assigned work for security issues.
     model_id: claude-sonnet
@@ -91,6 +92,12 @@ the backend before the graph can run. Agent IDs remain retired after removal.
 A named definition does not grant tools or permissions: its optional allowlist
 can only narrow the server-registered tools, workspace access and approval
 policy.
+
+Set `default: true` on one visible `all` or `primary` profile to make new
+conversations use it automatically. The backend pins that agent revision into
+the conversation when its first run is admitted. At most one profile may be
+default; omitted values mean `false`, and a subagent or hidden profile cannot
+be the default.
 
 ## Single-agent conversation selection
 

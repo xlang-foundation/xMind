@@ -21,6 +21,7 @@ struct AgentDefinition {
     // `primary` agents own conversations; `subagent` agents are admitted in graphs.
     std::string mode = "all";
     bool hidden = false;
+    bool is_default = false;
 };
 
 inline void validate_agent_tool_allowlist(const std::optional<std::vector<std::string>>& tools) {
@@ -43,6 +44,7 @@ struct AgentDefinitionMetadata {
     std::string description;
     std::string mode = "all";
     bool hidden = false;
+    bool is_default = false;
 };
 
 struct AgentDefinitionCatalog {

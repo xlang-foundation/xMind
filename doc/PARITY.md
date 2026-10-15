@@ -114,6 +114,18 @@ Claude-to-OpenAI in the local browser; it does not establish every wire pair,
 every listed model, VS Code provider switching, or broader OpenCode parity.
 See [sanitized live evidence](evidence/provider-switch-live-browser-20261015.json).
 
+## Default named agent for new conversations — 2026-10-15
+
+The native YAML agent catalogue accepts one `default: true` visible primary
+profile. The native API exposes that field; an unselected conversation reports
+the configured default for the picker, and first run admission saves the exact
+definition revision in the session snapshot. Existing explicit selections keep
+precedence. The browser/VS Code picker labels the default profile, and session
+archives retain the flag. The agent service contract exercises duplicate and
+hidden-default rejection plus automatic pinning before actual synthetic
+provider dispatch. This adds a functional agent default; permissions, provider
+request overrides, and the rest of `Agent.Info` parity remain incomplete.
+
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind
@@ -713,7 +725,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; dynamic plans now support sealed resource/prompt aliases through actual subprocesses and dependent child runs. Modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. MCP `2026-07-28` list-change subscriptions are validated on both transports; AgentRunner fixtures and direct graph MCP fixtures over stdio and HTTP verify bounded sanitized events and listener shutdown before terminal state. Crash recovery/reconnect, OAuth renewal, other HTTP/SSE behavior, plugin lifecycle and complete command parity remain incomplete. AgentRunner refreshes a changed catalogue within the active run; a direct graph MCP node fails closed because its alias is pinned. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 36 have reviewed native source candidates, 105 are unmapped, and none has verified operation-level parity. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 36 have partial native source candidates, 104 are unmapped, and one operation has a verified behavior contract. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 Current-source live browser coverage now verifies local automatic connection,
 workspace catalogue access, and actual Claude/Gemini/DeepSeek/OpenAI model

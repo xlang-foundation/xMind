@@ -69,9 +69,10 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
     }
 
     std::set<std::string> ids;
+    bool has_default = false;
     for (const auto& record : value.at("agents")) {
-        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description", "mode", "hidden"});
-        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description", "mode", "hidden"});
+        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools", "name", "description", "mode", "hidden", "default"});
+        else fields(record, {"id", "model_id", "instructions", "tools", "name", "description", "mode", "hidden", "default"});
         const auto key = text(record, "id", 64);
         if (!identifier(key) || !ids.insert(key).second) throw std::invalid_argument("Invalid or duplicate agent definition ID");
         const auto model = record.contains("model_id") ? text(record, "model_id", 256, true) : std::string{};
@@ -97,6 +98,15 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
         if (record.contains("hidden") && !record.at("hidden").is_boolean())
             throw std::invalid_argument("Named agent hidden flag must be boolean");
         agent.hidden = record.contains("hidden") && record.at("hidden").get<bool>();
+        if (record.contains("default") && !record.at("default").is_boolean())
+            throw std::invalid_argument("Named agent default flag must be boolean");
+        agent.is_default = record.contains("default") && record.at("default").get<bool>();
+        if (agent.is_default) {
+            if (has_default) throw std::invalid_argument("Agent definition catalog can have only one default agent");
+            if (agent.hidden || agent.mode == "subagent")
+                throw std::invalid_argument("Default agent must be a visible primary agent");
+            has_default = true;
+        }
         result.entries.push_back(std::move(agent));
     }
 
@@ -116,7 +126,7 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 std::string encode(const AgentDefinitionCatalog& catalog) {
     auto entries = Json::array();
     for (const auto& agent : catalog.entries) {
-        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}, {"mode", agent.mode}, {"hidden", agent.hidden}};
+        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}, {"name", agent.name.empty() ? agent.id : agent.name}, {"description", agent.description}, {"mode", agent.mode}, {"hidden", agent.hidden}, {"default", agent.is_default}};
         if (agent.tools) entry["tools"] = *agent.tools;
         entries.push_back(std::move(entry));
     }
@@ -142,7 +152,7 @@ AgentDefinitionCatalog AgentDefinitionStore::apply(const std::string& source) {
             throw std::invalid_argument("Retired agent definition IDs cannot be reused");
         const auto found = std::find_if(previous.entries.begin(), previous.entries.end(), [&](const auto& old) { return old.id == entry.id; });
         if (found == previous.entries.end()) { entry.revision = 1; changed = true; }
-        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description && found->mode == entry.mode && found->hidden == entry.hidden) entry.revision = found->revision;
+        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools && found->name == entry.name && found->description == entry.description && found->mode == entry.mode && found->hidden == entry.hidden && found->is_default == entry.is_default) entry.revision = found->revision;
         else {
             if (found->revision == maximum_revision) throw std::overflow_error("Agent definition revision exhausted");
             entry.revision = found->revision + 1;
