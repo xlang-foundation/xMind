@@ -49,3 +49,15 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 .inbox-summary{font-weight:600;margin-bottom:4px}.inbox-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0}.inbox-text{min-width:0;flex:1;overflow-wrap:anywhere}.inbox-cancel{flex:none;padding:2px 7px;font-size:10px}
 
 .permission-grant{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;border:1px solid var(--vscode-panel-border);border-radius:6px;padding:10px;margin:8px 0;overflow-wrap:anywhere}.permission-grant strong,.permission-grant p{grid-column:1}.permission-grant button{grid-column:2;grid-row:1/3;align-self:center}.permission-grants-dialog{width:min(680px,calc(100vw - 36px));max-height:80vh;overflow:auto}
+/* Keep the model picker and send controls usable in narrow VS Code sidebars. */
+html,body,footer,.composer,.composer-bar{min-width:0;max-width:100%}
+html,body{overflow-x:hidden}
+@media(max-width:360px){
+  .composer-bar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px}
+  .composer-bar #footer-provider:not([hidden]){grid-column:1;grid-row:1;width:100%;max-width:none;box-sizing:border-box}
+  .composer-bar #model{grid-column:2;grid-row:1;width:100%;max-width:none;box-sizing:border-box}
+  .composer-bar #footer-provider[hidden]+#model{grid-column:1 / -1}
+  .composer-bar .spacer{display:none}
+  .composer-bar #cancel{grid-column:1;grid-row:2}
+  .composer-bar #send{grid-column:2;grid-row:2;justify-self:end}
+}
