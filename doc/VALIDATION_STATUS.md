@@ -1,5 +1,22 @@
 # Current native validation
 
+## Installed VS Code focused coding run — 2026-10-15
+
+The VS Code Extension Development Host opened the TestProj workspace, reused
+its saved DeepSeek profile, and applied an approved focused edit to
+`model-zoo/frontend/src/views/HomeView.vue`. The parent now listens for the
+`ModelCard` `toggle-save` event and passes its model ID to the existing
+localStorage-backed save/unsave handler. A separate focused run completed
+`npm.cmd run build` through the configured PowerShell process profile with
+exit code 0: Vite 6.4.4 transformed 37 modules in 739 ms, with no stderr.
+The built preview at `http://127.0.0.1:4173/` returned HTTP 200. Chrome could
+not be opened through Windows UI automation (`GetCursorPos` returned access
+denied), so rendered external-browser inspection remains pending. TestProj has
+no Git root, preventing a full workspace diff. The preceding broad redesign
+run timed out with a file approval pending; this checkpoint proves the focused
+VS Code edit and build only. See the sanitized
+[run evidence](evidence/vscode-testproj-focused-edit-20261015.json).
+
 ## VS Code managed-profile edit-policy upgrade — 2026-10-15
 
 An existing local workspace profile can now change between approved-edit and

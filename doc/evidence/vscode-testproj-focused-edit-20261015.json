@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-15",
+  "product_commit": "8ad975c",
+  "client": "VS Code Extension Development Host",
+  "workspace": "TestProj",
+  "provider_profile": "DeepSeek",
+  "model": "deepseek-flash",
+  "focused_run_id": "c79bfbdf7fae85f7708c099f498b8161",
+  "edit": {
+    "path": "model-zoo/frontend/src/views/HomeView.vue",
+    "change": "Changed the ModelCard binding from the onToggleSave prop to @toggle-save so the existing toggleSaveModel handler continues to persist saved and unsaved model IDs.",
+    "operation_id": "94c2c54a4f4a6920751296f85738f4b4"
+  },
+  "verification": {
+    "command": "npm.cmd run build",
+    "process_profile": "powershell",
+    "working_directory": "model-zoo/frontend",
+    "exit_code": 0,
+    "stderr_bytes": 0,
+    "vite_version": "6.4.4",
+    "transformed_modules": 37,
+    "build_milliseconds": 739
+  },
+  "preview": {
+    "url": "http://127.0.0.1:4173/",
+    "http_status": 200,
+    "content_type": "text/html",
+    "opened_in_external_browser": false,
+    "note": "The preview responded successfully. Windows UI automation could not launch Chrome because GetCursorPos returned access denied."
+  },
+  "limitations": [
+    "TestProj has no Git repository, so a complete source diff against its baseline was unavailable.",
+    "The broader ModelZoo redesign run timed out while a file approval was pending; this evidence covers only the successful focused saved-model binding repair and build."
+  ]
+}
