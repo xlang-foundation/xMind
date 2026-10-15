@@ -1,4 +1,5 @@
 #include "agentflow/edit_executor.hpp"
+#include "agentflow/patch_file_executor.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
 #include <chrono>
@@ -124,6 +125,38 @@ int main(int argc,char** argv) {
             rejects<ToolAccessDenied>([&]{EditExecutor(reopened,other).inspect_uncertain("journal-fault");});
             require(reopened.operation("journal-fault").get().state==OperationState::uncertain,"Inspection must not consume quarantine or invent an outcome");
             write(plan["after_content"].get<std::string>());
+            reopened.create_session("patch-recovery-session","patch recovery").get();
+            reopened.start_prompt_run("patch-recovery-run","patch-recovery-session",R"({"content":"patch recovery"})").get();
+            reopened.transition("patch-recovery-run",RunState::queued,RunState::running).get();
+            const auto patch_root=root.parent_path()/"patch-inspection-workspace";std::filesystem::create_directory(patch_root);
+            {std::ofstream output(patch_root/"patch-recovery.txt",std::ios::binary);output<<"before patch update\n";output.close();require(bool(output),"Patch recovery fixture write failed");}
+            WorkspaceTools patch_workspace(patch_root.string());
+            const auto patch_prepared=patch_workspace.plan_patch(parse_file_patch("*** Begin Patch\n*** Update File: patch-recovery.txt\n@@\n-before patch update\n+after patch update\n*** End Patch\n")).files.at(0);
+            const auto patch_before=patch_workspace.snapshot_file("patch-recovery.txt");
+            PatchFileExecutor patch_executor(reopened,patch_workspace);
+            const PatchFileIdentity patch_identity{"uncertain-patch",0,1,{}};
+            const auto patch_spec=patch_executor.proposal("uncertain-patch-0","patch-recovery-run",patch_prepared,patch_identity);
+            reopened.request_operation("uncertain-patch-0",patch_spec,expiry()).get();
+            reopened.decide_operation("uncertain-patch-0",OperationDecision::allow,"test-controller").get();
+            reopened.claim_operation("uncertain-patch-0",patch_spec).get();
+            reopened.finish_operation("uncertain-patch-0",OperationState::uncertain,R"({"reason":"fixture_uncertain_patch_update"})").get();
+            reopened.transition("patch-recovery-run",RunState::running,RunState::failed).get();
+            const auto patch_inspection=EditExecutor(reopened,patch_workspace).inspect_uncertain("uncertain-patch-0");
+            require(patch_inspection.operation.spec.tool=="patch_file"&&patch_inspection.same_file&&patch_inspection.match==EditSnapshotMatch::before,
+                "An uncertain patch_file update must inspect its exact unchanged before image");
+            require(patch_inspection.observed.content_sha256==patch_before.content_sha256,
+                "Patch update inspection must report the actual native file fingerprint");
+            const auto patch_payload=nlohmann::json::parse(patch_spec.arguments_json);
+            auto write_patch_fixture=[&](const std::string& bytes){std::ofstream output(patch_root/"patch-recovery.txt",std::ios::binary|std::ios::trunc);output.write(bytes.data(),static_cast<std::streamsize>(bytes.size()));output.close();require(bool(output),"Patch recovery fixture rewrite failed");};
+            write_patch_fixture(patch_payload["after_content"].get<std::string>());
+            require(EditExecutor(reopened,patch_workspace).inspect_uncertain("uncertain-patch-0").match==EditSnapshotMatch::after,
+                "Patch update inspection must identify its exact after image");
+            write_patch_fixture("third-party content\n");
+            require(EditExecutor(reopened,patch_workspace).inspect_uncertain("uncertain-patch-0").match==EditSnapshotMatch::different,
+                "Patch update inspection must distinguish intervening third-party bytes");
+            rejects<Conflict>([&]{reopened.finish_operation("uncertain-patch-0",OperationState::failed,R"({})").get();});
+            require(reopened.operation("uncertain-patch-0").get().state==OperationState::uncertain,
+                "Patch inspection must not resolve or release the uncertain operation");
             reopened.close();
         }
         std::cout<<"Approved native edit executor passed with actual files and embedded xlang3 persistence; no model or public approval route was used\n";return 0;

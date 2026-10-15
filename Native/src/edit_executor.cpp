@@ -7,13 +7,19 @@ namespace agentflow {
 EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std::stop_token cancel) {
     using Json=nlohmann::json;
     const auto operation=store_.operation(id).get();
-    if(operation.state!=OperationState::uncertain || operation.spec.tool!="replace_file") throw Conflict("Operation is not an uncertain file edit");
+    const bool replacement=operation.spec.tool=="replace_file";
+    if(operation.state!=OperationState::uncertain || (!replacement&&operation.spec.tool!="patch_file")) throw Conflict("Operation is not an uncertain file edit");
     if(operation.spec.workspace!=owner_workspace_) throw ToolAccessDenied("Recovery inspection belongs to another workspace");
     const auto owner=store_.run(operation.spec.run_id).get();
     if(owner.state!=RunState::failed && owner.state!=RunState::cancelled) throw Conflict("Recovery inspection requires a retired owner");
     const auto plan=Json::parse(operation.spec.arguments_json,[](int depth,Json::parse_event_t,Json&) {
         if(depth>64) throw std::invalid_argument("Recovery proposal nesting exceeds limits");return true;
     });
+    // A patch_file update has the same exact single-file before/after
+    // preconditions as edit_file. Other patch actions have absent-path or
+    // two-path semantics and must not be misclassified as an ordinary edit.
+    if(!replacement&&(!plan.contains("action")||!plan["action"].is_string()||plan["action"]!="update"))
+        throw Conflict("Only an uncertain single-file patch update can be inspected as an edit");
     for(const auto* key:{"path","file_id","before_sha256","after_sha256"})
         if(!plan.contains(key) || !plan[key].is_string()) throw std::invalid_argument("Recovery proposal has no verified file preconditions");
     if(plan.contains("folder_id")&&plan.value("folder_id",std::string{})!=folder_id_)throw ToolAccessDenied("Recovery inspection belongs to another workspace folder");
