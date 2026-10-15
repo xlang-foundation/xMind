@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-14",
+  "configuration": "Release",
+  "ctest_directory": "build/native-verify",
+  "filter": "native_(http_cli|unified_program|console_workspace|local_profile|backend_owner|agent_process_http|process_executor|persistent_pty_sessions)_contract",
+  "result": "passed",
+  "passed": 8,
+  "failed": 0,
+  "total_seconds": 235.98,
+  "slowest_test": {
+    "name": "native_local_profile_contract",
+    "seconds": 232.78
+  },
+  "tests": [
+    "native_http_cli_contract",
+    "native_unified_program_contract",
+    "native_console_workspace_contract",
+    "native_local_profile_contract",
+    "native_backend_owner_contract",
+    "native_agent_process_http_contract",
+    "native_process_executor_contract",
+    "native_persistent_pty_sessions_contract"
+  ],
+  "scope": "Local CLI/profile/process contracts only. No full-screen CLI or OpenCode parity claim."
+}

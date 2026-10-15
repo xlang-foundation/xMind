@@ -333,6 +333,20 @@ scope only; full-screen CLI parity, cross-client run-control parity, hosted
 package acceptance and the full native gate remain open. See
 [CLI lifecycle details](native-interactive-cli.md#conversations-observation-and-approvals).
 
+## Managed CLI and process acceptance (2026-10-14)
+
+The Release CTest subset for the unified CLI, managed local profile, persistent
+PTY, workspace selection and process execution passed **8/8**. This includes
+`native_local_profile_contract`, which stages and launches the packaged runtime,
+reattaches clients to one backend owner, exercises multi-folder workspace and
+graph/session persistence, and verifies safe upgrades while human work is
+paused. The focused gate took **235.98 seconds**; the profile contract took
+232.78 seconds, so this is a slow test and not a response-time measurement.
+The actual managed TestProj CLI workspace result is recorded separately in
+[CLI workspace evidence](evidence/managed-cli-workspace-testproj-20261014.json).
+This validates the listed local CLI contracts, not full-screen or OpenCode
+parity. [Focused gate record](evidence/managed-cli-focused-contracts-20261014.json).
+
 ## MCP resources and prompts (2026-10-11)
 
 The native MCP registry now discovers resources and prompts alongside tools for
