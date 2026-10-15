@@ -104,6 +104,24 @@ including nested answer/resume and SQLite close/reopen recovery, passed five
 consecutive Release runs. Simultaneous nested human waits across sibling
 branches remain unsupported.
 
+## MCP SDK interoperability recheck and OpenCode inventory — 2026-10-14
+
+After the broad native suite reported timeouts for the two SDK-era contracts,
+the MCP graph HTTP, graph subscription, AgentRunner HTTP, AgentRunner
+subscription, official modern SDK and official legacy SDK contracts were run
+together in Release mode. All **6/6 passed in 13.93 seconds**. Each SDK case
+uses the actual native server/admin/CLI and official peer package with
+synthetic inference; this scoped pass does not establish completion of the
+full native suite or all MCP behavior.
+
+The pinned OpenCode v2.0.26 inventory was regenerated after the recent native
+process and persistence changes. Its pin remains commit
+`9b4ec5714d481559990db0a816d5dec19541a814`: **141 operations**, **36 reviewed
+native source candidates**, **105 unmapped**, and **zero operation-level parity
+verified**. Candidate source hashes are refreshed in
+[`OPENCODE_API_INVENTORY.json`](OPENCODE_API_INVENTORY.json); full coding and
+API parity remain open.
+
 ## Managed unified CLI workspace acceptance — 2026-10-14
 
 The profile-managed unified `xmind.exe` connected to the existing TestProj

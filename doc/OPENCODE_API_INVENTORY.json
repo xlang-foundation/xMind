@@ -9452,7 +9452,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "ce62134d636b49aafd9078332ec3ca4debd021483e0cba31c47045bddbf727fc",
+        "sourceSha256": "d8a5f4abaea06896799f0a7147c93f0ccfe5f4f4519bb90f54aa0648b92583a4",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",
@@ -19830,7 +19830,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/repository.cpp",
-        "sourceSha256": "8c3fccfe9454b5c544da7ad45fe3861b97c7f7d81ddc7b01da63bc9321bc8500",
+        "sourceSha256": "b11b56cffcca9f237793b4919ef776fd20a472bded06a37d64ef68e3354f5838",
         "surface": "GET /v1/sessions/{id}/messages/{message_id}",
         "sourceAnchor": "Repository::message",
         "gap": "A single stored typed history entry is addressable by its durable sequence; upstream message part types and complete response parity remain incomplete.",
