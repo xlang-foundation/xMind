@@ -94,7 +94,7 @@ function harness(options={}) {
       }else data=options.providerSetup;
     }
     else if(target.pathname==='/v1/sessions') data=options.deletedSession?[]:[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
-    else if(target.pathname==='/v1/sessions/saved'&&requestOptions.method==='DELETE'){options.deletedSession=true;return {ok:true,status:200,json:async()=>null};}
+    else if(target.pathname==='/v1/sessions/saved'&&requestOptions.method==='DELETE'){options.deletedSession=true;return {ok:true,status:204,json:async()=>{throw Error('A 204 response must not be decoded as JSON');}};}
     else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
     else if(target.pathname==='/v1/sessions/forked/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/forked/runs') data=[];

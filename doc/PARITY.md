@@ -64,8 +64,10 @@ the deleted transcript while selecting another conversation or showing the
 empty state. Client controller/renderer and extension-host tests cover
 cancellation, active-run refusal, deletion and last-session cleanup. This is a
 reviewed OpenCode `session.remove` source candidate, not verified operation
-parity yet: xMind returns HTTP 200 with JSON `null` instead of OpenCode's 204,
-and installed desktop acceptance remains unverified.
+parity yet: xMind now returns the pinned 204 no-content response, but retains
+an audit tombstone and rejects deletion during active effects. Those lifecycle
+semantics still need comparison with upstream, and installed desktop acceptance
+remains unverified.
 
 ## Graph coding restore — 2026-10-15
 

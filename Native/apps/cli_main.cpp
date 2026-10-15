@@ -1280,7 +1280,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         };
         auto terminal_id=[](const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid terminal ID");return value;};
         auto terminal_dimension=[](const std::string& value){const auto parsed=event_cursor(value);if(parsed<1||parsed>500)throw std::invalid_argument("Terminal dimension is outside its supported range");return parsed;};
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI",connection_id,connection_name,connection_origin,transfer_file;Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,terminal_force_console=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false,connection_operation=false,connection_save=false,connection_remove=false,session_export=false,session_delete=false;std::int64_t watch_cursor=0,connection_expected_revision=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI",connection_id,connection_name,connection_origin,transfer_file,deleted_session_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,terminal_force_console=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false,connection_operation=false,connection_save=false,connection_remove=false,session_export=false,session_delete=false;std::int64_t watch_cursor=0,connection_expected_revision=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="info" && argc==3) path="/v1/info";
         else if(command=="connections"&&argc==3){path="/v1/connections";connection_operation=true;}
@@ -1289,7 +1289,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         else if(command=="connection-remove"&&argc==5){connection_id=connection_profile_identity(argv[3]);connection_expected_revision=provider_revision(argv[4]);if(connection_id=="local")throw std::invalid_argument("The Local connection profile cannot be removed");connection_remove=true;connection_operation=true;}
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
-        else if(command=="delete-session"&&argc==4){path="/v1/sessions/"+id(argv[3]);session_delete=true;}
+        else if(command=="delete-session"&&argc==4){deleted_session_id=id(argv[3]);path="/v1/sessions/"+deleted_session_id;session_delete=true;}
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
         else if(command=="rename-session" && argc==6) {path="/v1/sessions/"+id(argv[3])+"/title";body={{"title",argv[4]},{"expected_title",argv[5]}};post=true;}
         else if(command=="fork-session"&&(argc==4||argc==5)){path="/v1/sessions/"+id(argv[3])+"/fork";body={{"before",argc==5?Json(argv[4]):Json(nullptr)}};post=true;}
@@ -1483,7 +1483,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             else {std::cerr<<Json::parse(response->body).dump()<<'\n';if(command=="set-skills")std::cerr<<"Backend rejected session skill change (HTTP "<<response->status<<"). No automatic retry.\n";if(connection_operation)std::cerr<<"Connection profile request was not applied; no fallback or implicit profile change occurred.\n";}
             return 1;
         }
-        auto result=Json::parse(response->body);
+        if(session_delete&&(response->status!=204||!response->body.empty()))throw std::runtime_error("Invalid native session deletion response");
+        auto result=session_delete?Json{{"deleted",true},{"session_id",deleted_session_id}}:Json::parse(response->body);
         if(connection_operation)result=validate_connection_catalog(result);
         if(session_export){
             const auto output=std::filesystem::u8path(transfer_file);if(std::filesystem::exists(output))throw std::invalid_argument("Export target already exists; choose a new file path");

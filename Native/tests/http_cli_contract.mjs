@@ -47,8 +47,9 @@ async function requestDelete(path) {
     method: 'DELETE', headers: {Authorization: `Bearer ${token}`},
     signal: AbortSignal.timeout(10000), redirect: 'error'
   });
-  assert.match(response.headers.get('content-type') || '', /application\/json/);
-  return {status: response.status, data: await response.json()};
+  assert.equal(response.status,204,'Successful session deletion follows the pinned no-content response contract');
+  assert.equal(await response.text(),'','A 204 deletion response has no body');
+  return {status: response.status};
 }
 function cli(...args) {
   const result = spawnSync(cliExe, [String(port), ...args], {env, encoding: 'utf8', timeout: 15000, windowsHide: true});
@@ -223,13 +224,13 @@ try {
   const deleteSource=await request('/v1/sessions',{id:'delete-source',title:'Deletion source'});assert.equal(deleteSource.status,201);
   assert.equal((await request('/v1/sessions/delete-source/messages',{role:'user',data:{content:'Fork retention fixture'}})).status,201);
   const deleteChild=await request('/v1/sessions/delete-source/fork',{});assert.equal(deleteChild.status,200);const childId=deleteChild.data.id;
-  assert.deepEqual(await requestDelete('/v1/sessions/delete-source'),{status:200,data:null});
+  assert.deepEqual(await requestDelete('/v1/sessions/delete-source'),{status:204});
   assert.equal((await request('/v1/sessions/delete-source')).status,404,'Deleted session is absent from the native API');
   assert.equal((await request('/v1/sessions/delete-source/messages')).status,404,'Deleted session history is absent from the native API');
   assert.ok(cli('sessions').some(item=>item.id===childId),'Deleting a parent keeps its independent fork session');
   assert.equal(cli('history',childId)[0].data.content,'Fork retention fixture','Fork history remains readable after deleting its source session');
   assert.equal(cli('sessions').find(item=>item.id===childId).parent_id,undefined,'A fork does not retain a dangling parent reference');
-  cli('delete-session',childId);assert.ok(!cli('sessions').some(item=>item.id===childId),'CLI deletion removes the selected session');
+  assert.deepEqual(cli('delete-session',childId),{deleted:true,session_id:childId},'CLI deletion reports the removed session without decoding an empty HTTP body');assert.ok(!cli('sessions').some(item=>item.id===childId),'CLI deletion removes the selected session');
   const foreign=await request('/v1/sessions', {id:'other',title:'Other session'});assert.equal(foreign.status,201);
   const foreignMessage=await request('/v1/sessions/other/messages',{role:'user',data:{content:'foreign'}});assert.equal(foreignMessage.status,201);
   const foreignHistory=cli('history','other');assert.equal((await request('/v1/sessions/shared/fork',{before:`msg_${foreignHistory[0].seq}`})).status,404,'A message from another session cannot be used as a boundary');

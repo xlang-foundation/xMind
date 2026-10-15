@@ -1110,7 +1110,7 @@ struct HttpServer::Impl {
         server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||!request.body.empty())throw std::invalid_argument("Session deletion accepts no query parameters or request body");
             if(terminals)for(const auto& terminal:terminals->list(request.matches[1]))if(terminal.running)throw Conflict("Session has a running terminal and cannot be deleted");
-            persistence.delete_session(identifier(request.matches[1])).get();reply(response,Json(nullptr));
+            persistence.delete_session(identifier(request.matches[1])).get();response.status=204;
         }));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"id","title"});

@@ -2668,3 +2668,19 @@ passed: **372/372 VS Code tests**, **123/123 browser tests**, including
 controller, renderer, extension-host and browser adapter coverage. A live
 desktop-app check could not be completed: the computer-use helper twice
 reported `window id 132762 no longer belongs to Microsoft.VisualStudioCode; current owner is Microsoft.VisualStudioCode` while reacquiring the returned VS Code window. Installed UI acceptance remains open.
+
+## Session deletion HTTP contract — 2026-10-15
+
+The native `DELETE /v1/sessions/{id}` endpoint now returns the pinned OpenCode
+`204 No Content` response. The console validates the empty response and prints
+a local `{deleted, session_id}` result; the browser adapter preserves the
+native status and body. The current Release build passed
+`native_http_cli_contract` (4.08 s), `native_local_view_contract` (77.87 s),
+and a fresh `native_local_profile_contract` (306.86 s). Full client suites
+passed **372/372 VS Code tests** and **123/123 browser tests**. The `/info`
+acceptance record's source and build hashes were refreshed against this build,
+and `node Tools/audit-opencode.mjs` passed with **141 operations, 39 reviewed
+native candidates, 102 unmapped, and 1 operation-level parity verified**.
+`session.remove` remains a source candidate: xMind retains an audit tombstone
+and rejects deletion during active effects, and installed VS Code acceptance
+is still open.
