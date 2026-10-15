@@ -110,13 +110,13 @@ migration is supported. Existing installations remain intact.
 On Windows, the paired xlang3 runtime must preserve UTF-8 paths through its C
 ABI import-root calls and runtime path metadata. Without that support, a
 Unicode working directory can stop a managed backend before readiness, and a
-package installed under a Unicode path can fail to load `_sqlite3`. The
-xMind-focused xlang3 branch `xmind/windows-import-root-utf8` at
-`7b8b32ae3a0e6a99fac7babd97362736099448fb` passes the complete local Native
-gate; use this revision or a later xlang3 revision containing the same fixes.
-The evidence is recorded in
+package installed under a Unicode path can fail to load `_sqlite3`. Current
+xlang3 `main` (`f6bbc561673e3c166dc0dab9062cb24db26432a1`) contains the required
+path handling and passes the complete local Native gate. Reconfigure stale
+CMake builds that still select older xlang3 branches before testing or staging
+a package. The exact runtime integration evidence is recorded in
 [the Windows UTF-8 runtime integration checkpoint](evidence/native-runtime-utf8-xmind-20261014.md).
-This branch-level integration result is not an accepted release package.
+This local integration result is not an accepted release package.
 Add pure standard-library source and its license separately:
 
 ```powershell

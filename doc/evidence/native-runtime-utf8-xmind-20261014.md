@@ -1,38 +1,38 @@
 # Windows xlang3 UTF-8 runtime integration checkpoint
 
-This checkpoint verifies xMind's native backend against the xlang3 runtime
-branch that fixes Windows UTF-8 import-root and runtime path handling.
+This checkpoint verifies xMind's native backend against the current xlang3
+`main` runtime, including Windows UTF-8 import-root and runtime path handling.
 
 | Component | Revision / result |
 | --- | --- |
-| xMind source base | `ea926d1` (`main`; local dynamic-plan changes are included in the tested working tree) |
-| xlang3 source | `7b8b32ae3a0e6a99fac7babd97362736099448fb` (`xmind/windows-import-root-utf8`) |
+| xMind source | `79a0fc63d603afd5f392f4756d504bf9dd580449` (`main`) |
+| xlang3 source | `f6bbc561673e3c166dc0dab9062cb24db26432a1` (`main`) |
 | Native Release build | Passed |
-| Native CTest suite | 142/142 passed, parallelism 8 |
+| Native CTest suite | 142/142 passed, parallelism 8, against xlang3 `main` |
 | VS Code extension tests | 352/352 passed |
 | Browser tests | 112/112 passed |
 
-The probe build used `build/native-dynamic-plan-utf8probe` so it did not replace
-the existing build configured against `nexus/mmap-buffer-export`. The three
-previously failing contracts passed with the UTF-8 runtime: managed local
+The primary build directory `build/native-dynamic-plan` was reconfigured from
+the stale `nexus/mmap-buffer-export` runtime to xlang3 `main`, then rebuilt.
+The three previously failing contracts pass on xlang3 `main`: managed local
 profile startup with a Unicode workspace, browser/local-view operation, and
-handoff into a package generation whose path contains Unicode. The two
-corrected graph HTTP fixtures also passed in the full suite. This gives direct
-evidence that the older runtime's path conversion caused the startup/import
-failures.
+handoff into a package generation whose path contains Unicode. The corrected
+graph HTTP fixtures also pass in the full suite. This isolates the earlier
+startup/import failures to the stale runtime selected by the old build cache;
+the xMind-focused older branch is not required for this integration.
 
-Reproduce the build by configuring `Native` with
-`AGENTFLOW_XLANG3_SOURCE=D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8`,
-`AGENTFLOW_XLANG3_RUNTIME_DIR` set to that checkout's `build/Release`, and the
-matching `AGENTFLOW_XLANG3_LIBRARY` and `AGENTFLOW_XLANG3_SHARED` files, then
-building Release and running:
+The primary build was configured with
+`AGENTFLOW_XLANG3_SOURCE=D:/CantorAI2026/xlang3`,
+`AGENTFLOW_XLANG3_RUNTIME_DIR=D:/CantorAI2026/xlang3/build-pytest-pathaware/Release`,
+and the matching `AGENTFLOW_XLANG3_LIBRARY` and `AGENTFLOW_XLANG3_SHARED` files.
+Reproduce the test gate with:
 
 ```powershell
-ctest --test-dir build/native-dynamic-plan-utf8probe -C Release --output-on-failure --parallel 8
+ctest --test-dir build/native-dynamic-plan -C Release --output-on-failure --parallel 8
 ```
 
 The tests use synthetic provider replies and make no live provider requests.
 They are integration evidence for this source/runtime pairing, not release
 acceptance, an installed-editor acceptance, or provider acceptance. A packaged
-xMind release still needs an accepted xlang3 revision containing the UTF-8
-changes and a manifest pairing it with the exact Native binaries.
+xMind release still requires the normal accepted runtime manifest pairing the
+exact xlang3 and Native binaries.
