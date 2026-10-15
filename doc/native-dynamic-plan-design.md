@@ -2,9 +2,12 @@
 
 This design records the original implementation stages. Current source also
 supports bounded nested agent plans through depth eight, with shared root
-budgets and end-to-end execution contracts through depth two. A single nested
-human-wait chain can pause, resume and recover after SQLite reopen; simultaneous
-human waits in sibling branches remain unsupported. See the
+budgets and end-to-end execution contracts through depth two. A normalized root
+wait set now supports concurrent sibling human pauses, partial answer/resume,
+and SQLite restart recovery in native Release repository and engine contracts.
+Full HTTP/CLI and rendered browser/installed VS Code acceptance plus answer
+race, expiry, uncertainty and repeated-segment budget/context coverage remain
+open. See the
 [current nested-planning contract](native-dynamic-plan-recursion.md).
 
 The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
@@ -45,16 +48,18 @@ same frozen binding, controller approval and durable journal; see
 The exact ownership, persistence, budget and recovery boundary for nested
 planning is tracked in the
 [nested planning contract](native-dynamic-plan-recursion.md). Nested agent
-plans are implemented through depth eight. Single-chain nested human pauses
-now preserve exact accepted calls through answer, resume and restart recovery;
-simultaneous sibling waiters still need a coordinated continuation model.
+plans are implemented through depth eight. Multi-branch nested human pauses
+preserve exact accepted calls through partial answer, resume and restart
+recovery. The native Release repository and engine contracts cover two sibling
+owners; client and race acceptance remains tracked in the
+[multi-branch human-wait contract](native-dynamic-plan-multibranch.md).
 
 This document retains the broader design. The initial model-selected schema
 accepted only agent and human nodes; current source also supports deterministic
 workspace reads, exact-bound MCP and registered A2A tool nodes, synchronous
 registered process nodes, and bounded nested agent plans. Background process
-nodes, concurrent nested human waits, broader skill planning and full context
-compaction remain open. The installed preview and historical
+nodes, complete multi-branch human-wait client acceptance, broader skill
+planning and full context compaction remain open. The installed preview and historical
 acceptance boundaries below remain separate. Schema-v11 installation, live
 planning and installed VS Code acceptance remain pending. The installed
 ace/schema-v10 scope below is separate from the new local planning result.
@@ -450,8 +455,13 @@ Explicit existing recovery/inspection is required. No blind retry occurs.
 The current ordinary-Agent lifecycle supports queued, working, waiting and
 faulted owners in AgentService/AgentRunner. Waiting roots remain owned and
 occupy admission capacity; provider/profile mutation still requires true idle
-state. Nested waits persist the exact root-to-descendant owner chain, with
-simultaneous sibling waits remaining unsupported.
+state. Nested waits persist each exact root-to-descendant owner path in one
+normalized root wait set. The owner validates and pauses all registered
+branches atomically, then resumes the same set on an accepted answer;
+unanswered siblings remain pending and may cause another durable pause. Native
+repository and engine contracts cover two sibling waiters and partial resume.
+Client and race acceptance remains tracked in
+[multi-branch human waits](native-dynamic-plan-multibranch.md).
 
 Initially require a planning tool to be the sole tool call in its assistant
 turn. Reject a mixed planning/effect batch before any tool dispatch; document

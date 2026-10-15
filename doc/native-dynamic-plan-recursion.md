@@ -1,16 +1,16 @@
 # Nested dynamic planning contract
 
-Status: **partly implemented**. Schema v24 records immutable plan ownership;
-v25 permits multiple plans per root; v26 stores owner-scoped signed calls; and
-v27 admits bounded descendant ownership through depth eight. Dynamic-agent
-children can create nested plans under the same root budget and child pool.
-Depth-two execution and one root-to-descendant human-wait chain are covered end
-to end, including answer, resume and service close/reopen. Input waits for the
-physical root worker to finish unwinding its pause before committing, so an
-answer cannot race away its wake. Simultaneous nested waits in sibling
-branches remain unsupported and are rejected before plan acceptance. The
-required root wait-set, restart and client contract is specified in
-[multi-branch human waits](native-dynamic-plan-multibranch.md).
+Status: **partly implemented**. Schemas v24-v29 add immutable plan ownership,
+owner-scoped signed calls, bounded descendant ownership through depth eight,
+and normalized root wait sets. Dynamic-agent children create nested plans under
+the same root budget and child pool. Release repository and engine contracts
+cover two sibling nested agents pausing together, SQLite restart/recovery,
+answering one branch while the other remains pending, and exactly-once
+continuation of both original calls. Authenticated HTTP and A2A paths have
+focused nested-owner contracts; full CLI, rendered browser and installed VS
+Code acceptance, reverse-order/concurrent answers, cancellation races, expiry,
+uncertainty, and repeated-segment budget/context coverage remain open. See the
+[multi-branch human-wait acceptance](native-dynamic-plan-multibranch.md).
 
 ## Current boundary
 

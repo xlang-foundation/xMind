@@ -14,7 +14,11 @@ nested input/resume handling in the browser and VS Code views have focused
 contracts. Full completion still requires exercising the nested wait set
 through authenticated HTTP, CLI and the actual clients, plus reverse-order and
 concurrent answers, cancellation races, expiry/uncertainty cases, and measured
-budget/context checks across repeated partial resumes.
+budget/context checks across repeated partial resumes. The current Release
+rebuild passes the repository, engine and planning HTTP contracts **3/3**;
+browser controller passes **64/64** and VS Code planning client passes **11/11**.
+Exact commands, source and executable digests, verified behavior and limitations
+are recorded in [current-source evidence](evidence/native-dynamic-plan-multibranch-ctest-20261015.json).
 
 ## Required behavior
 

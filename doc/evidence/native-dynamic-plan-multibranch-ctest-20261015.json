@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-15",
+  "base_revision": "f0b79df3388e8e21fe0e16755d35cdb955639801",
+  "scope": "Current-source native multi-branch dynamic-plan human wait acceptance. Provider peers and answers are synthetic; xlang3 SQLite, native owner coordination and recovery are real.",
+  "build": {
+    "configuration": "Release",
+    "directory": "build/native-dynamic-plan",
+    "targets": [
+      "agentflow_dynamic_plan_repository_contract",
+      "agentflow_dynamic_plan_engine_contract",
+      "agentflow_planning_http_contract"
+    ],
+    "result": "passed"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/native-dynamic-plan -C Release -R \"^native_dynamic_plan_(repository|engine)_contract$|^native_planning_http_contract$\" --output-on-failure",
+    "passed": 3,
+    "failed": 0,
+    "tests": {
+      "native_dynamic_plan_repository_contract": "passed",
+      "native_planning_http_contract": "passed",
+      "native_dynamic_plan_engine_contract": "passed"
+    }
+  },
+  "client_contracts": [
+    {
+      "command": "node --test views/browser/tests/controller.test.cjs",
+      "passed": 64,
+      "failed": 0
+    },
+    {
+      "command": "node --test extensions/vscode/tests/client-planning.test.js",
+      "passed": 11,
+      "failed": 0
+    }
+  ],
+  "verified_behavior": [
+    "Two sibling nested owners register human waits under one durable root wait set.",
+    "SQLite reopen recovers both exact owner paths; answering one branch resumes the root while the other question remains pending.",
+    "The second accepted answer completes both original planning calls exactly once; ambiguous and stale A2A request selection is rejected.",
+    "Browser controller and VS Code planning DTO/input suites pass for current nested-plan observations."
+  ],
+  "limits": [
+    "The client suites are synthetic controller/host contracts, not rendered browser or installed VS Code acceptance.",
+    "No concurrent-answer race, reverse-order result, cancellation race, expiry, uncertainty, or repeated-segment budget/context exhaustion claim is made.",
+    "Authenticated planning HTTP contract passes but does not itself construct a multi-branch HTTP fixture."
+  ],
+  "sha256": {
+    "Native/tests/dynamic_plan_engine_peer.mjs": "1a3fecb53009a1c5829f3f52f7c3439be09c5e0e63af5e276f2011594b87b2ba",
+    "Native/tests/planning_http_contract.cpp": "b9cf80394766863b5bb4ca35cb4ec6478225e761f95a1a4ddbc135bc127967a5",
+    "Native/tests/dynamic_plan_engine_contract.cpp": "4f454995c603d2cb0b72a66b2d5edbe85ba5856f29f915cc9ab093a5032cabd4",
+    "Native/tests/dynamic_plan_repository_contract.cpp": "9c95208d6bcbdac2e72d21ad116ef7b51fc867ec24a9aa7b8487f9c0fcd4d9cb",
+    "doc/native-dynamic-plan-multibranch.md": "8e54eb5120f17778336842a44d5300ecf1cfb6945804b2a710aa8d0cb71ecdfa",
+    "doc/native-dynamic-plan-recursion.md": "a8cfe187e81367f6918cce052dbaad1200f9c0d83d361fee8ded7dcfc69333a4",
+    "doc/native-dynamic-plan-design.md": "f5d5bd550b400068c9a270beaa76242c9f509b7cdc189f57ef471df7bedf8c21",
+    "doc/PARITY.md": "c78f6c33db691a936f5065bb0ca0083706e0be115bc58e21aa72cf65ce0fbf3a"
+  },
+  "executables": {
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_repository_contract.exe": "1e86a44a26de3a9053a764f2ad6b6e5772e9afbe9977d6708ddec25e3541f207",
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_engine_contract.exe": "66e9c2d2286831756af3d8be2173504861099e04e96c8eaa6ef5d07b08b5e385",
+    "build/native-dynamic-plan/Release/agentflow_planning_http_contract.exe": "7eef9a456ca8ae73a6494c1db5d2e979ce176368156f87590b45e1361b7b5023"
+  }
+}

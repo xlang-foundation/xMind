@@ -55,7 +55,7 @@ const peer=createServer((request,response)=>{
   const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),canPlan=names.includes('plan_tasks');
   const isRoot=['main','nested','nested-restart','nested-parallel','nested-multihuman','final-human','restart-human','cancel','expiry'].some(label=>source.includes('fixture-'+label+'-parent'));
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
-  if(isRoot)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
+  if(isRoot)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','restore_operation','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
   owner=isRoot?(['main','nested','nested-restart','nested-parallel','nested-multihuman','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['nested-multihuman-left','nested-multihuman-right','nested-parallel-left-reader','nested-parallel-right-reader','nested-parallel-left-planner','nested-parallel-right-planner','left','right','code','verify','nested-outer','nested-restart-outer','nested-inner','nested-deep'].find(label=>source.includes('fixture-'+(label.startsWith('nested-')?'nested-':'main-')+label.replace(/^nested-/,'')+':')));
   assert.ok(owner,'Unknown actual execution objective');count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
   const last=results(body.messages).at(-1),signature=(isRoot?'opaque-parent-':'opaque-child-')+owner+'-'+count;
@@ -103,7 +103,7 @@ const peer=createServer((request,response)=>{
   }
   assert.ok(!names.includes('delegate_tasks'),'Dynamic child cannot delegate outside the shared dynamic planner');
   assert.equal(canPlan,true,'Planning-enabled Agent exposes its owner-scoped dynamic plan tools');
-  assert.deepEqual(names,[...(owner==='code'?[...readTools,'edit_file','create_file','apply_patch']:readTools),'plan_tasks','revise_plan','inspect_plan'].sort(),'Registered preset exposes exact inherited or read-only authority plus bounded planning');
+  assert.deepEqual(names,[...(owner==='code'?[...readTools,'edit_file','create_file','apply_patch','restore_operation']:readTools),'plan_tasks','revise_plan','inspect_plan'].sort(),'Registered preset exposes exact inherited or read-only authority plus bounded planning');
   if(owner==='nested-outer'){
    if(count===1){assert.equal(last,undefined);const args={expected_revision:0,expected_state_sequence:0,add:[human('approval','Confirm that this nested owner may continue to its inner reader.')]};send(response,start(11)+thought(signature)+tool('plan_tasks','nested-outer-plan',args)+terminal('tool_use',3));return;}
    if(count===2){assert.equal(last.tool_use_id,'nested-outer-plan');const report=JSON.parse(last.content);assert.equal(report.finished,true);assert.equal(report.nodes[0].id,'approval');assert.equal(JSON.parse(report.nodes[0].outcome_json).input_json,'{"approved":true}');const args={expected_revision:report.revision,expected_state_sequence:report.state_sequence,add:[agent('inner','fixture-nested-inner: Read nested-inner.txt and report the actual bytes.')]};send(response,start(11)+thought(signature)+tool('revise_plan','nested-outer-revise',args)+terminal('tool_use',3));return;}
