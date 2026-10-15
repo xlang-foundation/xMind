@@ -40,5 +40,21 @@ function fileReview(operation){
  if(operation.tool==='create_file'&&(plan.before_exists!==false||plan.before_content!==''))throw new Error('The creation proposal has no verified absent-file precondition.');
  return plan;
 }
-const api={patchReview,fileReview};if(typeof module!=='undefined'&&module.exports)module.exports=api;else globalThis.XMindPatchReview=api;
+function canRestoreFileOperation(operation){
+ try{
+  if(!operation||operation.state!=='succeeded'||typeof operation.id!=='string'||!/^[A-Za-z0-9_.:-]{1,128}$/.test(operation.id)||typeof operation.workspace_id!=='string'||!operation.workspace_id||!['replace_file','create_file','patch_file'].includes(operation.tool))return false;
+  const saved=operation.tool==='patch_file'?patchReview(operation):fileReview(operation),receipt=JSON.parse(operation.result_json);
+  if(!saved||!receipt||typeof receipt!=='object'||Array.isArray(receipt)||saved.workspace_id!==operation.workspace_id||typeof saved.folder_id!=='string'||!saved.folder_id||!Number.isSafeInteger(saved.workspace_revision)||saved.workspace_revision<1||typeof saved.target_workspace_id!=='string'||!saved.target_workspace_id)return false;
+  const hash=value=>digest(value),validPath=value=>typeof value==='string'&&value.length>0&&value.length<=8192;
+  const action=operation.tool==='replace_file'?'update':operation.tool==='create_file'?'add':saved.action,path=saved.path;
+  if(!validPath(path)||!['update','add','delete','move'].includes(action)||receipt.path!==(action==='move'?saved.destination_path:path))return false;
+  if(operation.tool==='patch_file'&&(receipt.operation_id!==operation.id||receipt.state!=='succeeded'||receipt.action!==action))return false;
+  if(operation.tool!=='patch_file'&&(!validPath(receipt.file_id)||receipt.path!==path))return false;
+  if(action==='update')return typeof saved.file_id==='string'&&!!saved.file_id&&typeof saved.before_content==='string'&&typeof saved.after_content==='string'&&hash(saved.before_sha256)&&hash(saved.after_sha256)&&receipt.file_id===saved.file_id&&receipt.after_sha256===saved.after_sha256;
+  if(action==='add')return typeof saved.after_content==='string'&&hash(saved.after_sha256)&&validPath(receipt.file_id)&&(receipt.after_sha256||receipt.content_sha256)===saved.after_sha256;
+  if(action==='delete')return validPath(saved.file_id)&&typeof saved.before_content==='string'&&hash(saved.before_sha256)&&receipt.file_id===saved.file_id&&receipt.removed_sha256===saved.before_sha256;
+  return validPath(saved.destination_path)&&typeof saved.file_id==='string'&&!!saved.file_id&&typeof saved.before_content==='string'&&typeof saved.after_content==='string'&&hash(saved.before_sha256)&&hash(saved.after_sha256)&&receipt.path===saved.destination_path&&receipt.source_path===path&&receipt.file_id===saved.file_id&&receipt.before_sha256===saved.before_sha256&&receipt.after_sha256===saved.after_sha256;
+ }catch{return false;}
+}
+const api={patchReview,fileReview,canRestoreFileOperation};if(typeof module!=='undefined'&&module.exports)module.exports=api;else globalThis.XMindPatchReview=api;
 })();

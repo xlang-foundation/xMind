@@ -3,6 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const { BackendClient,SessionHistoryPager,parseWorkspaceCommand } = require('../client');
+const { canRestoreFileOperation } = require('../patch-review');
 const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
@@ -14,6 +15,20 @@ test('workspace slash commands resolve exact catalogue IDs and preserve raw argu
  assert.throws(()=>parseWorkspaceCommand('/review/missing now',catalogue),/not found/);
  assert.throws(()=>parseWorkspaceCommand('/review//security',catalogue),/Use \/command/);
  assert.throws(()=>parseWorkspaceCommand('/review',{}),/catalogue is invalid/);
+});
+test('restore eligibility accepts only successful, receipt-bound native file changes',()=>{
+ const binding={workspace_id:'workspace',folder_id:'folder',workspace_revision:3,target_workspace_id:'folder'};
+ const make=(id,tool,action)=>{const operationId=tool==='patch_file'?id+'-0':id,path=action==='move'?'source.txt':'target.txt',destination='moved.txt',fileId='file-identity',before='a'.repeat(64),after='b'.repeat(64),saved={...binding,path};let receipt;
+  if(action==='update'){Object.assign(saved,{file_id:fileId,before_content:'before\n',after_content:'after\n',before_sha256:before,after_sha256:after});receipt=tool==='patch_file'?{operation_id:operationId,state:'succeeded',action,path,file_id:fileId,before_sha256:before,after_sha256:after}:{path,file_id:fileId,after_sha256:after};}
+  else if(action==='add'){Object.assign(saved,{action,before_exists:false,after_exists:true,parent_id:'parent',before_content:'',after_content:'added\n',after_sha256:after,create_directories:[]});receipt=tool==='patch_file'?{operation_id:operationId,state:'succeeded',action,path,file_id:fileId,after_sha256:after}:{path,file_id:fileId,after_sha256:after};}
+  else if(action==='delete'){Object.assign(saved,{action,before_exists:true,after_exists:false,parent_id:'parent',file_id:fileId,before_content:'before\n',before_sha256:before,after_content:''});receipt={operation_id:operationId,state:'succeeded',action,path,file_id:fileId,removed_sha256:before};}
+  else{Object.assign(saved,{action,before_exists:true,after_exists:true,parent_id:'parent',file_id:fileId,before_content:'before\n',before_sha256:before,after_content:'after\n',after_sha256:after,destination_path:destination,destination_parent_id:'destination-parent',create_directories:[]});receipt={operation_id:operationId,state:'succeeded',action,path:destination,source_path:path,file_id:fileId,before_sha256:before,after_sha256:after};}
+  if(tool==='patch_file'){saved.patch_id=id;saved.patch_index=0;saved.patch_file_count=1;saved.action=action;saved.before_exists=action!=='add';saved.after_exists=action!=='delete';saved.parent_id='parent';}
+  return{id:operationId,workspace_id:'workspace',tool,state:'succeeded',arguments_json:JSON.stringify(saved),result_json:JSON.stringify(receipt)};
+ };
+ for(const operation of [make('edit','replace_file','update'),make('create','create_file','add'),...['update','add','delete','move'].map(action=>make('patch-'+action,'patch_file',action))])assert.equal(canRestoreFileOperation(operation),true,operation.id);
+ for(const change of [{state:'uncertain'},{tool:'run_process'},{result_json:'{}'},{arguments_json:'{}'},{workspace_id:'foreign'}])assert.equal(canRestoreFileOperation({...make('patch-update','patch_file','update'),...change}),false);
+ const mismatched=make('patch-add','patch_file','add');mismatched.result_json=JSON.stringify({...JSON.parse(mismatched.result_json),operation_id:'another-operation'});assert.equal(canRestoreFileOperation(mismatched),false);
 });
 test('workspace command submission carries fresh workspace, provider and graph authority to native backend',async()=>{
  const requests=[],workspace={configured:true,root:'D:\\TestProj',workspace_id:skillWorkspace,authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>workspace};});

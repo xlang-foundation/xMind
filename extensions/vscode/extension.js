@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
-const {patchReview}=require('./patch-review');
+const {patchReview,canRestoreFileOperation}=require('./patch-review');
 const { browserViewLauncher } = require('./browser-view');
 const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
@@ -748,6 +748,14 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           validateEditInspection(proposal,inspection);
           post({type:'edit-inspection',id:proposal.id,inspection});
+        } else if(message.type==='prepare-restore'&&typeof message.id==='string') {
+          const proposal=reviewed.get(message.id);
+          if(!proposal||!observedOperation(proposal.run_id))throw new Error('Select a successful file change in the selected conversation.');
+          const version=generation,current=await client.operation(proposal.id);
+          if(panel!==view||version!==generation)return;
+          for(const field of ['id','run_id','workspace_id','tool','arguments_json','result_json','expires_unix_ms','state'])if(current[field]!==proposal[field])throw new Error('Operation changed. Refresh it before preparing a restore request.');
+          if(!canRestoreFileOperation(current))throw new Error('Only a successful saved file change in this conversation can be restored.');
+          post({type:'restore-prompt',id:current.id,prompt:`Restore the successful file change recorded as operation_id ${current.id} using only the native restore_operation tool. Do not make other file changes. Report the actual result.`});
         } else if (message.type === 'inspect-a2a-task' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before contacting a registered A2A peer.');
           const proposal=reviewed.get(message.id);

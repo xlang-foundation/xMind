@@ -1,6 +1,7 @@
 'use strict';
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 const patchReview=globalThis.XMindPatchReview.patchReview;
+const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
 let renameCapability=false,forkCapability=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
@@ -321,6 +322,7 @@ function operations(items){
     }else{
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
+      if(typeof canRestoreFileOperation==='function'&&canRestoreFileOperation(item)){const restore=node('button','Prepare restore request','operation-restore');restore.title='Fill the composer with a request to restore this saved file change';restore.onclick=()=>{restore.disabled=true;api.postMessage({type:'prepare-restore',id:item.id});};section.append(restore);}
     }
     if(item.tool==='run_process'&&item.state==='uncertain'){
       section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
@@ -677,6 +679,7 @@ window.addEventListener('message',event=>{
   }
   else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);}
+  else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready; the file change still requires approval.';}}}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();}
