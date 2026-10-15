@@ -16,12 +16,12 @@ test('browser accepts only a path-bound read-only inspection for an uncertain pa
  try{await view.handle({type:'inspect-edit',id});assert.deepEqual(calls,[id]);assert.deepEqual(posted.at(-1),{type:'edit-inspection',id,inspection});}
  finally{view.dispose();}
 });
-test('browser prepares a restore prompt only for a fresh successful file operation',async()=>{
+test('browser starts a native restore run only for a fresh successful file operation',async()=>{
  const id='saved-edit',saved={workspace_id:'workspace',folder_id:'folder',workspace_revision:2,target_workspace_id:'folder',path:'src/app.cpp',file_id:'file-1',before_content:'before\n',after_content:'after\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)},receipt={path:saved.path,file_id:saved.file_id,after_sha256:saved.after_sha256};
- const operation={id,run_id:'run',workspace_id:'workspace',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(saved),result_json:JSON.stringify(receipt)},posted=[];let current=operation;
- const view=new BrowserController({operation:async()=>current},message=>posted.push(message));view.runId='run';view.runs=[{id:'run',state:'completed'}];view.operations.set(id,operation);
- try{await view.handle({type:'prepare-restore',id});assert.equal(posted.at(-1).type,'restore-prompt');assert.match(posted.at(-1).prompt,new RegExp(id));assert.match(posted.at(-1).prompt,/Do not make other file changes/);
-  current={...operation,result_json:JSON.stringify({...receipt,after_sha256:'c'.repeat(64)})};await view.handle({type:'prepare-restore',id});assert.equal(posted.at(-1).type,'error');assert.match(posted.at(-1).text,/Operation changed/);
+ const operation={id,run_id:'run',workspace_id:'workspace',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(saved),result_json:JSON.stringify(receipt)},posted=[],calls=[];let current=operation;
+ const run={id:'restore-run',session_id:'session',state:'queued',parent_id:'',graph_root:true};const view=new BrowserController({operation:async()=>current,restoreOperation:async(...args)=>{calls.push(args);return run;}},message=>posted.push(message));view.session='session';view.runId='run';view.runs=[{id:'run',state:'completed'}];view.operations.set(id,operation);
+ try{current={...operation,result_json:JSON.stringify({...receipt,after_sha256:'c'.repeat(64)})};await view.handle({type:'restore-operation',id});assert.equal(posted.at(-1).type,'error');assert.match(posted.at(-1).text,/Operation changed/);assert.deepEqual(calls,[]);
+  current=operation;await view.handle({type:'restore-operation',id});assert.deepEqual(calls,[[id,'session']]);assert.equal(view.runId,'restore-run');assert.ok(posted.some(message=>message.type==='status'&&message.text.includes('Restore started')));
  }finally{view.dispose();}
 });
 test('browser conversation permission manager lists scoped grants and revokes only the observed revision',async()=>{

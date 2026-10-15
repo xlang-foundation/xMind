@@ -17,7 +17,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
-  const renameRequests=[],forkRequests=[],decisions=[],sessionPermissionReplies=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[];
+  const renameRequests=[],forkRequests=[],decisions=[],sessionPermissionReplies=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[],restoreRequests=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const inboxItems=options.inboxItems||[];
   const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
@@ -115,6 +115,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname===`/v1/operations/${options.permissionOperation?.id}`)data=options.permissionOperation;
     else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
+    else if(target.pathname===`/v1/operations/${operations[0]?.id}/restore`){assert.equal(requestOptions.method,'POST');const body=JSON.parse(requestOptions.body);restoreRequests.push(body);assert.equal(body.session_id,'saved');options.runs=[...(options.runs||[{id:'finished',state:'completed',parent_id:'',node_id:'',graph_root:false}]),options.restoreRun];data=options.restoreRun;}
     else if(/^\/v1\/operations\/[A-Za-z0-9_-]+\/inspection$/.test(target.pathname)) data=await options.inspection;
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/inspect`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),options.includeA2aArtifacts?{include_artifacts:true}:{});data=options.a2aInspection;}
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/resubscribe`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aResubscription;}
@@ -189,7 +190,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,restoreRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
     backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -628,15 +629,15 @@ test('uncertain patch addition inspection accepts verified absence without propo
   assert.deepEqual(view.posted.find(message=>message.type==='edit-inspection').inspection,inspection);
   assert.ok(h.requests.includes('/v1/operations/uncertain-patch-add-0/inspection'));assert.equal(h.decisions.length,0);assert.ok(!h.requests.includes('/v1/runs'));view.close();
 });
-test('restore request revalidates the saved successful operation before preparing the composer prompt',async()=>{
+test('restore action revalidates the source operation and starts a native graph run without a model request',async()=>{
  const plan={workspace_id:'fixture-root',folder_id:'fixture-folder',workspace_revision:2,target_workspace_id:'fixture-folder',path:'src/app.cpp',file_id:'fixture-file',before_content:'old\n',after_content:'new\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)},receipt={path:plan.path,file_id:plan.file_id,after_sha256:plan.after_sha256};
  const proposal={id:'completed-edit',run_id:'finished',workspace_id:'fixture-root',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:JSON.stringify(receipt)};
- const h=harness({operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ const restoreRun={id:'restore-run',session_id:'saved',state:'completed',parent_id:'',node_id:'',graph_root:true},restoreRoot={run:restoreRun,spec:{nodes:[{id:'restore',type:'tool',tool:'restore_operation'}]},context:{enabled:false,resumable:false,remaining_active_ms:null}};const h=harness({operations:[proposal],restoreRun,graphRoot:restoreRoot});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
  try{await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===proposal.id)));
-  view.receive({type:'prepare-restore',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='restore-prompt'));
-  const prepared=view.posted.find(message=>message.type==='restore-prompt');assert.match(prepared.prompt,new RegExp(proposal.id));assert.match(prepared.prompt,/Do not make other file changes/);assert.ok(h.requests.includes('/v1/operations/completed-edit'));assert.equal(h.decisions.length,0);
-  h.pauseOperation(Promise.resolve({...proposal,result_json:JSON.stringify({...receipt,after_sha256:'c'.repeat(64)})}));view.receive({type:'prepare-restore',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='error'));
-  assert.equal(view.posted.filter(message=>message.type==='restore-prompt').length,1,'A stale receipt must not prepare another restore request');assert.equal(h.decisions.length,0);
+  h.pauseOperation(Promise.resolve({...proposal,result_json:JSON.stringify({...receipt,after_sha256:'c'.repeat(64)})}));view.receive({type:'restore-operation',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='error'&&/Operation changed/.test(message.text)));
+  assert.deepEqual(h.restoreRequests,[],'A stale source receipt must not start a restore graph');
+  h.pauseOperation(undefined);view.receive({type:'restore-operation',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='graph'&&message.record.run.id===restoreRun.id));
+  assert.deepEqual(h.restoreRequests,[{session_id:'saved'}]);assert.ok(h.requests.includes('/v1/operations/completed-edit/restore'));assert.equal(h.decisions.length,0);assert.ok(view.posted.some(message=>message.type==='status'&&message.text==='completed'));
  }finally{view.close();}
 });
 test('inspection rejects a different backend operation and discards observations after selection changes',async()=>{

@@ -55,6 +55,11 @@ test('process output client validates paginated byte artifacts without text coer
  assert.deepEqual(await client.processOutput('process-op','stderr',12,64),page);assert.equal(new URL(requests[0].url).pathname,'/v1/operations/process-op/output');assert.equal(new URL(requests[0].url).search,'?channel=stderr&after=12&limit=64');
  for(const args of [['process-op','input',0,64],['process-op','stdout',-1,64],['process-op','stdout',0,262144]])await assert.rejects(client.processOutput(...args),/process output/i);page.next_offset=16;await assert.rejects(client.processOutput('process-op','stderr',12,64),/native process output page/i);
 });
+test('direct restore client binds the returned native graph run to its conversation',async()=>{
+ const requests=[],run={id:'restore-run',session_id:'session',state:'queued',parent_id:'',node_id:'',graph_root:true};const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>run};});
+ assert.deepEqual(await client.restoreOperation('saved-edit','session'),run);assert.equal(new URL(requests[0].url).pathname,'/v1/operations/saved-edit/restore');assert.deepEqual(JSON.parse(requests[0].options.body),{session_id:'session'});
+ for(const invalid of [{...run,session_id:'other'},{...run,parent_id:'foreign-run'},{...run,graph_root:false}]){const changed=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>invalid}));await assert.rejects(changed.restoreOperation('saved-edit','session'),/conversation/);}
+});
 test('session history page client validates bounded chronological pages and cursor shape',async()=>{
  const requests=[],page={messages:[8,9].map(seq=>({id:`msg_${seq}`,seq,role:'user',data:{content:`m${seq}`}})),has_more:true,next_before:'msg_8'};
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>page};});

@@ -9,7 +9,10 @@ and verify the inverse removes only that file. Both proposals retain the exact
 workspace membership revision and folder binding. The graph-runner contract
 passes with a synthetic model peer (the restore flow itself makes no model
 request), and the standalone restore contract passes for update, add, delete,
-move and stale-file rejection. Direct browser and VS Code Undo controls remain
+move and stale-file rejection. Browser and VS Code now expose Restore saved
+change actions that start a native restore graph with no model call; the inverse
+still follows the normal approval flow. Release native server compilation and
+browser/VS Code client suites pass. Rendered installed-client acceptance remains
 open.
 
 ## Installed VS Code focused coding run — 2026-10-15
@@ -92,7 +95,11 @@ confirms a changed live file is rejected before a restore proposal exists. The
 focused coding-edit gate passes **8/8**: create, edit, patch-file, patch-batch,
 restore, approved-edit HTTP, and native agent edit/patch HTTP contracts. The
 agent tool catalogue exposes `restore_operation` when approved edits are enabled.
-This milestone has no direct browser or VS Code Undo button yet.
+The browser and VS Code now expose Restore saved change controls. They start a
+native restore graph directly, without asking the model to construct a prompt;
+the filesystem inverse still waits for the existing human approval. The direct
+restore service and client route contracts pass. Rendered installed-client
+acceptance remains open.
 
 ## xMind TestProj coding and xlang3 import compatibility — 2026-10-15
 

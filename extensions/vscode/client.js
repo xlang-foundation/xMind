@@ -352,6 +352,11 @@ class BackendClient {
     return value;
   }
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
+  async restoreOperation(id,sessionId) {
+    executionIdentity(id);executionIdentity(sessionId);
+    const run=await this.request(`/v1/operations/${encodeURIComponent(id)}/restore`,{session_id:sessionId});validateRunDTO(run);
+    if(run.session_id!==sessionId||run.parent_id||run.graph_root!==true)throw new Error('Native restore run was not bound to this conversation.');return run;
+  }
   reconcileProcess(id,note) {
     executionIdentity(id);if(typeof note!=='string'||note.length<16||note.length>1024||/[\r\n\0]/.test(note))throw new Error('Enter a one-line reconciliation note of at least 16 characters.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/reconcile`,{note,acknowledge_possible_side_effects:true});

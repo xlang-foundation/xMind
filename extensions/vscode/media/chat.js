@@ -322,7 +322,7 @@ function operations(items){
     }else{
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
-      if(typeof canRestoreFileOperation==='function'&&canRestoreFileOperation(item)){const restore=node('button','Prepare restore request','operation-restore');restore.title='Fill the composer with a request to restore this saved file change';restore.onclick=()=>{restore.disabled=true;api.postMessage({type:'prepare-restore',id:item.id});};section.append(restore);}
+      if(typeof canRestoreFileOperation==='function'&&canRestoreFileOperation(item)){const restore=node('button','Restore saved change','operation-restore');restore.title='Start a native restore run; the inverse file change still requires approval';restore.onclick=()=>{restore.disabled=true;api.postMessage({type:'restore-operation',id:item.id});};section.append(restore);}
     }
     if(item.tool==='run_process'&&item.state==='uncertain'){
       section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));

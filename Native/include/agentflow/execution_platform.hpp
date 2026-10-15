@@ -63,6 +63,7 @@ public:
     std::vector<GraphExecutionMetadata> graphs() const override;
     Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
         std::string prompt,std::string model={}) override;
+    Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;
     Run resume_graph(const std::string& root,const std::string& actor,std::int64_t revision)override;

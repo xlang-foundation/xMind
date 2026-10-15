@@ -189,6 +189,10 @@ test('local browser allows only authenticated POST reconciliation for saved proc
  assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);
  for(const invalid of ['/v1/operations/process-1/reconcile/extra','/v1/operations/a%2Fb/reconcile','/v1/operations/process-1/decision/reconcile'])assert.equal(allowedApiRoute(invalid,'POST'),false);
 });
+test('local browser exposes only POST for an exact saved-file restore route',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs'),path='/v1/operations/saved-edit/restore';assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);
+ for(const invalid of ['/v1/operations/saved-edit/restore/extra','/v1/operations/a%2Fb/restore','/v1/operations/saved-edit/decision/restore'])assert.equal(allowedApiRoute(invalid,'POST'),false);
+});
 test('browser forwards revision-bound permission-grant DELETE bodies and blocks cross-origin revocation',async()=>{
  const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets'),master='permission-grant-proxy-master'.padEnd(64,'x'),credential='a'.repeat(64)+'.'+'b'.repeat(64);let view,viewOrigin,revocations=0;
  const peer=createServer(async(request,response)=>{let input='';for await(const chunk of request)input+=chunk;const reply=(status,data)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(data));};

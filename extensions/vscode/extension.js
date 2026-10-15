@@ -748,14 +748,19 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           validateEditInspection(proposal,inspection);
           post({type:'edit-inspection',id:proposal.id,inspection});
-        } else if(message.type==='prepare-restore'&&typeof message.id==='string') {
+        } else if(message.type==='restore-operation'&&typeof message.id==='string') {
           const proposal=reviewed.get(message.id);
           if(!proposal||!observedOperation(proposal.run_id))throw new Error('Select a successful file change in the selected conversation.');
-          const version=generation,current=await client.operation(proposal.id);
-          if(panel!==view||version!==generation)return;
-          for(const field of ['id','run_id','workspace_id','tool','arguments_json','result_json','expires_unix_ms','state'])if(current[field]!==proposal[field])throw new Error('Operation changed. Refresh it before preparing a restore request.');
+          const version=generation,target=client,current=await target.operation(proposal.id);
+          if(panel!==view||version!==generation||client!==target)return;
+          for(const field of ['id','run_id','workspace_id','tool','arguments_json','result_json','expires_unix_ms','state'])if(current[field]!==proposal[field])throw new Error('Operation changed. Refresh it before restoring.');
           if(!canRestoreFileOperation(current))throw new Error('Only a successful saved file change in this conversation can be restored.');
-          post({type:'restore-prompt',id:current.id,prompt:`Restore the successful file change recorded as operation_id ${current.id} using only the native restore_operation tool. Do not make other file changes. Report the actual result.`});
+          const run=await target.restoreOperation(current.id,sessionId);
+          if(panel!==view||version!==generation||client!==target)return;
+          stop();clearGraph();runId=run.id;cursor=0;sessionRuns=[...sessionRuns.filter(value=>value.id!==run.id),run];presentRuns();
+          await context.workspaceState.update(runStateKey,{...connectionState(),session_id:sessionId,id:run.id});
+          if(panel!==view||client!==target)return;
+          reviewed.clear();post({type:'operations',operations:[]});post({type:'status',text:'Restore started · review the proposed inverse in Operations'});watch();await poll();
         } else if (message.type === 'inspect-a2a-task' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before contacting a registered A2A peer.');
           const proposal=reviewed.get(message.id);

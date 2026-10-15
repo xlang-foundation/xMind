@@ -708,10 +708,9 @@ test('pending file comparison sends only an operation ID and remains separate fr
   assert.ok(!buttons.find(button=>button.textContent==='Allow edit').disabled);r.dom.window.close();
 });
 
-test('completed file operations prepare a restore prompt and preserve the composer draft',()=>{
+test('completed file operations start a native restore run directly',()=>{
  const r=renderer(),doc=r.dom.window.document,id='completed-edit',plan={workspace_id:'fixture-root',folder_id:'fixture-folder',workspace_revision:2,target_workspace_id:'fixture-folder',path:'src/app.cpp',file_id:'fixture-file',before_content:'old\n',after_content:'new\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)},receipt={path:plan.path,file_id:plan.file_id,after_sha256:plan.after_sha256};
- try{r.send({type:'operations',operations:[{id,run_id:'fixture-run',workspace_id:'fixture-root',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:JSON.stringify(receipt)}]});const button=doc.querySelector('.operation-restore');assert.ok(button);assert.equal(button.textContent,'Prepare restore request');button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'prepare-restore',id});
-  const composer=doc.getElementById('prompt');composer.value='Also explain the change';r.send({type:'restore-prompt',id,prompt:`Restore operation ${id}`});assert.equal(composer.value,`Also explain the change\n\nRestore operation ${id}`);assert.match(doc.getElementById('status').textContent,/Send it when ready/);
+ try{r.send({type:'operations',operations:[{id,run_id:'fixture-run',workspace_id:'fixture-root',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:JSON.stringify(receipt)}]});const button=doc.querySelector('.operation-restore');assert.ok(button);assert.equal(button.textContent,'Restore saved change');button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'restore-operation',id});
   r.send({type:'operations',operations:[{id:'uncertain',run_id:'fixture-run',workspace_id:'fixture-root',tool:'replace_file',state:'uncertain',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:JSON.stringify(receipt)}]});assert.equal(doc.querySelector('.operation-restore'),null);
  }finally{r.dom.window.close();}
 });

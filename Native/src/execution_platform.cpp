@@ -250,6 +250,7 @@ bool ExecutionPlatform::available() const{return static_cast<bool>(agents_);}
 bool ExecutionPlatform::idle() const{return (!agents_ || agents_->idle()) && graphs_->idle();}
 std::vector<GraphExecutionMetadata> ExecutionPlatform::graphs() const{auto result=graphs_->graphs();if(!healthy())for(auto& graph:result)graph.executable=false;return result;}
 Run ExecutionPlatform::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");return graphs_->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
+Run ExecutionPlatform::restore_operation(std::string id,std::string session,std::string operation_id){if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");return graphs_->restore_operation(std::move(id),std::move(session),std::move(operation_id));}
 GraphRootRecord ExecutionPlatform::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){return graphs_->human_input(root,node,input,actor,revision);}
 Run ExecutionPlatform::resume_graph(const std::string& root,const std::string& actor,std::int64_t revision){if(!healthy())throw RunUnavailable("Native graph resume is unavailable");return graphs_->resume_graph(root,actor,revision);}
 GraphContextMetadata ExecutionPlatform::graph_context(const std::string& root)const{

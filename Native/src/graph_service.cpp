@@ -185,6 +185,32 @@ Run GraphService::submit_graph(std::string id,std::string session,std::string gr
     catch(...){impl_->pending.pop_back();impl_->active.erase(owned);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
+Run GraphService::restore_operation(std::string id,std::string session,std::string operation_id) {
+    if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||
+       operation_id.empty()||operation_id.size()>128||operation_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)
+        throw std::invalid_argument("Invalid direct restore identity");
+    std::unique_lock lock(impl_->mutex);impl_->require_available();
+    if(impl_->active.size()>=impl_->capacity)throw RunBusy("Graph ownership capacity is full");
+    const auto original=impl_->store.operation(operation_id).get();
+    if(original.state!=OperationState::succeeded||(original.spec.tool!="replace_file"&&original.spec.tool!="create_file"&&original.spec.tool!="patch_file"))
+        throw Conflict("Only a successful saved file change can be restored");
+    if(impl_->store.run(original.spec.run_id).get().session_id!=session)throw ToolAccessDenied("Restore operation belongs to another conversation");
+    const auto saved=Json::parse(original.spec.arguments_json);
+    if(!saved.is_object()||!saved.contains("folder_id")||!saved["folder_id"].is_string())
+        throw ToolAccessDenied("Saved file change has no admitted workspace folder binding");
+    const Json arguments={{"operation_id",operation_id},{"folder_id",saved["folder_id"]}};
+    const Json specification={{"nodes",Json::array({Json{{"id","restore"},{"type","tool"},{"tool","restore_operation"},{"arguments",arguments}}})}};
+    const GraphPlan plan(specification.dump());impl_->runner.validate(plan);
+    const auto membership=impl_->runner.workspace_membership_admission();
+    const auto input=Json{{"content","Restore saved file operation "+operation_id},{"model_id",""}}.dump();
+    auto job=std::make_shared<Impl::Job>();job->id=id;
+    const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
+    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
+    Run result;
+    try{result=impl_->store.start_graph_run(id,session,"native-restore-operation",1,plan,input,{}, {},membership).get();}
+    catch(...){impl_->pending.pop_back();impl_->active.erase(owned);throw;}
+    lock.unlock();impl_->changed.notify_one();return result;
+}
 GraphRootRecord GraphService::human_input(const std::string& id,const std::string& node,
     const std::string& input,const std::string& actor,std::int64_t revision) {
     std::unique_lock lock(impl_->mutex);impl_->require_available();
