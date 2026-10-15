@@ -9,8 +9,8 @@ import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 
-const [executable,modules,stdlib]=process.argv.slice(2);
-assert.ok(executable&&modules&&stdlib,'Expected actual compiled contract and runtime module/source roots');
+const [executable,modules,stdlib,cliExecutable]=process.argv.slice(2);
+assert.ok(executable&&modules&&stdlib&&cliExecutable,'Expected engine contract, actual xmind_cli and runtime module/source roots');
 const folder=await mkdtemp(join(tmpdir(),'xmind-dynamic-engine-')),workspace=join(folder,'workspace');
 const key='synthetic-dynamic-engine-key-not-live',counts=new Map(),requests=[],barrier=[],planningBarrier=[],held=[];
 let failure;
@@ -149,7 +149,7 @@ const peer=createServer((request,response)=>{
 try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');for(const side of ['left','right'])await writeFile(join(workspace,`nested-parallel-${side}-reader.txt`),`Actual nested-parallel-${side}-reader bytes\n`);await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
- const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+ const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace,cliExecutable],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
   if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,44);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
 }catch(error){if(failure)throw new Error((failure.stack??String(failure))+'; actual native engine: '+(error.stderr??error.message));throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

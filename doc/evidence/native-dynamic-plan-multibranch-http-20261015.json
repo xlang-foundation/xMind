@@ -1,11 +1,11 @@
 {
   "date": "2026-10-15",
   "base_revision": "f3c8c26",
-  "scope": "Authenticated native HTTP answer against an actual two-branch dynamic-plan wait set, using AgentService, a synthetic model peer and xlang3-backed SQLite.",
+  "scope": "Interactive CLI and authenticated native HTTP client acceptance against one actual two-branch dynamic-plan wait set, using AgentService, a synthetic model peer and xlang3-backed SQLite.",
   "build": {
     "configuration": "Release",
     "directory": "build/native-dynamic-plan",
-    "target": "agentflow_dynamic_plan_engine_contract",
+    "targets": ["agentflow_dynamic_plan_engine_contract", "xmind_cli"],
     "result": "passed"
   },
   "ctest": {
@@ -23,26 +23,28 @@
   },
   "verified_behavior": [
     "Actual AgentService execution creates two concurrently waiting nested agents under one durable root pause.",
-    "The real native HTTP server returns both nested owners and their exact question IDs in one authenticated observation.",
+    "The actual xmind_cli process attaches with /watch and returns both nested questions, each with the exact owner plan identity.",
+    "The CLI submits one selected question with its owning plan revision and state sequence, then detaches while the sibling remains pending.",
     "The same plan observation route rejects a request without bearer authentication.",
-    "A stale nested-plan state sequence returns HTTP 409 and leaves that question waiting.",
-    "A valid HTTP answer carries the selected nested plan's observed revision and state sequence; it resumes the root and preserves the unanswered sibling for its next pause.",
-    "The remaining request is explicitly selected and answered through the A2A task path; both original nested calls complete exactly once.",
+    "The actual HTTP route refreshes the still-pending sibling, rejects a stale nested-plan state sequence with HTTP 409, and accepts the current CAS head.",
+    "A2A rejects a continuation that omits the request selector while both questions are pending; an already-answered request is rejected as stale.",
+    "The two original nested calls complete exactly once after one CLI answer and one HTTP answer.",
     "The combined Release contracts preserve repository restart/partial-resume coverage and CLI per-plan request routing."
   ],
   "limits": [
     "Provider and answer fixtures are synthetic; no live model/provider behavior is claimed.",
-    "This does not drive a full two-branch interactive CLI /watch session, rendered browser flow, or installed VS Code flow.",
+    "The CLI and HTTP client flows are tested; rendered browser flow and installed VS Code flow remain open.",
     "Concurrent HTTP answer races, cancellation races, expiry/uncertainty and repeated-segment budget/context exhaustion remain unverified."
   ],
   "sha256": {
-    "Native/CMakeLists.txt": "53ff00ae8ed5b193407e263c98301d2af8d9102119b704989dcbfad25ae3c560",
-    "Native/tests/dynamic_plan_engine_contract.cpp": "1e93448926dcd38770cfd02f30f451db97f99898a0789dc0028b17fe9e372df6",
-    "Native/tests/dynamic_plan_engine_peer.mjs": "1a3fecb53009a1c5829f3f52f7c3439be09c5e0e63af5e276f2011594b87b2ba",
-    "doc/PARITY.md": "7678b9c9ab537b7a00b2ed73aa268b68d4a84bc3985714a96f0d18c6bd18a3ee",
-    "doc/native-dynamic-plan-multibranch.md": "cba2cf0d21dd0a98d1f30223aa45d81462e2782edd71f51c200778b31977407c"
+    "Native/CMakeLists.txt": "7ed8253d3216bc3ab7ea6be2d354cd277f05e264955235a8b2a95bba53394a8c",
+    "Native/tests/dynamic_plan_engine_contract.cpp": "0ee562341e8526d8da1512acc12dda01bfb0b51361ba32de002fe547c43ff6b1",
+    "Native/tests/dynamic_plan_engine_peer.mjs": "f78acc9dc6dc4ae6c14dc15a88ec1e465dbd4548c77849f72a396b4137568850",
+    "doc/PARITY.md": "83015c3c34343c97d840b7dd3ff83b24aeea3c8d6ba83267fe8099519be2dc08",
+    "doc/native-dynamic-plan-multibranch.md": "488b7b9b3d19b261002f191a38301cab6d9740ed41971087512530231d607fbb"
   },
   "executables": {
-    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_engine_contract.exe": "b96ab2dc76df05694fc871c87f9a7f66abeacdfeebb3f1cbf6c7b63b905e48a5"
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_engine_contract.exe": "9157183f3fc1e9759a498a14dab8f6ab4e24a60b433654bcaa467f5d004a0dc4",
+    "build/native-dynamic-plan/Release/xmind_cli.exe": "d8360be039b6a6f826bcb711cea26cf4780449d8c7cc2d339b72d60f6175cbd6"
   }
 }
