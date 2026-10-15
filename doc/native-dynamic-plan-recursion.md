@@ -8,7 +8,9 @@ Depth-two execution and one root-to-descendant human-wait chain are covered end
 to end, including answer, resume and service close/reopen. Input waits for the
 physical root worker to finish unwinding its pause before committing, so an
 answer cannot race away its wake. Simultaneous nested waits in sibling
-branches remain unsupported and are rejected before plan acceptance.
+branches remain unsupported and are rejected before plan acceptance. The
+required root wait-set, restart and client contract is specified in
+[multi-branch human waits](native-dynamic-plan-multibranch.md).
 
 ## Current boundary
 
