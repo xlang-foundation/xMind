@@ -1490,3 +1490,21 @@ a process-owned execution set, so recovery and cross-process semantics still
 need comparison. The refreshed pinned inventory contains **38 reviewed native
 source candidates, 103 unmapped operations, and 1 operation-level behavior
 contract verified**.
+
+## Conversation model selection — 2026-10-15
+
+xMind supports a durable model selection per conversation through its native
+HTTP API, CLI, browser and VS Code clients. The selection is revisioned in
+SQLite and bound to the saved provider profile and route; single-agent and graph
+runs resolve it consistently, stale admission is rejected, and clearing the
+selection returns to the active provider profile's default. The native runtime
+and CLI contracts pass against the Release xlang3/SQLite server, and the
+browser and VS Code model-selection client contracts pass.
+
+This corrects the former inventory note that xMind had only a per-run override.
+The capability is not counted as OpenCode `session.switchModel` parity: the
+pinned upstream uses `POST /api/session/{id}/model` with a `{model:{providerID,
+modelID}}` body and a 204 response, while xMind uses `/v1/sessions/{id}/model`,
+provider and session revision bindings, and returns the resulting saved state.
+The durable model behavior is verified; full request/response parity remains
+open. See the [acceptance record](evidence/session-model-selection-20261015.json).

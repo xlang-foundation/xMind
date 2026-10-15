@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-15",
+  "xmind_revision": "4f8efb682944329ed9dc6ea8b7ccddc226a6569b",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "operation": "session.switchModel",
+  "upstream": {
+    "tag": "anomalyco/opencode v2.0.26",
+    "method": "POST",
+    "path": "/api/session/{sessionID}/model",
+    "request": {"model": {"providerID": "fixture-provider", "modelID": "fixture-model"}},
+    "success_status": 204
+  },
+  "xmind": {
+    "routes": ["GET /v1/sessions/{id}/model", "POST /v1/sessions/{id}/model"],
+    "selection_binding": ["provider profile ID", "provider route ID", "model ID", "provider revision", "session model revision"],
+    "persistence": "revisioned SQLite-backed conversation state",
+    "behavior": [
+      "new conversations have no fabricated override",
+      "selection survives SQLite read/reopen",
+      "single-agent and graph runs resolve the saved conversation model",
+      "stale run admission is rejected before run/history creation",
+      "clearing the selection returns to the active provider-profile default",
+      "forked sessions preserve their selected model state",
+      "CLI /model and browser/VS Code selectors expose the selection"
+    ],
+    "success_status": 200,
+    "success_body": "Revisioned saved model state"
+  },
+  "validation": {
+    "native_ctest_command": "ctest --test-dir build/native-dynamic-plan -C Release -R ^native_provider_profile_(runtime|cli)_contract$ --output-on-failure",
+    "native_ctest": {
+      "native_provider_profile_runtime_contract": "passed",
+      "native_provider_profile_cli_contract": "passed",
+      "passed": 2,
+      "failed": 0
+    },
+    "browser_command": "node --test --test-name-pattern=browser saves a selected model to the active conversation views/browser/tests/controller.test.cjs",
+    "browser_model_selector": "passed",
+    "vscode_command": "node --test extensions/vscode/tests/session-model.test.js",
+    "vscode_session_model": {"passed": 2, "failed": 0},
+    "release_server_sha256": "81b72c0d165a52a70d617d640509124e6dd90f51cac01a89ddc5e59da5568739",
+    "runtime_contract_executable_sha256": "f984a82f3879dbaf4a148e493b89e90dd57f2a8b5ac2003780c995a8fd005668",
+    "normalized_http_source_sha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481"
+  },
+  "parity_assessment": "The durable per-conversation capability is implemented and exercised through native HTTP, CLI, browser and VS Code client contracts. This is not marked operation-level parity: xMind has a different local route and request shape, requires provider/session revision bindings, returns a state receipt instead of 204, and adds a provider-default reset. Synthetic provider peers were used; no live model request or installed VS Code UI selection was part of this acceptance."
+}

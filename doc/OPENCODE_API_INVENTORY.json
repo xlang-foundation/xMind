@@ -19971,9 +19971,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
-        "surface": "Native per-run model override",
-        "sourceAnchor": "executor->submit_model",
-        "gap": "A per-run override is not persistent session model switching; upstream behavior remains incomplete.",
+        "surface": "GET/POST /v1/sessions/{id}/model; browser and VS Code model selectors; xmind chat /model",
+        "sourceAnchor": "executor->select_session_model",
+        "gap": "A revisioned SQLite selection is bound to the provider profile and route, survives reopen, is copied to forks, drives single-agent and graph runs, and can reset to the active profile default. OpenCode accepts {model:{providerID,modelID}} and returns 204; xMind uses its native provider/model fields and revision bindings and returns the saved state, so request/response wire parity remains incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

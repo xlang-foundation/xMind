@@ -2703,3 +2703,15 @@ native candidates, 102 unmapped, and 1 operation-level parity verified**.
 `session.remove` remains a source candidate: xMind retains an audit tombstone
 and rejects deletion during active effects, and installed VS Code acceptance
 is still open.
+
+## Conversation model selection — 2026-10-15
+
+The Release native provider-profile runtime and CLI contracts pass **2/2**.
+They verify provider-bound per-conversation model selection, saved-state reads,
+single-agent and graph model resolution, rejection of stale model admission,
+and reset to the active provider default. Browser model-selector coverage
+passes **1/1** and the VS Code session-model client suite passes **2/2**.
+These are native and client contracts, not installed VS Code UI acceptance or
+live inference. Full OpenCode request/response parity remains open because
+xMind's route/body and success response differ; details and hashes are in the
+[acceptance record](evidence/session-model-selection-20261015.json).
