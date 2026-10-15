@@ -447,11 +447,11 @@ Explicit existing recovery/inspection is required. No blind retry occurs.
 
 ## Human pauses and signed continuation
 
-A human pause is a new ordinary-Agent lifecycle, not currently supported by
-AgentService/AgentRunner. Extend their owner state machine to queued, working,
-waiting and faulted, following the existing GraphService pattern without using
-its graph-only persistence methods. Waiting roots remain owned and occupy
-admission capacity; provider/profile mutation still requires true idle state.
+The current ordinary-Agent lifecycle supports queued, working, waiting and
+faulted owners in AgentService/AgentRunner. Waiting roots remain owned and
+occupy admission capacity; provider/profile mutation still requires true idle
+state. Nested waits persist the exact root-to-descendant owner chain, with
+simultaneous sibling waits remaining unsupported.
 
 Initially require a planning tool to be the sole tool call in its assistant
 turn. Reject a mixed planning/effect batch before any tool dispatch; document
@@ -470,10 +470,12 @@ all child/model counters and holds the parent continuation allowance. Human
 expiry is backend-owned and bounded; the model cannot extend it.
 
 Publication, input scheduling and worker retirement share the owner's lock and
-durable state checks. An answer arriving between pause publication and worker
-retirement must not be lost: re-read the committed root/checkpoint before
-entering waiting state, as GraphService does today. Input received while other
-children run changes dependency state without enqueueing a second owner.
+durable state checks. For a nested pause, an authenticated answer waits until
+the root worker has physically unwound the descendant pause and entered its
+waiting phase. The answer then reserves exactly one wake before committing.
+This closes the race where a fast answer could otherwise arrive while the
+worker was still validating a not-yet-retired pause. Input received while
+other children run changes dependency state without enqueueing a second owner.
 
 Authenticated input verifies exact root/session/request ownership, question and
 revision/state preconditions. It records a write-once answer and typed event,

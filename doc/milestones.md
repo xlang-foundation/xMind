@@ -92,6 +92,18 @@ the new tool schema. Services still end at their trusted profile timeout or
 backend shutdown, and do not resume after restart. A live TestProj preview
 started by the model and rendered browser/VS Code review remain open.
 
+## Nested human-wait wake handoff — 2026-10-14
+
+A focused Release run exposed a timing race: a nested human answer could be
+accepted while the root worker was still unwinding the durable pause. The
+answer then raced the worker's pause validation and the root remained paused.
+`plan_input` now waits for that physical worker to reach its waiting phase
+before validating and committing the answer; terminal/faulted ownership wakes
+the waiter without admitting input. The complete dynamic-plan engine contract,
+including nested answer/resume and SQLite close/reopen recovery, passed five
+consecutive Release runs. Simultaneous nested human waits across sibling
+branches remain unsupported.
+
 ## Managed unified CLI workspace acceptance — 2026-10-14
 
 The profile-managed unified `xmind.exe` connected to the existing TestProj

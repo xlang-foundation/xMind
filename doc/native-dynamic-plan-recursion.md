@@ -4,10 +4,11 @@ Status: **partly implemented**. Schema v24 records immutable plan ownership;
 v25 permits multiple plans per root; v26 stores owner-scoped signed calls; and
 v27 admits bounded descendant ownership through depth eight. Dynamic-agent
 children can create nested plans under the same root budget and child pool.
-Depth-two execution is covered end to end. Nested human waits and durable
-nested pause/restart recovery are implemented for one waiting owner chain and
-covered through a real service close/reopen. Simultaneous nested waits in
-sibling branches remain unsupported and are rejected before plan acceptance.
+Depth-two execution and one root-to-descendant human-wait chain are covered end
+to end, including answer, resume and service close/reopen. Input waits for the
+physical root worker to finish unwinding its pause before committing, so an
+answer cannot race away its wake. Simultaneous nested waits in sibling
+branches remain unsupported and are rejected before plan acceptance.
 
 ## Current boundary
 
@@ -22,9 +23,11 @@ their results to the parent plan. Completion is refused until the child-owned
 plan is finished, then both the run and plan are completed transactionally.
 Focused synthetic-provider contracts exercise root → outer agent → inner
 planner → depth-two reader, verify owner links and actual read history, and
-confirm the shared root budget. A nested human node is rejected with
-`nested_human_wait_unsupported`; a plan beyond the supported depth of eight is
-rejected with `planning_depth_exhausted`.
+confirm the shared root budget. They also answer a nested human request,
+complete its exact accepted continuation and repeat the pause/restart path. A
+human wait while an unrelated sibling remains live is rejected before plan
+acceptance; a plan beyond depth eight is rejected with
+`planning_depth_exhausted`.
 
 The runtime already gives a dynamic child the ordinary root's
 `RootExecutionBudget`, and model reservations identify both `root_run_id` and
@@ -63,8 +66,8 @@ plan/node links. The v26 migration preserves existing call, event and plan
 identities transactionally and validates foreign keys; v27 replaces the
 single-nested-owner admission trigger with bounded descendant validation.
 Runtime admission and execution validate the live claimed owner and carry its
-identity through model turns, scheduling and presentation. Nested pause and
-restart recovery remain pending.
+identity through model turns, scheduling and presentation. Schema 27 also
+stores the exact root-to-descendant pause binding for a single waiting chain.
 
 Capabilities remain derived from the root's immutable admitted settings and
 the exact coding preset. Nested plans may select only registered presets and
@@ -93,21 +96,12 @@ repository binds the deepest waiting plan/call to the exact root-to-child owner
 chain, pauses each admitted owner and closes the shared active-time segment in
 one transaction. An authenticated answer resumes that same chain and segment;
 after SQLite reopen, recovery preserves the owner chain only when its accepted
-calls, claimed parent nodes, closed segment and effects all validate. No plan
-or child is reconstructed from a prompt, and accepted provider calls are not
-replayed. The current single-chain binding rejects a nested human wait while a
-sibling root child remains live; multi-branch pause coordination is still open.
-
-The current synchronous call stack makes this a root-wide pause, not an
-independent child pause. A nested `DynamicPlanExecutor` runs inside its admitted
-agent child's `AgentRunner`, which in turn is a future owned by its parent
-executor. Returning a paused child directly currently fails the parent's
-terminal-child settlement check; after restart, the in-memory future and active
-batch no longer exist, and the executor deliberately refuses to adopt that
-claimed node. A correct implementation therefore has to persist the complete
-owner chain from the ordinary root plan to the waiting plan, then update the
-child executor's join rules so only a database-proven terminal child outcome
-can be settled after restart.
+calls, claimed parent nodes, closed segment and effects all validate. The
+service waits for an in-flight root worker to finish unwinding before it
+commits human input, then dispatches exactly one wake. No plan or child is
+reconstructed from a prompt, and accepted provider calls are not replayed. The
+current single-chain binding rejects a nested human wait while a sibling root
+child remains live; multi-branch pause coordination is still open.
 
 The durable pause must bind the waiting plan and accepted call to each ancestor
 plan node and its claimed child run. The pause transaction must close the one

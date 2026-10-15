@@ -191,12 +191,12 @@ struct AgentService::Impl {
             if(children&&!children->healthy())fail();
             try{
                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools);std::unique_lock lock(mutex);
-                if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);continue;}
+                if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
                 // committed between the runner pause and worker retirement.
                 const auto current=persistence.run(job->id).get();
-                if(terminal(current.state)){remove_ticket(job);active.erase(job->id);continue;}
+                if(terminal(current.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
                 const auto plan=persistence.dynamic_plan_for_root(job->id).get();if(!plan||current.state!=RunState::paused)throw DatabaseError("Dynamic pause ownership changed unexpectedly");
                 verify_pause(current,*plan);
                 if(job->user_cancel)retire_waiting(job,RunState::cancelled,R"({"reason":"cancelled_during_human_wait"})");
@@ -215,7 +215,7 @@ struct AgentService::Impl {
                 try{const auto current=persistence.run(job->id).get();const auto plan=persistence.dynamic_plan_for_root(job->id).get();
                     if(current.state==RunState::paused&&plan){std::lock_guard lock(mutex);verify_pause(current,*plan);
                         if(job->user_cancel)retire_waiting(job,RunState::cancelled,R"({"reason":"cancelled_during_human_wait"})");
-                        else{remove_ticket(job);job->phase=Phase::waiting;}retained=true;}}
+                        else{remove_ticket(job);job->phase=Phase::waiting;changed.notify_all();}retained=true;}}
                 catch(...){}
                 if(!retained){{std::lock_guard lock(mutex);job->phase=Phase::faulted;remove_ticket(job);}fail();}
             }catch(const Conflict&){
@@ -464,6 +464,16 @@ Run AgentService::plan_input(const std::string& root,const std::string& request,
     controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();
     const auto owned=impl_->active.find(root);if(owned==impl_->active.end())throw NotFound("Dynamic root is not owned by this service");const auto job=owned->second;
     if(job->phase==Impl::Phase::faulted||job->user_cancel||job->stop.stop_requested())throw Conflict("Dynamic cancellation or recovery is pending");
+    // A nested pause is committed by the descendant runner before the root
+    // worker has necessarily unwound and marked its service job as waiting.
+    // Let that physical owner finish its pause boundary before mutating the
+    // human node; otherwise the worker can observe an answered request while
+    // validating the still-closed pause and discard the reserved wake.
+    if(job->phase==Impl::Phase::working){
+        impl_->changed.wait(lock,[&]{return job->phase!=Impl::Phase::working||!impl_->active.contains(root)||!impl_->accepting||impl_->faulted;});
+        if(!impl_->active.contains(root)||!impl_->accepting||impl_->faulted)throw RunUnavailable("Dynamic owner stopped while its pause was settling");
+        if(job->phase!=Impl::Phase::waiting)throw Conflict("Dynamic owner did not settle into a human-wait pause");
+    }
     impl_->runner.validate_dynamic_owner(root,job->model);const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Owned root has no dynamic plan");
     const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const auto waiting=impl_->persistence.dynamic_plan(binding.plan_id).get();impl_->verify_pause(impl_->persistence.run(root).get(),*plan);
     const bool reserved=impl_->reserve_wake(job);
