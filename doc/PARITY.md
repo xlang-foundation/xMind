@@ -43,9 +43,9 @@ CLI/API output, required owner authentication, and rejection of unknown query
 parameters. Hashed source and build evidence is in
 [`server-info-opencode-parity-20261015.json`](evidence/server-info-opencode-parity-20261015.json).
 
-The refreshed inventory counts **1 operation-level behavior contract
-verified**, **36 reviewed source candidates still unverified**, and **104
-unmapped operations**. The API path and owner-token requirement intentionally
+The refreshed inventory counts **38 reviewed native source candidates**, of
+which **1 operation-level behavior contract is verified** and **37 remain
+unverified**, plus **103 unmapped operations**. The API path and owner-token requirement intentionally
 differ from OpenCode's unauthenticated `/api/info`; the shared information
 capability and response fields match the pinned contract. This does not imply
 broader OpenCode API or product parity.
@@ -811,7 +811,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; dynamic plans now support sealed resource/prompt aliases through actual subprocesses and dependent child runs. Modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. MCP `2026-07-28` list-change subscriptions are validated on both transports; AgentRunner fixtures and direct graph MCP fixtures over stdio and HTTP verify bounded sanitized events and listener shutdown before terminal state. Crash recovery/reconnect, OAuth renewal, other HTTP/SSE behavior, plugin lifecycle and complete command parity remain incomplete. AgentRunner refreshes a changed catalogue within the active run; a direct graph MCP node fails closed because its alias is pinned. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Named-agent ordered allow/ask/deny globs persist through session/archive/delegation/graph snapshots; direct-path evaluation uses the last match, while native authority and effect approvals remain separate. The native API lists up to 256 pending approvals across one session's runs and replies only when the operation belongs to that session; replies settle the existing durable operation journal. Uncertain replacement and patch add/update/delete/move effects support read-only before/after/different inspection with verified optional path fingerprints. A successful edit/create/patch operation can be reversed by the agent or a direct browser/VS Code restore action through the same approval journal, with exact saved hashes and live filesystem identity checks. Starting a client restore uses a native graph run and makes no model call. Direct redo, saved grants, session-level policy enforcement, global/location request listing, broad historical diff recovery and full export/sharing contracts remain incomplete. |
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 37 have reviewed native source candidates, 36 remain unverified, 104 are unmapped, and one operation has a verified behavior contract. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 38 have reviewed native source candidates, one has a verified behavior contract, 37 remain unverified, and 103 are unmapped. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 Current-source live browser coverage now verifies local automatic connection,
 workspace catalogue access, and actual Claude/Gemini/DeepSeek/OpenAI model
@@ -1388,9 +1388,9 @@ operations**, with upstream parameters/body/responses and acceptance requirement
 Earlier upstream audit snapshots counted 139; the pinned schema count is
 authoritative.
 
-Removed-prototype mappings are absent. The native mapping identifies **37
-reviewed C++ source candidates: one has a verified behavior contract, 36 remain
-unverified, and 104 operations are unmapped**. Each candidate
+Removed-prototype mappings are absent. The native mapping identifies **38
+reviewed C++ source candidates: one has a verified behavior contract, 37 remain
+unverified, and 103 operations are unmapped**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed
