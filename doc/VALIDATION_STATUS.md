@@ -15,6 +15,14 @@ still follows the normal approval flow. Release native server compilation and
 browser/VS Code client suites pass. Rendered installed-client acceptance remains
 open.
 
+The Release graph-service HTTP/CLI integration contract now exercises the direct
+restore route through the production provider-profile adapter. It verifies
+cross-conversation rejection, exact request-schema validation, native graph-run
+admission, approval-gated deletion of the created file, and zero provider calls.
+This also caught and fixed missing `restore_operation` forwarding in both provider
+runtime adapters and updated the CLI validator for the backend's current agent
+catalogue metadata.
+
 ## Installed VS Code focused coding run — 2026-10-15
 
 The VS Code Extension Development Host opened the TestProj workspace, reused

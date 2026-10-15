@@ -61,7 +61,10 @@ human approval journal. Release contracts verify the create-then-restore flow
 and the standalone update/add/delete/move restore cases. The browser and VS Code
 offer a Restore saved change control that starts this native restore graph without
 a model call; the inverse still requires human approval. Full OpenCode Undo parity
-and rendered installed-client acceptance remain open.
+and rendered installed-client acceptance remain open. The Release graph-service
+HTTP/CLI contract verifies the production provider-profile adapter, rejects
+cross-conversation restore, admits the direct request, waits for approval before
+the inverse removes the file, and confirms that no model request was made.
 
 ## Native agent modes and visibility — 2026-10-15
 

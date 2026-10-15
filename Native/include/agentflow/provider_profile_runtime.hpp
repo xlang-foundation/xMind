@@ -106,6 +106,7 @@ public:
     bool supports_file_edit_proposals()const override;
     bool available() const override;
     std::vector<GraphExecutionMetadata> graphs() const override;
+    Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
         std::string prompt,std::string model={}) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,

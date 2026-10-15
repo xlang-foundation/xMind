@@ -105,6 +105,7 @@ void ProviderRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->
 bool ProviderRuntime::healthy() const{std::lock_guard lock(impl_->mutex);return !impl_->service || impl_->service->healthy();}
 bool ProviderRuntime::available() const{std::lock_guard lock(impl_->mutex);return impl_->service && impl_->service->available();}
 std::vector<GraphExecutionMetadata> ProviderRuntime::graphs() const{std::lock_guard lock(impl_->mutex);return impl_->service->graphs();}
+Run ProviderRuntime::restore_operation(std::string id,std::string session,std::string operation_id){std::lock_guard lock(impl_->mutex);if(!impl_->service)throw RunUnavailable("Provider is not configured");return impl_->service->restore_operation(std::move(id),std::move(session),std::move(operation_id));}
 Run ProviderRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 GraphRootRecord ProviderRuntime::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->human_input(root,node,input,actor,revision);}
 
