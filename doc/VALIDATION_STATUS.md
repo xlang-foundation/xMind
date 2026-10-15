@@ -34,6 +34,13 @@ external MCP/A2A interoperability, release packaging, and the wider OpenCode 2
 feature-parity audit. These results establish a local browser workflow and a
 targeted xlang3 compatibility fix, not completion of the full product goal.
 
+The current VS Code extension regression suite also passes **353/353**. The
+running Extension Development Host command line points to this repository's
+`extensions/vscode` source and the TestProj workspace; its extension-host log
+confirms `agentflow-local.agentflow` activated. The live VS Code window could
+not be inspected in this run, so this does not establish current sidebar
+rendering or a new editor-driven coding/build acceptance.
+
 ## Nested human pause/resume and restart recovery — 2026-10-14
 
 An ordinary root can now pause on a human node owned by an admitted nested
