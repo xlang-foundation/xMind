@@ -14,9 +14,11 @@ depth-two file reader and checks the actual SQLite owner chain, saved tool
 history and shared budget. The planning HTTP DTO validates arbitrary parent
 order and the shared browser/VS Code renderer recursively shows descendant
 plans, owner/child transcripts and actual response metrics. Depth-eight
-exhaustion, remaining total-work bounds, parallel nested frontiers, and durable
-nested pause/restart recovery remain pending. Root-wide node, revision and
-human-question limits are enforced transactionally and covered by repository
+boundary coverage reaches the maximum valid owner chain; a ninth child is
+prevented by the root's eight-child budget. Remaining total-work bounds,
+parallel nested frontiers, and durable nested pause/restart recovery remain
+pending. Root-wide node, revision and human-question limits are enforced
+transactionally and covered by repository
 contracts. Nested human nodes are rejected with
 `nested_human_wait_unsupported`. See the [recursion contract](native-dynamic-plan-recursion.md)
 and [current validation](VALIDATION_STATUS.md).

@@ -179,9 +179,10 @@ synthetic. A follow-up repository contract now admits nine plans at depths 0
 through 8, validates their exact owner chain and shared budget, and passes with
 the maximum eight child owners. A new repository contract also rejects nested
 plans that would exceed root-wide node, revision or human-question allowances.
-Runtime rejection from a depth-nine owner is still untested; the reachable
-repository boundary does not admit a ninth child under the registered root
-policy. Remaining total-work bounds, nested pause/restart recovery,
+A ninth owner cannot be created through valid admission because every nested
+level consumes a child from the same eight-child root budget; the executor's
+depth-nine defense is therefore not directly end-to-end reachable. Remaining
+total-work bounds, nested pause/restart recovery,
 live-provider interoperability and external-client acceptance remain open.
 
 ## Nested plan owner repository admission — 2026-10-14

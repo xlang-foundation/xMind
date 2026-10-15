@@ -154,8 +154,12 @@ inspectable; it cannot be converted into an ordinary tool error.
    and planned/published human questions across every descendant owner inside
    the serialized root transaction. Focused contracts verify that each shared
    limit rejects a nested plan without leaving partial owner or reservation
-   state. Typed runtime rejection from a synthetic depth-nine owner and the
-   remaining total-work bounds remain pending.
+   state. The repository contract verifies the supported depth-zero through
+   depth-eight chain and all eight lifetime child admissions. A ninth owner is
+   unreachable through valid admission because each nested level consumes one
+   of the root's eight child slots; the executor's depth-nine guard therefore
+   has no honest end-to-end fixture. Remaining total-work bounds remain
+   pending.
 4. Add durable pause/resume and crash-recovery for nested human waits and
    unresolved effects. Verify root restart drains or preserves every nested
    owner without duplicate provider dispatch or effect replay.
@@ -167,11 +171,10 @@ inspectable; it cannot be converted into an ordinary tool error.
    the admitting parent task, retaining each response's supplied metrics. The
    native `inspect-plan` command prints this same authenticated observation as
    formatted JSON. Repository, HTTP, client and renderer contracts verify the
-   owner links and projection. The repository now exercises the reachable
-   depth-eight boundary under the shared child budget; typed over-depth runtime
-   rejection, additional total-work bounds and parallel nested-plan scheduling
-   remain pending. Root-wide node, revision and human-question bounds are
-   covered by the repository contract.
+   owner links and projection. The repository exercises the reachable
+   depth-eight boundary under the shared child budget; additional total-work
+   bounds and parallel nested-plan scheduling remain pending. Root-wide node,
+   revision and human-question bounds are covered by the repository contract.
 
 The executor, owner lifecycle and nested-provider acceptance stages passed
 the focused Release set **3/3** (`native_dynamic_plan_repository_contract`,
@@ -181,9 +184,8 @@ does not prove live-provider behavior. Nested-plan HTTP and shared client
 presentation, including actual descendant transcripts and response metrics,
 are implemented and tested. The CLI uses the same JSON endpoint/output path;
 its presentation remains structured JSON rather than a dedicated tree view.
-Durable nested pause/restart recovery, typed over-depth runtime rejection,
-remaining total-work exhaustion, parallel nested-plan scheduling and
-live-provider behavior remain incomplete.
+Durable nested pause/restart recovery, remaining total-work exhaustion,
+parallel nested-plan scheduling and live-provider behavior remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).
