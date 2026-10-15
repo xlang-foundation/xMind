@@ -2568,6 +2568,12 @@ loop: one `read_file`, zero delegated children, and no write or process
 operations. The provider reported two model attempts, each with uncached input
 and output metrics, and the run completed successfully. This verifies direct
 handling for a small read-only task on the rebuilt executable. It does not yet
-prove model behavior across larger tasks, coding edits, or other providers; the
-separate TestProj coding run and Vite build were exercised on the earlier
-runtime.
+prove model behavior across larger tasks or other providers. A second live run
+on that same rebuilt runtime tested an approved one-file coding task in the
+disposable `D:\CantorAI2026\xMindLiveCodingSmoke` workspace. Run
+`84c89a071a295fc41c3bc29bbacae215` used only `read_file` and `edit_file`, had
+zero children, and completed the approved `replace_file` operation. A separate
+disk check confirmed the requested description and Open Graph tags were
+written while the page title and body stayed intact. This is an isolated HTML
+edit smoke, not a replacement for the earlier TestProj Vite build or a broad
+coding/IDE acceptance run.
