@@ -24,9 +24,10 @@ response correlation, bounds and redacts peer errors, and currently accepts
 only interfaces on the configured card origin. Its local loopback peer contract
 is included in the native CTest suite. A second CTest contract launches the
 pinned official JavaScript SDK 1.3.0 as an authenticated peer and exercises
-native card discovery, send, get and cancel. The peer harness has passed its
-standalone SDK self-check; the native executable's independent interop result
-is pending the hosted Windows native gate.
+native card discovery, send, get, streaming and cancel. The fresh current-source
+Windows Release build passed this native executable contract on 2026-10-15;
+the exact binary and CTest evidence is in
+[`native-a2a-sdk-bidirectional-20261015.json`](evidence/native-a2a-sdk-bidirectional-20261015.json).
 The native client now reads v1 and legacy card security requirements, accepts
 only no-auth alternatives or HTTP Bearer, refuses unsupported requirements,
 and withholds a configured bearer from subsequent calls when the card does not
@@ -164,11 +165,11 @@ The registry contract checks two delivered events using the A2A 1.0
 `StreamResponse` wrappers (`task` and `statusUpdate`) and durable event counts.
 The pinned official JavaScript SDK peer now advertises and serves streaming;
 its own self-check exercises `sendMessageStream`, and the native CTest contract
-consumes that peer's wrapped events. The native executable contract is awaiting
-the hosted Windows gate. The shared browser/VS Code activity panel labels each
-event with peer, task state, task ID and event sequence, then retains the full
-JSON payload for inspection. Rendered live-stream browser and installed VS Code
-acceptance are still required.
+consumes that peer's wrapped events. That outbound contract now passes on the
+fresh current-source Windows Release build. The shared browser/VS Code activity
+panel labels each event with peer, task state, task ID and event sequence, then
+retains the full JSON payload for inspection. Rendered live-stream browser and
+installed VS Code acceptance are still required.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),
