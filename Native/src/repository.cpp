@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <limits>
 #include <chrono>
+#include <map>
 #include <set>
 #include <type_traits>
 #include "nlohmann/json.hpp"
@@ -114,7 +115,7 @@ Json context_group_json(const ConversationGroup& g){return {{"ordinal",g.ordinal
 Json context_snapshot_json(const ContextSnapshot& s){Json groups=Json::array(),users=Json::array();for(const auto& g:s.groups)groups.push_back(context_group_json(g));for(const auto& g:s.protected_users)users.push_back(context_group_json(g));return {{"scope_kind",context_scope_name(s.head.scope.kind)},{"scope_id",s.head.scope.id},{"binding",context_binding_json(s.head.binding)},{"revision",s.head.revision},{"covered",s.head.covered_through_ordinal},{"checkpoint",s.head.checkpoint_id?Json(*s.head.checkpoint_id):Json(nullptr)},{"watermark",s.source_watermark},{"latest_user",s.latest_user_ordinal},{"groups",groups},{"users",users}};}
 ContextAdmission context_admission(const std::string& source){const auto j=Json::parse(source);const auto kind=j.at("kind").get<std::string>();if(kind=="idle")return IdleContextAdmission{j.at("owner").get<std::string>(),j.at("max_calls").get<std::int64_t>(),j.at("wall_ms").get<std::int64_t>()};if(kind=="planning")return PlanningContextAdmission{j.at("root").get<std::string>(),j.at("owner").get<std::string>(),j.at("step").get<std::string>(),j.at("attempt").get<std::string>(),j.at("call").get<std::string>(),j.at("budget_revision").get<std::int64_t>()};if(kind=="active")return ActiveContextAdmission{j.at("root").get<std::string>(),j.at("owner").get<std::string>(),j.at("step").get<std::string>(),j.at("attempt").get<std::string>(),j.at("role")=="parent"?ModelCallRole::parent:ModelCallRole::leaf,j.at("budget_revision").get<std::int64_t>()};if(kind=="rebuild")return RebuildContextAdmission{j.at("root").get<std::string>(),j.at("owner").get<std::string>(),j.at("step").get<std::string>(),j.at("failed").get<std::string>(),j.at("attempt").get<std::string>(),j.at("role")=="parent"?ModelCallRole::parent:ModelCallRole::leaf,j["call"].is_null()?std::optional<std::string>{}:std::optional<std::string>{j["call"].get<std::string>()},j.at("budget_revision").get<std::int64_t>()};throw DatabaseError("Invalid saved context admission");}
 Json context_admission_json(const ContextAdmission& a){return std::visit([](const auto& v)->Json{using T=std::decay_t<decltype(v)>;if constexpr(std::is_same_v<T,IdleContextAdmission>)return {{"kind","idle"},{"owner",v.owner_id},{"max_calls",v.max_model_calls},{"wall_ms",v.wall_limit_ms}};else {Json j={{"kind",std::is_same_v<T,PlanningContextAdmission>?"planning":std::is_same_v<T,RebuildContextAdmission>?"rebuild":"active"},{"root",v.root_run_id},{"owner",v.owner_run_id},{"step",v.inference_step_id},{"budget_revision",v.expected_budget_revision}};if constexpr(std::is_same_v<T,PlanningContextAdmission>){j["attempt"]=v.held_attempt_id;j["call"]=v.plan_call_id;}else if constexpr(std::is_same_v<T,RebuildContextAdmission>){j["attempt"]=v.retry_attempt_id;j["failed"]=v.failed_attempt_id;j["role"]=call_role(v.role);j["call"]=v.planning_call_id?Json(*v.planning_call_id):Json(nullptr);}else{j["attempt"]=v.inference_attempt_id;j["role"]=call_role(v.role);}return j;}},a);}
-void ensure_context_scope(XlangSqlite& db,const ContextScope& s){bounded_identity(s.id,256);const auto kind=context_scope_name(s.kind);const auto rows=s.kind==ContextScopeKind::session?db.execute("SELECT id FROM sessions WHERE id=?",{s.id}).rows:db.execute("SELECT id FROM runs WHERE id=? AND parent_run_id IS NOT NULL",{s.id}).rows;if(rows.empty())throw NotFound("Context scope does not exist");db.execute("INSERT INTO context_scopes(kind,id) VALUES(?,?) ON CONFLICT(kind,id) DO NOTHING",{std::string(kind),s.id});}
+void ensure_context_scope(XlangSqlite& db,const ContextScope& s){bounded_identity(s.id,256);const auto kind=context_scope_name(s.kind);const auto rows=s.kind==ContextScopeKind::session?db.execute("SELECT id FROM sessions WHERE id=? AND NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=sessions.id)",{s.id}).rows:db.execute("SELECT id FROM runs WHERE id=? AND parent_run_id IS NOT NULL",{s.id}).rows;if(rows.empty())throw NotFound("Context scope does not exist");db.execute("INSERT INTO context_scopes(kind,id) VALUES(?,?) ON CONFLICT(kind,id) DO NOTHING",{std::string(kind),s.id});}
 std::vector<Message> context_originals(XlangSqlite& db,const ContextScope& s,std::int64_t after,std::size_t limit){std::vector<Message> result;const auto sql=s.kind==ContextScopeKind::session?"SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL AND seq>? ORDER BY seq LIMIT ?":"SELECT seq,role,payload FROM messages WHERE execution_run_id=? AND seq>? ORDER BY seq LIMIT ?";for(const auto& r:db.execute(sql,{s.id,after,static_cast<std::int64_t>(limit)}).rows)result.push_back({integer(r[0]),text(r[1]),text(r[2])});return result;}
 std::string context_messages_digest(const std::vector<Message>& messages){std::string framed="xMind.context.group.v1\n";for(const auto& m:messages){for(const auto& value:{std::to_string(m.sequence),m.role,m.json}){framed+=std::to_string(value.size());framed+=':';framed+=value;}}return context_digest(framed);}
 ConversationGroupKind validate_context_group(const std::vector<Message>& messages){
@@ -560,7 +561,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>29)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>30)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -589,7 +590,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>29) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>30) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -985,6 +986,14 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TRIGGER retain_dynamic_owner_pause_waits BEFORE DELETE ON dynamic_owner_pause_waits BEGIN SELECT RAISE(ABORT,'dynamic durable evidence cannot be deleted'); END");
         db.execute("PRAGMA user_version=29");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Dynamic pause wait-set migration did not preserve foreign key ownership");
+    }
+    if(version<30){
+        db.execute("CREATE TABLE IF NOT EXISTS deleted_sessions(id TEXT PRIMARY KEY NOT NULL,deleted_ms INTEGER NOT NULL CHECK(deleted_ms>0))");
+        const auto tombstone_columns=db.execute("PRAGMA table_info(deleted_sessions)").rows;
+        if(tombstone_columns.size()!=2||text(tombstone_columns[0][1])!="id"||text(tombstone_columns[1][1])!="deleted_ms"||integer(tombstone_columns[0][5])!=1||integer(tombstone_columns[1][3])!=1)
+            throw DatabaseError("Existing session tombstone table has an incompatible schema");
+        db.execute("PRAGMA user_version=30");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session tombstone migration did not preserve repository ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -1438,14 +1447,26 @@ Session Repository::rename_session(const std::string& id,const std::string& titl
     transaction.commit();return {id,title};
 }
 Session Repository::session(const std::string& id) {
-    const auto result=impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id WHERE s.id=?",{id});
+    const auto result=impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id WHERE s.id=? AND NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=s.id)",{id});
     if(result.rows.empty()) throw NotFound("Session not found");
     const auto& row=result.rows[0];Session value{text(row[0]),text(row[1]),text(row[2]),{},text(row[4])};if(!std::holds_alternative<std::nullptr_t>(row[3]))value.fork_boundary_sequence=integer(row[3]);return value;
 }
 std::vector<Session> Repository::sessions() {
     std::vector<Session> result;
-    for(const auto& row:impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id ORDER BY s.rowid").rows){Session value{text(row[0]),text(row[1]),text(row[2]),{},text(row[4])};if(!std::holds_alternative<std::nullptr_t>(row[3]))value.fork_boundary_sequence=integer(row[3]);result.push_back(std::move(value));}
+    for(const auto& row:impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id WHERE NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=s.id) ORDER BY s.rowid").rows){Session value{text(row[0]),text(row[1]),text(row[2]),{},text(row[4])};if(!std::holds_alternative<std::nullptr_t>(row[3]))value.fork_boundary_sequence=integer(row[3]);result.push_back(std::move(value));}
     return result;
+}
+void Repository::delete_session(const std::string& id) {
+    identifier(id);auto& db=impl_->database;Transaction transaction(db);(void)session(id);
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{id}).rows.empty()||
+       !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{id}).rows.empty()||
+       !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{id}).rows.empty()||
+       !db.execute("SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{id,id}).rows.empty()||
+       !db.execute("SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') AND ((scope_kind='session' AND scope_id=?) OR (scope_kind='execution' AND scope_id IN (SELECT id FROM runs WHERE session_id=?))) LIMIT 1",{id,id}).rows.empty())
+        throw Conflict("Session has active work or unresolved effects and cannot be deleted");
+    changed_one(db.execute("INSERT INTO deleted_sessions(id,deleted_ms) VALUES(?,?)",{id,now_ms()}));
+    db.execute("DELETE FROM session_forks WHERE session_id=? OR parent_session_id=?",{id,id});
+    transaction.commit();
 }
 Run Repository::run(const std::string& id) {
     const auto result=impl_->database.execute("SELECT id,session_id,state,COALESCE(parent_run_id,''),COALESCE(node_id,''),EXISTS(SELECT 1 FROM graph_roots WHERE run_id=runs.id),COALESCE((SELECT CASE WHEN json_type(m.payload,'$.provider_context') IS NULL THEN '' ELSE json_quote(json_extract(m.payload,'$.provider_context')) END FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=runs.id AND m.role='user' ORDER BY m.seq LIMIT 1),'') FROM runs WHERE id=?",{id});
@@ -1525,7 +1546,7 @@ Run Repository::start_prompt_run(const std::string& id,const std::string& sessio
 ContextSnapshot Repository::context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound){Transaction tx(impl_->database);auto result=read_context_snapshot(impl_->database,scope,binding,bound);tx.commit();return result;}
 ContextStatusObservation Repository::context_status_observation(const ContextScope& scope,const ContextBinding& binding){
     bounded_identity(scope.id,256);const auto kind=std::string(context_scope_name(scope.kind)),encoded=context_binding_json(binding).dump(),key=context_binding_key(binding);auto& db=impl_->database;Transaction tx(db);
-    const auto exists=scope.kind==ContextScopeKind::session?db.execute("SELECT id FROM sessions WHERE id=?",{scope.id}).rows:db.execute("SELECT id FROM runs WHERE id=? AND parent_run_id IS NOT NULL",{scope.id}).rows;if(exists.empty())throw NotFound("Context scope does not exist");
+    const auto exists=scope.kind==ContextScopeKind::session?db.execute("SELECT id FROM sessions WHERE id=? AND NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=sessions.id)",{scope.id}).rows:db.execute("SELECT id FROM runs WHERE id=? AND parent_run_id IS NOT NULL",{scope.id}).rows;if(exists.empty())throw NotFound("Context scope does not exist");
     ContextStatusObservation result;result.head.scope=scope;result.head.binding=binding;
     const auto heads=db.execute("SELECT revision,covered_ordinal,checkpoint_id,binding_json FROM context_heads WHERE scope_kind=? AND scope_id=? AND binding_key=?",{kind,scope.id,key}).rows;
     if(!heads.empty()){const auto& h=heads[0];if(text(h[3])!=encoded)throw ContextBindingChanged("Context status authority differs");result.head.revision=integer(h[0]);result.head.covered_through_ordinal=integer(h[1]);if(!std::holds_alternative<std::nullptr_t>(h[2]))result.head.checkpoint_id=text(h[2]);}

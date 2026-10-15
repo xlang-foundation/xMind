@@ -50,6 +50,19 @@ differ from OpenCode's unauthenticated `/api/info`; the shared information
 capability and response fields match the pinned contract. This does not imply
 broader OpenCode API or product parity.
 
+## Native session deletion — 2026-10-15
+
+The native backend and CLI can now delete a settled session from the visible
+catalog. SQLite records a transactional tombstone so immutable context and
+audit records remain intact; normal session/history APIs return it as absent.
+Deletion rejects active runs and unresolved effects/context work, and detaches
+fork ancestry while keeping the child history. The HTTP/CLI, repository and
+local-view contracts exercise deletion, fork retention and the same-machine
+view credential. This is a reviewed OpenCode `session.remove` source candidate,
+not verified operation parity yet: xMind returns HTTP 200 with JSON `null`
+instead of OpenCode's 204, and visible browser and VS Code session controls are
+not connected to the operation.
+
 ## Graph coding restore — 2026-10-15
 
 Registered graph plans may now call native `restore_operation` when approved

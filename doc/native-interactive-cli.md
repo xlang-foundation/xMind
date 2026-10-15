@@ -41,6 +41,15 @@ and approve its proposed operation through the existing operation controls.
 The graph restore contract exercises this command against the real xlang3/SQLite
 backend and verifies that the file stays unchanged until approval.
 
+## Delete a conversation
+
+`delete-session SESSION` hides a settled conversation from the shared session
+catalog and normal history APIs. Its immutable context and audit records remain
+in SQLite. Deletion is rejected while a run, unresolved operation, context
+owner, compaction, or manual context request is active. A forked child remains
+usable after its source is removed; its parent link is cleared. The equivalent authenticated native endpoint is
+`DELETE /v1/sessions/{session_id}`.
+
 ## Selected workspace connection
 
 Use an explicit workspace when attaching the console to a local backend:

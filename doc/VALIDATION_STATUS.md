@@ -2641,3 +2641,19 @@ outputs: [initial native run](evidence/native-release-ctest-20261015.log),
 [final native run](evidence/native-release-ctest-final-20261015.log),
 [VS Code suite](evidence/vscode-client-tests-20261015.log) and
 [browser suite](evidence/browser-client-tests-20261015.log).
+
+## Session deletion lifecycle — 2026-10-15
+
+Session deletion is implemented across the native repository, HTTP API, CLI,
+and same-machine browser adapter. It is a durable soft delete: xMind hides the
+session from ordinary session/history APIs while retaining immutable context
+and audit records. Active runs, unresolved effects, and context maintenance
+block deletion; child forks remain usable after their source is deleted.
+Validation passed on the current Release build: HTTP/CLI and repository
+contracts, local-view contract, local-profile contract, eight schema and owner
+contracts, **368/368 VS Code tests**, and **13/13 browser adapter tests**.
+`git diff --check` passed. This does not yet add a visible webpage delete
+control. The OpenCode inventory audit reports **39 reviewed native candidates,
+1 operation-level parity verified, and 102 unmapped**; session removal remains
+an unverified candidate. The long server-info profile acceptance record is
+[`server-info-opencode-parity-20261015.json`](evidence/server-info-opencode-parity-20261015.json).

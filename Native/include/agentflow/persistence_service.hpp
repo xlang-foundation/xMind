@@ -38,6 +38,7 @@ public:
     std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);
     std::future<std::vector<Session>> sessions();
+    std::future<void> delete_session(std::string id);
     std::future<Run> create_run(std::string id,std::string session_id);
     std::future<std::optional<Run>> incoming_message(std::string message,std::string context,std::string identity,std::string content);
     std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});

@@ -14,6 +14,7 @@ public:
     httplib::Result Get(const std::string& route,const httplib::Headers& headers);
     httplib::Result Post(const std::string& route,const httplib::Headers& headers,
         const std::string& body,const std::string& content_type);
+    httplib::Result Delete(const std::string& route,const httplib::Headers& headers);
     void set_connection_timeout(int seconds,int micros){client_.set_connection_timeout(seconds,micros);}
     void set_read_timeout(int seconds,int micros){client_.set_read_timeout(seconds,micros);}
     void set_write_timeout(int seconds,int micros){client_.set_write_timeout(seconds,micros);}

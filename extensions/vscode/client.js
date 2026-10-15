@@ -198,6 +198,7 @@ class BackendClient {
     return validateConnectionProfiles(await this.request('/v1/connections',{profiles,expected_revision:current.revision}));
   }
   sessions() { return this.request('/v1/sessions'); }
+  deleteSession(id) { executionIdentity(id);return this.request(`/v1/sessions/${encodeURIComponent(id)}`,undefined,15000,'DELETE'); }
   activeSessions() { return this.request('/v1/sessions/active'); }
   skills() { return this.request('/v1/workspace/skills'); }
   commands() { return this.request('/v1/workspace/commands'); }

@@ -57,4 +57,7 @@ httplib::Result ConsoleTransport::Post(const std::string& route,const httplib::H
     }
     return client_.Post(route,headers,body,content_type);
 }
+httplib::Result ConsoleTransport::Delete(const std::string& route,const httplib::Headers& headers){
+    verify(headers);return client_.Delete(route,headers);
+}
 }

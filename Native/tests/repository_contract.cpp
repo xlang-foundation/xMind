@@ -144,6 +144,27 @@ int main(int argc,char** argv) {
             faults.execute("DROP TRIGGER reject_event");
             reopened.create_run("rollback","session");
             require(reopened.events("rollback").size()==1,"Fault must leave no orphan run or event");
+            reopened.create_session("delete-parent","session deletion fixture");
+            reopened.append_message("delete-parent","user",R"({"content":"Synthetic parent history"})");
+            reopened.fork_session("delete-child","delete-parent");
+            reopened.delete_session("delete-parent");
+            rejects<NotFound>([&]{reopened.session("delete-parent");});
+            require(reopened.history("delete-child").size()==1&&reopened.session("delete-child").parent_id.empty(),"Deleting a source session must retain the independent fork and detach its missing parent link");
+            reopened.create_session("delete-active","active deletion fixture");
+            reopened.create_run("delete-active-run","delete-active");
+            rejects<Conflict>([&]{reopened.delete_session("delete-active");});
+            reopened.transition("delete-active-run",RunState::queued,RunState::cancelled,R"({"reason":"contract_cleanup"})");
+            reopened.delete_session("delete-active");
+            reopened.create_session("delete-context","execution context cleanup fixture");
+            reopened.create_run("delete-context-run","delete-context");
+            reopened.transition("delete-context-run",RunState::queued,RunState::cancelled,R"({"reason":"contract_cleanup"})");
+            faults.execute("INSERT INTO context_scopes(kind,id) VALUES('execution','delete-context-run')");
+            faults.execute("INSERT INTO context_events(scope_kind,scope_id,owner_id,kind,payload) VALUES('execution','delete-context-run','delete-context-run','contract.fixture','{}')");
+            reopened.delete_session("delete-context");
+            require(faults.execute("SELECT id FROM context_scopes WHERE kind='execution' AND id='delete-context-run'").rows.size()==1&&faults.execute("SELECT seq FROM context_events WHERE scope_kind='execution' AND scope_id='delete-context-run'").rows.size()==1,"Session removal retains immutable execution context evidence while hiding the session");
+            const auto remaining_sessions=reopened.sessions();
+            require(std::none_of(remaining_sessions.begin(),remaining_sessions.end(),[](const auto& value){return value.id=="delete-context";}),"Deleted sessions disappear from the shared catalog");
+            require(faults.execute("PRAGMA foreign_key_check").rows.empty(),"Session removal must leave no dangling repository foreign keys");
         }
         std::cout<<"xlang3-backed repository contracts passed\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}

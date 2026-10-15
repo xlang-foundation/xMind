@@ -52,6 +52,7 @@ public:
     Session rename_session(const std::string& id,const std::string& title,const std::string& expected_title);
     Session session(const std::string& id);
     std::vector<Session> sessions();
+    void delete_session(const std::string& id);
     Run create_run(const std::string& id,const std::string& session_id);
     std::optional<Run> incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content);
     Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});

@@ -21,6 +21,7 @@ test('browser adapter forwards durable native view credentials across restart wi
     if(request.url==='/v1/view-sessions/current'){reply(mode==='unavailable'?503:200,{connected:true});return;}
     if(request.url==='/v1/view-sessions/revoke'){active=false;reply(200,{connected:false});return;}
     if(request.url==='/v1/health'){reply(200,{status:'ok'});return;}
+    if(request.url==='/v1/sessions/session'&&request.method==='DELETE'){assert.equal(input,'','Session deletion is forwarded without inventing a request body');reply(200,null);return;}
     if(request.url==='/v1/sessions/session/messages?limit=40'||request.url==='/v1/sessions/session/messages?limit=40&before=msg_12'){assert.equal(request.method,'GET');reply(200,{messages:[{id:'msg_1',seq:1,role:'user',data:{content:'Actual paginated history fixture'}}],has_more:false,next_before:null});return;}
     if(request.url==='/v1/sessions/session/inbox'){if(request.method==='GET'){reply(200,{items:[]});return;}assert.equal(request.method,'POST');assert.deepEqual(JSON.parse(input),{id:'inbox-item',content:'Queued while the run is active'});reply(202,{id:'inbox-item',session_id:'session',content:'Queued while the run is active',state:'queued',created_ms:1});return;}
     if(request.url==='/v1/sessions/session/messages/msg_1'){assert.equal(request.method,'GET');reply(200,{id:'msg_1',seq:1,role:'user',data:{content:'Actual single-message fixture'}});return;}
@@ -38,6 +39,7 @@ test('browser adapter forwards durable native view credentials across restart wi
     const cookie=login.headers.get('set-cookie').split(';')[0];assert.ok(!cookie.includes(master));assert.match(login.headers.get('set-cookie'),/HttpOnly; SameSite=Strict/);
     assert.equal((await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
     assert.equal(observed.at(-1).authorization,'View '+credential);assert.equal(observed.at(-1).origin,origin);
+    const deleted=await fetch(origin+'/v1/sessions/session',{method:'DELETE',headers:{Cookie:cookie,Origin:origin,'Sec-Fetch-Site':'same-origin'}});assert.equal(deleted.status,200);assert.equal(await deleted.json(),null);assert.equal(observed.at(-1).authorization,'View '+credential);assert.equal(observed.at(-1).input,'');
     const browsed=await fetch(origin+'/v1/workspace/files?path=src',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(browsed.status,200);assert.deepEqual(await browsed.json(),{path:'src',workspace_id:'windows-local-file-v1:synthetic',entries:[{name:'main.js',kind:'file'}],truncated:false});assert.equal(observed.at(-1).path,'/v1/workspace/files?path=src');assert.equal(observed.at(-1).authorization,'View '+credential);
     const found=await fetch(origin+'/v1/workspace/find?query=main&type=file',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(found.status,200);assert.deepEqual((await found.json()).entries,[{path:'src/main.js',type:'file'}]);assert.equal(observed.at(-1).authorization,'View '+credential);
     const folderFound=await fetch(origin+'/v1/workspace/folders/find?folder_id=windows-local-file-v1%3Asynthetic&query=main&type=file',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(folderFound.status,200);assert.equal((await folderFound.json()).folder_id,'windows-local-file-v1:synthetic');assert.equal(observed.at(-1).authorization,'View '+credential);
@@ -153,6 +155,7 @@ test('browser adapts a VS Code-attached single-workspace server without inventin
 test('event stream routes are read-only and exclude foreign path encodings',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  assert.equal(allowedApiRoute('/v1/sessions/session_1/messages','GET'),true,'The local browser may retrieve bounded native transcript pages');
+ assert.equal(allowedApiRoute('/v1/sessions/session_1','DELETE'),true,'The local browser may delete an explicitly selected native session');for(const method of ['GET','POST','PUT','PATCH','HEAD'])assert.equal(allowedApiRoute('/v1/sessions/session_1',method),false,'Session identity routes expose only the exact delete operation');assert.equal(allowedApiRoute('/v1/sessions/session_1/extra','DELETE'),false,'Session deletion cannot be extended to child routes');
  assert.equal(allowedApiRoute('/v1/sessions/active','GET'),true,'The local browser may inspect active native runs');for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute('/v1/sessions/active',method),false);
  assert.equal(allowedApiRoute('/v1/workspace/commands','GET'),true,'The local browser may read the native workspace command catalogue');
  assert.equal(allowedApiRoute('/v1/workspace/commands','POST'),false,'The command catalogue is read-only');
