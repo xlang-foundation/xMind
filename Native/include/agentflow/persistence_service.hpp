@@ -182,6 +182,7 @@ public:
     std::future<Operation> cancel_operation(std::string id,OperationSpec actual);
     std::future<Operation> expire_operation(std::string id);
     std::future<Operation> finish_operation(std::string id,OperationState outcome,std::string result_json);
+    std::future<Operation> reconcile_interrupted_process(std::string id,std::string actor,std::string note);
     std::future<CredentialMetadata> put_credential(std::string scope,std::string id,
         std::string purpose,std::string label,SecretBytes secret,std::int64_t expected_revision);
     std::future<std::vector<CredentialMetadata>> credentials(std::string scope);

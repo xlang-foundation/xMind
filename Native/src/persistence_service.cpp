@@ -383,6 +383,9 @@ std::future<Operation> PersistenceService::cancel_operation(std::string id,Opera
 std::future<Operation> PersistenceService::expire_operation(std::string id) {
     return impl_->submit([id=std::move(id)](Repository& repository){return repository.expire_operation(id);});
 }
+std::future<Operation> PersistenceService::reconcile_interrupted_process(std::string id,std::string actor,std::string note) {
+    return impl_->submit([id=std::move(id),actor=std::move(actor),note=std::move(note)](Repository& repository){return repository.reconcile_interrupted_process(id,actor,note);});
+}
 std::future<std::vector<CredentialMetadata>> PersistenceService::credentials(std::string scope) {
     return impl_->observe([scope=std::move(scope)](Repository& repository){return repository.credentials(scope);});
 }

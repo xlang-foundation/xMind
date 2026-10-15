@@ -182,3 +182,8 @@ test('synthetic stream peer forwards bytes before completion and detaches withou
   const until=Date.now()+2000;while(!detached&&Date.now()<until)await new Promise(yes=>setTimeout(yes,10));assert.equal(detached,true);assert.deepEqual(observed.map(value=>value.path),['/v1/runs/root/events/stream?after=7']);
  }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(yes=>peer.close(yes));}
 });
+test('local browser allows only authenticated POST reconciliation for saved process operations',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs'),path='/v1/operations/process-1/reconcile';
+ assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);
+ for(const invalid of ['/v1/operations/process-1/reconcile/extra','/v1/operations/a%2Fb/reconcile','/v1/operations/process-1/decision/reconcile'])assert.equal(allowedApiRoute(invalid,'POST'),false);
+});

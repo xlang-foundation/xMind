@@ -315,7 +315,18 @@ function operations(items){
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
     }
-    if(item.tool==='run_process'&&item.state==='uncertain')section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
+    if(item.tool==='run_process'&&item.state==='uncertain'){
+      section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
+      let receipt;try{receipt=JSON.parse(item.result_json);}catch{}
+      if(receipt?.process_tree_retired===true&&receipt?.output_artifact?.state==='complete'){
+        section.append(node('p','Inspect the workspace and the saved command output before releasing the quarantine. This records that you accept possible side effects; it does not claim the command had none.','inspection-note'));
+        const note=node('textarea');note.rows=2;note.maxLength=1024;note.placeholder='What did you inspect?';note.setAttribute('aria-label','Process reconciliation note');section.append(note);
+        const acknowledge=node('input');acknowledge.type='checkbox';const label=node('label','I inspected the workspace and accept possible command side effects.');label.prepend(acknowledge);section.append(label);
+        const reconcile=node('button','Acknowledge and release workspace quarantine');reconcile.disabled=true;
+        const update=()=>{reconcile.disabled=!acknowledge.checked||note.value.trim().length<16;};acknowledge.onchange=update;note.oninput=update;
+        reconcile.onclick=()=>{reconcile.disabled=true;api.postMessage({type:'reconcile-process',id:item.id,note:note.value.trim()});};section.append(reconcile);
+      }
+    }
     operationExtras(section,item,reviewable);operationRows.set(item.id,{signature,section});sections.push(section);
   }
   for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);

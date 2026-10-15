@@ -71,6 +71,16 @@ try {
   assert.equal((await request(recoveryPath,{})).status,404,'Inspection has no mutation route');
   assert.equal((await request('/v1/operations/missing/inspection')).status,404);
   assert.equal((await request('/v1/operations/allow-edit/inspection')).status,409);
+  const reconcilePath='/v1/operations/uncertain-process/reconcile';
+  assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'},{Authorization:'Bearer wrong'})).status,401);
+  assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'})).status,400,'Possible side effects require explicit acknowledgment');
+  assert.equal((await request(reconcilePath,{note:'short',acknowledge_possible_side_effects:true})).status,400,'Reconciliation requires an audit note');
+  const reconciled=await request(reconcilePath,{note:'Inspected workspace and command output; accepting possible side effects.',acknowledge_possible_side_effects:true});
+  assert.equal(reconciled.status,200);assert.equal(reconciled.data.state,'failed');
+  const reconciliation=JSON.parse(reconciled.data.result_json).reconciliation;assert.equal(reconciliation.actor,'local-owner');assert.equal(reconciliation.note,'Inspected workspace and command output; accepting possible side effects.');assert.ok(Number.isSafeInteger(reconciliation.reconciled_unix_ms));assert.equal(reconciliation.acknowledges_possible_side_effects,true);
+  assert.equal((await request(reconcilePath,{note:'Inspected workspace and command output; accepting possible side effects.',acknowledge_possible_side_effects:true})).status,409,'A reconciliation cannot be replayed');
+  assert.ok(cli('events','run-process-recovery').some(event=>event.kind==='operation.reconciled'&&event.data.actor==='local-owner'));
+  assert.equal((await request('/v1/operations/uncertain-edit/reconcile',{note:'Inspected workspace and output; accepting possible effects.',acknowledge_possible_side_effects:true})).status,409,'File recovery cannot use process reconciliation');
   const beforeInspection=cli('inspect-edit','uncertain-edit');
   assert.deepEqual(await hostClient.inspectEdit('uncertain-edit').then(value=>({...value,observed_unix_ms:beforeInspection.observed_unix_ms})),beforeInspection,'Actual editor host client uses the compiled native inspection route');
   assert.equal(beforeInspection.match,'before');assert.equal(beforeInspection.same_file,true);

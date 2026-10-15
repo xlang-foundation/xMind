@@ -193,6 +193,10 @@ public:
     Operation cancel_operation(const std::string& id,const OperationSpec& actual);
     Operation expire_operation(const std::string& id);
     Operation finish_operation(const std::string& id,OperationState outcome,const std::string& result_json);
+    // Explicitly releases a retired, fully captured run_process quarantine.
+    // The operator note is durable audit data; this never claims the command
+    // had no side effects or retries it.
+    Operation reconcile_interrupted_process(const std::string& id,const std::string& actor,const std::string& note);
     // Backend-internal operations. Service must authorize scope before calling.
     // expected_revision=0 creates; positive revisions rotate with stale-write rejection.
     // Deleted identities are retired permanently to prevent stale-reference reuse.

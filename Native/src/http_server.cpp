@@ -425,7 +425,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|commands|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|commands|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
@@ -1416,6 +1416,13 @@ struct HttpServer::Impl {
                 reply(response,encode(recovery->inspect_uncertain(identifier(request.matches[1]))));
             }));
         }
+        server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/reconcile)",guarded([this](const Request& request,Response& response) {
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Process reconciliation request exceeds limits");
+            const auto value=body(request,{"note","acknowledge_possible_side_effects"});
+            if(!value.contains("acknowledge_possible_side_effects")||!value["acknowledge_possible_side_effects"].is_boolean()||!value["acknowledge_possible_side_effects"].get<bool>())throw std::invalid_argument("Explicit acknowledgment of possible process side effects is required");
+            const auto note=string_field(value,"note",1024);
+            reply(response,encode(persistence.reconcile_interrupted_process(identifier(request.matches[1]),"local-owner",note).get()));
+        }));
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/decision)",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"decision"});const auto decision=string_field(value,"decision",8);
             if(decision!="allow" && decision!="deny") throw std::invalid_argument("Decision must be allow or deny");

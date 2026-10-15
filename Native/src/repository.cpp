@@ -2757,6 +2757,26 @@ Operation Repository::finish_operation(const std::string& id,OperationState outc
     changed_one(db.execute("UPDATE operations SET state=?,result=? WHERE id=? AND state='executing'",{to_string(outcome),result_json,id}));
     result.state=outcome;result.result_json=result_json;impl_->operation_state_event(result);transaction.commit();return result;
 }
+Operation Repository::reconcile_interrupted_process(const std::string& id,const std::string& actor,const std::string& note) {
+    identifier(actor);if(actor.size()>4096)throw std::invalid_argument("Controller identity exceeds its limit");
+    if(note.size()<16||note.size()>1024||note.find_first_of("\r\n")!=std::string::npos||note.find('\0')!=std::string::npos)throw std::invalid_argument("Reconciliation note must be 16 to 1,024 characters on one line");
+    try{(void)Json(actor).dump();(void)Json(note).dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid reconciliation audit text");}
+    auto& db=impl_->database;Transaction transaction(db);auto result=operation(id);
+    if(result.state!=OperationState::uncertain||result.spec.tool!="run_process")throw Conflict("Only an uncertain process operation can be reconciled here");
+    const auto owner=run(result.spec.run_id);if(owner.state!=RunState::failed&&owner.state!=RunState::cancelled)throw Conflict("An active process owner cannot be reconciled");
+    Json receipt;try{receipt=Json::parse(result.result_json);}catch(const Json::exception&){throw DatabaseError("Saved process receipt is invalid");}
+    if(!receipt.is_object()||receipt.value("process_tree_retired",false)!=true||!receipt.contains("output_artifact")||!receipt["output_artifact"].is_object()||
+       receipt["output_artifact"].value("operation_id",std::string{})!=id||receipt["output_artifact"].value("state",std::string{})!="complete")
+        throw Conflict("Process receipt does not prove a retired process tree and complete output capture");
+    const auto artifact=db.execute("SELECT run_id,state FROM process_output_artifacts WHERE operation_id=?",{id}).rows;
+    if(artifact.size()!=1||text(artifact[0][0])!=result.spec.run_id||text(artifact[0][1])!="complete")throw Conflict("Complete process output artifact is unavailable");
+    const auto timestamp=now_ms();receipt["reconciliation"]={{"actor",actor},{"note",note},{"reconciled_unix_ms",timestamp},{"acknowledges_possible_side_effects",true}};
+    const auto encoded=receipt.dump();if(encoded.size()>1024*1024)throw DatabaseError("Reconciled process receipt exceeds its limit");
+    changed_one(db.execute("UPDATE operations SET state='failed',result=? WHERE id=? AND state='uncertain'",{encoded,id}));
+    result.state=OperationState::failed;result.result_json=encoded;impl_->operation_state_event(result);
+    impl_->event(result.spec.run_id,"operation.reconciled",Json{{"operation_id",id},{"tool",result.spec.tool},{"actor",actor},{"reconciled_unix_ms",timestamp},{"acknowledges_possible_side_effects",true}}.dump());
+    transaction.commit();return result;
+}
 std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     if(!owner.covers(impl_->path)) throw Conflict("Recovery requires this database's owner lease");
     auto& db=impl_->database; Transaction transaction(db);

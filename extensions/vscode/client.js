@@ -311,6 +311,10 @@ class BackendClient {
     return value;
   }
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
+  reconcileProcess(id,note) {
+    executionIdentity(id);if(typeof note!=='string'||note.length<16||note.length>1024||/[\r\n\0]/.test(note))throw new Error('Enter a one-line reconciliation note of at least 16 characters.');
+    return this.request(`/v1/operations/${encodeURIComponent(id)}/reconcile`,{note,acknowledge_possible_side_effects:true});
+  }
   inspectA2aTask(id, includeArtifacts = false) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, includeArtifacts ? {include_artifacts:true} : {}); }
   resubscribeA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/resubscribe`, {}, 30000); }
   cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }
