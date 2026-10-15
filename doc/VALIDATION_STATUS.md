@@ -2700,11 +2700,13 @@ passed **372/372 VS Code tests** and **123/123 browser tests**. The `/info`
 acceptance record's source and build hashes were refreshed against this build,
 and `node Tools/audit-opencode.mjs` passed with **141 operations, 39 reviewed
 native candidates, 102 unmapped, and 1 operation-level parity verified**.
-`session.remove` now removes direct child forks atomically with their parent;
-the Release repository and HTTP/CLI contracts pass. The operation remains a
-source candidate because xMind retains internal audit tombstones and rejects
-active work rather than interrupting and waiting for idle as upstream does.
-Installed VS Code acceptance is still open.
+`session.remove` now interrupts active root runs and waits up to 30 seconds for
+the parent and direct child forks to settle before removal. Release contracts
+passed: repository (**1/1**), HTTP/CLI (**1/1**), agent HTTP (**1/1**, using a
+synthetic held provider peer), and local profile (**1/1**, 307.37 s). The
+operation remains a source candidate because xMind retains internal audit
+tombstones and rejects unresolved effects or running terminals. Installed VS
+Code acceptance is still open.
 
 ## Conversation model selection — 2026-10-15
 

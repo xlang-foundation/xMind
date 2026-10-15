@@ -52,18 +52,18 @@ broader OpenCode API or product parity.
 
 ## Native session deletion — 2026-10-15
 
-The native backend and CLI delete a settled session and its direct child forks
-from the visible catalog. SQLite records transactional tombstones and retains
-immutable context and audit records. The operation is atomic across the parent
-and direct children: active runs, unresolved effects, or context work on any
-affected session reject the full deletion. Focused Release repository and
-HTTP/CLI contracts verify child removal, preserved audit rows, and no partial
-deletion when a child is active. The browser and VS Code confirmation controls
-continue to target only the selected session. This remains a reviewed
-OpenCode `session.remove` source candidate, not verified operation parity:
-upstream interrupts execution and waits for idle, while xMind currently rejects
-active work. xMind also keeps its internal audit tombstones. Full lifecycle
-comparison and installed-client acceptance remain open.
+The native backend and CLI delete a session and its direct child forks from the
+visible catalog. SQLite records transactional tombstones and retains immutable
+context and audit records. The operation is atomic across the parent and direct
+children. It cancels active root runs and waits up to 30 seconds for every run
+in the affected sessions to settle; unresolved effects, context work, or a
+running terminal rejects the full deletion. Release repository, HTTP/CLI, and
+agent HTTP contracts cover child removal, preserved audit rows, atomic refusal,
+and cancellation through a held synthetic provider peer. The browser and VS Code
+confirmation controls continue to target only the selected session. This
+remains a reviewed OpenCode `session.remove` source candidate, not verified
+operation parity: upstream closes session transports and does not expose
+xMind's timeout or audit tombstones. Installed-client acceptance is open.
 
 ## Graph coding restore — 2026-10-15
 

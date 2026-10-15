@@ -14,17 +14,17 @@
     {
       "name": "native_http_cli_contract",
       "result": "passed",
-      "durationSeconds": 3.65
+      "durationSeconds": 3.5
     },
     {
       "name": "native_local_profile_contract",
       "result": "passed",
-      "durationSeconds": 309.73
+      "durationSeconds": 307.37
     }
   ],
   "execution": {
     "command": "ctest --test-dir build/native-dynamic-plan -C Release -R \"^(native_http_cli_contract|native_local_profile_contract)$\" --output-on-failure",
-    "durationSeconds": 313.4,
+    "durationSeconds": 310.89,
     "result": "passed"
   },
   "contractChecks": {
@@ -37,7 +37,7 @@
   },
   "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
   "sourceSha256": {
-    "Native/src/http_server.cpp": "6efd0c8b720dc9aaf631c768ee3ffebd5b55c714396e50f349367ba65e5e1481",
+    "Native/src/http_server.cpp": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
     "Native/src/repository.cpp": "aa8ea489a7799a3d8d922f92e9ea3b6d6a2f9a17328fcc1738a92e8645d3d11f",
     "Native/apps/cli_main.cpp": "a8e5124bb0f0d0ac1bda67122cc4926197ff2bb96afacd8eacac1439c506023f",
     "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
@@ -46,8 +46,8 @@
     "Native/CMakeLists.txt": "06f0686c64c70949e891d78465e5eebf557b776ffae0914fb84add8422203f53"
   },
   "buildArtifactSha256": {
-    "build/native-dynamic-plan/Release/xmind.exe": "5a234c2cea872d054be1ec8ffdb8355be1c7226754454c77aecd9860483d6f82",
-    "build/native-dynamic-plan/Release/xmind_server.exe": "9a0f7f7d5a44ec170d1d413e0de9300c1e003ee68f5b912fc2fee216ab5103fe",
+    "build/native-dynamic-plan/Release/xmind.exe": "0582393785d5f360b36882705a6149a7744cd7c73c2915102bf9604ce3ba737e",
+    "build/native-dynamic-plan/Release/xmind_server.exe": "92ec3ba88fbe3444f1d4b475847a172a6c10175f677152263f82dc584ba83663",
     "build/native-dynamic-plan/Release/xmind_cli.exe": "4e54626b57ca3d01cf96bd23ae44c8dde521b8cd104fa3955afea0918f955856",
     "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
   }

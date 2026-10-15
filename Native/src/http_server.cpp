@@ -1111,8 +1111,20 @@ struct HttpServer::Impl {
         }));
         server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||!request.body.empty())throw std::invalid_argument("Session deletion accepts no query parameters or request body");
-            if(terminals)for(const auto& terminal:terminals->list(request.matches[1]))if(terminal.running)throw Conflict("Session has a running terminal and cannot be deleted");
-            persistence.delete_session(identifier(request.matches[1])).get();response.status=204;
+            const auto session=identifier(request.matches[1]);std::vector<std::string> affected{session};
+            for(const auto& item:persistence.sessions().get())if(item.parent_id==session)affected.push_back(item.id);
+            if(terminals)for(const auto& target:affected)for(const auto& terminal:terminals->list(target))if(terminal.running)throw Conflict("Session tree has a running terminal and cannot be deleted");
+            const auto active=[](RunState state){return state==RunState::queued||state==RunState::running||state==RunState::paused;};
+            for(const auto& target:affected)for(const auto& run:persistence.runs(target).get())if(active(run.state)&&run.parent_id.empty()){
+                if(!executor)throw Conflict("Session tree has active work but no execution owner can interrupt it");
+                try{executor->cancel(run.id);}catch(const Conflict&){const auto current=persistence.run(run.id).get();if(active(current.state))throw;}catch(const NotFound&){const auto current=persistence.run(run.id).get();if(active(current.state))throw;}
+            }
+            const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
+            for(;;){bool running=false;for(const auto& target:affected)for(const auto& run:persistence.runs(target).get())running=running||active(run.state);
+                if(!running)break;if(std::chrono::steady_clock::now()>=deadline)throw Conflict("Session interruption did not settle within 30 seconds; the session was retained");
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            }
+            persistence.delete_session(session).get();response.status=204;
         }));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"id","title"});
