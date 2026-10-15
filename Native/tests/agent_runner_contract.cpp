@@ -228,6 +228,35 @@ int main(int argc,char** argv) {
         rejects<DatabaseError>([&]{store.complete_run("atomic",R"({"content":"Answer"})").get();});
         require(store.run("atomic").get().state==RunState::running && store.history("atomic").get().size()==1,"Final answer/state must roll back together");
         faults.execute("DROP TRIGGER reject_completion");store.complete_run("atomic",R"({"content":"Answer"})").get();
+        store.create_session("blocker-session","Uncertain process effect fixture").get();
+        store.start_prompt_run("blocker-run","blocker-session",R"({"content":"Synthetic uncertain process receipt"})").get();
+        store.transition("blocker-run",RunState::queued,RunState::running).get();
+        OperationSpec blocker_spec{"blocker-run",WorkspaceTools(argv[4]).identity(),"run_process",R"({"background":true,"persistent":false})",{"process-profile:powershell"}};
+        const auto blocker_expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+60000;
+        store.request_operation("blocker-operation",blocker_spec,blocker_expiry).get();
+        store.decide_operation("blocker-operation",OperationDecision::allow,"fixture-controller").get();
+        store.claim_operation("blocker-operation",blocker_spec).get();
+        store.finish_operation("blocker-operation",OperationState::uncertain,R"({"reason":"fixture_quarantine"})").get();
+        store.transition("blocker-run",RunState::running,RunState::failed,R"({"reason":"fixture_quarantine"})").get();
+        auto quarantined=settings;quarantined.provider.endpoint=base+"/blocked-effect";quarantined.approved_edits=true;
+        store.create_session("blocked-effect","Quarantined workspace edit reporting").get();
+        AgentRunner blocked_runner(store,quarantined);blocked_runner.start("blocked-effect","blocked-effect","Please make the requested workspace edit");
+        auto blocked_run=std::async(std::launch::async,[&]{return blocked_runner.execute("blocked-effect");});std::optional<Operation> blocked_proposal;
+        const auto blocked_deadline=std::chrono::steady_clock::now()+5s;
+        while(std::chrono::steady_clock::now()<blocked_deadline&&!blocked_proposal){
+            if(blocked_run.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Quarantined edit run ended before approval: "+to_string(blocked_run.get().state));
+            for(const auto& operation:store.operations("blocked-effect").get())if(operation.state==OperationState::awaiting_approval){blocked_proposal=operation;break;}
+            if(!blocked_proposal)std::this_thread::sleep_for(5ms);
+        }
+        require(blocked_proposal.has_value(),"Quarantined edit must still use the normal controller approval");
+        store.decide_operation(blocked_proposal->id,OperationDecision::allow,"fixture-controller").get();
+        require(blocked_run.get().state==RunState::completed,"An uncertain prior effect must reach the model as a tool result instead of failing opaquely");
+        const auto blocked_history=store.history("blocked-effect").get();require(blocked_history.size()==4,"The blocked effect must remain in the ordinary persisted tool loop");
+        const auto blocked_result=Json::parse(Json::parse(blocked_history[2].json).at("content").get<std::string>());
+        require(blocked_result.at("error").at("code")=="effect_resource_uncertain"&&blocked_result.at("error").at("message").get<std::string>().find("blocker-operation")!=std::string::npos,"The model-visible error must identify the unresolved effect without authorizing a write");
+        const auto blocked_operations=store.operations("blocked-effect").get();
+        require(store.operation("blocker-operation").get().state==OperationState::uncertain&&blocked_operations.size()==1&&blocked_operations[0].state==OperationState::cancelled,"The earlier effect must remain quarantined and the blocked edit proposal must be cancelled");
+        require(WorkspaceTools(argv[4]).read_file("README.md").content=="Actual file content written by fixture\n","A blocked approved edit must not alter workspace bytes");
         store.close();
         {Repository reopened(argv[1],roots);require(reopened.run("main").state==RunState::completed && reopened.history("main").size()==4,"Agent state/conversation must survive reopen");}
         std::cout<<"Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called\n";return 0;

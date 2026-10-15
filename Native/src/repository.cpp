@@ -2718,9 +2718,9 @@ Operation Repository::claim_operation(const std::string& id,const OperationSpec&
         // claims, so a wait cannot obscure a quarantined remote domain.
         bool busy=false;
         for(const auto& resource:resources) {
-            const auto blocked=db.execute("SELECT o.state FROM operation_resources r JOIN operations o ON o.id=r.operation_id WHERE r.resource=? AND o.state IN ('executing','uncertain') AND o.id<>? ORDER BY CASE o.state WHEN 'uncertain' THEN 0 ELSE 1 END LIMIT 1",{resource,id}).rows;
+            const auto blocked=db.execute("SELECT o.state,o.id FROM operation_resources r JOIN operations o ON o.id=r.operation_id WHERE r.resource=? AND o.state IN ('executing','uncertain') AND o.id<>? ORDER BY CASE o.state WHEN 'uncertain' THEN 0 ELSE 1 END LIMIT 1",{resource,id}).rows;
             if(!blocked.empty()) {
-                if(text(blocked[0][0])=="uncertain")throw WorkspaceEffectUncertain("Effect resource has an uncertain operation");
+                if(text(blocked[0][0])=="uncertain")throw WorkspaceEffectUncertain("Effect resource is quarantined by uncertain operation "+text(blocked[0][1]));
                 busy=true;
             }
         }

@@ -888,6 +888,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const DelegationCapacityUnavailable&){output={{"error",{{"code","delegation_capacity_unavailable"},{"message","No children were admitted; the native leaf queue is full"}}}};}
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
+                catch(const WorkspaceEffectUncertain& error) {output={{"error",{{"code","effect_resource_uncertain"},{"message",std::string(error.what())+". No effect was dispatched; inspect and reconcile the earlier operation before retrying."}}}};}
                 catch(const McpCatalogueChanged&) {refresh_mcp_after_turn=true;output={{"error",{{"code","mcp_catalogue_changed"},{"message","MCP catalogue changed before dispatch; no effect occurred. Available tools were refreshed; reconsider this call."}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
                 catch(const A2aEffectNotDispatched&) {output={{"error",{{"code","a2a_not_dispatched"},{"message","Remote A2A request was not dispatched"}}}};}
