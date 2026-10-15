@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-15",
+  "xmind_commit": "2c3b8c70c030ae0388d0dae0fffc8a3bd026b7ea",
+  "xlang3_commit": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "sdk": "@a2a-js/sdk 1.3.0",
+  "build": {
+    "configuration": "Release",
+    "generator": "Visual Studio 18 2026",
+    "directory": "build/goal-current-a2a",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "server_sha256": "A0D238DFAF8833159EAB2F1407A714AEFC4353F19F3B61A758A49EC0511BB881",
+    "outbound_contract_sha256": "3489E6D209D1B34A24B8934AB632C697B7EFEB6A6AB9775808BE940CE183B178"
+  },
+  "contracts": [
+    {
+      "name": "native_a2a_client_sdk_contract",
+      "direction": "xMind native outbound client -> independent official SDK 1.3.0 server peer",
+      "result": "passed",
+      "scope": [
+        "reject missing bearer credentials",
+        "discover authenticated AgentCard",
+        "SendMessage and GetTask",
+        "preserve an SDK-produced text artifact",
+        "consume wrapped task/statusUpdate SendStreamingMessage events",
+        "CancelTask"
+      ],
+      "ctest_seconds": 0.54
+    },
+    {
+      "name": "native_a2a_v1_http_contract",
+      "direction": "independent official SDK 1.3.0 client -> xMind native server",
+      "result": "passed",
+      "scope": [
+        "official SDK discovery, send, get, list, cancel, stream and subscribe",
+        "A2A 1.0 and supported 0.3 compatibility wire",
+        "task history and cross-version retry persistence through SQLite restart",
+        "text and structured-data part/metadata preservation",
+        "current and legacy inline UTF-8 text file parts",
+        "same-context terminal referenceTaskIds",
+        "rejection of malformed, binary, unsupported-media and remote-URL file parts",
+        "native AgentRunner reaches an independent synthetic provider endpoint"
+      ],
+      "ctest_seconds": 1.36
+    }
+  ],
+  "aggregate": {
+    "passed": 2,
+    "failed": 0,
+    "command": "ctest --test-dir build/goal-current-a2a -C Release -R 'native_a2a_(client_sdk|v1_http)_contract' --output-on-failure"
+  },
+  "limitations": [
+    "Peer and provider behavior is test-fixture behavior; this is not a live external service or model acceptance.",
+    "JSON-RPC HTTP is the tested binding; this does not establish every transport, security scheme, MIME type, or A2A 1.0.1 requirement.",
+    "This does not establish installed VS Code or browser-rendered A2A workflows, nor full product parity."
+  ]
+}

@@ -1,5 +1,25 @@
 # Current native validation
 
+## Bidirectional official A2A SDK interoperability — 2026-10-15
+
+Fresh Visual Studio 18 Release binaries built from xMind `2c3b8c7` against
+xlang3 `fcecf499` pass both directions of the pinned `@a2a-js/sdk` 1.3.0
+interop check (**2/2 CTests**). The native outbound client interoperates with
+an independently implemented official SDK server peer for authenticated
+AgentCard discovery, send/get, text artifact retrieval, streaming and
+cancellation. Inbound, the official SDK client exercises xMind's actual local
+native server through discovery, send/get/list/cancel, stream/subscribe,
+version compatibility, multipart history, UTF-8 text attachments, task
+references and SQLite restart. The server contract also reaches a synthetic
+provider endpoint through the native AgentRunner.
+
+This closes the pending hosted native build for these two contracts and
+establishes bidirectional SDK wire evidence. The peer and provider are test
+fixtures: live third-party agents, other bindings/security modes, installed
+VS Code or rendered browser workflows, and complete A2A compliance remain
+unverified. Exact revisions, binary hashes, test scope and command are in
+[`native-a2a-sdk-bidirectional-20261015.json`](evidence/native-a2a-sdk-bidirectional-20261015.json).
+
 ## Approved coding restore — 2026-10-15
 
 The Release server and restore contract build successfully. The new native
