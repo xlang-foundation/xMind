@@ -8264,7 +8264,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/agents",
         "sourceAnchor": "executor->agent_definitions",
         "gap": "Persisted ID, display name, description, revision, model, mode, hidden and default metadata are returned; permissions and source metadata are omitted from catalogue entries.",
@@ -8374,7 +8374,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/agents/{id}",
         "sourceAnchor": "executor->agent_definition",
         "gap": "Persisted ordered allow/deny rules are returned and enforced from session/graph snapshots; OpenCode interactive asks, saved grants, source metadata and complete permission lifecycle remain incomplete.",
@@ -8499,7 +8499,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/workspace/commands; POST /v1/sessions/{id}/commands; browser, VS Code and console slash-command dispatch",
         "sourceAnchor": "server.Get(\"/v1/workspace/commands\"",
         "gap": "Workspace Markdown prompt commands support nested IDs, descriptions and bounded argument substitution across native single-agent or selected graph runs. Plugin and dynamic command providers, autocomplete and OpenCode command-source/configuration parity remain incomplete.",
@@ -9232,7 +9232,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "Native per-run durable event observation",
         "sourceAnchor": "persistence.events",
         "gap": "Per-run event reads support client polling; upstream global/location subscription semantics remain incomplete.",
@@ -9395,7 +9395,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/provider/configuration",
         "sourceAnchor": "\"/v1/provider/configuration\"",
         "gap": "Optimistic provider enrollment exists; general effective configuration precedence and reload remain incomplete.",
@@ -11098,7 +11098,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/sessions/{id}/export; xmind_cli export-session",
         "sourceAnchor": "persistence.export_session",
         "gap": "Versioned xMind archives preserve the title, selected agent snapshot and settled user-visible messages; parent/fork, workspace/provider profile, workspace skills, full OpenCode metadata and sanitize behavior remain incomplete.",
@@ -11505,7 +11505,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/runs/{id}/events",
         "sourceAnchor": "persistence.events",
         "gap": "Run events are not a complete upstream session log with its filtering and response contract.",
@@ -12213,7 +12213,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/sessions/import; xmind_cli import-session",
         "sourceAnchor": "persistence.import_session",
         "gap": "Version 1 and 2 archives import atomically with fresh local IDs and selected agent snapshots; original session identity, parent/fork, workspace/provider binding and full OpenCode typed metadata remain incomplete.",
@@ -12594,7 +12594,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/workspace/find; native find_files Agent tool",
         "sourceAnchor": "\"/v1/workspace/find\"",
         "gap": "Native bounded fuzzy path search, multi-folder workspace scope and browser/VS Code result previews exist; exact OpenCode ranking/location semantics, response equivalence and CLI navigation remain unverified.",
@@ -12970,7 +12970,7 @@
       "nativeStatus": "verified-operation-parity",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/info; xmind info",
         "sourceAnchor": "\"/v1/info\"",
         "gap": "The pinned response contract is exercised through HTTP and CLI; xMind deliberately requires its local owner token, unlike the upstream unauthenticated metadata route.",
@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "db19c24d4f083d979cf7337de116b1b0f721412d33ddafce70f956c55863c4e1",
+          "evidenceSha256": "5539a57d79aae36d7d8b5a27061e34a55a485246caecace4db26c0d0932397e8",
           "tests": [
             {
               "name": "native_http_cli_contract",
@@ -14460,7 +14460,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/mcp/servers",
         "sourceAnchor": "\"/v1/mcp/servers\"",
         "gap": "Saved stdio server metadata exists; upstream connection lifecycle fields, HTTP/OAuth and live model/tool acceptance remain incomplete.",
@@ -14669,7 +14669,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/models; POST /v1/provider/profiles/models",
         "sourceAnchor": "\"/v1/models\"",
         "gap": "Native OpenAI Chat/Responses, Anthropic Messages, Gemini GenerateContent, DeepSeek Chat, xAI Responses, Mistral Chat Completions and OpenRouter catalogue discovery exist; broad per-model capability acceptance and upstream catalogue fields remain incomplete.",
@@ -14968,7 +14968,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Only run-scoped operations exist; a global/location pending permission catalogue is absent.",
@@ -15724,7 +15724,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/provider/profiles",
         "sourceAnchor": "\"/v1/provider/profiles\"",
         "gap": "An encrypted multi-provider profile registry exposes OpenAI Chat/Responses, Anthropic, Gemini, DeepSeek, xAI, Mistral and OpenRouter routes; upstream provider fields, broad provider coverage and per-model acceptance remain incomplete.",
@@ -15844,7 +15844,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/provider/profiles",
         "sourceAnchor": "\"/v1/provider/profiles\"",
         "gap": "Public saved profile metadata exists; the upstream provider-by-ID response and broader native provider behavior remain incomplete.",
@@ -17059,7 +17059,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/sessions",
         "sourceAnchor": "\"/v1/sessions\"",
         "gap": "Location/project scoping, filters and pagination remain to be compared.",
@@ -17272,7 +17272,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/sessions",
         "sourceAnchor": "persistence.create_session",
         "gap": "The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.",
@@ -17448,10 +17448,10 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "DELETE /v1/sessions/{id}; xmind_cli delete-session; browser and VS Code confirmation controls",
         "sourceAnchor": "server.Delete(R\"(/v1/sessions/([A-Za-z0-9_-]+))\"",
-        "gap": "Deletion returns 204, interrupts and waits up to 30 seconds for active root runs in the session and direct child forks, and removes direct forks from the visible catalog. xMind retains audit tombstones and rejects unresolved effects or running terminals; upstream transport-close behavior and complete lifecycle parity remain open. Installed-client acceptance is pending.",
+        "gap": "Deletion returns 204, interrupts and waits up to 30 seconds for active root runs in the session and direct child forks, removes direct forks from the visible catalog, and closes their local terminals. xMind retains audit tombstones and rejects unresolved effects; the timeout/error semantics and transport-close equivalence remain unverified. Installed-client acceptance is pending.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -17524,7 +17524,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/sessions/{id}",
         "sourceAnchor": "persistence.session",
         "gap": "The native single-record endpoint returns ID, title and fork ancestry; full OpenCode session metadata and response parity remain incomplete.",
@@ -17616,7 +17616,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/sessions/{id}/title",
         "sourceAnchor": "persistence.rename_session",
         "gap": "Only optimistic title updates exist; other upstream session metadata changes remain incomplete.",
@@ -18528,7 +18528,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/sessions/{id}/fork; xmind_cli fork-session; guarded browser and VS Code per-message fork controls",
         "sourceAnchor": "persistence.fork_session",
         "gap": "Durable full/before-message transcript branches, ancestry and agent/workspace-skill snapshots exist; browser and native view authorization expose only the exact POST fork route. Full upstream Session.Info metadata and complete response parity remain incomplete.",
@@ -19573,7 +19573,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/sessions/{id}/interrupt; POST /v1/runs/{id}/cancel; xmind_cli session-interrupt",
         "sourceAnchor": "executor->cancel",
         "gap": "Session-level cancellation returns {interrupted:boolean} and is covered for active, idle and missing sessions. The pinned upstream resume=true behavior for steering input and queued control items is not implemented; xMind rejects resume=true.",
@@ -19682,7 +19682,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/sessions/{id}/messages; xmind_cli history-page",
         "sourceAnchor": "persistence.history_page",
         "gap": "SQL-bounded latest-page retrieval and stable session-scoped before boundaries exist; OpenCode typed message/part projection, filter/order controls, opaque cursor semantics and full response parity remain incomplete.",
@@ -19970,7 +19970,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET/POST /v1/sessions/{id}/model; browser and VS Code model selectors; xmind chat /model",
         "sourceAnchor": "executor->select_session_model",
         "gap": "A revisioned SQLite selection is bound to the provider profile and route, survives reopen, is copied to forks, drives single-agent and graph runs, and can reset to the active profile default. OpenCode accepts {model:{providerID,modelID}} and returns 204; xMind uses its native provider/model fields and revision bindings and returns the saved state, so request/response wire parity remains incomplete.",
@@ -20174,7 +20174,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Run-scoped effect proposals exist; full session permission categories and lifecycle remain incomplete.",
@@ -20535,7 +20535,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/operations/{id}/decision",
         "sourceAnchor": "persistence.decide_operation",
         "gap": "Single-use allow/deny exists; upstream saved rules and permission category behavior remain incomplete.",
@@ -20658,7 +20658,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/runs",
         "sourceAnchor": "executor->submit_model",
         "gap": "Native model/tool admission exists; attachments, queued input and upstream session input ordering remain incomplete.",
@@ -21520,7 +21520,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/sessions/active",
         "sourceAnchor": "RunState::running",
         "gap": "Returns the server-wide map of sessions with an executing persisted run; OpenCode uses a process-owned execution set, so ownership and cross-process semantics remain to be compared.",
@@ -22293,7 +22293,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/vcs/info",
         "sourceAnchor": "executor->vcs_info",
         "gap": "Opened-workspace Git provider and current/default branch metadata; remote-provider identity and full upstream VCS semantics remain incomplete.",
@@ -22400,7 +22400,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/vcs/base",
         "sourceAnchor": "executor->vcs_base",
         "gap": "Infers a default or reflog branch base for review; ambiguous histories return null and require the caller to provide a base for diff.",
@@ -22524,7 +22524,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/vcs/branches",
         "sourceAnchor": "executor->vcs_info",
         "gap": "Lists local Git branches inside the opened workspace; query search/limit and remote branches remain incomplete.",
@@ -22661,7 +22661,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/vcs/diff",
         "sourceAnchor": "executor->vcs_diff",
         "gap": "Returns bounded working, branch or committed Git patches and line counts for the opened workspace; advanced rename, binary and provider parity remain incomplete.",
@@ -22812,7 +22812,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "POST /v1/vcs/init",
         "sourceAnchor": "executor->initialize_vcs",
         "gap": "Bounded native Git initialization is scoped to the opened workspace; other VCS providers remain unsupported.",
@@ -22951,7 +22951,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "8c64508305c16a03fce96a2e53fd8b00b14e2b7a9ba059e5ea7d5d9e4b81769a",
+        "sourceSha256": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
         "surface": "GET /v1/vcs/status",
         "sourceAnchor": "executor->vcs_status",
         "gap": "Native Git status reports changed paths and line counts only for the opened workspace; rename parity and cross-platform acceptance remain incomplete.",

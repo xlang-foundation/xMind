@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "operationId": "session.remove",
+  "upstreamRevision": "9b4ec5714d481559990db0a816d5dec19541a814",
+  "status": "partial",
+  "nativeSurface": "DELETE /v1/sessions/{id}; native repository, AgentService cancellation, Windows PTY owner, xMind HTTP/CLI",
+  "intentionalDifferences": [
+    "Active root runs are interrupted and must settle within 30 seconds; upstream awaits its session transport lifecycle without this bound.",
+    "SQLite tombstones preserve audit and context history after API removal.",
+    "Unresolved effects or context maintenance reject removal to preserve review and recovery."
+  ],
+  "contractChecks": {
+    "responseIs204NoContent": true,
+    "parentAndDirectChildForksAreRemovedAtomically": true,
+    "activeParentAndChildRunsAreCancelledBeforeRemoval": true,
+    "busyChildRejectsWholeRepositoryDeletion": true,
+    "terminalProcessTreesAreStoppedAndRetired": true,
+    "deletedSessionsCannotRecreateTerminals": true,
+    "auditRowsAreRetained": true
+  },
+  "execution": {
+    "command": "ctest --test-dir build/native-dynamic-plan -C Release -R \"^(native_agent_http_contract|native_http_cli_contract|xlang_repository_contract|native_agent_process_http_contract|native_persistent_pty_sessions_contract)$\" --output-on-failure",
+    "durationSeconds": 24.98,
+    "result": "passed"
+  },
+  "tests": [
+    {
+      "name": "native_agent_process_http_contract",
+      "result": "passed",
+      "durationSeconds": 14.37
+    },
+    {
+      "name": "native_persistent_pty_sessions_contract",
+      "result": "passed",
+      "durationSeconds": 0.13
+    },
+    {
+      "name": "native_agent_http_contract",
+      "result": "passed",
+      "durationSeconds": 6.53
+    },
+    {
+      "name": "native_http_cli_contract",
+      "result": "passed",
+      "durationSeconds": 3.49
+    },
+    {
+      "name": "xlang_repository_contract",
+      "result": "passed",
+      "durationSeconds": 0.43
+    }
+  ],
+  "sourceSha256": {
+    "Native/src/http_server.cpp": "5cdd5e47e60975c25e7aad8092ff98bdd9b6b78047ed7087a1410f4a5c05f92d",
+    "Native/src/repository.cpp": "aa8ea489a7799a3d8d922f92e9ea3b6d6a2f9a17328fcc1738a92e8645d3d11f",
+    "Native/include/agentflow/pty_sessions.hpp": "2478b7622eaa70ff872b6f6fb05415c42bd7fc030ede69319b5f263067bd03fd",
+    "Native/src/windows_pty_sessions.cpp": "e76c40347fe5f25ffbe44b3b3977b457aa63a926b5739da98345b9291259c02b",
+    "Native/apps/cli_main.cpp": "a8e5124bb0f0d0ac1bda67122cc4926197ff2bb96afacd8eacac1439c506023f",
+    "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
+    "Native/tests/agent_http_contract.mjs": "cabd23f885888872b90d2596755624ff0c33ee140c759f60c6da36f6604cd94d",
+    "Native/tests/http_cli_contract.mjs": "7c58c9bfa9cd3cccc88aeb9361317fe6199142664690cb95d04666e6b94202d3",
+    "Native/tests/agent_process_http_contract.mjs": "b517fa7b360fc1a79ea483111ad705768b623cf586a143a3d8d2ce2600c0ca63",
+    "Native/tests/repository_contract.cpp": "db5d7d113f95f7ff1558ca3dcaafeb4caed6342a9b8610cfbef2e16a2752229e",
+    "Native/tests/pty_sessions_contract.cpp": "b720594877760ea5e73a52b9ee868176f046d411b1210f97000f9dc8af618839",
+    "Native/CMakeLists.txt": "06f0686c64c70949e891d78465e5eebf557b776ffae0914fb84add8422203f53"
+  },
+  "buildArtifactSha256": {
+    "build/native-dynamic-plan/Release/xmind.exe": "6d9ab2131995056ab28cb637073b06d9f7c86aee3289a6da65f5a1d3b4fd0b69",
+    "build/native-dynamic-plan/Release/xmind_server.exe": "f624033f6640ca794c0c56bff13cedf429bb64c80f6e705a9ca6a88e37b1c026",
+    "build/native-dynamic-plan/Release/xmind_cli.exe": "4e54626b57ca3d01cf96bd23ae44c8dde521b8cd104fa3955afea0918f955856",
+    "build/native-dynamic-plan/Release/xmind_admin.exe": "c6197bb59a508cb935153f6f78f56727cd2e840268f736d52b75b8a446ee945d",
+    "build/native-dynamic-plan/Release/agentflow_pty_sessions_contract.exe": "14008e74afc4790a431d44e62253ee65a4795330b94370771458d0c3991c2c18",
+    "build/native-dynamic-plan/Release/agentflow_conpty_cli_harness.exe": "e6dc3b8fd8d6890318afd10db3607c1d8529fd5ce7e6941f79de65087b573001",
+    "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
+  }
+}

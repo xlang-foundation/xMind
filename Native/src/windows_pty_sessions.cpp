@@ -10,6 +10,7 @@
 #include <map>
 #include <mutex>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 
 namespace agentflow {
@@ -72,7 +73,7 @@ struct PtySessions::Impl {
         ~Terminal(){stop();}
     };
 
-    std::string root,shell;std::string root_identity,shell_identity;mutable std::mutex mutex;std::map<std::string,std::shared_ptr<Terminal>> terminals;
+    std::string root,shell;std::string root_identity,shell_identity;mutable std::mutex mutex;std::map<std::string,std::shared_ptr<Terminal>> terminals;std::unordered_set<std::string> closed_sessions;
     Impl(std::string workspace,std::string executable){
         if(!api().available())throw std::runtime_error("Windows ConPTY is unavailable on this system");
         auto canonical_root=std::filesystem::canonical(std::filesystem::u8path(workspace));auto canonical_shell=std::filesystem::canonical(std::filesystem::u8path(executable));
@@ -110,7 +111,7 @@ struct PtySessions::Impl {
 PtySessions::PtySessions(std::string root,std::string shell):impl_(std::make_unique<Impl>(std::move(root),std::move(shell))){}
 PtySessions::~PtySessions()=default;
 PtySessionMetadata PtySessions::create(const std::string& session,const std::string& title,std::uint16_t rows,std::uint16_t columns){
-    std::lock_guard lock(impl_->mutex);if(impl_->terminals.size()>=max_sessions)throw std::runtime_error("Terminal session limit reached");const auto count=std::count_if(impl_->terminals.begin(),impl_->terminals.end(),[&](const auto& entry){return entry.second->session_id==session;});if(static_cast<std::size_t>(count)>=max_session_count)throw std::runtime_error("Conversation terminal limit reached");auto terminal=impl_->launch(session,title,rows,columns);if(impl_->terminals.contains(terminal->id))throw std::runtime_error("Terminal identity collision");impl_->terminals.emplace(terminal->id,terminal);return terminal->metadata();
+    std::lock_guard lock(impl_->mutex);if(impl_->closed_sessions.contains(session))throw std::runtime_error("Conversation is being deleted");if(impl_->terminals.size()>=max_sessions)throw std::runtime_error("Terminal session limit reached");const auto count=std::count_if(impl_->terminals.begin(),impl_->terminals.end(),[&](const auto& entry){return entry.second->session_id==session;});if(static_cast<std::size_t>(count)>=max_session_count)throw std::runtime_error("Conversation terminal limit reached");auto terminal=impl_->launch(session,title,rows,columns);if(impl_->terminals.contains(terminal->id))throw std::runtime_error("Terminal identity collision");impl_->terminals.emplace(terminal->id,terminal);return terminal->metadata();
 }
 std::vector<PtySessionMetadata> PtySessions::list(const std::string& session)const{if(!valid_identity(session))throw std::invalid_argument("Invalid conversation identity");std::vector<PtySessionMetadata> result;std::lock_guard lock(impl_->mutex);for(const auto& [id,terminal]:impl_->terminals){(void)id;if(terminal->session_id==session)result.push_back(terminal->metadata());}return result;}
 PtySessionMetadata PtySessions::get(const std::string& id)const{return impl_->require(id)->metadata();}
@@ -118,5 +119,6 @@ PtyOutputChunk PtySessions::read(const std::string& id,std::uint64_t after,std::
 void PtySessions::write(const std::string& id,const std::string& utf8){if(utf8.empty()||utf8.size()>input_limit||utf8.find('\0')!=std::string::npos||!MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,utf8.data(),static_cast<int>(utf8.size()),nullptr,0))throw std::invalid_argument("Terminal input must contain 1-65536 non-NUL UTF-8 bytes");const auto terminal=impl_->require(id);std::lock_guard serial(terminal->input_mutex);if(!terminal->running||!terminal->input.value)throw std::runtime_error("Terminal session has exited");std::size_t offset=0;while(offset<utf8.size()){DWORD written=0;const auto request=static_cast<DWORD>(std::min<std::size_t>(utf8.size()-offset,32768));if(!WriteFile(terminal->input.value,utf8.data()+offset,request,&written,nullptr)||!written)throw std::runtime_error("Terminal input could not be written");offset+=written;}}
 PtySessionMetadata PtySessions::resize(const std::string& id,std::uint16_t rows,std::uint16_t columns){dimensions(rows,columns);const auto terminal=impl_->require(id);std::lock_guard serial(terminal->pseudo_mutex);if(!terminal->pseudo||!terminal->running)throw std::runtime_error("Terminal session has exited");const auto result=api().resize(terminal->pseudo,COORD{static_cast<SHORT>(columns),static_cast<SHORT>(rows)});if(FAILED(result))throw std::runtime_error("Windows pseudoconsole resize failed");{std::lock_guard lock(terminal->mutex);terminal->rows=rows;terminal->columns=columns;}return terminal->metadata();}
 void PtySessions::close(const std::string& id){std::shared_ptr<Impl::Terminal> terminal;{std::lock_guard lock(impl_->mutex);const auto found=impl_->terminals.find(id);if(found==impl_->terminals.end())throw std::out_of_range("Terminal session not found");terminal=std::move(found->second);impl_->terminals.erase(found);}terminal->stop();}
+void PtySessions::close_session(const std::string& session){if(!valid_identity(session))throw std::invalid_argument("Invalid conversation identity");std::vector<std::shared_ptr<Impl::Terminal>> closing;{std::lock_guard lock(impl_->mutex);const auto count=static_cast<std::size_t>(std::count_if(impl_->terminals.begin(),impl_->terminals.end(),[&](const auto& entry){return entry.second->session_id==session;}));closing.reserve(count);impl_->closed_sessions.insert(session);for(auto item=impl_->terminals.begin();item!=impl_->terminals.end();)if(item->second->session_id==session){closing.push_back(std::move(item->second));item=impl_->terminals.erase(item);}else ++item;}for(const auto& terminal:closing)terminal->stop();}
 
 }

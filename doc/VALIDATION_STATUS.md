@@ -2703,10 +2703,13 @@ native candidates, 102 unmapped, and 1 operation-level parity verified**.
 `session.remove` now interrupts active root runs and waits up to 30 seconds for
 the parent and direct child forks to settle before removal. Release contracts
 passed: repository (**1/1**), HTTP/CLI (**1/1**), agent HTTP (**1/1**, using a
-synthetic held provider peer), and local profile (**1/1**, 307.37 s). The
+synthetic held provider peer), local profile (**1/1**, 303.85 s), process HTTP
+and PTY (**2/2**). The
 operation remains a source candidate because xMind retains internal audit
-tombstones and rejects unresolved effects or running terminals. Installed VS
-Code acceptance is still open.
+tombstones and rejects unresolved effects. Native PTY and process HTTP
+contracts passed (**2/2**); the HTTP test deletes a session with a live terminal,
+confirms the terminal identity is retired, and rejects terminal recreation for
+that deleted session. Installed VS Code acceptance is still open.
 
 ## Conversation model selection — 2026-10-15
 

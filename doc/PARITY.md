@@ -56,14 +56,19 @@ The native backend and CLI delete a session and its direct child forks from the
 visible catalog. SQLite records transactional tombstones and retains immutable
 context and audit records. The operation is atomic across the parent and direct
 children. It cancels active root runs and waits up to 30 seconds for every run
-in the affected sessions to settle; unresolved effects, context work, or a
-running terminal rejects the full deletion. Release repository, HTTP/CLI, and
-agent HTTP contracts cover child removal, preserved audit rows, atomic refusal,
-and cancellation through a held synthetic provider peer. The browser and VS Code
-confirmation controls continue to target only the selected session. This
-remains a reviewed OpenCode `session.remove` source candidate, not verified
-operation parity: upstream closes session transports and does not expose
-xMind's timeout or audit tombstones. Installed-client acceptance is open.
+in the affected sessions to settle; unresolved effects or context work rejects
+the full deletion. After the SQLite tombstone commits, all local terminals for
+the removed sessions are stopped and retired, and the PTY owner prevents a
+concurrent terminal from being recreated. Release repository, HTTP/CLI, agent
+HTTP, and process HTTP contracts cover child removal, preserved audit rows,
+atomic refusal, active-run cancellation, and terminal closure. The browser and
+VS Code confirmation controls continue to target only the selected session.
+Source and Release artifact hashes for these cases are recorded in [the session-removal evidence](evidence/session-remove-active-delete-20261015.json).
+This remains a reviewed OpenCode `session.remove` source candidate, not verified
+operation parity: xMind has a 30-second cancellation bound and retains internal
+audit tombstones. The equivalence between upstream transport closure and local
+process-tree termination still needs a broader contract comparison.
+Installed-client acceptance is open.
 
 ## Graph coding restore — 2026-10-15
 

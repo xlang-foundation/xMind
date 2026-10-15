@@ -125,6 +125,11 @@ try {
   const viewTerminal=await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential,{title:'Browser-view terminal'});assert.equal(viewTerminal.running,true);
   assert.deepEqual((await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential)).terminals.map(value=>value.id),[viewTerminal.id]);
   await viewApi(`/v1/terminals/${viewTerminal.id}/close`,viewOrigin,viewCredential,{});
+  await api('/v1/sessions',{id:'delete-pty-session',title:'Delete session with terminal'});
+  const deletePty=await api('/v1/sessions/delete-pty-session/terminals',{title:'Terminate with session'});assert.equal(deletePty.running,true);
+  const deletedSession=await fetch(`http://127.0.0.1:${port}/v1/sessions/delete-pty-session`,{method:'DELETE',headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(10000)});assert.equal(deletedSession.status,204,'Session deletion closes its running native terminal before returning');
+  const closedPty=await fetch(`http://127.0.0.1:${port}/v1/terminals/${deletePty.id}`,{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(5000)});assert.equal(closedPty.status,404,'Closed terminal identity is retired with its deleted session');
+  assert.equal((await fetch(`http://127.0.0.1:${port}/v1/sessions/delete-pty-session/terminals`,{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(5000)})).status,404,'Deleted sessions cannot create replacement terminals');
   assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
   assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(await api('/v1/agent/instructions')).includes(instructionText),false,'Public discovery cannot expose instruction text');
   const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');

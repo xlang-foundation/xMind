@@ -46,6 +46,7 @@ public:
     void write(const std::string& id,const std::string& utf8);
     PtySessionMetadata resize(const std::string& id,std::uint16_t rows,std::uint16_t columns);
     void close(const std::string& id);
+    void close_session(const std::string& session_id);
 
 private:
     struct Impl;

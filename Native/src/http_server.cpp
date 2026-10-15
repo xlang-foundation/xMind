@@ -1113,7 +1113,6 @@ struct HttpServer::Impl {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||!request.body.empty())throw std::invalid_argument("Session deletion accepts no query parameters or request body");
             const auto session=identifier(request.matches[1]);std::vector<std::string> affected{session};
             for(const auto& item:persistence.sessions().get())if(item.parent_id==session)affected.push_back(item.id);
-            if(terminals)for(const auto& target:affected)for(const auto& terminal:terminals->list(target))if(terminal.running)throw Conflict("Session tree has a running terminal and cannot be deleted");
             const auto active=[](RunState state){return state==RunState::queued||state==RunState::running||state==RunState::paused;};
             for(const auto& target:affected)for(const auto& run:persistence.runs(target).get())if(active(run.state)&&run.parent_id.empty()){
                 if(!executor)throw Conflict("Session tree has active work but no execution owner can interrupt it");
@@ -1124,7 +1123,7 @@ struct HttpServer::Impl {
                 if(!running)break;if(std::chrono::steady_clock::now()>=deadline)throw Conflict("Session interruption did not settle within 30 seconds; the session was retained");
                 std::this_thread::sleep_for(std::chrono::milliseconds(20));
             }
-            persistence.delete_session(session).get();response.status=204;
+            persistence.delete_session(session).get();if(terminals)for(const auto& target:affected)terminals->close_session(target);response.status=204;
         }));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"id","title"});
