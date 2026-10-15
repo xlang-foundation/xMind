@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "c12e4aa60396b42848bf0525f074f85b840b0ae6a907d40f9034d48b282f7278",
+          "evidenceSha256": "6da9e2c9ab808e48fce5bd662229f1b3c288e368b92be64719c230ad23974079",
           "tests": [
             {
               "name": "native_http_cli_contract",
