@@ -1,0 +1,25 @@
+{
+  "scope": "xMind xlang3 process profile and deep local runtime paths",
+  "xmindRevision": "af9f0fa",
+  "xlang3Branch": "xmind-required-compat",
+  "xlang3Revision": "fcecf499",
+  "runtimeChange": "The xlang3 CLI executable embeds a Windows longPathAware application manifest; the Pydantic native-package contract now loads from a 262+ character module path.",
+  "runtimeContract": {
+    "name": "xlang3_native_package_long_path",
+    "result": "passed",
+    "pathLengthCharacters": 269,
+    "importedPydanticCoreVersion": "2.50.1"
+  },
+  "testProjProcess": {
+    "workspace": "D:\\CantorAI2026\\TestProj\\model-zoo\\backend",
+    "executable": "xlang3.exe from the rebuilt xmind-required-compat Release runtime",
+    "arguments": ["-B", "-m", "pytest", "-q"],
+    "modulePath": "The same deeply staged runtime modules directory that failed before the manifest change, placed before the project's .xlang3-site directory.",
+    "result": "passed",
+    "summary": "9 passed, 1 existing Starlette/AnyIO deprecation warning, 1.61 seconds"
+  },
+  "limitations": [
+    "Provider replies and keys were not involved.",
+    "This validates the actual xlang3 process and workspace command, but does not claim a fresh rendered browser click-through."
+  ]
+}

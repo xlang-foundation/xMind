@@ -65,6 +65,21 @@ the captured profile narrows the parent tool allowlist and the native integratio
 contract verifies the resulting request and tool catalogue. Full OpenCode
 permission-rule parity remains incomplete.
 
+## xlang3 process profile with deep runtime paths — 2026-10-15
+
+The TestProj browser acceptance exposed a Windows native-package loading limit:
+the managed xlang3 runtime placed `pydantic_core._pydantic_core.x3pkg.dll` at
+a 262-character path, and pytest stopped during collection with
+`ModuleNotFoundError`. The xlang3 compatibility branch now marks its CLI host
+long-path aware. Its focused native-package contract imports Pydantic Core
+from a 269-character path, and the same TestProj `xlang3 -B -m pytest -q`
+command passes all nine backend tests with the original deep modules path.
+The change is pushed to `CantorAI/xlang3` branch `xmind-required-compat` at
+`fcecf499`; xlang3 `main` is unchanged. Exact scope and results are recorded
+in [the TestProj runtime-path evidence](evidence/testproj-xlang3-long-runtime-path-20261015.json).
+This validates the runtime and process command, not a fresh rendered browser
+click-through.
+
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind
