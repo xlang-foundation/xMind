@@ -26,6 +26,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <thread>
 
 namespace {
@@ -43,6 +44,35 @@ BOOL WINAPI stop_view(DWORD event) {
 void require(bool value, const char *message) {
     if (!value)
         throw std::invalid_argument(message);
+}
+bool allowed_view_delete_route(const std::string &path) {
+    constexpr std::string_view prefix = "/v1/sessions/";
+    if (!path.starts_with(prefix))
+        return false;
+    const auto id_start = prefix.size();
+    const auto id_end = path.find('/', id_start);
+    const auto valid_id = [&](std::size_t start, std::size_t end) {
+        if (end <= start)
+            return false;
+        for (auto i = start; i < end; ++i) {
+            const auto c = static_cast<unsigned char>(path[i]);
+            if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+                  (c >= '0' && c <= '9') || c == '_' || c == '-'))
+                return false;
+        }
+        return true;
+    };
+    if (id_end == std::string::npos)
+        return valid_id(id_start, path.size());
+    if (!valid_id(id_start, id_end))
+        return false;
+    constexpr std::string_view grants = "/permission-grants/";
+    constexpr std::string_view inbox = "/inbox/";
+    const auto suffix = std::string_view(path).substr(id_end);
+    for (const auto route : {grants, inbox})
+        if (suffix.starts_with(route))
+            return valid_id(id_end + route.size(), path.size());
+    return false;
 }
 bool equal(const std::string &left, const std::string &right) {
     std::size_t difference = left.size() ^ right.size();
@@ -392,7 +422,8 @@ int run_local_view(int argc, char **argv) {
             } else if (request.has_header("Origin")) {
                 response(output, 403, "Browser origins require the browser access adapter");
             } else if (!request.path.starts_with("/v1/") ||
-                       (request.method != "GET" && request.method != "POST")) {
+                       (request.method != "GET" && request.method != "POST" &&
+                        !(request.method == "DELETE" && allowed_view_delete_route(request.path)))) {
                 response(output, 404, "View route not found");
             } else if (request.get_header_value_count("Authorization") != 1) {
                 response(output, 401, "View authentication required");
@@ -981,8 +1012,11 @@ int run_local_view(int argc, char **argv) {
                 }
                 const auto result = request.method == "GET"
                                         ? client.Get(request.target, headers)
-                                        : client.Post(request.target, headers, body,
-                                                      request.get_header_value("Content-Type"));
+                                        : request.method == "DELETE"
+                                              ? client.Delete(request.target, headers, body,
+                                                              request.get_header_value("Content-Type"))
+                                              : client.Post(request.target, headers, body,
+                                                            request.get_header_value("Content-Type"));
                 if (!result)
                     response(output, 503,
                              "Native backend observation unavailable; reconnect this profile");
@@ -1019,6 +1053,7 @@ int run_local_view(int argc, char **argv) {
         };
         server.Get(R"(/v1/.*)", forward);
         server.Post(R"(/v1/.*)", forward);
+        server.Delete(R"(/v1/.*)", forward);
         httplib::Client metadata_client("127.0.0.1", connection->port);
         configure(metadata_client);
         const auto metadata =
