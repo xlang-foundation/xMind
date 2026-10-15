@@ -54,7 +54,12 @@
     "width_px": 292,
     "provider_and_model_selectors_visible": true,
     "send_control_visible": true,
-    "horizontal_scrollbar_visible": false,
+    "composer_horizontal_scrollbar_visible": false,
+    "history_layout_fix_revision": "2a35e6a",
+    "history_webview_width_px": 289,
+    "history_viewport_client_width_px": 239,
+    "history_viewport_scroll_width_px": 239,
+    "history_horizontal_scrollbar_visible_after_reload": false,
     "workspace_edit_policy": "File changes require approval"
   },
   "limitations": [

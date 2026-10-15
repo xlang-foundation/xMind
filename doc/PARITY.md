@@ -259,8 +259,12 @@ xMind then used its native `run_process` tool with the trusted PowerShell
 profile to run `npm run build` in `model-zoo/frontend`. Vite 6.4.4 transformed
 37 modules and exited 0; the native process result completed in 2.07 seconds.
 The rendered VS Code sidebar was 292 px wide with both selectors and Send
-visible and no horizontal scrollbar. This confirms one live provider, approved
-edit, and process/build path; it does not establish broad coding coverage,
+visible. The completed transcript then exposed horizontal overflow from long
+run/operation IDs; the history CSS now wraps those labels. After reloading the
+actual 289 px webview, the 239 px history viewport had matching client and
+scroll widths and no horizontal scrollbar. The extension suite passed
+361/361 after the CSS change. This confirms one live provider, approved edit,
+and process/build path; it does not establish broad coding coverage,
 browser-page visual acceptance, or OpenCode parity. The TestProj workspace is
 not a Git repository, so its source and generated `dist` files were not
 committed. See
