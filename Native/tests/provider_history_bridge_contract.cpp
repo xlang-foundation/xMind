@@ -35,14 +35,22 @@ int main(){try{
     ChatProviderConfig responses_target=chat;responses_target.wire=ProviderWire::responses;
     auto same_responses=conversation(saved("Reasoned answer",response_reasoning));
     require(project_provider_history(responses_target,same_responses).messages.back().provider_items_json==response_reasoning,"Same-wire Responses reasoning must remain available for native replay");
+    auto claude_to_responses=conversation(saved("Claude answer",claude));
+    const auto bridged_claude=project_provider_history(responses_target,claude_to_responses);
+    require(bridged_claude.messages.back().provider_items_json=="[]"&&bridged_claude.messages.back().content=="Claude answer",
+        "Responses context projection must preserve portable canonical text and remove Claude-only receipts");
     auto foreign_reasoning=conversation(saved("Reasoned answer",response_reasoning));rejects([&]{(void)project_provider_history(chat,foreign_reasoning);});
 
     ModelMessage canonical;canonical.role=MessageRole::assistant;canonical.content="Calling tool";canonical.tool_calls={{"native-tool-id","read_file",R"({"path":"README.md"})"}};
     canonical.provider_items_json=anthropic_content_receipt(R"([{"type":"text","text":"Calling tool"},{"type":"tool_use","id":"native-tool-id","name":"read_file","input":{"path":"README.md"}}])","tool_calls","tool_use");
     auto with_tool=conversation(canonical);ModelMessage answer;answer.role=MessageRole::tool;answer.tool_call_id="native-tool-id";answer.content="file body";with_tool.messages.push_back(answer);
     const auto projected=project_provider_history(gemini_target,with_tool);require(projected.messages[1].provider_items_json=="[]","Foreign Claude tool receipt must be projected after validation");
+    const auto responses_tool_history=project_provider_history(responses_target,with_tool);
+    require(responses_tool_history.messages[1].provider_items_json=="[]"&&responses_tool_history.messages[1].tool_calls.size()==1&&
+        responses_tool_history.messages[2].tool_call_id=="native-tool-id",
+        "Responses context projection must retain canonical Claude tool history without its provider receipt");
     const auto adapted=gemini_model_request(projected,Capability::supported);const auto body=Json::parse(serialize_gemini_request(adapted));
     require(body["contents"][1]["parts"][1]["functionCall"]["name"]=="read_file"&&!body["contents"][1]["parts"][1]["functionCall"].contains("id"),"Cross-wire tool conversion must retain the canonical tool and omit provider-owned IDs");
     require(body["contents"][2]["parts"][0]["functionResponse"]["response"]["output"]=="file body","Cross-wire tool result must correlate and serialize");
-    std::cout<<"Provider history bridge passed validated Claude, Gemini and DeepSeek conversion; Responses-only receipt retention; immutable history; same-wire replay; fail-closed unknown/corrupt receipts; and Claude-to-Gemini canonical tool conversion.\n";return 0;
+    std::cout<<"Provider history bridge passed validated Claude, Gemini and DeepSeek conversion; Responses-only receipt retention; immutable history; same-wire replay; fail-closed unknown/corrupt receipts; and Claude-to-Gemini/Responses canonical tool conversion.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

@@ -1,4 +1,5 @@
 #include "agentflow/context_manager.hpp"
+#include "agentflow/model_provider.hpp"
 #include <algorithm>
 #include <chrono>
 #include <random>
@@ -93,7 +94,7 @@ class Preparation {
         }
         if(!ordinals.empty())for(const auto& payload:store.context_group_payloads(snapshot,ordinals,bound).get())
             for(const auto& original:payload.originals)request.messages.push_back(decode(original));
-        return request;
+        return project_provider_history(provider,request);
     }
     ContextInputMeasure count(const ContextSnapshot& snapshot,const ModelRequest& request){
         check();const auto selected=transport_config();
