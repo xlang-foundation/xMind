@@ -8496,8 +8496,16 @@
         "command"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "976343303c64ca4004dfcacc0da0efb86d8616a914047593579e69d62cac60e3",
+        "surface": "GET /v1/workspace/commands; POST /v1/sessions/{id}/commands; browser, VS Code and console slash-command dispatch",
+        "sourceAnchor": "server.Get(\"/v1/workspace/commands\"",
+        "gap": "Workspace Markdown prompt commands support nested IDs, descriptions and bounded argument substitution across native single-agent or selected graph runs. Plugin and dynamic command providers, autocomplete and OpenCode command-source/configuration parity remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [

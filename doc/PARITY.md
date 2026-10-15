@@ -20,6 +20,18 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
+## OpenCode API inventory refresh — 2026-10-14
+
+The pinned inventory now records `command.list` as a reviewed native source
+candidate: workspace Markdown commands are discoverable through the native API
+and dispatch through the browser, VS Code and console. This maps the existing
+implementation without claiming OpenCode behavior parity; plugin and dynamic
+command providers, autocomplete and full configuration semantics remain open.
+The regenerated exact-source inventory contains **141 operations, 37 reviewed
+native source candidates, 104 unmapped operations and zero verified
+operation-level parity**. The command feature's focused native and client
+contracts are recorded in [the workspace command milestone](milestones.md).
+
 ## Native local session archive (2026-10-13)
 
 The local native API and console client can export and import versioned xMind
