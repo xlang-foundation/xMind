@@ -93,7 +93,8 @@ function harness(options={}) {
         const value=JSON.parse(requestOptions.body);providerRequests.push(value);options.health={agent_execution:true,status:'ok'};options.catalogue={default_model:value.model,models:[{id:value.model}]};data={...options.providerSetup,revision:options.providerSetup.revision+1,configured:true,model:value.model};
       }else data=options.providerSetup;
     }
-    else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
+    else if(target.pathname==='/v1/sessions') data=options.deletedSession?[]:[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
+    else if(target.pathname==='/v1/sessions/saved'&&requestOptions.method==='DELETE'){options.deletedSession=true;return {ok:true,status:200,json:async()=>null};}
     else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
     else if(target.pathname==='/v1/sessions/forked/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/forked/runs') data=[];
@@ -506,6 +507,17 @@ test('sidebar rename binds selected session and original title, refreshes metada
     assert.deepEqual(h.renameRequests,[{title:'Renamed fixture',expected_title:'Saved session'}]);assert.equal(view.posted.findLast(message=>message.type==='rename-result').success,!conflict);
     assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/messages?limit=40').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
   }
+});
+test('sidebar deletion requires modal confirmation and clears the last selected conversation',async()=>{
+ const {h,view}=await setupView({cancelChoice:()=> 'Remove conversation'});
+ try{
+  await until(()=>view.posted.some(message=>message.type==='sessions'&&message.selected==='saved'));
+  view.receive({type:'delete-session',id:'saved'});
+  await until(()=>view.posted.some(message=>message.type==='session-delete-result'&&message.success));
+  assert.match(h.warnings.at(-1).message,/Saved session/);assert.match(h.warnings.at(-1).message,/Immutable context and audit records remain stored/);assert.deepEqual(JSON.parse(JSON.stringify(h.warnings.at(-1).choices)),[{modal:true},'Remove conversation']);
+  assert.ok(h.requests.includes('/v1/sessions/saved'));assert.equal(h.state.get('agentflow.session').id,undefined);assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[]);assert.deepEqual(view.posted.findLast(message=>message.type==='history').history,[]);assert.equal(view.posted.findLast(message=>message.type==='session-delete-result').success,true);
+ }finally{view.close();}
+ const cancelled=await setupView();try{cancelled.view.receive({type:'delete-session',id:'saved'});await until(()=>cancelled.view.posted.some(message=>message.type==='session-delete-result'&&message.cancelled));assert.ok(!cancelled.h.requests.includes('/v1/sessions/saved'));assert.equal(cancelled.view.posted.findLast(message=>message.type==='sessions').selected,'saved');}finally{cancelled.view.close();}
 });
 test('VS Code forks only the active saved conversation boundary and selects the native child',async()=>{
  const h=harness({health:{agent_execution:false,status:'ok',session_fork:true}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});

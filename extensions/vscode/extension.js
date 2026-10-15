@@ -72,7 +72,7 @@ async function activate(context) {
   const gitChanges = new GitChangesTreeProvider(vscode);
   if(vscode.window.registerTreeDataProvider)context.subscriptions.push(vscode.window.registerTreeDataProvider('xmind.gitChanges',gitChanges));
 
-  const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined}:message);
+  const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined,sessionDeletion:!!client}:message);
   async function readSkills(){
     if(!panel||!client)return;const target=client,version=generation;
     if(health?.skill_controls!==true){if(skillController)skillController.invalidate();return;}
@@ -656,6 +656,25 @@ async function activate(context) {
           await refresh();
         } else if (message.type === 'select' && typeof message.id === 'string') {
           await selectSession(message.id);
+        } else if(message.type==='delete-session'){
+          const version=generation,target=client,deletedId=sessionId;
+          try{
+            if(!deletedId||message.id!==deletedId)throw new Error('Select the conversation you want to remove.');
+            if(busySession())throw new Error('Wait for this conversation to finish before removing it.');
+            const sessions=await target.sessions();if(panel!==view||client!==target||version!==generation)return;
+            const selected=sessions.find(item=>item.id===deletedId);if(!selected)throw new Error('The selected conversation is no longer available. Refresh the session list.');
+            const answer=await vscode.window.showWarningMessage(`Remove “${selected.title}” from the conversation list? Immutable context and audit records remain stored. Active work prevents removal.`,{modal:true},'Remove conversation');
+            if(panel!==view||client!==target||version!==generation)return;
+            if(answer!=='Remove conversation'){post({type:'session-delete-result',id:deletedId,cancelled:true});return;}
+            await target.deleteSession(deletedId);if(panel!==view||client!==target||version!==generation)return;
+            const remaining=await target.sessions();if(panel!==view||client!==target||version!==generation)return;
+            if(remaining.length){await selectSession(remaining.at(-1).id);if(panel!==view||client!==target)return;await refresh();}
+            else{
+              stop();sessionId=undefined;runId=undefined;sessionRuns=[];sessionModelState=undefined;historyPager.clear();reviewed.clear();sessionPermissionRequests.clear();sessionPermissionsLoaded=false;clearGraph();contextController?.invalidate();presentRuns();
+              await context.workspaceState.update(stateKey,{...connectionState()});post({type:'history',...historyPager.snapshot()});post({type:'inbox',items:[]});post({type:'operations',operations:[]});await refresh();if(panel!==view||client!==target)return;post({type:'status',text:'Ready · conversation removed'});
+            }
+            post({type:'session-delete-result',id:deletedId,success:true});
+          }catch(error){if(panel===view&&client===target&&version===generation)post({type:'session-delete-result',id:deletedId,success:false,text:error.message});}
         } else if(message.type==='rename-session'){
           const version=generation;
           try{if(health.session_rename!==true||message.id!==sessionId||typeof message.title!=='string'||typeof message.expected_title!=='string')throw new Error('Select a conversation on a backend supporting rename.');await client.renameSession(sessionId,message.title,message.expected_title);if(panel!==view||version!==generation)return;await refresh();if(panel===view&&version===generation)post({type:'rename-result',id:message.id,success:true});}

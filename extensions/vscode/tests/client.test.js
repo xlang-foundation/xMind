@@ -100,6 +100,12 @@ test('session history pager ignores a page response retired by a session switch'
  let release;const pending=new Promise(resolve=>release=resolve),client={historyPage:session=>session==='old'?pending:Promise.resolve({messages:[{id:'msg_1',seq:1,role:'user',data:{content:'new'}}],has_more:false,next_before:null})};
  const pager=new SessionHistoryPager(client,10),old=pager.select('old'),fresh=await pager.select('new');release({messages:[{id:'msg_9',seq:9,role:'user',data:{content:'old'}}],has_more:false,next_before:null});await old;assert.equal(fresh.history[0].id,'msg_1');assert.equal(pager.snapshot().history[0].id,'msg_1');
 });
+test('session deletion uses the exact native DELETE identity route without a body',async()=>{
+ const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,status:200,json:async()=>null};});assert.equal(await client.deleteSession('session-1'),null);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/session-1');assert.equal(requests[0].options.method,'DELETE');assert.equal(requests[0].options.body,undefined);assert.throws(()=>client.deleteSession('../other'),/identity/i);assert.equal(requests.length,1);
+});
+test('clearing a deleted session retires late history responses and leaves an empty snapshot',async()=>{
+ let release;const pending=new Promise(resolve=>release=resolve),pager=new SessionHistoryPager({historyPage:()=>pending});const old=pager.select('deleted');const empty=pager.clear();assert.deepEqual(empty,{history:[],historyHasMore:false,historyLoading:false});release({messages:[{id:'msg_1',seq:1,role:'user',data:{content:'deleted history'}}],has_more:false,next_before:null});await old;assert.equal(pager.session,undefined);assert.deepEqual(pager.snapshot(),empty);
+});
 test('session fork client binds the selected source and exact before-message boundary',async()=>{
  const requests=[],receipt={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:'msg_9'}};
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>receipt};});

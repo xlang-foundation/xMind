@@ -58,10 +58,14 @@ audit records remain intact; normal session/history APIs return it as absent.
 Deletion rejects active runs and unresolved effects/context work, and detaches
 fork ancestry while keeping the child history. The HTTP/CLI, repository and
 local-view contracts exercise deletion, fork retention and the same-machine
-view credential. This is a reviewed OpenCode `session.remove` source candidate,
-not verified operation parity yet: xMind returns HTTP 200 with JSON `null`
-instead of OpenCode's 204, and visible browser and VS Code session controls are
-not connected to the operation.
+view credential. The browser and VS Code now expose confirmation controls for
+the selected idle conversation, dispatch only its exact session ID, and clear
+the deleted transcript while selecting another conversation or showing the
+empty state. Client controller/renderer and extension-host tests cover
+cancellation, active-run refusal, deletion and last-session cleanup. This is a
+reviewed OpenCode `session.remove` source candidate, not verified operation
+parity yet: xMind returns HTTP 200 with JSON `null` instead of OpenCode's 204,
+and installed desktop acceptance remains unverified.
 
 ## Graph coding restore — 2026-10-15
 

@@ -2657,3 +2657,14 @@ control. The OpenCode inventory audit reports **39 reviewed native candidates,
 1 operation-level parity verified, and 102 unmapped**; session removal remains
 an unverified candidate. The long server-info profile acceptance record is
 [`server-info-opencode-parity-20261015.json`](evidence/server-info-opencode-parity-20261015.json).
+
+## Session deletion client controls — 2026-10-15
+
+The shared browser/VS Code conversation header now exposes session removal
+when connected to the xMind backend. Both clients confirm the selected idle
+session, refuse active work, clear the removed transcript, and select the most
+recent remaining session or show an empty conversation state. Validation
+passed: **372/372 VS Code tests**, **123/123 browser tests**, including
+controller, renderer, extension-host and browser adapter coverage. A live
+desktop-app check could not be completed: the computer-use helper twice
+reported `window id 132762 no longer belongs to Microsoft.VisualStudioCode; current owner is Microsoft.VisualStudioCode` while reacquiring the returned VS Code window. Installed UI acceptance remains open.

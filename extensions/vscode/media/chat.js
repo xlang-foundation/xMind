@@ -3,7 +3,7 @@ const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementB
 const patchReview=globalThis.XMindPatchReview.patchReview;
 const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
-let renameCapability=false,forkCapability=false,forkPending=false,renameSnapshot;
+let renameCapability=false,forkCapability=false,deleteCapability=false,deletePending=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
 let currentWorkspaceRoot;
 const operationSections=new Map();
@@ -176,6 +176,7 @@ function processOutput(value){
   channel.pre.textContent=text;channel.summary.textContent=value.channel+' · '+count(bytes.length)+' retained bytes · '+encoding;
 }
 function refreshForkControls(){for(const button of forkButtons)button.disabled=!forkCapability||sessionBusy||forkPending||!byId('sessions').value;}
+function refreshDeleteControls(){const button=byId('delete-session'),selected=byId('sessions').selectedOptions[0];if(!button)return;button.hidden=!deleteCapability;button.disabled=!deleteCapability||deletePending||sessionBusy||activeRun||!selected?.dataset.sessionId||selected.dataset.sessionActive==='true';}
 function entry(role,data,parent=byId('history'),messageId){
   byId('empty').hidden=true;
   const card=node('article',undefined,'message '+role);card.append(node('h4',role==='assistant'?'xMind':role==='user'?'You':role));
@@ -553,7 +554,8 @@ if(archiveExport)archiveExport.onclick=()=>{if(!archiveExport.disabled)api.postM
 if(archiveImport&&archiveFile){archiveImport.onclick=()=>archiveFile.click();archiveFile.onchange=async()=>{const file=archiveFile.files?.[0];archiveFile.value='';if(!file)return;if(file.size>4*1024*1024){byId('status').textContent='Session archive exceeds the 4 MiB limit.';return;}try{const archive=JSON.parse(await file.text());api.postMessage({type:'import-session',archive});}catch(error){byId('status').textContent='Could not read session archive: '+error.message;}};}
 byId('terminal').onclick=()=>api.postMessage({type:'open-terminal'});
 byId('git').onclick=()=>api.postMessage({type:'git-menu'});
-byId('sessions').onchange=()=>{refreshRename();forkPending=false;refreshForkControls();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
+byId('delete-session').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!deleteCapability||deletePending||!selected?.dataset.sessionId||selected.dataset.sessionActive==='true'||sessionBusy||activeRun)return;deletePending=true;refreshDeleteControls();api.postMessage({type:'delete-session',id:selected.value});};
+byId('sessions').onchange=()=>{refreshRename();forkPending=false;refreshForkControls();refreshDeleteControls();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
 byId('inbox-status').addEventListener('click',event=>{const button=event.target.closest?.('button.inbox-cancel');if(!button||!button.dataset.inboxId)return;button.disabled=true;api.postMessage({type:'cancel-inbox',id:button.dataset.inboxId});});
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
@@ -561,7 +563,7 @@ byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.
 function resizePrompt(){const prompt=byId('prompt');prompt.style.height='auto';prompt.style.height=prompt.value?Math.min(180,prompt.scrollHeight)+'px':'';}
 byId('prompt').oninput=()=>{resizePrompt();refreshSendControl();};
 const renameDialog=byId('rename-dialog');
-function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();refreshArchiveControls();}
+function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();refreshArchiveControls();refreshDeleteControls();}
 byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!renameCapability||!selected?.dataset.sessionId)return;renameSnapshot={id:selected.value,title:selected.dataset.sessionTitle||selected.textContent};byId('conversation-title').value=renameSnapshot.title;byId('rename-status').textContent='';byId('rename-save').disabled=false;renameDialog.showModal();byId('conversation-title').focus();};
 for(const id of ['rename-close','rename-cancel'])byId(id).onclick=()=>renameDialog.close();
 renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conversation-title').value='';byId('rename-save').disabled=false;if(!byId('rename').hidden)byId('rename').focus();});
@@ -660,10 +662,11 @@ window.addEventListener('message',event=>{
   else if(m.type==='owned-event')ownedEvent(m);
   else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories);}
   else if(m.type==='graph-event')graphEvent(m);
-  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.active?'● Running · '+session.title:session.title);option.value=session.id;option.dataset.sessionId=session.id;option.dataset.sessionTitle=session.title;option.title=session.active?'A run is active in this conversation':session.title;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;refreshRename();refreshForkControls();}
+  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.active?'● Running · '+session.title:session.title);option.value=session.id;option.dataset.sessionId=session.id;option.dataset.sessionTitle=session.title;option.dataset.sessionActive=session.active?'true':'false';option.title=session.active?'A run is active in this conversation':session.title;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;deletePending=false;refreshRename();refreshForkControls();refreshDeleteControls();}
   else if(m.type==='session-exported'){if(!m.archive||m.archive.format!=='xmind.session'){byId('status').textContent='The backend returned an invalid session archive.';return;}const blob=new Blob([JSON.stringify(m.archive,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),link=node('a');link.href=url;link.download='xmind-session-'+byId('sessions').value+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);byId('status').textContent='Conversation archive downloaded.';}
   else if(m.type==='session-imported'){byId('status').textContent='Imported conversation · '+m.title;}
   else if(m.type==='session-transfer-error'){byId('status').textContent='Session transfer failed · '+m.text;}
+  else if(m.type==='session-delete-result'){deletePending=false;refreshDeleteControls();byId('status').textContent=m.success?'Conversation removed.':m.cancelled?'Conversation removal cancelled.':'Conversation removal failed · '+m.text;}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='fork-result'){forkPending=false;refreshForkControls();if(!m.success)byId('status').textContent=m.text||'Fork was not created.';else byId('status').textContent='Fork created. The new conversation is selected.';}
   else if(m.type==='inbox'){const label=byId('inbox-status'),items=Array.isArray(m.items)?m.items:[],queued=items.filter(item=>item?.state==='queued');label.hidden=!queued.length;label.replaceChildren();if(queued.length){label.append(node('div',`${queued.length} queued prompt${queued.length===1?'':'s'}`,'inbox-summary'));for(const item of queued){const row=node('div',undefined,'inbox-row'),text=node('span',String(item.content||'').slice(0,180)+(item.content?.length>180?'…':''),'inbox-text'),cancel=node('button','Cancel','inbox-cancel');cancel.type='button';cancel.dataset.inboxId=item.id;cancel.setAttribute('aria-label','Cancel queued prompt');row.append(text,cancel);label.append(row);}}}
@@ -671,7 +674,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='queued-input-cancelled'){byId('status').textContent='Queued prompt cancelled.';}
   else if(m.type==='queued-started'){byId('status').textContent='Queued prompt started';}
   else if(m.type==='runs'){
-    sessionBusy=m.busy;refreshArchiveControls();refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
+    sessionBusy=m.busy;refreshArchiveControls();refreshForkControls();refreshDeleteControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
@@ -704,7 +707,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
   else if(m.type==='mcp-resources'){renderMcpResources(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
-  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;deleteCapability=m.sessionDeletion===true;refreshRename();refreshForkControls();refreshDeleteControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
