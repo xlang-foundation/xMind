@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-15",
+  "base_revision": "9f8ab369b7216fa47eff252834471579a9ff337b",
+  "scope": "Native CLI observation and routing for root and nested dynamic-plan human questions.",
+  "build": {
+    "configuration": "Release",
+    "directory": "build/native-dynamic-plan",
+    "targets": [
+      "agentflow_cli_plan_review_contract",
+      "xmind_cli",
+      "xmind",
+      "xmind_server",
+      "xmind_admin"
+    ],
+    "result": "passed"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/native-dynamic-plan -C Release -R '^native_(cli_plan_review|http_cli|agent_http|planning_http)_contract$|^native_dynamic_plan_(repository|engine)_contract$' --output-on-failure",
+    "passed": 6,
+    "failed": 0,
+    "tests": {
+      "native_cli_plan_review_contract": "passed",
+      "native_dynamic_plan_repository_contract": "passed",
+      "native_planning_http_contract": "passed",
+      "native_dynamic_plan_engine_contract": "passed",
+      "native_agent_http_contract": "passed",
+      "native_http_cli_contract": "passed"
+    }
+  },
+  "verified_behavior": [
+    "CLI plan observation aggregates waiting root and nested questions into one review payload.",
+    "Each human input is bound to its owning plan's revision and state sequence.",
+    "Resume availability includes ready work owned by a nested waiting plan, even while a sibling human question remains pending.",
+    "The focused review contract rejects duplicate requests, foreign owner paths, mismatched plan identities, and unsafe plan counters.",
+    "Existing native repository and engine contracts continue to cover sibling wait registration, partial answer/resume, restart recovery and exactly-once continuation."
+  ],
+  "limits": [
+    "The focused contract exercises the CLI review model; it does not drive a real two-branch wait set through interactive /watch end to end.",
+    "The HTTP and CLI contracts in this run are standard route/client contracts and do not construct a multi-branch HTTP fixture.",
+    "Rendered browser and installed VS Code acceptance, answer races, cancellation races, expiry/uncertainty and repeated-segment budget/context checks remain open."
+  ],
+  "sha256": {
+    "Native/CMakeLists.txt": "cbedaf70327b2390676c05a3c858da1f597b83507d276a3cd88d1e485e58bf88",
+    "Native/apps/cli_main.cpp": "473024388b1f2b31bbd22ab0e775d5c3aa977d30c626f3ec05ff42ad03888418",
+    "Native/include/agentflow/cli_plan_review.hpp": "54d90eaa00949a94022823755f0d4e7d164401c792999ad6e6534019c933e340",
+    "Native/tests/cli_plan_review_contract.cpp": "e62c487431f95b3f88aa3358a0ab242560ec6d0ce3350649ceb49c0870844314",
+    "doc/PARITY.md": "4a6f747beaf722b750b269b4ac317965cad223274f154ff9c4480e6c161d4cc5",
+    "doc/native-dynamic-plan-multibranch.md": "66a578c816603ab1c027d38ce7a96bedfa31afb092e02fd03ad7ef868de8c194",
+    "doc/native-dynamic-plan-recursion.md": "e321338169befb3970e0382322f6c5b7c060e3fe11efc8c338d0b0524865b68c"
+  },
+  "executables": {
+    "build/native-dynamic-plan/Release/agentflow_cli_plan_review_contract.exe": "bb4110441860141255002941cc74a39334086934bcf41d6774184ffecae5777a",
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_repository_contract.exe": "1e86a44a26de3a9053a764f2ad6b6e5772e9afbe9977d6708ddec25e3541f207",
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_engine_contract.exe": "66e9c2d2286831756af3d8be2173504861099e04e96c8eaa6ef5d07b08b5e385",
+    "build/native-dynamic-plan/Release/agentflow_planning_http_contract.exe": "7eef9a456ca8ae73a6494c1db5d2e979ce176368156f87590b45e1361b7b5023",
+    "build/native-dynamic-plan/Release/xmind_cli.exe": "d8360be039b6a6f826bcb711cea26cf4780449d8c7cc2d339b72d60f6175cbd6",
+    "build/native-dynamic-plan/Release/xmind.exe": "b0c7da79f4e82e34732f5efa858133a8613ea58532200ae764f80ee2a7f9ab4d",
+    "build/native-dynamic-plan/Release/xmind_server.exe": "64666cd1235d8c9ecf8ddfbfe8c35eff23a709f29bb3c4a4862d48c2de008e76",
+    "build/native-dynamic-plan/Release/xmind_admin.exe": "a862bc6e3ad9e858220d769577eabe14dce3f9314e22a4183ba67950618620fa"
+  }
+}

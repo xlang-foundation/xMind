@@ -1,6 +1,7 @@
 #include "agentflow/console_transport.hpp"
 #include "agentflow/program_entries.hpp"
 #include "agentflow/terminal_key_input.hpp"
+#include "agentflow/cli_plan_review.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -588,23 +589,17 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 if(response->status==409){std::this_thread::sleep_for(std::chrono::milliseconds(250));continue;}
                 if(response->status!=200)throw std::runtime_error("Server rejected plan inspection");
                 const auto snapshot=Json::parse(response->body);
-                if(!snapshot.is_object()||snapshot.at("run").value("id",std::string{})!=run||snapshot.at("run").value("session_id",std::string{})!=session||snapshot.at("run").value("parent_id",std::string{})!=""||snapshot.at("run").value("graph_root",false)||!snapshot.at("questions").is_array())throw std::runtime_error("Plan observation ownership changed");
                 if(!snapshot.at("plan").is_null()){
+                    const auto review=agentflow::cli::inspect_plan_human_review(snapshot,run,session);
                     const auto& plan=snapshot.at("plan");const auto revision=plan_revision(plan.at("revision").dump()),sequence=plan_revision(plan.at("state_sequence").dump());
-                    if(plan.value("root_run_id",std::string{})!=run||!plan.at("ready").is_array()||!plan.at("claimed").is_array()||!plan.at("waiting_human").is_array()||!plan.at("report_ready").is_boolean()||!plan.at("halted").is_boolean()||snapshot["questions"].size()>8)throw std::runtime_error("Invalid current plan readiness");
-                    auto questions=Json::array();std::set<std::string> waiting;
-                    for(const auto& question:snapshot["questions"]){if(question.value("state",std::string{})!="waiting")continue;const auto id=question.value("id",std::string{});
-                        if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||question.value("root_run_id",std::string{})!=run||question.value("plan_id",std::string{})!=plan.value("id",std::string{})||!question.contains("question")||!question["question"].is_string()||!waiting.insert(id).second)throw std::runtime_error("Invalid plan human ownership");questions.push_back(question);
-                    }
-                    const bool resume=snapshot["run"].value("state",std::string{})=="paused"&&waiting.empty()&&plan["claimed"].empty()&&plan["waiting_human"].empty()&&!plan["halted"].get<bool>()&&(!plan["ready"].empty()||plan["report_ready"].get<bool>());
-                    if(!questions.empty()||resume){
-                        std::cout<<Json{{"type","plan_human_review"},{"snapshot",snapshot}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Plan review output is unavailable");
-                        std::cerr<<"Enter /input REQUEST_ID JSON for a displayed question"<<(resume?", /resume":"")<<", /cancel or /exit to detach.\n";
+                    if(!review.questions.empty()||review.resume_available){
+                        std::cout<<Json{{"type","plan_human_review"},{"snapshot",snapshot},{"questions",review.questions}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Plan review output is unavailable");
+                        std::cerr<<"Enter /input REQUEST_ID JSON for a displayed question"<<(review.resume_available?", /resume":"")<<", /cancel or /exit to detach.\n";
                         std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(answer=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                         std::string route;Json input;
                         if(answer=="/cancel"){route=path+"/cancel";input=Json::object();}
-                        else if(answer=="/resume"&&resume){route=path+"/plan/resume";input={{"expected_revision",revision},{"expected_state_sequence",sequence}};}
-                        else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto request=split==std::string::npos?std::string{}:answer.substr(7,split-7),raw=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(request)){std::cerr<<"No input sent. Use an exact displayed question ID.\n";continue;}try{validate_plan_input(raw);}catch(...){std::cerr<<"No input sent. Use a bounded strict JSON object.\n";continue;}route=path+"/plan/human/"+request;input={{"input_json",raw},{"expected_revision",revision},{"expected_state_sequence",sequence}};}
+                        else if(answer=="/resume"&&review.resume_available){route=path+"/plan/resume";input={{"expected_revision",revision},{"expected_state_sequence",sequence}};}
+                        else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto request=split==std::string::npos?std::string{}:answer.substr(7,split-7),raw=split==std::string::npos?std::string{}:answer.substr(split+1);const auto target=review.waiting.find(request);if(target==review.waiting.end()){std::cerr<<"No input sent. Use an exact displayed question ID.\n";continue;}try{validate_plan_input(raw);}catch(...){std::cerr<<"No input sent. Use a bounded strict JSON object.\n";continue;}route=path+"/plan/human/"+request;input={{"input_json",raw},{"expected_revision",target->second.revision},{"expected_state_sequence",target->second.state_sequence}};}
                         else {std::cerr<<"No input sent. Use a displayed question, /resume when offered, /cancel or /exit.\n";continue;}
                         const auto result=client.Post(route,headers,input.dump(),"application/json");if(!result)throw std::runtime_error("Cannot reach xMind Server for plan input");if(result->status<200||result->status>=300)std::cerr<<"Backend rejected plan input (HTTP "<<result->status<<"). Refreshing the recorded head; no automatic retry.\n";else std::cout<<Json{{"type",answer=="/cancel"?"run_cancel_result":answer=="/resume"?"plan_resume_result":"plan_input_result"},{"result",Json::parse(result->body)}}.dump()<<'\n'<<std::flush;
                         continue;

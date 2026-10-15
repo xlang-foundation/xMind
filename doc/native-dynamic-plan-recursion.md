@@ -7,9 +7,12 @@ the same root budget and child pool. Release repository and engine contracts
 cover two sibling nested agents pausing together, SQLite restart/recovery,
 answering one branch while the other remains pending, and exactly-once
 continuation of both original calls. Authenticated HTTP and A2A paths have
-focused nested-owner contracts; full CLI, rendered browser and installed VS
-Code acceptance, reverse-order/concurrent answers, cancellation races, expiry,
-uncertainty, and repeated-segment budget/context coverage remain open. See the
+focused nested-owner contracts. The CLI now aggregates nested questions and
+uses the owning plan revision/state sequence; the focused review contract and
+standard CLI/agent HTTP contracts pass. A live multi-branch `/watch` run,
+rendered browser and installed VS Code acceptance, reverse-order/concurrent
+answers, cancellation races, expiry, uncertainty, and repeated-segment
+budget/context coverage remain open. See the
 [multi-branch human-wait acceptance](native-dynamic-plan-multibranch.md).
 
 ## Current boundary

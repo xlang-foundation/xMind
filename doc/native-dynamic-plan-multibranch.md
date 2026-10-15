@@ -11,14 +11,7 @@ runners through one shared root pause, answers one branch, verifies the other
 remains pending after the partial resume, and completes both original calls
 exactly once. HTTP ownership lookup, root/nested question DTO validation, and
 nested input/resume handling in the browser and VS Code views have focused
-contracts. Full completion still requires exercising the nested wait set
-through authenticated HTTP, CLI and the actual clients, plus reverse-order and
-concurrent answers, cancellation races, expiry/uncertainty cases, and measured
-budget/context checks across repeated partial resumes. The current Release
-rebuild passes the repository, engine and planning HTTP contracts **3/3**;
-browser controller passes **64/64** and VS Code planning client passes **11/11**.
-Exact commands, source and executable digests, verified behavior and limitations
-are recorded in [current-source evidence](evidence/native-dynamic-plan-multibranch-ctest-20261015.json).
+contracts. The CLI now flattens root and nested questions for `/watch`, carries each question’s owning plan CAS head, and offers resume when a nested wait owner has ready work. Its review helper and the standard interactive HTTP/agent contracts pass. A live multi-branch `/watch` flow, authenticated HTTP against a two-branch wait set, rendered browser and installed VS Code acceptance, reverse/concurrent answers, cancellation races, expiry/uncertainty cases, and repeated-segment budget/context checks remain open. The Release native repository/engine/planning HTTP contracts pass **3/3**; the CLI plan-review, native agent HTTP and CLI HTTP contracts pass **3/3**. Browser controller passes **64/64** and VS Code planning client passes **11/11**. Exact source and executable digests and the acceptance limits are in [CLI multi-branch review evidence](evidence/native-dynamic-plan-cli-multibranch-20261015.json) and [native multi-branch evidence](evidence/native-dynamic-plan-multibranch-ctest-20261015.json).
 
 ## Required behavior
 
