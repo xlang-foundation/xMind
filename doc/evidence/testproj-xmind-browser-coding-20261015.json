@@ -54,9 +54,34 @@
     "exit_code": 2,
     "error": "The xlang3 process tried to open 'npm' as a source file."
   },
+  "live_xlang3_pytest_run": {
+    "xmind_repository_revision_before_record": "9452b1b",
+    "run_id": "ca14c3e3e651856510c748fdfafcb94f",
+    "operation_id": "31ae9d4721e11326c9f302439f23a9d9",
+    "client": "xMind local browser UI",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "working_directory": "model-zoo/backend",
+    "profile": "xlang3",
+    "arguments": ["-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_api.py"],
+    "exit_code": 0,
+    "stdout_summary": "9 passed, 1 deprecation warning in 2.27s",
+    "stderr_bytes": 0,
+    "process_elapsed_ms": 4340,
+    "dependencies": "Imported the existing project-local .xlang3-site packages, including pytest, FastAPI, Starlette and httpx.",
+    "filesystem_verification": "Backend entries retain their pre-test timestamps; -B disabled bytecode writes and pytest cache was disabled.",
+    "result": "passed"
+  },
+  "rendered_model_zoo_check": {
+    "browser_surface": "Codex in-app browser; external Chrome was unavailable",
+    "catalog_url": "http://127.0.0.1:4174/?search=whisper",
+    "search_result": "One result, Whisper Small",
+    "detail_url": "http://127.0.0.1:4174/models/whisper-small",
+    "detail_result": "Rendered the expected model title, metadata and illustrative-metrics disclosure"
+  },
   "limitations": [
     "This verifies one reviewed frontend edit and a production build, not complete repository coding coverage or OpenCode parity.",
     "The successful build used the configured PowerShell profile because npm is a Node tool; xlang3 remains the Python/runtime profile.",
-    "The build recreated TestProj dist artifacts. TestProj is not in the xMind repository and the workspace has no Git history for this acceptance."
+    "The build recreated TestProj dist artifacts. TestProj is not in the xMind repository and the workspace has no Git history for this acceptance.",
+    "Rendered application acceptance was performed in the Codex in-app browser because no external Chrome surface was available."
   ]
 }

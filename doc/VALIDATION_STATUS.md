@@ -14,6 +14,17 @@ only that file. Exact run and operation IDs are in
 This validates one end-to-end browser file proposal, approval, and xlang3
 execution on TestProj; it does not yet cover a multi-step coding/build task.
 
+The same xMind local browser client then ran `pytest -q -p no:cacheprovider
+tests/test_api.py` from `model-zoo/backend` through its xlang3 process profile,
+with `-B` and the existing project-local `.xlang3-site`. All nine FastAPI
+contracts passed in 2.27 seconds; pytest emitted one Starlette/AnyIO deprecation
+warning and no stderr. The process took 4.34 seconds, exited 0, and the backend
+entries retained their earlier timestamps. No CPython, shell wrapper, network
+install or source edits were used. The existing Model Zoo preview also rendered
+the filtered Whisper Small result and its detail page in the Codex in-app
+browser; external Chrome is unavailable in this session. See the complete
+[TestProj browser evidence](evidence/testproj-xmind-browser-coding-20261015.json).
+
 ## Native graph restore — 2026-10-15
 
 The Release graph-runner contract now exercises a registered two-node graph:
