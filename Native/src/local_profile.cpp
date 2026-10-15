@@ -775,9 +775,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         state = store.state();
         shape(state, store, workspace);
         std::string loaded_manifest;
-        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
+        if(options.upgrade_backend&&!state.contains("owner_receipt"))
             loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
-        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent")){
+        if(options.upgrade_backend&&!state.contains("owner_receipt")){
             const auto phase=state.value("phase",std::string{});
             const bool recoverable_phase=phase=="ready"||phase=="starting"||phase=="preparing";
             const auto previous_pid=state.at("pid").get<std::uint32_t>();
@@ -792,6 +792,13 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                 auto [replacement,digest]=stage_current_runtime(store,workspace);
                 state["runtime"]=text(replacement);state["manifest"]=digest;
                 state["phase"]="preparing";state["pid"]=0;state["birth"]="";state["port"]=saved_port;
+                // An interrupted upgrade may have persisted its intent before
+                // the old owner issued a quiescence receipt. If the owner is
+                // gone and no receipt was persisted, retry as stopped-owner
+                // recovery. A database that did commit quiescence still rejects
+                // ordinary startup, preserving its admission fence.
+                state.erase("upgrade_intent");state.erase("replacement_runtime");
+                state.erase("replacement_manifest");state.erase("replacement_port");
                 store.write(state);recovered_stopped_owner=true;
             }
         }

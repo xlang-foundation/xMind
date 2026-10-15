@@ -2483,22 +2483,25 @@ void require_database_idle(XlangSqlite& db,bool allow_refresh=false){
     if(!allow_refresh)for(const auto& r:refresh_records(db))if(r.state=="prepared"||r.state=="dispatched")throw Conflict("Native MCP refresh ownership is still active");
     // All predicates are native literals. Include unfinished effect and context
     // ownership even if a corrupt/failed root claims to be terminal.
-    for(const auto* sql:{
-        "SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1",
-        "SELECT id FROM operations WHERE state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",
-        "SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1",
-        "SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1",
-        "SELECT id FROM dynamic_plans WHERE state IN ('active','waiting_human','uncertain') LIMIT 1",
-        "SELECT label FROM dynamic_plan_nodes WHERE state IN ('claimed','waiting_human','uncertain') LIMIT 1",
-        "SELECT id FROM dynamic_plan_calls WHERE state IN ('accepted','report_ready') LIMIT 1",
-        "SELECT id FROM agent_budget_segments WHERE state='open' LIMIT 1",
-        "SELECT root_run_id FROM dynamic_owner_pauses WHERE state='paused' LIMIT 1",
-        "SELECT id FROM context_idle_owners WHERE state='active' LIMIT 1",
-        "SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') LIMIT 1",
-        "SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') LIMIT 1",
-        "SELECT id FROM context_measures WHERE state IN ('reserved','started') LIMIT 1",
-        "SELECT id FROM inference_steps WHERE state IN ('reserved','started') LIMIT 1"
-    })if(!db.execute(sql).rows.empty())throw Conflict("Native execution or maintenance ownership is still active");
+    const auto require_empty=[&](const char* sql,const char* owner){if(!db.execute(sql).rows.empty())throw Conflict(std::string("Native backend upgrade is blocked by ")+owner);};
+    require_empty("SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1","a queued, running or paused run");
+    require_empty("SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1","an active model call");
+    require_empty("SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1","an active delegation batch");
+    require_empty("SELECT id FROM dynamic_plans WHERE state IN ('active','waiting_human','uncertain') LIMIT 1","an unresolved dynamic plan");
+    require_empty("SELECT label FROM dynamic_plan_nodes WHERE state IN ('claimed','waiting_human','uncertain') LIMIT 1","an unresolved graph node");
+    require_empty("SELECT id FROM dynamic_plan_calls WHERE state IN ('accepted','report_ready') LIMIT 1","an uncommitted plan call");
+    require_empty("SELECT id FROM agent_budget_segments WHERE state='open' LIMIT 1","an open agent budget segment");
+    require_empty("SELECT root_run_id FROM dynamic_owner_pauses WHERE state='paused' LIMIT 1","a paused dynamic owner");
+    require_empty("SELECT id FROM context_idle_owners WHERE state='active' LIMIT 1","an active context maintenance owner");
+    require_empty("SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') LIMIT 1","an active context compaction");
+    require_empty("SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') LIMIT 1","a pending context request");
+    require_empty("SELECT id FROM context_measures WHERE state IN ('reserved','started') LIMIT 1","an active context measurement");
+    require_empty("SELECT root_run_id FROM inference_steps WHERE state IN ('reserved','started') LIMIT 1","an active inference step");
+    const bool has_process_output=!db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='process_output_artifacts'").rows.empty();
+    const auto unresolved=has_process_output
+        ?db.execute("SELECT o.id FROM operations o LEFT JOIN runs r ON r.id=o.run_id LEFT JOIN process_output_artifacts a ON a.operation_id=o.id WHERE o.state IN ('awaiting_approval','ready','executing','uncertain') AND NOT (o.state='uncertain' AND o.tool='run_process' AND r.state IN ('failed','cancelled') AND json_valid(o.result)=1 AND json_extract(o.result,'$.process_tree_retired')=1 AND json_type(o.result,'$.output_artifact')='object' AND json_extract(o.result,'$.output_artifact.operation_id')=o.id AND json_extract(o.result,'$.output_artifact.state')='complete' AND a.run_id=o.run_id AND a.state='complete') LIMIT 1")
+        :db.execute("SELECT id FROM operations WHERE state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1");
+    if(!unresolved.rows.empty())throw Conflict("Native backend upgrade is blocked by an unresolved operation");
 }
 void require_bootstrap(XlangSqlite& db,const BackendLease& lease,const BackendOwnerState& prior,const BackendOwnerBootstrap& bootstrap){
     receipt_json(bootstrap.receipt);target_json(bootstrap.target);
