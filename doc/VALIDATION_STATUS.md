@@ -2591,3 +2591,27 @@ real local protocol servers with synthetic model/provider responses; it does
 not establish live external A2A/MCP peer behavior, installed VS Code acceptance
 or full feature parity. The reproducible CTest log is
 [`native-planning-mcp-a2a-focused-ctest-20261015.log`](evidence/native-planning-mcp-a2a-focused-ctest-20261015.log).
+
+## Full current-source Release and client gate — 2026-10-15
+
+The full Visual Studio 18 Release build completed for the current checkout.
+The first **145-test** CTest pass exposed two contract fixtures that omitted the
+implemented `restore_operation` tool and two context-receipt guards that did
+not compare an opaque receipt's captured context authority to the selected
+authority. The repository now rejects a provider receipt if its full captured
+context binding differs from the current selection, before any count or model
+request can use that receipt. The coding/delegation fixtures now include the
+registered restore tool where approved edits are enabled. After a fresh full
+build, all **145 native contracts passed**; the previously failing context,
+runner and delegation contracts are green in that complete run.
+
+The matching client suites passed **368/368 VS Code tests** and **121/121
+browser tests**. Native model peers remain synthetic; this gate verifies the
+local xlang3/SQLite runtime, native server/CLI integrations, provider-receipt
+scope enforcement and client contracts. It does not replace live external
+provider/peer checks or a newly launched installed VS Code acceptance. Exact
+outputs: [initial native run](evidence/native-release-ctest-20261015.log),
+[focused rerun of the four initial failures](evidence/native-release-previous-failures-20261015.log),
+[final native run](evidence/native-release-ctest-final-20261015.log),
+[VS Code suite](evidence/vscode-client-tests-20261015.log) and
+[browser suite](evidence/browser-client-tests-20261015.log).

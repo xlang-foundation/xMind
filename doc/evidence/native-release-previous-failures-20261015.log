@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/native-dynamic-plan
+    Start 25: native_context_repository_contract
+1/4 Test #25: native_context_repository_contract ...   Passed    2.89 sec
+    Start 28: native_context_engine_contract
+2/4 Test #28: native_context_engine_contract .......   Passed    3.83 sec
+    Start 50: native_delegation_http_contract
+3/4 Test #50: native_delegation_http_contract ......   Passed    0.94 sec
+    Start 78: native_agent_runner_contract
+4/4 Test #78: native_agent_runner_contract .........   Passed    8.75 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  16.43 sec

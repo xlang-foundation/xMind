@@ -1,0 +1,736 @@
+TAP version 13
+# Subtest: browser reload shows saved-settings restoration instead of a false unconfigured state while local reconnect is pending
+ok 1 - browser reload shows saved-settings restoration instead of a false unconfigured state while local reconnect is pending
+  ---
+  duration_ms: 516.2919
+  type: 'test'
+  ...
+# Subtest: full webpage streams a response, persists a queued follow-up and dispatches it after the turn
+ok 2 - full webpage streams a response, persists a queued follow-up and dispatches it after the turn
+  ---
+  duration_ms: 1029.2684
+  type: 'test'
+  ...
+# Subtest: production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only
+ok 3 - production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only
+  ---
+  duration_ms: 108.3984
+  type: 'test'
+  ...
+# Subtest: production classic scripts share a realm without collisions and restore owned history through the browser bridge
+ok 4 - production classic scripts share a realm without collisions and restore owned history through the browser bridge
+  ---
+  duration_ms: 96.585
+  type: 'test'
+  ...
+# Subtest: standalone webpage restores its existing HttpOnly session after reload without asking for the master token
+ok 5 - standalone webpage restores its existing HttpOnly session after reload without asking for the master token
+  ---
+  duration_ms: 515.252
+  type: 'test'
+  ...
+# Subtest: local session protocol mismatch explains the required restart without asking for a server token
+ok 6 - local session protocol mismatch explains the required restart without asking for a server token
+  ---
+  duration_ms: 117.27
+  type: 'test'
+  ...
+# Subtest: Cancel and Escape preserve an existing connection and do not logout or cancel execution
+ok 7 - Cancel and Escape preserve an existing connection and do not logout or cancel execution
+  ---
+  duration_ms: 68.8565
+  type: 'test'
+  ...
+# Subtest: local same-machine Connect reuses the server-owned credential without opening the token dialog
+ok 8 - local same-machine Connect reuses the server-owned credential without opening the token dialog
+  ---
+  duration_ms: 55.7381
+  type: 'test'
+  ...
+# Subtest: workspace Git action requires confirmation and reports successful initialization
+ok 9 - workspace Git action requires confirmation and reports successful initialization
+  ---
+  duration_ms: 75.2212
+  type: 'test'
+  ...
+# Subtest: workspace Git action reports an existing repository and honors cancellation
+ok 10 - workspace Git action reports an existing repository and honors cancellation
+  ---
+  duration_ms: 121.0277
+  type: 'test'
+  ...
+# Subtest: workspace Git status includes the branch and validated native file counts
+ok 11 - workspace Git status includes the branch and validated native file counts
+  ---
+  duration_ms: 64.9901
+  type: 'test'
+  ...
+# Subtest: browser Git controls select and consistently route a registered secondary folder
+ok 12 - browser Git controls select and consistently route a registered secondary folder
+  ---
+  duration_ms: 87.3726
+  type: 'test'
+  ...
+# Subtest: browser renders native Git diff files as text and never injects patch markup
+ok 13 - browser renders native Git diff files as text and never injects patch markup
+  ---
+  duration_ms: 52.3265
+  type: 'test'
+  ...
+# Subtest: browser infers a branch review base or explains when the user must supply one
+ok 14 - browser infers a branch review base or explains when the user must supply one
+  ---
+  duration_ms: 77.0581
+  type: 'test'
+  ...
+# Subtest: Git status distinguishes a clean repository from a workspace without Git
+ok 15 - Git status distinguishes a clean repository from a workspace without Git
+  ---
+  duration_ms: 68.7799
+  type: 'test'
+  ...
+# Subtest: older backend without Git metadata keeps the existing status view usable
+ok 16 - older backend without Git metadata keeps the existing status view usable
+  ---
+  duration_ms: 34.8828
+  type: 'test'
+  ...
+# Subtest: workspace canvas loads native folders lazily and previews the selected workspace file
+ok 17 - workspace canvas loads native folders lazily and previews the selected workspace file
+  ---
+  duration_ms: 50.809
+  type: 'test'
+  ...
+# Subtest: local Browse opens the native folder picker and registers its selected path on the same xMind node
+ok 18 - local Browse opens the native folder picker and registers its selected path on the same xMind node
+  ---
+  duration_ms: 37.7655
+  type: 'test'
+  ...
+# Subtest: cancelling the native folder picker leaves the typed workspace path unchanged
+ok 19 - cancelling the native folder picker leaves the typed workspace path unchanged
+  ---
+  duration_ms: 52.716
+  type: 'test'
+  ...
+# Subtest: workspace name and gear both open the workspace switcher and folder settings
+ok 20 - workspace name and gear both open the workspace switcher and folder settings
+  ---
+  duration_ms: 53.4543
+  type: 'test'
+  ...
+# Subtest: a folder picker that finishes after switching workspaces does not leave Browse disabled
+ok 21 - a folder picker that finishes after switching workspaces does not leave Browse disabled
+  ---
+  duration_ms: 53.8966
+  type: 'test'
+  ...
+# Subtest: fixed-workspace mode explains disabled folder registration and local profile mode enables it
+ok 22 - fixed-workspace mode explains disabled folder registration and local profile mode enables it
+  ---
+  duration_ms: 112.0573
+  type: 'test'
+  ...
+# Subtest: browser workspace switch reloads scoped history and does not cancel prior backend runs
+ok 23 - browser workspace switch reloads scoped history and does not cancel prior backend runs
+  ---
+  duration_ms: 54.7215
+  type: 'test'
+  ...
+# Subtest: browser workspace switch remains usable when AbortSignal static helpers throw Illegal invocation
+ok 24 - browser workspace switch remains usable when AbortSignal static helpers throw Illegal invocation
+  ---
+  duration_ms: 54.8395
+  type: 'test'
+  ...
+# Subtest: a rejected local reconnect reports how to restore the connection without exposing a token prompt
+ok 25 - a rejected local reconnect reports how to restore the connection without exposing a token prompt
+  ---
+  duration_ms: 52.3321
+  type: 'test'
+  ...
+# Subtest: cancelling an in-flight reconnect prevents late popup or conversation changes
+ok 26 - cancelling an in-flight reconnect prevents late popup or conversation changes
+  ---
+  duration_ms: 37.6511
+  type: 'test'
+  ...
+# Subtest: Cancel aborts pending network work and immediate retry stays owned by the new attempt
+ok 27 - Cancel aborts pending network work and immediate retry stays owned by the new attempt
+  ---
+  duration_ms: 51.6944
+  type: 'test'
+  ...
+# Subtest: sidebar divider supports drag, keyboard bounds and remembered width
+ok 28 - sidebar divider supports drag, keyboard bounds and remembered width
+  ---
+  duration_ms: 29.9187
+  type: 'test'
+  ...
+# Subtest: a workspace starts from one chosen folder and accepts more folders later
+ok 29 - a workspace starts from one chosen folder and accepts more folders later
+  ---
+  duration_ms: 53.9366
+  type: 'test'
+  ...
+# Subtest: workspace filename finder opens native fuzzy results from the active root
+ok 30 - workspace filename finder opens native fuzzy results from the active root
+  ---
+  duration_ms: 39.7452
+  type: 'test'
+  ...
+# Subtest: workspace filename finder searches and previews attached folders independently
+ok 31 - workspace filename finder searches and previews attached folders independently
+  ---
+  duration_ms: 42.8262
+  type: 'test'
+  ...
+# Subtest: Add folder attaches to the selected workspace without switching its session
+ok 32 - Add folder attaches to the selected workspace without switching its session
+  ---
+  duration_ms: 44.0647
+  type: 'test'
+  ...
+# Subtest: browser surfaces and replies to a pending approval from another run in the selected session
+ok 33 - browser surfaces and replies to a pending approval from another run in the selected session
+  ---
+  duration_ms: 6.5134
+  type: 'test'
+  ...
+# Subtest: browser accepts only a path-bound read-only inspection for an uncertain patch addition
+ok 34 - browser accepts only a path-bound read-only inspection for an uncertain patch addition
+  ---
+  duration_ms: 1.0503
+  type: 'test'
+  ...
+# Subtest: browser starts a native restore run only for a fresh successful file operation
+ok 35 - browser starts a native restore run only for a fresh successful file operation
+  ---
+  duration_ms: 2.9524
+  type: 'test'
+  ...
+# Subtest: browser conversation permission manager lists scoped grants and revokes only the observed revision
+ok 36 - browser conversation permission manager lists scoped grants and revokes only the observed revision
+  ---
+  duration_ms: 0.5809
+  type: 'test'
+  ...
+# Subtest: browser retrieves bounded saved process output pages only for an observed completed command
+ok 37 - browser retrieves bounded saved process output pages only for an observed completed command
+  ---
+  duration_ms: 0.7566
+  type: 'test'
+  ...
+# Subtest: browser older-history command publishes the expanded transcript for scroll-preserving prepend
+ok 38 - browser older-history command publishes the expanded transcript for scroll-preserving prepend
+  ---
+  duration_ms: 1.0963
+  type: 'test'
+  ...
+# Subtest: browser session client shares the committed parser using cookies without bearer access
+ok 39 - browser session client shares the committed parser using cookies without bearer access
+  ---
+  duration_ms: 30.2351
+  type: 'test'
+  ...
+# Subtest: browser session client accepts successful no-content native operations
+ok 40 - browser session client accepts successful no-content native operations
+  ---
+  duration_ms: 0.4441
+  type: 'test'
+  ...
+# Subtest: browser allows a bounded A2A follow-up request to span native peer discovery and reply
+ok 41 - browser allows a bounded A2A follow-up request to span native peer discovery and reply
+  ---
+  duration_ms: 0.6968
+  type: 'test'
+  ...
+# Subtest: browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access
+ok 42 - browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access
+  ---
+  duration_ms: 1.5067
+  type: 'test'
+  ...
+# Subtest: browser renders streamed chunks directly and reconciles only durable changes
+ok 43 - browser renders streamed chunks directly and reconciles only durable changes
+  ---
+  duration_ms: 1464.561
+  type: 'test'
+  ...
+# Subtest: browser coalesces concurrent snapshots and runs one follow-up for intervening durable events
+ok 44 - browser coalesces concurrent snapshots and runs one follow-up for intervening durable events
+  ---
+  duration_ms: 2.3192
+  type: 'test'
+  ...
+# Subtest: browser terminal command snapshot drains its current feed before retiring observation
+ok 45 - browser terminal command snapshot drains its current feed before retiring observation
+  ---
+  duration_ms: 8.2034
+  type: 'test'
+  ...
+# Subtest: browser selection retirement aborts the feed and rejects late events from that conversation
+ok 46 - browser selection retirement aborts the feed and rejects late events from that conversation
+  ---
+  duration_ms: 3.4903
+  type: 'test'
+  ...
+# Subtest: browser event arriving during a snapshot does not render that committed record twice
+ok 47 - browser event arriving during a snapshot does not render that committed record twice
+  ---
+  duration_ms: 2.7251
+  type: 'test'
+  ...
+# Subtest: browser resolves new graph child ownership after an older snapshot finishes
+ok 48 - browser resolves new graph child ownership after an older snapshot finishes
+  ---
+  duration_ms: 3.8805
+  type: 'test'
+  ...
+# Subtest: browser graph initial snapshot reads committed events before child ownership
+ok 49 - browser graph initial snapshot reads committed events before child ownership
+  ---
+  duration_ms: 1.4367
+  type: 'test'
+  ...
+# Subtest: browser graph terminal snapshot reads committed events before child ownership
+ok 50 - browser graph terminal snapshot reads committed events before child ownership
+  ---
+  duration_ms: 0.6273
+  type: 'test'
+  ...
+# Subtest: browser graph snapshot still rejects an event without owned child metadata
+ok 51 - browser graph snapshot still rejects an event without owned child metadata
+  ---
+  duration_ms: 0.6165
+  type: 'test'
+  ...
+# Subtest: browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes
+ok 52 - browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes
+  ---
+  duration_ms: 0.9743
+  type: 'test'
+  ...
+# Subtest: browser user skill commands use the selected session and stop publishing after disposal
+ok 53 - browser user skill commands use the selected session and stop publishing after disposal
+  ---
+  duration_ms: 6.7938
+  type: 'test'
+  ...
+# Subtest: conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired
+ok 54 - conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired
+  ---
+  duration_ms: 11.3808
+  type: 'test'
+  ...
+# Subtest: a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding
+ok 55 - a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding
+  ---
+  duration_ms: 6.5554
+  type: 'test'
+  ...
+# Subtest: browser imported key-only profiles guide the footer selection without a new-key error or provider calls
+ok 56 - browser imported key-only profiles guide the footer selection without a new-key error or provider calls
+  ---
+  duration_ms: 1.0353
+  type: 'test'
+  ...
+# Subtest: browser initializes saved provider profiles before any session is selected
+ok 57 - browser initializes saved provider profiles before any session is selected
+  ---
+  duration_ms: 0.9677
+  type: 'test'
+  ...
+# Subtest: browser startup discovers the active saved profile catalogue without delaying workspace readiness
+ok 58 - browser startup discovers the active saved profile catalogue without delaying workspace readiness
+  ---
+  duration_ms: 3.6405
+  type: 'test'
+  ...
+# Subtest: browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes
+ok 59 - browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes
+  ---
+  duration_ms: 5.6984
+  type: 'test'
+  ...
+# Subtest: browser saves a selected model to the active conversation with provider and revision binding
+ok 60 - browser saves a selected model to the active conversation with provider and revision binding
+  ---
+  duration_ms: 1.2382
+  type: 'test'
+  ...
+# Subtest: browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment
+ok 61 - browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment
+  ---
+  duration_ms: 5.7889
+  type: 'test'
+  ...
+# Subtest: browser graph resume requires displayed and freshly verified backend eligibility/CAS and never retries conflicts
+ok 62 - browser graph resume requires displayed and freshly verified backend eligibility/CAS and never retries conflicts
+  ---
+  duration_ms: 2.3787
+  type: 'test'
+  ...
+# Subtest: browser context control uses actual discovery and discards a stale session/model generation before compaction
+ok 63 - browser context control uses actual discovery and discards a stale session/model generation before compaction
+  ---
+  duration_ms: 3.6691
+  type: 'test'
+  ...
+# Subtest: browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities
+ok 64 - browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities
+  ---
+  duration_ms: 8.7872
+  type: 'test'
+  ...
+# Subtest: browser accepts a nested human answer against that nested plan CAS and resumes after one answered branch
+ok 65 - browser accepts a nested human answer against that nested plan CAS and resumes after one answered branch
+  ---
+  duration_ms: 5.678
+  type: 'test'
+  ...
+# Subtest: browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation
+ok 66 - browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation
+  ---
+  duration_ms: 6.1553
+  type: 'test'
+  ...
+# Subtest: browser generation change during a fresh plan check discards response and cannot answer the prior selected owner
+ok 67 - browser generation change during a fresh plan check discards response and cannot answer the prior selected owner
+  ---
+  duration_ms: 1.4698
+  type: 'test'
+  ...
+# Subtest: browser transient plan GET conflicts discard actions and retry only bounded read observation
+ok 68 - browser transient plan GET conflicts discard actions and retry only bounded read observation
+  ---
+  duration_ms: 1.2888
+  type: 'test'
+  ...
+# Subtest: owned observation rejects a same-session status for another root and selection resets cursor backlog
+ok 69 - owned observation rejects a same-session status for another root and selection resets cursor backlog
+  ---
+  duration_ms: 1.2336
+  type: 'test'
+  ...
+# Subtest: normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+ok 70 - normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+  ---
+  duration_ms: 2.6099
+  type: 'test'
+  ...
+# Subtest: browser refreshes a stale provider selection before admitting the next run
+ok 71 - browser refreshes a stale provider selection before admitting the next run
+  ---
+  duration_ms: 2.3676
+  type: 'test'
+  ...
+# Subtest: profile conflicts refresh the displayed account and model without replaying the retained task
+ok 72 - profile conflicts refresh the displayed account and model without replaying the retained task
+  ---
+  duration_ms: 6.1154
+  type: 'test'
+  ...
+# Subtest: browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+ok 73 - browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+  ---
+  duration_ms: 1.0791
+  type: 'test'
+  ...
+# Subtest: browser slash command uses the current command catalogue and selected graph run route
+ok 74 - browser slash command uses the current command catalogue and selected graph run route
+  ---
+  duration_ms: 1.2507
+  type: 'test'
+  ...
+# Subtest: browser Settings preserves the selected profile route through private discovery and footer enrollment
+ok 75 - browser Settings preserves the selected profile route through private discovery and footer enrollment
+  ---
+  duration_ms: 2.8617
+  type: 'test'
+  ...
+# Subtest: rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+ok 76 - rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+  ---
+  duration_ms: 1.2543
+  type: 'test'
+  ...
+# Subtest: session catalogue marks active runs from the native status map and rejects malformed status data
+ok 77 - session catalogue marks active runs from the native status map and rejects malformed status data
+  ---
+  duration_ms: 1.3571
+  type: 'test'
+  ...
+# Subtest: browser fork uses the selected saved message boundary and refuses foreign or busy sources
+ok 78 - browser fork uses the selected saved message boundary and refuses foreign or busy sources
+  ---
+  duration_ms: 2.6444
+  type: 'test'
+  ...
+# Subtest: Responses saved-key discovery and model selection preserve backend-reported wire
+ok 79 - Responses saved-key discovery and model selection preserve backend-reported wire
+  ---
+  duration_ms: 2.7759
+  type: 'test'
+  ...
+# Subtest: restoring the native view does not wait for provider catalogue discovery
+ok 80 - restoring the native view does not wait for provider catalogue discovery
+  ---
+  duration_ms: 21.9775
+  type: 'test'
+  ...
+# Subtest: new runs attach the browser stream before the session refresh completes
+ok 81 - new runs attach the browser stream before the session refresh completes
+  ---
+  duration_ms: 2.3139
+  type: 'test'
+  ...
+# Subtest: browser observation starts its reconciliation snapshot without blocking streamed events
+ok 82 - browser observation starts its reconciliation snapshot without blocking streamed events
+  ---
+  duration_ms: 1.182
+  type: 'test'
+  ...
+# Subtest: view catches a completion between event and status reads and drains final events
+ok 83 - view catches a completion between event and status reads and drains final events
+  ---
+  duration_ms: 2.0841
+  type: 'test'
+  ...
+# Subtest: an obsolete view response cannot overwrite the next selection
+ok 84 - an obsolete view response cannot overwrite the next selection
+  ---
+  duration_ms: 0.7787
+  type: 'test'
+  ...
+# Subtest: provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+ok 85 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+  ---
+  duration_ms: 2.6578
+  type: 'test'
+  ...
+# Subtest: stale operation bytes cannot produce an approval request
+ok 86 - stale operation bytes cannot produce an approval request
+  ---
+  duration_ms: 1.0184
+  type: 'test'
+  ...
+# Subtest: browser refreshes an A2A task only through its exact acknowledged saved operation
+ok 87 - browser refreshes an A2A task only through its exact acknowledged saved operation
+  ---
+  duration_ms: 1.2249
+  type: 'test'
+  ...
+# Subtest: browser artifact fetch explicitly requests remote A2A artifacts through the saved task inspection
+ok 88 - browser artifact fetch explicitly requests remote A2A artifacts through the saved task inspection
+  ---
+  duration_ms: 0.8165
+  type: 'test'
+  ...
+# Subtest: browser can inspect a stream-observed task on an uncertain A2A send without replaying it
+ok 89 - browser can inspect a stream-observed task on an uncertain A2A send without replaying it
+  ---
+  duration_ms: 0.5777
+  type: 'test'
+  ...
+# Subtest: browser resumes a saved A2A event stream through the local backend
+ok 90 - browser resumes a saved A2A event stream through the local backend
+  ---
+  duration_ms: 0.5635
+  type: 'test'
+  ...
+# Subtest: browser confirms and sends one explicit cancellation for the exact acknowledged A2A task
+ok 91 - browser confirms and sends one explicit cancellation for the exact acknowledged A2A task
+  ---
+  duration_ms: 0.7508
+  type: 'test'
+  ...
+# Subtest: browser A2A input-required follow-up uses the saved task and refreshes its durable sequence
+ok 92 - browser A2A input-required follow-up uses the saved task and refreshes its durable sequence
+  ---
+  duration_ms: 0.8095
+  type: 'test'
+  ...
+# Subtest: browser patch comparison revalidates owned snapshots and never submits approval
+ok 93 - browser patch comparison revalidates owned snapshots and never submits approval
+  ---
+  duration_ms: 1.8981
+  type: 'test'
+  ...
+# Subtest: browser approval shows the exact reviewed patch and clears it when the selected run changes
+ok 94 - browser approval shows the exact reviewed patch and clears it when the selected run changes
+  ---
+  duration_ms: 1.0684
+  type: 'test'
+  ...
+# Subtest: browser cannot compare malformed patch absence and missing batch manifest
+ok 95 - browser cannot compare malformed patch absence and missing batch manifest
+  ---
+  duration_ms: 3.6972
+  type: 'test'
+  ...
+# Subtest: browser Settings manages public Nexus addresses and leaves Local active until Nexus authentication exists
+ok 96 - browser Settings manages public Nexus addresses and leaves Local active until Nexus authentication exists
+  ---
+  duration_ms: 1.2981
+  type: 'test'
+  ...
+# Subtest: browser MCP Settings explicitly loads the native resource catalog without mixing OAuth state
+ok 97 - browser MCP Settings explicitly loads the native resource catalog without mixing OAuth state
+  ---
+  duration_ms: 1.0146
+  type: 'test'
+  ...
+# Subtest: browser launcher serves current workspace actions from freshly built assets
+ok 98 - browser launcher serves current workspace actions from freshly built assets
+  ---
+  duration_ms: 655.3316
+  type: 'test'
+  ...
+# Subtest: MCP login browser routes expose only exact observation, start and cancel methods
+ok 99 - MCP login browser routes expose only exact observation, start and cancel methods
+  ---
+  duration_ms: 37.0969
+  type: 'test'
+  ...
+# Subtest: session skill controls expose only exact GET and POST routes
+ok 100 - session skill controls expose only exact GET and POST routes
+  ---
+  duration_ms: 40.5102
+  type: 'test'
+  ...
+# Subtest: A2A owner routes are narrowly allowlisted for local browser forwarding
+ok 101 - A2A owner routes are narrowly allowlisted for local browser forwarding
+  ---
+  duration_ms: 0.5046
+  type: 'test'
+  ...
+# Subtest: workspace skill catalogue is an exact read-only browser route
+ok 102 - workspace skill catalogue is an exact read-only browser route
+  ---
+  duration_ms: 0.4468
+  type: 'test'
+  ...
+# Subtest: browser view cannot invoke the native provider YAML file reader
+ok 103 - browser view cannot invoke the native provider YAML file reader
+  ---
+  duration_ms: 0.2462
+  type: 'test'
+  ...
+# Subtest: context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route
+ok 104 - context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route
+  ---
+  duration_ms: 0.5835
+  type: 'test'
+  ...
+# Subtest: planning view allowlist exposes only scoped observation, human input and resume methods
+ok 105 - planning view allowlist exposes only scoped observation, human input and resume methods
+  ---
+  duration_ms: 0.5929
+  type: 'test'
+  ...
+# Subtest: view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication
+ok 106 - view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication
+  ---
+  duration_ms: 287.4895
+  type: 'test'
+  ...
+# Subtest: narrow browser layout overrides later workspace and sidebar defaults
+ok 107 - narrow browser layout overrides later workspace and sidebar defaults
+  ---
+  duration_ms: 0.9877
+  type: 'test'
+  ...
+# Subtest: filename search button overrides the full-width file-tree button rule
+ok 108 - filename search button overrides the full-width file-tree button rule
+  ---
+  duration_ms: 0.1821
+  type: 'test'
+  ...
+# Subtest: browser adapter forwards durable native view credentials across restart without retaining the master token
+ok 109 - browser adapter forwards durable native view credentials across restart without retaining the master token
+  ---
+  duration_ms: 337.4142
+  type: 'test'
+  ...
+# Subtest: profile-aware local browser session connects without asking the page for its server token
+ok 110 - profile-aware local browser session connects without asking the page for its server token
+  ---
+  duration_ms: 25.6516
+  type: 'test'
+  ...
+# Subtest: a same-machine browser view started before xMind resolves its active local credential on connect
+ok 111 - a same-machine browser view started before xMind resolves its active local credential on connect
+  ---
+  duration_ms: 33.7616
+  type: 'test'
+  ...
+# Subtest: local browser silently renews a stale same-machine session after the native owner restarts
+ok 112 - local browser silently renews a stale same-machine session after the native owner restarts
+  ---
+  duration_ms: 25.1
+  type: 'test'
+  ...
+# Subtest: local browser forwards saved A2A task inspection through its HttpOnly view session
+ok 113 - local browser forwards saved A2A task inspection through its HttpOnly view session
+  ---
+  duration_ms: 36.735
+  type: 'test'
+  ...
+# Subtest: local browser preserves native VCS status and no-content initialization responses
+ok 114 - local browser preserves native VCS status and no-content initialization responses
+  ---
+  duration_ms: 28.2424
+  type: 'test'
+  ...
+# Subtest: workspace catalogue and switch stay native and rotate the HttpOnly profile credential
+ok 115 - workspace catalogue and switch stay native and rotate the HttpOnly profile credential
+  ---
+  duration_ms: 75.8521
+  type: 'test'
+  ...
+# Subtest: browser adapts a VS Code-attached single-workspace server without inventing workspace registration
+ok 116 - browser adapts a VS Code-attached single-workspace server without inventing workspace registration
+  ---
+  duration_ms: 31.3166
+  type: 'test'
+  ...
+# Subtest: event stream routes are read-only and exclude foreign path encodings
+ok 117 - event stream routes are read-only and exclude foreign path encodings
+  ---
+  duration_ms: 1.4541
+  type: 'test'
+  ...
+# Subtest: synthetic stream peer forwards bytes before completion and detaches without a cancel command
+ok 118 - synthetic stream peer forwards bytes before completion and detaches without a cancel command
+  ---
+  duration_ms: 51.6698
+  type: 'test'
+  ...
+# Subtest: local browser allows only authenticated POST reconciliation for saved process operations
+ok 119 - local browser allows only authenticated POST reconciliation for saved process operations
+  ---
+  duration_ms: 0.6591
+  type: 'test'
+  ...
+# Subtest: local browser exposes only POST for an exact saved-file restore route
+ok 120 - local browser exposes only POST for an exact saved-file restore route
+  ---
+  duration_ms: 0.4279
+  type: 'test'
+  ...
+# Subtest: browser forwards revision-bound permission-grant DELETE bodies and blocks cross-origin revocation
+ok 121 - browser forwards revision-bound permission-grant DELETE bodies and blocks cross-origin revocation
+  ---
+  duration_ms: 39.6196
+  type: 'test'
+  ...
+1..121
+# tests 121
+# suites 0
+# pass 121
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15204.6099
