@@ -74,6 +74,7 @@ inline void remove_dynamic_plan_multiplicity_fixture(agentflow::XlangSqlite& dat
 }
 inline void remove_dynamic_plan_owner_scope_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
+    if(scalar("PRAGMA user_version")>=29){database.execute("DROP TRIGGER IF EXISTS retain_dynamic_owner_pause_waits");database.execute("DROP TABLE IF EXISTS dynamic_owner_pause_waits");}
     remove_dynamic_plan_multiplicity_fixture(database);
     if(scalar("PRAGMA user_version")<24)return;
     const auto owners=scalar("SELECT count(*) FROM dynamic_plan_owners");
@@ -173,9 +174,9 @@ inline void remove_dynamic_schema_fixture(agentflow::XlangSqlite& database){
     database.execute("DROP TRIGGER owned_child_boundary");
     for(const auto* trigger:{"actual_model_response_once","dynamic_capability_identity","dynamic_revision_immutable","dynamic_revision_node_immutable","dynamic_edge_immutable","dynamic_definition_protected","dynamic_claim_immutable","dynamic_child_settlement","dynamic_call_identity","dynamic_call_result","dynamic_call_commit","dynamic_call_tool_completion","dynamic_call_continuation","dynamic_human_identity","dynamic_human_input","dynamic_human_settlement","dynamic_plan_identity","dynamic_initial_node","dynamic_claim_boundary","dynamic_capability_admission","dynamic_signed_call_boundary","dynamic_plan_owner_admission","dynamic_plan_owner_identity","retain_dynamic_plan_owners"})
         database.execute(std::string("DROP TRIGGER IF EXISTS ")+trigger);
-    for(const auto* table:{"dynamic_capabilities","dynamic_plans","dynamic_plan_calls","dynamic_plan_revisions","dynamic_plan_nodes","dynamic_revision_nodes","dynamic_plan_edges","dynamic_human_requests","agent_budget_segments","dynamic_owner_pauses","dynamic_plan_owners"})
+    for(const auto* table:{"dynamic_capabilities","dynamic_plans","dynamic_plan_calls","dynamic_plan_revisions","dynamic_plan_nodes","dynamic_revision_nodes","dynamic_plan_edges","dynamic_human_requests","agent_budget_segments","dynamic_owner_pauses","dynamic_plan_owners","dynamic_owner_pause_waits"})
         database.execute(std::string("DROP TRIGGER IF EXISTS retain_")+table);
-    for(const auto* table:{"dynamic_owner_pauses","dynamic_plan_edges","dynamic_revision_nodes","dynamic_human_requests","dynamic_plan_nodes","dynamic_plan_revisions","dynamic_plan_calls","dynamic_plan_owners","dynamic_plans","agent_budget_segments","dynamic_capabilities"})
+    for(const auto* table:{"dynamic_owner_pause_waits","dynamic_owner_pauses","dynamic_plan_edges","dynamic_revision_nodes","dynamic_human_requests","dynamic_plan_nodes","dynamic_plan_revisions","dynamic_plan_calls","dynamic_plan_owners","dynamic_plans","agent_budget_segments","dynamic_capabilities"})
         database.execute(std::string("DROP TABLE IF EXISTS ")+table);
     database.execute("ALTER TABLE agent_model_call_reservations DROP COLUMN actual_assistant_json");
     database.execute("ALTER TABLE agent_execution_budgets DROP COLUMN planned_children_reserved");

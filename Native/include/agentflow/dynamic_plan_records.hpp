@@ -161,12 +161,15 @@ struct DynamicPauseSpec {
     std::int64_t measured_active_elapsed_ms=0;
     std::optional<ContextPausePin> context_pin;
 };
-struct DynamicPauseBinding {
+struct DynamicPlanWaitBinding {
     std::string plan_id,plan_call_id;
     // Dynamic-agent owner run IDs from the root's first claimed child through
     // the owner of the waiting plan. The chain is re-derived from immutable
     // plan-owner and claimed-node records whenever it is read.
     std::vector<std::string> owner_runs;
+};
+struct DynamicPauseBinding : DynamicPlanWaitBinding {
+    std::vector<DynamicPlanWaitBinding> waits;
 };
 struct DynamicResumeSpec {
     std::string plan_id,segment_id,backend_identity;

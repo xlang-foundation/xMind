@@ -532,7 +532,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>28)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>29)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -561,7 +561,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>28) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>29) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -948,6 +948,16 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE UNIQUE INDEX one_workspace_effect ON operations(workspace) WHERE state='executing' AND NOT(tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1)");
         db.execute("PRAGMA user_version=28");
     }
+    if(version<29){
+        // A root pause may eventually own several independent nested plan
+        // continuations. Keep the existing header as the pause/segment record
+        // and migrate its current single wait into the normalized wait set.
+        db.execute("CREATE TABLE dynamic_owner_pause_waits(root_run_id TEXT NOT NULL REFERENCES dynamic_capabilities(root_run_id),plan_id TEXT NOT NULL REFERENCES dynamic_plans(id),plan_call_id TEXT NOT NULL REFERENCES dynamic_plan_calls(id),state TEXT NOT NULL CHECK(state IN ('paused','resumed','retired')),PRIMARY KEY(root_run_id,plan_id,plan_call_id),UNIQUE(root_run_id,plan_id))");
+        db.execute("INSERT INTO dynamic_owner_pause_waits(root_run_id,plan_id,plan_call_id,state) SELECT root_run_id,plan_id,plan_call_id,state FROM dynamic_owner_pauses");
+        db.execute("CREATE TRIGGER retain_dynamic_owner_pause_waits BEFORE DELETE ON dynamic_owner_pause_waits BEGIN SELECT RAISE(ABORT,'dynamic durable evidence cannot be deleted'); END");
+        db.execute("PRAGMA user_version=29");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Dynamic pause wait-set migration did not preserve foreign key ownership");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -1289,8 +1299,10 @@ DynamicBudgetSegment Repository::dynamic_budget_segment(const std::string& root)
 }
 DynamicPauseBinding Repository::dynamic_owner_pause(const std::string& root_id){
     auto& db=impl_->database;const auto root=run(root_id);if(root.state!=RunState::paused||root.graph_root||!root.parent_id.empty())throw Conflict("Dynamic owner has no paused ordinary root");
-    const auto rows=db.execute("SELECT plan_id,plan_call_id FROM dynamic_owner_pauses WHERE root_run_id=? AND state='paused'",{root_id}).rows;if(rows.size()!=1)throw NotFound("Paused dynamic owner binding not found");
-    DynamicPauseBinding result;result.plan_id=text(rows[0][0]);result.plan_call_id=text(rows[0][1]);auto waiting=dynamic_plan(result.plan_id);const auto waiting_call=dynamic_plan_call(result.plan_call_id);
+    const auto rows=db.execute("SELECT plan_id,plan_call_id FROM dynamic_owner_pause_waits WHERE root_run_id=? AND state='paused' ORDER BY plan_id,plan_call_id",{root_id}).rows;if(rows.empty())throw NotFound("Paused dynamic owner binding not found");
+    DynamicPauseBinding result;result.plan_id=text(rows[0][0]);result.plan_call_id=text(rows[0][1]);
+    for(const auto& row:rows){DynamicPlanWaitBinding wait;wait.plan_id=text(row[0]);wait.plan_call_id=text(row[1]);
+    auto waiting=dynamic_plan(wait.plan_id);const auto waiting_call=dynamic_plan_call(wait.plan_call_id);
     if(waiting.root_run_id!=root_id||waiting.state!="waiting_human"||waiting_call.root_run_id!=root_id||waiting_call.plan_id!=waiting.id||waiting_call.owner_run_id!=waiting.owner_run_id||waiting_call.state!="accepted")throw DatabaseError("Paused dynamic wait lost its exact accepted owner call");
     auto current=waiting;while(current.owner_run_id!=root_id){
         if(current.parent_plan_id.empty()||current.parent_node_label.empty()||current.depth<1||current.depth>8)throw DatabaseError("Paused dynamic owner chain ended before its ordinary root");
@@ -1300,11 +1312,13 @@ DynamicPauseBinding Repository::dynamic_owner_pause(const std::string& root_id){
         if(node==parent.nodes.end()||node->definition.kind!=DynamicNodeKind::agent||node->state!=DynamicNodeState::claimed||node->claim_id.empty()||node->claim_revision!=node->definition_revision)throw DatabaseError("Paused dynamic owner lost its exact claimed parent node");
         const auto owner_calls=dynamic_plan_calls(root_id);const auto pending=std::count_if(owner_calls.begin(),owner_calls.end(),[&](const auto& value){return value.plan_id==current.id&&value.owner_run_id==current.owner_run_id&&value.state=="accepted";});
         if(pending!=1)throw DatabaseError("Paused dynamic descendant lacks one exact accepted continuation");
-        result.owner_runs.push_back(current.owner_run_id);current=parent;
+        wait.owner_runs.push_back(current.owner_run_id);current=parent;
     }
     if(current.owner_run_id!=root_id||current.depth!=0||!current.parent_plan_id.empty()||current.root_run_id!=root_id||(current.state!="active"&&current.state!="waiting_human"))throw DatabaseError("Paused dynamic chain does not terminate at its exact root plan");
     const auto root_calls=dynamic_plan_calls(root_id);const auto root_pending=std::count_if(root_calls.begin(),root_calls.end(),[&](const auto& value){return value.plan_id==current.id&&value.owner_run_id==root_id&&value.state=="accepted";});if(root_pending!=1)throw DatabaseError("Paused dynamic root lacks one exact accepted continuation");
-    std::reverse(result.owner_runs.begin(),result.owner_runs.end());const std::set<std::string> chain(result.owner_runs.begin(),result.owner_runs.end());for(const auto& row:db.execute("SELECT id,state FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused')",{root_id}).rows)if(!chain.contains(text(row[0]))||text(row[1])!="paused")throw DatabaseError("Paused dynamic root retains an independent or unpaused child");return result;
+    std::reverse(wait.owner_runs.begin(),wait.owner_runs.end());result.waits.push_back(std::move(wait));}
+    result.owner_runs=result.waits.front().owner_runs;
+    std::set<std::string> chain;for(const auto& wait:result.waits)chain.insert(wait.owner_runs.begin(),wait.owner_runs.end());for(const auto& row:db.execute("SELECT id,state FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused')",{root_id}).rows)if(!chain.contains(text(row[0]))||text(row[1])!="paused")throw DatabaseError("Paused dynamic root retains an independent or unpaused child");return result;
 }
 DynamicBudgetSegment Repository::open_dynamic_budget_segment(const DynamicSegmentSpec& spec){
     bounded_identity(spec.id,128);auto& db=impl_->database;Transaction tx(db);const auto caps=dynamic_capabilities(spec.root_run_id);const auto budget=root_budget(spec.root_run_id);if(caps.backend_identity!=spec.backend_identity)throw DynamicPlanUnavailable("Dynamic active segment settings changed");if(run(spec.root_run_id).state!=RunState::running||budget.revision!=spec.expected_budget_revision)throw Conflict("Dynamic segment owner or budget changed");
@@ -1336,7 +1350,8 @@ Run Repository::suspend_dynamic_owner(const DynamicPauseSpec& spec){
     changed_one(db.execute("UPDATE agent_execution_budgets SET revision=revision+1 WHERE root_run_id=? AND revision=?",{root.id,budget.revision}));changed_one(db.execute("UPDATE dynamic_plans SET state='waiting_human',state_sequence=state_sequence+1 WHERE id=? AND revision=? AND state_sequence=?",{p.id,p.revision,p.state_sequence}));
     for(const auto& child:owner_chain){changed_one(db.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{child}));impl_->event(child,"run.paused",Json{{"reason","nested_dynamic_human_wait"},{"waiting_plan_id",p.id},{"waiting_call_id",call.id}}.dump());}
     changed_one(db.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{root.id}));const auto e=impl_->event(root.id,"run.paused",Json{{"reason","dynamic_human_wait"},{"plan_id",p.id},{"plan_call_id",call.id},{"segment_id",spec.segment_id},{"owner_chain",owner_chain}}.dump());
-    changed_one(db.execute("INSERT INTO dynamic_owner_pauses(root_run_id,plan_id,plan_call_id,segment_id,paused_event_seq,state,context_pin) VALUES(?,?,?,?,?,'paused',?) ON CONFLICT(root_run_id) DO UPDATE SET plan_id=excluded.plan_id,plan_call_id=excluded.plan_call_id,segment_id=excluded.segment_id,paused_event_seq=excluded.paused_event_seq,state='paused',context_pin=excluded.context_pin",{root.id,p.id,call.id,spec.segment_id,e.sequence,spec.context_pin?SqlValue(context_pause_json(*spec.context_pin).dump()):SqlValue(nullptr)}));tx.commit();auto result=root;result.state=RunState::paused;return result;
+    changed_one(db.execute("INSERT INTO dynamic_owner_pauses(root_run_id,plan_id,plan_call_id,segment_id,paused_event_seq,state,context_pin) VALUES(?,?,?,?,?,'paused',?) ON CONFLICT(root_run_id) DO UPDATE SET plan_id=excluded.plan_id,plan_call_id=excluded.plan_call_id,segment_id=excluded.segment_id,paused_event_seq=excluded.paused_event_seq,state='paused',context_pin=excluded.context_pin",{root.id,p.id,call.id,spec.segment_id,e.sequence,spec.context_pin?SqlValue(context_pause_json(*spec.context_pin).dump()):SqlValue(nullptr)}));
+    changed_one(db.execute("INSERT INTO dynamic_owner_pause_waits(root_run_id,plan_id,plan_call_id,state) VALUES(?,?,?,'paused') ON CONFLICT(root_run_id,plan_id,plan_call_id) DO UPDATE SET state='paused'",{root.id,p.id,call.id}));tx.commit();auto result=root;result.state=RunState::paused;return result;
 }
 std::optional<ContextPausePin> Repository::dynamic_context_pause(const std::string& root){auto& db=impl_->database;Transaction tx(db);const auto owner=run(root);if(!owner.parent_id.empty()||owner.graph_root)throw std::invalid_argument("Closed context pin belongs to its ordinary root");const auto rows=db.execute("SELECT context_pin FROM dynamic_owner_pauses WHERE root_run_id=?",{root}).rows;if(rows.empty()||std::holds_alternative<std::nullptr_t>(rows[0][0])){if(!db.execute("SELECT id FROM inference_steps WHERE root_run_id=? AND owner_run_id=?",{root,root}).rows.empty()&&owner.state==RunState::paused)throw ContextBindingChanged("Modern closed owner is missing its context pin");tx.commit();return {};}auto pin=decode_context_pause(text(rows[0][0]));validate_context_pause(db,owner,dynamic_capabilities(root),pin);tx.commit();return pin;}
 DynamicResumeRecord Repository::resume_dynamic_owner(const DynamicResumeSpec& spec){
@@ -1354,7 +1369,7 @@ DynamicResumeRecord Repository::resume_dynamic_owner(const DynamicResumeSpec& sp
     for(const auto& owner:chain.owner_runs){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{owner}));impl_->event(owner,"run.running",Json{{"reason","nested_dynamic_human_resume"},{"waiting_plan_id",chain.plan_id}}.dump());}
     if(waiting_plan.id==root_plan.id)changed_one(db.execute("UPDATE dynamic_plans SET state='active',state_sequence=state_sequence+1 WHERE id=? AND state_sequence=?",{waiting_plan.id,waiting_plan.state_sequence}));
     else changed_one(db.execute("UPDATE dynamic_plans SET state='active',state_sequence=state_sequence+1 WHERE id=? AND state_sequence=? AND state='waiting_human'",{waiting_plan.id,waiting_plan.state_sequence}));
-    const auto e=impl_->event(root.id,"budget.segment.opened",Json{{"segment_id",spec.segment_id},{"ordinal",old.ordinal+1},{"remaining_active_ms",old.remaining_active_ms}}.dump());changed_one(db.execute("INSERT INTO agent_budget_segments(root_run_id,id,ordinal,state,remaining_active_ms,opened_event_seq) VALUES(?,?,?,'open',?,?)",{root.id,spec.segment_id,old.ordinal+1,old.remaining_active_ms,e.sequence}));changed_one(db.execute("UPDATE agent_execution_budgets SET revision=revision+1 WHERE root_run_id=? AND revision=?",{root.id,budget.revision}));changed_one(db.execute("UPDATE dynamic_owner_pauses SET state='resumed' WHERE root_run_id=? AND state='paused'",{root.id}));
+    const auto e=impl_->event(root.id,"budget.segment.opened",Json{{"segment_id",spec.segment_id},{"ordinal",old.ordinal+1},{"remaining_active_ms",old.remaining_active_ms}}.dump());changed_one(db.execute("INSERT INTO agent_budget_segments(root_run_id,id,ordinal,state,remaining_active_ms,opened_event_seq) VALUES(?,?,?,'open',?,?)",{root.id,spec.segment_id,old.ordinal+1,old.remaining_active_ms,e.sequence}));changed_one(db.execute("UPDATE agent_execution_budgets SET revision=revision+1 WHERE root_run_id=? AND revision=?",{root.id,budget.revision}));changed_one(db.execute("UPDATE dynamic_owner_pauses SET state='resumed' WHERE root_run_id=? AND state='paused'",{root.id}));db.execute("UPDATE dynamic_owner_pause_waits SET state='resumed' WHERE root_run_id=? AND state='paused'",{root.id});
     root.state=RunState::running;DynamicResumeRecord result{root,root_plan,dynamic_budget_segment(root.id),call,saved_pin,chain.owner_runs};tx.commit();return result;
 }
 Run Repository::complete_dynamic_owner(const std::string& root_id,const std::string& assistant,const std::string& segment_id,std::int64_t elapsed){
@@ -1376,7 +1391,7 @@ Run Repository::retire_dynamic_owner(const std::string& root_id,RunState next,co
         db.execute("UPDATE dynamic_plan_nodes SET state='cancelled',protected_definition=1 WHERE plan_id=? AND state IN ('pending','blocked')",{p->id});changed_one(db.execute("UPDATE dynamic_plans SET state=?,state_sequence=state_sequence+1,planned_children_reserved=0,planned_humans_reserved=0 WHERE id=?",{state_name(next),p->id}));
     }
     const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root.id}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='cancelled' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root.id});
-    changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root.id,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root.id});impl_->cancel_waiting(root.id);
+    changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root.id,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root.id});db.execute("UPDATE dynamic_owner_pause_waits SET state='retired' WHERE root_run_id=?",{root.id});impl_->cancel_waiting(root.id);
     changed_one(db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),root.id,state_name(root.state)}));impl_->event(root.id,"run."+state_name(next),reason);tx.commit();root.state=next;return root;
 }
 Session Repository::rename_session(const std::string& id,const std::string& title,const std::string& expected_title) {
@@ -2796,7 +2811,7 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
         }
         for(const auto& h:db.execute("SELECT id,label FROM dynamic_human_requests WHERE plan_id=? AND state='waiting'",{plan}).rows){const auto event=impl_->event(root,"plan.human.cancelled",Json{{"request_id",text(h[0])},{"reason","server_restart"}}.dump());changed_one(db.execute("UPDATE dynamic_human_requests SET state='cancelled',input_event_seq=? WHERE id=? AND state='waiting'",{event.sequence,text(h[0])}));const auto outcome=Json{{"human_state","cancelled"},{"request_id",text(h[0])}}.dump();const auto settled=impl_->event(root,"plan.human.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='waiting_human'",{outcome,settled.sequence,plan,text(h[1])}));}
         db.execute("UPDATE dynamic_plan_nodes SET state='cancelled',protected_definition=1 WHERE plan_id=? AND state IN ('pending','blocked')",{plan});changed_one(db.execute("UPDATE dynamic_plans SET state=?,state_sequence=state_sequence+1,planned_children_reserved=0,planned_humans_reserved=0 WHERE id=?",{uncertain?"uncertain":"interrupted",plan}));
-        const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='interrupted' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root});changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root});impl_->event(root,"plan.interrupted",Json{{"plan_id",plan},{"reason","server_restart"},{"replayed",false}}.dump());
+        const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='interrupted' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root});changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root});db.execute("UPDATE dynamic_owner_pause_waits SET state='retired' WHERE root_run_id=?",{root});impl_->event(root,"plan.interrupted",Json{{"plan_id",plan},{"reason","server_restart"},{"replayed",false}}.dump());
     }
     for(const auto& row:db.execute("SELECT run_id FROM graph_roots").rows){auto root=graph_run(text(row[0]));const GraphCoordinator recovered(GraphPlan(root.specification_json),root.checkpoint_json);if(recovered.checkpoint()!=root.checkpoint_json){impl_->graph_checkpoint(root,recovered);impl_->event(root.run.id,"graph.recovered",Json{{"checkpoint_revision",root.checkpoint_revision},{"reason","interrupted_nodes_not_replayed"}}.dump());}}
     transaction.commit(); return roots.size();
