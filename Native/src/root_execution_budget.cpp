@@ -5,12 +5,19 @@
 #include <random>
 #include <sstream>
 #include <iomanip>
+#include <set>
 #include <thread>
 
 namespace agentflow {
 namespace {
 std::string attempt_id(){std::random_device source;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<source();return out.str();}
 thread_local const RootExecutionBudget* yielded_leaf=nullptr;
+std::vector<std::string> wait_owner_path(PersistenceService& store,const DynamicPlanRecord& plan,const std::string& root){
+    std::vector<std::string> reverse;auto current=plan;std::size_t depth=0;
+    while(current.owner_run_id!=root){if(current.root_run_id!=root||current.parent_plan_id.empty()||++depth>8)throw DynamicPlanUnavailable("Human wait lost its complete dynamic owner path");reverse.push_back(current.owner_run_id);current=store.dynamic_plan(current.parent_plan_id).get();}
+    std::reverse(reverse.begin(),reverse.end());return reverse;
+}
+bool finished(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
 }
 RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRecord record,
     std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
@@ -88,15 +95,27 @@ Run RootExecutionBudget::suspend_for_human(const DynamicPlanRecord& plan,const s
     check();
     if(policy_!="native.dynamic-plan"||!segment_||plan.root_run_id!=root_||active_leaves_.load()!=0)
         throw Conflict("Human pause requires the exact drained planning owner");
-    const auto budget=snapshot();
-    DynamicPauseSpec spec;spec.plan_id=plan.id;spec.plan_call_id=call;spec.segment_id=segment_->id;
-    spec.backend_identity=backend_identity_;spec.expected_revision=plan.revision;
-    spec.expected_state_sequence=plan.state_sequence;spec.expected_budget_revision=budget.revision;
-    spec.measured_active_elapsed_ms=active_elapsed_ms();
-    spec.context_pin=context_pin_;
-    const auto paused=store_.suspend_dynamic_owner(std::move(spec)).get();
-    segment_->state="closed";
-    return paused;
+    const auto key=std::make_pair(plan.id,call);HumanWaitEntry entry{{plan.id,call,plan.revision,plan.state_sequence},wait_owner_path(store_,plan,root_)};
+    {std::lock_guard lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;const auto [it,inserted]=human_waits_.emplace(key,std::move(entry));if(!inserted&&(it->second.wait.expected_revision!=plan.revision||it->second.wait.expected_state_sequence!=plan.state_sequence))throw DynamicPlanChanged("Repeated human wait changed its accepted plan revision");}
+    human_wait_changed_.notify_all();
+    for(;;){
+        std::vector<HumanWaitEntry> snapshot_entries;
+        {std::unique_lock lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;if(human_pause_committing_){human_wait_changed_.wait_for(lock,std::chrono::milliseconds(10));continue;}for(const auto& [unused,value]:human_waits_){(void)unused;snapshot_entries.push_back(value);}}
+        check();
+        bool safe=active_leaves_.load()==0;std::set<std::string> owners;for(const auto& value:snapshot_entries)owners.insert(value.owner_runs.begin(),value.owner_runs.end());
+        if(safe)try{for(const auto& child:store_.owned_children(root_).get())if(!finished(child.run.state)&&(!owners.contains(child.run.id)||child.run.state!=RunState::running)){safe=false;break;}if(safe)for(const auto& plan:store_.dynamic_plans_for_root(root_).get()){for(const auto& node:plan.nodes)if(node.state==DynamicNodeState::claimed&&!node.child_run_id.empty()){const auto child=store_.run(node.child_run_id).get();if(finished(child.state)||!owners.contains(child.id)||child.state!=RunState::running){safe=false;break;}}if(!safe)break;}}catch(...){throw DynamicOutcomeUnrecorded("Could not verify every sibling owner before pausing the root");}
+        if(!safe){std::unique_lock lock(human_wait_mutex_);human_wait_changed_.wait_for(lock,std::chrono::milliseconds(10));continue;}
+        {std::unique_lock lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;if(human_pause_committing_)continue;human_pause_committing_=true;}
+        try{
+            const auto budget=snapshot();DynamicPauseSpec spec;spec.plan_id=snapshot_entries.front().wait.plan_id;spec.plan_call_id=snapshot_entries.front().wait.plan_call_id;spec.segment_id=segment_->id;
+            spec.backend_identity=backend_identity_;spec.expected_budget_revision=budget.revision;spec.measured_active_elapsed_ms=active_elapsed_ms();spec.context_pin=context_pin_;
+            for(const auto& value:snapshot_entries)spec.waits.push_back(value.wait);
+            const auto paused=store_.suspend_dynamic_owner(std::move(spec)).get();
+            {std::lock_guard lock(human_wait_mutex_);human_pause_result_=paused;human_pause_committing_=false;}human_wait_changed_.notify_all();return paused;
+        }catch(...){
+            {std::lock_guard lock(human_wait_mutex_);human_pause_error_=std::current_exception();human_pause_committing_=false;}human_wait_changed_.notify_all();throw;
+        }
+    }
 }
 bool RootExecutionBudget::try_acquire_leaf()noexcept{
     if(segment_&&segment_->state!="open")return false;

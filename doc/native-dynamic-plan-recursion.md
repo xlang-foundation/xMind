@@ -101,9 +101,11 @@ after SQLite reopen, recovery preserves the owner chain only when its accepted
 calls, claimed parent nodes, closed segment and effects all validate. The
 service waits for an in-flight root worker to finish unwinding before it
 commits human input, then dispatches exactly one wake. No plan or child is
-reconstructed from a prompt, and accepted provider calls are not replayed. The
-current single-chain binding rejects a nested human wait while a sibling root
-child remains live; multi-branch pause coordination is still open.
+reconstructed from a prompt, and accepted provider calls are not replayed.
+Schema v29 and the root wait-set coordinator now persist multiple waiting
+owner paths and resume them together; concurrent nested execution and its
+remaining race coverage are tracked in
+[multi-branch human waits](native-dynamic-plan-multibranch.md).
 
 The durable pause must bind the waiting plan and accepted call to each ancestor
 plan node and its claimed child run. The pause transaction must close the one
@@ -150,8 +152,9 @@ inspectable; it cannot be converted into an ordinary tool error.
    with synthetic provider turns and real SQLite child history. Engine
    contracts also answer a nested human question, resume its accepted owner
    call, close/reopen the backend during a nested pause and finish without
-   replay. A nested human wait with another live root child receives the typed
-   pre-acceptance rejection `nested_human_wait_parallel_unsupported`. The repository contract
+   replay. Multi-branch waiting no longer has a pre-acceptance rejection; its
+   repository rendezvous and durable wait-set coverage are present, while the
+   concurrent engine and client acceptance cases remain pending. The repository contract
    now admits plans through depth eight under the real eight-child shared root
    budget and checks all nine persisted plan depths plus the eight exact child
    admissions. Repository acceptance now counts plan nodes, accepted revisions

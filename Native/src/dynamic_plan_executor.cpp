@@ -238,12 +238,7 @@ DynamicExecutionResult DynamicPlanExecutor::invoke(const std::string& parent,con
         if(call.id.empty()||origin.empty()||call.arguments_json.size()>static_cast<std::size_t>(caps.change_bytes))throw std::invalid_argument("Planning call lacks its actual bounded origin");
         // Only this preacceptance phase may become a normal rejected tool turn.
         // Runtime/settlement failures below retain their typed owner retirement.
-        const auto parsed=parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
-        const auto contains_human=[](const auto& nodes){return std::any_of(nodes.begin(),nodes.end(),[](const auto& node){return node.kind==DynamicNodeKind::human;});};
-        if(parent!=root_id&&(contains_human(parsed.add)||contains_human(parsed.replace))){
-            for(const auto& child:store_.owned_children(root_id).get())if(child.run.id!=parent&&!terminal(child.run.state))
-                throw DynamicPlanRejected("nested_human_wait_parallel_unsupported");
-        }
+        (void)parse_dynamic_plan_change(call.arguments_json,call.name=="plan_tasks");
         const auto existing=store_.dynamic_plan_for_owner(parent).get();
         DynamicPlanChangeSpec spec;spec.id=identity();spec.plan_id=existing?existing->id:identity();spec.root_run_id=root_id;spec.owner_run_id=parent;spec.provider_tool_call_id=call.id;
         spec.origin_attempt_id=origin;spec.arguments_json=call.arguments_json;spec.parent_assistant_json=assistant;spec.backend_identity=caps.backend_identity;spec.expected_budget_revision=budget->snapshot().revision;

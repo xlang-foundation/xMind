@@ -106,6 +106,17 @@ and SDK build. The source manifest supplies their exact hashes and native/licens
 inventory, Windows x64 platform, bridge-disabled status and revision bindings.
 Use a fresh local profile for this package; no legacy package or profile
 migration is supported. Existing installations remain intact.
+
+On Windows, the paired xlang3 runtime must preserve UTF-8 paths through its C
+ABI import-root calls and runtime path metadata. Without that support, a
+Unicode working directory can stop a managed backend before readiness, and a
+package installed under a Unicode path can fail to load `_sqlite3`. The
+xMind-focused xlang3 branch `xmind/windows-import-root-utf8` at
+`7b8b32ae3a0e6a99fac7babd97362736099448fb` passes the complete local Native
+gate; use this revision or a later xlang3 revision containing the same fixes.
+The evidence is recorded in
+[the Windows UTF-8 runtime integration checkpoint](evidence/native-runtime-utf8-xmind-20261014.md).
+This branch-level integration result is not an accepted release package.
 Add pure standard-library source and its license separately:
 
 ```powershell

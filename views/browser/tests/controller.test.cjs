@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
-const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
+const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
 test('browser retrieves bounded saved process output pages only for an observed completed command',async()=>{
@@ -182,6 +182,10 @@ function planController(record,planRead=async()=>record){const posted=[],calls=[
 test('browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities',async()=>{
  const record=planFixture(),h=planController(record);try{const raw='{"quantity":1.00000000000000000001,"answer":true}';await h.view.handle(inputMessage(record,raw));assert.deepEqual(h.calls,[['input',record.run.id,record.questions[0].id,raw,2,17]]);assert.ok(h.posted.some(message=>message.type==='plan'));}finally{h.view.dispose();}
  const ready=planFixture({answer:true}),resume=planController(ready);try{await resume.view.handle({type:'plan-resume',root:ready.run.id,plan_id:ready.plan.id,expected_revision:2,expected_state_sequence:18});assert.deepEqual(resume.calls,[['resume',ready.run.id,2,18]]);}finally{resume.view.dispose();}
+});
+test('browser accepts a nested human answer against that nested plan CAS and resumes after one answered branch',async()=>{
+ const record=planFixture();record.nested_plans.push(nestedWaitPlanFixture(record));const h=planController(record);try{const question=record.nested_plans[0].questions[0];await h.view.handle({type:'plan-input',root:record.run.id,plan_id:record.nested_plans[0].plan.id,request:question.id,backend_node_id:question.backend_node_id,definition_revision:question.definition_revision,published_event_seq:question.published_event_seq,input_json:'{"answer":true}',expected_revision:record.nested_plans[0].plan.revision,expected_state_sequence:record.nested_plans[0].plan.state_sequence});assert.deepEqual(h.calls,[['input',record.run.id,question.id,'{"answer":true}',1,8]]);}finally{h.view.dispose();}
+ const resumed=planFixture({answer:true});resumed.nested_plans.push(nestedWaitPlanFixture(resumed,{answered:true}));const ready=planController(resumed);try{await ready.view.handle({type:'plan-resume',root:resumed.run.id,plan_id:resumed.plan.id,expected_revision:resumed.plan.revision,expected_state_sequence:resumed.plan.state_sequence});assert.deepEqual(ready.calls,[['resume',resumed.run.id,resumed.plan.revision,resumed.plan.state_sequence]]);}finally{ready.view.dispose();}
 });
 test('browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation',async()=>{
  for(const change of [record=>record.plan.state_sequence++,record=>record.questions[0].expires_unix_ms++,record=>record.run.session_id='foreign-session']){

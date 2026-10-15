@@ -2,8 +2,13 @@
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/dynamic_plan_records.hpp"
 #include <chrono>
+#include <condition_variable>
 #include <stop_token>
 #include <atomic>
+#include <exception>
+#include <map>
+#include <mutex>
+#include <optional>
 #include <vector>
 
 namespace agentflow {
@@ -38,6 +43,7 @@ public:
     void reacquire_leaf(std::stop_token cancel={});
     void release_leaf() noexcept;
 private:
+    struct HumanWaitEntry {DynamicPauseWaitSpec wait;std::vector<std::string> owner_runs;};
     PersistenceService& store_;
     std::string root_;
     std::string policy_;
@@ -50,5 +56,11 @@ private:
     std::vector<std::string> resumable_owners_;
     std::chrono::steady_clock::time_point active_started_;
     std::optional<ContextPausePin> context_pin_;
+    std::mutex human_wait_mutex_;
+    std::condition_variable human_wait_changed_;
+    std::map<std::pair<std::string,std::string>,HumanWaitEntry> human_waits_;
+    bool human_pause_committing_=false;
+    std::optional<Run> human_pause_result_;
+    std::exception_ptr human_pause_error_;
 };
 }

@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
-const {planFixture,inputMessage}=require('./plan-fixture');
+const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
@@ -57,7 +57,7 @@ function harness(options={}) {
     else if(target.pathname.endsWith('/resume')&&target.pathname.startsWith('/v1/graph-runs/')){graphResumes.push(JSON.parse(requestOptions.body));data=options.graphRoot.run;}
     else if(target.pathname==='/v1/agent/planning')data={enabled:true,tools:['inspect_plan','plan_tasks','revise_plan']};
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan`)data=options.planRead?await options.planRead():options.plan;
-    else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/human/${options.plan.questions[0].id}`){planInputs.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
+    else if(options.plan&&[...options.plan.questions,...options.plan.nested_plans.flatMap(owner=>owner.questions)].some(question=>target.pathname===`/v1/runs/${options.plan.run.id}/plan/human/${question.id}`)){planInputs.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/resume`){planResumes.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
     else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>requestOptions.method==='POST'?options.profileSave(JSON.parse(requestOptions.body)):options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
     if(data!==undefined)return {ok:true,json:async()=>data};
@@ -458,6 +458,10 @@ async function setupView(options={}){
 test('extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority',async()=>{
  const record=planFixture({root:'finished',session:'saved'}),options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);
  try{await until(()=>view.posted.some(message=>message.type==='plan'));const raw='{"quantity":1.00000000000000000001,"answer":true}';view.receive(inputMessage(record,raw));await until(()=>h.planInputs.length===1);assert.deepEqual(h.planInputs,[{input_json:raw,expected_revision:2,expected_state_sequence:17}]);assert.equal(h.decisions.length,0);assert.equal(h.graphRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes(h.token));}finally{view.close();}
+});
+test('extension routes nested plan questions through fresh ownership validation and nested CAS',async()=>{
+ const record=planFixture({root:'finished',session:'saved'});record.nested_plans.push(nestedWaitPlanFixture(record));const question=record.nested_plans[0].questions[0],{h,view}=await setupView({health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,runs:[record.run],ownedChildren:[]});
+ try{await until(()=>view.posted.some(message=>message.type==='plan'));view.receive({type:'plan-input',root:record.run.id,plan_id:record.nested_plans[0].plan.id,request:question.id,backend_node_id:question.backend_node_id,definition_revision:question.definition_revision,published_event_seq:question.published_event_seq,input_json:'{"answer":true}',expected_revision:record.nested_plans[0].plan.revision,expected_state_sequence:record.nested_plans[0].plan.state_sequence});await until(()=>h.planInputs.length===1||view.posted.some(message=>message.type==='error'));assert.deepEqual(h.planInputs,[{input_json:'{"answer":true}',expected_revision:1,expected_state_sequence:8}],JSON.stringify(view.posted.filter(message=>message.type==='error')));}finally{view.close();}
 });
 test('extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST',async()=>{
  const record=planFixture({root:'finished',session:'saved'});let stale=false;const options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,planRead:async()=>stale?{...record,plan:{...record.plan,state_sequence:18}}:record,runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);

@@ -1,10 +1,20 @@
 # Multi-branch human waits in dynamic plans
 
-Status: **required, not implemented**. The current runtime permits one durable
-root-to-descendant human-wait chain. A nested plan that proposes a human node
-while another root child is nonterminal is rejected before acceptance with
-`nested_human_wait_parallel_unsupported`. Keep that rejection until the
-root-owned wait set and restartable multi-owner resume path below are complete.
+Status: **partially implemented**. Schema v29 stores a normalized wait set;
+`RootExecutionBudget` rendezvous waits for every active descendant to finish or
+register a human-only frontier; and one SQLite transaction pauses or resumes
+all validated owner paths. The `native_dynamic_plan_repository_contract`
+exercises two concurrent wait registrations, restart recovery, and resuming all
+owners after one answer with xlang3-backed SQLite. The
+`native_dynamic_plan_engine_contract` now also drives two real nested Agent
+runners through one shared root pause, answers one branch, verifies the other
+remains pending after the partial resume, and completes both original calls
+exactly once. HTTP ownership lookup, root/nested question DTO validation, and
+nested input/resume handling in the browser and VS Code views have focused
+contracts. Full completion still requires exercising the nested wait set
+through authenticated HTTP, CLI and the actual clients, plus reverse-order and
+concurrent answers, cancellation races, expiry/uncertainty cases, and measured
+budget/context checks across repeated partial resumes.
 
 ## Required behavior
 
@@ -105,6 +115,12 @@ synthetic provider peer clearly labelled as such. Required contracts cover:
    and VS Code renderers; client observations never submit answers or approve
    effects on their own.
 
-The feature is complete only when the pre-acceptance rejection is removed under
-these invariants and all acceptance layers pass. A source change that merely
-allows another nested human node is not sufficient.
+The current native engine contract proves concurrent nested owners can pause
+under one root and that a partial resume keeps the unanswered branch durable.
+The feature is complete only when the remaining acceptance layers above pass.
+A source change that merely allows another nested human node is not sufficient.
+
+The Windows integration checkpoint also ran the full 142-contract Native gate
+against xlang3's UTF-8 import-root branch, including the actual local-profile,
+local-view and package-handoff fixtures that fail on the older path conversion.
+See [the recorded runtime integration evidence](evidence/native-runtime-utf8-xmind-20261014.md).

@@ -446,7 +446,7 @@ if(BUILD_TESTING)
     set_tests_properties(native_agent_authority_contract PROPERTIES TIMEOUT 30)
     add_executable(agentflow_dynamic_plan_repository_contract tests/dynamic_plan_repository_contract.cpp)
     target_include_directories(agentflow_dynamic_plan_repository_contract PRIVATE third_party)
-    target_link_libraries(agentflow_dynamic_plan_repository_contract PRIVATE agentflow_core)
+    target_link_libraries(agentflow_dynamic_plan_repository_contract PRIVATE agentflow_core agentflow_agent)
     add_custom_command(TARGET agentflow_dynamic_plan_repository_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_dynamic_plan_repository_contract>")
     add_test(NAME native_dynamic_plan_repository_contract COMMAND agentflow_dynamic_plan_repository_contract

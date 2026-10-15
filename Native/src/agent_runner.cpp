@@ -635,8 +635,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     throw DynamicPlanUnavailable("Resumed dynamic child has no unique accepted continuation");
                 pending_call=found->id;capabilities=&*child_caps;
             }
-            const auto actual=planning_->resume(id,pending_call,settings_,*capabilities,budget,token,planning_guidance);
-            if(actual.paused)return actual.root;
+            const bool yielded_leaf=resumed_dynamic_child&&budget->yield_leaf();DynamicExecutionResult actual;
+            try{actual=planning_->resume(id,pending_call,settings_,*capabilities,budget,token,planning_guidance);}
+            catch(...){if(yielded_leaf)budget->reacquire_leaf(token);throw;}
+            if(yielded_leaf&&!actual.paused)budget->reacquire_leaf(token);if(actual.paused)return actual.root;
             commit_plan_result(actual);refresh_tools();
         }
         std::string delivered_repository_metadata;

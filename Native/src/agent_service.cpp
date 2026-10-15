@@ -453,11 +453,10 @@ Run AgentService::continue_a2a_task(std::string task,std::string message,std::st
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;impl_->require_available();
     const auto owned=impl_->active.find(task);if(owned==impl_->active.end())throw NotFound("A2A task is not owned by this agent service");const auto job=owned->second;const auto current=impl_->persistence.run(task).get();if(current.state!=RunState::paused||job->phase!=Impl::Phase::waiting)throw Conflict("A2A task is not waiting for agent input");if(!context.empty()&&current.session_id!=context)throw Conflict("A2A context does not match its task");
     const auto plan=impl_->persistence.dynamic_plan_for_root(task).get();if(!plan)throw Conflict("A2A task has no dynamic human-input plan");impl_->verify_pause(current,*plan);
-    const auto binding=impl_->persistence.dynamic_owner_pause(task).get();const auto waiting_plan=impl_->persistence.dynamic_plan(binding.plan_id).get();
-    std::vector<DynamicHumanRequest> waiting;for(const auto& request:impl_->persistence.dynamic_human_requests(waiting_plan.id).get())if(request.state=="waiting")waiting.push_back(request);if(waiting.size()!=1)throw Conflict("A2A continuation requires exactly one pending human question");
-    const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=waiting_plan.id;answer.request_id=waiting.front().id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=waiting_plan.capabilities.backend_identity;answer.expected_revision=waiting_plan.revision;answer.expected_state_sequence=waiting_plan.state_sequence;
+    const auto binding=impl_->persistence.dynamic_owner_pause(task).get();std::optional<DynamicPlanRecord> waiting_plan;std::vector<DynamicHumanRequest> waiting;for(const auto& entry:binding.waits){const auto plan=impl_->persistence.dynamic_plan(entry.plan_id).get();for(const auto& request:impl_->persistence.dynamic_human_requests(plan.id).get())if(request.state=="waiting"){waiting_plan=plan;waiting.push_back(request);}}if(waiting.size()!=1||!waiting_plan)throw Conflict("A2A continuation requires exactly one pending human question across the paused wait set");
+    const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=waiting_plan->id;answer.request_id=waiting.front().id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=waiting_plan->capabilities.backend_identity;answer.expected_revision=waiting_plan->revision;answer.expected_state_sequence=waiting_plan->state_sequence;
     try{impl_->persistence.continue_a2a_message(std::move(answer),task,message,current.session_id,identity,content,payload).get();}catch(...){if(reserved)impl_->remove_ticket(job);throw;}
-    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan.id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();lock.unlock();impl_->changed.notify_all();return result;}
+    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan->id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();lock.unlock();impl_->changed.notify_all();return result;}
     catch(...){const auto stopping=impl_->fault_locked();lock.unlock();impl_->stop_jobs(stopping);if(impl_->children)impl_->children->fail();throw DynamicOutcomeUnrecorded("Committed A2A answer could not be observed by its native owner");}
 }
 Run AgentService::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){
@@ -475,12 +474,12 @@ Run AgentService::plan_input(const std::string& root,const std::string& request,
         if(job->phase!=Impl::Phase::waiting)throw Conflict("Dynamic owner did not settle into a human-wait pause");
     }
     impl_->runner.validate_dynamic_owner(root,job->model);const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Owned root has no dynamic plan");
-    const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const auto waiting=impl_->persistence.dynamic_plan(binding.plan_id).get();impl_->verify_pause(impl_->persistence.run(root).get(),*plan);
+    const auto binding=impl_->persistence.dynamic_owner_pause(root).get();std::optional<DynamicPlanRecord> waiting;for(const auto& entry:binding.waits){const auto candidate=impl_->persistence.dynamic_plan(entry.plan_id).get();const auto requests=impl_->persistence.dynamic_human_requests(candidate.id).get();if(std::any_of(requests.begin(),requests.end(),[&](const auto& value){return value.id==request;})){waiting=candidate;break;}}if(!waiting)throw NotFound("Human request does not belong to this paused dynamic wait set");impl_->verify_pause(impl_->persistence.run(root).get(),*plan);
     const bool reserved=impl_->reserve_wake(job);
-    DynamicHumanInputSpec spec;spec.plan_id=waiting.id;spec.request_id=request;spec.input_json=std::move(input);spec.authenticated_actor=actor;
-    spec.backend_identity=waiting.capabilities.backend_identity;spec.expected_revision=revision;spec.expected_state_sequence=sequence;
+    DynamicHumanInputSpec spec;spec.plan_id=waiting->id;spec.request_id=request;spec.input_json=std::move(input);spec.authenticated_actor=actor;
+    spec.backend_identity=waiting->capabilities.backend_identity;spec.expected_revision=revision;spec.expected_state_sequence=sequence;
     try{impl_->persistence.input_dynamic_human(std::move(spec)).get();}catch(...){if(reserved)impl_->remove_ticket(job);throw;}
-    try{const auto current=impl_->persistence.dynamic_plan(waiting.id).get();
+    try{const auto current=impl_->persistence.dynamic_plan(waiting->id).get();
         if(job->phase==Impl::Phase::waiting){if(runnable(current))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}
         // A working owner keeps its preallocated wake until pause re-read. A
         // queued owner already has exactly one scheduler entry.
@@ -499,8 +498,8 @@ Run AgentService::resume_plan(const std::string& root,const std::string& actor,s
     impl_->runner.validate_dynamic_owner(root,job->model);const auto current=impl_->persistence.run(root).get();const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();
     if(!plan||current.state!=RunState::paused)throw Conflict("Dynamic owner is not durably paused");
     if(plan->revision!=revision||plan->state_sequence!=sequence)throw DynamicPlanChanged("Dynamic plan observation changed");
-    impl_->verify_pause(current,*plan);const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const auto waiting=impl_->persistence.dynamic_plan(binding.plan_id).get();
-    if(!runnable(waiting))throw Conflict("Dynamic owner has no ready frontier or report");
+    impl_->verify_pause(current,*plan);const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const bool can_resume=std::any_of(binding.waits.begin(),binding.waits.end(),[&](const auto& entry){return runnable(impl_->persistence.dynamic_plan(entry.plan_id).get());});
+    if(!can_resume)throw Conflict("Dynamic owner has no ready frontier or report");
     impl_->reserve_wake(job);job->phase=Impl::Phase::queued;lock.unlock();impl_->changed.notify_one();return current;
 }
 void AgentService::cancel(const std::string& id){

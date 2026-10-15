@@ -1433,8 +1433,7 @@ struct HttpServer::Impl {
                 const auto revision=graph_revision(value,"expected_revision"),sequence=graph_revision(value,"expected_state_sequence");
                 const auto root=identifier(request.matches[1]),question=identifier(request.matches[2]);const auto run=persistence.run(root).get();
                 if(!run.parent_id.empty()||run.graph_root)throw NotFound("Select an ordinary owning root");
-                const auto plan=persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Root has no accepted plan");
-                const auto actual=persistence.dynamic_human_request(plan->id,question).get();if(actual.root_run_id!=root)throw NotFound("Question does not belong to this root");
+                const auto plans=persistence.dynamic_plans_for_root(root).get();if(plans.empty())throw NotFound("Root has no accepted plan");bool owned_question=false;for(const auto& plan:plans)for(const auto& actual:persistence.dynamic_human_requests(plan.id).get())if(actual.id==question&&actual.root_run_id==root)owned_question=true;if(!owned_question)throw NotFound("Question does not belong to this root");
                 reply(response,encode(executor->plan_input(root,question,input,"local-owner",revision,sequence)));
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/plan/resume)",guarded([this](const Request& request,Response& response){
