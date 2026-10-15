@@ -1,5 +1,19 @@
 # Current native validation
 
+## Refreshed pinned API evidence — 2026-10-15
+
+The CLI restore change updated `Native/apps/cli_main.cpp`, which invalidated
+the source hash in the prior `server.info` parity evidence. The Release build
+was refreshed and both declared contracts passed: `native_http_cli_contract`
+(3.67 seconds) and `native_local_profile_contract` (320.15 seconds). The
+managed-profile contract exercises the unified `xmind info` path after local
+profile startup and runtime upgrade. The evidence record now contains the
+current normalized source hashes and exact xMind, server, CLI, and xlang3
+runtime artifact hashes; each recorded binary hash was checked against disk.
+`node Tools/audit-opencode.mjs` passes against the pinned v2.0.26 revision:
+141 operations, 38 reviewed native source candidates, 103 unmapped, and 1
+verified operation-level behavior contract.
+
 ## Console restore for approved coding changes — 2026-10-15
 
 The native console now accepts `restore SESSION OPERATION_ID` and submits the

@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "ec04dd9b567b99a5aadeeed53d5ea3cfa95db2e324026322096d49f6e26c6543",
+          "evidenceSha256": "368b15756971bc99855a8f1e5313f84fc3df00af2bc358e31997596c88aebaa8",
           "tests": [
             {
               "name": "native_http_cli_contract",
@@ -19854,7 +19854,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/repository.cpp",
-        "sourceSha256": "b6d5369bccf349113620265d5f22e0f928e96d47dca8c34bcd2d939ec1b3e50a",
+        "sourceSha256": "8c34e6eedb31c3267080988429a1a5366384e0238f0a8e3f510989dedc45f455",
         "surface": "GET /v1/sessions/{id}/messages/{message_id}",
         "sourceAnchor": "Repository::message",
         "gap": "A single stored typed history entry is addressable by its durable sequence; upstream message part types and complete response parity remain incomplete.",

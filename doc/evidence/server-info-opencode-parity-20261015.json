@@ -12,20 +12,20 @@
   },
   "tests": [
     {
-      "name": "native_local_profile_contract",
       "result": "passed",
-      "durationSeconds": 277.5
+      "durationSeconds": 3.67,
+      "name": "native_http_cli_contract"
     },
     {
-      "name": "native_http_cli_contract",
       "result": "passed",
-      "durationSeconds": 3.92
+      "durationSeconds": 320.15,
+      "name": "native_local_profile_contract"
     }
   ],
   "execution": {
-    "command": "ctest --test-dir build/native-verify -C Release -R \"^native_http_cli_contract$\" --output-on-failure",
-    "result": "passed",
-    "durationSeconds": 3.94
+    "command": "ctest --test-dir build/native-verify -C Release -R \"^native_(http_cli|local_profile)_contract$\" --output-on-failure",
+    "durationSeconds": 323.83,
+    "result": "passed"
   },
   "contractChecks": {
     "responseHasExactlyPinnedServerInfoFields": true,
@@ -38,16 +38,16 @@
   "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
   "sourceSha256": {
     "Native/src/http_server.cpp": "23bef852d56f94b735d3244be6f778a6437ac3547de2e0f8646624897e8c1da1",
-    "Native/apps/cli_main.cpp": "55d9fdb718df3e2ca20ecfbe2cdfcc752f11dba3d4a5b472c4993aa327d77a41",
+    "Native/apps/cli_main.cpp": "87a1d33ad74ccfb8877b441bbf6342fa7d29ab20749d08802962ec829cf6df12",
     "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
     "Native/tests/http_cli_contract.mjs": "826e1b358ba9562004fb4e65c7a1c3a86c8746eedd0a492674466be6e1c1a8b4",
     "Native/tests/local_profile_contract.mjs": "ca5d9b7c030f0569807c7fc0ed1a6aa8e0e4ab38c57488e42ad506c7a6471e64",
     "Native/CMakeLists.txt": "06f0686c64c70949e891d78465e5eebf557b776ffae0914fb84add8422203f53"
   },
   "buildArtifactSha256": {
-    "build/native-verify/contract-bin/Release/xmind.exe": "a40589142d35e020807eef241373a801d8f1848aa9b0d62ab251c36e341a684b",
-    "build/native-verify/contract-bin/Release/xmind_server.exe": "2c7d70f5356c4b3f86819539f8cfd26d7fe33fd258ec7a68a53da300fbdd56f5",
-    "build/native-verify/contract-bin/Release/xmind_cli.exe": "8b6561c225e75d877a91c3c72a1a6cea854d397d7566bd406b038a721265d153",
+    "build/native-verify/contract-bin/Release/xmind.exe": "b0d7acee2a18b1eccd3a33d5d6e1ec4b054dd5419c57e30ce2193014ff890db4",
+    "build/native-verify/contract-bin/Release/xmind_server.exe": "e95833e70073eb5433179d94e7c880f53784f2dad8ad1e469770e9f094f175dc",
+    "build/native-verify/contract-bin/Release/xmind_cli.exe": "a611a7cf7e727dcfb1521225748aa966caef74784e0afb2e31d43b2a4829a14a",
     "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
   }
 }
