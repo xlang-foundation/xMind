@@ -3,9 +3,11 @@
 The local browser, VS Code sidebar and interactive CLI let a user queue another
 prompt while a session has an active run. The prompt is stored in the native
 SQLite repository before the client reports it as saved. The active run
-continues; when the session becomes idle, the client admits the oldest queued
-prompt through the ordinary native run path. A concurrent admission conflict
-leaves the prompt queued for a later retry.
+continues; the native backend admits the oldest queued prompt through the
+ordinary run path when the session becomes idle. Clients can disconnect without
+stranding accepted input. The backend also scans persisted inboxes at startup
+and resumes queued items after restart. A concurrent admission conflict leaves
+the prompt queued for a later retry.
 
 `GET /v1/sessions/{id}/inbox` returns `{items:[...]}` in enqueue order. Each item
 contains its stable `id`, `session_id`, exact `content`, `state` (`queued` or
@@ -24,8 +26,8 @@ queued. The canceled row is retained internally to reserve its stable ID, but
 is omitted from inbox listings. If a concurrent run already claimed the item,
 cancellation succeeds without changing its audit link. Repeating cancellation
 is idempotent; reusing a canceled ID conflicts. Browser and VS Code show a
-Cancel control for each pending item; the CLI can inspect the same inbox and
-resumes queued entries when the conversation is opened or its active run ends.
+Cancel control for each pending item; the CLI can inspect the same inbox. All
+three clients observe the same backend-owned dispatch and durable run link.
 
 Run admission accepts `inbox_id` alongside the regular `/v1/runs` fields. In
 one SQLite transaction, the repository verifies that the queued item belongs
@@ -46,4 +48,7 @@ controls. VS Code host contracts verify queuing while active, cancellation and
 dispatch of a persisted item when idle. The actual-server CLI contract queues a
 prompt during a held inference stream, cancels the held run, observes automatic
 admission of the queued prompt, and confirms exactly one history record and its
-claimed run link. Provider inference in these contracts is synthetic.
+claimed run link. The native provider-profile contract also posts input to an
+idle session and verifies that the backend runs it without a client polling or
+draining the inbox, with the selected provider and model preserved in run and
+history provenance. Provider inference in these contracts is synthetic.

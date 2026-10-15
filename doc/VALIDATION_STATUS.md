@@ -2769,3 +2769,23 @@ test-owned backend PIDs before waiting for verified process exit. Its focused
 contract passed **1/1**, and a process inventory confirmed **0** remaining
 servers under the test's Temp fixture prefix. This closes a test-harness leak;
 it is not a product process-management claim. [Focused output](evidence/native-local-view-provider-cleanup-20261015.log).
+
+## Backend-owned queued prompts — 2026-10-15
+
+The native HTTP backend now wakes a server-owned dispatcher when a prompt is
+saved to a session inbox. It admits the oldest prompt only after native
+single-root admission permits it, captures the active provider-profile
+revision, and uses the normal atomic queued-run path. On startup, the dispatcher
+also finds and resumes persisted queued input, so an accepted prompt does not
+depend on the browser, CLI or VS Code process remaining connected. Unconfigured
+providers, active runs and temporary admission failures leave the durable input
+queued for retry.
+
+The native Debug provider-profile contract passed **1/1** against the synthetic
+OpenAI peer. It posts an inbox item to an idle session without polling
+or draining the queue, then verifies the linked run completes and retains its
+provider/model provenance in durable history. The actual native HTTP/CLI
+contract passed **1/1** after rebuilding `xmind_server`, `xmind_cli` and
+`xmind_admin`. `git diff --check` passed. These focused contracts do not replace
+the full 145-test Release suite and do not establish live-provider behavior.
+The implementation and tests are in commit [`23250e9`](https://github.com/xlang-foundation/xMind/commit/23250e9).
