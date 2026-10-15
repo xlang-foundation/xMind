@@ -312,6 +312,13 @@ test('browser patch comparison revalidates owned snapshots and never submits app
  let current={id:'synthetic-patch-0',run_id:'run',workspace_id:'synthetic-workspace',tool:'patch_file',arguments_json:JSON.stringify(plan),state:'awaiting_approval',expires_unix_ms:Date.now()+60000};const reviews=[],decisions=[],posted=[],view=new BrowserController({operation:async()=>current,decide:async(...args)=>decisions.push(args)},value=>posted.push(value),{review:value=>reviews.push(value)});
  view.runId='run';view.operations.set(current.id,{...current});try{await view.handle({type:'review',id:current.id,after_content:'forged'});assert.deepEqual(reviews,[plan]);assert.deepEqual(decisions,[]);current={...current,arguments_json:JSON.stringify({...plan,path:'changed.cpp'})};await view.handle({type:'review',id:current.id});assert.equal(posted.at(-1).type,'error');assert.match(posted.at(-1).text,/changed/);assert.equal(reviews.length,1);}finally{view.dispose();}
 });
+test('browser approval shows the exact reviewed patch and clears it when the selected run changes',async()=>{
+ const plan={patch_id:'current-patch',patch_index:0,patch_file_count:1,action:'update',path:'current.cpp',parent_id:'current-parent',file_id:'current-file',before_exists:true,after_exists:true,before_content:'old',after_content:'new',before_sha256:'b'.repeat(64),after_sha256:'c'.repeat(64)};
+ let current={id:'current-patch-0',run_id:'current-run',workspace_id:'current-workspace',tool:'patch_file',arguments_json:JSON.stringify(plan),state:'awaiting_approval',expires_unix_ms:Date.now()+60000};const reviews=[],decisions=[],clears=[],view=new BrowserController({operation:async()=>current,decide:async(...args)=>decisions.push(args)},()=>{},{review:value=>reviews.push(value),clearReview:()=>clears.push(true)});
+ view.runId='current-run';view.operations.set(current.id,{...current});view.poll=async()=>{};
+ try{await view.handle({type:'decide',id:current.id,decision:'allow'});assert.deepEqual(reviews,[plan]);assert.deepEqual(decisions,[[current.id,'allow']]);view.stop();assert.deepEqual(clears,[true]);}
+ finally{view.dispose();}
+});
 test('browser cannot compare malformed patch absence and missing batch manifest',async()=>{
  const {fileReview}=require('../../../extensions/vscode/patch-review');
  const plan={patch_id:'synthetic',patch_index:0,patch_file_count:1,action:'delete',path:'remove.cpp',parent_id:'synthetic-parent',file_id:'synthetic-file',before_exists:true,after_exists:false,before_content:'before',after_content:'',before_sha256:'a'.repeat(64)};
