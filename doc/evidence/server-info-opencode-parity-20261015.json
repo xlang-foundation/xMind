@@ -19,13 +19,13 @@
     {
       "name": "native_http_cli_contract",
       "result": "passed",
-      "durationSeconds": 3.48
+      "durationSeconds": 3.92
     }
   ],
   "execution": {
     "command": "ctest --test-dir build/native-verify -C Release -R \"^native_http_cli_contract$\" --output-on-failure",
     "result": "passed",
-    "durationSeconds": 3.5
+    "durationSeconds": 3.94
   },
   "contractChecks": {
     "responseHasExactlyPinnedServerInfoFields": true,
@@ -37,7 +37,7 @@
   },
   "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
   "sourceSha256": {
-    "Native/src/http_server.cpp": "b0ba41a063e222cea745885efd6d1954d25ef55a3d0abc7bc157669573c2b379",
+    "Native/src/http_server.cpp": "23bef852d56f94b735d3244be6f778a6437ac3547de2e0f8646624897e8c1da1",
     "Native/apps/cli_main.cpp": "55d9fdb718df3e2ca20ecfbe2cdfcc752f11dba3d4a5b472c4993aa327d77a41",
     "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
     "Native/tests/http_cli_contract.mjs": "826e1b358ba9562004fb4e65c7a1c3a86c8746eedd0a492674466be6e1c1a8b4",
@@ -46,7 +46,7 @@
   },
   "buildArtifactSha256": {
     "build/native-verify/contract-bin/Release/xmind.exe": "a40589142d35e020807eef241373a801d8f1848aa9b0d62ab251c36e341a684b",
-    "build/native-verify/contract-bin/Release/xmind_server.exe": "fdf629b7482ea98ef21a1aa2312b22fd4e4e35619df8ab887c25008fc9d228e5",
+    "build/native-verify/contract-bin/Release/xmind_server.exe": "2c7d70f5356c4b3f86819539f8cfd26d7fe33fd258ec7a68a53da300fbdd56f5",
     "build/native-verify/contract-bin/Release/xmind_cli.exe": "8b6561c225e75d877a91c3c72a1a6cea854d397d7566bd406b038a721265d153",
     "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
   }

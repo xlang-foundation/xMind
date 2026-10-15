@@ -139,6 +139,7 @@ try {
   for(const name of ['main.cpp','keep.tmp','drop.tmp','build/skip.cpp'])await writeFile(join(workspace,'ignore-http',name),'IgnoreHttpNeedle\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
+  assert.equal((await api('/v1/health')).data.active_session_map,true,'The browser can discover support for active session status');
   assert.deepEqual((await api('/v1/sessions/active')).data,{data:{}},'No executing roots are listed as active');
   assert.equal((await api('/v1/sessions/active?unexpected=true')).status,400,'Active-session listing rejects unknown query parameters');
   const unauthenticatedActive=await fetch(`http://127.0.0.1:${port}/v1/sessions/active`,{signal:AbortSignal.timeout(10000)});assert.equal(unauthenticatedActive.status,401,'Active-session listing requires the local owner credential');

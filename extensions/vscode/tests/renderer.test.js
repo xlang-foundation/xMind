@@ -267,6 +267,9 @@ test('recorded GenerateContent response and run context retain their native iden
 
 const processProposalFixture=()=>({id:'fixture-command',tool:'run_process',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,
   arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',executable_id:'opaque-fixture-backend-executable-binding',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});
+test('active conversation label preserves its original title for rename',()=>{
+ const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('rename-dialog');dialog.showModal=()=>{dialog.open=true;};try{r.send({type:'sessions',sessions:[{id:'active',title:'Build task',active:true},{id:'idle',title:'Review task',active:false}],selected:'active'});const option=doc.querySelector('#sessions option[value="active"]');assert.equal(option.textContent,'● Running · Build task');assert.equal(option.title,'A run is active in this conversation');r.send({type:'capabilities',execution:false,renameSessions:true,models:[]});doc.getElementById('rename').click();assert.equal(doc.getElementById('conversation-title').value,'Build task');}finally{r.dom.window.close();}
+});
 test('conversation rename keeps expected title and draft through conflicts, and cancels when selection changes',()=>{
   const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('rename-dialog');dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new r.dom.window.Event('close'));};
   r.send({type:'sessions',sessions:[{id:'first',title:'<script>fixture title</script>'},{id:'second',title:'Other'}],selected:'first'});assert.equal(doc.getElementById('rename').hidden,true);

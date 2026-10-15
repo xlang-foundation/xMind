@@ -1456,8 +1456,13 @@ The native server now exposes `GET /v1/sessions/active` with the OpenCode-shaped
 session-to-running-status map. The HTTP contract exercised empty, active, and
 settled states during a real held/cancelled AgentService run, plus owner-token
 authentication and query rejection. The same-machine browser adapter allows
-only `GET` for this route; its route and security suite passed 13/13. This is a
-reviewed native source candidate, not a verified OpenCode parity claim: the
+only `GET` for this route. The health response advertises the capability, and
+the browser and VS Code conversation selectors show an active-run marker while
+refreshing the status map every five seconds; they publish only when session
+state changes. Rendered browser and VS Code tests verify the marker and that
+the original title remains intact for rename. The suites passed 121/121 and
+368/368; the native run-state contract passed against the rebuilt server. This
+is a reviewed native source candidate, not a verified OpenCode parity claim: the
 native response derives from persisted `RunState::running`, while OpenCode uses
 a process-owned execution set, so recovery and cross-process semantics still
 need comparison. The refreshed pinned inventory contains **38 reviewed native

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "checkpoint": "active-session-indicator-20261015",
+  "status": "passed",
+  "scope": "Native active-run HTTP contract and rendered local browser/VS Code conversation selectors. Provider inference was not part of this UI-specific acceptance.",
+  "environment": {
+    "platform": "Windows x64",
+    "configuration": "Release",
+    "storage": "xlang3 SQLite"
+  },
+  "tests": [
+    {
+      "name": "native_agent_http_contract",
+      "result": "passed",
+      "durationSeconds": 6.67
+    },
+    {
+      "name": "browser_rendered_session_suite",
+      "result": "passed",
+      "tests": 121,
+      "durationSeconds": 15.2
+    },
+    {
+      "name": "vscode_extension_suite",
+      "result": "passed",
+      "tests": 368,
+      "durationSeconds": 5.08
+    }
+  ],
+  "contractChecks": {
+    "healthAdvertisesActiveSessionMap": true,
+    "activeRouteRequiresOwnerAuthentication": true,
+    "activeRouteRejectsUnknownQuery": true,
+    "emptyActiveMapIsEmpty": true,
+    "activeRunAppearsWhileAgentServiceIsHeld": true,
+    "settledRunDisappears": true,
+    "browserConversationPickerMarksActiveSession": true,
+    "vscodeConversationPickerMarksActiveSession": true,
+    "conversationTitleRemainsUnmodifiedForRename": true,
+    "pickersRefreshOnlyWhenSessionStateChanges": true
+  },
+  "sourceSha256": {
+    "Native/src/http_server.cpp": "23bef852d56f94b735d3244be6f778a6437ac3547de2e0f8646624897e8c1da1",
+    "Native/tests/agent_http_contract.mjs": "40de29d201007d76b4cd7dc2c0e4f8e31d23c8420ffa33c61da564d83ace218b",
+    "extensions/vscode/client.js": "ec1f187956417cbdb8cf80ad85a8b5808d54a20973b9c81c7d0b44c6036f92eb",
+    "extensions/vscode/extension.js": "63bb5a973d55e7207cbb4dd81b0a748e978b524276ea8bb1e6029bab4a5efc87",
+    "extensions/vscode/media/chat.js": "93ab8969ba7e12d13ad6bd146e0699425432c0e483bde0bd6ea2d4b2354e4358",
+    "extensions/vscode/tests/renderer.test.js": "ae300ba2bf35046aa58bb030fc7c18471d8364d4ab8f1270ba15b1483414f166",
+    "views/browser/browser.js": "9e993cb202fbbb1eb33705e9e3a2de53be47cefa64f2daa3426092d3d3df08a7",
+    "views/browser/tests/classic-script.test.cjs": "e3f9f33c374ef644044aa8f2d2428f77b6ba9edf4fc40d25e0aaa7376a408a30",
+    "views/browser/tests/controller.test.cjs": "3dfb6651c02558dd881474c1e1f40b03675ef7971cf1249217054ea24dfa97c5"
+  },
+  "buildArtifactSha256": {
+    "build/native-verify/contract-bin/Release/xmind_server.exe": "2c7d70f5356c4b3f86819539f8cfd26d7fe33fd258ec7a68a53da300fbdd56f5"
+  },
+  "parityScope": "This verifies xMind client use of its native active-session map. OpenCode process-owned versus xMind persisted-run semantics remain a reviewed source candidate, not verified operation-level parity."
+}

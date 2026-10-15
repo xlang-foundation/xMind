@@ -275,6 +275,10 @@ test('rename sends the displayed expected title only for the selected supported 
  conflict=true;await view.handle({type:'rename-session',id:'selected',title:'Draft',expected_title:'Stale'});assert.equal(posted.at(-1).success,false);assert.match(posted.at(-1).text,/title changed/);
  view.health={};await view.handle({type:'rename-session',id:'selected',title:'New',expected_title:'Old'});assert.equal(calls.length,2);view.dispose();
 });
+test('session catalogue marks active runs from the native status map and rejects malformed status data',async()=>{
+ const posted=[],client={sessions:async()=>[{id:'busy',title:'Working'}, {id:'idle',title:'Ready'}],activeSessions:async()=>({data:{busy:{type:'running'}}})};const view=new BrowserController(client,value=>posted.push(value));view.health={active_session_map:true};
+ try{await view.refreshSessions();assert.deepEqual(posted.at(-1),{type:'sessions',sessions:[{id:'busy',title:'Working',active:true},{id:'idle',title:'Ready',active:false}],selected:undefined});client.activeSessions=async()=>({data:{busy:{type:'completed'}}});await assert.rejects(view.refreshSessions(),/Invalid active session map/);}finally{view.dispose();}
+});
 test('browser fork uses the selected saved message boundary and refuses foreign or busy sources',async()=>{
  const posted=[],calls=[],client={forkSession:async(...args)=>{calls.push(args);return{id:'forked',title:'Source (fork #1)',parent_id:'source',fork:{session_id:'source',boundary_type:'before',message_id:'msg_7'}};}};
  const view=new BrowserController(client,value=>posted.push(value));view.health={session_fork:true};view.session='source';view.select=async id=>{view.stop();view.session=id;};

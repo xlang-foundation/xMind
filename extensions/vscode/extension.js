@@ -40,7 +40,7 @@ async function activate(context) {
   let runId;
   let sessionRuns=[];
   let cursor = 0;
-  let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer;
+  let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer,sessionRefreshTimer,sessionCatalogueSignature;
   let pendingTreeEvents=false;
   let generation = 0;
   let opening;
@@ -86,6 +86,7 @@ async function activate(context) {
     try{await agentController.read();}catch(error){if(client===target&&version===generation)post({type:'agent-selection-error',text:error.message});}
   }
   const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;clearTimeout(permissionTimer);permissionTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
+  function scheduleSessionRefresh(){clearTimeout(sessionRefreshTimer);if(!panel||health?.active_session_map!==true)return;sessionRefreshTimer=setTimeout(async()=>{sessionRefreshTimer=undefined;if(!panel)return;try{await refresh();}catch{}if(panel)scheduleSessionRefresh();},5000);}
   const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
   function watch(){
     schedulePermissionRefresh();
@@ -379,9 +380,15 @@ async function activate(context) {
 
   async function refresh() {
     const version = generation;
-    const sessions = await client.sessions();
+    let sessions = await client.sessions();
     if (version !== generation || !panel) return;
-    post({ type: 'sessions', sessions, selected: sessionId });
+    if(!Array.isArray(sessions)||sessions.some(item=>!item||typeof item.id!=='string'||!item.id))throw new Error('Invalid native session catalogue');
+    if(health?.active_session_map===true&&typeof client.activeSessions==='function'){
+      let result;try{result=await client.activeSessions();}catch(error){if(error.status!==404)throw error;}
+      if(result){const data=result.data;if(!data||typeof data!=='object'||Array.isArray(data)||Object.entries(data).some(([id,value])=>!id||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||value.type!=='running'))throw new Error('Invalid active session map');const active=new Set(Object.keys(data));sessions=sessions.map(item=>({...item,active:active.has(item.id)}));}
+    }
+    if (version !== generation || !panel) return;
+    const signature=JSON.stringify([sessionId,sessions.map(item=>[item.id,item.title,item.active===true])]);if(signature!==sessionCatalogueSignature){sessionCatalogueSignature=signature;post({ type: 'sessions', sessions, selected: sessionId });}
   }
 
   async function capabilities() {
@@ -484,7 +491,7 @@ async function activate(context) {
     mcpController=new McpAuthorizationController(mcpClient,post,{current:()=>panel===view&&client===mcpClient&&workspaceBackend.epoch===workspaceEpoch&&configuredOrigin()===mcpClient.baseUrl,requestId:()=>crypto.randomUUID(),save:attempts=>context.workspaceState.update('xmind.mcp.login',{...mcpScope,attempts})});
     const readMcp=()=>{if(mcpRestored)return mcpController.read();mcpRestored=true;const saved=context.workspaceState.get('xmind.mcp.login');return mcpController.read(savedConnection(saved)?saved.attempts:[]);};
     disposeSubscription?.dispose();receiveSubscription?.dispose();
-    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { contextReadyView=undefined;pendingEditorContexts=[];mcpController?.dispose();profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { clearTimeout(sessionRefreshTimer);sessionRefreshTimer=undefined;sessionCatalogueSignature=undefined;contextReadyView=undefined;pendingEditorContexts=[];mcpController?.dispose();profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     receiveSubscription=panel.webview.onDidReceiveMessage(message => {
       if(panel!==view||workspaceBackend.epoch!==workspaceEpoch)return;
       if(panel===view&&['model','select-provider'].includes(message?.type))contextController?.invalidate();
@@ -503,7 +510,7 @@ async function activate(context) {
           contextReadyView=view;const pending=pendingEditorContexts;pendingEditorContexts=[];
           for(const item of pending)if(item.view===view&&item.client===client&&item.generation===generation&&item.epoch===workspaceBackend.epoch)post(item.message);
           post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,agentSelection:health.agent_selection===true, model:selectedModel, models:modelCatalogue.models });
-          await refresh();
+          await refresh();scheduleSessionRefresh();
           if (sessionId) await selectSession(sessionId);
           await refreshGraphs();
           // Fetch with the saved backend key; settings handles a rejected key.
@@ -905,7 +912,7 @@ async function activate(context) {
     workspaceBackend.invalidate();stop();mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
     providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
     modelCatalogue={models:[],default_model:''};selectedModel=undefined;graphCatalogue=[];selectedGraph=undefined;
-    receiveSubscription?.dispose();receiveSubscription=undefined;disposeSubscription?.dispose();disposeSubscription=undefined;
+    clearTimeout(sessionRefreshTimer);sessionRefreshTimer=undefined;sessionCatalogueSignature=undefined;receiveSubscription?.dispose();receiveSubscription=undefined;disposeSubscription?.dispose();disposeSubscription=undefined;
     post({type:'workspace-clear'});post({type:'history',history:[]});post({type:'sessions',sessions:[]});post({type:'runs',runs:[],busy:false});post({type:'graphs',graphs:[]});post({type:'operations',operations:[]});post({type:'capabilities',execution:false,models:[]});post({type:'status',text:'Connecting the opened workspace…'});panel=undefined;
   }
   async function reconnectWorkspace(forcePick=false){
@@ -1054,7 +1061,7 @@ async function activate(context) {
       else{if(pendingEditorContexts.length>=8)throw new Error('The sidebar is still opening. Wait before adding more selections.');pendingEditorContexts.push({view,client:target,generation:epoch,epoch:workspaceBackend.epoch,message});}
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
-  context.subscriptions.push({ dispose:()=>{mcpController?.dispose();languageServerEditor.dispose();stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
+  context.subscriptions.push({ dispose:()=>{clearTimeout(sessionRefreshTimer);sessionRefreshTimer=undefined;sessionCatalogueSignature=undefined;mcpController?.dispose();languageServerEditor.dispose();stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
   if(previewReady) {
     // View resolution waits for extension activation. Opening synchronously
     // inside activation would wait on itself in a normal development host.
