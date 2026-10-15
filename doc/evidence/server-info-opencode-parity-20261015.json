@@ -12,20 +12,20 @@
   },
   "tests": [
     {
-      "name": "native_http_cli_contract",
-      "result": "passed",
-      "durationSeconds": 4.27
-    },
-    {
       "name": "native_local_profile_contract",
       "result": "passed",
-      "durationSeconds": 277.50
+      "durationSeconds": 277.5
+    },
+    {
+      "name": "native_http_cli_contract",
+      "result": "passed",
+      "durationSeconds": 3.48
     }
   ],
   "execution": {
-    "command": "ctest --test-dir build/native-verify -C Release -R '^native_http_cli_contract$' --output-on-failure; then ctest --test-dir build/native-verify -C Release -R '^native_local_profile_contract$' --output-on-failure",
+    "command": "ctest --test-dir build/native-verify -C Release -R \"^native_http_cli_contract$\" --output-on-failure",
     "result": "passed",
-    "durationSeconds": 281.77
+    "durationSeconds": 3.5
   },
   "contractChecks": {
     "responseHasExactlyPinnedServerInfoFields": true,
@@ -37,16 +37,16 @@
   },
   "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
   "sourceSha256": {
-    "Native/src/http_server.cpp": "b8f7e4a8e3e2029c2761beb2621591eb546477ec137e3c6e070e14c7db2f2d53",
-    "Native/apps/cli_main.cpp": "e8ed5cd9842e7c6503a0bc758f654f7fa1d88a06a4188e94096c11b598fc3ca3",
-    "Native/apps/xmind_main.cpp": "3c28ea640147cf7ad7cfd8cb61662fe026b6bf3cd147fce196fde9cd7ac50503",
+    "Native/src/http_server.cpp": "b0ba41a063e222cea745885efd6d1954d25ef55a3d0abc7bc157669573c2b379",
+    "Native/apps/cli_main.cpp": "55d9fdb718df3e2ca20ecfbe2cdfcc752f11dba3d4a5b472c4993aa327d77a41",
+    "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
     "Native/tests/http_cli_contract.mjs": "826e1b358ba9562004fb4e65c7a1c3a86c8746eedd0a492674466be6e1c1a8b4",
-    "Native/tests/local_profile_contract.mjs": "79cc5c301e5454ef375b7b85503acbe41edc6b38bf56dbc0931d9cf8063a5b61",
-    "Native/CMakeLists.txt": "577fd92312a7fb6abf7eb55a1d5e7972bc259e705fcb0e520f919fd79e1eb3d0"
+    "Native/tests/local_profile_contract.mjs": "ca5d9b7c030f0569807c7fc0ed1a6aa8e0e4ab38c57488e42ad506c7a6471e64",
+    "Native/CMakeLists.txt": "06f0686c64c70949e891d78465e5eebf557b776ffae0914fb84add8422203f53"
   },
   "buildArtifactSha256": {
-    "build/native-verify/contract-bin/Release/xmind.exe": "12666ac2991961575c0a7aa3b3bf74abadb20e1fdaba8aaa200f590054c7a9c0",
-    "build/native-verify/contract-bin/Release/xmind_server.exe": "b1c0f929f1ba488fd8c7a8b0fcc2d9656e46eddf29e4f592a2dc03c37df7f8d8",
+    "build/native-verify/contract-bin/Release/xmind.exe": "a40589142d35e020807eef241373a801d8f1848aa9b0d62ab251c36e341a684b",
+    "build/native-verify/contract-bin/Release/xmind_server.exe": "fdf629b7482ea98ef21a1aa2312b22fd4e4e35619df8ab887c25008fc9d228e5",
     "build/native-verify/contract-bin/Release/xmind_cli.exe": "8b6561c225e75d877a91c3c72a1a6cea854d397d7566bd406b038a721265d153",
     "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
   }

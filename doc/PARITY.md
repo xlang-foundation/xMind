@@ -1449,3 +1449,17 @@ The actual human/tool graph and restored IDE transcript have their own
 `3297a4bce2d591c0f1c1dd37ccc18a15297369e7` passed **35 native and 40 extension
 contracts**; [milestones](milestones.md) preserve its exact evidence. These
 versioned results prove bounded components and do not establish full parity.
+
+## Active session visibility — 2026-10-15
+
+The native server now exposes `GET /v1/sessions/active` with the OpenCode-shaped
+session-to-running-status map. The HTTP contract exercised empty, active, and
+settled states during a real held/cancelled AgentService run, plus owner-token
+authentication and query rejection. The same-machine browser adapter allows
+only `GET` for this route; its route and security suite passed 13/13. This is a
+reviewed native source candidate, not a verified OpenCode parity claim: the
+native response derives from persisted `RunState::running`, while OpenCode uses
+a process-owned execution set, so recovery and cross-process semantics still
+need comparison. The refreshed pinned inventory contains **38 reviewed native
+source candidates, 103 unmapped operations, and 1 operation-level behavior
+contract verified**.

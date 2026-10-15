@@ -139,6 +139,9 @@ try {
   for(const name of ['main.cpp','keep.tmp','drop.tmp','build/skip.cpp'])await writeFile(join(workspace,'ignore-http',name),'IgnoreHttpNeedle\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
+  assert.deepEqual((await api('/v1/sessions/active')).data,{data:{}},'No executing roots are listed as active');
+  assert.equal((await api('/v1/sessions/active?unexpected=true')).status,400,'Active-session listing rejects unknown query parameters');
+  const unauthenticatedActive=await fetch(`http://127.0.0.1:${port}/v1/sessions/active`,{signal:AbortSignal.timeout(10000)});assert.equal(unauthenticatedActive.status,401,'Active-session listing requires the local owner credential');
   assert.equal(cli('health').agent_execution,true);
   const orderedPermissions=[{action:'read_file',resource:'**/.env*',effect:'deny'},{action:'read_file',resource:'.env.example',effect:'allow'}];
   const agentDetail={agent:{id:'reviewer.v1',name:'Repository Reviewer',description:'Reviews workspace changes with source evidence.',revision:1,model_id:'synthetic-protocol-model',instructions:'Preserve the exact persisted reviewer guidance marker.',tools:['read_file'],permissions:orderedPermissions,mode:'all',hidden:false,default:false}};
@@ -211,6 +214,7 @@ try {
   const activeRunRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='run'),'CLI active-run admission');
   const activeRunRecord=activeRunRecords.find(record=>record.type==='run');
   const activeRun=activeRunRecord.run;assert.equal(activeRun.session_id,'active-control');await streaming(activeRun.id);
+  assert.deepEqual((await api('/v1/sessions/active')).data,{data:{'active-control':{type:'running'}}},'A live persisted run appears in the server-wide active-session map');
   activeControl.process.stdin.write('Read README after the active turn\n');
   const queuedPromptRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='prompt_queued'),'CLI durable prompt queue');
   const queuedPromptRecord=queuedPromptRecords.find(record=>record.type==='prompt_queued');assert.equal(queuedPromptRecord.item.content,'Read README after the active turn');assert.equal(queuedPromptRecord.item.state,'queued');
@@ -223,6 +227,7 @@ try {
   assert.ok(activeControl.records().some(record=>record.type==='run_cancel_result'),'The interactive CLI must send cancellation while it is observing a live turn');
   const queuedRunRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='queued_run'),'CLI automatic queued-prompt admission');
   const queuedRun=queuedRunRecords.find(record=>record.type==='queued_run').run;assert.equal(queuedRun.session_id,'active-control');await terminal(queuedRun.id,'completed');
+  assert.deepEqual((await api('/v1/sessions/active')).data,{data:{}},'Completed work disappears from the active-session map');
   const queuedFinishRecords=await activeControl.waitFor(records=>records.filter(record=>record.type==='turn_finished').length===2,'CLI queued turn completion');
   assert.equal(queuedFinishRecords.filter(record=>record.type==='turn_finished')[1].exit_status,0);
   const inboxAfterDispatch=(await api('/v1/sessions/active-control/inbox')).data.items;assert.equal(inboxAfterDispatch[0].state,'claimed');assert.equal(inboxAfterDispatch[0].run_id,queuedRun.id);

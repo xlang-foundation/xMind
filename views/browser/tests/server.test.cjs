@@ -153,6 +153,7 @@ test('browser adapts a VS Code-attached single-workspace server without inventin
 test('event stream routes are read-only and exclude foreign path encodings',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  assert.equal(allowedApiRoute('/v1/sessions/session_1/messages','GET'),true,'The local browser may retrieve bounded native transcript pages');
+ assert.equal(allowedApiRoute('/v1/sessions/active','GET'),true,'The local browser may inspect active native runs');for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute('/v1/sessions/active',method),false);
  assert.equal(allowedApiRoute('/v1/workspace/commands','GET'),true,'The local browser may read the native workspace command catalogue');
  assert.equal(allowedApiRoute('/v1/workspace/commands','POST'),false,'The command catalogue is read-only');
  assert.equal(allowedApiRoute('/v1/sessions/session_1/commands','POST'),true,'The local browser may invoke a workspace prompt command through the native run service');
