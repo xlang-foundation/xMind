@@ -107,6 +107,10 @@ int dispatch(int argc,char** argv){
     while(first<argc&&std::string_view(argv[first]).starts_with("--")){
         const std::string option=argv[first++];if(!seen.insert(option).second)throw std::invalid_argument("Duplicate console option");
         if(option=="--read-only"){options.approved_edits=false;continue;}
+        if(option=="--workspace-edits"){
+            if(first==argc||std::string_view(argv[first++])!="approved")throw std::invalid_argument("--workspace-edits requires the value approved");
+            options.approved_edits=true;continue;
+        }
         if(option=="--upgrade-backend"){options.upgrade_backend=true;continue;}
         if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config"&&option!="--python-tools-config"&&option!="--language-server-config"&&option!="--process-config")throw std::invalid_argument("Unknown console option");
         if(first==argc||!*argv[first])throw std::invalid_argument("Console option requires a value");const std::string value=argv[first++];
@@ -128,7 +132,7 @@ int dispatch(int argc,char** argv){
 #endif
     if(first<argc&&std::string_view(argv[first])=="profile-info"){
         if(named_port||first+1!=argc)throw std::invalid_argument("profile-info requires a managed local profile and no command arguments");
-        const auto connected=profile();std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(connected.port)},{"workspace",connected.workspace},{"profile_directory",connected.directory},{"process_id",connected.process_id},{"started",connected.started}}.dump()<<'\n';return 0;
+        const auto connected=profile();std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(connected.port)},{"workspace",connected.workspace},{"profile_directory",connected.directory},{"process_id",connected.process_id},{"started",connected.started},{"workspace_edits",connected.approved_edits?"approved":"read_only"}}.dump()<<'\n';return 0;
     }
     if(first<argc&&std::string_view(argv[first])=="workspaces"){
         if(named_port||first+1!=argc)throw std::invalid_argument("workspaces requires local profile storage and no command arguments");

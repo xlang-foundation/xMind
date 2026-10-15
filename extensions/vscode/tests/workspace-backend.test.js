@@ -44,6 +44,10 @@ test('trusted process profiles reach native only through machine settings or the
 test('an explicit trusted runtime update requests one protected native backend upgrade',async()=>{
  const h=harness();h.manager.requestBackendUpgrade();await h.manager.connect();assert.ok(h.launches[0].args.includes('--upgrade-backend'));assert.equal(h.manager.backendUpgradeRequested,false,'Successful startup consumes the one-shot owner-upgrade request');
 });
+test('applying edit policy upgrades the retained profile and preserves explicit read-only mode',async()=>{
+ const h=harness(),first=await h.manager.connect();h.manager.requestBackendUpgrade();h.manager.invalidate();const upgraded=await h.manager.connect();assert.equal(h.launches.length,2);assert.ok(h.launches[1].args.includes('--upgrade-backend'));assert.deepEqual(h.launches[1].args.slice(-2),['--workspace-edits','approved']);assert.equal(upgraded.profileDirectory,first.profileDirectory);assert.equal(upgraded.backendPid,first.backendPid);
+ const readOnly=harness({settings:{workspaceEdits:false}});readOnly.manager.requestBackendUpgrade();await readOnly.manager.connect();assert.ok(readOnly.launches[0].args.includes('--upgrade-backend'));assert.ok(readOnly.launches[0].args.includes('--read-only'));assert.ok(!readOnly.launches[0].args.includes('--workspace-edits'));
+});
 test('packaged Windows profile remains short and canonical despite redirected LocalAppData',async()=>{
  const h=harness();h.deps.env.LOCALAPPDATA='C:\\Users\\shaw9\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local';const owner=await h.manager.connect(),root=h.launches[0].args[h.launches[0].args.indexOf('--profile-root')+1];assert.equal(root,'C:\\User\\.xMind\\p');assert.ok(root.length<=84);assert.equal(owner.canonical,'D:\\Projects\\Example');
 });

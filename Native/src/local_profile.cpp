@@ -836,10 +836,21 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if(state.contains("upgrade_intent")&&process_configuration_changed){
             state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;store.write(state);
         }
-        if (options.approved_edits)
-            require(state.at("approved_edits") == *options.approved_edits,
-                    "Profile edit policy changed; update the existing backend explicitly");
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||language_server_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        const bool edit_policy_changed=options.approved_edits&&
+            state.at("approved_edits").get<bool>()!=*options.approved_edits;
+        if(edit_policy_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("Profile edit policy changed; update the existing backend explicitly");
+        if(state.contains("owner_receipt")&&edit_policy_changed)
+            throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing workspace edit policy");
+        if(recovered_stopped_owner&&options.approved_edits){
+            state["approved_edits"]=*options.approved_edits;
+            store.write(state);
+        }
+        if(state.contains("upgrade_intent")&&options.approved_edits){
+            state["approved_edits"]=*options.approved_edits;
+            store.write(state);
+        }
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||language_server_configuration_changed||edit_policy_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
@@ -850,6 +861,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
+                    if(options.approved_edits)state["approved_edits"]=*options.approved_edits;
                     state["upgrade_intent"]=true;store.write(state);
                 }
                 const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
@@ -1019,7 +1031,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state.at("port").get<std::uint16_t>(),
             state.at("pid").get<std::uint32_t>(),
             started,
-            SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()})};
+            SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()}),
+            state.at("approved_edits").get<bool>()};
 }
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,

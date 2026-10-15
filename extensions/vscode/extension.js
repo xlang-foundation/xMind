@@ -875,7 +875,7 @@ async function activate(context) {
       const selection=await workspaceBackend.selectedFolder(false),root=selection?.folder?.uri?.fsPath;
       if(typeof root!=='string'||!root)throw new Error('Open a workspace folder before updating the managed xMind backend.');
       const epoch=workspaceBackend.epoch,signature=workspaceBackend.signature();
-      const answer=await vscode.window.showWarningMessage(`Apply the current trusted runtime and process configuration to the local xMind backend for ${root}? The backend will restart while keeping saved sessions and history. Active work is not replayed.`,{modal:true},'Apply and reconnect');
+      const answer=await vscode.window.showWarningMessage(`Apply the current trusted runtime, process configuration, and workspace edit policy to the local xMind backend for ${root}? The backend will restart while keeping saved sessions and history. File changes still require approval. Active work is not replayed.`,{modal:true},'Apply and reconnect');
       if(answer!=='Apply and reconnect')return;
       if(epoch!==workspaceBackend.epoch||signature!==workspaceBackend.signature())throw new Error('The selected workspace changed before the backend update.');
       workspaceBackend.requestBackendUpgrade();
@@ -1026,7 +1026,11 @@ async function activate(context) {
     if(client&&panel&&workspaceBackend.active)refreshGitChangesSnapshot().catch(()=>{});
   }));
   if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{
-    if(['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','languageServerConfigPath','processConfigPath','workspaceEdits'].some(key=>event.affectsConfiguration('agentflow.'+key)))reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
+    const policyChanged=event.affectsConfiguration('agentflow.workspaceEdits');
+    const runtimeChanged=['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','languageServerConfigPath','processConfigPath'].some(key=>event.affectsConfiguration('agentflow.'+key));
+    if(policyChanged){
+      vscode.window.showInformationMessage('Workspace edit policy is stored with this local profile. Apply the policy to this backend to enable or disable approved file changes.','Apply now').then(choice=>{if(choice==='Apply now')vscode.commands.executeCommand('agentflow.applyRuntimeConfiguration');});
+    }else if(runtimeChanged)reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;

@@ -129,7 +129,8 @@ class WorkspaceBackend {
     const retained=this.adapters.get(scope);
     if(retained){
       if(roots.some(root=>contained(root,retained.privateDirectory)||contained(retained.privateDirectory,root)||contained(root,retained.profileDirectory)||contained(retained.profileDirectory,root)))throw new Error('Private native storage overlaps the opened folder set. Existing storage was preserved.');
-      try{await this.observe(retained);await this.importProviders(retained.origin,await this.context.secrets.get(`xmind.auth:${retained.origin}`),runtime.providerConfig);if(!current())throw new Error('Workspace changed while reconnecting.');this.active={...retained,epoch,signature:selection.signature,roots:selection.roots};return this.active;}
+      if(upgradeBackend){this.closeAdapter(retained);this.adapters.delete(scope);}
+      else try{await this.observe(retained);await this.importProviders(retained.origin,await this.context.secrets.get(`xmind.auth:${retained.origin}`),runtime.providerConfig);if(!current())throw new Error('Workspace changed while reconnecting.');this.active={...retained,epoch,signature:selection.signature,roots:selection.roots};return this.active;}
       catch(error){if(!current())throw error;this.closeAdapter(retained);this.adapters.delete(scope);}
     }
     let privateRoot=canonicalPath(runtime.privateStateRoot);
@@ -175,7 +176,9 @@ class WorkspaceBackend {
     if(runtime.providerConfig)args.push('--trusted-provider-config',runtime.providerConfig);
     if(runtime.languageServerConfig)args.push('--language-server-config',runtime.languageServerConfig);
     if(runtime.processConfig)args.push('--process-config',runtime.processConfig);
-    if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');
+    const workspaceEdits=machineSetting(this.vscode,'workspaceEdits')!==false;
+    if(workspaceEdits===false)args.push('--read-only');
+    else if(upgradeBackend)args.push('--workspace-edits','approved');
     if(!current())throw new Error('Workspace changed before starting its native view.');
     const env={...this.deps.env,XMIND_VIEW_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete env[key];
     const child=this.deps.spawn(runtime.nativeProgram,args,{cwd:canonical,env,windowsHide:true,stdio:'ignore'});

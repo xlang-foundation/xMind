@@ -18,6 +18,7 @@ struct LocalProfileConnection {
     std::uint32_t process_id = 0;
     bool started = false;
     SecretBytes auth;
+    bool approved_edits = true;
 };
 struct LocalWorkspaceProfile {
     std::string workspace_id, root, name;

@@ -140,6 +140,13 @@ int run_local_view(int argc, char **argv) {
                 options.approved_edits = false;
                 continue;
             }
+            if (key == "--workspace-edits") {
+                require(i + 1 < argc && std::string_view(argv[i + 1]) == "approved",
+                        "--workspace-edits requires the value approved");
+                ++i;
+                options.approved_edits = true;
+                continue;
+            }
             if (key == "--upgrade-backend") {
                 options.upgrade_backend = true;
                 continue;

@@ -1,5 +1,23 @@
 # Current native validation
 
+## VS Code managed-profile edit-policy upgrade — 2026-10-15
+
+An existing local workspace profile can now change between approved-edit and
+read-only modes through the explicit trusted-runtime upgrade. The native owner
+quiesces and hands off its existing profile, retaining the same loopback origin,
+profile directory, SQLite sessions and history. The extension skips its retained
+view adapter during that one-shot upgrade and forwards the selected policy;
+ordinary reconnects do not silently change an existing profile. The sidebar
+offers the apply command when `agentflow.workspaceEdits` changes, and coding
+edits continue to use the native approval journal.
+
+The current VS Code extension suite passes **366/366**. The Release native
+`native_local_profile_contract` passes in **373.71 seconds**, including both
+read-only-to-approved and approved-to-read-only handoffs, stable endpoint and
+profile identity, and exact session/history preservation. This fixture-based
+contract does not by itself establish that the live Development Host has been
+reloaded or that an editor coding task has passed.
+
 ## Bidirectional official A2A SDK interoperability — 2026-10-15
 
 Fresh Visual Studio 18 Release binaries built from xMind `2c3b8c7` against
