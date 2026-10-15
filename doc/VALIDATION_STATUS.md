@@ -1,5 +1,16 @@
 # Current native validation
 
+## Root-wide nested planning limits — 2026-10-14
+
+Plan acceptance now enforces node-label, accepted-revision and human-question
+allowances across all plans owned by one root, inside the serialized SQLite
+transaction. A nested owner cannot reset these allowances by opening another
+plan. The focused Release repository contract passed **1/1** and includes
+separate nested-owner rejection checks for all three limits, verifying that
+rejected work leaves no nested plan or partial reservation. This does not yet
+cover nested pause/restart continuation, depth-nine runtime rejection, or the
+remaining total-work limits. [Contract source](../Native/tests/dynamic_plan_repository_contract.cpp).
+
 ## Live TestProj coding acceptance — 2026-10-14
 
 The current xMind browser backend admitted and completed a real coding run on
@@ -166,11 +177,12 @@ passed serially after a full parallel run exposed test-fixture assumptions and
 a paused-graph plan-lookup bug. Provider responses and credentials are
 synthetic. A follow-up repository contract now admits nine plans at depths 0
 through 8, validates their exact owner chain and shared budget, and passes with
-the maximum eight child owners. Runtime rejection from a depth-nine owner is
-still untested; the reachable repository boundary does not admit a ninth child
-under the registered root policy. Total-work bounds, nested pause/restart
-recovery, live-provider interoperability and external-client acceptance remain
-open.
+the maximum eight child owners. A new repository contract also rejects nested
+plans that would exceed root-wide node, revision or human-question allowances.
+Runtime rejection from a depth-nine owner is still untested; the reachable
+repository boundary does not admit a ninth child under the registered root
+policy. Remaining total-work bounds, nested pause/restart recovery,
+live-provider interoperability and external-client acceptance remain open.
 
 ## Nested plan owner repository admission — 2026-10-14
 

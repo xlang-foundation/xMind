@@ -26,12 +26,13 @@ struct Directory {
 std::int64_t now(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 const std::string authority(64,'a'),inspect_authority(64,'b'),coding_authority(64,'c');
 RootBudgetSpec policy(const std::string& workspace){return {"native.dynamic-plan",1,workspace,R"({"model_id":"synthetic-repository-model","wire":"responses"})",8,2,32,600000};}
-DynamicPlanCapabilities capabilities(const RootBudgetSpec& budget){
+DynamicPlanCapabilities capabilities(const RootBudgetSpec& budget,std::int64_t max_nodes=32,std::int64_t max_revisions=16,std::int64_t max_humans=8){
     DynamicPlanCapabilities c;c.backend_identity=authority;c.workspace_identity=budget.workspace_identity;c.provider_identity_json=budget.provider_identity_json;c.tool_catalog_json="{}";
+    c.max_nodes=max_nodes;c.max_revisions=max_revisions;c.max_humans=max_humans;
     c.presets={{"workspace.inspect",1,true,{},4,{}},{"workspace.coding",1,false,{},16,{}}};return c;
 }
-void seed_root(PersistenceService& store,const std::string& root,const RootBudgetSpec& budget,const std::vector<Json>& additional_tools={}){
-    store.create_session("s_"+root,"Synthetic typed plan repository").get();store.start_prompt_run(root,"s_"+root,R"({"content":"Synthetic repository plan boundary"})",budget,capabilities(budget)).get();store.transition(root,RunState::queued,RunState::running).get();
+void seed_root(PersistenceService& store,const std::string& root,const RootBudgetSpec& budget,const std::vector<Json>& additional_tools={},std::int64_t max_nodes=32,std::int64_t max_revisions=16,std::int64_t max_humans=8){
+    store.create_session("s_"+root,"Synthetic typed plan repository").get();store.start_prompt_run(root,"s_"+root,R"({"content":"Synthetic repository plan boundary"})",budget,capabilities(budget,max_nodes,max_revisions,max_humans)).get();store.transition(root,RunState::queued,RunState::running).get();
     auto b=store.root_budget(root).get();store.open_dynamic_budget_segment({root,"segment_"+root,authority,b.revision}).get();
     rejects<DynamicPlanUnavailable>([&]{store.reserve_model_call(root,root,"before_catalogue",ModelCallRole::parent).get();},"Provisional capabilities must not dispatch model attempts");
     auto catalog=Json{{"tools",Json::array({{{"name","read_file"}},{{"name","list_files"}},{{"name","search_files"}},{{"name","read_repository_instructions"}},{{"name","edit_file"}}})}};
@@ -241,6 +242,29 @@ void nested_owner_admission_contract(const std::string& database,const std::vect
     require(continuation.owner_run_id=="nested_owner"&&continuation.role==ModelCallRole::leaf&&store.dynamic_plan_call(accepted.id).get().continuation_attempt_id=="nested_continuation"&&store.root_budget("nested_root").get().parent_calls_held==1,"Committed nested call must consume one shared hold into its owner-bound leaf continuation");
     store.close();
 }
+void root_wide_nested_planning_bounds(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
+    PersistenceService store(database,imports);
+    auto nested_attempt=[&](const std::string& root,std::int64_t max_nodes,std::int64_t max_revisions,std::int64_t max_humans,bool root_human){
+        seed_root(store,root,policy(workspace),{},max_nodes,max_revisions,max_humans);
+        Json initial_nodes=Json::array({agent("outer","Synthetic bounded nested planner","workspace.inspect")});
+        if(root_human)initial_nodes.push_back(human("root_question","Synthetic root human allowance",Json::array()));
+        const auto initial_args=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",initial_nodes}}.dump();
+        const auto root_call=store.accept_dynamic_plan_change(change_spec(store,root,root+"_origin",initial_args)).get();
+        store.admit_dynamic_frontier(frontier(store,root_call,"outer",root+"_child")).get();
+        store.transition(root+"_child",RunState::queued,RunState::running).get();
+        const auto nested_args=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({human("nested_question","Synthetic nested human request",Json::array())})}}.dump();
+        const auto provider_call=root+"_nested_origin",attempt=root+"_nested_attempt",reply=assistant(provider_call,nested_args);
+        store.reserve_model_call(root,root+"_child",attempt,ModelCallRole::leaf).get();store.start_model_call(root,root+"_child",attempt).get();store.finish_model_call(root,root+"_child",attempt,reply).get();
+        store.append_event(root+"_child","tool.started",Json{{"activity_id",root+"_child:plan:"+provider_call},{"call_id",provider_call},{"name","plan_tasks"},{"arguments",Json::parse(nested_args)},{"arguments_json",nested_args}}.dump()).get();
+        DynamicPlanChangeSpec nested;nested.id=root+"_nested_call";nested.plan_id=root+"_nested_plan";nested.root_run_id=root;nested.owner_run_id=root+"_child";nested.provider_tool_call_id=provider_call;nested.origin_attempt_id=attempt;nested.arguments_json=nested_args;nested.parent_assistant_json=reply;nested.backend_identity=authority;nested.expected_budget_revision=store.root_budget(root).get().revision;
+        rejects<RootBudgetExhausted>([&]{store.accept_dynamic_plan_change(nested).get();},"Nested plan acceptance must enforce shared root-wide planning bounds");
+        require(!store.dynamic_plan_for_owner(root+"_child").get()&&store.dynamic_plans_for_root(root).get().size()==1,"Rejected nested plan must leave no owner, reservation, or partial revision behind");
+    };
+    nested_attempt("bound_nodes",1,16,8,false);
+    nested_attempt("bound_revisions",32,1,8,false);
+    nested_attempt("bound_humans",32,16,1,true);
+    store.close();
+}
 void nested_depth_boundary_contract(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
     PersistenceService store(database,imports);auto budget=policy(workspace);budget.max_model_calls=20;seed_root(store,"depth_root",budget);
     std::string owner="depth_root";DynamicPlanCallRecord accepted;
@@ -414,6 +438,6 @@ void dynamic_effect_admission(const std::string& database,const std::vector<std:
 }
 int main(int argc,char** argv){
     if(argc!=3)return 2;
-    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());owner_scope_migration_contract((dir.path/"owner-scope.sqlite").string(),imports,dir.path.string());nested_owner_admission_contract((dir.path/"nested-owner.sqlite").string(),imports,dir.path.string());nested_depth_boundary_contract((dir.path/"nested-depth.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared budget, nested claimed-owner admission through depth eight, exact human pause/recovery/continuation, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
+    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());owner_scope_migration_contract((dir.path/"owner-scope.sqlite").string(),imports,dir.path.string());nested_owner_admission_contract((dir.path/"nested-owner.sqlite").string(),imports,dir.path.string());root_wide_nested_planning_bounds((dir.path/"nested-bounds.sqlite").string(),imports,dir.path.string());nested_depth_boundary_contract((dir.path/"nested-depth.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared root-wide node/revision/human limits, nested claimed-owner admission through depth eight, exact human pause/recovery/continuation, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
     catch(const std::exception& error){std::cerr<<error.what()<<"\n";return 1;}
 }

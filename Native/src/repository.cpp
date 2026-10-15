@@ -1032,6 +1032,17 @@ DynamicPlanCallRecord Repository::accept_dynamic_plan_change(const DynamicPlanCh
     // revisions can advance after this caller observes a snapshot, so use the
     // current row read under this BEGIN IMMEDIATE transaction and enforce every
     // root-wide limit atomically below instead of rejecting on that stale view.
+    const std::string root_plan_ids="SELECT plan_id FROM dynamic_plan_owners WHERE root_run_id=?";
+    const auto root_nodes=integer(db.execute("SELECT count(*) FROM dynamic_plan_nodes WHERE plan_id IN ("+root_plan_ids+")",{root.id}).rows.at(0).at(0));
+    const auto prior_owner_nodes=existing?static_cast<std::int64_t>(p.nodes.size()):0;
+    if(root_nodes-prior_owner_nodes+static_cast<std::int64_t>(candidate.nodes.size())>caps.max_nodes)
+        throw RootBudgetExhausted("Root-wide dynamic plan node allowance exhausted");
+    const auto root_revisions=integer(db.execute("SELECT count(*) FROM dynamic_plan_revisions WHERE plan_id IN ("+root_plan_ids+")",{root.id}).rows.at(0).at(0));
+    if(root_revisions>=caps.max_revisions)throw RootBudgetExhausted("Root-wide dynamic plan revision allowance exhausted");
+    const auto root_humans=integer(db.execute("SELECT COALESCE(sum(planned_humans_reserved+humans_published),0) FROM dynamic_plans WHERE id IN ("+root_plan_ids+")",{root.id}).rows.at(0).at(0));
+    const auto prior_owner_humans=existing?existing->planned_humans_reserved:0;
+    if(root_humans-prior_owner_humans+candidate.planned_humans_reserved>caps.max_humans)
+        throw RootBudgetExhausted("Root-wide dynamic human-question allowance exhausted");
     const auto additional_children=candidate.planned_children_reserved-(existing?existing->planned_children_reserved:0);if(additional_children<0&&budget.planned_children_reserved< -additional_children)throw DatabaseError("Root planned-child reservation underflow");if(budget.children_admitted+budget.planned_children_reserved+additional_children>budget.spec.max_children||budget.model_calls_reserved+budget.parent_calls_held>=budget.spec.max_model_calls)throw RootBudgetExhausted("Plan cannot reserve child and continuation capacity");
     if(owner_id==root.id&&budget.parent_model_calls_reserved+budget.parent_calls_held>=caps.max_parent_turns)throw RootBudgetExhausted("Root planning-turn allowance exhausted");
     if(owner_id!=root.id){const auto admission=child_admission(owner_id);const auto parent_plan=dynamic_plan(admission.plan_id);const auto claimed=std::find_if(parent_plan.nodes.begin(),parent_plan.nodes.end(),[&](const auto& n){return n.child_run_id==owner_id;});const auto& preset=dynamic_preset(parent_plan.capabilities,claimed->definition);const auto inference_turns=integer(db.execute("SELECT count(DISTINCT COALESCE(inference_step_id,attempt_id)) FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND role='leaf' AND purpose='inference'",{root.id,owner_id}).rows.at(0).at(0));if(inference_turns>=preset.turn_limit)throw RootBudgetExhausted("Nested planning has no child continuation turn remaining");}
