@@ -233,6 +233,7 @@ try {
   assert.equal(queuedFinishRecords.filter(record=>record.type==='turn_finished')[1].exit_status,0);
   const inboxAfterDispatch=(await api('/v1/sessions/active-control/inbox')).data.items;assert.equal(inboxAfterDispatch[0].state,'claimed');assert.equal(inboxAfterDispatch[0].run_id,queuedRun.id);
   const activeHistory=cli('history','active-control');assert.equal(activeHistory.filter(message=>message.role==='user'&&message.data.content==='Read README after the active turn').length,1,'The queued prompt must be saved exactly once in session history');
+  assert.equal(requestsByPrompt.get('Read README after the active turn'),2,'The single CLI-attached run must make one tool request and one follow-up, without admitting a duplicate run');
   activeControl.process.stdin.write('/exit\n');
   const activeControlExit=await new Promise((yes,no)=>{const timer=setTimeout(()=>activeControl.process.kill(),10000);activeControl.process.once('error',no);activeControl.process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});
   assert.equal(activeControlExit.signal,null);assert.equal(activeControlExit.code,0,activeControl.errors());assert.ok(!activeControl.output().includes(key));

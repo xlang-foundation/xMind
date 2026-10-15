@@ -36,8 +36,8 @@ is omitted from inbox listings. If a concurrent run already claimed the item,
 cancellation succeeds without changing its audit link. Repeating cancellation
 is idempotent; reusing a canceled ID conflicts. Browser and VS Code show a
 Cancel control for each pending item. All three clients can inspect and cancel
-the same persisted inbox; browser and VS Code also attach to the durable run
-link after native dispatch.
+the same persisted inbox and attach to the durable run link after native
+dispatch.
 
 Run admission accepts `inbox_id` alongside the regular `/v1/runs` fields. In
 one SQLite transaction, the repository verifies that the queued item belongs

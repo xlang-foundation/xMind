@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## CLI attachment to native queued runs — 2026-10-15
+
+When `/v1/health` advertises `session_inbox_dispatch`, the interactive console
+now waits on its saved inbox row, validates the claimed run belongs to the same
+root session, and attaches through the ordinary run observer. It no longer
+competes with the server by posting a second `/v1/runs` admission. While
+dispatch is pending, `/cancel` removes the oldest queued entry, `/exit` detaches,
+and ordinary prompt text is appended to the same durable inbox. Older servers
+that omit the capability retain the existing console-side admission fallback.
+The rebuilt Release `native_agent_http_contract` and
+`native_http_cli_contract` pass **2/2**; the actual-server CLI scenario verifies
+one admitted run (its two expected provider requests are the tool call and
+follow-up) and exactly one saved user message. Provider replies are synthetic.
+
 ## Reusable xlang3 tool workers — 2026-10-15
 
 Registered trusted xlang3 tools now reuse a local process across calls for the

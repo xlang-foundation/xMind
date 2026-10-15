@@ -649,6 +649,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
     const bool agent_selection=health.value("agent_selection",false);
     const bool provider_profile_admission=health.value("provider_profile_admission",false);
+    const bool session_inbox_dispatch=health.value("session_inbox_dispatch",false);
     const bool profile_admission=provider_profile_admission||health.value("graph_provider_profile_admission",false);
     const bool session_model_selection=health.value("session_model_selection",false);
     auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
@@ -710,6 +711,52 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             }
             if(!next)return false;
             const auto inbox_id=next->at("id").get<std::string>(),queued_prompt=next->at("content").get<std::string>();
+            if(session_inbox_dispatch){
+                for(;;){
+                    if(const auto control=input.control_line()){
+                        if(*control=="/exit"){std::cerr<<"Detached while xMind Server dispatches the queued prompt; backend work remains owned by the server.\n";return true;}
+                        if(*control=="/cancel"){
+                            const auto cancelled=client.Delete("/v1/sessions/"+session+"/inbox/"+inbox_id,headers);
+                            if(!cancelled)throw std::runtime_error("Cannot reach xMind Server to cancel the queued prompt");
+                            std::cout<<Json{{"type",cancelled->status==204?"prompt_cancelled":"prompt_cancel_rejected"},{"session_id",session},{"inbox_id",inbox_id},{"http_status",cancelled->status}}.dump()<<'\n'<<std::flush;
+                            if(!std::cout)throw std::runtime_error("Queued cancellation output is unavailable");
+                            if(cancelled->status!=204)std::cerr<<"The queued prompt was already claimed or could not be cancelled (HTTP "<<cancelled->status<<").\n";
+                            if(cancelled->status==409)continue; // Re-read the row and attach if native dispatch won the race.
+                            break;
+                        }
+                        if(!control->empty()&&control->find_first_not_of(" \t\r\n")!=std::string::npos){
+                            const auto additional_id=queued_input_id();const Json queued={{"id",additional_id},{"content",*control}};
+                            const auto response=client.Post("/v1/sessions/"+session+"/inbox",headers,queued.dump(),"application/json");
+                            if(!response)throw std::runtime_error("Cannot reach xMind Server while saving queued chat input; inspect the session inbox before resubmitting");
+                            if(response->status==202){
+                                const auto item=Json::parse(response->body);if(!item.is_object()||item.value("id",std::string{})!=additional_id||item.value("session_id",std::string{})!=session||item.value("content",std::string{})!=*control||!item.contains("state")||!item["state"].is_string()||(item["state"]!="queued"&&item["state"]!="claimed")||!item.contains("created_ms")||!item["created_ms"].is_number_integer())throw std::runtime_error("Invalid durable queued-input acknowledgement");
+                                std::cout<<Json{{"type","prompt_queued"},{"item",item}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued-input output is unavailable");
+                            }else{
+                                std::cout<<Json{{"type","prompt_queue_rejected"},{"session_id",session},{"http_status",response->status},{"content",*control}}.dump()<<'\n'<<std::flush;
+                                std::cerr<<"Backend did not save the queued prompt (HTTP "<<response->status<<"); the prompt is retained above.\n";
+                            }
+                        }
+                    }
+                    const auto current=request("/v1/sessions/"+session+"/inbox");
+                    if(!current.is_object()||current.size()!=1||!current.contains("items")||!current["items"].is_array()||current["items"].size()>128)throw std::runtime_error("Invalid session prompt inbox");
+                    const Json* observed=nullptr;
+                    for(const auto& item:current["items"])if(item.is_object()&&item.value("id",std::string{})==inbox_id){observed=&item;break;}
+                    if(!observed)break; // Another client cancelled this queued item.
+                    if(observed->value("session_id",std::string{})!=session||observed->value("content",std::string{})!=queued_prompt||!observed->contains("state")||!observed->at("state").is_string()||((*observed)["state"]!="queued"&&(*observed)["state"]!="claimed"))throw std::runtime_error("Queued prompt changed while awaiting native dispatch");
+                    if((*observed)["state"]=="claimed"){
+                        if(!observed->contains("run_id")||!(*observed)["run_id"].is_string())throw std::runtime_error("Claimed prompt has no durable run identity");
+                        const auto id=(*observed)["run_id"].get<std::string>();if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid queued run identity");
+                        const auto run=request("/v1/runs/"+id);
+                        if(!run.is_object()||run.value("id",std::string{})!=id||run.value("session_id",std::string{})!=session||run.value("graph_root",false)||!run.value("parent_id",std::string{}).empty())throw std::runtime_error("Claimed prompt run does not belong to this root session");
+                        std::cout<<Json{{"type","queued_run"},{"inbox_id",inbox_id},{"run",run}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued-run output is unavailable");
+                        const auto watched=watch_run(client,headers,id,0,false,true,&input);if(watched==run_detached)return true;last_result=watched;profile_result=0;
+                        std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result},{"queued",true}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Queued turn output is unavailable");
+                        break;
+                    }
+                    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+                }
+                continue;
+            }
             Json body={{"session_id",session},{"prompt",queued_prompt},{"inbox_id",inbox_id}};if(!model.empty())body["model_id"]=model;if(provider_profile_admission&&!provider_binding.value("provider_profile_id",std::string{}).empty())body.update(provider_binding);
             const auto response=client.Post("/v1/runs",headers,body.dump(),"application/json");
             if(!response||response->status!=202){
