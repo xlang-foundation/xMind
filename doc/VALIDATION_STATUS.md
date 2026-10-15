@@ -1,5 +1,39 @@
 # Current native validation
 
+## xMind TestProj coding and xlang3 import compatibility — 2026-10-15
+
+The browser UI completed a real TestProj request using the saved Gemini
+provider profile and `models/gemini-3.8-flash`. The run invoked the native
+`run_process` tool with the xlang3 profile to execute `pytest -q` in
+`model-zoo/backend`; the UI recorded exit code 0 and **9 passed, 1 warning**.
+This exercised the browser, saved provider configuration, native AgentFlow
+backend, workspace selection, and process executor. It was a local development
+runtime, not a release-package or installed VS Code acceptance.
+
+xlang3's `xmind-required-compat` branch fixes two import cases found by this
+workspace: qualified native package DLLs emitted flat in the module root, and
+Windows `LoadLibraryExW` failures for profile paths near `MAX_PATH`. The
+patched runtime imports `pydantic_core` from the 254-character TestProj profile
+path and runs the backend pytest suite **9/9**. The schema-gather and
+near-`MAX_PATH` CTest contracts pass **2/2**. The complete 11-workload paired
+performance gate against the preserved pre-fix runtime passes with no case
+over the 10% regression limit. The xlang3 fix is isolated on its branch and
+does not broaden into general runtime optimization.
+
+The xMind profile recovery change clears a persisted replacement intent only
+when the previous owner is observed stopped and has not committed a quiescence
+receipt. The local profile contract passed in 268 seconds, including real
+SQLite-backed graph history, interrupted-upgrade recovery, and active human
+approval admission fencing. After rebuilding the backend-owner contract
+binary, the owner and owner-HTTP contracts passed **2/2**; the full focused
+native selection passed **4/4**. xMind checkpoint `a77b693` is on `main`; the
+xlang3 compatibility checkpoint is `9679dfbd` on `xmind-required-compat`.
+
+Remaining acceptance includes complete installed VS Code coding workflows,
+external MCP/A2A interoperability, release packaging, and the wider OpenCode 2
+feature-parity audit. These results establish a local browser workflow and a
+targeted xlang3 compatibility fix, not completion of the full product goal.
+
 ## Nested human pause/resume and restart recovery — 2026-10-14
 
 An ordinary root can now pause on a human node owned by an admitted nested
