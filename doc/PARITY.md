@@ -59,9 +59,11 @@ graph admission blocks primary-only agents. Browser and VS Code omit hidden and
 subagent definitions from the conversation selector. Mode and visibility are
 included in revision comparisons, durable session snapshots, archives, and API
 metadata. The VS Code suite passed 353/353; native graph, agent-service, and
-agent HTTP/CLI contracts passed against xlang3 and SQLite. This implements the
-mode/visibility slice only; named-profile delegation binding and OpenCode
-permission-rule parity remain incomplete.
+agent HTTP/CLI contracts passed against xlang3 and SQLite. Named subagent
+profiles now bind to individual bounded read-only `delegate_tasks` children;
+the captured profile narrows the parent tool allowlist and the native integration
+contract verifies the resulting request and tool catalogue. Full OpenCode
+permission-rule parity remains incomplete.
 
 ## Native local session archive (2026-10-13)
 

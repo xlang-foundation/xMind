@@ -18,7 +18,7 @@ const files={left:'Actual left delegation file: "quoted" 雪\n',right:'Actual ri
 const findings={left:'Synthetic left finding after the actual left file read.',right:'Synthetic right finding after the actual right file read.',followup:'Synthetic follow-up finding after the actual right file read.'};
 for(const side of ['a','b'])for(const file of ['left','right'])findings[`parallel-${side}-${file}`]=`Synthetic parallel-${side}-${file} finding after the actual ${file} file read.`;
 const tasks=(labels)=>({tasks:labels.map(label=>({id:label,objective:`fixture-leaf-${label}: Read ${label.endsWith('left')?'left':'right'}.txt and report the observed finding.`,preset:'workspace.inspect'}))});
-const rawTasks=JSON.stringify(tasks(['left','right']));
+const selectedTasks=tasks(['left','right']);selectedTasks.tasks[0].agent_id='fixture.reader';const rawTasks=JSON.stringify(selectedTasks);
 const event=value=>'event: '+value.type+'\ndata: '+JSON.stringify(value)+'\n\n';
 function start(input){return event({type:'message_start',message:{id:'synthetic-delegation-message',type:'message',role:'assistant',model:'fixture-delegation',content:[],stop_reason:null,stop_sequence:null,usage:{input_tokens:input,output_tokens:0}}});}
 function thinking(signature,index=0){return event({type:'content_block_start',index,content_block:{type:'thinking',thinking:'',signature:''}})+event({type:'content_block_delta',index,delta:{type:'thinking_delta',thinking:'Synthetic private thought for '+signature}})+event({type:'content_block_delta',index,delta:{type:'signature_delta',signature}})+event({type:'content_block_stop',index});}
@@ -27,6 +27,7 @@ function tool(name,id,argumentsText,index=1){return event({type:'content_block_s
 function terminal(reason,output){return event({type:'message_delta',delta:{stop_reason:reason,stop_sequence:null},usage:{output_tokens:output}})+event({type:'message_stop'});}
 function send(response,wire,end=true){response.writeHead(200,{'Content-Type':'text/event-stream'});const bytes=Buffer.from(wire);for(let offset=0;offset<bytes.length;offset+=11)response.write(bytes.subarray(offset,offset+11));if(end)response.end();}
 const publicText=messages=>messages.flatMap(message=>message.content||[]).filter(item=>item.type==='text').map(item=>item.text).join('\n');
+const systemText=body=>typeof body.system==='string'?body.system:Array.isArray(body.system)?body.system.map(item=>typeof item==='string'?item:item.text||'').join('\n'):body.messages.find(message=>message.role==='system')?.content||'';
 const results=messages=>messages.flatMap(message=>message.content||[]).filter(item=>item.type==='tool_result');
 let failure,child;const requests=[],counts=new Map(),held=[],pendingSuccess=[],pendingFaults=[],pendingParallel=[];
 const releaseFaults=setInterval(()=>{
@@ -43,6 +44,8 @@ const server=createServer((request,response)=>{
   const parentSide=parent&&route==='/parallel'?(user.includes('fixture-parent-parallel-a')?'a':'b'):undefined;
   const label=parent?(parentSide?'parent-'+parentSide:'parent'):(['parallel-a-left','parallel-a-right','parallel-b-left','parallel-b-right','left','right','followup','forbidden','nested','oversize'].find(label=>user.includes('fixture-leaf-'+label))||'unknown');
   const count=routeCount(route,label);requests.push({route,owner:label,count});
+  if(parent&&route==='/success'&&count===1){const system=systemText(body);assert.ok(system.includes('["fixture.reader"]'),'Parent must receive the visible named subagent catalogue before delegation');}
+  if(!parent&&route==='/success'&&label==='left'){const system=systemText(body);assert.ok(system.includes('Read-only fixture subagent profile instructions.'),'Named subagent instructions must reach the actual delegated model request');assert.deepEqual(names,['read_file'],'Named subagent tool allowlist must narrow the actual leaf tool catalogue');}
   if(parent){
    assert.ok(names.includes('edit_file')&&names.includes('create_file'),'Delegation must retain the configured parent coding authority');
    assert.ok(!source.includes('opaque-leaf-'),'Child signed receipts cannot enter another execution parent history');
@@ -90,7 +93,8 @@ const server=createServer((request,response)=>{
    }
    throw new Error('Unexpected fixture parent provider route');
   }
-  assert.deepEqual([...names].sort(),['find_files','glob_files','list_files','list_skills','load_skill','read_file','read_repository_instructions','search_files']);
+  const namedReadOnly=(route==='/success'||route==='/budget')&&label==='left';
+  assert.deepEqual([...names].sort(),namedReadOnly?['read_file']:['find_files','glob_files','list_files','list_skills','load_skill','read_file','read_repository_instructions','search_files']);
   assert.notEqual(label,'unknown','Accepted native leaf objective must identify its own fixture task');
   if(label==='left')assert.ok(!user.includes('fixture-leaf-right'));if(label==='right')assert.ok(!user.includes('fixture-leaf-left'));
   assert.ok(!source.includes('opaque-parent-'),'Parent signed continuation must not be copied into leaf prompt/history');

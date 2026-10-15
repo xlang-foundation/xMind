@@ -2,6 +2,7 @@
 // direct repository lifecycle inputs below are explicitly synthetic fixtures.
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/agent_service.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "agentflow/delegation_executor.hpp"
 #include "agentflow/root_execution_budget.hpp"
 #include "agentflow/schema_worker.hpp"
@@ -60,6 +61,7 @@ void actual_success(PersistenceService& store,const AgentSettings& value,const s
     require(Json::parse(root_history[1].json)==original,"Replayable parent tool turn must retain the accepted actual signed receipt exactly");
     for(const auto& child:saved_children){
         const auto rows=store.owned_child_history("success-root",child.run.id).get();require(rows.size()==4&&rows[0].role=="user"&&rows[1].role=="assistant"&&rows[2].role=="tool"&&rows[3].role=="assistant","Each real leaf tool loop must own its independent four-row history");
+        if(child.task_id=="left"){const auto input=Json::parse(rows[0].json);require(input.at("agent_profile").at("id")=="fixture.reader"&&input.at("agent_profile").at("mode")=="subagent"&&input.at("agent_profile").at("revision")==1,"Delegated child prompt must persist the exact selected subagent profile identity and revision");}
         const bool left=child.task_id=="left";const auto tool=Json::parse(rows[1].json),result=Json::parse(Json::parse(rows[2].json).at("content").get<std::string>()),answer=Json::parse(rows.back().json);metrics(tool);metrics(answer);
         require(tool.at("tool_calls")[0].at("arguments")==std::string("{\"pa\\u0074h\":\"")+(left?"left.txt":"right.txt")+"\"}","Leaf signed replay must retain original escaped argument spelling");
         require(result==Json{{"path",left?"left.txt":"right.txt"},{"content",left?left_file:right_file}},"Actual native workspace bytes must reach the leaf's durable result");
@@ -305,6 +307,7 @@ int main(int argc,char** argv){
         const std::string database=argv[1],endpoint=argv[5];const std::vector<std::string> imports{argv[2],argv[3]};const auto workspace=std::filesystem::u8path(argv[4]);std::vector<Message> saved;std::vector<OwnedChildRecord> saved_children;
         {
             PersistenceService store(database,imports);const std::string key=fixture_key;store.put_credential("fixture","delegation-provider","provider:fixture-delegation","Synthetic delegation credential",SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()}),0).get();
+        AgentDefinitionStore definitions(store);const auto profiles=definitions.apply("agents:\n  - id: fixture.reader\n    name: Fixture Reader\n    description: Reads one assigned workspace path.\n    model_id: fixture-delegation\n    mode: subagent\n    instructions: Read-only fixture subagent profile instructions.\n    tools: [read_file]\n");require(profiles.entries.size()==1&&profiles.entries[0].revision==1,"Native delegated fixture must register the explicit subagent profile in xlang3 SQLite");
             actual_success(store,settings(endpoint+"/success",workspace.string()),workspace,saved,saved_children);
             actual_followup(store,settings(endpoint+"/followup",workspace.string()));actual_parallel(store,settings(endpoint+"/parallel",workspace.string()));actual_nested(store,settings(endpoint+"/nested",workspace.string()));actual_budget_race(store,settings(endpoint+"/budget",workspace.string()));actual_cancel(store,settings(endpoint+"/cancel",workspace.string()));
             actual_admission_fault(store,settings(endpoint+"/admission-fault",workspace.string()),database,imports);

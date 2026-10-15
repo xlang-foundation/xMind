@@ -75,8 +75,11 @@ allowlist. Older definitions default the name to their ID and the description
 to empty text. The optional `mode` is `all`, `primary`, or `subagent`; old
 definitions default to `all`. `all` supports conversation and graph use,
 `primary` is restricted to direct conversations, and `subagent` is restricted
-to graph nodes. Named-profile delegation binding remains unimplemented. The
-optional `hidden` flag defaults to `false` and
+to graph nodes and the bounded `delegate_tasks` tool. For delegation, a task
+may set `agent_id` to a visible subagent ID; xMind pins that definition
+revision, instructions, model and tool allowlist into the child. Its tools are
+intersected with the parent agent's effective allowlist, so the child cannot
+expand parent authority. The optional `hidden` flag defaults to `false` and
 removes a definition from the browser and VS Code conversation picker; explicit
 backend selection remains available. Graph import resolves the ID and
 copies its revision, instructions, model, and tool binding into the immutable
