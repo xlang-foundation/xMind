@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { partial, acceptance } from './opencode-mapping.mjs';
-import { nativePartial } from './opencode-native-mapping.mjs';
+import { nativePartial, nativeVerified } from './opencode-native-mapping.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const reference = resolve(root, '.agentflow/reference/opencode');
@@ -41,6 +41,7 @@ for (const [path, methods] of Object.entries(schema.paths)) {
     if (mapping) readFileSync(resolve(root, mapping[0]));
     const native = nativePartial[id];
     let nativeEvidence = null;
+    const verified = nativeVerified[id];
     if (native) {
       const sourceBytes = readFileSync(resolve(root, native[0]));
       const sourceText = sourceBytes.toString('utf8').replaceAll('\r\n', '\n');
@@ -48,11 +49,40 @@ for (const [path, methods] of Object.entries(schema.paths)) {
       nativeEvidence = { source: native[0], sourceSha256: createHash('sha256').update(sourceText, 'utf8').digest('hex'),
         surface: native[1], sourceAnchor: native[2], gap: native[3], verifiedParity: false,
         scope: 'Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance.' };
+      if (verified) {
+        if (!Array.isArray(verified.tests) || verified.tests.length === 0) throw new Error(`Native parity tests are not declared: ${id}`);
+        for (const test of verified.tests) {
+          const testText = readFileSync(resolve(root, test.file), 'utf8').replaceAll('\r\n', '\n');
+          if (!testText.includes(test.anchor)) throw new Error(`Native parity test anchor absent: ${id} (${test.file})`);
+        }
+        const evidenceBytes = readFileSync(resolve(root, verified.evidence));
+        const evidence = JSON.parse(evidenceBytes.toString('utf8'));
+        if (evidence.operationId !== id || evidence.upstreamRevision !== expected ||
+            evidence.status !== 'passed' || !Array.isArray(evidence.tests) ||
+            !evidence.contractChecks || Object.values(evidence.contractChecks).some(value => value !== true))
+          throw new Error(`Native operation parity evidence is incomplete or stale: ${id}`);
+        for (const test of verified.tests)
+          if (!evidence.tests.some(result => result.name === test.name && result.result === 'passed'))
+            throw new Error(`Native operation parity acceptance did not pass: ${id} (${test.name})`);
+        for (const required of [native[0], 'Native/apps/cli_main.cpp', 'Native/apps/xmind_main.cpp', 'Native/CMakeLists.txt', ...verified.tests.map(test => test.file)])
+          if (!Object.hasOwn(evidence.sourceSha256 ?? {}, required))
+            throw new Error(`Native operation parity evidence omits source coverage: ${required}`);
+        for (const [file, expectedHash] of Object.entries(evidence.sourceSha256 ?? {})) {
+          const bytes = readFileSync(resolve(root, file));
+          const text = bytes.toString('utf8').replaceAll('\r\n', '\n');
+          if (createHash('sha256').update(text, 'utf8').digest('hex') !== expectedHash)
+            throw new Error(`Native operation parity source changed after acceptance: ${file}`);
+        }
+        nativeEvidence = { ...nativeEvidence, verifiedParity: true,
+          acceptance: { evidence: verified.evidence, evidenceSha256: createHash('sha256').update(evidenceBytes).digest('hex'),
+            tests: verified.tests },
+          scope: 'Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.' };
+      }
     }
     operations.push({ method: method.toUpperCase(), path, operationId: id,
       summary: operation.summary ?? '', tags: operation.tags ?? [],
       status: mapping ? 'partial-source-unverified' : 'missing',
-      nativeStatus: native ? 'partial-source-unverified' : 'unmapped',
+      nativeStatus: verified ? 'verified-operation-parity' : native ? 'partial-source-unverified' : 'unmapped',
       nativeEvidence,
       agentflowEvidence: mapping ? { source: mapping[0], surface: mapping[1], gap: mapping[2], verifiedParity: false } : null,
       upstreamContract: { parameters: [...(methods.parameters ?? []), ...(operation.parameters ?? [])],
@@ -62,8 +92,10 @@ for (const [path, methods] of Object.entries(schema.paths)) {
 }
 operations.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
 for (const id of Object.keys(nativePartial)) if (!operations.some(operation => operation.operationId === id)) throw new Error(`Native mapping is outside the pinned schema: ${id}`);
+for (const id of Object.keys(nativeVerified)) if (!operations.some(operation => operation.operationId === id && operation.nativeEvidence?.verifiedParity)) throw new Error(`Verified native operation is outside the pinned schema or lacks evidence: ${id}`);
+const verifiedParity = operations.filter(x => x.nativeEvidence?.verifiedParity === true).length;
 const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.26', revision,
-  statusScope: 'Historical Python prototype mappings were removed with that implementation. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.',
+  statusScope: `Historical Python prototype mappings were removed with that implementation. Native source candidates remain unverified unless a hashed acceptance record and test anchor exist; ${verifiedParity} operation-level behavior contracts are currently verified. Unmapped is not proof of absence.`,
   nativeSourceHashFormat: 'SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.',
   schema: 'packages/protocol/openapi.json', schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
   schemaReferenceCount, pinnedComponents: schema.components,
@@ -73,8 +105,4 @@ const target = resolve(root, 'doc/OPENCODE_API_INVENTORY.json');
 writeFileSync(target, JSON.stringify(inventory, null, 2) + '\n');
 const nativeCandidates = operations.filter(x => x.nativeEvidence).length;
 const unmapped = operations.length - nativeCandidates;
-const verifiedParity = operations.filter(x => x.nativeEvidence?.verifiedParity === true).length;
-if (operations.some(x => x.nativeEvidence && x.nativeEvidence.verifiedParity !== false)) {
-  throw new Error('Native operation parity must remain explicitly unverified until operation-level acceptance is recorded');
-}
 console.log(`Audited ${operations.length} pinned OpenCode operations: ${nativeCandidates} reviewed native source candidates, ${unmapped} unmapped, ${verifiedParity} operation-level parity verified; ${operations.filter(x => x.agentflowEvidence).length} historical prototype mappings`);

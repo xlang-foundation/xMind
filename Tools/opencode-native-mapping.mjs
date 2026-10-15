@@ -1,4 +1,5 @@
-// Reviewed native candidates only. Matching source is not observable parity.
+// Reviewed native source candidates. Matching source alone is not parity;
+// operation-level verification is declared separately with acceptance evidence.
 const http = 'Native/src/http_server.cpp';
 const workspace = 'Native/src/workspace_tools.cpp';
 export const nativePartial = {
@@ -38,5 +39,17 @@ export const nativePartial = {
   'provider.get': [http, 'GET /v1/provider/profiles', '"/v1/provider/profiles"', 'Public saved profile metadata exists; the upstream provider-by-ID response and broader native provider behavior remain incomplete.'],
   'experimental.config.update': [http, 'POST /v1/provider/configuration', '"/v1/provider/configuration"', 'Optimistic provider enrollment exists; general effective configuration precedence and reload remain incomplete.'],
   'mcp.list': [http, 'GET /v1/mcp/servers', '"/v1/mcp/servers"', 'Saved stdio server metadata exists; upstream connection lifecycle fields, HTTP/OAuth and live model/tool acceptance remain incomplete.'],
-  'server.info': [http, 'GET /v1/health', '"/v1/health"', 'Native health/capabilities exist; the full pinned identity/version response remains incomplete.'],
+  'server.info': [http, 'GET /v1/info; xmind info', '"/v1/info"', 'The pinned response contract is exercised through HTTP and CLI; xMind deliberately requires its local owner token, unlike the upstream unauthenticated metadata route.'],
+};
+
+// Operation-level claims require both an executed acceptance record and
+// source/test hashes. A source mapping alone can never promote parity.
+export const nativeVerified = {
+  'server.info': {
+    evidence: 'doc/evidence/server-info-opencode-parity-20261015.json',
+    tests: [
+      { name: 'native_http_cli_contract', file: 'Native/tests/http_cli_contract.mjs', anchor: "const serverInfo=await request('/v1/info');" },
+      { name: 'native_local_profile_contract', file: 'Native/tests/local_profile_contract.mjs', anchor: "const unifiedInfoResult=await invoke(['info']);" },
+    ],
+  },
 };

@@ -29,8 +29,26 @@ implementation without claiming OpenCode behavior parity; plugin and dynamic
 command providers, autocomplete and full configuration semantics remain open.
 The regenerated exact-source inventory contains **141 operations, 37 reviewed
 native source candidates, 104 unmapped operations and zero verified
-operation-level parity**. The command feature's focused native and client
-contracts are recorded in [the workspace command milestone](milestones.md).
+operation-level parity** at that checkpoint. The command feature's focused
+native and client contracts are recorded in [the workspace command
+milestone](milestones.md).
+
+## Server information behavior — 2026-10-15
+
+The local backend now exposes `GET /v1/info`, and the console provides
+`xmind info`. Both return the live process PID, version, loopback URL, temp
+path, and persistent-PTY capability in the pinned `ServerInfo` shape. The
+native HTTP/CLI contract verifies exact fields, current-process values, shared
+CLI/API output, required owner authentication, and rejection of unknown query
+parameters. Hashed source and build evidence is in
+[`server-info-opencode-parity-20261015.json`](evidence/server-info-opencode-parity-20261015.json).
+
+The refreshed inventory counts **1 operation-level behavior contract
+verified**, **36 reviewed source candidates still unverified**, and **104
+unmapped operations**. The API path and owner-token requirement intentionally
+differ from OpenCode's unauthenticated `/api/info`; the shared information
+capability and response fields match the pinned contract. This does not imply
+broader OpenCode API or product parity.
 
 ## Native local session archive (2026-10-13)
 

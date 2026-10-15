@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "operationId": "server.info",
+  "upstreamRevision": "9b4ec5714d481559990db0a816d5dec19541a814",
+  "upstreamContract": "GET /api/info -> ServerInfo from packages/protocol/openapi.json; a different native route is allowed by the pinned acceptance criteria.",
+  "nativeSurface": "GET /v1/info and xmind info in the unified product executable",
+  "status": "passed",
+  "environment": {
+    "platform": "Windows x64",
+    "configuration": "Release",
+    "storage": "SQLite through embedded xlang3"
+  },
+  "tests": [
+    {
+      "name": "native_http_cli_contract",
+      "result": "passed",
+      "durationSeconds": 4.46
+    },
+    {
+      "name": "native_local_profile_contract",
+      "result": "passed",
+      "durationSeconds": 277.43
+    }
+  ],
+  "execution": {
+    "command": "ctest --test-dir build/native -C Release -R '^(native_http_cli_contract|native_local_profile_contract)$' --output-on-failure",
+    "result": "passed",
+    "durationSeconds": 281.9
+  },
+  "contractChecks": {
+    "responseHasExactlyPinnedServerInfoFields": true,
+    "versionPidLoopbackUrlTempPathAndPersistentPtyCapabilityMatchLiveBackend": true,
+    "consoleInfoReturnsSameLiveBackendRecord": true,
+    "unifiedXmindInfoReturnsTheSameLiveBackendRecord": true,
+    "ownerAuthenticationIsRequired": true,
+    "unknownQueryParametersAreRejected": true
+  },
+  "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
+  "sourceSha256": {
+    "Native/src/http_server.cpp": "17f6c8d16cc89a3da450ab83e16e4547364c976d9daad1fd649dc851cd508726",
+    "Native/apps/cli_main.cpp": "e8ed5cd9842e7c6503a0bc758f654f7fa1d88a06a4188e94096c11b598fc3ca3",
+    "Native/apps/xmind_main.cpp": "3c28ea640147cf7ad7cfd8cb61662fe026b6bf3cd147fce196fde9cd7ac50503",
+    "Native/tests/http_cli_contract.mjs": "6aaa7b3abc99c8b4cc7ba989d20528c5e4b0f97915b08c6a8668781cc1fee6b9",
+    "Native/tests/local_profile_contract.mjs": "79cc5c301e5454ef375b7b85503acbe41edc6b38bf56dbc0931d9cf8063a5b61",
+    "Native/CMakeLists.txt": "1a7775d8412fb1a4d9c0bdb3c93109bcb305b321ddebfa826ef4ab9a4a307ba7"
+  },
+  "buildArtifactSha256": {
+    "build/native/contract-bin/Release/xmind.exe": "e04df1d4c04311cc0d9dcad4d10cf4b21753bfac452001fc6f0a281deee3286f",
+    "build/native/contract-bin/Release/xmind_server.exe": "0719067ea480056a94e64a3bc325da899045698f25caa94c1a31b01b16111214",
+    "build/native/contract-bin/Release/xmind_cli.exe": "31c4bf01f6337a9fc29202277fedfc093ad536d98925a757aed589d8d11ca197",
+    "../xlang3/build-xmind-import-diagnostic/Release/xlang3_runtime.dll": "88a00148f42d55ce1ac21ed9bea96ff13c6a6993475680e1a5897ce862ed8448"
+  }
+}

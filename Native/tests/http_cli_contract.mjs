@@ -83,6 +83,17 @@ try {
   await start();
   await idleConnectionFairness();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
+  const serverInfo=await request('/v1/info');
+  assert.equal(serverInfo.status,200);
+  assert.deepEqual(Object.keys(serverInfo.data).sort(),['capabilities','paths','pid','urls','version']);
+  assert.equal(serverInfo.data.version,'0.1.0');
+  assert.equal(serverInfo.data.pid,processHandle.pid);
+  assert.deepEqual(serverInfo.data.urls,[`http://127.0.0.1:${port}`]);
+  assert.equal(resolve(serverInfo.data.paths.tmp),resolve(tmpdir()));
+  assert.equal(typeof serverInfo.data.capabilities.persistentPty,'boolean');
+  assert.deepEqual(cli('info'),serverInfo.data,'CLI server info must observe the same live backend contract');
+  assert.equal((await request('/v1/info',undefined,{Authorization:''})).status,401);
+  assert.equal((await request('/v1/info?unexpected=true')).status,400);
   const processCatalog=cli('process-profiles');assert.equal(processCatalog.runtime_state,'per_operation');assert.ok(['powershell','cmd'].includes(processCatalog.profiles.find(profile=>['powershell','cmd'].includes(profile.id))?.id),'Windows local server provides a trusted built-in shell profile');assert.equal(processCatalog.profiles.find(profile=>['powershell','cmd'].includes(profile.id))?.max_timeout_ms,600000,'The built-in shell is bounded');
   const bundledXlang=await stat(resolve(dirname(modules),'xlang3.exe')).then(()=>true,()=>false);assert.equal(processCatalog.profiles.some(profile=>profile.id==='xlang3'),bundledXlang,'The trusted xlang3 process profile follows the backend-paired runtime executable');if(bundledXlang){const profile=processCatalog.profiles.find(value=>value.id==='xlang3');assert.deepEqual(profile,{id:'xlang3',revision:1,max_timeout_ms:600000});}
   assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);

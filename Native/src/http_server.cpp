@@ -40,6 +40,8 @@
 #include "agentflow/view_sessions.hpp"
 #include "agentflow/vcs_service.hpp"
 #include "agentflow/pty_sessions.hpp"
+#else
+#include <unistd.h>
 #endif
 
 namespace agentflow {
@@ -559,6 +561,21 @@ struct HttpServer::Impl {
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+        }));
+        server.Get("/v1/info",guarded([this](const Request& request,Response& response) {
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())
+                throw std::invalid_argument("Server info does not accept query parameters");
+            const auto temporary=std::filesystem::temp_directory_path().u8string();
+            const std::string temporary_utf8(reinterpret_cast<const char*>(temporary.data()),temporary.size());
+#if defined(_WIN32)
+            const auto process_id=static_cast<std::uint64_t>(GetCurrentProcessId());
+#else
+            const auto process_id=static_cast<std::uint64_t>(::getpid());
+#endif
+            reply(response,{{"version","0.1.0"},{"pid",process_id},
+                {"urls",Json::array({"http://127.0.0.1:"+std::to_string(port)})},
+                {"paths",{{"tmp",temporary_utf8}}},
+                {"capabilities",{{"persistentPty",terminals!=nullptr}}}});
         }));
 #if defined(_WIN32)
         const auto connection_metadata=[](const ConnectionProfileCatalog& catalog){
