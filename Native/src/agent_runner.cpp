@@ -521,7 +521,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
-        if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());}
+        if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());if(!dynamic_plan_owner&&!leaf)request.tools.push_back(process_->stop_definition());}
         if(language_servers_)for(auto& definition:language_servers_->definitions())request.tools.push_back(std::move(definition));
         std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
         for(const auto& registration:settings_.xlang_python_tools){
@@ -854,6 +854,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="wait_process"&&process_) {
                         output=Json::parse(process_->wait(id,call.arguments_json,token));
                         if(output.value("state",std::string{})=="uncertain")success=false;
+                    } else if(call.name=="stop_process"&&process_&&!dynamic_plan_owner&&!leaf) {
+                        output=Json::parse(process_->stop(id,call.arguments_json,token));
+                        if(output.value("state",std::string{})=="stopping"||output.value("state",std::string{})=="uncertain")success=false;
                     } else if(call.name=="language_server"&&language_servers_) {
                         const auto* admitted_folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
                         output=Json::parse(language_servers_->invoke(call.arguments_json,token,admitted_folders,settings_.language_server_dispatch));

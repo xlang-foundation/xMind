@@ -124,8 +124,9 @@ ModelToolDefinition ProcessExecutor::definition() const {
     properties["folder_id"]={{"type","string"},{"description","Optional registered workspace folder ID; omit it to use the primary folder."}};
     properties["timeout_ms"]={{"type","integer"},{"minimum",1},{"maximum",600000}};
     properties["background"]={{"type","boolean"}};
+    properties["persistent"]={{"type","boolean"},{"description","Keep a bounded service running after this agent response; requires background=true and can be stopped with stop_process."}};
     const auto schema=Json{{"type","object"},{"properties",properties},{"required",Json::array({"profile","arguments"})},{"additionalProperties",false}}.dump();
-    std::string description="Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Before reviewing changes, use the bounded workspace tools to inspect the relevant files and confirm the target directory is a Git repository before running Git diff commands. Do not chain Git status and diff commands: if the directory is not a repository, skip Git review and inspect the relevant files with workspace tools. Use background=true for bounded jobs that need asynchronous monitoring; then call wait_process with the returned job_id and inspect its terminal result before giving a final answer. The agent run joins every background job before finishing, so this is not a persistent-server mode. Set timeout_ms long enough for startup and execution: a short limit terminates the process tree and can quarantine uncertain effects. If a server must stay open after the agent responds, use the session Terminal UI and verify its ready URL; do not claim run_process left it running. Never detach child processes with shell-level Start-Process, start, or output redirection. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.";
+    std::string description="Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Before reviewing changes, use the bounded workspace tools to inspect the relevant files and confirm the target directory is a Git repository before running Git diff commands. Do not chain Git status and diff commands: if the directory is not a repository, skip Git review and inspect the relevant files with workspace tools. Use background=true for bounded jobs that need asynchronous monitoring; then call wait_process with the returned job_id and inspect its terminal result before a final response. For a local development server or watcher that must remain after the response, set both background=true and persistent=true, choose a timeout of at least 30 seconds and within the trusted profile's limit, then call wait_process briefly to inspect startup output. Stop it later with stop_process using its job_id. Persistent jobs are bounded by the trusted profile timeout, stop when the backend shuts down, and do not resume after restart. A short timeout terminates the process tree and can quarantine uncertain effects. Never detach child processes with shell-level Start-Process, start, or output redirection. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="powershell";}))description+=" For the powershell profile, pass one complete PowerShell script as arguments[0]; it uses a no-profile, noninteractive PowerShell process and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="cmd";}))description+=" For the cmd profile, pass one complete Windows command as arguments[0]; it uses the system command processor and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile for Python-compatible workspace scripts, tests and package commands; never invoke python or python.exe. xMind already prepends -B to this profile, so do not pass -B or a python launcher name. Pass module commands directly, for example ['-m','pip','install','-r','requirements.txt'], ['-m','pytest','-q'] or ['-c','print(1 + 1)']. Its executable is pinned to the xlang3 runtime paired with this xMind backend, so it does not depend on whichever xlang3.exe happens to appear first on machine PATH. xMind adds the paired runtime modules and a .xlang3-site directory in the selected working directory to PYTHONPATH when those directories exist.";
@@ -137,6 +138,10 @@ ModelToolDefinition ProcessExecutor::wait_definition() const {
     const auto schema=Json{{"type","object"},{"properties",{{"job_id",{{"type","string"},{"minLength",1},{"maxLength",128}}},{"timeout_ms",{{"type","integer"},{"minimum",1},{"maximum",600000}}}}},{"required",Json::array({"job_id"})},{"additionalProperties",false}}.dump();
     return {"wait_process","Wait for a background run_process job owned by this run and return its actual exit status and retained output. Use the job_id returned by run_process; if it is still running, call again. Never report completion before this tool returns a terminal state.",schema};
 }
+ModelToolDefinition ProcessExecutor::stop_definition() const {
+    const auto schema=Json{{"type","object"},{"properties",{{"job_id",{{"type","string"},{"minLength",1},{"maxLength",128}}}}},{"required",Json::array({"job_id"})},{"additionalProperties",false}}.dump();
+    return {"stop_process","Stop a persistent run_process service from this session and workspace. The native backend waits for its process tree to exit and returns the recorded stop outcome; it does not undo effects the service already made.",schema};
+}
 ProcessExecutor::~ProcessExecutor(){
     std::lock_guard lock(workers_mutex_);for(auto& worker:workers_)worker.thread.request_stop();workers_.clear();
 }
@@ -145,7 +150,7 @@ void ProcessExecutor::reap_workers(){
     for(auto it=workers_.begin();it!=workers_.end();){if(it->done->load(std::memory_order_acquire)){if(it->thread.joinable())it->thread.join();it=workers_.erase(it);}else ++it;}
 }
 std::string ProcessExecutor::execute_claimed(const std::string& id,const std::string& run,const std::string& profile,
-        ProcessConfiguration launch,std::stop_token cancel) {
+        ProcessConfiguration launch,std::stop_token cancel,bool persistent,std::shared_ptr<std::atomic_bool> intentional_stop) {
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
     try {
         OutputJournal output(store_,run,id,profile);OutputArtifactWriter artifact(store_,run,id);
@@ -157,8 +162,10 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
         catch(...){(void)artifact.finish(false);finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
         output.finish();const auto captured_output=artifact.finish(true);
         const auto termination=result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::cancelled?"cancelled":"timed_out";
-        const auto encoded=Json{{"operation_id",id},{"job_id",id},{"profile_id",profile},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"output_artifact",{{"operation_id",id},{"stdout_bytes",captured_output.stdout_bytes},{"stderr_bytes",captured_output.stderr_bytes},{"state",captured_output.state}}},{"process_tree_retired",true},{"independently_verified",false}}.dump();
-        if(result.termination!=ProcessTermination::exited){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}
+        auto encoded=Json{{"operation_id",id},{"job_id",id},{"profile_id",profile},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"output_artifact",{{"operation_id",id},{"stdout_bytes",captured_output.stdout_bytes},{"stderr_bytes",captured_output.stderr_bytes},{"state",captured_output.state}}},{"process_tree_retired",true},{"independently_verified",false}}.dump();
+        const bool expected_service_stop=persistent&&intentional_stop&&intentional_stop->load(std::memory_order_acquire)&&result.termination==ProcessTermination::cancelled;
+        if(result.termination!=ProcessTermination::exited&&!expected_service_stop){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}
+        if(expected_service_stop){auto stopped=Json::parse(encoded);stopped["service_stopped"]=true;encoded=stopped.dump();}
         finish(OperationState::succeeded,encoded);return encoded;
     }catch(const ProcessOutcomeUnrecorded&){throw;}
     catch(const ProcessEffectUncertain&){throw;}
@@ -180,14 +187,16 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(workspace_id.empty()||folder_id.empty()||workspace_revision<1||workspace.identity()!=folder_id||workspace.root_path()!=root)throw ToolAccessDenied("Process folder binding is invalid");
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
     if(!args.is_object())throw std::invalid_argument("Invalid process argument object");
-    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="folder_id" && it.key()!="timeout_ms" && it.key()!="background")throw std::invalid_argument("Unknown process argument");
+    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="folder_id" && it.key()!="timeout_ms" && it.key()!="background" && it.key()!="persistent")throw std::invalid_argument("Unknown process argument");
     if(args.contains("folder_id")&&(!args["folder_id"].is_string()||args["folder_id"].get<std::string>()!=folder_id))throw ToolAccessDenied("Process folder does not match its admitted workspace folder");
     if(!args.contains("folder_id")&&!primary_folder)throw ToolAccessDenied("An attached process folder must be selected explicitly");
     if(!args.contains("profile") || !args["profile"].is_string() || !args.contains("arguments") || !args["arguments"].is_array() || args["arguments"].size()>32)throw std::invalid_argument("Invalid process profile/arguments");
     const auto selected=args["profile"].get<std::string>();const auto found=std::find_if(profiles_.begin(),profiles_.end(),[&](const auto& p){return p.id==selected;});
     if(found==profiles_.end())throw std::invalid_argument("Unknown registered process profile");
     if(args.contains("background")&&!args["background"].is_boolean())throw std::invalid_argument("Invalid process background mode");
-    const bool background=args.value("background",false);if(background&&!allow_background)throw std::invalid_argument("Background process execution requires an agent owner");
+    const bool background=args.value("background",false),persistent=args.value("persistent",false);if(background&&!allow_background)throw std::invalid_argument("Background process execution requires an agent owner");
+    if(persistent&&!background)throw std::invalid_argument("Persistent services require background=true");
+    if(persistent){const auto owner=store_.run(run).get();if(owner.graph_root||!owner.parent_id.empty())throw ToolAccessDenied("Persistent services can only be started by an ordinary session agent");if(!primary_folder)throw ToolAccessDenied("Persistent services must use the primary workspace folder");if(found->max_timeout<std::chrono::seconds(30))throw std::invalid_argument("Persistent services require a trusted process profile with at least a 30-second timeout");if(args.contains("timeout_ms")&&(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<30000))throw std::invalid_argument("Persistent service timeout must be at least 30 seconds; use the session terminal for shorter commands");}
     ProcessConfiguration launch;launch.executable=found->executable;launch.arguments=found->prefix_arguments;launch.timeout=found->max_timeout;launch.output_limit=65536;
     // xlang3 writes xlang3-specific .pyc files beside pure module facades by
     // default. Keep the paired, hash-verified runtime tree immutable during
@@ -222,7 +231,8 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
         }
     }
     Json environment=Json::array();for(const auto& [name,value]:launch.environment)environment.push_back({{"name",name},{"value",value}});
-    OperationSpec spec{run,workspace_id,"run_process",Json{{"workspace_id",workspace_id},{"workspace_revision",workspace_revision},{"folder_id",folder_id},{"target_workspace_id",launch.workspace_root_id},{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"environment",std::move(environment)},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
+    const auto process_resource=persistent?"process-service:"+id:"process-profile:"+found->id;
+    OperationSpec spec{run,workspace_id,"run_process",Json{{"workspace_id",workspace_id},{"workspace_revision",workspace_revision},{"folder_id",folder_id},{"target_workspace_id",launch.workspace_root_id},{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"environment",std::move(environment)},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background},{"persistent",persistent}}.dump(),{process_resource}};
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     const auto trusted_actor=found->auto_approve?"trusted-process-profile:"+found->id:std::string{};
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel,trusted_actor);
@@ -230,24 +240,24 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish_before_dispatch("repository_guidance_changed_or_unavailable_before_effect");throw;}}
     if(!background)return execute_claimed(id,run,found->id,std::move(launch),cancel);
     reap_workers();
-    auto done=std::make_shared<std::atomic_bool>(false);
+    auto done=std::make_shared<std::atomic_bool>(false);auto intentional_stop=std::make_shared<std::atomic_bool>(false);
     {
         std::lock_guard lock(workers_mutex_);
         if(workers_.size()>=16){finish_before_dispatch("background_process_capacity_exceeded");throw ProcessBeforeDispatchError("Background process capacity is full");}
         try {
             workers_.reserve(workers_.size()+1);
             auto* const self=this;const auto profile=found->id;auto owned_launch=std::move(launch);
-            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,owner_cancel=cancel](std::stop_token shutdown)mutable{
+            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=cancel,persistent](std::stop_token shutdown)mutable{
                 std::stop_source stop;std::stop_callback stop_shutdown(shutdown,[&]{stop.request_stop();});std::stop_callback stop_owner(owner_cancel,[&]{stop.request_stop();});
-                try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token());}
+                try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token(),persistent,intentional_stop);}
                 catch(...){try{const auto current=self->store_.operation(id).get();if(current.state==OperationState::executing)self->store_.finish_operation(id,OperationState::uncertain,R"({"reason":"background_process_worker_failed"})").get();}catch(...) {}}
                 done->store(true,std::memory_order_release);
             });
-            workers_.push_back({done,std::move(worker)});
+            workers_.push_back({id,done,intentional_stop,std::move(worker)});
         }catch(const ProcessOutcomeUnrecorded&){throw;}
         catch(...){finish_before_dispatch("background_process_start_failed");throw ProcessBeforeDispatchError("Background process could not be started");}
     }
-    return Json{{"job_id",id},{"operation_id",id},{"profile_id",found->id},{"state","running"},{"background",true}}.dump();
+    return Json{{"job_id",id},{"operation_id",id},{"profile_id",found->id},{"state","running"},{"background",true},{"persistent",persistent}}.dump();
 }
 std::string ProcessExecutor::wait(const std::string& run,const std::string& source,std::stop_token cancel){
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid background process wait arguments");}
@@ -255,15 +265,29 @@ std::string ProcessExecutor::wait(const std::string& run,const std::string& sour
     for(auto it=args.begin();it!=args.end();++it)if(it.key()!="job_id"&&it.key()!="timeout_ms")throw std::invalid_argument("Unknown background process wait argument");
     std::int64_t timeout=600000;if(args.contains("timeout_ms")){if(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<1||args["timeout_ms"]>600000)throw std::invalid_argument("Invalid background process wait timeout");timeout=args["timeout_ms"].get<std::int64_t>();}
     const auto id=args["job_id"].get<std::string>();const auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
-    for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process wait was cancelled");const auto op=store_.operation(id).get();if(op.spec.run_id!=run||op.spec.tool!="run_process")throw ToolAccessDenied("Background process belongs to another run");
+    for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process wait was cancelled");const auto op=store_.operation(id).get();if(op.spec.tool!="run_process")throw ToolAccessDenied("Background process identity is invalid");
         Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}if(!binding.value("background",false))throw std::invalid_argument("Operation is not a background process job");
+        if(op.spec.run_id!=run&&(!binding.value("persistent",false)||store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity()))throw ToolAccessDenied("Background process belongs to another session or workspace");
         if(op.state!=OperationState::executing){Json result={{"job_id",id},{"operation_id",id},{"state",to_string(op.state)}};if(op.state==OperationState::succeeded||op.state==OperationState::failed||op.state==OperationState::uncertain){try{result["result"]=Json::parse(op.result_json);}catch(...){throw DatabaseError("Saved process result is invalid");}}return result.dump();}
-        if(std::chrono::steady_clock::now()>=deadline)return Json{{"job_id",id},{"operation_id",id},{"state","running"}}.dump();std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        if(std::chrono::steady_clock::now()>=deadline){Json result={{"job_id",id},{"operation_id",id},{"state","running"}};try{for(const auto* channel:{"stdout","stderr"}){const auto page=store_.read_process_output(id,channel,0,4096).get();if(!page.bytes.empty())result[channel]=captured(page.bytes,page.total_bytes);}}catch(const NotFound&){}return result.dump();}std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 std::vector<std::string> ProcessExecutor::join_run(const std::string& run,std::stop_token cancel){
-    std::vector<std::string> completed;for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process join was cancelled");const auto operations=store_.operations(run).get();auto found=std::find_if(operations.begin(),operations.end(),[](const auto& operation){if(operation.state!=OperationState::executing||operation.spec.tool!="run_process")return false;try{return Json::parse(operation.spec.arguments_json).value("background",false);}catch(...){return false;}});if(found==operations.end())return completed;
+    std::vector<std::string> completed;for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process join was cancelled");const auto operations=store_.operations(run).get();auto found=std::find_if(operations.begin(),operations.end(),[](const auto& operation){if(operation.state!=OperationState::executing||operation.spec.tool!="run_process")return false;try{const auto args=Json::parse(operation.spec.arguments_json);return args.value("background",false)&&!args.value("persistent",false);}catch(...){return false;}});if(found==operations.end())return completed;
         const auto waited=Json::parse(wait(run,Json{{"job_id",found->id}}.dump(),cancel));if(waited.value("state",std::string{})=="running")continue;if(waited.value("state",std::string{})=="uncertain")throw ProcessEffectUncertain("Background process outcome is uncertain");completed.push_back(waited.dump());
     }
+}
+std::string ProcessExecutor::stop(const std::string& run,const std::string& source,std::stop_token cancel){
+    Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid persistent process stop arguments");}
+    if(!args.is_object()||args.size()!=1||!args.contains("job_id")||!args["job_id"].is_string()||args["job_id"].get_ref<const std::string&>().empty()||args["job_id"].get_ref<const std::string&>().size()>128)throw std::invalid_argument("Invalid persistent process job ID");
+    const auto id=args["job_id"].get<std::string>();const auto op=store_.operation(id).get();Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}
+    if(op.spec.tool!="run_process"||!binding.value("background",false)||!binding.value("persistent",false))throw ToolAccessDenied("Process is not a persistent service");
+    if(store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Persistent process belongs to another session or workspace");
+    if(op.state!=OperationState::executing)return Json{{"job_id",id},{"state",to_string(op.state)},{"already_stopped",true}}.dump();
+    bool found=false;{
+        std::lock_guard lock(workers_mutex_);for(auto& worker:workers_)if(worker.id==id&&!worker.done->load(std::memory_order_acquire)){worker.intentional_stop->store(true,std::memory_order_release);worker.thread.request_stop();found=true;break;}
+    }
+    if(!found)throw ProcessOutcomeUnrecorded("Persistent process has no live backend owner; recovery is required");
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);for(;;){if(cancel.stop_requested())throw ToolCancelled("Persistent process stop was cancelled");const auto current=store_.operation(id).get();if(current.state!=OperationState::executing){Json result={{"job_id",id},{"state",to_string(current.state)}};if(current.state==OperationState::succeeded){try{result["result"]=Json::parse(current.result_json);}catch(...){throw DatabaseError("Saved process result is invalid");}}return result.dump();}if(std::chrono::steady_clock::now()>=deadline)return Json{{"job_id",id},{"state","stopping"}}.dump();std::this_thread::sleep_for(std::chrono::milliseconds(50));}
 }
 }

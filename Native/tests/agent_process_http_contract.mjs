@@ -19,15 +19,16 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
-      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','run_process','wait_process','delegate_tasks']);
+      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','run_process','wait_process','stop_process','delegate_tasks']);
       assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
       assert.ok(body.messages[0].content.includes(repositoryText),'Actual native provider request must include the root guidance read from disk');
       assert.deepEqual(body.tools.find(tool=>tool.function.name==='run_process').function.parameters.properties.profile.enum,['fixture']);
       const processDescription=body.tools.find(tool=>tool.function.name==='run_process').function.description;
       assert.ok(processDescription.includes('Never detach child processes with shell-level Start-Process'),'Agent must keep long-lived child-process ownership inside the native process manager');
-      assert.ok(processDescription.includes('The agent run joins every background job before finishing, so this is not a persistent-server mode'),'Agent must not mistake a joined background job for a service that survives its run');
-      assert.ok(processDescription.includes('Set timeout_ms long enough for startup and execution'),'Agent must allow real startup time before launching a background process');
-      assert.ok(processDescription.includes('If a server must stay open after the agent responds, use the session Terminal UI'),'Agent must route persistent servers to the session terminal instead of run_process');
+      assert.ok(processDescription.includes('set both background=true and persistent=true'),'Agent must select the persistent-service lifecycle explicitly');
+      assert.ok(processDescription.includes('timeout of at least 30 seconds'),'Agent must leave enough bounded startup time for a service');
+      assert.ok(processDescription.includes('Stop it later with stop_process'),'Agent must know how to retire its service');
+      assert.ok(body.tools.find(tool=>tool.function.name==='stop_process').function.description.includes('process tree to exit'),'Stop-tool semantics must require observed process retirement');
       assert.ok(processDescription.includes('confirm the target directory is a Git repository before running Git diff commands'),'Agent must establish repository context before requesting a Git diff');
       assert.ok(processDescription.includes('Do not chain Git status and diff commands'),'A failed Git precondition must not trigger a noisy follow-up command');
       assert.ok(processDescription.includes('skip Git review and inspect the relevant files with workspace tools'),'Non-Git workspace review must continue through native file tools');

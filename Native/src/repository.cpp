@@ -267,7 +267,10 @@ OperationState operation_state(const std::string& name) {
 }
 std::vector<std::string> effect_resources(const OperationSpec& spec) {
     if(spec.resources.size()>16)throw std::invalid_argument("Operation resource count exceeds limits");
-    std::vector<std::string> result{"workspace:"+spec.workspace};std::set<std::string> seen{result[0]};
+    bool persistent_service=false;
+    if(spec.tool=="run_process")try{const auto args=Json::parse(spec.arguments_json);persistent_service=args.value("background",false)&&args.value("persistent",false);}catch(...){}
+    std::vector<std::string> result;std::set<std::string> seen;
+    if(!persistent_service){result.push_back("workspace:"+spec.workspace);seen.insert(result[0]);}
     for(const auto& resource:spec.resources) {
         identifier(resource);if(resource.size()>4096 || !seen.insert(resource).second)throw std::invalid_argument("Invalid or duplicate operation resource");
         try{(void)Json(resource).dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid operation resource encoding");}
@@ -464,6 +467,9 @@ struct Repository::Impl {
         // State list is an internal SQL literal, never caller-provided text.
         return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ("+states+") LIMIT 1",{id}).rows.empty();
     }
+    bool has_unresolved_effects(const std::string& id) {
+        return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ('awaiting_approval','ready','executing','uncertain') AND NOT (tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1) LIMIT 1",{id}).rows.empty();
+    }
     void message(const Run& run,const std::string& role,const std::string& json){changed_one(database.execute("INSERT INTO messages(session_id,execution_run_id,role,payload) VALUES(?,?,?,?)",{run.session_id,run.parent_id.empty()?SqlValue(nullptr):SqlValue(run.id),role,json}));changed_one(database.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{run.id}));}
     void root_boundary(const Run& current,RunState next){
         if(next==RunState::paused||terminal(next)){
@@ -526,7 +532,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>27)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>28)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -555,7 +561,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>27) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>28) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -933,6 +939,14 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TRIGGER dynamic_plan_owner_admission BEFORE INSERT ON dynamic_plan_owners BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM dynamic_plans p JOIN agent_execution_budgets b ON b.root_run_id=NEW.root_run_id JOIN dynamic_capabilities a ON a.root_run_id=NEW.root_run_id JOIN runs owner ON owner.id=NEW.owner_run_id WHERE p.id=NEW.plan_id AND p.root_run_id=NEW.root_run_id AND b.policy_id='native.dynamic-plan' AND a.catalogue_finalized=1 AND ((NEW.parent_plan_id IS NULL AND NEW.parent_node_label IS NULL AND NEW.owner_run_id=NEW.root_run_id AND NEW.depth=0 AND owner.parent_run_id IS NULL AND owner.state='running' AND NOT EXISTS(SELECT 1 FROM graph_roots g WHERE g.run_id=owner.id)) OR (NEW.parent_plan_id IS NOT NULL AND NEW.parent_node_label IS NOT NULL AND NEW.depth BETWEEN 1 AND 8 AND owner.state='running' AND owner.parent_run_id=NEW.root_run_id AND EXISTS(SELECT 1 FROM dynamic_plan_owners parent JOIN dynamic_plans pp ON pp.id=parent.plan_id JOIN dynamic_plan_nodes n ON n.plan_id=parent.plan_id AND n.label=NEW.parent_node_label WHERE parent.plan_id=NEW.parent_plan_id AND parent.root_run_id=NEW.root_run_id AND parent.depth=NEW.depth-1 AND pp.state='active' AND n.state='claimed' AND n.child_run_id=owner.id AND json_extract(n.definition_json,'$.type')='agent')))) THEN RAISE(ABORT,'invalid dynamic plan owner scope') END; END");
         db.execute("PRAGMA user_version=27");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Recursive dynamic plan owner migration did not preserve foreign key ownership");
+    }
+    if(version<28){
+        // Explicit persistent development services are isolated by their own
+        // durable process-service resource and must not block later workspace
+        // effects. Every other executing effect retains the one-workspace cap.
+        db.execute("DROP INDEX one_workspace_effect");
+        db.execute("CREATE UNIQUE INDEX one_workspace_effect ON operations(workspace) WHERE state='executing' AND NOT(tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1)");
+        db.execute("PRAGMA user_version=28");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -2159,7 +2173,7 @@ Run Repository::complete_run(const std::string& id,const std::string& assistant_
         }
     }
     impl_->root_boundary(current,RunState::completed);
-    if(impl_->has_operations(id,"'awaiting_approval','ready','executing','uncertain'")) throw Conflict("Run has unresolved operations");
+    if(impl_->has_unresolved_effects(id)) throw Conflict("Run has unresolved operations");
     impl_->message(current,"assistant",assistant_json);
     changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{id}));
     if(child_plan)changed_one(db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE id=? AND state='active' AND EXISTS(SELECT 1 FROM dynamic_plan_owners WHERE plan_id=dynamic_plans.id AND owner_run_id=?)",{child_plan->id,id}));
@@ -2202,10 +2216,9 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     impl_->root_boundary(result,next);
     const auto executing=db.execute("SELECT tool,arguments FROM operations WHERE run_id=? AND state='executing'",{id}).rows;
     if(!executing.empty()) {
-        if(next!=RunState::failed&&next!=RunState::cancelled)throw Conflict("Run has an executing operation");
-        for(const auto& operation:executing){bool background=false;try{const auto args=Json::parse(text(operation[1]));background=args.value("background",false);}catch(...){throw DatabaseError("Executing operation binding is invalid");}if(text(operation[0])!="run_process"||!background)throw Conflict("Run has an executing non-background operation");}
+        for(const auto& operation:executing){bool background=false,persistent=false;try{const auto args=Json::parse(text(operation[1]));background=args.value("background",false);persistent=args.value("persistent",false);}catch(...){throw DatabaseError("Executing operation binding is invalid");}if(text(operation[0])!="run_process"||!background||!((next==RunState::failed||next==RunState::cancelled)||(next==RunState::completed&&persistent)))throw Conflict("Run has an executing non-background operation");}
     }
-    if(next==RunState::completed && impl_->has_operations(id,"'awaiting_approval','ready','uncertain'")) throw Conflict("Run has unresolved operations");
+    if(next==RunState::completed && impl_->has_unresolved_effects(id)) throw Conflict("Run has unresolved operations");
     const auto changed=db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),id,state_name(expected)});
     if(changed.affected_rows==0) throw Conflict("Run state changed");
     changed_one(changed);
@@ -2639,7 +2652,8 @@ Operation Repository::request_operation(const std::string& id,const OperationSpe
     const auto owner=run(spec.run_id);if(!owner.parent_id.empty()){const auto admission=child_admission(owner.id);if(admission.kind==ChildAdmissionKind::dynamic_agent){const auto p=dynamic_plan(admission.plan_id);const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==owner.id;});if(n==p.nodes.end()||p.root_run_id!=admission.root_run_id||p.root_run_id!=owner.parent_id||run(p.root_run_id).state!=RunState::running||n->backend_node_id!=owner.node_id||n->definition.label!=admission.node_label||n->claim_id!=admission.claim_id||n->definition_revision!=admission.definition_revision||n->claim_revision!=admission.claim_revision)throw Conflict("Dynamic child effect differs from its actual native ownership");dynamic_effect_authority(spec,p,*n,dynamic_preset(p.capabilities,n->definition));}}
     if(!db.execute("SELECT id FROM operations WHERE id=?",{id}).rows.empty()) throw Conflict("Operation already exists");
     changed_one(db.execute("INSERT INTO operations(id,run_id,workspace,tool,arguments,state,expires_ms) VALUES(?,?,?,?,?,'awaiting_approval',?)",{id,spec.run_id,spec.workspace,spec.tool,spec.arguments_json,expiry}));
-    for(std::size_t index=0;index<resources.size();++index)changed_one(db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) VALUES(?,?,?,'awaiting_approval')",{id,resources[index],static_cast<std::int64_t>(index)-1}));
+    const auto resource_offset=resources.size()&&!resources.front().starts_with("workspace:")?0:1;
+    for(std::size_t index=0;index<resources.size();++index)changed_one(db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) VALUES(?,?,?,'awaiting_approval')",{id,resources[index],static_cast<std::int64_t>(index)-resource_offset}));
     Operation result{id,std::move(spec),OperationState::awaiting_approval,expiry,"{}",{}};
     impl_->operation_state_event(result);transaction.commit();return result;
 }

@@ -74,6 +74,24 @@ contract passes **1/1** with assertions for this guidance. Persistent
 model-managed service lifecycle is still a product gap.
 [Validation evidence](evidence/background-process-tool-guidance-20261014.json).
 
+## Persistent process lifecycle for local development — 2026-10-14
+
+The earlier joined-background behavior is replaced by explicit persistent
+services for ordinary session agents. A start uses
+`background=true,persistent=true`; the assistant can finish while the native
+backend continues to own the process. A later same-session run can inspect its
+startup output and stop it through `stop_process`. Normal workspace commands
+remain available while the service runs. SQLite schema 28 exempts only these
+explicit services from the executing-effect workspace lock; other effects
+retain their existing resource constraints.
+
+The Release process contract verifies service start, cross-run output access,
+workspace command execution during service lifetime, session/workspace stop
+authorization and observed process-tree exit. The HTTP tool contract verifies
+the new tool schema. Services still end at their trusted profile timeout or
+backend shutdown, and do not resume after restart. A live TestProj preview
+started by the model and rendered browser/VS Code review remain open.
+
 ## Managed unified CLI workspace acceptance — 2026-10-14
 
 The profile-managed unified `xmind.exe` connected to the existing TestProj

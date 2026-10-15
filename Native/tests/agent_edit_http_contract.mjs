@@ -20,7 +20,7 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',async()=>{
     try {
       requests++;const body=JSON.parse(source);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','edit_file','create_file','apply_patch','run_process','wait_process','delegate_tasks']);
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','edit_file','create_file','apply_patch','run_process','wait_process','stop_process','delegate_tasks']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;

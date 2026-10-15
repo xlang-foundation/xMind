@@ -172,6 +172,35 @@ The native implementation must preserve these lifecycle guarantees:
   models a persisted wait/join dependency. A graph cannot complete successfully
   merely because it launched an unobserved background effect.
 
+## Persistent local development services — 2026-10-14
+
+An ordinary session agent can start a backend-owned service with
+`run_process(background=true, persistent=true)`. The start stays bound to the
+trusted profile, exact arguments, primary workspace folder, approval decision
+and configured process timeout. It returns a durable operation/job ID without
+joining that operation to the assistant response. The model can use
+`wait_process` to inspect startup output; a later run in the same session and
+workspace can continue reading output or call `stop_process`. Stop reports
+success only after native process-tree termination is observed and journaled.
+Requests from another session or workspace are rejected.
+
+Persistent services use an operation-specific `process-service:<job-id>`
+resource and do not hold the broad workspace effect lock. This allows ordinary
+workspace commands and edits while a server runs. SQLite schema 28 narrows the
+executing-effect index to the same non-service operations; other effects keep
+their existing workspace serialization and uncertainty rules. Services end at
+the trusted profile timeout (at most ten minutes) or backend shutdown. Startup
+recovery marks an in-flight service interrupted/uncertain and never replays it.
+Only ordinary root session agents may start a service, and only in their
+primary folder; graph and nested dynamic-plan tool paths remain synchronous.
+
+Release contracts cover live start, READY output read from a later run, run
+completion while the service stays active, cross-session rejection, normal
+workspace command execution during service lifetime, same-session stop and
+observed process-tree retirement. The process executor, agent HTTP tool and
+agent runner contracts pass. Live-model TestProj startup and rendered browser
+or VS Code acceptance remain open.
+
 The per-run event API now admits late process-output chunks only for an
 operation owned by that run that remains executing. Resource ownership remains
 held until operation completion. The native start/wait/join lifecycle, bounded
