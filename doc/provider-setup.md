@@ -82,6 +82,13 @@ skipped; an existing empty key reuses that profile's encrypted credential.
 Optional `active_profile` selects an existing or supplied profile without
 inventing a model. Unspecified profiles and the current selection remain.
 
+OpenRouter is available through the native `openrouter.chat` route. Add an
+`openrouter` profile with its OpenRouter key to this same file; Settings can
+then discover models from the account and the regular model chooser selects
+one. Discovery retains OpenRouter's provider-qualified model IDs and currently
+filters to catalogue entries that declare native tool support. This route is
+optional; direct provider profiles continue to use their own endpoints and keys.
+
 An import publishes the complete validated document with one registry revision
 check. Identical configuration retains revisions and credential references.
 Invalid documents leave the active execution generation unchanged. Duplicate

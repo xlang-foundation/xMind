@@ -17,7 +17,7 @@ namespace {
 using Json=nlohmann::json;
 const std::string claude_key="synthetic-yaml-claude-key-not-live";
 const std::string openai_key="synthetic-yaml-openai-key-not-live";
-const std::vector<std::string> allowed={"anthropic.messages","openai.responses","openai.chat"};
+const std::vector<std::string> allowed={"anthropic.messages","openai.responses","openai.chat","openrouter.chat"};
 void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
 template<class E,class F>void rejects(F call){try{call();}catch(const E&){return;}throw std::runtime_error("Expected native YAML/profile rejection did not occur");}
 void reject_yaml(const std::string& source,std::optional<ProviderYamlErrorCode> code={}){
@@ -43,6 +43,8 @@ void pure_parser(const std::filesystem::path& root){
     require(parsed.profiles.size()==2,"Native YAML reads valid UTF8 BOM and comments");
     parsed=parse_provider_yaml_config("version: 1\nprofiles: {claude: {route: anthropic.messages, api_key: \"\"}}\n",allowed);
     require(parsed.profiles.size()==1&&parsed.profiles[0].key.view().empty()&&!parsed.profiles[0].model,"Empty-key template is syntactically valid but does not grant enrollment");
+    parsed=parse_provider_yaml_config("version: 1\nprofiles: {openrouter: {route: openrouter.chat, api_key: synthetic-openrouter-key-not-live}}\n",allowed);
+    require(parsed.profiles.size()==1&&parsed.profiles[0].id=="openrouter"&&parsed.profiles[0].route_id=="openrouter.chat"&&same(parsed.profiles[0].key,"synthetic-openrouter-key-not-live"),"OpenRouter can be configured through the same native provider YAML profile contract");
     parsed=parse_provider_yaml_config("version: 1\nprofiles: {\"clau\\u0064e\": {route: anthropic.messages, api_key: 'synthetic-flow-key'}}\n",allowed);
     require(parsed.profiles[0].id=="claude"&&same(parsed.profiles[0].key,"synthetic-flow-key"),"Native quoted/flow YAML decoding is real parser behavior");
     const auto synthetic_file=root/"synthetic-providers.yaml";

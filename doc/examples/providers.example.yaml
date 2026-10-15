@@ -22,3 +22,7 @@ profiles:
   mistral:
     route: mistral.chat
     api_key: ""
+  # Optional unified gateway. Discovery keeps only models declaring tool support.
+  openrouter:
+    route: openrouter.chat
+    api_key: ""
