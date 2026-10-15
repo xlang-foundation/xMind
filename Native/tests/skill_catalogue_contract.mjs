@@ -12,10 +12,11 @@ import {request as rawRequest} from 'node:http';
 import {createRequire} from 'node:module';
 import {createBrowserServer} from '../../views/browser/server.mjs';
 const require=createRequire(import.meta.url),{BackendClient}=require('../../extensions/vscode/client.js'),execute=promisify(execFile);
-const [server,cli,modules,stdlib]=process.argv.slice(2),parent=await fs.realpath(tmpdir()),root=await fs.mkdtemp(path.join(parent,'xmind-skill-catalogue-')),workspace=path.join(root,'workspace'),skills=path.join(workspace,'.agents/skills'),assets=path.join(root,'assets');
-await fs.mkdir(skills,{recursive:true});await fs.mkdir(assets);
+const [server,cli,modules,stdlib]=process.argv.slice(2),parent=await fs.realpath(tmpdir()),root=await fs.mkdtemp(path.join(parent,'xmind-skill-catalogue-')),workspace=path.join(root,'workspace'),skills=path.join(workspace,'.agents/skills'),commands=path.join(workspace,'.agents/commands'),assets=path.join(root,'assets');
+await fs.mkdir(skills,{recursive:true});await fs.mkdir(commands,{recursive:true});await fs.mkdir(assets);
 for(const name of ['index.html','browser.js','browser.css','chat.js','chat.css','client.js','patch-review.js','marked.js','purify.js'])await fs.writeFile(path.join(assets,name),'Synthetic routing fixture; not rendered UI.\n',{flag:'wx'});
 const explicit='---\nname: Explicit guide\ndescription: Synthetic catalogue metadata\nautoinvoke: false\n---\nSynthetic body must not appear in a catalogue.\n',disabled='---\nname: Disabled guide\ndisable-model-invocation: true\n---\nSynthetic disabled body must not be invoked.\n';
+await fs.writeFile(path.join(commands,'review.md'),'---\ndescription: Synthetic review command\n---\nReview $ARGUMENTS using the current workspace.\n',{flag:'wx'});
 await fs.mkdir(path.join(skills,'explicit'));await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit,{flag:'wx'});await fs.writeFile(path.join(skills,'disabled.md'),disabled,{flag:'wx'});
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 let child,exitPromise,exited,view,activeCookie;
@@ -29,6 +30,7 @@ try{
   assert.equal((await client.health()).file_edit_proposals,false,'A configured model must not imply native file-effect permission');
   assert.equal((await fetch(origin+'/v1/workspace/skills')).status,401);
   const catalogue=await client.skills();assert.equal(catalogue.workspace_id,binding.workspace_id);assert.equal(catalogue.authority_id,binding.authority_id);assert.equal(catalogue.skills.length,2);
+  const commandCatalogue=await client.commands();assert.equal(commandCatalogue.workspace_id,binding.workspace_id);assert.equal(commandCatalogue.authority_id,binding.authority_id);assert.deepEqual(commandCatalogue.commands.map(item=>item.id),['review']);assert.equal(commandCatalogue.commands[0].description,'Synthetic review command');assert.ok(!JSON.stringify(commandCatalogue).includes('Review $ARGUMENTS'));
   assert.equal(catalogue.skills.find(s=>s.id==='explicit').autoinvoke,false);assert.equal(catalogue.skills.find(s=>s.id==='disabled').model_invocable,false);assert.ok(!JSON.stringify(catalogue).includes('Synthetic body'));assert.ok(!JSON.stringify(catalogue).includes('Synthetic disabled body'));assert.ok(catalogue.skills.every(s=>!Object.hasOwn(s,'content')&&!Object.hasOwn(s,'body')));
   // fetch normalizes away an empty trailing query. Send this exact request
   // target through raw HTTP so the backend, not the URL serializer, is tested.
@@ -41,6 +43,8 @@ try{
   view=await createBrowserServer({backend:origin,assetRoot:assets});const viewOrigin=await view.listen(),viewHeaders={Origin:viewOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
   const enrolled=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...viewHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(enrolled.status,200);activeCookie=enrolled.headers.get('set-cookie').split(';')[0];
   const observed=await fetch(viewOrigin+'/v1/workspace/skills',{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(observed.status,200);assert.deepEqual(await observed.json(),catalogue);
+  const observedCommands=await fetch(viewOrigin+'/v1/workspace/commands',{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(observedCommands.status,200);assert.deepEqual(await observedCommands.json(),commandCatalogue);
+  assert.equal((await fetch(viewOrigin+'/v1/workspace/commands',{method:'POST',headers:{...viewHeaders,Cookie:activeCookie},body:'{}'})).status,404);
   assert.equal((await fetch(viewOrigin+'/v1/workspace/skills',{method:'POST',headers:{...viewHeaders,Cookie:activeCookie},body:'{}'})).status,404);
   assert.equal((await fetch(viewOrigin+'/v1/workspace/skills?path=other',{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}})).status,400);
   await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit.replace('Explicit guide','Current guide'));
@@ -48,6 +52,17 @@ try{
   await fs.writeFile(path.join(skills,'explicit.md'),explicit,{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409,'Ambiguous current sources cannot yield a partial catalogue');await fs.unlink(path.join(skills,'explicit.md'));
   await fs.writeFile(path.join(skills,'malformed.md'),'---\nname: [not, scalar]\n---\nSynthetic invalid guide',{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409);await fs.unlink(path.join(skills,'malformed.md'));
   assert.deepEqual(await client.sessions(),[],'Scoped catalogue inspection must leave sessions empty');
+  const commandSession=await client.createSession('Synthetic command execution authority');
+  assert.equal((await fetch(origin+`/v1/sessions/${commandSession.id}/commands`,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({command_id:'review',arguments:'actual request',expected_workspace_id:binding.workspace_id,expected_workspace_authority_id:'f'.repeat(32)})})).status,409,'Workspace commands must reject stale authority before starting a run');
+  assert.equal((await fetch(origin+`/v1/sessions/${commandSession.id}/commands`,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({command_id:'../outside',arguments:'actual request',expected_workspace_id:binding.workspace_id,expected_workspace_authority_id:binding.authority_id})})).status,400,'Traversal-shaped command IDs must fail before execution');
+  assert.deepEqual(await client.runs(commandSession.id),[],'Rejected command requests must not create runs');
+  if(mode==='platform'){
+   const invocation=JSON.stringify({command_id:'review',arguments:'inspect src/app.cpp',model_id:'synthetic-catalogue-model',expected_workspace_id:binding.workspace_id,expected_workspace_authority_id:binding.authority_id});
+   const accepted=await fetch(viewOrigin+`/v1/sessions/${commandSession.id}/commands`,{method:'POST',headers:{...viewHeaders,Cookie:activeCookie},body:invocation});assert.equal(accepted.status,202,'The browser view must submit a valid workspace command through the native run service');
+   const run=await accepted.json();assert.equal(run.session_id,commandSession.id);assert.equal(run.state,'queued');
+   const deadline=Date.now()+5000;let history=[];while(Date.now()<deadline){history=await client.history(commandSession.id);if(history.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')))break;await new Promise(resolve=>setTimeout(resolve,25));}
+   assert.ok(history.some(item=>item.role==='user'&&item.data?.content?.includes('Review inspect src/app.cpp using the current workspace.')),'Command template expansion must be durably admitted as the ordinary run prompt');
+  }
   await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit);
   const session=await client.createSession('Synthetic explicit skill controls');const sessionPath='/v1/sessions/'+session.id+'/skills';
   assert.equal((await fetch(origin+sessionPath)).status,401);assert.equal((await fetch(origin+'/v1/sessions/absent/skills',{headers})).status,404);

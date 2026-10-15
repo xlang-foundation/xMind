@@ -36,7 +36,7 @@ class BackendClient {
     if(ticket){
       if(ticket.origin!==this.baseUrl)throw new Error('The selected workspace backend changed before admission.');
       this.#workspaceGuard.assert(ticket);
-      if(path==='/v1/runs'||path==='/v1/graph-runs')body={...body,...ticket.fields};
+      if(path==='/v1/runs'||path==='/v1/graph-runs'||/^\/v1\/sessions\/[A-Za-z0-9_-]+\/commands$/.test(path))body={...body,...ticket.fields};
     }
     const response = await this.fetch(this.baseUrl + path, {
       method: method || (body === undefined ? 'GET' : 'POST'),
@@ -180,6 +180,16 @@ class BackendClient {
   }
   sessions() { return this.request('/v1/sessions'); }
   skills() { return this.request('/v1/workspace/skills'); }
+  commands() { return this.request('/v1/workspace/commands'); }
+  command(sessionId,commandId,args,modelId,binding,workspace,graph) {
+    executionIdentity(sessionId);if(typeof commandId!=='string'||!commandId||commandId.length>256||typeof args!=='string'||new TextEncoder().encode(args).length>8192||!workspace||typeof workspace.workspace_id!=='string'||!/^[a-f0-9]{32}$/.test(workspace.authority_id))throw new Error('Invalid workspace command request.');
+    if(graph&&(!graph||typeof graph.id!=='string'||!Number.isSafeInteger(graph.revision)||graph.revision<1))throw new Error('Invalid workspace command graph selection.');
+    return this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/commands`,{command_id:commandId,arguments:args,...(modelId?{model_id:modelId}:{}),...profileBindingFields(binding),...(graph?{graph_id:graph.id,graph_revision:graph.revision}:{}),expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id});
+  }
+  async runCommand(sessionId,commandId,args,modelId,binding,graph) {
+    const workspace=await this.workspace();if(!workspace.configured)throw new Error('Workspace commands require an opened workspace.');
+    const value=await this.command(sessionId,commandId,args,modelId,binding,workspace,graph);validateRunDTO(value);return value;
+  }
   async sessionSkills(id) { executionIdentity(id);return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`),id); }
   async replaceSessionSkills(id,ids,observed) {
     executionIdentity(id);skillIds(ids);validateSessionSkills(observed,id);
@@ -352,6 +362,14 @@ function validateWorkspace(value){
   if(!value.configured){if(value.root!==null||value.workspace_id!==null||value.authority_id!==null)throw new Error('Invalid backend workspace metadata.');}
   else if(typeof value.root!=='string'||!value.root||value.root.length>32760||/[\x00-\x1f]/.test(value.root)||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid backend workspace identity.');
   return value;
+}
+function parseWorkspaceCommand(input,catalogue){
+  if(typeof input!=='string'||!input.startsWith('/'))return undefined;
+  const match=/^\/([A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*)(?:[ \t]+([\s\S]*))?$/.exec(input);
+  if(!match)throw new Error('Use /command-name followed by optional arguments.');
+  if(!catalogue||!Array.isArray(catalogue.commands)||catalogue.commands.length>128)throw new Error('The native workspace command catalogue is invalid.');
+  const command=catalogue.commands.find(item=>item?.id===match[1]);if(!command)throw new Error(`Workspace command /${match[1]} was not found.`);
+  return {id:command.id,arguments:match[2]??''};
 }
 function validateWorkspaceMembership(value,workspace){
   exactFields(value,['workspace_id','name','root','revision','primary_folder_id','folders']);
@@ -956,5 +974,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
+else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};

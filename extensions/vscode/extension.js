@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('./client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview}=require('./patch-review');
@@ -649,6 +649,7 @@ async function activate(context) {
           await cancelQueuedPrompt(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
           if(sessionId&&busySession()){
+            if(message.prompt.startsWith('/'))throw new Error('Workspace commands cannot be queued yet. Wait for the active run to finish, then send the command.');
             const selected=sessionRuns.find(run=>run.id===runId);
             if(selected&&!['queued','running','paused'].includes(selected.state))throw new Error('Select the active run before queuing another prompt.');
             await queuePrompt(message.prompt);return;
@@ -656,11 +657,13 @@ async function activate(context) {
           const graph=selectedGraph?graphCatalogue.find(g=>g.id===selectedGraph&&g.executable):undefined;
           if(selectedGraph&&!graph)throw new Error('Graph is not executable on this backend.');
           if (!graph&&!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
+          const commandGeneration=generation,submissionClient=client;
+          const slashCommand=message.prompt.startsWith('/')?parseWorkspaceCommand(message.prompt,await client.commands()):undefined;
+          if(panel!==view||generation!==commandGeneration||client!==submissionClient||configuredOrigin()!==client.baseUrl)return;
           const admissionVersion=generation;
           const binding=(graph?health.graph_provider_profile_admission:health.provider_profile_admission)===true?await profileController.admission():undefined;
           if(panel!==view||admissionVersion!==generation||configuredOrigin()!==client.baseUrl)return;
           if (!sessionId) {
-            const submissionClient=client;
             const session = await submissionClient.createSession(message.prompt.slice(0, 80));
             if (panel !== view||generation!==admissionVersion||client!==submissionClient) return;
             await selectSession(session.id);
@@ -669,7 +672,7 @@ async function activate(context) {
           }
           if (panel !== view) return;
           const admissionClient=client,runVersion=generation;let run;
-          try{run=graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding);}
+          try{run=slashCommand?await admissionClient.runCommand(sessionId,slashCommand.id,slashCommand.arguments,selectedModel,binding,graph):graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding);}
           catch(error){
             if(panel!==view||generation!==runVersion||client!==admissionClient)return;
             const changed=await profileController.reconcileAdmission(binding,error).catch(()=>false);

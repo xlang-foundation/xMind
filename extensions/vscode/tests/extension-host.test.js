@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
 const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -17,7 +17,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
-  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
+  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const inboxItems=options.inboxItems||[];
   const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
@@ -25,6 +25,7 @@ function harness(options={}) {
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     if(target.pathname==='/v1/workspace'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>owner.metadata};}
+    if(target.pathname==='/v1/workspace/commands')return {ok:true,json:async()=>options.commandCatalogue||{commands:[{id:'review/security',description:'Synthetic workspace command'}]}};
     if(target.pathname==='/v1/workspace/membership'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>options.workspaceMembership||({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:1,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0}]})};}
     if(target.pathname==='/v1/vcs/status')return{ok:true,json:async()=>options.vcsStatus||[]};
     if(target.pathname==='/v1/workspaces/add'){const body=JSON.parse(requestOptions.body),owner=backendOwners[0];assert.equal(body.workspace_id,owner.metadata.workspace_id);assert.equal(body.root,options.workspaceFolderToAdd||'D:\\Shared');return {ok:true,json:async()=>({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:2,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:body.root,ordinal:1}]})};}
@@ -47,6 +48,8 @@ function harness(options={}) {
       if(requestOptions.method==='POST'){const body=JSON.parse(requestOptions.body),item={id:body.id||'inbox-fixture',session_id:session,content:body.content,state:'queued',created_ms:Date.now()};inboxItems.push(item);return {ok:true,status:202,json:async()=>item};}
       if(requestOptions.method==='DELETE'){const index=inboxItems.findIndex(item=>item.id===id&&item.session_id===session&&item.state==='queued');if(index>=0)inboxItems.splice(index,1);return {ok:true,status:204,json:async()=>({})};}
     }
+    const commandRoute=target.pathname.match(/^\/v1\/sessions\/([A-Za-z0-9_-]+)\/commands$/);
+    if(commandRoute&&requestOptions.method==='POST'){const body=JSON.parse(requestOptions.body);commandRequests.push(body);const run=options.commandRun||{id:'command-run',session_id:commandRoute[1],state:'queued',graph_root:false,parent_id:'',node_id:''};options.runs=[run];return {ok:true,status:202,json:async()=>run};}
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
     else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
@@ -177,13 +180,13 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
     backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -230,6 +233,14 @@ test('sidebar terminal snapshot retains queued completion frames until native st
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];await feed.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Synthetic pending completion'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);h.configureRuns([{id:'finished',state:'completed'}]);task.callback();await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');assert.equal(feed.options.signal.aborted,false,'A faster snapshot must drain its owned event stream');
   await feed.options.onEvent({seq:3,run_id:'finished',kind:'run.completed',data:{}});assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===3).length,1);feed.resolve({reason:'terminal',cursor:3});await until(()=>feed.options.signal.aborted);assert.equal(h.streams.length,1);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ }finally{view.close();}
+});
+
+test('VS Code slash command resolves the opened workspace catalogue and admits a native run',async()=>{
+ const h=harness();await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));view.receive({type:'send',prompt:'/review/security src/app.cpp'});try{await until(()=>h.commandRequests.length===1);}catch(error){throw new Error(JSON.stringify({requests:h.requests,errors:h.errors,posted:view.posted.slice(-8).map(message=>({type:message.type,text:message.text}))}));}
+  assert.deepEqual(h.commandRequests,[{command_id:'review/security',arguments:'src/app.cpp',model_id:'synthetic-host-default',expected_workspace_id:h.backendOwners[0].metadata.workspace_id,expected_workspace_authority_id:h.backendOwners[0].metadata.authority_id}]);
+  assert.ok(h.requests.includes('/v1/workspace/commands'));assert.ok(h.requests.includes('/v1/sessions/saved/commands'));assert.ok(!h.requests.includes('/v1/runs'));assert.ok(view.posted.some(message=>message.type==='user'&&message.text==='/review/security src/app.cpp'));assert.deepEqual(h.errors,[]);
  }finally{view.close();}
 });
 

@@ -245,6 +245,10 @@ supported. JSON input remains accepted.
 
 ## Still required for the agreed product
 
+Workspace slash commands use bounded Markdown templates in `.agents/commands/`.
+See [native workspace commands](native-commands.md) for the template fields,
+argument rules, backend routes and remaining compatibility limits.
+
 The current slice supports reusable named YAML agents in graph nodes, per-node
 inline instructions, per-agent native tool allowlists, revisioned single-agent
 conversation selection, trusted startup-registered xlang3 Python tools in the
@@ -252,7 +256,8 @@ AgentRunner catalogue, and trusted xlang3 programs that register named agent
 and graph definitions through the native authoring API. Native effect mediation
 for trusted code and durable agent-level worker execution remain incomplete.
 Workspace Markdown skill discovery and selection are implemented,
-while the full command/skill lifecycle still has documented gaps.
+while plugin-driven command providers and the wider skill lifecycle still have
+documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone
 does not establish runtime behavior. See the

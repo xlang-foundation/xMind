@@ -15,6 +15,7 @@
 #include "agentflow/mcp_oauth_setup.hpp"
 #include "agentflow/mcp_resource_catalog.hpp"
 #include "agentflow/http_stream_transport.hpp"
+#include "agentflow/command_context.hpp"
 #if defined(_WIN32)
 #include "agentflow/a2a_client.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
@@ -307,6 +308,7 @@ struct HttpServer::Impl {
     A2aRemoteAgentRegistry remote_agents;
 #endif
     RunExecutor* executor;
+    GraphExecution* graph_executor;
     BackendOwnerControl* owner_control;
     McpOAuthSetup* mcp_oauth;
     PtySessions* terminals;
@@ -398,7 +400,7 @@ struct HttpServer::Impl {
         connection_profiles(store),
         remote_agents(store),
 #endif
-        executor(execution),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),mcp_resources(resources),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+        executor(execution),graph_executor(graphs),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),mcp_resources(resources),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
@@ -423,9 +425,9 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|commands|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
-            static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
+            static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -762,6 +764,30 @@ struct HttpServer::Impl {
             const auto actual=executor->workspace_skills();auto catalogue=Json::parse(actual.catalogue_json);
             catalogue["workspace_id"]=actual.workspace.workspace_id;catalogue["authority_id"]=actual.workspace.authority_id;
             reply(response,catalogue);
+        }));
+        server.Get("/v1/workspace/commands",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Command catalogue does not accept query parameters");
+            if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace command inspection requires an opened workspace");
+            const auto before=executor->execution_workspace();if(!before.configured)throw RunUnavailable("Workspace command inspection requires an opened workspace");
+            WorkspaceTools workspace(before.root);const auto catalogue=Json::parse(CommandContext(workspace).catalogue_json());
+            validate_workspace_admission({before.workspace_id,before.authority_id},executor->execution_workspace());
+            auto result=catalogue;result["workspace_id"]=before.workspace_id;result["authority_id"]=before.authority_id;reply(response,result);
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/commands)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>16384)throw std::invalid_argument("Command invocation exceeds its limits");
+            if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace commands require an opened workspace");
+            const auto value=body(request,{"command_id","arguments","model_id","provider_profile_id","expected_provider_revision","graph_id","graph_revision","expected_workspace_id","expected_workspace_authority_id"});
+            const auto admission=workspace_admission(value);if(!admission)throw std::invalid_argument("Command execution requires workspace authority");
+            const auto before=executor->execution_workspace();validate_workspace_admission(*admission,before);
+            const auto command=string_field(value,"command_id",256);std::string arguments;
+            if(value.contains("arguments")){if(!value["arguments"].is_string())throw std::invalid_argument("Command arguments must be text");arguments=value["arguments"].get<std::string>();if(arguments.size()>8192||arguments.find('\0')!=std::string::npos)throw std::invalid_argument("Command arguments exceed their bounds");}
+            const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};const auto binding=profile_admission(value);
+            WorkspaceTools workspace(before.root);const auto prompt=CommandContext(workspace).expand(command,arguments);
+            validate_workspace_admission(*admission,executor->execution_workspace());
+            const auto session=identifier(request.matches[1].str());(void)persistence.session(session).get();
+            const bool has_graph=value.contains("graph_id"),has_revision=value.contains("graph_revision");if(has_graph!=has_revision)throw std::invalid_argument("Graph command selection requires an exact graph revision");
+            if(has_graph){if(!graph_executor||!value["graph_revision"].is_number_integer()||value["graph_revision"]<1||value["graph_revision"]>=9007199254740991LL)throw std::invalid_argument("Invalid graph command selection");reply(response,encode(graph_executor->submit_graph_workspace(new_id(),session,string_field(value,"graph_id",64),value["graph_revision"].get<std::int64_t>(),prompt,model,*admission,binding)),202);}
+            else reply(response,encode(executor->submit_workspace(new_id(),session,prompt,model,*admission,binding)),202);
         }));
         server.Get("/v1/language-servers",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Language-server metadata does not accept query parameters");

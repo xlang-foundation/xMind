@@ -2,11 +2,25 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { BackendClient,SessionHistoryPager } = require('../client');
+const { BackendClient,SessionHistoryPager,parseWorkspaceCommand } = require('../client');
 const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
 const skillCatalogue={workspace_id:skillWorkspace,authority_id:skillAuthority,skills:[{id:'manual',name:'User guide',path:'.agents/skills/manual.md',model_invocable:false}]};
+test('workspace slash commands resolve exact catalogue IDs and preserve raw arguments',()=>{
+ const catalogue={commands:[{id:'review/security'},{id:'review'}]};
+ assert.deepEqual(parseWorkspaceCommand('/review/security "src/app file.cpp" --strict',catalogue),{id:'review/security',arguments:'"src/app file.cpp" --strict'});
+ assert.equal(parseWorkspaceCommand('Please review this file',catalogue),undefined);
+ assert.throws(()=>parseWorkspaceCommand('/review/missing now',catalogue),/not found/);
+ assert.throws(()=>parseWorkspaceCommand('/review//security',catalogue),/Use \/command/);
+ assert.throws(()=>parseWorkspaceCommand('/review',{}),/catalogue is invalid/);
+});
+test('workspace command submission carries fresh workspace, provider and graph authority to native backend',async()=>{
+ const requests=[],workspace={configured:true,root:'D:\\TestProj',workspace_id:skillWorkspace,authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>workspace};});
+ const result=await client.command('session-command','review/security','src/app.cpp','model-id',{provider_profile_id:'profile-a',expected_provider_revision:4},workspace,{id:'review-flow',revision:3});
+ assert.deepEqual(result,workspace);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/session-command/commands');assert.equal(requests[0].options.method,'POST');
+ assert.deepEqual(JSON.parse(requests[0].options.body),{command_id:'review/security',arguments:'src/app.cpp',model_id:'model-id',provider_profile_id:'profile-a',expected_provider_revision:4,graph_id:'review-flow',graph_revision:3,expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority});
+});
 test('opened workspace folder attachment preserves the native primary workspace identity',async()=>{
  const workspace={configured:true,root:'D:\\TestProj',workspace_id:'windows-local-file-v1:1:testproj',authority_id:'a'.repeat(32)},requests=[];
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});if(url.endsWith('/v1/workspace'))return{ok:true,json:async()=>workspace};return{ok:true,json:async()=>({workspace_id:workspace.workspace_id,name:'TestProj',root:workspace.root,revision:2,primary_folder_id:workspace.workspace_id,folders:[{folder_id:workspace.workspace_id,name:'TestProj',root:workspace.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:'D:\\\\Shared',ordinal:1}]})};});
