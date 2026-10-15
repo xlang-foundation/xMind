@@ -217,6 +217,7 @@ struct WorkspaceTools::Impl {
 };
 WorkspaceTools::WorkspaceTools(const std::string& root):impl_(std::make_unique<Impl>(root)) {}
 WorkspaceTools::~WorkspaceTools()=default;
+std::string WorkspaceTools::hash_content(std::string_view content){return content_hash(std::string(content));}
 bool WorkspaceTools::same_relative_path(const std::string& first,const std::string& second){const auto a=wide(relative_path(first)),b=wide(relative_path(second));return CompareStringOrdinal(a.data(),static_cast<int>(a.size()),b.data(),static_cast<int>(b.size()),TRUE)==CSTR_EQUAL;}
 std::string WorkspaceTools::creation_directory(const std::string& path,std::stop_token cancel) const {return impl_->creation_parent(path,cancel,true).existing_directory;}
 WorkspaceCreatePlan WorkspaceTools::plan_creation(const std::string& path,const std::string& content,std::stop_token cancel,bool create_parents) const {

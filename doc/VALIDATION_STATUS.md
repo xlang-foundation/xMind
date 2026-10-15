@@ -1,5 +1,16 @@
 # Current native validation
 
+## Approved coding restore — 2026-10-15
+
+The Release server and restore contract build successfully. The new native
+restore contract creates real update/add/delete/move operations, approves each
+inverse through the normal journal, verifies the exact restored bytes, and
+confirms a changed live file is rejected before a restore proposal exists. The
+focused coding-edit gate passes **8/8**: create, edit, patch-file, patch-batch,
+restore, approved-edit HTTP, and native agent edit/patch HTTP contracts. The
+agent tool catalogue exposes `restore_operation` when approved edits are enabled.
+This milestone has no direct browser or VS Code Undo button yet.
+
 ## xMind TestProj coding and xlang3 import compatibility — 2026-10-15
 
 The browser UI completed a real TestProj request using the saved Gemini

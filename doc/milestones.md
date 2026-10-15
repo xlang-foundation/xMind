@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Restore approved coding changes — 2026-10-15
+
+The coding agent can now reverse one successful `edit_file`, `create_file`, or
+`apply_patch` operation by its saved operation ID. The native restore executor
+reconstructs only the inverse of that durable file change, verifies the
+workspace membership and folder revision, checks saved before/after hashes and
+the live file identity/content, then submits the inverse through the existing
+`patch_file` approval journal. Update, add, delete, and move reversals are
+covered with real files and SQLite. The focused Release contracts pass **8/8**,
+including native agent HTTP tool-catalogue, create/edit/patch execution, stale
+restore rejection, and restore approval. There is not yet a direct Undo button
+in the browser or VS Code; the agent invokes the restore tool from conversation
+history. [Restore executor contract](../Native/tests/restore_executor_contract.cpp).
+
 ## Action-aware uncertain file recovery inspection — 2026-10-15
 
 Native inspection now classifies uncertain replacement and patch add/update/
@@ -11,8 +25,10 @@ and leaves the durable operation uncertain and the workspace quarantined.
 Release CTest passes the native edit executor and approved-edit HTTP/CLI
 contracts **2/2**. Browser controller tests pass **63/63**, and the VS Code
 client suite passes **362/362**, including patch-add inspection validation.
-Undo/redo, attributed reconciliation and post-write process-kill recovery remain
-open. [Native recovery contract](../Native/tests/edit_executor_contract.cpp).
+Direct UI Undo/redo, attributed reconciliation and post-write process-kill
+recovery remain open. Agent-invoked restore of a saved approved file operation
+is now covered in [the restore milestone](#restore-approved-coding-changes--2026-10-15).
+[Native recovery contract](../Native/tests/edit_executor_contract.cpp).
 
 ## Saved-provider live browser smoke across four gateways — 2026-10-14
 

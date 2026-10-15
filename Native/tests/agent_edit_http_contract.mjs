@@ -20,10 +20,10 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',async()=>{
     try {
       requests++;const body=JSON.parse(source);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','edit_file','create_file','apply_patch','run_process','wait_process','stop_process','delegate_tasks']);
-      const prompt=body.messages.findLast(message=>message.role==='user').content;
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','edit_file','create_file','apply_patch','restore_operation','run_process','wait_process','stop_process','delegate_tasks']);
+      const latestUser=body.messages.findLastIndex(message=>message.role==='user');const prompt=body.messages[latestUser].content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
-      const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
+      const tool=body.messages.slice(latestUser+1).findLast(message=>message.role==='tool');let delta,finish;
       if(prompt==='stale-recover'){
         assert.match(body.messages.findLast(message=>message.role==='system').content,/Trusted workspace edit recovery policy/);
         assert.match(body.messages.findLast(message=>message.role==='system').content,/do not ask the user to restate the request/);
@@ -56,10 +56,14 @@ const peer=createServer((request,response)=>{
         }else{const outcome=JSON.parse(tool.content);assert.ok(outcome.operation_id && outcome.content_sha256);continuations.set(prompt,outcome);delta={content:'Synthetic scoped continuation after actual effect'};finish='stop';}
       }else if(tool) {
         const outcome=JSON.parse(tool.content);continuations.set(prompt,outcome);
-        assert.equal(tool.tool_call_id,`fixture-${prompt}`);
-        if(prompt==='allowed'||prompt==='create-allowed') assert.ok(outcome.operation_id && outcome.content_sha256);
+        assert.equal(tool.tool_call_id,prompt==='restore previous'?'restore-previous-call':`fixture-${prompt}`);
+        if(prompt==='restore previous'){assert.equal(outcome.state,'succeeded');assert.equal(outcome.restored_operation_id,continuations.get('allowed').operation_id);}
+        else if(prompt==='allowed'||prompt==='create-allowed') assert.ok(outcome.operation_id && outcome.content_sha256);
         else assert.equal(outcome.error.code,prompt==='denied'||prompt==='create-denied'?'permission_denied':'content_conflict');
         delta={content:'Synthetic inference continuation after actual tool outcome'};finish='stop';
+      }else if(prompt==='restore previous'){
+        const original=continuations.get('allowed');assert.ok(original?.operation_id,'Restore fixture needs the earlier successful operation');
+        delta={tool_calls:[{index:0,id:'restore-previous-call',type:'function',function:{name:'restore_operation',arguments:JSON.stringify({operation_id:original.operation_id})}}]};finish='tool_calls';
       } else {
         const creation=prompt.startsWith('create-');
         delta={tool_calls:[{index:0,id:`fixture-${prompt}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path:`${prompt}.txt`,content:`created ${prompt}\n`}:{path:`${prompt}.txt`,old_text:'original',new_text:`changed ${prompt}`})}}]};finish='tool_calls';
@@ -236,6 +240,13 @@ try {
     cli('decide',second.id,'allow');await until(()=>api(`/v1/runs/${run.id}`),value=>value.state==='completed');assert.equal(cli('operation',second.id).state,'succeeded');assert.equal(await readFile(join(workspace,name,'target.txt'),'utf8'),name==='approval-create'?'approval create applied\n':'approval edit applied\n');
     assert.equal(approvalSteps.get(name),name==='approval-added'?3:4);
   }
+  const restoreRun=cli('run','allowed','restore previous');assert.equal(restoreRun.state,'queued');
+  const [restoreProposal]=await until(()=>api(`/v1/runs/${restoreRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
+  assert.equal(restoreProposal.tool,'patch_file');const restorePlan=JSON.parse(restoreProposal.arguments_json);
+  assert.equal(restorePlan.action,'update');assert.equal(restorePlan.before_content,'changed allowed\n');assert.equal(restorePlan.after_content,'original\n');
+  assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n','Restore must not write before its normal approval');
+  cli('decide',restoreProposal.id,'allow');await until(()=>api(`/v1/runs/${restoreRun.id}`),value=>value.state==='completed');
+  assert.equal((await api(`/v1/operations/${restoreProposal.id}`)).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'original\n');
   await api('/v1/sessions',{id:'create-interrupted',title:'Restart pending creation'});cli('run','create-interrupted','create-interrupted');
   const creationRun=(await api('/v1/sessions/create-interrupted/runs'))[0];
   const [creationInterrupted]=await until(()=>api(`/v1/runs/${creationRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
@@ -251,13 +262,13 @@ try {
   assert.equal((await api(`/v1/operations/${interrupted.id}`)).state,'cancelled');
   assert.equal(await readFile(join(workspace,'interrupted.txt'),'utf8'),'original\n');
   assert.equal((await api(`/v1/operations/${continuations.get('allowed').operation_id}`)).state,'succeeded');
-  assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
+  assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'original\n','Approved restore must survive backend restart with exact original bytes');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */ + 4 /* stale edit, exact reread, fresh approved retry and actual outcome continuation */;
+  const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */ + 4 /* stale edit, exact reread, fresh approved retry and actual outcome continuation */ + 2 /* model-selected restore tool and actual approval result */;
   const parentCreationRequests=3;assert.equal(scopeSteps.get('scope-create-parents'),parentCreationRequests,'New parent creation has exactly guidance discovery, one effect request and actual continuation');
   assert.equal(requests,48+additionalConsoleRequests+parentCreationRequests,'Original scenario baseline plus checked console-control and parent-creation calls');if(peerError) throw peerError;
-  console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
+  console.log('Compiled native agent edit and restore loop passed: approved restore, actual inverse approval, denial, stale content, cancellation, tool continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();
   peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));

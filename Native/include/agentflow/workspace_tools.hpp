@@ -79,6 +79,7 @@ public:
     // view's path spelling. Shared servers must namespace it by trusted worker
     // identity. Changed root path requires reopening the runtime.
     std::string identity() const;
+    static std::string hash_content(std::string_view content);
     // Canonical public spelling of the same opened root, never the caller's
     // startup spelling. Revalidates its handle identity before observation.
     std::string root_path() const;

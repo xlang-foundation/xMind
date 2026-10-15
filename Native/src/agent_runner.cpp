@@ -9,6 +9,7 @@
 #include "agentflow/a2a_agent_registry.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/patch_tool.hpp"
+#include "agentflow/restore_executor.hpp"
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -220,7 +221,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     const auto a2a_available=settings_.a2a_enabled&&std::any_of(a2a_catalog.entries.begin(),a2a_catalog.entries.end(),[](const auto& agent){return agent.enabled;});
     if(settings_.approved_edits||process_||a2a_available||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
-        if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");coding.tools.push_back("apply_patch");}
+        if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");coding.tools.push_back("apply_patch");coding.tools.push_back("restore_operation");}
         if(process_){coding.tools.push_back("run_process");coding.tools.push_back("wait_process");}caps.presets.push_back(std::move(coding));
     }
     return caps;
@@ -304,7 +305,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(instructions.size()>65536)throw ModelRequestCapacityExceeded("Current idle context instructions exceed limits");
     if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
-    if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
+    if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());trusted.tools.push_back(RestoreExecutor::definition());}
     if(process_){trusted.tools.push_back(process_->definition());trusted.tools.push_back(process_->wait_definition());}
     if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
     struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
@@ -554,6 +555,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
+        if(settings_.approved_edits) request.tools.push_back(RestoreExecutor::definition());
         if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());if(!dynamic_plan_owner&&!leaf)request.tools.push_back(process_->stop_definition());}
         if(language_servers_)for(auto& definition:language_servers_->definitions())request.tools.push_back(std::move(definition));
         std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
@@ -825,7 +827,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;std::vector<PreparedFolderPatch> prepared_folder_patches;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
-                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch";
+                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch"||call.name=="restore_operation";
                     std::size_t selected_folder_index=0;
                     Json scoped_args;
                     if(folder_scoped){try{scoped_args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
@@ -835,7 +837,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     }
                     std::string permission_resource="*";
                     if(folder_scoped&&call.name!="run_process"){
-                        const char* resource_field=call.name=="run_process"?"workdir":"path";
+                        const char* resource_field=call.name=="run_process"?"workdir":call.name=="restore_operation"?"operation_id":"path";
                         if(scoped_args.contains(resource_field)&&scoped_args[resource_field].is_string()){
                             permission_resource=scoped_args[resource_field].get<std::string>();
                             std::replace(permission_resource.begin(),permission_resource.end(),'\\','/');
@@ -893,6 +895,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="create_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(CreateExecutor(persistence_,*selected_workspace,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1).invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
+                    } else if(call.name=="restore_operation"&&settings_.approved_edits){
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        const auto authorize=[&](const std::string& path){if(permission_denied("apply_patch",path))throw AgentPermissionDenied("Selected agent policy denied this restored file path");};
+                        const auto make_guidance=[&](const std::vector<std::string>& paths,std::stop_token cancel){
+                            if(!selected_repository_context)return InstructionPrecondition{};std::vector<InstructionPrecondition> conditions;
+                            for(const auto& path:paths){const auto directory=selected_workspace->creation_directory(path,cancel);if(!selected_repository_context->ready(directory,cancel))throw ToolGuidanceChanged("Updated repository guidance must reach the model before restoring this change");conditions.push_back(selected_repository_context->precondition(directory));}
+                            if(conditions.size()==1)return conditions.front();Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
+                            InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token verify){for(const auto& condition:conditions)if(condition.verify)condition.verify(verify);}};combined.validate();return combined;
+                        };
+                        output=Json::parse(RestoreExecutor(persistence_,*selected_workspace,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1).invoke(operation_id(),id,call.arguments_json,expiry,token,authorize,make_guidance));
                     } else if(call.name=="apply_patch"&&settings_.approved_edits&&run_workspace_tools&&!prepared_folder_patches.empty()){
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();const auto patch_id=operation_id();Json folder_results=Json::array(),not_requested=Json::array();std::size_t requested_files=0,succeeded_files=0,processed=0;std::string stop_reason;for(const auto& prepared:prepared_folder_patches)requested_files+=prepared.patch.plan.files.size();
                         for(std::size_t folder=0;folder<prepared_folder_patches.size();++folder){auto& prepared=prepared_folder_patches[folder];auto& folder_workspace=run_workspace_tools->folder_tools(prepared.folder_index);auto* folder_context=repository_context_for_folder(prepared.folder_index);if(!folder_context)throw ToolAccessDenied("Patch folder has no admitted instruction context");
