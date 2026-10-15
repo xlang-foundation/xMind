@@ -34,6 +34,8 @@
 #include <regex>
 #include <optional>
 #include <mutex>
+#include <condition_variable>
+#include <map>
 #include <span>
 #include <string_view>
 #include <filesystem>
@@ -331,6 +333,13 @@ struct HttpServer::Impl {
     AgentInstructionMetadata instructions;
     std::string authorization;
     std::atomic<bool> stopping=false;
+    ProviderSetup* provider_setup=nullptr;
+    ProviderProfileSetup* provider_profiles=nullptr;
+    struct QueuedSession {std::uint64_t generation=0;std::chrono::steady_clock::time_point retry_at{};};
+    std::mutex queued_sessions_mutex;
+    std::condition_variable_any queued_sessions_changed;
+    std::map<std::string,QueuedSession> queued_sessions;
+    std::jthread queued_session_dispatcher;
     std::mutex vcs_initialization_mutex;
     std::atomic<std::size_t> active_streams=0;
     struct StreamLease {
@@ -346,6 +355,59 @@ struct HttpServer::Impl {
         if(owner_control)return !owner_control->status().quiesced;
 #endif
         return true;
+    }
+    void enqueue_session_for_dispatch(const std::string& session){
+        {std::lock_guard lock(queued_sessions_mutex);auto& entry=queued_sessions[session];++entry.generation;entry.retry_at=std::chrono::steady_clock::now();}
+        queued_sessions_changed.notify_one();
+    }
+    void recover_queued_sessions(){
+        try{for(const auto& session:persistence.sessions().get()){
+            const auto items=persistence.session_inbox(session.id).get();
+            if(std::any_of(items.begin(),items.end(),[](const auto& item){return item.state=="queued";}))enqueue_session_for_dispatch(session.id);
+        }}catch(...){}
+    }
+    void dispatch_queued_session(const std::string& session,std::uint64_t generation){
+        bool retained=false;
+        try{
+            const auto items=persistence.session_inbox(session).get();
+            const auto next=std::find_if(items.begin(),items.end(),[](const auto& item){return item.state=="queued";});
+            if(next==items.end()){
+                std::lock_guard lock(queued_sessions_mutex);const auto found=queued_sessions.find(session);if(found!=queued_sessions.end()&&found->second.generation==generation)queued_sessions.erase(found);return;
+            }
+            retained=true;
+            if(stopping||!executor||!executor->healthy()||!executor->available()||!owner_admission_open())throw RunUnavailable("Queued session execution is not currently available");
+            std::optional<ProviderProfileAdmission> profile;std::string model;
+            if(executor->supports_profile_admission()){
+                if(!provider_profiles)throw RunUnavailable("Queued session provider binding is unavailable");
+                const auto state=provider_profiles->configuration();if(state.active.empty())throw RunUnavailable("Select a provider profile before queued input can run");
+                profile=ProviderProfileAdmission{state.active,state.revision};
+            }else if(provider_setup){
+                const auto state=provider_setup->configuration();if(!state.configured)throw RunUnavailable("Configure a provider before queued input can run");model=state.model;
+            }
+            executor->submit_queued(new_id(),session,next->content,model,next->id,{},profile);
+        }catch(...){}
+        if(retained){std::lock_guard lock(queued_sessions_mutex);const auto found=queued_sessions.find(session);if(found!=queued_sessions.end()&&found->second.generation==generation)found->second.retry_at=std::chrono::steady_clock::now()+std::chrono::milliseconds(500);}
+    }
+    void start_queued_session_dispatcher(){
+        if(!executor||queued_session_dispatcher.joinable())return;
+        queued_session_dispatcher=std::jthread([this](std::stop_token stop){
+            recover_queued_sessions();
+            while(!stop.stop_requested()){
+                std::vector<std::pair<std::string,std::uint64_t>> due;
+                {
+                    std::unique_lock lock(queued_sessions_mutex);
+                    queued_sessions_changed.wait_for(lock,stop,std::chrono::milliseconds(500),[&]{
+                        const auto now=std::chrono::steady_clock::now();return std::any_of(queued_sessions.begin(),queued_sessions.end(),[&](const auto& value){return value.second.retry_at<=now;});
+                    });
+                    if(stop.stop_requested())return;
+                    const auto now=std::chrono::steady_clock::now();for(const auto& [session,pending]:queued_sessions)if(pending.retry_at<=now)due.emplace_back(session,pending.generation);
+                }
+                for(const auto& [session,generation]:due){if(stop.stop_requested())return;dispatch_queued_session(session,generation);}
+            }
+        });
+    }
+    void stop_queued_session_dispatcher(){
+        if(!queued_session_dispatcher.joinable())return;queued_session_dispatcher.request_stop();queued_sessions_changed.notify_all();queued_session_dispatcher.join();
     }
     template<class Handler> auto guarded(Handler handler){return guard_errors([this,handler=std::move(handler)](const Request& request,Response& response){
 #if defined(_WIN32)
@@ -412,7 +474,7 @@ struct HttpServer::Impl {
         connection_profiles(store),
         remote_agents(store),
 #endif
-        executor(execution),graph_executor(graphs),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),mcp_resources(resources),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+        executor(execution),graph_executor(graphs),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),mcp_resources(resources),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token),provider_setup(setup),provider_profiles(profile_setup) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
@@ -1084,7 +1146,7 @@ struct HttpServer::Impl {
             reply(response,{{"messages",std::move(messages)},{"has_more",page.next_before_sequence.has_value()},{"next_before",page.next_before_sequence?Json("msg_"+std::to_string(*page.next_before_sequence)):Json(nullptr)}});
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guarded([this](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Session inbox does not accept query parameters");Json items=Json::array();for(const auto& item:persistence.session_inbox(identifier(request.matches[1])).get())items.push_back(encode(item));reply(response,{{"items",std::move(items)}});}));
-        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guarded([this](const Request& request,Response& response){const auto value=body(request,{"id","content"});const auto session=identifier(request.matches[1]);const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();const auto content=string_field(value,"content",1024*1024);reply(response,encode(persistence.enqueue_session_input(id,session,content).get()),202);}));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guarded([this](const Request& request,Response& response){const auto value=body(request,{"id","content"});const auto session=identifier(request.matches[1]);const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();const auto content=string_field(value,"content",1024*1024);reply(response,encode(persistence.enqueue_session_input(id,session,content).get()),202);try{enqueue_session_for_dispatch(session);}catch(...){} }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/permissions)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session permission requests do not accept query parameters");const auto session=identifier(request.matches[1]);AgentPermissionGrantStore grants(persistence);auto requests=encode_all(persistence.pending_operations_for_session(session).get());for(auto& item:requests){const auto context=grants.request(item.at("id").get<std::string>());if(context)item["agent_permission_request"]={{"grantable",true},{"action",context->action},{"resource",context->resource},{"grant_id",context->grant_id}};}reply(response,{{"session_id",session},{"requests",std::move(requests)}});}));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/permission-grants)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session permission grants do not accept query parameters");const auto session=identifier(request.matches[1]);const auto snapshot=AgentPermissionGrantStore(persistence).list(session);auto result=encode(snapshot);result["session_id"]=session;reply(response,std::move(result));}));
         server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+)/permission-grants/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){if(!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Permission grant revocation exceeds limits");const auto value=body(request,{"expected_revision"});if(!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Invalid expected permission grant revision");const auto session=identifier(request.matches[1]),grant_id=identifier(request.matches[2]);auto result=encode(AgentPermissionGrantStore(persistence).revoke(session,grant_id,value["expected_revision"].get<std::int64_t>()));result["session_id"]=session;reply(response,std::move(result));}));
@@ -1526,6 +1588,7 @@ struct HttpServer::Impl {
                 reply(response,{{"id",id},{"cancellation_requested",true}},202);
             }));
         }
+        start_queued_session_dispatcher();
     }
 };
 HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* terminals,McpResourceCatalog* resources):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth,terminals,resources)) {}
@@ -1536,5 +1599,5 @@ int HttpServer::bind(int port) {
     if(bound<0) throw std::runtime_error("Cannot bind loopback server");impl_->port=bound;return bound;
 }
 bool HttpServer::listen() {if(impl_->port<0) throw std::logic_error("Bind before listen");return impl_->server.listen_after_bind();}
-void HttpServer::stop() {impl_->stopping=true;impl_->server.stop();}
+void HttpServer::stop() {impl_->stopping=true;impl_->stop_queued_session_dispatcher();impl_->server.stop();}
 }
