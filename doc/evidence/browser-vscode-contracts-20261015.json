@@ -45,5 +45,21 @@
     "These contracts use synthetic host/controller and DOM fixtures.",
     "The rendered check did not create a second workspace, so live switching between two registered workspaces remains unverified.",
     "Installed VS Code coding acceptance remains separate from these source suites."
-  ]
+  ],
+  "live_browser_coding_run": {
+    "date": "2026-10-15",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "folder": "xmind-ui-folder-smoke",
+    "file": "hello_world.py",
+    "create_operation": "4518e9a7b625372a1f24d3ebb80d0499",
+    "command_operation": "67bc63e22be3ab068ed790c1c3a4cfb4",
+    "profile": "xlang3",
+    "executable": "xlang3.exe",
+    "arguments": ["-B", "hello_world.py"],
+    "stdout": "xMind browser coding smoke passed.\r",
+    "stderr": "",
+    "exit_code": 0,
+    "filesystem_verification": "The file was read back from TestProj; a directory listing showed it was the only entry in xmind-ui-folder-smoke.",
+    "result": "passed"
+  }
 }

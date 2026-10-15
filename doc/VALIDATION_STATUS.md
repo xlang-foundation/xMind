@@ -1,5 +1,19 @@
 # Current native validation
 
+## Live browser coding acceptance — 2026-10-15
+
+From the rendered local browser UI, the current TestProj workspace created the
+reviewed `xmind-ui-folder-smoke/hello_world.py` through the normal approval
+flow, then ran it through the admitted xlang3 process profile. The recorded
+executable was the profile-bound `xlang3.exe`, with arguments `-B
+hello_world.py` and working directory `xmind-ui-folder-smoke`. The process
+exited 0, wrote `xMind browser coding smoke passed.` to stdout, and wrote
+nothing to stderr. I read the file back and confirmed the target folder contains
+only that file. Exact run and operation IDs are in
+[browser and VS Code evidence](evidence/browser-vscode-contracts-20261015.json).
+This validates one end-to-end browser file proposal, approval, and xlang3
+execution on TestProj; it does not yet cover a multi-step coding/build task.
+
 ## Native graph restore — 2026-10-15
 
 The Release graph-runner contract now exercises a registered two-node graph:
