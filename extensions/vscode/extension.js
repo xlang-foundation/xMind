@@ -547,6 +547,16 @@ async function activate(context) {
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
           try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-renew')await mcpController.start(message.server,true);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
           catch(error){post({type:'mcp-error',text:error.message});}
+        } else if(message.type==='permission-grants-load'||message.type==='permission-grant-revoke'){
+          try{
+            const selected=sessionId,version=generation,target=client;if(!selected||message.session!==selected)throw new Error('Select the conversation whose saved permissions you want to inspect.');
+            let snapshot=await target.sessionPermissionGrants(selected);if(panel!==view||target!==client||version!==generation||selected!==sessionId)return;
+            if(message.type==='permission-grant-revoke'){
+              if(typeof message.id!=='string'||!Number.isSafeInteger(message.revision)||message.revision!==snapshot.revision||!snapshot.grants.some(item=>item.id===message.id))throw new Error('Saved permissions changed. Refresh the conversation permissions and try again.');
+              snapshot=await target.revokeSessionPermissionGrant(selected,message.id,snapshot.revision);if(panel!==view||target!==client||version!==generation||selected!==sessionId)return;
+            }
+            post({type:'permission-grants',snapshot:{...snapshot,session_id:selected}});
+          }catch(error){if(panel===view)post({type:'permission-grants-error',text:error.message});}
         } else if(message.type==='skills-refresh'){
           if(!sessionId){const session=await client.createSession('Workspace skills');if(panel!==view)return;await selectSession(session.id);await refresh();}else await readSkills();
         } else if(message.type==='skills-change'){
@@ -804,8 +814,9 @@ async function activate(context) {
           }
           if (message.type === 'review') {await showEditReview(current);return;}
           if(message.decision==='allow'&&current.tool==='patch_file')patchReview(current);
-          const sessionScopedApproval=sessionApproval&&!observedOperation(proposal.run_id);
-          const decided = sessionScopedApproval?await client.replySessionPermission(sessionId,message.id,message.decision):await client.decide(message.id, message.decision);
+          const sessionScopedApproval=sessionApproval&&!observedOperation(proposal.run_id),grantResource=message.grantResource===true;
+          if(message.grantResource!==undefined&&typeof message.grantResource!=='boolean')throw new Error('Invalid saved permission choice.');
+          let decided;if(grantResource)decided=await client.replySessionPermission(sessionId,message.id,message.decision,true);else if(sessionScopedApproval)decided=await client.replySessionPermission(sessionId,message.id,message.decision);else decided=await client.decide(message.id, message.decision);
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);
           if(sessionApproval){sessionPermissionRequests.delete(decided.id);publishOperations();await refreshSessionPermissions(client,sessionId,version);}else publishOperations();

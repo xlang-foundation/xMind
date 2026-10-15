@@ -309,11 +309,22 @@ class BackendClient {
     if(!value||value.session_id!==id||!Array.isArray(value.requests)||value.requests.length>256||value.requests.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.run_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.run_id)||typeof item.workspace_id!=='string'||!item.workspace_id||item.workspace_id.length>32768||typeof item.tool!=='string'||!item.tool||item.tool.length>128||typeof item.arguments_json!=='string'||typeof item.expires_unix_ms!=='number'||!Number.isSafeInteger(item.expires_unix_ms)||item.state!=='awaiting_approval'))throw new Error('Invalid pending session permission requests.');
     return value;
   }
-  async replySessionPermission(sessionId,requestId,decision) {
+  async replySessionPermission(sessionId,requestId,decision,grantResource=false) {
     executionIdentity(sessionId);executionIdentity(requestId);if(decision!=='allow'&&decision!=='deny')throw new Error('Permission decision must be allow or deny.');
-    const result=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permissions/${encodeURIComponent(requestId)}/reply`,{decision});
+    if(typeof grantResource!=='boolean'||(grantResource&&decision!=='allow'))throw new Error('Invalid permission grant choice.');
+    const result=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permissions/${encodeURIComponent(requestId)}/reply`,{decision,...(grantResource?{grant_resource:true}:{})});
     if(!result||result.id!==requestId||!['ready','denied'].includes(result.state)||result.state!==(decision==='allow'?'ready':'denied'))throw new Error('Permission reply did not settle the requested operation.');
     return result;
+  }
+  async sessionPermissionGrants(sessionId) {
+    executionIdentity(sessionId);const value=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permission-grants`);
+    if(!value||value.session_id!==sessionId||!Number.isSafeInteger(value.revision)||value.revision<0||!Array.isArray(value.grants)||value.grants.length>256||value.grants.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.workspace_id!=='string'||!item.workspace_id||typeof item.action!=='string'||!item.action||typeof item.resource!=='string'||!item.resource||typeof item.policy_binding!=='string'||!item.policy_binding||!Number.isSafeInteger(item.created_unix_ms)))throw new Error('Invalid saved session permission grants.');
+    return value;
+  }
+  async revokeSessionPermissionGrant(sessionId,grantId,expectedRevision) {
+    executionIdentity(sessionId);executionIdentity(grantId);if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)throw new Error('Invalid saved permission revision.');
+    const value=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permission-grants/${encodeURIComponent(grantId)}`,{expected_revision:expectedRevision},15000,'DELETE');
+    if(!value||value.session_id!==sessionId||!Number.isSafeInteger(value.revision)||value.revision!==expectedRevision+1||!Array.isArray(value.grants)||value.grants.some(item=>item?.id===grantId))throw new Error('Saved permission grant revocation was not confirmed.');return value;
   }
   async processOutput(id,channel,after=0,limit=65536) {
     executionIdentity(id);if(!['stdout','stderr'].includes(channel)||!Number.isSafeInteger(after)||after<0||!Number.isSafeInteger(limit)||limit<1||limit>65536)throw new Error('Invalid process output page request.');

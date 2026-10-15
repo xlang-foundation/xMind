@@ -311,6 +311,13 @@ function operations(items){
         button.disabled=Date.now()>=item.expires_unix_ms||(decision==='allow'&&!reviewable);
         button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);
       }
+      const permission=item.agent_permission_request;
+      if(permission?.grantable===true&&typeof permission.action==='string'&&typeof permission.resource==='string'){
+        section.append(node('p','Applies only to '+permission.action+' on '+permission.resource+' in this workspace and permission policy.'));
+        const grant=node('button','Always allow this resource in this conversation');
+        grant.disabled=Date.now()>=item.expires_unix_ms||(item.tool==='patch_file'&&!reviewable);
+        grant.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision:'allow',grantResource:true});};section.append(grant);
+      }
     }else{
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
@@ -558,6 +565,10 @@ byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];i
 for(const id of ['rename-close','rename-cancel'])byId(id).onclick=()=>renameDialog.close();
 renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conversation-title').value='';byId('rename-save').disabled=false;if(!byId('rename').hidden)byId('rename').focus();});
 byId('rename-form').onsubmit=event=>{event.preventDefault();if(!renameSnapshot||byId('rename-save').disabled)return;const title=byId('conversation-title').value;if(!title.trim())return;byId('rename-save').disabled=true;byId('rename-status').textContent='Saving…';api.postMessage({type:'rename-session',id:renameSnapshot.id,title,expected_title:renameSnapshot.title});};
+const permissionGrantsDialog=byId('permission-grants-dialog');
+byId('permission-grants').onclick=()=>{if(!byId('sessions').value)return;byId('permission-grants-status').textContent='Loading saved approvals…';byId('permission-grants-list').replaceChildren();permissionGrantsDialog.showModal();api.postMessage({type:'permission-grants-load',session:byId('sessions').value});};
+byId('permission-grants-close').onclick=()=>permissionGrantsDialog.close();
+permissionGrantsDialog.addEventListener('close',()=>{byId('permission-grants-list').replaceChildren();byId('permission-grants-status').textContent='';});
 const settings=byId('provider-settings');
 let profileState;
 let settingsProfileSelection;
@@ -679,6 +690,13 @@ window.addEventListener('message',event=>{
     if(m.completed==='connection-save'){byId('connection-name').value='';byId('connection-origin').value='';}
     for(const profile of state.profiles){const row=node('div',undefined,'connection-profile'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',profile.name),node('span',profile.id===state.active_id?'Active':'Not connected','hint'));row.append(heading);if(profile.kind==='nexus')row.append(node('p',profile.origin,'hint'),node('p','Authentication and remote command/event routing are not implemented. Local remains active.','hint'));else row.append(node('p','This xMind runtime · SQLite and workspace run locally.','hint'));if(profile.kind==='nexus'){const remove=node('button','Remove connection');remove.type='button';remove.onclick=()=>{if(!window.confirm(`Remove “${profile.name}”? This retires its ID permanently.`))return;byId('connection-add').disabled=true;byId('connections-status').textContent='Removing connection…';api.postMessage({type:'connection-remove',id:profile.id});};row.append(remove);}list.append(row);}
   }
+  else if(m.type==='permission-grants'){
+    const snapshot=m.snapshot,selected=byId('sessions').value,list=byId('permission-grants-list');
+    if(!snapshot||snapshot.session_id!==selected||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0||!Array.isArray(snapshot.grants)||snapshot.grants.length>256||snapshot.grants.some(item=>!item||typeof item.id!=='string'||typeof item.action!=='string'||typeof item.resource!=='string'||typeof item.workspace_id!=='string')){byId('permission-grants-status').textContent='The saved permission list is invalid or belongs to a different conversation.';return;}
+    list.replaceChildren();byId('permission-grants-status').textContent=snapshot.grants.length?`${snapshot.grants.length} saved approval${snapshot.grants.length===1?'':'s'} · revision ${snapshot.revision}`:'No reusable approvals in this conversation.';
+    for(const grant of snapshot.grants){const row=node('section',undefined,'permission-grant'),title=node('strong',grant.action+' · '+grant.resource),scope=node('p','Workspace '+grant.workspace_id,'hint'),remove=node('button','Revoke');remove.type='button';remove.onclick=()=>{remove.disabled=true;byId('permission-grants-status').textContent='Revoking saved approval…';api.postMessage({type:'permission-grant-revoke',session:selected,id:grant.id,revision:snapshot.revision});};row.append(title,scope,remove);list.append(row);}
+  }
+  else if(m.type==='permission-grants-error'){byId('permission-grants-status').textContent=m.text||'Could not load saved permissions.';}
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}

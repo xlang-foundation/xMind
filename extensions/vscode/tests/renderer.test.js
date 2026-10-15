@@ -708,6 +708,17 @@ test('pending file comparison sends only an operation ID and remains separate fr
   assert.ok(!buttons.find(button=>button.textContent==='Allow edit').disabled);r.dom.window.close();
 });
 
+test('session read approvals offer an exact-scope reusable grant only when native metadata allows it',()=>{
+  const r=renderer(),doc=r.dom.window.document,operation={id:'fixture-read',run_id:'fixture-run',tool:'read_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:'{"path":"src/main.cpp"}',agent_permission_request:{grantable:true,action:'read_file',resource:'src/main.cpp',grant_id:'grant_fixture'}};
+  r.send({type:'operations',operations:[operation]});let buttons=[...doc.querySelectorAll('#operations button')];const grant=buttons.find(button=>button.textContent==='Always allow this resource in this conversation');assert.ok(grant);assert.match(doc.querySelector('#operations').textContent,/read_file on src\/main\.cpp/);grant.click();assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'decide',id:'fixture-read',decision:'allow',grantResource:true}));
+  r.send({type:'operations',operations:[{...operation,agent_permission_request:{grantable:false,action:'read_file',resource:'src/main.cpp'}}]});buttons=[...doc.querySelectorAll('#operations button')];assert.ok(!buttons.some(button=>button.textContent==='Always allow this resource in this conversation'));r.dom.window.close();
+});
+test('conversation permission dialog lists saved scopes and sends revision-bound revocation requests',()=>{
+  const r=renderer(),doc=r.dom.window.document;try{r.send({type:'sessions',sessions:[{id:'session-a',title:'Project'}],selected:'session-a'});doc.getElementById('permission-grants').click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'permission-grants-load',session:'session-a'});
+    const grant={id:'grant_a',workspace_id:'workspace-a',action:'read_file',resource:'src/main.cpp',policy_binding:'policy-a',created_unix_ms:1234};r.send({type:'permission-grants',snapshot:{session_id:'session-a',revision:7,grants:[grant]}});const revoke=doc.querySelector('#permission-grants-list button');assert.equal(revoke.textContent,'Revoke');revoke.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'permission-grant-revoke',session:'session-a',id:'grant_a',revision:7});r.send({type:'permission-grants',snapshot:{session_id:'session-a',revision:8,grants:[]}});assert.match(doc.getElementById('permission-grants-status').textContent,/No reusable approvals/);
+  }finally{r.dom.window.close();}
+});
+
 test('top-right settings dialog clears key input and leaves model selection in the footer',()=>{
   const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('provider-settings');
   // jsdom has no dialog implementation; emulate only these native DOM methods.

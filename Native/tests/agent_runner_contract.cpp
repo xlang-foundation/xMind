@@ -1,4 +1,5 @@
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/agent_permission_grants.hpp"
 #include "agentflow/xlang_authoring_program.hpp"
 #include "agentflow/xlang_python_config.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -110,6 +111,19 @@ int main(int argc,char** argv) {
         };
         run_asked_read("agent-permission-ask","/agent-permission-ask",true);
         run_asked_read("agent-permission-ask-deny","/agent-permission-ask-deny",false);
+        {
+            const std::string session="agent-permission-reusable",first_run="agent-permission-reusable-first",second_run="agent-permission-reusable-second";
+            store.create_session(session,"Reusable exact-scope permission fixture").get();auto reusable_settings=settings;reusable_settings.provider.endpoint=base+"/agent-permission-ask-reuse";reusable_settings.permission_rules={{"read_file","README.md","ask"}};
+            AgentRunner first_runner(store,reusable_settings);first_runner.start(first_run,session,"Read the workspace readme");std::stop_source cancellation;
+            auto first_execution=std::async(std::launch::async,[&]{return first_runner.execute(first_run,cancellation.get_token());});std::optional<Operation> proposal;const auto deadline=std::chrono::steady_clock::now()+5s;
+            while(std::chrono::steady_clock::now()<deadline&&!proposal){if(first_execution.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Reusable permission fixture ended before review");for(const auto& operation:store.pending_operations_for_session(session).get())if(operation.spec.run_id==first_run){proposal=operation;break;}if(!proposal)std::this_thread::sleep_for(5ms);}
+            if(!proposal){cancellation.request_stop();(void)first_execution.get();throw std::runtime_error("Reusable permission fixture did not publish its approval request");}
+            const auto permission_request=AgentPermissionGrantStore(store).request(proposal->id);require(permission_request&&permission_request->session_id==session&&permission_request->action=="read_file"&&permission_request->resource=="README.md","The native approval must retain its exact session and resource scope");
+            AgentPermissionGrantStore(store).grant(session,proposal->id);store.decide_operation(proposal->id,OperationDecision::allow,"fixture-controller").get();require(first_execution.get().state==RunState::completed,"The explicitly granted first read must finish normally");
+            AgentRunner second_runner(store,reusable_settings);second_runner.start(second_run,session,"Read the workspace readme again");require(second_runner.execute(second_run).state==RunState::completed,"A saved exact-scope grant must authorize the next matching read in the same conversation");
+            const auto second_operations=store.operations(second_run).get();require(second_operations.size()==1&&second_operations.front().state==OperationState::succeeded&&second_operations.front().decision_actor=="agent-permission-grant","The reused read must remain durably journaled with its grant decision actor");
+            require(!AgentPermissionGrantStore(store).allows("another-session",permission_request->workspace_id,permission_request->policy_binding,permission_request->action,permission_request->resource),"A saved grant must not authorize another conversation");
+        }
         const auto attached_root=std::filesystem::path(argv[4]).parent_path()/L"attached";
         WorkspaceTools primary(argv[4]),attached(attached_root.string());
         const auto primary_id=primary.identity(),attached_id=attached.identity(),primary_root=primary.root_path(),attached_canonical=attached.root_path();

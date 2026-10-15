@@ -18,6 +18,7 @@
 #include "agentflow/agent_definitions.hpp"
 #include "agentflow/run_executor.hpp"
 #include "agentflow/permission_waiter.hpp"
+#include "agentflow/agent_permission_grants.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <random>
@@ -347,6 +348,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& layer:inherited_permission_layers)if(agent_permission_effect(layer,action,resource)==AgentPermissionEffect::ask)return true;
         return agent_permission_effect(agent_permission_rules,action,resource)==AgentPermissionEffect::ask;
     };
+    const auto permission_policy_binding=agent_permission_policy_binding(inherited_permission_layers,agent_permission_rules);
     const auto directory_enumeration_denied=[&](const std::string& action,const std::string& directory){
         for(const auto& layer:inherited_permission_layers)if(agent_permission_denies_directory_enumeration(layer,action,directory))return true;
         return agent_permission_denies_directory_enumeration(agent_permission_rules,action,directory);
@@ -936,7 +938,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         if(agent_permission_ask&&askable_read){
                             const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                             OperationSpec spec{id,selected_workspace->identity(),call.name,call.arguments_json,{}};
-                            auto approved=PermissionWaiter(persistence_).acquire(operation_id(),spec,expiry,token);
+                            const auto pending_id=operation_id(),normalized_resource=detail::agent_permission_normalize_resource(permission_resource);
+                            AgentPermissionGrantStore grants(persistence_);
+                            const bool reusable=grants.allows(admitted.session_id,selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource);
+                            if(!reusable)grants.record_request({pending_id,admitted.session_id,selected_workspace->identity(),permission_policy_binding,
+                                call.name,normalized_resource,agent_permission_grant_identifier(selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource)});
+                            auto approved=PermissionWaiter(persistence_).acquire(pending_id,spec,expiry,token,reusable?"agent-permission-grant":std::string{});
                             try{
                                 auto source=run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token);
                                 output=Json::parse(source);

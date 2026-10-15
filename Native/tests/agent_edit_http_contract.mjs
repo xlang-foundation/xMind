@@ -171,8 +171,10 @@ try {
     assert.equal(JSON.parse(proposal.arguments_json).before_content,'original\n');
     assert.equal(await readFile(join(workspace,`${name}.txt`),'utf8'),'original\n');
     const permissionRequests=await api(`/v1/sessions/${name}/permissions`);assert.equal(permissionRequests.session_id,name);assert.deepEqual(permissionRequests.requests.map(item=>item.id),[proposal.id],'Session permission listing aggregates the exact pending controller request');
+    assert.equal(permissionRequests.requests[0].agent_permission_request,undefined,'File effects do not acquire reusable read grants');const savedGrants=await api(`/v1/sessions/${name}/permission-grants`);assert.deepEqual(savedGrants,{session_id:name,revision:0,grants:[]},'Saved grants are conversation-scoped and revisioned');
     if(name==='stale') await writeFile(join(workspace,'stale.txt'),'outside change\n');
     if(name==='cancelled')cli('cancel',run.id);else if(name==='denied'){
+      const unsafeGrant=await fetch(`http://127.0.0.1:${port}/v1/sessions/${name}/permissions/${proposal.id}/reply`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow',grant_resource:true}),signal:AbortSignal.timeout(5000)});assert.equal(unsafeGrant.status,404,'Effect operations cannot be converted into reusable read grants');assert.equal((await api(`/v1/operations/${proposal.id}`)).state,'awaiting_approval','A rejected grant must leave the effect approval untouched');
       const foreign=await fetch(`http://127.0.0.1:${port}/v1/sessions/allowed/permissions/${proposal.id}/reply`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'deny'}),signal:AbortSignal.timeout(5000)});assert.equal(foreign.status,404,'A session cannot reply to another session request');
       const reply=await api(`/v1/sessions/${name}/permissions/${proposal.id}/reply`,{decision:'deny'});assert.equal(reply.state,'denied');
     }else cli('decide',proposal.id,'allow');

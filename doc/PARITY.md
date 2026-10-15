@@ -72,11 +72,15 @@ Direct resource checks use the last matching `allow`, `ask` or `deny`; `allow`
 only overrides prior agent-level rules and cannot widen native workspace/tool
 authority, clear a separately inherited parent ceiling, or bypass a separate
 effect approval. `ask` pauses native workspace reads for a one-shot controller
-decision using the durable exact-operation journal. The native runner checks paths
+decision using the durable exact-operation journal. An explicit “always allow”
+choice records a SQLite-backed grant limited to the same conversation, workspace,
+permission-policy snapshot, read tool and normalized resource; later matching reads
+still create durable operations. The conversation permission dialog can list and
+revision-revoke those grants. The native runner checks paths
 before dispatch, conservatively blocks directory enumeration that could expose
 a restricted path, and checks every prepared patch target before any patch
-proposal executes. Saved grants and session-level policy enforcement remain
-incomplete: asks do not create reusable grants. `run_process` requires a broad
+proposal executes. Broader session-level policy enforcement remains
+incomplete. `run_process` requires a broad
 `resource: "*"` rule because
 its process can access more than its working directory. Rules are included in
 agent revisions, conversation snapshots and archives, named delegated-agent
@@ -86,8 +90,9 @@ workspace authority remain in force.
 Release contracts verify profile parsing and revisioning, ordered direct-path
 evaluation, persistence, delegation/graph snapshots, archive transport, and
 real native runner deny, later-allow, inherited-deny, controller-approved read
-and controller-denied read outcomes. This is partial parity only: saved grants
-and session policy remain parity work.
+and controller-denied read outcomes, reusable-read execution, session/workspace/
+policy/resource isolation, SQLite reopen persistence and revocation. Global and
+location-based request discovery and broader session policy remain parity work.
 
 ## Session-wide approval discovery and review — 2026-10-15
 
@@ -98,8 +103,9 @@ owning run in the operation details, and refresh the list while the conversation
 is open. Replies for another run use the session-bound endpoint; selected-run
 and graph-child approvals retain their existing operation decision path. Both
 clients revalidate the exact operation before a decision and preserve the
-existing file patch review step. Saved grants, session-level policy enforcement,
-global/location request listing and change reversal remain incomplete.
+existing file patch review step. Saved grants now have an explicit conversation
+UI, native SQLite storage and revision-bound revocation. Global/location request
+listing and broader session-level policy enforcement remain incomplete.
 
 ## xlang3 process profile with deep runtime paths — 2026-10-15
 
@@ -1364,7 +1370,7 @@ removed Python prototype's status table; it is not a completion score.
 | Skills and commands | Native workspace skill discovery/loading, catalogue inspection, model activation, user attachments/removal and persisted selections have scoped native and actual OpenAI/other-provider acceptance; bounded Markdown slash-command discovery and single-agent/graph execution use shared native routes in browser, VS Code and CLI; see [skills](native-skills.md) and [commands](native-commands.md) | Plugin/dynamic command providers, command autocomplete and lifecycle events, shell interpolation, full skill source management, URL/embedded sources, broader scoping and current installed/rendered acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
 | MCP | Configured native stdio/HTTP tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts. Native resources/list-read and prompts/list-get use the same approval registry and durable journal; pinned official v2 SDK HTTP tests cover approved/denied retrieval and SQLite reopen. Both modern transports validate `2026-07-28` `subscriptions/listen`; AgentRunner and direct graph MCP child contracts verify bounded sanitized notifications and pre-terminal listener shutdown on stdio and HTTP, while HTTP AgentRunner also proves an approval-gated effect. See [subscription validation](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-for-agents-and-graphs--2026-10-12). The modern HTTP owner handles correlated SSE events and filter enforcement; see [HTTP transport scope](native-mcp-http.md). Hosted trusted synthetic login/callbacks and durable encrypted grants are verified. Manual renewal service and console/Settings controls have separate acceptance in [renewal](native-mcp-renewal.md) | Reconnection and broader SDK features; trusted renewal for the new source, real authority login, registration/CIMD/DCR, automatic renewal/revocation and running-owner coordination, uncertain grant recovery, remaining HTTP/SSE behavior and full live coding interoperability |
-| Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
+| Permissions and policies | Ordered native rules; one-shot approval; exact-session/workspace/policy/tool/resource reusable read grants with SQLite reopen and revision-bound revocation contracts | Broader session policy enforcement, global/location request listing, policy recovery and consistent enforcement across exposed tools/protocols |
 | Context compaction | Native Responses checkpoints/counting, session/mid-run and manual/automatic paths, private provider state and actual budgets passed their scoped complete gate, including the later serializer repair; [design and evidence](native-context-compaction-design.md) | Complete non-Responses provider strategies and live coding/installed thin-client acceptance using the current package format; local contracts do not establish full compaction completion |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
 | Attachments and references | Thin VS Code selection captures a workspace-bound, labelled buffer as an editable sidebar draft; source, filesystem and archive scopes are recorded in [editor selection](vscode-editor-selection.md). Native CLI work retains [its scope](native-interactive-cli.md) | Installed/rendered selection, native structured file-context/snapshot contracts across clients, complete model-input and multimodal acceptance |
