@@ -28,6 +28,8 @@ const peer=createServer((request,response)=>{
       assert.ok(processDescription.includes('set both background=true and persistent=true'),'Agent must select the persistent-service lifecycle explicitly');
       assert.ok(processDescription.includes('timeout of at least 30 seconds'),'Agent must leave enough bounded startup time for a service');
       assert.ok(processDescription.includes('Stop it later with stop_process'),'Agent must know how to retire its service');
+      assert.ok(processDescription.includes('Nonpersistent background jobs retain the workspace/profile resource lock until completion'),'Agent must know that ordinary background jobs hold their resource lock');
+      assert.ok(processDescription.includes('persistent services retain exact authorization and timeout but use a per-service resource claim so normal workspace commands can continue'),'Agent must distinguish service ownership from ordinary background-job locking');
       assert.ok(body.tools.find(tool=>tool.function.name==='stop_process').function.description.includes('process tree to exit'),'Stop-tool semantics must require observed process retirement');
       assert.ok(processDescription.includes('confirm the target directory is a Git repository before running Git diff commands'),'Agent must establish repository context before requesting a Git diff');
       assert.ok(processDescription.includes('Do not chain Git status and diff commands'),'A failed Git precondition must not trigger a noisy follow-up command');
