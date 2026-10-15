@@ -732,6 +732,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"During an active turn, /cancel requests backend cancellation and /exit detaches while the run continues. Prompt text is saved in the session inbox and starts after the active turn; slash commands wait until it finishes.\n";
             std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
+            std::cerr<<"/commands lists workspace Markdown commands, invoked as /command-id arguments.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
             std::cerr<<"/agents lists named agent definitions; /agent shows this conversation's selection; /agent ID selects one and /agent default clears it. Selection is revision-checked and locked while a run is active.\n";
@@ -1003,9 +1004,21 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             if(!(*selected)["executable"].get<bool>()){std::cerr<<"Graph cannot execute with the current backend configuration. Use /graphs to inspect availability.\n";continue;}
             graphRevision=(*selected)["revision"].get<std::int64_t>();graphSubmission=true;prompt=task;
         }
+        std::optional<std::string> workspace_command;std::string workspace_command_arguments;Json workspace_command_catalogue;
         if(!composed&&!graphSubmission&&prompt.front()=='/'){
             if(prompt.starts_with("//"))prompt.erase(0,1);
-            else {std::cerr<<"Unknown chat command. Use /help, or // to send a literal slash request.\n";continue;}
+            else {
+                try{workspace_command_catalogue=request("/v1/workspace/commands");}
+                catch(const std::exception& error){if(prompt=="/commands"){std::cerr<<error.what()<<'\n';continue;}std::cerr<<"Unknown chat command. Use /help, /commands, or // to send a literal slash request.\n";continue;}
+                if(!workspace_command_catalogue.is_object()||!workspace_command_catalogue.contains("commands")||!workspace_command_catalogue["commands"].is_array()||workspace_command_catalogue["commands"].size()>128||!workspace_command_catalogue.contains("workspace_id")||!workspace_command_catalogue["workspace_id"].is_string()||workspace_command_catalogue["workspace_id"].get<std::string>().empty()||!workspace_command_catalogue.contains("authority_id")||!workspace_command_catalogue["authority_id"].is_string()||workspace_command_catalogue["authority_id"].get<std::string>().size()!=32||workspace_command_catalogue["authority_id"].get<std::string>().find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::runtime_error("Invalid workspace command authority catalogue");
+                if(prompt=="/commands"){
+                    std::cout<<Json{{"type","workspace_commands"},{"catalogue",workspace_command_catalogue}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Workspace command catalogue output is unavailable");continue;
+                }
+                const auto end=prompt.find_first_of(" \t\r\n");const auto selected=prompt.substr(1,end==std::string::npos?std::string::npos:end-1);
+                const auto found=std::find_if(workspace_command_catalogue["commands"].begin(),workspace_command_catalogue["commands"].end(),[&](const Json& entry){return entry.is_object()&&entry.value("id",std::string{})==selected;});
+                if(found==workspace_command_catalogue["commands"].end()){std::cerr<<"Unknown chat command. Use /help, /commands, or // to send a literal slash request.\n";continue;}
+                workspace_command=selected;if(end!=std::string::npos)workspace_command_arguments=prompt.substr(end+1);
+            }
         }
         if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
         if(!graphSubmission){const auto current=request("/v1/health");
@@ -1024,10 +1037,11 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
         if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
         if(health.value(graphSubmission?"graph_provider_profile_admission":"provider_profile_admission",false)&&!provider_binding.value("provider_profile_id",std::string{}).empty())body.update(provider_binding);
-        const auto admitted=client.Post(graphSubmission?"/v1/graph-runs":"/v1/runs",headers,body.dump(),"application/json");
+        if(workspace_command){body.erase("prompt");body.erase("session_id");body["command_id"]=*workspace_command;body["arguments"]=workspace_command_arguments;body["expected_workspace_id"]=workspace_command_catalogue["workspace_id"];body["expected_workspace_authority_id"]=workspace_command_catalogue["authority_id"];}
+        const auto admitted=client.Post(workspace_command?"/v1/sessions/"+session+"/commands":graphSubmission?"/v1/graph-runs":"/v1/runs",headers,body.dump(),"application/json");
         if(!admitted)throw std::runtime_error("Cannot reach xMind Server during run admission; admission outcome is unknown. Inspect /runs before resubmitting.");
         if(admitted->status==400||admitted->status==404||admitted->status==409||admitted->status==429||admitted->status==503){
-            std::cout<<Json{{"type","run_rejected"},{"session_id",session},{"http_status",admitted->status},{"prompt",prompt},{"graph_id",graphSubmission?graphId:std::string{}}}.dump()<<'\n'<<std::flush;
+            std::cout<<Json{{"type","run_rejected"},{"session_id",session},{"http_status",admitted->status},{"prompt",prompt},{"graph_id",graphSubmission?graphId:std::string{}},{"command_id",workspace_command?Json(*workspace_command):Json(nullptr)}}.dump()<<'\n'<<std::flush;
             const auto diagnostic=provider_rejection(admitted->body);const auto detail=diagnostic.value("detail",std::string{});
             std::cerr<<"Backend rejected run admission (HTTP "<<admitted->status<<")"<<(detail.empty()?std::string{}:": "+detail)<<". Request retained above; no automatic retry. Use /runs to inspect existing work.\n";
             last_result=1;continue;

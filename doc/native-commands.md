@@ -4,6 +4,10 @@ xMind supports workspace-authored prompt commands from `.agents/commands/`.
 Each Markdown file is one command; subdirectories become slash-separated IDs.
 For example, `.agents/commands/review/security.md` is `/review/security`.
 
+The interactive CLI lists commands with `/commands`; enter `/review/security
+src/file.cpp` to invoke the corresponding definition. Built-in CLI commands keep
+their existing meanings.
+
 An optional frontmatter block may contain only a plain-text `description` field:
 
 ```markdown

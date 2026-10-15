@@ -183,6 +183,7 @@ or interrupting the client leaves backend execution ownership unchanged.
 | `/models`, `/model ID`, `/model` | Inspect backend-enabled execution models, select an advertised model for this chat, or clear the local override |
 | `/watch RUN_ID`, `/graph-watch ROOT_ID` | Attach existing single-agent or graph work and replay durable state without admitting another run |
 | `/graphs`, `/graph GRAPH_ID REQUEST` | Inspect registered backend graphs or explicitly admit one at its observed catalogue revision |
+| `/commands`, `/command-id ARGUMENTS` | List workspace Markdown commands or invoke an exact ID from `.agents/commands/` through the native command route |
 | `/help`, `/exit`, `/cancel` | Show commands or leave; during an active run `/cancel` requests backend cancellation and `/exit` detaches without cancelling. Prefix a literal slash request with `//` |
 
 Model-free backends still permit history/run inspection and registered human/tool

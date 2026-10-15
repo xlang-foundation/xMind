@@ -7,12 +7,14 @@ xMind now discovers bounded Markdown prompt commands under
 user text, and exposes authenticated workspace-catalogue and session-execution
 routes. The browser and VS Code composers resolve `/command arguments` and
 submit through the existing single-agent or selected graph run path with
-workspace and provider authority. Command files are prompt text only; xMind
+workspace and provider authority. The interactive CLI lists `/commands` and
+dispatches slash IDs through the same endpoint with exact workspace authority.
+Command files are prompt text only; xMind
 does not execute shell, Python or plugin code from them. Release CTest passes
-the native command parser and live server/browser-adapter contracts **2/2**;
+the native parser, live server/browser-adapter and CLI dispatch contracts **3/3**;
 the focused browser/VS Code client and controller suite passes **206/206**.
-CLI dispatch, plugin/dynamic command sources and shell interpolation remain
-open. [Command contract](native-commands.md).
+Plugin/dynamic command sources, command autocomplete, and shell interpolation
+remain open. [Command contract](native-commands.md).
 
 ## Reject direct CPython process launches — 2026-10-14
 
