@@ -94,12 +94,13 @@ session policy and permission request APIs remain parity work.
 The TestProj browser acceptance exposed a Windows native-package loading limit:
 the managed xlang3 runtime placed `pydantic_core._pydantic_core.x3pkg.dll` at
 a 262-character path, and pytest stopped during collection with
-`ModuleNotFoundError`. The xlang3 compatibility branch now marks its CLI host
-long-path aware. Its focused native-package contract imports Pydantic Core
+`ModuleNotFoundError`. The xlang3 compatibility fix is now on
+`CantorAI/xlang3` `main` at `fcecf499` and marks its CLI host long-path aware.
+Its focused native-package contract imports Pydantic Core
 from a 269-character path, and the same TestProj `xlang3 -B -m pytest -q`
 command passes all nine backend tests with the original deep modules path.
-The change is pushed to `CantorAI/xlang3` branch `xmind-required-compat` at
-`fcecf499`; xlang3 `main` is unchanged. Exact scope and results are recorded
+The TestProj run was recorded on branch `xmind-required-compat` at the same
+commit before it was promoted to `main`. Exact scope and results are recorded
 in [the TestProj runtime-path evidence](evidence/testproj-xlang3-long-runtime-path-20261015.json).
 The browser UI was then connected to TestProj, fetched 13 Claude models using
 the saved encrypted provider key, and ran the configured xlang3 profile from
