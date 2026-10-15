@@ -2715,3 +2715,21 @@ These are native and client contracts, not installed VS Code UI acceptance or
 live inference. Full OpenCode request/response parity remains open because
 xMind's route/body and success response differ; details and hashes are in the
 [acceptance record](evidence/session-model-selection-20261015.json).
+
+## Optional OpenRouter provider and clean Release validation — 2026-10-15
+
+OpenRouter is an optional model-gateway route. Its model discovery uses the
+OpenRouter `/models` catalogue and filters for models advertising tool support;
+the route then participates in normal saved-provider profile and model
+selection. This does not require an OpenRouter account for other providers and
+does not replace direct provider routes. After rebuilding every Release native
+target, the full CTest suite passed **145/145** in **402.82 seconds**. The
+browser and VS Code client tests passed **495/495**. The native provider tests
+use synthetic credentials and model fixtures; live OpenRouter discovery,
+credentials and inference were not tested. The LiteLLM audit currently records
+6 partially covered groups, 130 unmapped groups and 0 verified operation-level
+parity. The CLI provider contract now expects the registered OpenRouter route;
+focused provider/graph/MCP contracts passed **3/3**, and both modern and legacy
+MCP SDK contracts passed **2/2** independently. The earlier parallel CTest
+attempt used stale mixed native executables and was stopped; only the clean,
+fully rebuilt 145/145 result above is the current full-suite result.

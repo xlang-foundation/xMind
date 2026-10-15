@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+## Optional OpenRouter model provider — 2026-10-15
+
+xMind's native model gateway now exposes OpenRouter as an optional provider
+route, alongside direct provider integrations. Its model catalogue is discovered
+from OpenRouter's `/models` endpoint with the tools-capability filter, then
+bound to the saved profile and the existing provider/model selector. This is a
+gateway adapter, not a required account or replacement for direct OpenAI,
+Anthropic, Gemini, DeepSeek, xAI or Mistral profiles. The Release build passed
+the complete native CTest suite **145/145** after rebuilding all native targets;
+the browser/VS Code client suite passed **495/495**. All provider credentials
+and model responses in the focused route tests are synthetic; no live
+OpenRouter account or inference was tested. LiteLLM inventory remains a parity
+reference: 6 partially covered, 130 unmapped and 0 verified operation-level
+parity. [Validation record](VALIDATION_STATUS.md#optional-openrouter-provider-and-clean-release-validation--2026-10-15).
+[Release test summary](evidence/native-openrouter-release-ctest-20261015.json).
+
 ## Restore approved coding changes — 2026-10-15
 
 The coding agent can now reverse one successful `edit_file`, `create_file`, or

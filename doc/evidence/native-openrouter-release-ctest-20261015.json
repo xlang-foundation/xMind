@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "build_directory": "build/native-dynamic-plan",
+  "configuration": "Release",
+  "build_command": "cmake --build build/native-dynamic-plan --config Release --parallel 4",
+  "build_result": "passed",
+  "test_command": "ctest --test-dir build/native-dynamic-plan -C Release --output-on-failure -j 2",
+  "test_result": "passed",
+  "tests_passed": 145,
+  "tests_failed": 0,
+  "elapsed_seconds": 402.82,
+  "focused_follow_up": {
+    "contracts": [
+      "native_provider_cli_contract",
+      "native_graph_mcp_http_contract",
+      "native_agent_mcp_http_contract"
+    ],
+    "passed": 3,
+    "failed": 0
+  },
+  "mcp_sdk_follow_up": {
+    "contracts": [
+      "native_mcp_sdk_modern_contract",
+      "native_mcp_sdk_legacy_contract"
+    ],
+    "passed": 2,
+    "failed": 0
+  },
+  "scope": "Synthetic native contracts only. No live OpenRouter credentials, catalogue request, or inference was tested."
+}
