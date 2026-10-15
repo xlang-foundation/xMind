@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-15",
+  "base_commit": "12b61fd421763b83a74773b5e6697e976adb452e",
+  "working_tree_changes_included": true,
+  "native_binary_sha256": "790787963d7edb3c1abdf82c4efe1221a9966314a07615b3a7298532a2f8e8f3",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "browser": {
+    "url": "http://127.0.0.1:51880/ui/",
+    "rendered": true,
+    "result": "Fork created. The new conversation is selected.",
+    "source_title": "Browser conversation",
+    "fork_title": "Browser conversation (fork #1)",
+    "fork_selected": true,
+    "fork_boundary": "before assistant response",
+    "copied_history": "The original user message appears in the child; the assistant response after the boundary does not."
+  },
+  "provider_smoke": {
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "credential_source": "existing local saved profile",
+    "key_entered_in_browser": false,
+    "prompt": "Reply exactly: Fork acceptance response. Do not use tools.",
+    "reply": "Fork acceptance response.",
+    "provider_reported_tokens": {
+      "input": 4967,
+      "output": 6,
+      "total": 4973,
+      "cached": 4736,
+      "reasoning": 0
+    },
+    "backend_timings": {
+      "first_token_seconds": 1.21,
+      "elapsed_seconds": 1.24
+    },
+    "tool_calls": 0
+  },
+  "native_contract": {
+    "test": "native_local_view_contract",
+    "result": "passed",
+    "scope": [
+      "POST fork passes through the real browser adapter and native view authorization",
+      "parent session and full-transcript boundary are preserved",
+      "transcript content and roles are copied with destination-local message IDs"
+    ]
+  },
+  "browser_tests": {
+    "command": "node --test views/browser/tests/controller.test.cjs views/browser/tests/server.test.cjs",
+    "passed": 80,
+    "failed": 0
+  },
+  "limitations": [
+    "The DeepSeek request is one local smoke test, not per-model provider acceptance.",
+    "This does not establish complete OpenCode Session.Info parity or installed VS Code acceptance."
+  ]
+}

@@ -396,9 +396,12 @@ forks through the actual xlang3/SQLite repository, versioned HTTP server and
 CLI. Focused contracts verify exclusive cutoffs, stable `msg_<seq>` IDs,
 lineage, transcript immutability, agent/skill state copies and restart recovery.
 The inventory marks `session.fork` as a partial native source candidate. Browser
-and VS Code now expose guarded per-message fork controls, backed by focused
-controller/renderer contracts. Full OpenCode Session.Info parity remains open;
-see [native session fork](native-session-fork.md).
+and VS Code expose guarded per-message fork controls, backed by
+controller/renderer contracts. The local browser adapter and native view now
+authorize only the exact `POST /v1/sessions/{id}/fork` operation; the rendered
+TestProj workflow and webpage-to-SQLite contract pass. Forks preserve message
+content while assigning destination-local message IDs. Full OpenCode
+Session.Info parity remains open; see [native session fork](native-session-fork.md).
 
 ## Workspace/browser baseline checkpoint (`4831636`, 2026-10-11)
 

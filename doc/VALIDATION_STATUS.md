@@ -1,5 +1,24 @@
 # Current native validation
 
+## Rendered webpage conversation fork — 2026-10-15
+
+The local TestProj browser completed a short no-tool DeepSeek `deepseek-flash`
+response using its saved profile, then forked immediately before the assistant
+message. The page selected `Browser conversation (fork #1)`, retained the
+copied user prompt, and showed “Fork created. The new conversation is
+selected.” This exposed two missing authorization entries: the browser
+adapter's exact-route allowlist and the native server's view-session write
+allowlist. Both now admit only `POST /v1/sessions/{id}/fork`; native view
+credentials do not gain other fork methods. The focused browser server tests
+pass **13/13**, and `native_local_view_contract` passes **1/1**, creating a
+fork through the real webpage gateway and checking its parent, full-history
+boundary, preserved message content and destination-local message IDs; the
+browser route tests enforce its exact POST-only method restriction. This is local rendered-page and native
+integration evidence; full OpenCode `Session.Info` parity and installed
+desktop acceptance remain open. Sanitized provider, fork, and test details are
+in [the browser fork evidence](evidence/browser-session-fork-live-20261015.json).
+The current development browser is at `http://127.0.0.1:51880/ui/`.
+
 ## Refreshed pinned API evidence — 2026-10-15
 
 The CLI restore change updated `Native/apps/cli_main.cpp`, which invalidated
