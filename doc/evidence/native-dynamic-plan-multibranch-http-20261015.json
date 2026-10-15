@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-15",
+  "base_revision": "f3c8c26",
+  "scope": "Authenticated native HTTP answer against an actual two-branch dynamic-plan wait set, using AgentService, a synthetic model peer and xlang3-backed SQLite.",
+  "build": {
+    "configuration": "Release",
+    "directory": "build/native-dynamic-plan",
+    "target": "agentflow_dynamic_plan_engine_contract",
+    "result": "passed"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/native-dynamic-plan -C Release -R '^native_(cli_plan_review|http_cli|agent_http|planning_http)_contract$|^native_dynamic_plan_(repository|engine)_contract$' --output-on-failure",
+    "passed": 6,
+    "failed": 0,
+    "tests": {
+      "native_cli_plan_review_contract": "passed",
+      "native_dynamic_plan_repository_contract": "passed",
+      "native_planning_http_contract": "passed",
+      "native_dynamic_plan_engine_contract": "passed",
+      "native_agent_http_contract": "passed",
+      "native_http_cli_contract": "passed"
+    }
+  },
+  "verified_behavior": [
+    "Actual AgentService execution creates two concurrently waiting nested agents under one durable root pause.",
+    "The real native HTTP server returns both nested owners and their exact question IDs in one authenticated observation.",
+    "The same plan observation route rejects a request without bearer authentication.",
+    "A stale nested-plan state sequence returns HTTP 409 and leaves that question waiting.",
+    "A valid HTTP answer carries the selected nested plan's observed revision and state sequence; it resumes the root and preserves the unanswered sibling for its next pause.",
+    "The remaining request is explicitly selected and answered through the A2A task path; both original nested calls complete exactly once.",
+    "The combined Release contracts preserve repository restart/partial-resume coverage and CLI per-plan request routing."
+  ],
+  "limits": [
+    "Provider and answer fixtures are synthetic; no live model/provider behavior is claimed.",
+    "This does not drive a full two-branch interactive CLI /watch session, rendered browser flow, or installed VS Code flow.",
+    "Concurrent HTTP answer races, cancellation races, expiry/uncertainty and repeated-segment budget/context exhaustion remain unverified."
+  ],
+  "sha256": {
+    "Native/CMakeLists.txt": "53ff00ae8ed5b193407e263c98301d2af8d9102119b704989dcbfad25ae3c560",
+    "Native/tests/dynamic_plan_engine_contract.cpp": "1e93448926dcd38770cfd02f30f451db97f99898a0789dc0028b17fe9e372df6",
+    "Native/tests/dynamic_plan_engine_peer.mjs": "1a3fecb53009a1c5829f3f52f7c3439be09c5e0e63af5e276f2011594b87b2ba",
+    "doc/PARITY.md": "7678b9c9ab537b7a00b2ed73aa268b68d4a84bc3985714a96f0d18c6bd18a3ee",
+    "doc/native-dynamic-plan-multibranch.md": "cba2cf0d21dd0a98d1f30223aa45d81462e2782edd71f51c200778b31977407c"
+  },
+  "executables": {
+    "build/native-dynamic-plan/Release/agentflow_dynamic_plan_engine_contract.exe": "b96ab2dc76df05694fc871c87f9a7f66abeacdfeebb3f1cbf6c7b63b905e48a5"
+  }
+}
