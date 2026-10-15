@@ -1,5 +1,17 @@
 # Current native validation
 
+## Native graph restore — 2026-10-15
+
+The Release graph-runner contract now exercises a registered two-node graph:
+create a file in an admitted secondary workspace folder, reference the first
+node's actual operation ID from `restore_operation`, review both operations,
+and verify the inverse removes only that file. Both proposals retain the exact
+workspace membership revision and folder binding. The graph-runner contract
+passes with a synthetic model peer (the restore flow itself makes no model
+request), and the standalone restore contract passes for update, add, delete,
+move and stale-file rejection. Direct browser and VS Code Undo controls remain
+open.
+
 ## Installed VS Code focused coding run — 2026-10-15
 
 The VS Code Extension Development Host opened the TestProj workspace, reused

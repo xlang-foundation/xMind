@@ -50,6 +50,18 @@ differ from OpenCode's unauthenticated `/api/info`; the shared information
 capability and response fields match the pinned contract. This does not imply
 broader OpenCode API or product parity.
 
+## Graph coding restore — 2026-10-15
+
+Registered graph plans may now call native `restore_operation` when approved
+file edits are enabled. The graph can pass a prior node's journaled operation
+ID through a typed dependency reference. Restore checks the same conversation,
+workspace, folder and membership revision as the source change, verifies the
+current file identity and bytes, and sends the inverse through the existing
+human approval journal. Release contracts verify the create-then-restore flow
+and the standalone update/add/delete/move restore cases. A direct browser or
+VS Code Undo control remains unimplemented; this graph capability does not
+claim OpenCode Undo parity.
+
 ## Native agent modes and visibility — 2026-10-15
 
 Named YAML agents now support OpenCode-style `mode` values (`all`, `primary`,

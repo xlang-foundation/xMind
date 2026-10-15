@@ -3,6 +3,7 @@
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/create_executor.hpp"
+#include "agentflow/restore_executor.hpp"
 #include "agentflow/patch_tool.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/mcp_run_subscription_observer.hpp"
@@ -92,7 +93,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
             if(node.mcp){
                 const auto found=std::find_if(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[&](const auto& server){return server.id==node.mcp->server_id;});
                 if(found==settings_.mcp_servers.end() || !found->enabled || found->revision!=node.mcp->config_revision)throw GraphMcpUnavailable("Graph MCP server binding is unavailable or has changed");
-            }else{const bool read=std::find(reads.begin(),reads.end(),node.tool)!=reads.end();const bool write=settings_.approved_edits && (node.tool=="edit_file" || node.tool=="create_file" || node.tool=="apply_patch");if(!read && !write && !(node.tool=="run_process" && process_))throw std::invalid_argument("Graph tool is not registered for direct execution");}
+            }else{const bool read=std::find(reads.begin(),reads.end(),node.tool)!=reads.end();const bool write=settings_.approved_edits && (node.tool=="edit_file" || node.tool=="create_file" || node.tool=="apply_patch" || node.tool=="restore_operation");if(!read && !write && !(node.tool=="run_process" && process_))throw std::invalid_argument("Graph tool is not registered for direct execution");}
         }
     }
     if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
@@ -220,17 +221,28 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
                 store_.append_event(id,"tool.failed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();
                 result["reason"]="graph_patch_incomplete";result["source"]="graph_tool";return store_.transition(id,RunState::running,RunState::failed,result.dump()).get();
             }
-        }else if(name=="edit_file" || name=="create_file" || name=="run_process"){
+        }else if(name=="edit_file" || name=="create_file" || name=="restore_operation" || name=="run_process"){
             const auto args=Json::parse(source);const auto field=name=="run_process"?"workdir":"path";std::string directory=".";WorkspaceTools* effect_workspace=workspace_.get();std::size_t process_folder_index=0;
             if(workspace_tools){if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Invalid graph effect folder ID");process_folder_index=workspace_tools->folder_index(args["folder_id"].get<std::string>());}effect_workspace=&workspace_tools->folder_tools(process_folder_index);}
-            if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid graph effect scope");directory=args[field].get<std::string>();}else if(name!="run_process")throw std::invalid_argument("Graph file effect requires a path");
-            if(name!="run_process")directory=RepositoryInstructionContext::file_directory(directory);
+            if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid graph effect scope");directory=args[field].get<std::string>();}else if(name!="run_process"&&name!="restore_operation")throw std::invalid_argument("Graph file effect requires a path");
+            if(name!="run_process" && name!="restore_operation")directory=RepositoryInstructionContext::file_directory(directory);
             RepositoryInstructionContext instructions(*effect_workspace,effect_workspace->repository_instructions(".",cancel));instructions.ready(directory,cancel);instructions.prepare(cancel);auto guard=instructions.precondition(directory);
             const auto lifetime=shared_context?std::max<std::int64_t>(1,std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count()):settings_.run_timeout.count();
             const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+lifetime;
             const auto owner_workspace=workspace_tools?workspace_tools->workspace_id():workspace_->identity();const auto effect_folder_id=workspace_tools?workspace_tools->folders()[process_folder_index].folder_id:workspace_->identity();const auto workspace_revision=workspace_tools?workspace_tools->revision():1;
             if(name=="edit_file")result=Json::parse(EditExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
             else if(name=="create_file")result=Json::parse(CreateExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
+            else if(name=="restore_operation"){
+                const auto authorize=[](const std::string&){};
+                const auto guidance=[&](const std::vector<std::string>& paths,std::stop_token token){
+                    std::vector<InstructionPrecondition> conditions;
+                    for(const auto& path:paths){const auto scope=effect_workspace->creation_directory(path,token);if(!instructions.ready(scope,token))throw ToolGuidanceChanged("Updated repository guidance must be loaded before restoring this graph operation");conditions.push_back(instructions.precondition(scope));}
+                    if(conditions.size()==1)return conditions.front();
+                    Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
+                    InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token verify){for(const auto& condition:conditions)if(condition.verify)condition.verify(verify);}};combined.validate();return combined;
+                };
+                result=Json::parse(RestoreExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,authorize,guidance));
+            }
             else result=Json::parse(workspace_tools?process_->invoke_in_workspace(identifier(),id,source,expiry,*workspace_tools,process_folder_index,cancel,std::move(guard)):process_->invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
         }else if(workspace_tools&&(name=="read_repository_instructions"||name=="read_file"||name=="list_files"||name=="search_files"||name=="find_files"||name=="glob_files"))result=Json::parse(workspace_tools->invoke(name,source,cancel));
         else result=Json::parse(workspace_->invoke(name,source,cancel));
