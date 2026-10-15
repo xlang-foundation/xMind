@@ -17,7 +17,8 @@ eligible completed file change. The control re-fetches and validates the saved
 operation, then fills the composer with a request naming its operation ID; it
 does not submit the request or approve the resulting inverse patch. Client
 validation covers successful edit/create operations and patch update/add/delete/
-move receipts. The full VS Code suite passes **364/364** and the browser suite
+move receipts. The VS Code suite passes **365/365**, including extension-host
+revalidation, and the browser suite
 passes **119/119**. [Restore executor contract](../Native/tests/restore_executor_contract.cpp).
 
 ## Action-aware uncertain file recovery inspection — 2026-10-15

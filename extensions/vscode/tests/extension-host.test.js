@@ -628,6 +628,17 @@ test('uncertain patch addition inspection accepts verified absence without propo
   assert.deepEqual(view.posted.find(message=>message.type==='edit-inspection').inspection,inspection);
   assert.ok(h.requests.includes('/v1/operations/uncertain-patch-add-0/inspection'));assert.equal(h.decisions.length,0);assert.ok(!h.requests.includes('/v1/runs'));view.close();
 });
+test('restore request revalidates the saved successful operation before preparing the composer prompt',async()=>{
+ const plan={workspace_id:'fixture-root',folder_id:'fixture-folder',workspace_revision:2,target_workspace_id:'fixture-folder',path:'src/app.cpp',file_id:'fixture-file',before_content:'old\n',after_content:'new\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)},receipt={path:plan.path,file_id:plan.file_id,after_sha256:plan.after_sha256};
+ const proposal={id:'completed-edit',run_id:'finished',workspace_id:'fixture-root',tool:'replace_file',state:'succeeded',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:JSON.stringify(receipt)};
+ const h=harness({operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ try{await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===proposal.id)));
+  view.receive({type:'prepare-restore',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='restore-prompt'));
+  const prepared=view.posted.find(message=>message.type==='restore-prompt');assert.match(prepared.prompt,new RegExp(proposal.id));assert.match(prepared.prompt,/Do not make other file changes/);assert.ok(h.requests.includes('/v1/operations/completed-edit'));assert.equal(h.decisions.length,0);
+  h.pauseOperation(Promise.resolve({...proposal,result_json:JSON.stringify({...receipt,after_sha256:'c'.repeat(64)})}));view.receive({type:'prepare-restore',id:proposal.id});await until(()=>view.posted.some(message=>message.type==='error'));
+  assert.equal(view.posted.filter(message=>message.type==='restore-prompt').length,1,'A stale receipt must not prepare another restore request');assert.equal(h.decisions.length,0);
+ }finally{view.close();}
+});
 test('inspection rejects a different backend operation and discards observations after selection changes',async()=>{
   const h=harness({operations:[uncertainEdit],inspection:{...inspectionFixture,operation:{...uncertainEdit,arguments_json:'{}'}}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='transcript'));
