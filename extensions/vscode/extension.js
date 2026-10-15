@@ -40,7 +40,7 @@ async function activate(context) {
   let runId;
   let sessionRuns=[];
   let cursor = 0;
-  let eventSubscription,snapshotTimer,snapshotPromise;
+  let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer;
   let pendingTreeEvents=false;
   let generation = 0;
   let opening;
@@ -48,6 +48,8 @@ async function activate(context) {
   let contextReadyView,pendingEditorContexts=[];
   let messages = Promise.resolve();
   let reviewed = new Map();
+  let sessionPermissionRequests = new Map();
+  let sessionPermissionsLoaded = false;
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
   let sessionModelState;
@@ -83,9 +85,10 @@ async function activate(context) {
     if(!agentController||agentController.client!==target)agentController=new AgentSelectionController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.agent_selection===true}));
     try{await agentController.read();}catch(error){if(client===target&&version===generation)post({type:'agent-selection-error',text:error.message});}
   }
-  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
+  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;clearTimeout(permissionTimer);permissionTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
   const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
   function watch(){
+    schedulePermissionRefresh();
     const pin=eventSubscription?.pin,selected=sessionRuns.find(value=>value.id===runId);
     if(pin&&selected&&['completed','failed','cancelled'].includes(selected.state)&&!eventSubscription.finished&&pin.root===selected.id&&streamCurrent(pin))return;
     const active=value=>['queued','running','paused'].includes(value.state);
@@ -113,6 +116,9 @@ async function activate(context) {
   let contextProfileAdmission=false;
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
+  function publishOperations(items){const base=items?new Map(items.map(operation=>[operation.id,operation])):reviewed;reviewed=new Map([...base].filter(([id,operation])=>!sessionPermissionsLoaded||operation.state!=='awaiting_approval'||sessionPermissionRequests.has(id)||observedOperation(operation.run_id)));for(const [id,operation] of sessionPermissionRequests)reviewed.set(id,operation);post({type:'operations',operations:[...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});}
+  async function refreshSessionPermissions(target=client,session=sessionId,version=generation){if(!target||!session)return;const observed=await target.sessionPermissions(session);if(target!==client||session!==sessionId||version!==generation||!panel)return;if(!observed||observed.session_id!==session||!Array.isArray(observed.requests)||observed.requests.length>256||observed.requests.some(operation=>!operation||typeof operation.id!=='string'||typeof operation.run_id!=='string'||operation.state!=='awaiting_approval'||!Number.isSafeInteger(operation.expires_unix_ms)))throw new Error('Invalid session permission request list.');sessionPermissionRequests=new Map(observed.requests.map(operation=>[operation.id,operation]));sessionPermissionsLoaded=true;publishOperations();}
+  function schedulePermissionRefresh(version=generation){clearTimeout(permissionTimer);if(!panel||!client||!sessionId)return;permissionTimer=setTimeout(async()=>{permissionTimer=undefined;if(!panel||version!==generation)return;try{await refreshSessionPermissions(client,sessionId,version);}catch(error){if(panel&&version===generation)post({type:'error',text:error.message});}if(panel&&version===generation)schedulePermissionRefresh(version);},2500);}
   const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   let inboxDispatching=false;
   async function refreshInbox(target=client,session=sessionId,version=generation){
@@ -189,10 +195,10 @@ async function activate(context) {
       const history=await client.graphChildHistory(id,child.id);if(version!==generation || !panel)return;childHistory.set(child.id,{state:child.state,history});
     }
     const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation || !panel)return;}
-    graphSnapshot=root;graphChildren=owned;reviewed=new Map(operations.map(o=>[o.id,o]));
+    graphSnapshot=root;graphChildren=owned;
     post({type:'graph',record:root,children,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
     for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
-    post({type:'operations',operations:operations.map(operation=>({...operation,node_id:owned.get(operation.run_id)?.node_id}))});post({type:'status',text:root.run.state});
+    publishOperations(operations);post({type:'status',text:root.run.state});
     sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
     if(['completed','failed','cancelled'].includes(root.run.state)){
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
@@ -234,8 +240,7 @@ async function activate(context) {
       post({ type: 'status', text: run.state });
       const operations = await client.operations(id);
       if (version !== generation) return;
-      reviewed = new Map(operations.map(operation => [operation.id, operation]));
-      post({ type: 'operations', operations });
+      publishOperations(operations);
       if (['completed', 'cancelled', 'failed'].includes(run.state)) {
         // A terminal transition can occur between the event query and status query.
         const finalEvents = await client.events(id, cursor);
@@ -256,10 +261,9 @@ async function activate(context) {
     const validRoot=value=>{if(value.id!==id||value.session_id!==sessionId||value.parent_id||value.graph_root)throw new Error('Owned run observation identity changed');};validRoot(run);
     const publish=snapshot=>{
       graphChildren=new Map(snapshot.children.map(child=>[child.run.id,child.run]));
-      reviewed=new Map(snapshot.operations.map(operation=>[operation.id,operation]));
       post({type:'owned-children',parent:run,children:snapshot.children,histories:snapshot.histories});
       for(const event of snapshot.events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});cursor=event.seq;}
-      post({type:'operations',operations:snapshot.operations.map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});
+      publishOperations(snapshot.operations);
     };
     let snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);
     run=await client.status(id);if(version!==generation||!panel)return;
@@ -313,6 +317,8 @@ async function activate(context) {
     const version = generation;
     clearGraph();
     sessionId = id;
+    sessionPermissionRequests.clear();
+    sessionPermissionsLoaded=false;
     sessionModelState=undefined;
     runId = undefined;
     sessionRuns=[];presentRuns();
@@ -328,6 +334,7 @@ async function activate(context) {
     if(version!==generation||!panel)return;
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
+    await refreshSessionPermissions(client,id,version);schedulePermissionRefresh(version);
     const previousProfile=profileController?.state;await profileController?.refresh();
     if(version!==generation||!panel)return;
     if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
@@ -786,8 +793,8 @@ async function activate(context) {
         } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
-          const proposal = reviewed.get(message.id);
-          if (!proposal || !observedOperation(proposal.run_id) || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected run before deciding.');
+          const proposal = reviewed.get(message.id),sessionApproval=sessionPermissionRequests.has(message.id);
+          if (!proposal || (!observedOperation(proposal.run_id)&&!(sessionApproval&&['decide','review'].includes(message.type))) || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected conversation before deciding.');
           const version = generation;
           const current = await client.operation(message.id);
           if (panel !== view || version !== generation) return;
@@ -797,10 +804,11 @@ async function activate(context) {
           }
           if (message.type === 'review') {await showEditReview(current);return;}
           if(message.decision==='allow'&&current.tool==='patch_file')patchReview(current);
-          const decided = await client.decide(message.id, message.decision);
+          const sessionScopedApproval=sessionApproval&&!observedOperation(proposal.run_id);
+          const decided = sessionScopedApproval?await client.replySessionPermission(sessionId,message.id,message.decision):await client.decide(message.id, message.decision);
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);
-          post({ type: 'operations', operations: [...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id})) });
+          if(sessionApproval){sessionPermissionRequests.delete(decided.id);publishOperations();await refreshSessionPermissions(client,sessionId,version);}else publishOperations();
           await poll();
         }
       } catch (error) { if (panel === view&&workspaceBackend.epoch===workspaceEpoch) post(message?.type==='process-output'?{type:'process-output-error',id:message.id,channel:message.channel,text:error.message}:{type:'error',text:error.message}); }

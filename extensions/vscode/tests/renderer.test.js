@@ -488,12 +488,12 @@ test('command output metrics require exact encoded retained bytes and safe drain
 test('pending approval remains reachable without streamed activity moving review or granting permission',()=>{
  const r=renderer(),doc=r.dom.window.document;
  try{
-  const operation={id:'pending-create',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'hello.py',before_content:'',after_content:'print("Hello")\n'}),result_json:'{}'};
+  const operation={id:'pending-create',run_id:'older-run',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'hello.py',before_content:'',after_content:'print("Hello")\n'}),result_json:'{}'};
   const scroll=doc.getElementById('scroll');let position=400,writes=0;
   Object.defineProperties(scroll,{scrollHeight:{get:()=>500},clientHeight:{get:()=>100},scrollTop:{get:()=>position,set:value=>{writes++;position=value;}}});
   r.send({type:'operations',operations:[operation]});
   const notice=doc.getElementById('approval-notice'),card=doc.querySelector('#operations .operation'),allow=[...card.querySelectorAll('button')].find(b=>b.textContent==='Allow creation');
-  assert.equal(notice.closest('main'),null);assert.equal(notice.hidden,false);assert.equal(doc.getElementById('approval-count').textContent,'1 approval awaiting review');
+  assert.equal(notice.closest('main'),null);assert.equal(notice.hidden,false);assert.equal(doc.getElementById('approval-count').textContent,'1 approval awaiting review');assert.match(card.querySelector('h4').textContent,/run older-run/);
   doc.getElementById('events').closest('details').open=true;allow.focus();const initial=r.posted.length;
   for(let seq=1;seq<=30;seq++)r.send({type:'event',event:{kind:'model.tool_delta',seq,data:{arguments:'fixture streamed activity'}}});
   r.send({type:'status',text:'running'});r.send({type:'operations',operations:[{...operation}]});

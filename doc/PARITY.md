@@ -75,9 +75,9 @@ effect approval. `ask` pauses native workspace reads for a one-shot controller
 decision using the durable exact-operation journal. The native runner checks paths
 before dispatch, conservatively blocks directory enumeration that could expose
 a restricted path, and checks every prepared patch target before any patch
-proposal executes. Saved grants and permission request APIs remain incomplete:
-asks do not create reusable grants, and session-wide permission APIs remain
-unsupported. `run_process` requires a broad `resource: "*"` rule because
+proposal executes. Saved grants and session-level policy enforcement remain
+incomplete: asks do not create reusable grants. `run_process` requires a broad
+`resource: "*"` rule because
 its process can access more than its working directory. Rules are included in
 agent revisions, conversation snapshots and archives, named delegated-agent
 snapshots, and resolved graph-agent nodes. Existing backend approval and
@@ -86,8 +86,20 @@ workspace authority remain in force.
 Release contracts verify profile parsing and revisioning, ordered direct-path
 evaluation, persistence, delegation/graph snapshots, archive transport, and
 real native runner deny, later-allow, inherited-deny, controller-approved read
-and controller-denied read outcomes. This is partial parity only: saved grants,
-session policy and permission request APIs remain parity work.
+and controller-denied read outcomes. This is partial parity only: saved grants
+and session policy remain parity work.
+
+## Session-wide approval discovery and review — 2026-10-15
+
+The native backend exposes a bounded session permission list and an exact
+session-bound reply endpoint. The local browser UI and VS Code sidebar now
+include pending requests from older runs in the selected conversation, show the
+owning run in the operation details, and refresh the list while the conversation
+is open. Replies for another run use the session-bound endpoint; selected-run
+and graph-child approvals retain their existing operation decision path. Both
+clients revalidate the exact operation before a decision and preserve the
+existing file patch review step. Saved grants, session-level policy enforcement,
+global/location request listing and change reversal remain incomplete.
 
 ## xlang3 process profile with deep runtime paths — 2026-10-15
 

@@ -2,6 +2,12 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('browser surfaces and replies to a pending approval from another run in the selected session',async()=>{
+ const proposal={id:'older-request',run_id:'older-run',workspace_id:'workspace',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'new.txt',before_content:'',after_content:'new'}),result_json:'{}'},calls=[],posted=[];let pending=[proposal];
+ const client={sessionPermissions:async session=>({session_id:session,requests:pending}),operation:async()=>proposal,replySessionPermission:async(...args)=>{calls.push(args);pending=[];return {...proposal,state:'ready'};}};
+ const view=new BrowserController(client,message=>posted.push(message));view.session='selected-session';view.runId='newer-run';
+ try{await view.refreshSessionPermissions();assert.ok(posted.at(-1).operations.some(item=>item.id===proposal.id));await view.handle({type:'decide',id:proposal.id,decision:'allow'});assert.deepEqual(calls,[['selected-session',proposal.id,'allow']]);assert.equal(view.sessionPermissionRequests.size,0);assert.ok(posted.at(-1).operations.every(item=>item.id!==proposal.id));}finally{view.dispose();}
+});
 test('browser retrieves bounded saved process output pages only for an observed completed command',async()=>{
  const id='process-op',run='run-root',artifact={operation_id:id,stdout_bytes:70000,stderr_bytes:3,state:'complete'},operation={id,run_id:run,workspace_id:'workspace',tool:'run_process',state:'succeeded',arguments_json:'{}',expires_unix_ms:0,result_json:JSON.stringify({output_artifact:artifact})},page={operation_id:id,run_id:run,state:'complete',channel:'stdout',encoding:'hex',data:'f09f',offset:0,total_bytes:70000,next_offset:2,complete:true},calls=[],posted=[];
  const client={operation:async()=>operation,processOutput:async(...args)=>{calls.push(args);return page;}};const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId=run;view.runs=[{id:run,state:'completed'}];view.operations.set(id,operation);

@@ -269,8 +269,8 @@ function operations(items){
       sections.push(previous.section);continue;
     }
     if(previous)previous.section.remove();operationSections.delete(item.id);
-    const section=node('section',undefined,'operation');section.append(node('h4',(item.node_id?'Node '+item.node_id+' · ':'')+(item.tool==='run_process'?'Command':item.tool)+' · '+item.state));
-    const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);
+    const section=node('section',undefined,'operation');section.append(node('h4',(item.node_id?'Node '+item.node_id+' · ':'')+(item.tool==='run_process'?'Command':item.tool)+' · '+item.state+(item.run_id?' · run '+item.run_id:'')));
+    const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Run: '+item.run_id+'\nWorkspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);
     let reviewable=true;
     if(item.tool==='run_process')reviewable=processProposal(section,item);
     if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']])section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}catch{}}

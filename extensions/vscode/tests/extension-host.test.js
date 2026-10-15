@@ -17,7 +17,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
-  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[];
+  const renameRequests=[],forkRequests=[],decisions=[],sessionPermissionReplies=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const inboxItems=options.inboxItems||[];
   const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
@@ -41,6 +41,8 @@ function harness(options={}) {
     if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     if(target.pathname==='/v1/mcp/resources')return {ok:true,json:async()=>options.mcpResources||{servers:[],resources:[],templates:[]}};
+    const permissionRoute=target.pathname.match(/^\/v1\/sessions\/([A-Za-z0-9_-]+)\/permissions(?:\/([A-Za-z0-9_-]+)\/reply)?$/);
+    if(permissionRoute){const session=permissionRoute[1],requestId=permissionRoute[2];if(!requestId)return {ok:true,json:async()=>({session_id:session,requests:options.sessionPermissions||[]})};const body=JSON.parse(requestOptions.body);sessionPermissionReplies.push({session_id:session,request_id:requestId,...body});if(options.permissionOperation?.id===requestId){options.permissionOperation={...options.permissionOperation,state:body.decision==='allow'?'ready':'denied',decision_actor:'fixture-controller'};options.sessionPermissions=(options.sessionPermissions||[]).filter(item=>item.id!==requestId);return {ok:true,json:async()=>options.permissionOperation};}return {ok:false,status:404,json:async()=>({detail:'No fixture permission request'})};}
     const inboxRoute=target.pathname.match(/^\/v1\/sessions\/([A-Za-z0-9_-]+)\/inbox(?:\/([A-Za-z0-9_-]+))?$/);
     if(inboxRoute){
       const session=inboxRoute[1],id=inboxRoute[2];
@@ -111,6 +113,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished') data={id:'finished',state:options.running?'running':'completed'};
     else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
+    else if(target.pathname===`/v1/operations/${options.permissionOperation?.id}`)data=options.permissionOperation;
     else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
     else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/inspect`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),options.includeA2aArtifacts?{include_artifacts:true}:{});data=options.a2aInspection;}
@@ -186,7 +189,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
     backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -549,6 +552,14 @@ test('selection intent invalidates queued human input before another conversatio
 test('graph child approval retains exact current operation review and uses the shared decision endpoint',async()=>{
  const options=graphFixture();options.graphRoot.run.state='running';options.graphChildren[0].state='running';options.graphRoot.checkpoint.nodes[0].state='running';options.operations=[{...pendingEdit,run_id:'child-a',arguments_json:JSON.stringify({...JSON.parse(pendingEdit.arguments_json),path:'file.cpp'})}];const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graph'));
  view.receive({type:'review',id:'edit'});await until(()=>h.comparisons.length===1);assert.equal(h.decisions.length,0);view.receive({type:'decide',id:'edit',decision:'allow'});await until(()=>h.decisions.length===1);assert.deepEqual(h.decisions,[{decision:'allow'}]);view.close();
+});
+test('session approval from an older run is surfaced and replied to through the selected session API',async()=>{
+ const proposal={id:'older-run-request',run_id:'older-run',workspace_id:'fixture-root',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'src/new.cpp',before_content:'',after_content:'new file'}),result_json:'{}'};
+ const h=harness({sessionPermissions:[proposal],permissionOperation:proposal,runs:[{id:'finished',session_id:'saved',state:'completed'}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===proposal.id)));
+ view.receive({type:'decide',id:proposal.id,decision:'allow'});await until(()=>h.sessionPermissionReplies.length===1);
+ assert.deepEqual(h.sessionPermissionReplies,[{session_id:'saved',request_id:proposal.id,decision:'allow'}]);assert.equal(h.decisions.length,0);assert.ok(h.requests.some(route=>route==='/v1/sessions/saved/permissions'));
+ view.close();
 });
 test('graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs',async()=>{
  const options=graphFixture();options.runs=[];options.health={agent_execution:false,status:'ok'};const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));
