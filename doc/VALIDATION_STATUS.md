@@ -9,7 +9,8 @@ console, verifies session and graph ownership, observes the exact inverse
 proposal, confirms the file remains unchanged while approval is pending, then
 approves the inverse and verifies the file is removed. The restore path makes
 no model request. Release targets `xmind` and `xmind_cli` built successfully;
-`native_graph_service_http_contract` passed (1/1).
+both `native_graph_service_http_contract` and the production
+`native_unified_graph_http_contract` passed (1/1 each).
 
 ## Live browser coding acceptance — 2026-10-15
 
