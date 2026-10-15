@@ -34,8 +34,20 @@
     "modelFirstTokenSeconds": 2.92,
     "modelResponseSeconds": 6.22
   },
+  "providerCatalogues": [
+    {"profile": "claude", "route": "anthropic.messages", "status": 200, "modelCount": 13},
+    {"profile": "gemini", "route": "gemini.generate-content", "status": 200, "modelCount": 11},
+    {"profile": "deepseek", "route": "deepseek.chat", "status": 200, "modelCount": 2},
+    {"profile": "openai", "route": "openai.responses", "status": 200, "modelCount": 20}
+  ],
+  "additionalLiveProviderChecks": [
+    {"profile": "openai", "model": "gpt-5.6-sol", "result": "passed; exact expected response", "inputTokens": 3521, "outputTokens": 10, "firstTokenSeconds": 1.42, "responseSeconds": 1.61},
+    {"profile": "gemini", "model": "models/gemini-3.8-flash", "result": "passed; exact expected response", "inputTokens": 4373, "outputTokens": 6, "firstTokenSeconds": 1.78, "responseSeconds": 1.78},
+    {"profile": "deepseek", "model": "deepseek-v4-pro", "result": "passed; exact expected response", "inputTokens": 4787, "outputTokens": 8, "firstTokenSeconds": 5.18, "responseSeconds": 5.28}
+  ],
   "limitations": [
-    "The saved Claude profile was used for one model request; the key remained in the encrypted local xMind profile and was never entered into the browser or included in the prompt.",
-    "Browser acceptance covers one configured Claude profile and TestProj backend test command; it does not prove all providers, VS Code, or the remaining AgentFlow feature set."
+    "All four provider catalogues were fetched using existing encrypted local profiles; the keys remained in xMind and were never entered into the browser or included in prompts.",
+    "Gemini models models/gemini-2.5-flash and models/gemini-2.5-flash-lite returned HTTP 404 at generation even though catalogue discovery listed them; models/gemini-3.8-flash succeeded.",
+    "The live provider checks cover short text responses and one xlang3 pytest command; they do not prove every model, VS Code, or the remaining AgentFlow feature set."
   ]
 }

@@ -82,7 +82,14 @@ the saved encrypted provider key, and ran the configured xlang3 profile from
 `model-zoo/backend`; the UI recorded exit code 0 and nine passing tests. The
 run took 2.93 seconds at the process boundary, and the Claude response took
 6.22 seconds with a 2.92-second first-token time. This acceptance covers one
-provider and one workspace command, not VS Code or the remaining feature set.
+workspace command. All four saved provider catalogues returned models through
+the local backend: Claude 13, Gemini 11, DeepSeek 2 and OpenAI 20. Short live
+OpenAI `gpt-5.6-sol`, Gemini `models/gemini-3.8-flash` and DeepSeek
+`deepseek-v4-pro` replies also succeeded in the browser. Gemini
+`models/gemini-2.5-flash` and `models/gemini-2.5-flash-lite` were listed but
+returned HTTP 404 during generation; the newer Gemini 3.8 model worked. This
+does not establish every listed model, VS Code acceptance or the remaining
+AgentFlow feature set.
 
 ## Native local session archive (2026-10-13)
 
