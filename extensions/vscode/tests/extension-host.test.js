@@ -256,8 +256,8 @@ test('sidebar selection retires its feed, delayed events and queued metadata ref
  }finally{view.close();}
 });
 
-test('VS Code saves follow-ups to SQLite, cancels pending entries, and starts persisted entries when idle',async()=>{
- const activeRun={id:'active',session_id:'saved',state:'running',graph_root:false,parent_id:'',node_id:''},activeOptions={running:true,runs:[activeRun],inboxItems:[]},active=harness(activeOptions);
+test('VS Code leaves queued-prompt dispatch to the backend and can cancel pending entries',async()=>{
+ const activeRun={id:'active',session_id:'saved',state:'running',graph_root:false,parent_id:'',node_id:''},activeOptions={health:{agent_execution:true,session_inbox_dispatch:true},running:true,runs:[activeRun],inboxItems:[]},active=harness(activeOptions);
  await active.commands.get('agentflow.open')();const activeView=active.views[0];
  try{
   activeView.receive({type:'ready'});await until(()=>active.streams.length===1&&activeView.posted.some(message=>message.type==='inbox'));
@@ -267,10 +267,11 @@ test('VS Code saves follow-ups to SQLite, cancels pending entries, and starts pe
   activeView.receive({type:'cancel-inbox',id:queued.id});await until(()=>activeOptions.inboxItems.length===0&&activeView.posted.some(message=>message.type==='queued-input-cancelled'));
  }finally{activeView.close();}
  let admission;const pending={id:'inbox-restart',session_id:'saved',content:'Recover queued VS Code prompt',state:'queued',created_ms:1};
- const recoveredOptions={runs:[],inboxItems:[pending],onAdmission:body=>{admission=body;return {ok:true,status:202,json:async()=>({id:'recovered-queued-run',session_id:'saved',state:'queued',graph_root:false,parent_id:'',node_id:''})};}},recovered=harness(recoveredOptions);
+ const recoveredOptions={health:{agent_execution:true,session_inbox_dispatch:true},runs:[],inboxItems:[pending],onAdmission:body=>{admission=body;return {ok:true,status:202,json:async()=>({id:'recovered-queued-run',session_id:'saved',state:'queued',graph_root:false,parent_id:'',node_id:''})};}},recovered=harness(recoveredOptions);
  await recovered.commands.get('agentflow.open')();const recoveredView=recovered.views[0];
- try{recoveredView.receive({type:'ready'});await until(()=>admission&&recoveredView.posted.some(message=>message.type==='queued-started'));
-  assert.equal(admission.inbox_id,pending.id);assert.equal(admission.prompt,pending.content);assert.ok(recovered.requests.includes('/v1/runs'));assert.ok(!recovered.errors.length);
+ try{recoveredView.receive({type:'ready'});await until(()=>recoveredView.posted.some(message=>message.type==='inbox'));
+  assert.equal(admission,undefined);assert.ok(!recovered.requests.includes('/v1/runs'),'A backend-owned inbox must not be admitted a second time by VS Code');assert.deepEqual(recoveredOptions.inboxItems,[pending]);assert.ok(!recovered.errors.length);
+  const observe=recovered.scheduledTasks.findLast(task=>task.delay===250);assert.ok(observe,'The sidebar must watch for the native backend to claim recovered input');const run={id:'recovered-queued-run',session_id:'saved',state:'running',graph_root:false,parent_id:'',node_id:''};pending.state='claimed';pending.run_id=run.id;recoveredOptions.runs=[run];await observe.callback();assert.ok(recoveredView.posted.some(message=>message.type==='queued-started'&&message.run.id===run.id));assert.ok(recovered.streams.some(stream=>stream.id===run.id&&stream.options.scope==='run'),'VS Code must attach to the backend-created run');assert.ok(!recovered.requests.includes('/v1/runs'));
  }finally{recoveredView.close();}
 });
 

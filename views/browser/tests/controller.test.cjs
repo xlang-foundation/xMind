@@ -2,6 +2,17 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('browser leaves persisted prompt admission to a backend advertising queue dispatch',async()=>{
+ const calls=[],view=new BrowserController({run:async(...args)=>calls.push(args),sessionInbox:async()=>({items:[{id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'}]})},()=>{});view.session='session';view.health={agent_execution:true,session_inbox_dispatch:true};
+ try{await view.drainInbox();assert.deepEqual(calls,[]);}finally{view.dispose();}
+});
+test('browser attaches to a run claimed by the backend after the active run settles',async()=>{
+ const item={id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'},run={id:'backend-run',session_id:'session',parent_id:'',graph_root:false,state:'running'},posted=[],streams=[];let inbox=[item];
+  const client={baseUrl:'http://127.0.0.1:60405',sessionInbox:async()=>({items:inbox}),status:async id=>{assert.equal(id,run.id);return run;},runs:async()=>[run],events:async()=>[],operations:async()=>[],history:async()=>[],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId='old-run';view.runs=[{id:'old-run',session_id:'session',state:'completed',parent_id:'',graph_root:false}];view.health={agent_execution:true,session_inbox_dispatch:true};
+ try{await view.refreshInbox();await new Promise(resolve=>setTimeout(resolve,300));inbox=[{...item,state:'claimed',run_id:run.id}];await new Promise(resolve=>setTimeout(resolve,300));assert.equal(view.runId,run.id);assert.ok(posted.some(message=>message.type==='queued-started'&&message.run.id===run.id));assert.equal(streams.at(-1).id,run.id);}
+ finally{view.dispose();for(const stream of streams)stream.resolve({reason:'aborted',cursor:0});}
+});
 test('browser removes only the selected idle session after confirmation and clears its transcript',async()=>{
  const calls=[],posted=[],prompts=[];let sessions=[{id:'session-a',title:'Selected conversation'}];const client={sessions:async()=>sessions,deleteSession:async id=>{calls.push(id);sessions=[];return null;}};const view=new BrowserController(client,message=>posted.push(message),{confirm:message=>{prompts.push(message);return true;}});view.session='session-a';view.runs=[{id:'settled-run',state:'completed'}];view.historyPager.session='session-a';view.historyPager.messages=[{id:'msg_1',seq:1,role:'assistant',data:{content:'private history'}}];
  try{await view.handle({type:'delete-session',id:'session-a'});assert.deepEqual(calls,['session-a']);assert.match(prompts[0],/Selected conversation/);assert.match(prompts[0],/Immutable context and audit records remain stored/);assert.equal(view.session,undefined);assert.deepEqual(view.historyPager.snapshot(),{history:[],historyHasMore:false,historyLoading:false});assert.ok(posted.some(message=>message.type==='sessions'&&message.sessions.length===0));assert.deepEqual(posted.at(-1),{type:'session-delete-result',id:'session-a',success:true});assert.ok(!JSON.stringify(posted).includes('private history'));}

@@ -5,9 +5,18 @@ prompt while a session has an active run. The prompt is stored in the native
 SQLite repository before the client reports it as saved. The active run
 continues; the native backend admits the oldest queued prompt through the
 ordinary run path when the session becomes idle. Clients can disconnect without
-stranding accepted input. The backend also scans persisted inboxes at startup
-and resumes queued items after restart. A concurrent admission conflict leaves
-the prompt queued for a later retry.
+stranding accepted input. The backend advertises this ownership as
+`session_inbox_dispatch` in `/v1/health`; browser and VS Code clients use that
+capability to avoid duplicate client-side admission and attach to the run once
+the native queue marks the item claimed. Older backends keep the client-side
+fallback. The backend scans persisted inboxes at startup and resumes queued
+items after restart. A concurrent admission conflict leaves the prompt queued
+for a later retry.
+
+A prompt posted to an idle session receives a one-second dispatch grace period
+so the user can cancel it from the inbox. A prompt posted while the session has
+an active root run wakes the dispatcher immediately; it is admitted after that
+run settles. Startup recovery dispatches persisted prompts immediately.
 
 `GET /v1/sessions/{id}/inbox` returns `{items:[...]}` in enqueue order. Each item
 contains its stable `id`, `session_id`, exact `content`, `state` (`queued` or
@@ -26,8 +35,9 @@ queued. The canceled row is retained internally to reserve its stable ID, but
 is omitted from inbox listings. If a concurrent run already claimed the item,
 cancellation succeeds without changing its audit link. Repeating cancellation
 is idempotent; reusing a canceled ID conflicts. Browser and VS Code show a
-Cancel control for each pending item; the CLI can inspect the same inbox. All
-three clients observe the same backend-owned dispatch and durable run link.
+Cancel control for each pending item. All three clients can inspect and cancel
+the same persisted inbox; browser and VS Code also attach to the durable run
+link after native dispatch.
 
 Run admission accepts `inbox_id` alongside the regular `/v1/runs` fields. In
 one SQLite transaction, the repository verifies that the queued item belongs

@@ -40,7 +40,7 @@ async function activate(context) {
   let runId;
   let sessionRuns=[];
   let cursor = 0;
-  let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer,sessionRefreshTimer,sessionCatalogueSignature;
+  let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer,sessionRefreshTimer,sessionCatalogueSignature,inboxObservationTimer;
   let pendingTreeEvents=false;
   let generation = 0;
   let opening;
@@ -85,7 +85,7 @@ async function activate(context) {
     if(!agentController||agentController.client!==target)agentController=new AgentSelectionController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.agent_selection===true}));
     try{await agentController.read();}catch(error){if(client===target&&version===generation)post({type:'agent-selection-error',text:error.message});}
   }
-  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;clearTimeout(permissionTimer);permissionTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
+  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;clearTimeout(permissionTimer);permissionTimer=undefined;clearTimeout(inboxObservationTimer);inboxObservationTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
   function scheduleSessionRefresh(){clearTimeout(sessionRefreshTimer);if(!panel||health?.active_session_map!==true)return;sessionRefreshTimer=setTimeout(async()=>{sessionRefreshTimer=undefined;if(!panel)return;try{await refresh();}catch{}if(panel)scheduleSessionRefresh();},5000);}
   const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
   function watch(){
@@ -126,7 +126,22 @@ async function activate(context) {
     if(!target||!session)return [];
     const observed=await target.sessionInbox(session);if(target!==client||session!==sessionId||version!==generation||!panel)return [];
     if(!observed||!Array.isArray(observed.items)||observed.items.length>128||observed.items.some(item=>!item||item.session_id!==session||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.content!=='string'||!['queued','claimed'].includes(item.state)))throw new Error('Invalid native session inbox.');
-    post({type:'inbox',items:observed.items});return observed.items;
+    post({type:'inbox',items:observed.items});scheduleInboxObservation(target,session,version,observed.items);return observed.items;
+  }
+  function scheduleInboxObservation(target,session,version,items){
+    clearTimeout(inboxObservationTimer);inboxObservationTimer=undefined;
+    if(health?.session_inbox_dispatch!==true||target!==client||session!==sessionId||version!==generation||!panel||busySession())return;
+    const queued=items.some(item=>item.state==='queued'),unobserved=items.some(item=>item.state==='claimed'&&item.run_id&&!sessionRuns.some(run=>run.id===item.run_id));if(!queued&&!unobserved)return;
+    inboxObservationTimer=setTimeout(async()=>{
+      inboxObservationTimer=undefined;if(target!==client||session!==sessionId||version!==generation||!panel)return;
+      try{const latest=await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+        const item=latest.find(value=>value.state==='claimed'&&value.run_id&&!sessionRuns.some(run=>run.id===value.run_id));if(!item)return;
+        const run=await target.status(item.run_id);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+        if(run.id!==item.run_id||run.session_id!==session||run.parent_id)return;
+        const runs=await target.runs(session);if(target!==client||session!==sessionId||version!==generation)return;
+        clearTimeout(inboxObservationTimer);inboxObservationTimer=undefined;runId=run.id;cursor=0;clearGraph();reviewed.clear();post({type:'operations',operations:[]});sessionRuns=runs;presentRuns();await context.workspaceState.update(runStateKey,{...connectionState(),session_id:session,id:run.id});post({type:'queued-started',item,run});await poll();watch();
+      }catch(error){if(target===client&&session===sessionId&&version===generation&&panel)post({type:'error',text:error.message});}
+    },250);
   }
   async function queuePrompt(prompt){
     const target=client,session=sessionId,version=generation;if(!target||!session)throw new Error('Select a conversation before queuing a prompt.');
@@ -143,7 +158,7 @@ async function activate(context) {
     await refreshInbox(target,session,version);post({type:'queued-input-cancelled',id});
   }
   async function drainInbox(){
-    if(inboxDispatching||!panel||!client||!sessionId||busySession()||health?.agent_execution!==true)return;
+    if(health?.session_inbox_dispatch===true||inboxDispatching||!panel||!client||!sessionId||busySession()||health?.agent_execution!==true)return;
     inboxDispatching=true;const target=client,session=sessionId,version=generation;
     try{
       const items=await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||busySession())return;
@@ -254,7 +269,7 @@ async function activate(context) {
 
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { if(version===generation&&panel){if(!busySession()){await readSkills();await drainInbox();}await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
+    finally { if(version===generation&&panel){if(!busySession()){await readSkills();if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version);else await drainInbox();}await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
   }
 
   async function pollOwned(id,version){
@@ -272,7 +287,7 @@ async function activate(context) {
     if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);await refreshGitChangesSnapshot().catch(()=>{});}
     await readPlan(id,version);if(version!==generation||!panel)return;
     const history=await historyPager.refresh(),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
-    sessionRuns=runs;presentRuns();post({type:'transcript',...history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
+    sessionRuns=runs;presentRuns();post({type:'transcript',...history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version);
     pendingTreeEvents=!snapshot.caughtUp;
   }
 

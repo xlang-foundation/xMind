@@ -1,5 +1,20 @@
 # Current native validation
 
+## Backend-owned session inbox dispatch — 2026-10-15
+
+The native server now advertises `session_inbox_dispatch` and owns queue
+admission, including recovery after restart. It gives prompts sent to an idle
+session a one-second cancellation grace period; prompts queued behind an active
+root run wake the dispatcher immediately and start once that run settles.
+Browser and VS Code observe the claimed run and attach to it instead of
+submitting a duplicate run. Their compatibility fallback remains enabled for
+older servers that do not advertise native dispatch. The Release
+`native_agent_http_contract`, `native_http_cli_contract`,
+`native_local_profile_contract`, and `native_provider_profile_runtime_contract`
+passed (**4/4**, 315.19 seconds). The VS Code suite passed **373/373** and the
+browser suite passed **125/125**. The separate Release OpenRouter
+`native_provider_model_policy_runtime_contract` passed **1/1**.
+
 ## Rendered webpage conversation fork — 2026-10-15
 
 The local TestProj browser completed a short no-tool DeepSeek `deepseek-flash`
