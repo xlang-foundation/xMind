@@ -61,3 +61,6 @@ html,body{overflow-x:hidden}
   .composer-bar #cancel{grid-column:1;grid-row:2}
   .composer-bar #send{grid-column:2;grid-row:2;justify-self:end}
 }
+/* Long run and operation ids must wrap inside history cards at sidebar width. */
+#scroll,.message,.operation,.message-body{min-width:0;max-width:100%}
+#scroll .message h4,#scroll .operation h4,#scroll details>summary{min-width:0;max-width:100%;overflow-wrap:anywhere}
