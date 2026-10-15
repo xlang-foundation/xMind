@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-14",
+  "result": "passed",
+  "source_revision": "df4d2a6e2ddb47bef9d60420b1b4067ffc75b3a5",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "browser_adapter": "http://127.0.0.1:60418/ui/",
+  "native_backend": "http://127.0.0.1:55804",
+  "profile": "Isolated local browser profile; existing profiles and sessions were left untouched.",
+  "credential_source": "Existing configured Gemini credential was imported by the native backend; key was not displayed or entered in the browser.",
+  "model_discovery": {
+    "provider": "Gemini",
+    "models_returned": 11,
+    "selected_model": "models/gemini-2.5-flash"
+  },
+  "run": {
+    "id": "5af9ab4565ee11a6ebc8247afb82fc64",
+    "prompt": "Reply exactly: Gemini diagnostic. Do not call tools or inspect workspace files.",
+    "state": "failed",
+    "provider_http_status": 404,
+    "provider_error_code": null,
+    "provider_error_body_retained": false,
+    "workspace_file_effects": false
+  },
+  "rendered_diagnostic": "The model provider could not find the selected model or endpoint (HTTP 404). Choose another discovered model or check the provider route.",
+  "regression_test": "node --test extensions/vscode/tests/renderer.test.js passed 89/89 tests.",
+  "limitations": "The actual provider response carried no recognized structured NOT_FOUND code. This validates the generic HTTP 404 guidance in the live browser using saved run data; the renderer does not claim why this provider returned 404."
+}

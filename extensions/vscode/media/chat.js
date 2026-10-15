@@ -213,8 +213,8 @@ function runFailure(data){
   const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
   card.append(node('h4','Selected run failed'));
   const status=data?.status;
-  card.append(node('p',data?.reason==='provider_http_error'&&status===404&&data.provider_error_code==='NOT_FOUND'
-    ?'The selected model or provider endpoint was not found or is unavailable to this credential. Choose another discovered model or check the provider route.'
+  card.append(node('p',data?.reason==='provider_http_error'&&status===404
+    ?'The model provider could not find the selected model or endpoint (HTTP 404). Choose another discovered model or check the provider route.'
     :data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='incompatible_provider_history'
