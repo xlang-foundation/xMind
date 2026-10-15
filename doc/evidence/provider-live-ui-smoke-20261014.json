@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-14",
+  "workflow": "Saved provider smoke through the local xMind browser UI",
+  "ui_url": "http://127.0.0.1:60417/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "credentials": "Existing encrypted local provider credentials were reused; no key was entered or exposed in the browser.",
+  "scope": "Each successful request asked for a short text response and explicitly prohibited tool calls and file inspection.",
+  "results": [
+    {
+      "provider": "OpenAI",
+      "wire": "Responses",
+      "model": "gpt-5.6-luna",
+      "run_id": "29d6e7e30262724311861e49727982be",
+      "state": "completed",
+      "input_tokens": 4010,
+      "output_tokens": 93,
+      "total_tokens": 4103,
+      "reasoning_tokens": 63,
+      "first_token_ms": 2200,
+      "elapsed_ms": 2520,
+      "note": "Transport and response completed. The response did not identify its model, while the UI correctly showed the admitted provider and model."
+    },
+    {
+      "provider": "Anthropic",
+      "wire": "Messages",
+      "model": "claude-haiku-4-5-20251001",
+      "run_id": "2e7ddcb769ce089698aa1f5b917170a0",
+      "state": "completed",
+      "input_tokens_uncached": 5102,
+      "output_tokens": 10,
+      "total_tokens": null,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "first_token_ms": 540,
+      "elapsed_ms": 620,
+      "response": "Claude saved-key smoke passed."
+    },
+    {
+      "provider": "Gemini",
+      "wire": "GenerateContent",
+      "model": "models/gemini-3.8-flash",
+      "run_id": "546aea5f9f8e60c8d5a3af8c6822a4ec",
+      "state": "completed",
+      "input_tokens": 4091,
+      "output_tokens": 8,
+      "total_tokens": 4133,
+      "reasoning_tokens": 34,
+      "first_token_ms": 1960,
+      "elapsed_ms": 1970,
+      "response": "Gemini saved-key smoke passed."
+    },
+    {
+      "provider": "DeepSeek",
+      "wire": "Chat Completions",
+      "model": "deepseek-flash",
+      "run_id": "c95c44e8ed37238a6683dc9d711b6a88",
+      "state": "completed",
+      "input_tokens": 4433,
+      "output_tokens": 9,
+      "total_tokens": 4442,
+      "reasoning_tokens": 0,
+      "first_token_ms": 2530,
+      "elapsed_ms": 2560,
+      "response": "DeepSeek saved-key smoke passed."
+    }
+  ],
+  "observed_limits": [
+    "Selecting Claude for the existing OpenAI tool-history conversation was rejected before provider contact because that history was incompatible. A fresh conversation completed successfully with Claude; history remained intact.",
+    "Gemini model discovery returned 11 models using the saved key. models/gemini-2.5-flash returned HTTP 404; models/gemini-3.8-flash completed successfully through the same saved profile. The cause of the single-model 404 was not established."
+  ],
+  "workspace_effects": "No files were read or changed by these four smoke prompts. A separate previously recorded preview process remains uncertain and quarantined; it was not retried.",
+  "source_note": "The live backend binary's exact source revision is not exposed by this UI session; this record proves observed local behavior, not a build-to-commit identity."
+}

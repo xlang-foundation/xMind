@@ -1,5 +1,23 @@
 # Reviewable milestones
 
+## Saved-provider live browser smoke across four gateways — 2026-10-14
+
+The local xMind browser reused its encrypted saved credentials and completed
+short no-tool responses through OpenAI Responses (`gpt-5.6-luna`), Anthropic
+Messages (`claude-haiku-4-5-20251001`), Gemini GenerateContent
+(`models/gemini-3.8-flash`) and DeepSeek Chat Completions (`deepseek-flash`).
+The sidebar showed each admitted profile/model, provider token counts and
+backend timing. First-token latency ranged from 0.54 to 2.53 seconds in these
+four requests. No provider key was entered in the page, and the smoke prompts
+did not invoke workspace tools. A clean conversation was required when changing
+from existing OpenAI-specific tool history to Claude; the original history was
+preserved. Gemini's saved-key catalogue returned 11 models, but the selected
+`models/gemini-2.5-flash` returned HTTP 404 while `models/gemini-3.8-flash`
+completed. The single-model 404 cause remains unverified. The earlier uncertain
+preview operation was not retried. This is live saved-key/provider wire
+evidence, not broad per-model, tool-call, coding or installed-package parity.
+[Sanitized run records](evidence/provider-live-ui-smoke-20261014.json).
+
 ## Native workspace Markdown slash commands — 2026-10-14
 
 xMind now discovers bounded Markdown prompt commands under
