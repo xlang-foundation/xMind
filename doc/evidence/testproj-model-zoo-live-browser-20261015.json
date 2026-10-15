@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-15",
+  "scope": "Rendered browser check of the TestProj Model Zoo frontend and xlang3-hosted API",
+  "xmind_repository_revision": "56e53a9",
+  "workspace": "D:/CantorAI2026/TestProj/model-zoo",
+  "frontend": {
+    "url": "http://127.0.0.1:5173/",
+    "dev_server": "Vite",
+    "page_title": "Model Zoo · model registry catalog",
+    "rendered_content": [
+      "Model Zoo navigation and API docs link",
+      "Two-column search and filter panel",
+      "Catalog hero and actions",
+      "Seeded demo statistics with an explicit illustrative-data disclosure",
+      "Model result cards and pagination"
+    ],
+    "interactions": {
+      "browse_models": "Clicking the hero button moved focus to the catalog search field.",
+      "view_results": "Clicking the results link changed the URL to /#catalog-results and scrolled the model cards into view."
+    },
+    "visual_check": "The in-app browser rendered the page and result cards without an observed layout break."
+  },
+  "backend": {
+    "url": "http://127.0.0.1:8000",
+    "runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/xlang3.exe -m uvicorn app.main:app",
+    "health": {
+      "status": "ok",
+      "app": "Model Zoo API",
+      "version": "0.1.0"
+    },
+    "catalog_stats": {
+      "total_models": 12,
+      "total_task_types": 10,
+      "demo_data": true
+    }
+  },
+  "limitations": [
+    "This is a TestProj website acceptance, not evidence of xMind OpenCode parity.",
+    "Catalog models and metrics are seeded illustrative data, not live registry data.",
+    "The visual review used the Codex in-app browser; an external Chrome window was unavailable in this run."
+  ]
+}
