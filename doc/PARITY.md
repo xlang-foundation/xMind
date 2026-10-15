@@ -243,6 +243,29 @@ xlang3 branch pytest path; a mobile viewport review, broader coding coverage
 and OpenCode parity remain open. See
 [`testproj-vscode-coding-20261013.json`](evidence/testproj-vscode-coding-20261013.json).
 
+## Live VS Code coding and process acceptance (2026-10-15)
+
+A fresh VS Code Extension Development Host opened the TestProj Model Zoo
+workspace with native approved edits enabled. The saved local provider
+configuration supplied Claude credentials without another key prompt; the
+sidebar fetched 13 Claude models and completed a `claude-sonnet-4-6` coding run.
+The approved change to `HomeView.vue` added a search-focused “Browse models”
+button, a working results anchor, and responsive CTA styles with keyboard focus
+and solid hover contrast. Review rejected an earlier replacement that would
+have removed existing scroll behavior, and rejected a CTA proposal before its
+anchor existed. The final reviewed changes touched that source file only.
+
+xMind then used its native `run_process` tool with the trusted PowerShell
+profile to run `npm run build` in `model-zoo/frontend`. Vite 6.4.4 transformed
+37 modules and exited 0; the native process result completed in 2.07 seconds.
+The rendered VS Code sidebar was 292 px wide with both selectors and Send
+visible and no horizontal scrollbar. This confirms one live provider, approved
+edit, and process/build path; it does not establish broad coding coverage,
+browser-page visual acceptance, or OpenCode parity. The TestProj workspace is
+not a Git repository, so its source and generated `dist` files were not
+committed. See
+[`testproj-vscode-live-coding-20261015.json`](evidence/testproj-vscode-live-coding-20261015.json).
+
 The xMind development-host launcher now takes its default xlang3 runtime from
 the same `build/native/CMakeCache.txt` as the C++ server, and verifies their
 runtime DLLs before staging. A fresh VS Code host opened TestProj with the

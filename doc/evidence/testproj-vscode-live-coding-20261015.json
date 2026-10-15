@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "scope": "Live TestProj coding, approval, and frontend build through the xMind VS Code extension",
+  "xmind_repository_revision_at_test": "67463e3",
+  "workspace": {
+    "client": "VS Code Extension Development Host",
+    "root": "D:/CantorAI2026/TestProj",
+    "project": "model-zoo"
+  },
+  "provider": {
+    "name": "Claude",
+    "model": "claude-sonnet-4-6",
+    "credential_source": "Saved local provider profile; secret omitted",
+    "catalogue_models_fetched": 13
+  },
+  "coding_run": {
+    "run_ids": [
+      "d463888893044c35a34bea09d5258356",
+      "6afce25753ee66777c3f3b02314d0d5a",
+      "507b0775b52ef202a16668100ae26ae2"
+    ],
+    "changed_files": [
+      "model-zoo/frontend/src/views/HomeView.vue"
+    ],
+    "approved_changes": [
+      "Added browseModels() to focus and scroll the existing catalog search input.",
+      "Added Browse models and View results hero actions.",
+      "Added the catalog-results id to the existing results element.",
+      "Added responsive CTA styles, solid hover contrast, and keyboard focus rings."
+    ],
+    "reviewed_and_denied": [
+      "A replacement that altered existing scrollToResults behavior.",
+      "A CTA proposal whose #catalog-results link had no matching target."
+    ],
+    "source_sha256": "170E44D675A6E0C8562FAA75FF17E12C1CBE3C32B874ACAF5EFBC98AB135A9B6"
+  },
+  "process_build": {
+    "run_id": "beb72ca44e13568520dce41a3b33e4fa",
+    "profile": "powershell",
+    "command": "npm run build",
+    "working_directory": "model-zoo/frontend",
+    "exit_code": 0,
+    "process_elapsed_ms": 2073,
+    "vite": "6.4.4",
+    "transformed_modules": 37,
+    "vite_build_ms": 748,
+    "stderr_bytes": 0,
+    "generated_assets": [
+      "dist/assets/index-DSePk-z2.js",
+      "dist/assets/index-f4z8zJN9.css"
+    ]
+  },
+  "vscode_sidebar": {
+    "width_px": 292,
+    "provider_and_model_selectors_visible": true,
+    "send_control_visible": true,
+    "horizontal_scrollbar_visible": false,
+    "workspace_edit_policy": "File changes require approval"
+  },
+  "limitations": [
+    "This is one real coding and build acceptance, not broad project coverage or OpenCode parity.",
+    "The Model Zoo site itself was not opened in a browser for visual review in this run.",
+    "TestProj is not a Git repository; its source and generated build artifacts were left in the workspace and not committed."
+  ]
+}
