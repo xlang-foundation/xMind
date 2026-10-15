@@ -25,6 +25,20 @@ the filtered Whisper Small result and its detail page in the Codex in-app
 browser; external Chrome is unavailable in this session. See the complete
 [TestProj browser evidence](evidence/testproj-xmind-browser-coding-20261015.json).
 
+## Saved-provider sidebar and live inference — 2026-10-15
+
+The rendered browser's saved profiles discovered 13 Claude models, 11 Gemini
+models and 2 DeepSeek models without manual model-ID entry. Live requests using
+`claude-sonnet-4-6`, `models/gemini-3.8-flash` and `deepseek-flash` returned the
+requested exact replies. OpenAI `gpt-5.6-sol` is covered by the live browser
+coding run above. Gemini `models/gemini-2.5-flash` was listed but returned HTTP
+404 for this key; the same Gemini route succeeded with 3.8 Flash. Google
+currently limits 2.5-model access to users who have actively used them, so the
+failed selection is recorded as account/model availability rather than a route
+failure ([Google model catalogue](https://ai.google.dev/gemini-api/docs/models)).
+Per-run timings and IDs are in
+[provider sidebar evidence](evidence/provider-sidebar-live-20261015.json).
+
 ## Native graph restore — 2026-10-15
 
 The Release graph-runner contract now exercises a registered two-node graph:

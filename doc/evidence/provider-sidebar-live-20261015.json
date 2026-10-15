@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-15",
+  "client": "xMind local browser UI",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "credential_policy": "Saved local profiles reused; no key values were displayed or recorded.",
+  "results": [
+    {
+      "provider": "OpenAI",
+      "model": "gpt-5.6-sol",
+      "run_id": "d64c16ca6863f39b8c1f4c9fab4ade9f",
+      "scenario": "Reviewed file creation followed by an xlang3 process run",
+      "result": "passed"
+    },
+    {
+      "provider": "Claude",
+      "model": "claude-sonnet-4-6",
+      "discovered_models": 13,
+      "run_id": "285cdf985c153bdd9aadf3c5e808e378",
+      "reply": "Claude provider smoke passed.",
+      "first_token_seconds": 1.06,
+      "elapsed_seconds": 1.17,
+      "result": "passed"
+    },
+    {
+      "provider": "Gemini",
+      "discovered_models": 11,
+      "run_id": "88e7fd6c1bb6c755d4bfcef57e1fe40c",
+      "model": "models/gemini-3.8-flash",
+      "reply": "Gemini provider smoke passed.",
+      "first_token_seconds": 1.83,
+      "elapsed_seconds": 1.84,
+      "result": "passed"
+    },
+    {
+      "provider": "Gemini",
+      "run_id": "14a751009ffa999a3067e0133b3cd182",
+      "model": "models/gemini-2.5-flash",
+      "result": "rejected_before_provider_call",
+      "error": "The conversation contained incompatible OpenAI provider history."
+    },
+    {
+      "provider": "Gemini",
+      "run_id": "17458b09c5cc2d2a670edd877b8019ef",
+      "model": "models/gemini-2.5-flash",
+      "result": "failed",
+      "http_status": 404,
+      "error": "The selected model or endpoint was not found.",
+      "note": "The account's model catalogue included this ID, but inference was unavailable for this key. Google currently restricts 2.5-model access to users who have actively used those models; see the official model catalogue."
+    },
+    {
+      "provider": "DeepSeek",
+      "discovered_models": 2,
+      "run_id": "34f78790190ba63a561e52bb6c535e62",
+      "model": "deepseek-flash",
+      "reply": "DeepSeek provider smoke passed.",
+      "first_token_seconds": 0.97,
+      "elapsed_seconds": 1.24,
+      "result": "passed"
+    }
+  ],
+  "conclusion": "Saved-provider discovery and sidebar model selection worked for Claude, Gemini and DeepSeek; each returned live inference through its native adapter. OpenAI's real coding run is recorded in the TestProj browser acceptance. The Gemini 2.5 404 is account/model availability, not a Gemini endpoint-shape failure; models/gemini-3.8-flash succeeded through the same route."
+}
