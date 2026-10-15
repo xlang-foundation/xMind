@@ -79,6 +79,9 @@ struct AgentDefinitionMetadata {
     std::string mode = "all";
     bool hidden = false;
     bool is_default = false;
+    // Ordered rules are part of an agent's effective behavior and must be
+    // visible anywhere the backend publishes the reusable profile catalogue.
+    std::vector<AgentPermissionRule> permissions;
 };
 
 struct AgentDefinitionCatalog {

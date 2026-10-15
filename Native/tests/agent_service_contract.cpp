@@ -56,7 +56,7 @@ int main(int argc,char** argv) {
         {
             AgentService repeated(store,settings,1,1);
             store.create_session("profile_snapshot","profile snapshot").get();
-            const auto catalogue=repeated.agent_definitions();require(catalogue.size()==3&&catalogue[0].id=="service.profile"&&catalogue[0].mode=="all"&&!catalogue[0].hidden&&!catalogue[0].is_default&&catalogue[1].id=="service.default"&&catalogue[1].is_default&&catalogue[2].mode=="subagent","Agent service must expose safe mode, visibility and default metadata");
+            const auto catalogue=repeated.agent_definitions();require(catalogue.size()==3&&catalogue[0].id=="service.profile"&&catalogue[0].mode=="all"&&!catalogue[0].hidden&&!catalogue[0].is_default&&catalogue[0].permissions==std::vector<AgentPermissionRule>{{"read_file","README.md","deny"}}&&catalogue[1].id=="service.default"&&catalogue[1].is_default&&catalogue[2].mode=="subagent","Agent service must expose ordered permissions alongside mode, visibility and default metadata");
             const auto detail=repeated.agent_definition("service.profile");require(detail.instructions.find("service-profile-instructions")!=std::string::npos&&detail.model_id=="synthetic-service-protocol"&&detail.tools&&*detail.tools==std::vector<std::string>{"read_file"},"Agent service must return the persisted definition and bounded tool allowlist");
             rejects<NotFound>([&]{repeated.agent_definition("missing-agent");});
             store.create_session("default_profile","default profile selection").get();

@@ -90,9 +90,9 @@ Json session_skill_metadata(const std::string& session,const WorkspaceSessionSki
     return {{"session_id",session},{"workspace_id",value.workspace.workspace_id},{"authority_id",value.workspace.authority_id},
         {"revision",value.state.revision},{"ids",value.state.selections.ids},{"manual_ids",value.state.selections.manual_ids},{"editable",value.state.editable}};
 }
-Json agent_metadata(const AgentDefinitionMetadata& value){return {{"id",value.id},{"revision",value.revision},{"model_id",value.model_id},{"name",value.name.empty()?value.id:value.name},{"description",value.description},{"mode",value.mode},{"hidden",value.hidden},{"default",value.is_default}};}
+Json agent_metadata(const AgentDefinitionMetadata& value){Json permissions=Json::array();for(const auto& rule:value.permissions)permissions.push_back({{"action",rule.action},{"resource",rule.resource},{"effect",rule.effect}});return {{"id",value.id},{"revision",value.revision},{"model_id",value.model_id},{"name",value.name.empty()?value.id:value.name},{"description",value.description},{"mode",value.mode},{"hidden",value.hidden},{"default",value.is_default},{"permissions",std::move(permissions)}};}
 Json session_agent_metadata(const std::string& session,const SessionAgentState& value){
-    const auto selected=value.selected?agent_metadata({value.selected->id,value.selected->revision,value.selected->model_id,value.selected->name,value.selected->description,value.selected->mode,value.selected->hidden,value.selected->is_default}):Json(nullptr);
+    const auto selected=value.selected?agent_metadata({value.selected->id,value.selected->revision,value.selected->model_id,value.selected->name,value.selected->description,value.selected->mode,value.selected->hidden,value.selected->is_default,value.selected->permissions}):Json(nullptr);
     return {{"session_id",session},{"revision",value.revision},{"editable",value.editable},{"selected",selected}};
 }
 Json session_model_metadata(const std::string& session,const SessionModelState& value){
