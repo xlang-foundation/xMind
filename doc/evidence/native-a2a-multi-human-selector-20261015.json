@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-15",
+  "source_commit": "4aab67fd438d8ea1310bae7fe151c2f7a84fb258",
+  "scope": "Native A2A task status projection and selected continuation for simultaneous sibling human questions.",
+  "behavior": [
+    "tasks/get exposes each pending question as a status-message part with xmind.human_request_id metadata.",
+    "message/send requires metadata.xmind.human_request_id when multiple questions are pending.",
+    "Ambiguous and stale selectors are rejected without admitting the A2A message.",
+    "A selected answer wakes the same root task; unanswered siblings remain pending for the next pause.",
+    "Retrying a committed message returns the same task and does not answer the question twice."
+  ],
+  "build": {
+    "command": "& 'C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe' --build build/native --config Release --target agentflow_dynamic_plan_engine_contract xmind -- /m:8",
+    "result": "passed"
+  },
+  "contracts": [
+    {
+      "name": "native_dynamic_plan_engine_contract",
+      "result": "passed",
+      "notes": "Exercises A2aTaskControl dispatch, status metadata, ambiguous/stale rejection, selected sibling continuation, retry identity, and the next durable pause using actual AgentService and xlang3/SQLite. Provider replies are synthetic."
+    },
+    {
+      "name": "native_a2a_task_control_http_contract",
+      "result": "passed"
+    },
+    {
+      "name": "native_a2a_message_http_contract",
+      "result": "passed"
+    }
+  ],
+  "limits": [
+    "No live external A2A peer interoperability test exercises the xMind metadata selector.",
+    "Continuation of arbitrary messages into an active provider turn remains unsupported."
+  ]
+}
