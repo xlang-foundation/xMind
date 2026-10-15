@@ -41,12 +41,31 @@
         "native AgentRunner reaches an independent synthetic provider endpoint"
       ],
       "ctest_seconds": 1.36
+    },
+    {
+      "name": "native_a2a_agent_registry_contract",
+      "direction": "xMind native AgentRunner -> registered synthetic A2A peer",
+      "result": "passed",
+      "scope": [
+        "registered peer metadata and bearer credential stored through xlang3-backed SQLite",
+        "typed agent tool discovery and approval bound to exact peer revision and prompt",
+        "actual native remote dispatch and streaming event journaling",
+        "denial without peer dispatch",
+        "post-dispatch uncertainty, SQLite reopen inspection and resubscription without send replay",
+        "owner-authenticated registry APIs and same-origin local view access"
+      ],
+      "ctest_seconds": 1.83,
+      "binary_sha256": "F8C0F763A61486FD7A91EF76E32CA2992F0DEAF945CA3EEFDA041C207951F180"
     }
   ],
   "aggregate": {
-    "passed": 2,
+    "passed": 3,
     "failed": 0,
-    "command": "ctest --test-dir build/goal-current-a2a -C Release -R 'native_a2a_(client_sdk|v1_http)_contract' --output-on-failure"
+    "commands": [
+      "ctest --test-dir build/goal-current-a2a -C Release -R native_a2a_client_sdk_contract --output-on-failure",
+      "ctest --test-dir build/goal-current-a2a -C Release -R native_a2a_v1_http_contract --output-on-failure",
+      "ctest --test-dir build/goal-current-a2a -C Release -R a2a_agent_registry --output-on-failure"
+    ]
   },
   "limitations": [
     "Peer and provider behavior is test-fixture behavior; this is not a live external service or model acceptance.",

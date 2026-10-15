@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-15",
+  "xmind_commit": "7bbae8f4f814e449bcd43c9d1f3659ca7b6166dd",
+  "scope": "Current-source Node contracts for the browser UI/controller and VS Code extension host/renderer",
+  "commands": [
+    {
+      "directory": "extensions/vscode",
+      "command": "node --test tests/*.test.js",
+      "tests": 365,
+      "passed": 365,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 4041
+    },
+    {
+      "directory": ".",
+      "command": "node --test views/browser/tests/*.test.cjs",
+      "tests": 119,
+      "passed": 119,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 15195
+    }
+  ],
+  "aggregate": {
+    "tests": 484,
+    "passed": 484,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "These contracts use synthetic host/controller and DOM fixtures.",
+    "They do not constitute installed VS Code acceptance or a live rendered browser workflow."
+  ]
+}
