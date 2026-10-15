@@ -91,9 +91,10 @@ definition's model or instructions. A configured model ID must be enabled by
 the backend before the graph can run. Agent IDs remain retired after removal.
 A named definition does not grant tools or native authority: its optional
 allowlist can only narrow the server-registered tools, workspace access and
-approval policy. Ordered permission rules can deny a tool/resource or let a
-later `allow` override an earlier agent-level denial. Rules use the native tool
-name (or `*`) and a workspace-relative glob. For example:
+approval policy. Ordered permission rules can deny a tool/resource, request a
+one-shot controller approval for workspace reads, or let a later `allow`
+override an earlier agent-level denial. Rules use the native tool name (or `*`)
+and a workspace-relative glob. For example:
 
 ```yaml
 permissions:
@@ -103,6 +104,9 @@ permissions:
   - action: read_file
     resource: "config/example.env"
     effect: allow
+  - action: search_files
+    resource: "src/**"
+    effect: ask
   - action: run_process
     resource: "*"
     effect: deny
@@ -110,7 +114,12 @@ permissions:
 
 The backend checks these rules before dispatch and snapshots them with the
 conversation and graph node. For direct resources, the last matching agent
-rule wins. `allow` only clears an earlier agent rule; it cannot widen the tool
+rule wins. `ask` creates the same durable, exact-argument operation approval
+shown for other controller-reviewed operations; an asked read does not run
+until approved, and its operation records the actual read result. Directory
+enumeration is conservative when an asked descendant may be exposed. Saved
+grants and session-wide permission APIs are not implemented yet. `allow` only
+clears an earlier agent rule; it cannot widen the tool
 allowlist, workspace membership or native authorization, and it never skips an
 effect approval. Inherited policy ceilings are evaluated separately, so a
 child profile cannot clear a restriction inherited from its parent. Directory

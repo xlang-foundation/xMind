@@ -59,7 +59,7 @@ inline bool agent_permission_may_cover_directory(const AgentPermissionRule& rule
 }
 }
 
-enum class AgentPermissionEffect { no_match, allow, deny };
+enum class AgentPermissionEffect { no_match, allow, ask, deny };
 
 inline AgentPermissionEffect agent_permission_effect(const std::vector<AgentPermissionRule>& rules,
                                                        const std::string& action, const std::string& resource) {
@@ -67,8 +67,11 @@ inline AgentPermissionEffect agent_permission_effect(const std::vector<AgentPerm
     for (auto it=rules.rbegin();it!=rules.rend();++it) {
         const auto& rule=*it;
         if ((rule.action == "*" || rule.action == action) &&
-            detail::agent_permission_glob(rule.resource, normalized_resource))
-            return rule.effect=="allow"?AgentPermissionEffect::allow:AgentPermissionEffect::deny;
+            detail::agent_permission_glob(rule.resource, normalized_resource)) {
+            if(rule.effect=="allow")return AgentPermissionEffect::allow;
+            if(rule.effect=="ask")return AgentPermissionEffect::ask;
+            return AgentPermissionEffect::deny;
+        }
     }
     return AgentPermissionEffect::no_match;
 }
@@ -83,6 +86,15 @@ inline bool agent_permission_denies_directory_enumeration(const std::vector<Agen
                                                            const std::string& directory) {
     for (const auto& rule : rules)
         if (rule.effect == "deny" && detail::agent_permission_may_cover_directory(rule, action, directory))
+            return true;
+    return false;
+}
+
+inline bool agent_permission_asks_directory_enumeration(const std::vector<AgentPermissionRule>& rules,
+                                                          const std::string& action,
+                                                          const std::string& directory) {
+    for (const auto& rule : rules)
+        if (rule.effect == "ask" && detail::agent_permission_may_cover_directory(rule, action, directory))
             return true;
     return false;
 }

@@ -68,14 +68,16 @@ permission-rule parity remains incomplete.
 ## Native per-agent permission rules — 2026-10-15
 
 Agent YAML may attach up to 128 ordered `{action, resource, effect}` rules.
-Direct resource checks use the last matching `allow` or `deny`; `allow` only
-overrides prior agent-level rules and cannot widen native workspace/tool
+Direct resource checks use the last matching `allow`, `ask` or `deny`; `allow`
+only overrides prior agent-level rules and cannot widen native workspace/tool
 authority, clear a separately inherited parent ceiling, or bypass a separate
-effect approval. The native runner checks paths
+effect approval. `ask` pauses native workspace reads for a one-shot controller
+decision using the durable exact-operation journal. The native runner checks paths
 before dispatch, conservatively blocks directory enumeration that could expose
 a restricted path, and checks every prepared patch target before any patch
-proposal executes. Interactive `ask`, saved grants and permission request APIs
-remain unsupported. `run_process` requires a broad `resource: "*"` rule because
+proposal executes. Saved grants and permission request APIs remain incomplete:
+asks do not create reusable grants, and session-wide permission APIs remain
+unsupported. `run_process` requires a broad `resource: "*"` rule because
 its process can access more than its working directory. Rules are included in
 agent revisions, conversation snapshots and archives, named delegated-agent
 snapshots, and resolved graph-agent nodes. Existing backend approval and
@@ -83,9 +85,9 @@ workspace authority remain in force.
 
 Release contracts verify profile parsing and revisioning, ordered direct-path
 evaluation, persistence, delegation/graph snapshots, archive transport, and
-real native runner deny, later-allow, and inherited-deny outcomes. This is partial parity only:
-interactive asks, saved grants, session policy and permission request APIs
-remain parity work.
+real native runner deny, later-allow, inherited-deny, controller-approved read
+and controller-denied read outcomes. This is partial parity only: saved grants,
+session policy and permission request APIs remain parity work.
 
 ## xlang3 process profile with deep runtime paths — 2026-10-15
 

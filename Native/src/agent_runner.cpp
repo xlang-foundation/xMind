@@ -17,6 +17,7 @@
 #include "agentflow/agent_authority.hpp"
 #include "agentflow/agent_definitions.hpp"
 #include "agentflow/run_executor.hpp"
+#include "agentflow/permission_waiter.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <random>
@@ -342,9 +343,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& layer:inherited_permission_layers)if(agent_permission_denies(layer,action,resource))return true;
         return agent_permission_denies(agent_permission_rules,action,resource);
     };
+    const auto permission_asks=[&](const std::string& action,const std::string& resource){
+        for(const auto& layer:inherited_permission_layers)if(agent_permission_effect(layer,action,resource)==AgentPermissionEffect::ask)return true;
+        return agent_permission_effect(agent_permission_rules,action,resource)==AgentPermissionEffect::ask;
+    };
     const auto directory_enumeration_denied=[&](const std::string& action,const std::string& directory){
         for(const auto& layer:inherited_permission_layers)if(agent_permission_denies_directory_enumeration(layer,action,directory))return true;
         return agent_permission_denies_directory_enumeration(agent_permission_rules,action,directory);
+    };
+    const auto directory_enumeration_asks=[&](const std::string& action,const std::string& directory){
+        for(const auto& layer:inherited_permission_layers)if(agent_permission_asks_directory_enumeration(layer,action,directory))return true;
+        return agent_permission_asks_directory_enumeration(agent_permission_rules,action,directory);
     };
     auto execution_settings=settings_;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
     if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
@@ -831,12 +840,15 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             while(permission_resource.starts_with("./"))permission_resource.erase(0,2);
                             if(permission_resource.empty())permission_resource=".";
                         }
+                        if(permission_resource=="*"&&(call.name=="search_files"||call.name=="find_files"||call.name=="glob_files"))permission_resource=".";
                     }
                     if(permission_denied(call.name,permission_resource))
                         throw AgentPermissionDenied("Selected agent policy denied this tool resource");
-                    if((call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files")&&
-                       directory_enumeration_denied(call.name,permission_resource))
+                    const bool enumerates_directory=call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files";
+                    if(enumerates_directory&&directory_enumeration_denied(call.name,permission_resource))
                         throw AgentPermissionDenied("Selected agent policy denies enumeration of a directory containing restricted resources");
+                    const bool agent_permission_ask=permission_asks(call.name,permission_resource)||
+                        (enumerates_directory&&directory_enumeration_asks(call.name,permission_resource));
                     if(selected_repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=selected_repository_context->skills().ready(token);
                     if(selected_repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
                         Json args=folder_scoped?scoped_args:Json{};if(!folder_scoped)try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
@@ -919,7 +931,22 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
                             cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];persistence_.append_a2a_task_event(id,a2a_operation,journal.dump()).get();
                         }));
-                    } else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
+                    } else {
+                        const bool askable_read=call.name=="read_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files";
+                        if(agent_permission_ask&&askable_read){
+                            const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                            OperationSpec spec{id,selected_workspace->identity(),call.name,call.arguments_json,{}};
+                            auto approved=PermissionWaiter(persistence_).acquire(operation_id(),spec,expiry,token);
+                            try{
+                                auto source=run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token);
+                                output=Json::parse(source);
+                                persistence_.finish_operation(approved.id,OperationState::succeeded,std::move(source)).get();
+                            }catch(...){
+                                persistence_.finish_operation(approved.id,OperationState::failed,R"({"reason":"permission_asked_read_failed"})").get();
+                                throw;
+                            }
+                        }else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
+                    }
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }
                 catch(const PermissionCancelled&) {throw;}

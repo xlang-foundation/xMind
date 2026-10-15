@@ -9,7 +9,8 @@
 namespace agentflow {
 struct AgentPermissionRule {
     // Ordered policy rules layer on backend authorization. A matching allow may
-    // clear an earlier agent rule, never native workspace/effect authorization.
+    // clear an earlier agent rule and ask pauses for controller review; neither
+    // can bypass native workspace/effect authorization.
     // Actions name a native tool or '*'; resources are workspace-relative globs.
     std::string action;
     std::string resource;
@@ -52,8 +53,8 @@ inline void validate_agent_permission_rules(const std::vector<AgentPermissionRul
             rule.resource.empty() || rule.resource.size() > 1024 || rule.resource.find('\0') != std::string::npos ||
             rule.resource.find(':') != std::string::npos || rule.resource.find('\\') != std::string::npos ||
             rule.resource.front() == '/' || parent_component ||
-            (rule.effect != "deny" && rule.effect != "allow"))
-            throw std::invalid_argument("Invalid agent permission rule; only ordered allow/deny rules are currently supported");
+            (rule.effect != "deny" && rule.effect != "allow" && rule.effect != "ask"))
+            throw std::invalid_argument("Invalid agent permission rule; effects must be allow, ask or deny");
     }
 }
 

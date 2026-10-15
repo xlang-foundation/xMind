@@ -89,6 +89,27 @@ int main(int argc,char** argv) {
         store.create_session("agent-permission-ceiling","Inherited native permission ceiling fixture").get();auto permission_ceiling=settings;permission_ceiling.provider.endpoint=base+"/agent-permission-deny";permission_ceiling.permission_rules={{"read_file","README.md","deny"}};
         AgentRunner ceiling_runner(store,permission_ceiling);ceiling_runner.start("agent-permission-ceiling","agent-permission-ceiling","Do not read the workspace readme");require(ceiling_runner.execute("agent-permission-ceiling",{}, {}, {}, {}, {},false,{{"read_file","README.md","allow"}}).state==RunState::completed,"A child/profile allow cannot override an inherited permission ceiling");
         const auto ceiling_history=store.history("agent-permission-ceiling").get();const auto ceiling_result=Json::parse(Json::parse(ceiling_history[2].json).at("content").get<std::string>());require(ceiling_result.at("error").at("code")=="agent_permission_denied","Inherited denies must remain hard constraints when profile rules include allow");
+        const auto run_asked_read=[&](const std::string& session,const std::string& route,bool allow){
+            store.create_session(session,"Native one-shot permission ask fixture").get();auto ask_settings=settings;ask_settings.provider.endpoint=base+route;ask_settings.permission_rules={{"read_file","README.md","ask"}};
+            AgentRunner ask_runner(store,ask_settings);ask_runner.start(session,session,"Read the workspace readme");std::stop_source cancellation;
+            auto execution=std::async(std::launch::async,[&]{return ask_runner.execute(session,cancellation.get_token());});
+            std::optional<Operation> proposal;const auto deadline=std::chrono::steady_clock::now()+5s;
+            while(std::chrono::steady_clock::now()<deadline&&!proposal){
+                if(execution.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Ask-policy read ended before controller review");
+                for(const auto& operation:store.operations(session).get())if(operation.state==OperationState::awaiting_approval){proposal=operation;break;}
+                if(!proposal)std::this_thread::sleep_for(5ms);
+            }
+            if(!proposal){cancellation.request_stop();(void)execution.get();throw std::runtime_error("Ask-policy read did not publish a durable approval request");}
+            require(proposal->spec.run_id==session&&proposal->spec.tool=="read_file"&&Json::parse(proposal->spec.arguments_json)==Json{{"path","README.md"}},"Ask request must bind the exact owning run, tool and arguments");
+            require(store.history(session).get().size()==1,"Asked read must remain undispatched until the controller decides");
+            store.decide_operation(proposal->id,allow?OperationDecision::allow:OperationDecision::deny,"fixture-controller").get();
+            require(execution.get().state==RunState::completed,"The model loop must resume after a one-shot permission decision");
+            const auto saved=store.operation(proposal->id).get();
+            if(allow){require(saved.state==OperationState::succeeded&&Json::parse(saved.result_json).at("content")=="Actual file content written by fixture\n","Allowed read must execute once and durably settle the asked operation");const auto history=store.history(session).get();const auto result=Json::parse(Json::parse(history[2].json).at("content").get<std::string>());require(result.at("content")=="Actual file content written by fixture\n","Allowed read output must continue to the model");}
+            else{require(saved.state==OperationState::denied,"Denied permission ask must remain durably denied");const auto history=store.history(session).get();const auto result=Json::parse(Json::parse(history[2].json).at("content").get<std::string>());require(result.at("error").at("code")=="permission_denied","Denied read must return a denied result without dispatching the workspace tool");}
+        };
+        run_asked_read("agent-permission-ask","/agent-permission-ask",true);
+        run_asked_read("agent-permission-ask-deny","/agent-permission-ask-deny",false);
         const auto attached_root=std::filesystem::path(argv[4]).parent_path()/L"attached";
         WorkspaceTools primary(argv[4]),attached(attached_root.string());
         const auto primary_id=primary.identity(),attached_id=attached.identity(),primary_root=primary.root_path(),attached_canonical=attached.root_path();
