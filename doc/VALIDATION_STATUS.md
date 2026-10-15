@@ -2559,7 +2559,15 @@ with Visual Studio 18 CMake. The focused CTest run passed
 `native_delegation_contract` (1/1). It verifies that model-facing delegation
 guidance recommends direct handling for small/sequential edits, concise scoped
 child findings, and warns that child calls share the parent model-call and
-wall-clock budgets. This checks the native tool contract, not live model
-behavior after installing the rebuilt executable; the previously exercised
-TestProj browser run used the existing runtime and separately verified direct
-coding, approval, and Vite build behavior.
+wall-clock budgets. A fresh hash-verified development runtime for exact xMind
+revision `bc2d222a9e2a2f5fe04858fa81deadfddb9de0ce` was then launched with an
+isolated local profile and browser on `127.0.0.1:57746`, using the configured
+saved Claude profile. The UI fetched 13 Claude models and a real
+`claude-sonnet-4-6` request to explain `hello.py` completed in the parent tool
+loop: one `read_file`, zero delegated children, and no write or process
+operations. The provider reported two model attempts, each with uncached input
+and output metrics, and the run completed successfully. This verifies direct
+handling for a small read-only task on the rebuilt executable. It does not yet
+prove model behavior across larger tasks, coding edits, or other providers; the
+separate TestProj coding run and Vite build were exercised on the earlier
+runtime.
