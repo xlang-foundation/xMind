@@ -81,6 +81,15 @@ window handle became stale on two fresh lookups; no interaction was attempted
 from it. This is rendered browser evidence only, not screenshot-based visual
 review or new browser/VS Code coding acceptance. [Sanitized observation](evidence/testproj-rendered-browser-ui-20261014.json).
 
+## Current browser and VS Code client contracts — 2026-10-14
+
+The current checkout passes the complete automated browser and VS Code
+extension contract command **456/456**, with zero failures, cancellations or
+skips in 15.42 seconds. This includes workspace switching, provider/model
+selection, reconnect ownership, session history, run activity and sidebar
+behavior. These contracts do not substitute for the separately recorded live
+browser acceptance or prove a current installed VS Code package. [Test result](evidence/browser-vscode-contracts-current-20261014.json).
+
 ## Concurrent sibling nested plans — 2026-10-14
 
 Independent dynamic-agent siblings can now accept nested plans while sharing

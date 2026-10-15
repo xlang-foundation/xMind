@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-14",
+  "sourceRevision": "49627558d1bb7cb55e1a84f707786aef65e4e9b6",
+  "command": "node --test extensions/vscode/tests/*.test.js views/browser/tests/*.test.cjs",
+  "exitCode": 0,
+  "passed": 456,
+  "failed": 0,
+  "cancelled": 0,
+  "skipped": 0,
+  "elapsedMilliseconds": 15419.224,
+  "scope": "Automated browser UI and VS Code extension contracts; no current installed VS Code interaction or full OpenCode parity claim."
+}
