@@ -344,6 +344,8 @@ test('recorded provider identifiers render without raw error messages or unknown
   const card=doc.getElementById('run-failure');assert.match(card.textContent,/Type: invalid_request_error/);assert.match(card.textContent,/Code: unsupported_parameter/);assert.match(card.textContent,/Parameter: n/);assert.ok(!card.textContent.includes('private-fixture-key'));
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,provider_error_type:'private-fixture-key',provider_error_code:'<script>fixtureAttack()</script>',provider_error_param:'private-fixture-key'}}});
   assert.equal(card.querySelector('details'),null);assert.ok(!card.textContent.includes('private-fixture-key'));assert.equal(card.querySelector('script'),null);
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:404,provider_error_code:'NOT_FOUND',message:'private provider response'}}});
+  assert.match(card.textContent,/selected model or provider endpoint was not found or is unavailable to this credential/i);assert.match(card.textContent,/Code: NOT_FOUND/);assert.ok(!card.textContent.includes('private provider response'));
 });
 
 test('durable command output renders independent channels without executing markup or controls',()=>{

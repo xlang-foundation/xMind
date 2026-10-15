@@ -213,7 +213,9 @@ function runFailure(data){
   const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
   card.append(node('h4','Selected run failed'));
   const status=data?.status;
-  card.append(node('p',data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
+  card.append(node('p',data?.reason==='provider_http_error'&&status===404&&data.provider_error_code==='NOT_FOUND'
+    ?'The selected model or provider endpoint was not found or is unavailable to this credential. Choose another discovered model or check the provider route.'
+    :data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='incompatible_provider_history'
     ?'xMind stopped this request before contacting the provider: this conversation contains provider-specific history that the selected model cannot use. The saved provider key was not the cause. Start a new conversation to use this model, or switch back to the model used for this history. The recorded history is preserved.'
@@ -246,7 +248,7 @@ function runFailure(data){
   if(data?.reason==='provider_http_error'){
     const fields=[
       ['Type','provider_error_type',['invalid_request_error','authentication_error','permission_error','rate_limit_error','server_error','insufficient_quota']],
-      ['Code','provider_error_code',['unsupported_parameter','unsupported_value','invalid_value','missing_required_parameter','model_not_found','invalid_api_key','insufficient_quota','context_length_exceeded','rate_limit_exceeded']],
+      ['Code','provider_error_code',['unsupported_parameter','unsupported_value','invalid_value','missing_required_parameter','model_not_found','invalid_api_key','insufficient_quota','context_length_exceeded','rate_limit_exceeded','NOT_FOUND','PERMISSION_DENIED','INVALID_ARGUMENT','UNAUTHENTICATED','RESOURCE_EXHAUSTED','FAILED_PRECONDITION','UNAVAILABLE','DEADLINE_EXCEEDED']],
       ['Parameter','provider_error_param',['model','messages','tools','tool_choice','n','stream','stream_options','stream_options.include_usage','max_completion_tokens','max_tokens','temperature','top_p','reasoning_effort','response_format','input','instructions','max_output_tokens']]
     ],lines=[];
     for(const [label,key,allowed] of fields)if(allowed.includes(data[key]))lines.push(label+': '+data[key]);

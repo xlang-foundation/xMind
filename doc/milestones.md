@@ -18,6 +18,18 @@ preview operation was not retried. This is live saved-key/provider wire
 evidence, not broad per-model, tool-call, coding or installed-package parity.
 [Sanitized run records](evidence/provider-live-ui-smoke-20261014.json).
 
+The 2.5 Flash HTTP 404 exposed an observability gap: Google’s structured
+`NOT_FOUND` status was discarded even though the HTTP status survived. The
+native transport now preserves only a strict allowlist of provider status
+identifiers, and the shared browser/VS Code failure card explains that the
+selected model or endpoint may be unavailable to the saved credential without
+showing the provider’s error body. A synthetic Gemini socket contract passes
+the structured-404 boundary, the VS Code renderer suite passes **89/89**, and
+the Release `xmind` executable links successfully. Google documents that
+Gemini 2.5 Flash has no announced shutdown but access is restricted to users
+who actively used 2.5; this supports an account-access explanation but does
+not establish the cause of this specific 404. [Google Gemini deprecations](https://ai.google.dev/gemini-api/docs/deprecations/).
+
 ## Native workspace Markdown slash commands — 2026-10-14
 
 xMind now discovers bounded Markdown prompt commands under

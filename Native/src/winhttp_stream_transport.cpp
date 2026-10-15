@@ -274,6 +274,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
                     };
                     failure.type=allowed("type",{"invalid_request_error","authentication_error","permission_error","rate_limit_error","server_error","insufficient_quota"});
                     failure.code=allowed("code",{"unsupported_parameter","unsupported_value","invalid_value","missing_required_parameter","model_not_found","invalid_api_key","insufficient_quota","context_length_exceeded","rate_limit_exceeded"});
+                    if(failure.code.empty())failure.code=allowed("status",{"NOT_FOUND","PERMISSION_DENIED","INVALID_ARGUMENT","UNAUTHENTICATED","RESOURCE_EXHAUSTED","FAILED_PRECONDITION","UNAVAILABLE","DEADLINE_EXCEEDED"});
                     failure.param=allowed("param",{"model","messages","tools","tool_choice","n","stream","stream_options","stream_options.include_usage","max_completion_tokens","max_tokens","temperature","top_p","reasoning_effort","response_format","input","instructions","max_output_tokens"});
                 }
             }

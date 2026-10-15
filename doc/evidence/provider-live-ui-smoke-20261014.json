@@ -66,7 +66,7 @@
   ],
   "observed_limits": [
     "Selecting Claude for the existing OpenAI tool-history conversation was rejected before provider contact because that history was incompatible. A fresh conversation completed successfully with Claude; history remained intact.",
-    "Gemini model discovery returned 11 models using the saved key. models/gemini-2.5-flash returned HTTP 404; models/gemini-3.8-flash completed successfully through the same saved profile. The cause of the single-model 404 was not established."
+    "Gemini model discovery returned 11 models using the saved key. models/gemini-2.5-flash returned HTTP 404; models/gemini-3.8-flash completed successfully through the same saved profile. The cause of the single-model 404 was not established. Google's current Gemini API deprecation page says Gemini 2.5 Flash has no announced shutdown but access is limited to users who actively used 2.5: https://ai.google.dev/gemini-api/docs/deprecations/"
   ],
   "workspace_effects": "No files were read or changed by these four smoke prompts. A separate previously recorded preview process remains uncertain and quarantined; it was not retried.",
   "source_note": "The live backend binary's exact source revision is not exposed by this UI session; this record proves observed local behavior, not a build-to-commit identity."
