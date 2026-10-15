@@ -31,6 +31,16 @@ letters, numbers, `_`, `-` and `.`. This inspection is read-only and does not
 start a run. The current implementation is only a partial OpenCode mapping;
 mode, permission, description, visibility and source metadata remain absent.
 
+## Restore an approved file change
+
+`restore SESSION OPERATION_ID` starts a native restore graph for a successful
+file operation from that conversation. The backend revalidates the saved
+operation and proposes its inverse through the ordinary approval journal; the
+CLI does not write the inverse directly or bypass review. Inspect the new run
+and approve its proposed operation through the existing operation controls.
+The graph restore contract exercises this command against the real xlang3/SQLite
+backend and verifies that the file stays unchanged until approval.
+
 ## Selected workspace connection
 
 Use an explicit workspace when attaching the console to a local backend:

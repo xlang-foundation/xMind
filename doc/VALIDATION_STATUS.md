@@ -1,5 +1,16 @@
 # Current native validation
 
+## Console restore for approved coding changes — 2026-10-15
+
+The native console now accepts `restore SESSION OPERATION_ID` and submits the
+same authenticated restore request used by the browser and VS Code. The
+graph-service HTTP/CLI integration contract starts the restore through the
+console, verifies session and graph ownership, observes the exact inverse
+proposal, confirms the file remains unchanged while approval is pending, then
+approves the inverse and verifies the file is removed. The restore path makes
+no model request. Release targets `xmind` and `xmind_cli` built successfully;
+`native_graph_service_http_contract` passed (1/1).
+
 ## Live browser coding acceptance — 2026-10-15
 
 From the rendered local browser UI, the current TestProj workspace created the
