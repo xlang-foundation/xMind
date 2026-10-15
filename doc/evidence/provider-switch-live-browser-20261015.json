@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "kind": "sanitized-live-provider-switch-acceptance",
+  "date": "2026-10-15",
+  "sourceRevision": "11ac730",
+  "xmindExecutableSha256": "b718e98afc953452a9bd09cfdafb3f4f0e177de7babd0b612c9bac03fac0b190",
+  "xlang3Branch": "xmind-required-compat",
+  "xlang3Revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "xlang3MainIncluded": true,
+  "xlang3RuntimeDllSha256": "88a00148f42d55ce1ac21ed9bea96ff13c6a6993475680e1a5897ce862ed8448",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "interface": "http://127.0.0.1:51433/ui/",
+  "profile": "isolated local browser profile; provider credentials were reused from local configuration",
+  "sequence": [
+    {
+      "provider": "Claude",
+      "model": "claude-sonnet-4-6",
+      "prompt": "Reply with exactly: Claude context bridge test started.",
+      "result": "completed",
+      "response": "Claude context bridge test started.",
+      "inputTokens": 5427,
+      "outputTokens": 9,
+      "firstTokenSeconds": 1.18,
+      "responseSeconds": 1.29
+    },
+    {
+      "provider": "OpenAI",
+      "model": "gpt-5.6-sol",
+      "prompt": "Reply with exactly: Provider switch succeeded.",
+      "result": "completed",
+      "response": "Provider switch succeeded.",
+      "inputTokens": 3545,
+      "outputTokens": 8,
+      "cachedTokens": 3504,
+      "firstTokenSeconds": 1.05,
+      "responseSeconds": 1.25,
+      "sameConversation": true,
+      "priorClaudeTextRetained": true
+    }
+  ],
+  "nativeContracts": {
+    "native_provider_history_bridge_contract": "passed",
+    "native_context_engine_contract": "passed"
+  },
+  "releaseAccepted": false,
+  "limitations": [
+    "Verifies Claude-to-OpenAI switching in the local browser only.",
+    "Does not establish other wire combinations, every model, VS Code switching, or OpenCode feature parity."
+  ]
+}
