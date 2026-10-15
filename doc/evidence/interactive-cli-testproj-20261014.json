@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-14",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "profile": "existing managed local TestProj profile",
+  "runtime_executable_sha256": "EF035986FAC8B38737C21D12F8D60EE6DD4A2585EC830F4E9B593C52F4E64906",
+  "input": [
+    "/sessions",
+    "/exit"
+  ],
+  "sessions_listed": 6,
+  "selected_session": "",
+  "exit_code": 0,
+  "provider_requests": 0,
+  "new_session_created": false,
+  "scope": "Direct packaged Windows CLI smoke test for read-only session listing and clean exit; no model turn or full-screen CLI parity claimed."
+}

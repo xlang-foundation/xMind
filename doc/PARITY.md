@@ -347,6 +347,12 @@ The actual managed TestProj CLI workspace result is recorded separately in
 This validates the listed local CLI contracts, not full-screen or OpenCode
 parity. [Focused gate record](evidence/managed-cli-focused-contracts-20261014.json).
 
+The packaged console was also run directly from `D:\CantorAI2026\TestProj` on
+the existing managed local profile. `/sessions` returned the six saved
+conversations, `/exit` detached cleanly, and the CLI exited with code 0 without
+creating a session or sending a provider request. The executable SHA-256 and
+sanitized result are in [interactive CLI evidence](evidence/interactive-cli-testproj-20261014.json).
+
 ## MCP resources and prompts (2026-10-11)
 
 The native MCP registry now discovers resources and prompts alongside tools for
