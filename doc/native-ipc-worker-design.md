@@ -89,21 +89,40 @@ Trusted xlang3 tool definitions accept `execution: in_process|worker` in the
 existing startup YAML and SQLite snapshot; omitted placement stays
 `in_process`. The single `xmind` executable hosts the private `worker` entry
 point and packages its xlang3 service script beside the binary. For `worker`,
-the backend starts one child for that tool call, probes the random `lrpc:`
-endpoint with the selected xlang3 runtime, verifies that the endpoint reports
-the child PID, and transfers only bounded JSON strings. The child runs the
-trusted module/function binding and the backend owns the model loop and
-persisted tool result. A cancellation request terminates the child. The worker
-starts with a minimal Windows environment so provider credentials held in
-backend environment variables are not copied into it.
+the backend starts a child on the first call for a trusted tool binding and
+reuses that child for later calls. It probes the random `lrpc:` endpoint with
+the selected xlang3 runtime, verifies that the endpoint reports the child PID,
+and transfers only bounded JSON strings. The child runs the trusted
+module/function binding and the backend owns the model loop and persisted tool
+result. Calls to one worker are serialized. Cancellation retires the child; a
+later call can start a replacement. The worker starts with a minimal Windows
+environment so provider credentials held in backend environment variables are
+not copied into it.
 
 The native contract uses an actual xlang3 fixture and unified `xmind` child,
-checks the returned value through IPC, then cancels a slow callable and checks
-prompt child retirement. A second contract sends the tool call through the
-real AgentRunner/model protocol fixture and verifies the persisted continuation.
-This path starts a process per tool call; it is not yet a reusable worker pool.
+checks repeated and concurrent call behavior through IPC, then cancels a slow
+callable and checks prompt child retirement. A second contract sends the tool
+call through the real AgentRunner/model protocol fixture and verifies the
+persisted continuation.
 The PID check binds discovery to the spawned process but is not an
 authentication boundary against another process running as the same user.
-Durable leases, scoped capabilities, restart reconciliation, worker pooling,
-and OS sandboxing remain unimplemented; no completion or isolation guarantee
-for those features is implied.
+Durable leases, scoped capabilities, restart reconciliation, and OS sandboxing
+remain unimplemented; no completion or isolation guarantee for those features
+is implied.
+
+## Reusable trusted-tool workers — 2026-10-15
+
+The native xlang3 callable bridge now keeps a worker process for each exact
+trusted binding (module, function and code/runtime roots), serializes calls to
+that worker, and reuses its imported callable across successive invocations.
+The registry is capped at 16 sessions; when full it retires an idle session,
+and reports capacity exhaustion if every session is in use. Cancellation or an
+IPC/result failure retires the worker. xMind never retries a dispatched call
+after transport failure, since the callable may already have produced an
+effect. A later invocation may start a replacement worker. The Release
+`native_xlang3_shared_memory_worker_contract` verifies repeated calls observe
+the same worker-local module state and cancellation retires a slow worker; the
+actual AgentRunner contract verifies tool-result continuation through the
+reused-worker path. This is an in-process scheduler-owned local pool only:
+leases, durable attempt journaling/reconciliation, worker identity beyond the
+spawned PID, remote distribution, and OS sandboxing remain open.

@@ -2733,3 +2733,32 @@ focused provider/graph/MCP contracts passed **3/3**, and both modern and legacy
 MCP SDK contracts passed **2/2** independently. The earlier parallel CTest
 attempt used stale mixed native executables and was stopped; only the clean,
 fully rebuilt 145/145 result above is the current full-suite result.
+
+## Reusable xlang3 tool workers — 2026-10-15
+
+The Release `xmind` binary now reuses one local xlang3/LRPC worker process for
+repeated calls to the same trusted binding. A per-worker mutex serializes
+concurrent calls. The process-session registry is limited to 16 bindings and
+retires an idle worker to admit a new binding; if every slot is active, new
+bindings fail explicitly. Cancellation and transport/result failures retire
+the worker, and the runtime does not replay a dispatched call. The focused
+`native_xlang3_shared_memory_worker_contract` and
+`native_agent_runner_contract` pass **2/2**, exercising module-state reuse,
+concurrent-call serialization, cancellation, and actual model-tool
+continuation. The clean full Release run passes **145/145** in **378.78
+seconds**: [full CTest output](evidence/native-reusable-workers-ctest-retry-20261015.log).
+One earlier full run produced a transient `native_local_view_contract` 503
+while the profile/view contracts overlapped; that contract passed by itself,
+the pair passed concurrently, and the final full run passed both. The first
+run and concurrency rerun are retained in [initial output](evidence/native-reusable-workers-ctest-20261015.log),
+[isolated view output](evidence/native-local-view-contract-rerun-20261015.log),
+and [profile/view concurrency output](evidence/native-local-profile-view-concurrency-20261015.log).
+This is a local trusted-callable pool only. Durable worker leases and attempt
+reconciliation, authentication stronger than spawned-PID matching, remote
+distribution, and OS sandboxing remain unverified or unimplemented.
+
+The local-view provider-configuration test cleanup now signals its exact
+test-owned backend PIDs before waiting for verified process exit. Its focused
+contract passed **1/1**, and a process inventory confirmed **0** remaining
+servers under the test's Temp fixture prefix. This closes a test-harness leak;
+it is not a product process-management claim. [Focused output](evidence/native-local-view-provider-cleanup-20261015.log).

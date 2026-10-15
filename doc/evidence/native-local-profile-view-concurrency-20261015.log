@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/native-dynamic-plan
+    Start 121: native_local_profile_contract
+    Start 122: native_local_view_contract
+1/2 Test #122: native_local_view_contract .......   Passed   80.50 sec
+2/2 Test #121: native_local_profile_contract ....   Passed  301.66 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) = 301.68 sec

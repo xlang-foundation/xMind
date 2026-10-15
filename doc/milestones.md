@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## Reusable xlang3 tool workers — 2026-10-15
+
+Registered trusted xlang3 tools now reuse a local process across calls for the
+same module/function/runtime roots. xMind serializes concurrent invocations to
+each worker, caps the process registry at 16 sessions, retires an idle session
+when capacity is needed, and retires workers after cancellation or an IPC/result
+failure. It never retries a dispatched call after transport failure. The
+Release worker and actual AgentRunner contracts pass **2/2**, including
+worker-local state reuse, serialized concurrent calls, cancellation, and
+persisted model continuation. The complete Release CTest suite passes
+**145/145** in **378.78 seconds**. A prior full run had one transient local-view
+profile-record publish failure; the contract passed alone and with the slow
+local-profile contract in parallel, then passed in the final full run. Durable
+attempt leases/reconciliation, worker authentication beyond spawned PID,
+remote scheduling, and OS sandboxing remain open. [Design and limits](native-ipc-worker-design.md),
+[final full test output](evidence/native-reusable-workers-ctest-retry-20261015.log).
+
 ## Optional OpenRouter model provider — 2026-10-15
 
 xMind's native model gateway now exposes OpenRouter as an optional provider

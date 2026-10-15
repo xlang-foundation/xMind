@@ -5,12 +5,17 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <array>
+#include <algorithm>
 #include <charconv>
 #include <filesystem>
 #include <stdexcept>
 #include <thread>
 #include <vector>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <exception>
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -60,9 +65,18 @@ std::wstring quote(const std::wstring& value) {
     for(wchar_t c:value){if(c==L'\\'){++slashes;continue;}result.append(c==L'\"'?slashes*2+1:slashes,L'\\');slashes=0;result.push_back(c);}
     result.append(slashes*2,L'\\');result.push_back(L'\"');return result;
 }
-struct Process {
+struct WorkerSession {
+    std::mutex invocation;
     HANDLE process=nullptr;
-    ~Process(){if(process){TerminateProcess(process,1);WaitForSingleObject(process,5000);CloseHandle(process);}}
+    std::uint32_t port=0;
+    ~WorkerSession(){retire();}
+    bool alive() const { return process&&WaitForSingleObject(process,0)==WAIT_TIMEOUT; }
+    void stop_process() const { if(process)TerminateProcess(process,1); }
+    void retire() {
+        if(!process)return;
+        if(WaitForSingleObject(process,0)==WAIT_TIMEOUT)TerminateProcess(process,1);
+        WaitForSingleObject(process,5000);CloseHandle(process);process=nullptr;port=0;
+    }
 };
 std::uint32_t random_port() {
     std::uint32_t value=0;
@@ -81,6 +95,49 @@ std::vector<wchar_t> worker_environment() {
     std::vector<wchar_t> result;
     for(const auto& [key,value]:variables){result.insert(result.end(),key.begin(),key.end());result.push_back(L'=');result.insert(result.end(),value.begin(),value.end());result.push_back(L'\0');}
     result.push_back(L'\0');return result;
+}
+std::string worker_key(const std::string& modules,const std::string& stdlib,const std::string& code_root,
+    const std::string& module,const std::string& function,const std::string& executable) {
+    std::string key;
+    for(const auto* value:{&modules,&stdlib,&code_root,&module,&function,&executable}){
+        key+=std::to_string(value->size());key.push_back(':');key+=*value;key.push_back('\0');
+    }
+    return key;
+}
+std::shared_ptr<WorkerSession> worker_session(const std::string& key) {
+    static std::mutex mutex;
+    static std::unordered_map<std::string,std::shared_ptr<WorkerSession>> sessions;
+    std::lock_guard lock(mutex);
+    if(const auto found=sessions.find(key);found!=sessions.end())return found->second;
+    constexpr std::size_t max_sessions=16;
+    if(sessions.size()>=max_sessions){
+        const auto idle=std::find_if(sessions.begin(),sessions.end(),[](const auto& entry){return entry.second.use_count()==1;});
+        if(idle==sessions.end())throw std::runtime_error("xMind agent worker capacity reached");
+        idle->second->retire();sessions.erase(idle);
+    }
+    auto session=std::make_shared<WorkerSession>();sessions.emplace(key,session);return session;
+}
+void start_worker(WorkerSession& session,const std::filesystem::path& binary,
+    const std::string& modules_root,const std::string& stdlib_root,const std::string& code_root,
+    const std::string& module,const std::string& function) {
+    const auto script=binary.parent_path()/L"worker"/L"agent_worker.py";
+    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
+    for(int attempt=0;attempt<8;++attempt){
+        const auto port=random_port();std::wstring command=quote(binary.wstring())+L" worker";
+        for(const auto& [key,value]:std::vector<std::pair<std::string,std::string>>{{"--agent-port",std::to_string(port)},{"--modules",modules_root},{"--stdlib",stdlib_root},{"--code-root",code_root},{"--module",module},{"--function",function}})command+=L" "+quote(wide(key))+L" "+quote(wide(value));
+        command.push_back(L'\0');STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION created{};auto environment=worker_environment();
+        if(!CreateProcessW(binary.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,environment.data(),binary.parent_path().c_str(),&startup,&created))throw std::runtime_error("Cannot start xMind agent worker");
+        CloseHandle(created.hThread);session.process=created.hProcess;session.port=port;
+        X::Runtime probe;const std::string endpoint="lrpc:"+std::to_string(port);const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
+        while(std::chrono::steady_clock::now()<deadline){
+            if(WaitForSingleObject(session.process,0)==WAIT_OBJECT_0){session.retire();break;}
+            X3LrpcEndpointInfo info{};info.size=sizeof(info);
+            if(x3_runtime_probe_remote(probe.get(),endpoint.c_str(),100,&info)==X3_STATUS_OK&&info.pid==created.dwProcessId)return;
+            std::this_thread::sleep_for(std::chrono::milliseconds(25));
+        }
+        session.retire();
+    }
+    throw std::runtime_error("xMind agent worker did not become ready");
 }
 #endif
 }
@@ -113,22 +170,25 @@ std::string invoke_xlang_python_worker(const std::string& modules_root,const std
     const auto arguments=Json::parse(arguments_json);if(!arguments.is_object())throw std::invalid_argument("xlang3 tool arguments must be an object");
     if(cancel.stop_requested())throw XlangPythonCancelled();
 #if defined(_WIN32)
-    const auto binary=worker_executable.empty()?executable_path():std::filesystem::u8path(worker_executable);const auto script=binary.parent_path()/L"worker"/L"agent_worker.py";
-    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
-    Process child;std::uint32_t port=0;
-    for(int attempt=0;attempt<8;++attempt){port=random_port();std::wstring command=quote(binary.wstring())+L" worker";
-        for(const auto& [key,value]:std::vector<std::pair<std::string,std::string>>{{"--agent-port",std::to_string(port)},{"--modules",modules_root},{"--stdlib",stdlib_root},{"--code-root",code_root},{"--module",module},{"--function",function}})command+=L" "+quote(wide(key))+L" "+quote(wide(value));
-        command.push_back(L'\0');STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION created{};auto environment=worker_environment();
-        if(!CreateProcessW(binary.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,environment.data(),binary.parent_path().c_str(),&startup,&created))throw std::runtime_error("Cannot start xMind agent worker");
-        CloseHandle(created.hThread);child.process=created.hProcess;
-        std::stop_callback stop(cancel,[&]{if(child.process)TerminateProcess(child.process,1);});
-        X::Runtime probe;const std::string endpoint="lrpc:"+std::to_string(port);bool ready=false;
-        const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
-        while(std::chrono::steady_clock::now()<deadline){if(cancel.stop_requested())throw XlangPythonCancelled();if(WaitForSingleObject(child.process,0)==WAIT_OBJECT_0)throw std::runtime_error("xMind agent worker exited during startup");X3LrpcEndpointInfo info{};info.size=sizeof(info);if(x3_runtime_probe_remote(probe.get(),endpoint.c_str(),100,&info)==X3_STATUS_OK&&info.pid==created.dwProcessId){ready=true;break;}std::this_thread::sleep_for(std::chrono::milliseconds(25));}
-        if(ready){try{auto remote=probe.ImportRemote("xmind_agent_worker",endpoint.c_str());const auto invoke=remote["invoke"];X::Value output;const std::vector<X::Value> args{X::Value(probe,arguments.dump())};if(!invoke.Call(args,output)||!output.IsString())throw std::runtime_error("xMind agent worker returned an invalid result");const auto serialized=output.ToString();validate_json_result(serialized);const auto result=Json::parse(serialized);(void)result;if(cancel.stop_requested())throw XlangPythonCancelled();return serialized;}catch(...){if(cancel.stop_requested())throw XlangPythonCancelled();throw;}}
-        throw std::runtime_error("xMind agent worker did not become ready");
+    const auto binary=worker_executable.empty()?executable_path():std::filesystem::u8path(worker_executable);
+    auto session=worker_session(worker_key(modules_root,stdlib_root,code_root,module,function,path_text(binary)));
+    std::unique_lock invocation(session->invocation);
+    if(cancel.stop_requested())throw XlangPythonCancelled();
+    if(!session->alive()){session->retire();start_worker(*session,binary,modules_root,stdlib_root,code_root,module,function);}
+    std::string serialized;std::exception_ptr failure;
+    {
+        std::stop_callback stop(cancel,[session]{session->stop_process();});
+        try{
+            X::Runtime probe;const std::string endpoint="lrpc:"+std::to_string(session->port);
+            auto remote=probe.ImportRemote("xmind_agent_worker",endpoint.c_str());const auto invoke=remote["invoke"];X::Value output;
+            const std::vector<X::Value> args{X::Value(probe,arguments.dump())};
+            if(!invoke.Call(args,output)||!output.IsString())throw std::runtime_error("xMind agent worker returned an invalid result");
+            serialized=output.ToString();validate_json_result(serialized);
+        }catch(...){failure=std::current_exception();}
     }
-    throw std::runtime_error("Could not allocate a private xMind agent worker endpoint");
+    if(cancel.stop_requested()){session->retire();throw XlangPythonCancelled();}
+    if(failure){session->retire();std::rethrow_exception(failure);}
+    return serialized;
 #else
     (void)modules_root;(void)stdlib_root;(void)code_root;(void)module;(void)function;
     throw std::runtime_error("Out-of-process xlang3 workers are supported on Windows only");
