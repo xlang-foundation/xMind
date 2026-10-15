@@ -77,8 +77,12 @@ command passes all nine backend tests with the original deep modules path.
 The change is pushed to `CantorAI/xlang3` branch `xmind-required-compat` at
 `fcecf499`; xlang3 `main` is unchanged. Exact scope and results are recorded
 in [the TestProj runtime-path evidence](evidence/testproj-xlang3-long-runtime-path-20261015.json).
-This validates the runtime and process command, not a fresh rendered browser
-click-through.
+The browser UI was then connected to TestProj, fetched 13 Claude models using
+the saved encrypted provider key, and ran the configured xlang3 profile from
+`model-zoo/backend`; the UI recorded exit code 0 and nine passing tests. The
+run took 2.93 seconds at the process boundary, and the Claude response took
+6.22 seconds with a 2.92-second first-token time. This acceptance covers one
+provider and one workspace command, not VS Code or the remaining feature set.
 
 ## Native local session archive (2026-10-13)
 

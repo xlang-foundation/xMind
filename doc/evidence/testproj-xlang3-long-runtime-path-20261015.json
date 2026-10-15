@@ -18,8 +18,24 @@
     "result": "passed",
     "summary": "9 passed, 1 existing Starlette/AnyIO deprecation warning, 1.61 seconds"
   },
+  "browserAcceptance": {
+    "surface": "xMind local browser UI",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "providerProfile": "claude",
+    "model": "claude-sonnet-4-6",
+    "credentialSource": "Existing encrypted local xMind provider profile; no key was entered into the browser",
+    "modelDiscovery": "passed; 13 Anthropic models loaded",
+    "prompt": "Run exactly one command using the configured xlang3 process tool: profile xlang3, workdir model-zoo/backend, arguments [\"-m\",\"pytest\",\"-q\"], timeout_ms 120000. Do not use CPython and do not edit files.",
+    "actualExecutable": "xlang3.exe in the isolated xMind-managed runtime",
+    "actualArguments": ["-B", "-m", "pytest", "-q"],
+    "processExitCode": 0,
+    "result": "9 passed, 1 existing Starlette/AnyIO deprecation warning, 1.74 seconds",
+    "commandWallTimeSeconds": 2.93,
+    "modelFirstTokenSeconds": 2.92,
+    "modelResponseSeconds": 6.22
+  },
   "limitations": [
-    "Provider replies and keys were not involved.",
-    "This validates the actual xlang3 process and workspace command, but does not claim a fresh rendered browser click-through."
+    "The saved Claude profile was used for one model request; the key remained in the encrypted local xMind profile and was never entered into the browser or included in the prompt.",
+    "Browser acceptance covers one configured Claude profile and TestProj backend test command; it does not prove all providers, VS Code, or the remaining AgentFlow feature set."
   ]
 }
