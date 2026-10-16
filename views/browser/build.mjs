@@ -11,12 +11,12 @@ export async function buildBrowserAssets(targetPath,adapterPath){
   const {browserHtml}=require('./page.cjs');
   await mkdir(target,{recursive:true});
   await writeFile(join(target,'index.html'),browserHtml());
-  for(const [source,name] of [["extensions/vscode/patch-review.js","patch-review.js"],["extensions/vscode/media/chat.js","chat.js"],["extensions/vscode/media/chat.css","chat.css"],["extensions/vscode/client.js","client.js"],["extensions/vscode/node_modules/marked/lib/marked.umd.js","marked.js"],["extensions/vscode/node_modules/dompurify/dist/purify.min.js","purify.js"],["views/browser/browser.js","browser.js"],["views/browser/browser.css","browser.css"]])
+  for(const [source,name] of [["extensions/vscode/patch-review.js","patch-review.js"],["extensions/vscode/media/chat.js","chat.js"],["extensions/vscode/media/chat.css","chat.css"],["extensions/vscode/client.js","client.js"],["extensions/vscode/node_modules/marked/lib/marked.umd.js","marked.js"],["extensions/vscode/node_modules/dompurify/dist/purify.min.js","purify.js"],["extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js","xterm.js"],["extensions/vscode/node_modules/@xterm/xterm/css/xterm.css","xterm.css"],["extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js","xterm-fit.js"],["views/browser/terminal.js","terminal.js"],["views/browser/browser.js","browser.js"],["views/browser/browser.css","browser.css"]])
     await copyFile(join(root,source),join(target,name));
   console.log('Browser view assets built at '+target);
   const notices=join(target,'licenses');
   await mkdir(notices,{recursive:true});
-  for(const [source,name] of [['marked/LICENSE','marked.txt'],['dompurify/LICENSE','dompurify.txt'],['dompurify/LICENSE-MPL','dompurify-MPL.txt']])
+  for(const [source,name] of [['marked/LICENSE','marked.txt'],['dompurify/LICENSE','dompurify.txt'],['dompurify/LICENSE-MPL','dompurify-MPL.txt'],['@xterm/xterm/LICENSE','xterm.txt'],['@xterm/addon-fit/LICENSE','xterm-addon-fit.txt']])
     await copyFile(join(root,'extensions/vscode/node_modules',source),join(notices,name));
   if(adapterPath){
     const adapter=resolve(adapterPath);

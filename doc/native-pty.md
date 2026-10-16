@@ -30,8 +30,14 @@ stays line-based for scripted use. The VT mapping covers printable Unicode,
 control keys, arrows, navigation and function keys. VS Code opens the same backend-owned shell in its native terminal
 panel through a pseudoterminal bridge. The bridge pins one workspace,
 conversation and server generation, then relays terminal bytes without
-interpreting or estimating output. Full-screen application behavior still
-requires acceptance in a real console and editor terminal.
+interpreting or estimating output. The browser view uses xterm.js and the same
+session-authenticated xMind terminal routes; it keeps the project file tree
+visible while switching the preview pane to the terminal. Both editor clients
+pin one workspace and conversation, relay byte-cursor output, send input and
+resize updates, and close their terminal when the view disconnects or its
+conversation/workspace changes. The browser does not start a local shell.
+Full-screen application behavior still requires acceptance in a real browser,
+console and editor terminal.
 
 The in-memory output ring retains at most 1 MiB per terminal. Each response
 returns the next sequence, whether older bytes were truncated, and actual
@@ -47,7 +53,9 @@ launches the unified CLI inside a nested Windows ConPTY, types through
 command output. The native contract launches the real system command shell in
 an isolated fixture workspace, waits for its initial prompt, sends a synthetic echo command,
 checks exact output replay, resizes the pseudoconsole, observes shell exit and
-closes the session. The HTTP integration contract runs the same lifecycle
+closes the session. Browser terminal unit and page-contract tests verify
+session-bound creation, UTF-8 output, input, resize, close and the same-origin
+route allowlist. The HTTP integration contract runs the same lifecycle
 through the actual native server. It also attaches the CLI to a real fixture
 shell, sends commands and confirms output and cleanup. VS Code bridge tests
 cover UTF-8 chunk boundaries, input and resize routing, and workspace

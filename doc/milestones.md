@@ -38,9 +38,12 @@ The strengthened `native_local_view_contract` now passes **1/1**: its real
 native SQLite server, production browser adapter and VS Code `BackendClient`
 share a session, restart the backend, then each read the exact same saved
 history. This proves the shared API and persistence layer, while rendered
-cross-client session selection remains to be verified. The latest client
-suites pass **377/377** in VS Code and
-**129/129** in the browser; rebuilt native patch, patch-tool, edit-executor,
+cross-client session selection remains to be verified. The browser now also
+opens a real xterm.js terminal against the same native session-bound PTY as
+VS Code, with authenticated input/output/resize/close routes and cleanup on
+workspace or conversation changes. The browser page and PTY unit contracts
+pass; real browser acceptance remains outstanding. The latest client suites
+pass **377/377** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
 agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
 
