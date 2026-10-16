@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-16",
+  "scope": "Native/browser/VS Code client session visibility across native backend restart",
+  "xmind_revision": "b32a484",
+  "command": "ctest --test-dir build/a2a-native -C Release -R ^native_local_view_contract$ --output-on-failure",
+  "result": {
+    "tests": 1,
+    "passed": 1,
+    "failed": 0,
+    "duration_seconds": 80.04
+  },
+  "coverage": {
+    "backend": "Actual xMind native server with xlang3-backed SQLite persistence",
+    "browser": "Production local browser adapter and BackendClient history route",
+    "vscode": "The VS Code extension's production BackendClient pointed at the same native server",
+    "scenario": "One persisted session was read through both client paths after restarting the native backend process.",
+    "assertion": "Browser and VS Code BackendClient history responses exactly matched the saved native session history; the run remained singular and was not replayed."
+  },
+  "limits": [
+    "The coding/model interaction was not repeated in this contract; separate live acceptance records cover one coding task in each client.",
+    "This is client-to-backend integration evidence, not a rendered screenshot or live inspection of the same session in both UI surfaces."
+  ]
+}

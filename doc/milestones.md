@@ -29,11 +29,16 @@ production build successfully. The [browser record](evidence/testproj-xmind-brow
 and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
 capture those results. The first coding loop is therefore demonstrated in
 each client, but the first target remains active until restart persistence and
-the same session/change history being visible across both clients are verified
-as one acceptance. The latest client suites pass **377/377** in VS Code and
+the same session/change history is confirmed in both rendered clients.
+The strengthened `native_local_view_contract` now passes **1/1**: its real
+native SQLite server, production browser adapter and VS Code `BackendClient`
+share a session, restart the backend, then each read the exact same saved
+history. This proves the shared API and persistence layer, while rendered
+cross-client session selection remains to be verified. The latest client
+suites pass **377/377** in VS Code and
 **129/129** in the browser; rebuilt native patch, patch-tool, edit-executor,
-agent HTTP and unified HTTP contracts pass **5/5**. Those contracts support the
-live runs but do not replace the remaining shared-session and restart check.
+agent HTTP and unified HTTP contracts pass **5/5**. See the
+[cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
 
 ## CLI attachment to native queued runs — 2026-10-15
 
