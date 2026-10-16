@@ -11,7 +11,7 @@ The initial `3fc4204` planning source also passed its [exact hosted gate](https:
 
 ![Architecture](architecture.svg)
 
-The platform combines xMind's general-agent and graph concepts with coding capabilities referenced from OpenCode and model coverage referenced from LiteLLM. We implement the shared core in C++. xlang3 runs scripts, skills and compatible pure-Python libraries. The CLI and IDE use the same backend. This is the proposed design; it does not claim that the native implementation is complete.
+The platform combines xMind's general-agent and graph concepts with selected coding-workflow ideas from OpenCode and provider-coverage research from LiteLLM. Those projects are references only: xMind has its own native engine, provider adapters, APIs, commands and user experience. Compatibility and feature parity with them are not requirements. We implement the shared core in C++. xlang3 runs scripts, skills and compatible pure-Python libraries. The CLI and IDE use the same backend. This is the proposed design; it does not claim that the native implementation is complete.
 
 Coding has three OSS clients: native console CLI, HTML/browser UI and the VS Code extension. They use the same local xMind Server API and durable session/event contracts. Views render backend state; execution, tools, permissions, model routing and persistence remain in C++ with embedded xlang3.
 
@@ -36,9 +36,9 @@ remains xMind; AgentFlow describes its single-agent and graph capability.
 | Native C++ core with embedded xlang3 | Actual execution through supported native SDK ownership rules; no CPython runtime or native-extension fallback |
 | Local xMind Server and SQLite | Durable sessions/history/events, encrypted credentials, recovery and concurrent client inspection; database I/O through xlang3 |
 | Single and graph agents | Shared real model/tool engine, dynamic delegation/replanning, dependencies, branching, human input, cancellation and checkpoints |
-| Coding engine and CLI | Relevant pinned OpenCode core coding behavior, real workspace/Git/process tools, approvals, context management, reviewable changes and interactive console workflows |
+| Coding engine and CLI | xMind-owned coding workflows with real workspace/Git/process tools, approvals, context management, reviewable changes and interactive console workflows; OpenCode is a source of selected ideas, not a contract |
 | Browser and VS Code | Right-side agent UI, resizable layout, bottom model chooser, Settings, durable connection, rendered history/code and actual response metrics |
-| Native providers | Broad frontier-model support guided by pinned LiteLLM inventory, provider-specific wire/authentication, account model discovery and separate encrypted keys; per-model capability and live acceptance evidence |
+| Native providers | Broad frontier-model support guided by ecosystem research, including LiteLLM's provider inventory; xMind-owned provider protocols, authentication, account model discovery and encrypted keys, with per-model capability and live acceptance evidence |
 | MCP and A2A | Native interoperability over in-scope transports, shared permissions/execution, independent peers and actual protocol acceptance |
 
 Team-server features (organizations, shared company sessions, multi-user/tenant
