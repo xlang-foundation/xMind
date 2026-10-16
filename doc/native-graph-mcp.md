@@ -131,6 +131,14 @@ gate and retain its **98 extension and 17 browser tests** in the local scope,
 without rerunning those suites locally for this native change.
 [Local evidence](evidence/native-graph-mcp-local-provenance.json).
 
+On 2026-10-15, the current checkout rebuilt the Release server, CLI,
+administrator and graph contract, then passed `native_graph_mcp_contract` and
+`native_graph_mcp_http_contract` (**2/2**, 10.66 seconds). The actual graph
+performed an approved file effect and dependent read; the HTTP/CLI contract
+covered the native server, shared VS Code client adapter and xlang3 SQLite.
+The peer protocol metadata/replies remain synthetic fixtures. [Current-source
+build and test evidence](evidence/native-graph-mcp-current-checkout-20261015.json).
+
 Exact revision `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed
 the [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937):
 **69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402

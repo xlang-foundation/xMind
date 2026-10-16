@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "revision": "d9f4866",
+  "scope": "Current-source native direct-MCP graph and HTTP/CLI integration",
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target xmind_server xmind_cli xmind_admin agentflow_graph_mcp_contract --parallel 8",
+    "result": "passed",
+    "binaries": {
+      "xmind_server.exe": "A9C83355AB9AD8E8C8BFCFAEAFDF8DD21275533AAA74A9E3DAE4121CB73EE38A",
+      "xmind_cli.exe": "CB4F2CF6EE680793B2394271978274FD4D9665BA0930582391945DF8373ED2D8",
+      "xmind_admin.exe": "2DA54EEF71FF07254E059D704A5EA08F0CC5EA91CED47DE970ABBBF30BDDE06E",
+      "agentflow_graph_mcp_contract.exe": "E828E45238876747E512E8E427EAB8CD93C4397F9C977864210E7EAB094C5D00",
+      "xlang3_runtime.dll": "294834B7567A4668C51489BD62894D0EEB34CFEF8EADAA9A2F32C0F71AEC0778"
+    }
+  },
+  "test": {
+    "command": "ctest --test-dir build/a2a-native -C Release -R native_graph_mcp_(contract|http_contract) --output-on-failure",
+    "passed": 2,
+    "failed": 0,
+    "duration_seconds": 10.66,
+    "cases": {
+      "native_graph_mcp_contract": {"result": "passed", "duration_seconds": 6.89},
+      "native_graph_mcp_http_contract": {"result": "passed", "duration_seconds": 3.76}
+    }
+  },
+  "verified": [
+    "A registered MCP tool node runs in a native graph, waits for the controller's exact approval, performs one real file effect in a disposable workspace, and passes the acknowledged output to a dependent native read.",
+    "The actual native administrator, server, CLI, shared VS Code BackendClient adapter, and xlang3-backed SQLite journal complete approved, denied, cancelled, and stale-registration paths without replaying denied effects."
+  ],
+  "limitations": [
+    "The MCP peer metadata and protocol replies are synthetic fixtures, although the owned peer process and filesystem effects are real.",
+    "This is local protocol/integration evidence; it does not establish interoperability with an independent MCP implementation, live model use, or rendered UI acceptance."
+  ]
+}
