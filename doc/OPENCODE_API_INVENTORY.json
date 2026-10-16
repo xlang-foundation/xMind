@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "0bb133880cb82624769c62a3cecb4fc7f4f4c0ffe8ee6bad245e9c430b730bd9",
+          "evidenceSha256": "523734471e4712a31e703aca09dd42ca7f012bbb580bee40b89ab25edb2dae51",
           "tests": [
             {
               "name": "native_http_cli_contract",
@@ -20661,7 +20661,7 @@
         "sourceSha256": "e455b4ce2acda2d78a20a69c4f996a0074867a452fd00ccc3d5c4b8b229def14",
         "surface": "POST /v1/runs",
         "sourceAnchor": "executor->submit_with_attachments",
-        "gap": "Workspace file references are resolved under the admitted membership and their exact UTF-8 snapshots are persisted before the model call. Attachments are currently single-agent only; queued input with attachments and upstream session input ordering remain incomplete.",
+        "gap": "Workspace file references from VS Code or the CLI are resolved under the admitted membership and their exact UTF-8 snapshots are persisted before the model call. Browser and graph attachments, queued input with attachments and upstream session input ordering remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

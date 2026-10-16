@@ -14,17 +14,17 @@
     {
       "name": "native_http_cli_contract",
       "result": "passed",
-      "durationSeconds": 3.64
+      "durationSeconds": 3.67
     },
     {
       "name": "native_local_profile_contract",
       "result": "passed",
-      "durationSeconds": 305.86
+      "durationSeconds": 303.43
     }
   ],
   "execution": {
     "command": "ctest --test-dir build/native -C Release -R \"^(native_http_cli_contract|native_local_profile_contract)$\" --output-on-failure",
-    "durationSeconds": 309.52,
+    "durationSeconds": 307.11,
     "result": "passed"
   },
   "contractChecks": {
@@ -41,16 +41,16 @@
     "Native/src/repository.cpp": "aa8ea489a7799a3d8d922f92e9ea3b6d6a2f9a17328fcc1738a92e8645d3d11f",
     "Native/include/agentflow/pty_sessions.hpp": "2478b7622eaa70ff872b6f6fb05415c42bd7fc030ede69319b5f263067bd03fd",
     "Native/src/windows_pty_sessions.cpp": "e76c40347fe5f25ffbe44b3b3977b457aa63a926b5739da98345b9291259c02b",
-    "Native/apps/cli_main.cpp": "37dd2be38a839d902c4a0d4c89b10108707e4981ccc3b4d86b7cec8a82b08a9c",
+    "Native/apps/cli_main.cpp": "8a6d0da577f170573a6036f376817027287cc9814ca60823b9abd7fcd99ba09c",
     "Native/apps/xmind_main.cpp": "87cb8a3b9b3f2cbc49101b5f910d72b081869beb24184b440846f8f5d6290851",
     "Native/tests/http_cli_contract.mjs": "7c58c9bfa9cd3cccc88aeb9361317fe6199142664690cb95d04666e6b94202d3",
     "Native/tests/local_profile_contract.mjs": "ca5d9b7c030f0569807c7fc0ed1a6aa8e0e4ab38c57488e42ad506c7a6471e64",
     "Native/CMakeLists.txt": "06f0686c64c70949e891d78465e5eebf557b776ffae0914fb84add8422203f53"
   },
   "buildArtifactSha256": {
-    "build/native/contract-bin/Release/xmind.exe": "2dc2cf6ea57f06989569055808aa6abf32ee009bc67d051cbd1fb87fb6c15965",
+    "build/native/contract-bin/Release/xmind.exe": "ab3cd793011fd87ef0f14d9eec714f8716ea1c2c99fc462eabb73ad13c8a7025",
     "build/native/contract-bin/Release/xmind_server.exe": "c2bf05f6a7a971d1aa1914d89492ffe7dc6ec7a39a2c564f0820b8cbab7e9802",
-    "build/native/contract-bin/Release/xmind_cli.exe": "3279d88d3d2f1581d172639c70970999a76f0721f6eba0354fda38d486babd94",
+    "build/native/contract-bin/Release/xmind_cli.exe": "c352618bc5412c54ce162ee5c04db59882261a82964aa0669ce1371e57c79efb",
     "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
   }
 }
