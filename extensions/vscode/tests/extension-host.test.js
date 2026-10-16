@@ -214,7 +214,7 @@ test('changing the shared profile root reconnects the active VS Code view',async
 
 test('opening the xMind sidebar on startup is opt-in and connects the active workspace',async()=>{
  const off=harness();await off.activation;assert.equal(off.bootstrapTasks.length,0);assert.equal(off.connectCalls.length,0);
- const on=harness({openOnStartup:true});await on.activation;assert.equal(on.bootstrapTasks.length,1);await on.bootstrapTasks[0]();await until(()=>on.views.length===1);
+ const on=harness({openOnStartup:true,beforeConnect:async()=>{assert.equal(on.views.length,1);assert.match(on.views[0].webview.html,/Connecting to xMind/);}});await on.activation;assert.equal(on.bootstrapTasks.length,1);await on.bootstrapTasks[0]();await until(()=>on.views.length===1);
  assert.equal(on.connectCalls.length,1);assert.equal(on.backendOwners[0].metadata.root,'D:\\TestProj');
  const view=on.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='sessions'));
  await until(()=>view.posted.some(message=>message.type==='transcript'));
@@ -234,10 +234,10 @@ test('newly resolved xMind sidebar immediately shows a CSP-protected connecting 
 });
 
 test('failed xMind startup replaces the connecting state with safe retry guidance',async()=>{
- const h=harness({beforeConnect:async()=>{throw new Error('<synthetic runtime failure>');}});await h.activation;const view=h.resolveSidebarView();
+ const h=harness({openOnStartup:true,beforeConnect:async()=>{throw new Error('<synthetic runtime failure>');}});await h.activation;await h.bootstrapTasks[0]();const view=h.views[0];
  await until(()=>view.webview.html.includes('could not connect'));
  assert.match(view.webview.html,/default-src \'none\'/);
- assert.match(view.webview.html,/xMind could not connect\. Reopen the view to try again\./);
+ assert.match(view.webview.html,/xMind could not connect\. Run “xMind: Open Workspace” to retry\./);
  assert.doesNotMatch(view.webview.html,/<synthetic runtime failure>/);
  assert.ok(h.errors.includes('<synthetic runtime failure>'));
 });

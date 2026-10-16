@@ -495,6 +495,13 @@ async function activate(context) {
   async function openPanel() {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before using AgentFlow.');
     if (panel) { panel.show(); return; }
+    // Reveal the contributed view before starting native discovery. Otherwise
+    // a slow or blocked backend leaves the user looking at an empty editor and
+    // gives them no indication that xMind is opening.
+    const availableView=await acquireSidebar();
+    if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before using AgentFlow.');
+    availableView.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
+    availableView.webview.html = startupHtml('Connecting to xMind…');
     await messages;
     let connection;
     if(previewOrigin||machineSetting(vscode,'backendMode')==='external'){
@@ -515,7 +522,7 @@ async function activate(context) {
     const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedConnection(savedGraph)?savedGraph.id:undefined;
     const saved = context.workspaceState.get(stateKey);
     sessionId = savedConnection(saved) ? saved.id : undefined;
-    const availableView=await acquireSidebar();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');panel=availableView;
+    if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');panel=availableView;
     panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
     const assetVersion=crypto.randomBytes(16).toString('hex');
     const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString()+'?v='+assetVersion;
@@ -924,7 +931,10 @@ async function activate(context) {
     }, null, context.subscriptions);
   }
   function open() {
-    if (!opening) opening = openPanel().finally(() => { opening = undefined; });
+    if (!opening) opening = openPanel().catch(error=>{
+      if(sidebarView&&!panel)sidebarView.webview.html=startupHtml('xMind could not connect. Run “xMind: Open Workspace” to retry.');
+      throw error;
+    }).finally(() => { opening = undefined; });
     return opening;
   }
 
