@@ -181,6 +181,11 @@ async function activate(context) {
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
       sidebarView = view;
+      // Show a CSP-protected startup state immediately. Backend startup and
+      // capability discovery happen asynchronously in openPanel(); leaving
+      // this view empty makes a healthy extension look broken.
+      view.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
+      view.webview.html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src \'none\';"></head><body><p role="status">Connecting to xMind…</p></body></html>';
       if (resolveSidebar) { const resolve = resolveSidebar; resolveSidebar = undefined; resolve(view); }
       else open().catch(error => vscode.window.showErrorMessage(error.message));
     }

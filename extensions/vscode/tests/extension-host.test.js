@@ -194,6 +194,7 @@ function harness(options={}) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,connectCalls,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,restoreRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+    resolveSidebarView(){const view=makeView();sidebarProvider.resolveWebviewView(view);return view;},
     backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},changeConfiguration(names){configurationListener?.({affectsConfiguration:name=>names.includes(name)});},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -220,6 +221,16 @@ test('opening the xMind sidebar on startup is opt-in and connects the active wor
  assert.ok(on.requests.includes('/v1/sessions'));assert.ok(on.requests.includes('/v1/sessions/saved/messages?limit=40'));
  assert.equal(view.posted.findLast(message=>message.type==='sessions').selected,'saved');assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);
  assert.equal(on.state.get('agentflow.session').id,'saved');assert.deepEqual(on.errors,[]);
+});
+
+test('newly resolved xMind sidebar immediately shows a CSP-protected connecting state',async()=>{
+ const h=harness();await h.activation;const view=h.resolveSidebarView();
+ assert.match(view.webview.html,/Content-Security-Policy/);
+ assert.match(view.webview.html,/default-src \'none\'/);
+ assert.match(view.webview.html,/Connecting to xMind/);
+ await until(()=>view.webview.html.includes('Message xMind'));
+ view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));
+ assert.deepEqual(h.errors,[]);view.close();
 });
 
 test('a stale VS Code session selection falls back to the newest native catalogue entry',async()=>{
