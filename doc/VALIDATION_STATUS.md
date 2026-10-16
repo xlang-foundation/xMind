@@ -247,9 +247,12 @@ native selection passed **4/4**. xMind checkpoint `a77b693` is on `main`; the
 xlang3 compatibility checkpoint is `9679dfbd` on `xmind-required-compat`.
 
 Remaining acceptance includes complete installed VS Code coding workflows,
-external MCP/A2A interoperability, release packaging, and the wider OpenCode 2
-feature-parity audit. These results establish a local browser workflow and a
-targeted xlang3 compatibility fix, not completion of the full product goal.
+external MCP/A2A interoperability, release packaging, and the remaining
+in-scope xMind product capabilities. OpenCode 2 and LiteLLM are references for
+selected workflow ideas and provider-ecosystem research; compatibility or
+feature parity with either project is not an acceptance requirement. These
+results establish a local browser workflow and a targeted xlang3 compatibility
+fix, not completion of the full product goal.
 
 The current VS Code extension regression suite also passes **353/353**. The
 running Extension Development Host command line points to this repository's
