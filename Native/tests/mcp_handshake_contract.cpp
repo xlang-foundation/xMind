@@ -24,7 +24,7 @@ void negotiate(char** argv,const std::string& mode,bool expected_failure=false) 
             actions.clear();
             try {
                 const auto bytes=process.read(mode=="legacy-timeout" && !fallback?std::chrono::steady_clock::now()+150ms:deadline);
-                require(bool(bytes),"Lifecycle fixture exited before negotiation");wire.feed(*bytes);
+                require(bool(bytes),("Lifecycle fixture exited before negotiation: "+mode).c_str());wire.feed(*bytes);
             }catch(const McpTransportTimeout&){require(mode=="legacy-timeout" && !fallback,"Only the intended probe timeout may trigger fallback");fallback=true;current=handshake.probe_timeout();process.write(current.frame,deadline);continue;}
             for(auto& action:actions){
                 if(action.request){require(!handshake.ready(),"Initialization request is not readiness");process.write(action.request->frame,deadline);}
@@ -32,7 +32,7 @@ void negotiate(char** argv,const std::string& mode,bool expected_failure=false) 
             }
         }
     }catch(const McpProtocolError&){failed=true;}
-    require(failed==expected_failure,"Unexpected native negotiation result");
+    if(failed!=expected_failure)throw std::runtime_error("Unexpected native negotiation result for "+mode);
     if(!failed){
         const auto& server=handshake.server();const bool legacy=mode.starts_with("legacy");
         require(server.era==(legacy?McpWireEra::legacy:McpWireEra::modern),"Negotiated protocol era must match the actual peer");

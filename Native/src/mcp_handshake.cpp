@@ -93,6 +93,10 @@ McpPreparedRequest McpHandshake::probe_timeout() {
     auto& state=*impl_;if(state.phase!=Impl::Phase::probe)throw McpProtocolError("Only MCP discovery timeout can trigger legacy fallback");
     try {state.requests.abandon(state.expected_id);return state.legacy();}catch(...){state.phase=Impl::Phase::failed;throw;}
 }
+McpPreparedRequest McpHandshake::probe_unrecognized_response() {
+    auto& state=*impl_;if(state.phase!=Impl::Phase::probe)throw McpProtocolError("Only an unrecognized MCP discovery response can trigger legacy fallback");
+    try {state.requests.abandon(state.expected_id);return state.legacy();}catch(...){state.phase=Impl::Phase::failed;throw;}
+}
 void McpHandshake::initialized_sent() {auto& state=*impl_;if(state.phase!=Impl::Phase::ack)throw McpProtocolError("MCP initialization acknowledgement is not pending");state.phase=Impl::Phase::legacy_ready;}
 bool McpHandshake::ready() const {return impl_->phase==Impl::Phase::modern_ready || impl_->phase==Impl::Phase::legacy_ready;}
 const McpServerDescription& McpHandshake::server() const {if(!ready())throw McpProtocolError("MCP negotiation is not ready");return impl_->description;}

@@ -1,5 +1,17 @@
 # Native MCP HTTP transport
 
+## Discovery fallback checkpoint — 2026-10-15
+
+The native HTTP client now follows the modern discovery downgrade boundary:
+an empty, non-JSON or unrecognized response to `server/discover` on HTTP 400,
+404 or 405 triggers one legacy `initialize` attempt. Recognized modern errors
+remain failures; in particular, HTTP 404 with JSON-RPC `-32601` is an explicit
+discovery rejection. A stdio `-32601` remains eligible for legacy fallback,
+because the transport carries no HTTP status to distinguish a retired endpoint.
+The real loopback peer contract checks those cases and the successful legacy
+acknowledgement ordering. Handshake, HTTP fallback and existing HTTP read-only
+contracts pass **3/3** locally. This does not claim full MCP HTTP coverage.
+
 The newer [single-use refresh primitive](native-mcp-refresh.md) is separately
 scoped. It does not enable automatic refresh or replace the required durable
 grant-rotation and running-owner coordination work. The current complete rebuilt
@@ -343,7 +355,7 @@ commit. This is no installed/rendered acceptance of the current implementation.
 - Extend resource/prompt coverage beyond current list/read/get calls; implement
   server-request replies and notification/subscription ownership. Verify older
   initialization/session expiry, resumable GET and
-  DELETE separately; empty/non-JSON discovery fallback remains unfinished.
+  DELETE separately.
 - Verify concurrent independent HTTP owners and credential/destination isolation.
 - Exercise positive trusted HTTPS OAuth discovery, registration, callback/state,
   PKCE exchange, resource/issuer/account binding, token storage/rotation and

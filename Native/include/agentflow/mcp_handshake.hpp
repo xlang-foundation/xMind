@@ -22,6 +22,7 @@ public:
     McpPreparedRequest begin();
     McpHandshakeAction accept(const McpCorrelatedReply& reply);
     McpPreparedRequest probe_timeout(); // same stdio process; late probe replies retired
+    McpPreparedRequest probe_unrecognized_response(); // HTTP discovery may fall back only when no recognized modern JSON-RPC error was returned
     void initialized_sent();
     bool ready() const;
     const McpServerDescription& server() const;

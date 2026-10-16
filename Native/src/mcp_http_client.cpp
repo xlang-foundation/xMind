@@ -7,6 +7,7 @@
 #include "agentflow/mcp_oauth.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
+#include <exception>
 #include <map>
 #include <set>
 #include <utility>
@@ -47,22 +48,25 @@ struct McpHttpClient::Impl {
     std::optional<McpCorrelatedReply> exchange(const std::string& frame,McpWireEra era,
         const std::string& expected,Deadline deadline,std::stop_token cancel,bool& attempted,
         const std::optional<std::string>& schema={},bool initializing=false,std::string* observed_response=nullptr,
-        const std::function<void(const McpWireMessage&)>& notification={},bool require_event_stream=false) {
+        const std::function<void(const McpWireMessage&)>& notification={},bool require_event_stream=false,
+        bool allow_legacy_fallback=false,bool* legacy_fallback=nullptr) {
         if(validity){const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();if(now<validity->acquired_unix_ms||(validity->expires_unix_ms&&now>=*validity->expires_unix_ms))throw McpOAuthAuthorizationRequired({});}
         const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
         if(remaining.count()<=0)throw McpTransportTimeout("MCP HTTP request deadline exceeded");
         McpHttpPost input;input.url=endpoint;input.body=frame;input.era=era;input.legacy_protocol=legacy_protocol;
         input.input_schema=schema;input.deadline=std::min(remaining,std::chrono::milliseconds(600000));input.idle_timeout=input.deadline;
         if(era==McpWireEra::legacy)input.legacy_session=legacy_session;
-        std::optional<McpCorrelatedReply> result;std::unique_ptr<McpHttpMessageStream> decoder;
+        std::optional<McpCorrelatedReply> result;std::unique_ptr<McpHttpMessageStream> decoder;int response_status=0;bool fallback_status=false;std::exception_ptr decode_failure;
         try {
             post_mcp_http(input,bearer?&*bearer:nullptr,[&](const auto& head){
+                response_status=head.status;fallback_status=allow_legacy_fallback&&(head.status==400||head.status==404||head.status==405);
                 if(head.status==401 || head.status==403)throw McpOAuthAuthorizationRequired(head.authenticate?mcp_oauth_bearer_challenge(*head.authenticate):std::nullopt);
                 if(expected.empty()) {
                     if(head.status!=202)throw McpProtocolError("MCP notification did not receive an empty acknowledgement");
                     return;
                 }
-                if(head.status!=200 && head.status!=400 && head.status!=404)throw McpTransportError("MCP HTTP peer rejected the request (status "+std::to_string(head.status)+")");
+                if(head.status!=200 && head.status!=400 && head.status!=404 && head.status!=405)throw McpTransportError("MCP HTTP peer rejected the request (status "+std::to_string(head.status)+")");
+                if(fallback_status&&head.media_type!="application/json"&&head.media_type!="text/event-stream")return;
                 if(require_event_stream && head.media_type!="text/event-stream")throw McpProtocolError("MCP subscriptions/listen requires a request-scoped SSE response");
                 if(era==McpWireEra::legacy && head.legacy_session) {
                     session(*head.legacy_session);
@@ -77,8 +81,25 @@ struct McpHttpClient::Impl {
                     if(observed_response)*observed_response=reply->response.raw_json;
                     result=*reply;
                 });
-            },[&](std::string_view bytes){if(!decoder)throw McpProtocolError("MCP notification returned response bytes");decoder->feed(bytes);},[&]{attempted=true;},cancel);
+            },[&](std::string_view bytes){if(!decoder){if(fallback_status)return;throw McpProtocolError("MCP notification returned response bytes");}if(decode_failure)return;try{decoder->feed(bytes);}catch(...){decode_failure=std::current_exception();}},[&]{attempted=true;},cancel);
+            if(fallback_status){
+                if(decode_failure){if(legacy_fallback)*legacy_fallback=true;return std::nullopt;}
+                if(!decoder){if(legacy_fallback)*legacy_fallback=true;return std::nullopt;}
+                try{decoder->finish();}catch(...){if(legacy_fallback)*legacy_fallback=true;return std::nullopt;}
+                if(!result||result->response.kind!=McpMessageKind::error){if(legacy_fallback)*legacy_fallback=true;return std::nullopt;}
+                // A 404 carrying JSON-RPC method-not-found is an explicit modern
+                // discovery rejection. The same code over stdio is ambiguous and
+                // remains eligible for legacy fallback.
+                if(response_status==404) {
+                    const auto error=Json::parse(result->response.payload_json);
+                    if(error.contains("code") && error["code"].is_number_integer() && !error["code"].is_number_unsigned() && error["code"]==-32601)
+                        throw McpProtocolError("MCP discovery endpoint explicitly rejected server/discover");
+                }
+                return result;
+            }
+            if(decode_failure)std::rethrow_exception(decode_failure);
             if(decoder)decoder->finish();
+            if(allow_legacy_fallback&&response_status==200&&result&&result->response.kind==McpMessageKind::error)throw McpProtocolError("MCP discovery returned a JSON-RPC error with HTTP 200");
             if(!expected.empty() && !result)throw McpProtocolError("MCP HTTP response ended without its correlated result");
             return result;
         }catch(const TransportCancelled&){throw McpTransportCancelled("MCP HTTP request cancelled");}
@@ -93,7 +114,9 @@ void McpHttpClient::connect(Deadline deadline,std::stop_token cancel) {
     try {
         auto request=state.handshake.begin();auto era=McpWireEra::modern;
         while(!state.handshake.ready()) {
-            bool attempted=false;const auto reply=state.exchange(request.frame,era,request.request.id,deadline,cancel,attempted,{},request.request.method=="initialize");
+            bool attempted=false,legacy_fallback=false;const auto reply=state.exchange(request.frame,era,request.request.id,deadline,cancel,attempted,{},request.request.method=="initialize",nullptr,{},false,request.request.method=="server/discover",&legacy_fallback);
+            if(legacy_fallback){request=state.handshake.probe_unrecognized_response();era=McpWireEra::legacy;continue;}
+            if(!reply)throw McpProtocolError("MCP discovery ended without a correlated response");
             const auto action=state.handshake.accept(*reply);
             if(action.request){request=*action.request;era=McpWireEra::legacy;continue;}
             if(!action.notification.empty()) {
