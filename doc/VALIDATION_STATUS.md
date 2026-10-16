@@ -44,8 +44,12 @@ updated the hash and placed the section below the sticky header; at the tested
 633 px viewport, document width remained 633 px. File edits still required
 approval, and one stale edit was rejected before the agent reread and retried.
 This is a real browser coding result for one workspace and one task, not broad
-coding or VS Code acceptance. The VS Code extension test suite passes **382/382**;
-live editor code writing remains unverified. [Scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
+coding or same-session cross-client acceptance. A separate live VS Code coding
+and build run is recorded in [its acceptance evidence](evidence/testproj-vscode-live-coding-20261015.json),
+and the current VS Code extension suite passes **382/382**. The outstanding
+first-target gate is to visibly confirm the shared transcript in the live
+VS Code pane and complete a coding turn from that same shared conversation.
+[Browser scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
 
 ## Backend-owned session inbox dispatch — 2026-10-15
 
