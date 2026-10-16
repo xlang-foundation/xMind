@@ -9,6 +9,17 @@
   "backend_profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/live-acceptance-20261016",
   "browser_coding_profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/live-acceptance-20261016",
   "backend_origin": "http://127.0.0.1:65290",
+  "runtime_manifest_verification": {
+    "status": "passed",
+    "file_count": 1900,
+    "native_revision": "74111500119112242f4027cb08881026d5e48011",
+    "manifest_sha256": "0fb615a901515da8e48d5b4e1cff12acc242e63e641eb2f6a1235f1adc9f19fd",
+    "checked_locations": [
+      "D:/CantorAI2026/xMind/extensions/vscode/native-runtime",
+      "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.12/native-runtime",
+      "D:/CantorAI2026/xMind/.agentflow/goal-live/extensions/agentflow-local.agentflow-0.1.11/native-runtime"
+    ]
+  },
   "observations": [
     "The VS Code extension launched a native view for TestProj and published ready.json.",
     "The ready record names backend process 41096 and the same profile root used for the live webpage coding acceptance run.",
