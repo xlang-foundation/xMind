@@ -160,6 +160,8 @@ function harness(options={}) {
         const view={posted:[],showCalls:0,webview:{html:'',cspSource:'https://fixture-webview',asWebviewUri:uri=>({toString:()=>uri}),postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
           onDidReceiveMessage:callback=>{view.receive=callback;return {dispose(){}};}},
           onDidDispose:callback=>{view.close=callback;return {dispose(){}};},show(){view.showCalls++;}};
+        view.htmlAssignments=[];
+        Object.defineProperty(view.webview,'html',{get(){return this.currentHtml||'';},set(value){this.currentHtml=value;view.htmlAssignments.push(value);}});
         views.push(view);return view;
       }
   const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
@@ -229,6 +231,7 @@ test('newly resolved xMind sidebar immediately shows a CSP-protected connecting 
  assert.match(view.webview.html,/default-src \'none\'/);
  assert.match(view.webview.html,/Connecting to xMind/);
  await until(()=>view.webview.html.includes('Message xMind'));
+ assert.equal(view.htmlAssignments.filter(value=>value.includes('<p role="status">Connecting to xMind…</p>')).length,1,'the connecting document is assigned only once before the coding UI replaces it');
  view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));
  assert.deepEqual(h.errors,[]);view.close();
 });

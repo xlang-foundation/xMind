@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-15",
+  "purpose": "Separate a VS Code host webview failure from xMind webview code.",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "installed_environment": {
+    "vscode_version": "1.142.0",
+    "xmind_extension_version": "0.1.12",
+    "user_data_directory": "C:/Users/shaw9/AppData/Roaming/Code",
+    "result": "failed",
+    "observations": [
+      "xMind sidebar reported ServiceWorker registration InvalidStateError.",
+      "VS Code built-in Markdown preview reported the same ServiceWorker registration InvalidStateError.",
+      "A full VS Code app exit and relaunch did not clear the failure.",
+      "xMind also reported that its owned local backend exited before readiness; the profile and database were preserved."
+    ]
+  },
+  "fresh_user_data_test": {
+    "vscode_version": "1.142.0",
+    "user_data_directory": "D:/CantorAI2026/xMind/.agentflow/vscode-webview-cache-clean/profile",
+    "extensions_directory": "C:/Users/shaw9/.vscode/extensions",
+    "workspace_item": "D:/CantorAI2026/TestProj/model-zoo/README.md",
+    "check": "VS Code built-in Markdown: Open Preview",
+    "result": "passed",
+    "observation": "Markdown rendered in the preview webview without a service-worker error."
+  },
+  "limits": [
+    "The fresh-profile check validates only the built-in Markdown preview, not the xMind extension or coding flow.",
+    "The default VS Code profile cache was not moved or deleted because other Code processes were still running.",
+    "The xMind native backend startup failure remains a separate unresolved issue."
+  ],
+  "upstream_reference": "https://github.com/microsoft/vscode/issues/326956"
+}

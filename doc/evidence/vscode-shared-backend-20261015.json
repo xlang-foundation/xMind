@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-15",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "extension_source": "D:/CantorAI2026/xMind/extensions/vscode",
+  "extension_version": "0.1.12",
+  "vscode_profile": "D:/CantorAI2026/xMind/.agentflow/goal-live/profile",
+  "view_process_id": 32968,
+  "backend_process_id": 41096,
+  "backend_profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/live-acceptance-20261016",
+  "browser_coding_profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/live-acceptance-20261016",
+  "backend_origin": "http://127.0.0.1:65290",
+  "observations": [
+    "The VS Code extension launched a native view for TestProj and published ready.json.",
+    "The ready record names backend process 41096 and the same profile root used for the live webpage coding acceptance run.",
+    "An unauthenticated request reached the backend and received HTTP 401 Authentication required; no secret was emitted or stored in this evidence."
+  ],
+  "validation": {
+    "command": "node --test tests/extension-host.test.js tests/workspace-backend.test.js",
+    "result": "passed",
+    "tests": 127
+  },
+  "limits": [
+    "This verifies VS Code native-view startup and shared backend/profile attachment, not rendering of the sidebar UI or a coding edit submitted from VS Code.",
+    "The default VS Code profile still has a webview service-worker failure; a fresh profile rendered the built-in Markdown preview but xMind was not tested there.",
+    "The separate historic hashed profile with replacement-receipt errors was preserved and was not used as the shared browser/VS Code acceptance profile."
+  ]
+}

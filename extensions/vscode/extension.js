@@ -501,7 +501,9 @@ async function activate(context) {
     const availableView=await acquireSidebar();
     if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before using AgentFlow.');
     availableView.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
-    availableView.webview.html = startupHtml('Connecting to xMind…');
+    // resolveWebviewView already assigned the connecting document. Reassigning
+    // it here can interrupt VS Code's asynchronous webview service-worker
+    // registration, leaving the view permanently blank on some builds.
     await messages;
     let connection;
     if(previewOrigin||machineSetting(vscode,'backendMode')==='external'){
