@@ -100,10 +100,10 @@ function harness(options={}) {
     else if(target.pathname==='/v1/sessions/forked/runs') data=[];
     else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
     else if(target.pathname==='/v1/sessions/saved/messages') data=await pagedHistory(pendingHistory?pendingHistory:transcript);
-    else if(target.pathname==='/v1/sessions/latest/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
-    else if(target.pathname==='/v1/sessions/latest/runs') data=[];
+    else if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/messages$/.test(target.pathname)) data=await pagedHistory(transcript);
+    else if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/runs$/.test(target.pathname)) data=[];
     else if(options.ownedChildren&&target.pathname.endsWith('/children'))data=options.ownedChildren;
     else if(options.ownedChildren&&target.pathname.includes('/children/')&&target.pathname.endsWith('/history')){const child=options.ownedChildren.find(value=>value.run.id===target.pathname.split('/')[5]);assert.ok(child);assert.equal(target.pathname.split('/')[3],child.run.parent_id);data=options.ownedHistories?.[child.run.id]||[];}
     else if(options.ownedChildren&&target.pathname.endsWith('/tree-events'))data=target.search==='?after=0'?(options.treeEvents||[]):[];
@@ -164,7 +164,7 @@ function harness(options={}) {
       }
   const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
-  state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:options.initialSessionId||'saved'});
+  state.set('agentflow.session',options.initialSessionRecord||{url:'http://127.0.0.1:8765',id:options.initialSessionId||'saved'});
   // Native ownership is a separate mock boundary here. Its actual host lifecycle
   // and authenticated HTTP admission races are exercised in workspace-backend.
   class TestWorkspaceBackend{
@@ -228,6 +228,14 @@ test('a stale VS Code session selection falls back to the newest native catalogu
  const selected=view.posted.findLast(message=>message.type==='sessions');assert.equal(selected.selected,'latest');assert.deepEqual(selected.sessions,[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]);
  assert.deepEqual(view.posted.findLast(message=>message.type==='history').history.map(message=>message.role),['user','assistant']);
  assert.ok(h.requests.includes('/v1/sessions/latest/messages?limit=40'));assert.equal(h.state.get('agentflow.session').id,'latest');assert.deepEqual(h.errors,[]);
+});
+
+test('a session saved for another workspace profile is never restored in the current VS Code workspace',async()=>{
+ const scope={workspace_id:'windows-local-file-v1:1:0',profile_directory:'C:\\Profiles\\TestProj'};
+ const h=harness({openOnStartup:true,stateScope:scope,initialSessionRecord:{url:'http://127.0.0.1:8765',id:'foreign',workspace_id:'windows-local-file-v1:1:other',profile_directory:'C:\\Profiles\\OtherProject'},sessions:[{id:'current',title:'TestProj session'}]});await h.activation;await h.bootstrapTasks[0]();await until(()=>h.views.length===1);
+ const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='history'));
+ assert.equal(view.posted.findLast(message=>message.type==='sessions').selected,'current');assert.ok(h.requests.includes('/v1/sessions/current/messages?limit=40'));assert.ok(!h.requests.some(path=>path.includes('/foreign/')));
+ assert.deepEqual(view.posted.findLast(message=>message.type==='history').history.map(message=>message.role),['user','assistant']);assert.equal(h.state.get('agentflow.session').id,'current');assert.deepEqual(h.errors,[]);
 });
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{
