@@ -11,6 +11,20 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Full native Release contract gate — 2026-10-16
+
+The current xMind Release build passed **149/149 CTest contracts** against the
+xlang3 runtime at `fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8`. The gate covers
+embedded xlang3/SQLite, provider and model protocols, single-agent and graph
+execution, process and file tools, MCP/A2A, CLI, local profiles and browser
+views, language-server queries, persistence, and credential storage. The
+rust-analyzer definition-query contract passed in this full run and in three
+consecutive focused reruns after one earlier intermittent failure. The full
+CTest transcript is [preserved here](evidence/native-full-ctest-20261016.log),
+with build and executable hashes in [the provenance record](evidence/native-full-ctest-20261016.json).
+This records a green native Release test gate; it does not change the local
+development VS Code bundle's separate `releaseAccepted=false` provenance.
+
 ## Browser workspace selector guidance — 2026-10-16
 
 The live TestProj profile contains one registered workspace, so the switcher

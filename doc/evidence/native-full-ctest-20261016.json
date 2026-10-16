@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-16",
+  "scope": "Full native xMind Release CTest gate",
+  "xmind_revision": "a0ea2376001a3a92c8dbf1f7d772c210a94efe4b",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "build_configuration": "Release",
+  "build_directory": "build/native",
+  "executable": "build/native/contract-bin/Release/xmind.exe",
+  "executable_sha256": "f066c8ad68ce8d9cb8b4f7e3b9f55c3235eba206c56134d3ce48b651d070b3ac",
+  "ctest_total": 149,
+  "ctest_passed": 149,
+  "ctest_failed": 0,
+  "ctest_elapsed_seconds": 745.81,
+  "transcript": "native-full-ctest-20261016.log",
+  "transcript_sha256": "58188710df0e01dc4bd085ed639d2af3c6961ba6d015ee862411858a4c194724",
+  "notes": [
+    "The full run includes the corrected browser asset fixture and historical SQLite schema fixture.",
+    "The rust-analyzer contract passed in the full run and in three consecutive focused reruns after one earlier intermittent failure.",
+    "The local development VS Code runtime bundle retains releaseAccepted=false; this native contract gate is not a production packaging claim."
+  ]
+}
