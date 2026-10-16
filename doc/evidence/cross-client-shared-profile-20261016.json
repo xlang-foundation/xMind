@@ -9,7 +9,12 @@
   "vscode_xmind_webview_created": true,
   "provider_request_sent_by_vscode": false,
   "vscode_coding_turn_verified": false,
-  "cross_client_session_and_history_rendering_verified": false,
+  "browser_selected_testproj_session_rendered": true,
+  "vscode_extension_state_matches_browser_selected_session": true,
+  "selected_session_exists_in_shared_profile": true,
+  "selected_session_saved_message_count": 31,
+  "vscode_live_webview_created": true,
+  "vscode_transcript_visual_rendering_independently_verified": false,
   "credentials_or_tokens_included": false,
-  "scope": "The webpage and VS Code view adapters reported the same native backend owner and profile identity. This verifies shared backend attachment only. It does not verify that the VS Code view rendered the webpage's selected session/history or completed a coding turn."
+  "scope": "The browser visibly rendered a TestProj coding conversation. The VS Code extension host persisted the same selected session identity and workspace binding; a read-only check found that session and its 31 saved messages in the shared profile database, and the live extension host created the xMind webview. Extension-host contracts verify that selecting this session requests and posts its transcript. The native VS Code pane was not independently inspected, and no VS Code coding turn was sent during this check."
 }
