@@ -38,6 +38,14 @@ and 31 saved messages. The first target remains active until that transcript is
 visibly confirmed in the live VS Code pane and a coding turn is completed from
 the shared session there.
 
+2026-10-16 unified CLI live profile check: the single `xmind` binary attached to
+the existing TestProj local profile, discovered its saved Claude model without
+re-entering credentials, and completed a read-only framework inspection using
+real workspace `list_files` and `read_file` calls. The run completed and its
+persisted transcript records the provider/model and tool results. This confirms
+the console uses the same managed backend and workspace; the CLI coding-edit
+flow remains a separate acceptance item. [Evidence](evidence/xmind-cli-live-framework-inspection-20261016.json).
+
 On 2026-10-16, a fresh local webpage run against TestProj also loaded the four
 saved providers from `.config/providers.yaml`, discovered 20 OpenAI models,
 completed a real coding turn, displayed provider token/timing metrics, showed
@@ -2646,7 +2654,7 @@ Credential storage checkpoint: the C++ repository now protects and persists cred
 - OSS release: reproducible native builds, scoped parity evidence, documented limitations and end-to-end local coding/protocol/provider acceptance.
 - Connection profiles: Local single-user mode plus optional Nexus binding over the shared protocol, scoped identities/state, authenticated local agent/workspace enrollment and real reconnect/lease/recovery acceptance. Nexus owns the private team-server/distributed implementation.
 
-These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Nexus and are excluded. Relevant OpenCode coding parity and agreed broad model/provider support remain required.
+These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Nexus and are excluded. OpenCode is a workflow reference only; xMind implements the coding capabilities selected for its own product. Agreed broad model/provider support remains required.
 
 2026-10-14 live Gemini 404 UI diagnosis: the browser run against `models/gemini-2.5-flash` returned HTTP 404 without a recognized structured provider code. The saved failure now renders a safe, actionable model/endpoint message for every provider HTTP 404, while preserving allowlisted code details when present and never showing provider response bodies. The fresh-profile TestProj browser acceptance and 89/89 shared renderer tests passed. [Evidence](evidence/gemini-404-diagnostic-live-20261014.json). The previously uncertain production-preview operation remains untouched.
 
