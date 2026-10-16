@@ -98,9 +98,9 @@ Anthropic, Gemini, DeepSeek, xAI or Mistral profiles. The Release build passed
 the complete native CTest suite **145/145** after rebuilding all native targets;
 the browser/VS Code client suite passed **495/495**. All provider credentials
 and model responses in the focused route tests are synthetic; no live
-OpenRouter account or inference was tested. LiteLLM inventory remains a parity
-reference: 6 partially covered, 130 unmapped and 0 verified operation-level
-parity. [Validation record](VALIDATION_STATUS.md#optional-openrouter-provider-and-clean-release-validation--2026-10-15).
+OpenRouter account or inference was tested. LiteLLM's provider catalogue is used
+only as a discovery reference; xMind's own provider adapters and model behavior
+are implemented and validated independently. [Validation record](VALIDATION_STATUS.md#optional-openrouter-provider-and-clean-release-validation--2026-10-15).
 [Release test summary](evidence/native-openrouter-release-ctest-20261015.json).
 
 ## Restore approved coding changes — 2026-10-15

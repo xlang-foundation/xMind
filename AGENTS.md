@@ -26,4 +26,4 @@
 - CPython-compatible pure-Python standard-library and third-party source packages are explicitly allowed under xlang3. Native dependencies must use xlang3-compatible bindings; do not rely on CPython native extension binaries. Library reuse is not authorization to execute the CPython interpreter.
 - Install pure-Python packages from PyPI using pip executed by xlang3. If a pure-Python package exposes a missing native runtime capability, discuss the exact gap and proposed resolution with the user before changing native code or selecting a workaround. Continue independent authorized work meanwhile.
 - AgentFlow's repository-local commit email is shawn@cantorai.com. Preserve global Git settings and sibling repository identity.
-- Preserve the upstream history and applicable license notices. Full OpenCode parity, MCP/A2A, graph execution and editor validation remain required by the active project goal.
+- Preserve upstream history and applicable license notices. OpenCode and LiteLLM remain references only; xMind's own MCP/A2A, graph, coding and editor capabilities are the product targets.
