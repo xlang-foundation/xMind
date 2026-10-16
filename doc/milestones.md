@@ -1,5 +1,40 @@
 # Reviewable milestones
 
+## First target: usable local coding in the webpage and VS Code — active
+
+The first product acceptance gate is a complete local coding task through both
+clients, using the same xMind backend and a real opened project such as
+`D:\\CantorAI2026\\TestProj`. Each client must discover the active workspace,
+show its sessions and available configured models, submit a prompt, stream the
+response and token metrics, invoke coding tools, present scoped file changes
+for approval, and verify the approved result on disk. The browser connects to
+the local profile without asking the user to copy a server token or provider
+key that is already configured. VS Code uses its opened folder/workspace roots
+and the same local profile. Add-folder and new-workspace flows must stay clear
+and must not silently redirect a session to the xMind source checkout.
+
+Acceptance requires an end-to-end coding prompt against TestProj in the actual
+webpage and VS Code, with file changes reviewed and approved in each client,
+plus restart/session persistence and cross-client visibility checks. Existing
+component tests and synthetic provider contracts are supporting evidence only;
+they do not satisfy this gate. This is the active first priority; OpenCode
+operation parity and broader provider/model coverage continue after it is met.
+
+Current progress: separate live coding tasks now pass through both clients.
+The browser used its saved OpenAI profile to review and apply a focused
+Model Zoo accessibility change, ran the frontend production build, and passed
+the backend's nine API tests under xlang3. VS Code used its saved Claude
+profile to review and apply a focused frontend improvement and ran the same
+production build successfully. The [browser record](evidence/testproj-xmind-browser-coding-20261015.json)
+and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
+capture those results. The first coding loop is therefore demonstrated in
+each client, but the first target remains active until restart persistence and
+the same session/change history being visible across both clients are verified
+as one acceptance. The latest client suites pass **377/377** in VS Code and
+**129/129** in the browser; rebuilt native patch, patch-tool, edit-executor,
+agent HTTP and unified HTTP contracts pass **5/5**. Those contracts support the
+live runs but do not replace the remaining shared-session and restart check.
+
 ## CLI attachment to native queued runs — 2026-10-15
 
 When `/v1/health` advertises `session_inbox_dispatch`, the interactive console
