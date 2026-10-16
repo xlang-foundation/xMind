@@ -759,8 +759,7 @@ async function activate(context) {
           if (panel !== view) return;
           const admissionClient=client,runVersion=generation;let run;
           if(files.length&&slashCommand)throw new Error('Workspace commands do not accept file attachments.');
-          if(files.length&&graph)throw new Error('Choose Agent (default) to send workspace file attachments.');
-          try{run=slashCommand?await admissionClient.runCommand(sessionId,slashCommand.id,slashCommand.arguments,selectedModel,binding,graph):graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding,undefined,files,promptWorkspaceRevision||undefined);}
+          try{run=slashCommand?await admissionClient.runCommand(sessionId,slashCommand.id,slashCommand.arguments,selectedModel,binding,graph):graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding,files,promptWorkspaceRevision||undefined):await admissionClient.run(sessionId,message.prompt,selectedModel,binding,undefined,files,promptWorkspaceRevision||undefined);}
           catch(error){
             if(panel!==view||generation!==runVersion||client!==admissionClient)return;
             const changed=await profileController.reconcileAdmission(binding,error).catch(()=>false);

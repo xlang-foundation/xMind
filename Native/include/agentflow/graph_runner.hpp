@@ -17,6 +17,8 @@ public:
     std::optional<RootBudgetSpec> execution_budget(const GraphPlan&,const std::string& model_id={}) const;
     std::optional<GraphContextSpec> execution_context(const GraphPlan&,const std::string& model_id={}) const;
     std::optional<WorkspaceMembershipSnapshot> workspace_membership_admission() const;
+    std::string capture_prompt_attachments_json(const std::vector<PromptFileAttachment>& files,
+        std::int64_t expected_workspace_revision) const;
     std::optional<GraphContextOwnerRecord> captured_context(const std::string& root_id) const;
     // Metadata-only adoption/input preflight. Never opens a clock or a peer.
     void validate_context_owner(const std::string& root_id) const;

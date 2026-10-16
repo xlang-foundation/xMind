@@ -19,10 +19,11 @@ Clients send workspace-relative paths, optional display metadata, the current wo
 
 The request supports at most 32 files, 512 KiB of aggregate file content and a 2 MiB serialized persisted prompt. A file uses the existing workspace reader's 1 MiB per-file bound, so large single files are rejected by the aggregate cap. Traversal, unregistered folders, paths outside membership, non-text files and symlink escapes are rejected before a run or history entry is created. File attachments cannot be submitted through the durable queued-input route yet.
 
-The VS Code extension can attach files selected from folders registered in its current xMind workspace. The CLI accepts multiple `--file PATH` arguments on a single-agent run; paths are relative to the primary folder by default. Use `--folder-id ID` before a `--file` to select another registered folder, for example:
+The VS Code extension and browser can attach files from folders registered in the current xMind workspace. The CLI accepts multiple `--file PATH` arguments for both single-agent and graph runs; paths are relative to the primary folder by default. Use `--folder-id ID` before a `--file` to select another registered folder, for example:
 
 ```powershell
 xmind run SESSION "Review these files" --file src/main.cpp --folder-id docs-folder --file README.md
+xmind graph-run SESSION review GRAPH_REV "Review these files" --file src/main.cpp --folder-id docs-folder --file README.md
 ```
 
-The CLI reads the current authority and membership revision from xMind Server and sends references only. In the browser, use the ＋ button beside a file in the workspace tree; the file appears in the composer before sending. The browser reads current workspace membership before admission, and the native client verifies the revision again while submitting. Graph-run and durable queued-input attachments remain unsupported and are reported in the OpenCode 2 parity inventory.
+All clients send workspace-relative references only. The native backend verifies workspace identity, authority and membership revision, reads bounded UTF-8 content through the registered folder boundary, and persists immutable snapshots before dispatch. Graph snapshots are copied to graph agent nodes as untrusted data; graph tool nodes remain explicit registered operations. Durable queued-input attachments remain unsupported and are reported in the OpenCode 2 parity inventory.

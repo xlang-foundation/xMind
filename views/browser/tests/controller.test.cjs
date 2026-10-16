@@ -391,3 +391,8 @@ test('browser file attachments carry workspace membership revision into native r
  try{await view.handle({type:'send',prompt:'Review this source',files});assert.deepEqual(calls,[['session','Review this source','model',undefined,undefined,files,12]]);assert.deepEqual(posted.find(value=>value.type==='user'),{type:'user',text:'Review this source',files});assert.deepEqual(posted.find(value=>value.type==='prompt-files'),{type:'prompt-files',files:[]});}
  finally{view.dispose();}
 });
+test('browser graph mode admits workspace file references through graphRun with the observed revision',async()=>{
+ const posted=[],calls=[],files=[{path:'src/main.js',folder_id:'folder-main',name:'main.js'}],graph={id:'review',revision:4,executable:true};const client={workspaceMembership:async()=>({revision:12}),graphRun:async(...args)=>{calls.push(args);return{id:'graph-run',session_id:'session',graph_root:true,state:'running'};},run:async()=>{throw new Error('Graph mode must not route file references through a single-agent run');}};const view=new BrowserController(client,value=>posted.push(value));view.session='session';view.health={agent_execution:true};view.graphs=[graph];view.graphId='review';view.model='model';view.present=()=>{};view.remember=()=>{};view.watch=()=>{};view.refreshSessions=async()=>{};
+ try{await view.handle({type:'send',prompt:'Inspect this graph input',files});assert.deepEqual(calls,[['session','review',4,'Inspect this graph input','model',undefined,files,12]]);assert.deepEqual(posted.find(value=>value.type==='user'),{type:'user',text:'Inspect this graph input',files});}
+ finally{view.dispose();}
+});

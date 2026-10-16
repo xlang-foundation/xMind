@@ -31,10 +31,12 @@ The file uses the existing catalog import format, for example:
 
 The catalog assigns revisions; clients obtain the current revision from `graphs`. Tool/human graphs can run before a provider is configured. Agent nodes require the existing configured native model adapter. Direct workspace tools require the server's verified workspace; writes additionally require approved edits and a separate approval of each actual proposal. Stored command profiles stay inactive on a model-free owner without a workspace.
 
+Graph runs may attach workspace-relative file references. The owner requires the current workspace identity, authority and membership revision, reads each file through its registered folder, and persists bounded UTF-8 snapshots into the graph root input before queuing execution. Each graph agent receives those snapshots as explicitly untrusted file content; direct graph tool nodes do not treat attachments as tool arguments. A graph without agent nodes rejects file attachments. Browser, VS Code and CLI graph admission share this contract.
+
 | CLI command after `xmind_cli PORT` | Backend operation |
 | --- | --- |
 | `graphs` | GET `/v1/graphs`: registered IDs, revisions, node counts and executable flags |
-| `graph-run SESSION GRAPH REV PROMPT [MODEL]` | POST `/v1/graph-runs`: admit a registered graph; return the actual queued root |
+| `graph-run SESSION GRAPH REV PROMPT [MODEL] [--file PATH] [--folder-id ID]` | POST `/v1/graph-runs`: admit a registered graph; optional files are native snapshots passed as untrusted context to graph agent nodes |
 | `graph ROOT` | GET `/v1/graph-runs/ROOT`: actual run, immutable specification/input and checkpoint revision |
 | `graph-children ROOT` | GET `/v1/graph-runs/ROOT/children`: actual owned child runs |
 | `graph-child-history ROOT CHILD` | GET `/v1/graph-runs/ROOT/children/CHILD/history`: isolated child transcript; a foreign child is rejected |

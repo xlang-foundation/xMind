@@ -444,6 +444,12 @@ Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string se
     if(profile)model=impl_->run_model(session,std::move(model),*profile);else impl_->validate_unbound_model(session,model);
     return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
+Run ProviderProfileRuntime::submit_graph_workspace_with_attachments(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
+    std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
+    if(profile)model=impl_->run_model(session,std::move(model),*profile);else impl_->validate_unbound_model(session,model);
+    const auto actual=impl_->service->execution_workspace();const WorkspaceAdmission backend{actual.workspace_id,actual.authority_id,expected.revision};
+    return impl_->service->submit_graph_workspace_with_attachments(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model),backend,{},std::move(files));
+}
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
 std::vector<AgentDefinitionMetadata> ProviderProfileRuntime::agent_definitions()const{std::lock_guard lock(impl_->mutex);return impl_->service->agent_definitions();}
 AgentDefinition ProviderProfileRuntime::agent_definition(const std::string& id)const{std::lock_guard lock(impl_->mutex);return impl_->service->agent_definition(id);}

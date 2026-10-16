@@ -1005,12 +1005,13 @@ struct HttpServer::Impl {
             }));
             server.Post("/v1/graph-runs",guarded([graphs](const Request& request,Response& response){
                 if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");
-                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id"});
+                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-                const auto binding=profile_admission(value);const auto workspace=workspace_admission(value);
+                const auto binding=profile_admission(value);const auto workspace=workspace_admission(value);const auto files=prompt_file_attachments(value);
+                if(!files.empty()&&(!workspace||workspace->revision<1))throw std::invalid_argument("Graph file attachments require the observed workspace membership revision");
                 const auto session=identifier(string_field(value,"session_id",128)),graph=string_field(value,"graph_id",64),prompt=string_field(value,"prompt",1024*1024);const auto revision=graph_revision(value,"graph_revision");
-                reply(response,encode(workspace?graphs->submit_graph_workspace(id,session,graph,revision,prompt,model,*workspace,binding):binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
+                reply(response,encode(!files.empty()?graphs->submit_graph_workspace_with_attachments(id,session,graph,revision,prompt,model,*workspace,binding,files):workspace?graphs->submit_graph_workspace(id,session,graph,revision,prompt,model,*workspace,binding):binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
             }));
             server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/restore)",guarded([graphs](const Request& request,Response& response){
                 if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Direct restore request exceeds limits");

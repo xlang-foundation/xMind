@@ -24,6 +24,12 @@ public:
     virtual bool supports_graph_profile_admission()const{return false;}
     virtual Run submit_graph_workspace(std::string,std::string,std::string,std::int64_t,std::string,std::string,
         WorkspaceAdmission,std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Graph workspace-bound admission is unavailable");}
+    virtual Run submit_graph_workspace_with_attachments(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model,WorkspaceAdmission workspace,std::optional<ProviderProfileAdmission> profile,
+        std::vector<PromptFileAttachment> files){
+        if(!files.empty())throw RunUnavailable("Graph file attachments are unavailable");
+        return submit_graph_workspace(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model),std::move(workspace),std::move(profile));
+    }
     virtual Run submit_graph_profile(std::string,std::string,std::string,std::int64_t,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Graph provider profile admission is unavailable");}
     virtual Run submit_graph(std::string id,std::string session,std::string graph,
         std::int64_t revision,std::string prompt,std::string model={})=0;
@@ -43,6 +49,8 @@ public:
     std::vector<GraphExecutionMetadata> graphs() const override;
     Run submit_graph(std::string id,std::string session,std::string graph,
         std::int64_t revision,std::string prompt,std::string model={}) override;
+    Run submit_graph_with_attachments(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::int64_t expected_workspace_revision);
     Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;

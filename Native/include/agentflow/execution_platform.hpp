@@ -48,6 +48,9 @@ public:
         WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
     Run submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,
         std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
+    Run submit_graph_workspace_with_attachments(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile,
+        std::vector<PromptFileAttachment> files)override;
     bool supports_delegation() const override;
     bool supports_dynamic_planning() const override;
     bool supports_context() const override;

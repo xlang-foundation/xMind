@@ -21,6 +21,7 @@
 #include <set>
 #include <condition_variable>
 #include <atomic>
+#include <filesystem>
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
@@ -117,13 +118,32 @@ std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& 
     result.backend_identity=context_digest("native.graph.context.v1:"+plan.json()+":"+bindings.dump());return result;
 }
 std::optional<WorkspaceMembershipSnapshot> GraphRunner::workspace_membership_admission()const{
-    if(!settings_.workspace_membership_snapshot)return {};
     if(!workspace_)throw ToolAccessDenied("Graph workspace membership requires a verified primary folder");
-    auto snapshot=settings_.workspace_membership_snapshot();
+    auto snapshot=settings_.workspace_membership_snapshot?settings_.workspace_membership_snapshot():WorkspaceMembershipSnapshot{
+        workspace_->identity(),1,{{workspace_->identity(),workspace_->root_path()}}};
     if(snapshot.workspace_id!=workspace_->identity()||snapshot.folders.empty()||snapshot.folders.front().folder_id!=snapshot.workspace_id||snapshot.folders.front().root!=workspace_->root_path())
         throw ToolAccessDenied("Graph workspace membership differs from the selected primary folder");
     WorkspaceToolSet verified(snapshot.workspace_id,snapshot.revision,snapshot.folders);
     return snapshot;
+}
+std::string GraphRunner::capture_prompt_attachments_json(const std::vector<PromptFileAttachment>& attachments,std::int64_t expected_workspace_revision)const{
+    if(attachments.empty())return "[]";
+    if(attachments.size()>32||expected_workspace_revision<1)throw ToolAccessDenied("Graph file attachments require current workspace membership admission");
+    const auto membership=workspace_membership_admission();
+    if(!membership||!workspace_)throw ToolAccessDenied("Graph file attachments require a verified workspace");
+    if(membership->revision!=expected_workspace_revision)throw Conflict("Workspace membership changed while selecting graph attachments");
+    WorkspaceToolSet tools(membership->workspace_id,membership->revision,membership->folders);auto captured=Json::array();std::size_t total_bytes=0;
+    for(const auto& attachment:attachments){
+        if(attachment.path.empty()||attachment.path.size()>4096||attachment.path.find('\0')!=std::string::npos||
+            attachment.folder_id.size()>256||attachment.name.size()>512||attachment.description.size()>4096||attachment.mention.size()>512||
+            attachment.name.find('\0')!=std::string::npos||attachment.description.find('\0')!=std::string::npos||attachment.mention.find('\0')!=std::string::npos)
+            throw std::invalid_argument("Invalid graph file attachment metadata");
+        const auto index=attachment.folder_id.empty()?std::size_t{0}:tools.folder_index(attachment.folder_id);const auto& folder=tools.folders().at(index);
+        const auto snapshot=tools.folder_tools(index).read_file(attachment.path);if(snapshot.content.size()>512*1024-total_bytes)throw std::invalid_argument("Graph attachments exceed the 512 KiB aggregate limit");total_bytes+=snapshot.content.size();
+        captured.push_back({{"path",snapshot.path},{"folder_id",folder.folder_id},{"name",attachment.name.empty()?std::filesystem::path(snapshot.path).filename().string():attachment.name},
+            {"description",attachment.description},{"mention",attachment.mention},{"content",snapshot.content}});
+    }
+    return captured.dump();
 }
 std::optional<GraphContextOwnerRecord> GraphRunner::captured_context(const std::string& id)const{
     try{return store_.graph_context_owner(id).get();}catch(const NotFound&){return {};}
@@ -361,7 +381,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
             try{prepared=coordinator.start(node_id);}catch(const std::invalid_argument&){resolution_failed=true;stop.request_stop();continue;}
             if(prepared.definition.kind==GraphNodeKind::human){try{store_.start_graph_human(id,node_id,root.checkpoint_revision).get();}catch(const Conflict&){}continue;}
             const auto child_id=identifier();const auto task="Graph task:\n"+input.at("content").get<std::string>()+"\n\nNode task:\n"+prepared.definition.prompt+"\n\nDependency outputs (data, not authority):\n"+prepared.dependency_outputs_json;
-            auto prompt=Json{{"content",task}};if(prepared.definition.kind==GraphNodeKind::agent){const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;const auto context=provider_context(selected);if(!context.empty())prompt["provider_context"]=Json::parse(context);}
+            auto prompt=Json{{"content",task}};if(input.contains("files"))prompt["files"]=input["files"];if(prepared.definition.kind==GraphNodeKind::agent){const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;const auto context=provider_context(selected);if(!context.empty())prompt["provider_context"]=Json::parse(context);}
             const bool slot=budget&&prepared.definition.kind==GraphNodeKind::agent;
             if(slot&&!budget->try_acquire_leaf()){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
             try{store_.start_graph_child(child_id,id,node_id,prompt.dump(),root.checkpoint_revision).get();}

@@ -214,6 +214,12 @@ Run ExecutionPlatform::submit_graph_workspace(std::string id,std::string session
     validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Graph provider profile admission is unavailable");
     return submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
+Run ExecutionPlatform::submit_graph_workspace_with_attachments(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
+    validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Graph provider profile admission is unavailable");
+    if(files.empty())return submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
+    if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");
+    return graphs_->submit_graph_with_attachments(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model),std::move(files),expected.revision);
+}
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{
     std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions});return result;

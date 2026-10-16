@@ -162,21 +162,32 @@ std::vector<GraphExecutionMetadata> GraphService::graphs() const {
 }
 Run GraphService::submit_graph(std::string id,std::string session,std::string graph,
     std::int64_t revision,std::string prompt,std::string model) {
+    return submit_graph_with_attachments(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model),{},0);
+}
+Run GraphService::submit_graph_with_attachments(std::string id,std::string session,std::string graph,
+    std::int64_t revision,std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::int64_t expected_workspace_revision) {
     if(prompt.empty() || prompt.size()>1024*1024 || prompt.find('\0')!=std::string::npos)throw std::invalid_argument("Graph task must contain valid bounded content");
+    if(files.size()>32)throw std::invalid_argument("A graph task can include up to 32 workspace files");
+    if(!files.empty()&&expected_workspace_revision<1)throw ToolAccessDenied("Graph file attachments require current workspace membership admission");
     std::unique_lock lock(impl_->mutex);impl_->require_available();
     const auto entry=std::find_if(impl_->catalog.entries.begin(),impl_->catalog.entries.end(),[&](const auto& item){return item.id==graph;});
     if(entry==impl_->catalog.entries.end())throw NotFound("Graph is not registered");
     if(revision!=entry->revision)throw Conflict("Graph catalog revision changed");
+    if(!files.empty()&&std::none_of(entry->plan.nodes().begin(),entry->plan.nodes().end(),[](const auto& node){return node.kind==GraphNodeKind::agent;}))
+        throw std::invalid_argument("Graph file attachments require at least one agent node");
     if(impl_->active.size()>=impl_->capacity)throw RunBusy("Graph ownership capacity is full");
     if(model.empty()) {
         const bool agent=std::any_of(entry->plan.nodes().begin(),entry->plan.nodes().end(),[](const auto& node){return node.kind==GraphNodeKind::agent;});
         const auto models=impl_->runner.models();if(agent && !models.empty())model=models.front();
     }
     impl_->runner.validate(entry->plan,model);
-    const auto membership=impl_->runner.workspace_membership_admission();
+    const auto membership=files.empty()?std::optional<WorkspaceMembershipSnapshot>{}:impl_->runner.workspace_membership_admission();
+    if(!files.empty()&&(!membership||membership->revision!=expected_workspace_revision))throw Conflict("Workspace membership changed while selecting graph attachments");
     const auto budget=impl_->runner.execution_budget(entry->plan,model);
     const auto context_authority=impl_->runner.execution_context(entry->plan,model);
-    auto input_record=Json{{"content",std::move(prompt)},{"model_id",model}};const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();
+    auto input_record=Json{{"content",std::move(prompt)},{"model_id",model}};
+    if(!files.empty()){input_record["files"]=Json::parse(impl_->runner.capture_prompt_attachments_json(files,expected_workspace_revision));std::string summary="Attached workspace files:";for(const auto& file:input_record["files"])summary+="\n- "+file.at("path").get<std::string>();input_record["content"]=input_record["content"].get<std::string>()+"\n\n"+summary;}
+    const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();if(input.size()>2*1024*1024)throw std::invalid_argument("Graph prompt and file attachments exceed the 2 MiB persisted input limit");
     auto job=std::make_shared<Impl::Job>();job->id=id;
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
     try {impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}

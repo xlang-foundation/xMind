@@ -135,7 +135,14 @@ class BackendClient {
     const result=await this.request(`/v1/graph-runs/${root}/resume`,{expected_checkpoint_revision});validateRunDTO(result);
     if(result.id!==root||result.parent_id!==''||result.graph_root!==true)throw new Error('Graph resume ownership changed');return result;
   }
-  graphRun(session_id,graph_id,graph_revision,prompt,model_id,binding) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{}),...profileBindingFields(binding)}); }
+  async graphRun(session_id,graph_id,graph_revision,prompt,model_id,binding,files=[],expectedWorkspaceRevision) {
+    if(!Array.isArray(files)||files.length>32)throw new Error('Invalid workspace file attachments.');
+    if(!files.length)return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{}),...profileBindingFields(binding)});
+    const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('Graph file attachments require an opened backend workspace.');const membership=await this.workspaceMembership(workspace);
+    if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before sending.');
+    for(const file of files)if(!file||typeof file!=='object'||Array.isArray(file)||Object.keys(file).some(key=>!['path','folder_id','name','description','mention'].includes(key))||typeof file.path!=='string'||!file.path||file.path.length>4096||file.path.startsWith('/')||/^[A-Za-z]:/.test(file.path)||file.path.includes('\\')||file.path.split('/').some(part=>!part||part==='.'||part==='..')||file.folder_id!==undefined&&(typeof file.folder_id!=='string'||file.folder_id.length>256))throw new Error('Invalid workspace file attachment.');
+    return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,files,expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id,expected_workspace_revision:expectedWorkspaceRevision??membership.revision,...(model_id?{model_id}:{}),...profileBindingFields(binding)});
+  }
   async graph(id) { const value=await this.request(`/v1/graph-runs/${encodeURIComponent(id)}`);if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
