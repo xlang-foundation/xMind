@@ -141,6 +141,12 @@
           "scope": "machine",
           "description": "Optional trusted machine-level pure standard-library directory for a development native runtime."
         },
+        "agentflow.profileRoot": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Optional absolute local xMind profile directory shared with the webpage or console. Defaults to the per-user .xMind/p directory. Keep it outside opened workspaces."
+        },
         "agentflow.providerConfigPath": {
           "type": "string",
           "default": "",

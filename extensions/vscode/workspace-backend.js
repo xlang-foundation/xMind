@@ -154,7 +154,8 @@ class WorkspaceBackend {
     // per-user path. Windows package caches can expand AppData paths past the
     // native runtime's legacy DLL-loading limit.
     let profileRoot;
-    if(this.deps.profileRoot)profileRoot=canonicalPath(this.deps.profileRoot);
+    const configuredProfileRoot=machineSetting(this.vscode,'profileRoot')||this.deps.profileRoot;
+    if(configuredProfileRoot)profileRoot=canonicalPath(configuredProfileRoot);
     else{
       const userProfile=this.deps.env.USERPROFILE;
       if(!userProfile)throw new Error('Local xMind profile storage requires the Windows user profile directory.');

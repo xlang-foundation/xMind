@@ -59,6 +59,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.languageServerConfigPath` | Optional absolute trusted native LSP profile YAML path. Development Host automatically uses this repository's `.config/language-servers.yaml` when present; the extension never searches the opened project. |
 | `agentflow.processConfigPath` | Optional absolute trusted native process profile YAML path. Development Host automatically uses this repository's `.config/processes.yaml` when present; the extension never searches the opened project. |
 | `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles keep their stored policy until the user applies the setting through **xMind: Apply Trusted Runtime Configuration**, which restarts the same profile and preserves sessions/history. |
+| `agentflow.profileRoot` | Optional machine-level profile directory for sharing the same local workspace sessions with the webpage or console. Defaults to `%USERPROFILE%\.xMind\p`; keep custom paths outside every opened workspace. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
 An unset provider path starts Native unconfigured so Settings can enroll a

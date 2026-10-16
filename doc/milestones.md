@@ -55,6 +55,7 @@ pass; real browser acceptance remains outstanding. The latest client suites
 pass **377/377** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
 agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
+VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The focused workspace-backend test and full client suite pass **378/378**. This setting has not yet been verified in a newly rendered VS Code host, so it does not close the live cross-client acceptance gate.
 
 ## CLI attachment to native queued runs — 2026-10-15
 

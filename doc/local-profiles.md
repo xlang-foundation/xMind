@@ -6,13 +6,15 @@ database operations continue through embedded xlang3. The profile controller
 does not read or modify agent tables.
 
 Without `--port`, the console selects its current directory, or the explicit
-`--workspace DIR`, and resolves the same profile root used by the VS Code
-extension: `%USERPROFILE%\.xMind\p`. If that path exceeds 84 characters, both
-clients use `%USERPROFILE%\p`; if that path also exceeds the limit, startup
+`--workspace DIR`, and resolves `%USERPROFILE%\.xMind\p`. The VS Code extension
+uses the same default; its machine-level `agentflow.profileRoot` setting can
+select a shared custom root. The browser launcher accepts the same root through
+`--profile-root DIR`. If the default path exceeds 84 characters, console and
+VS Code use `%USERPROFILE%\p`; if that path also exceeds the limit, startup
 fails with a clear error. `--profile-root DIR` selects an explicit private
-storage location. Storage that overlaps the selected workspace is rejected.
-The profile directory is keyed by the native workspace directory identity,
-not a spelling of its path or a package revision.
+storage location. Storage that overlaps an opened workspace is rejected. The
+profile directory is keyed by the native workspace directory identity, not a
+spelling of its path or a package revision.
 
 ```powershell
 xmind --workspace D:\Projects\Example --config D:\Private\.config\providers.yaml
