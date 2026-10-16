@@ -17744,7 +17744,7 @@
         "sourceSha256": "4761f0fb218eecf53a638a02d26072829e4817719d242354e1bea01ebb236c3d",
         "surface": "POST /v1/sessions/{id}/agent accepts OpenCode {agent} with 204; xMind revision-bound selection also remains available to CLI, browser and VS Code; GET /v1/sessions/{id}/agent/events?after=N reads durable switch events",
         "sourceAnchor": "executor->select_session_agent",
-        "gap": "The native backend pins a named agent definition snapshot per conversation, revision-checks the selection and locks changes during active runs. An OpenCode-shaped {agent} request selects the same snapshot and returns 204. Each successful selection atomically writes a typed agent-switched record to a separate SQLite event log; the owner-authenticated xMind cursor endpoint returns it across restart without adding it to model transcript history. The route differs from OpenCode, no OpenCode-compatible message/SSE publication is provided, and full operation-level parity remains unverified.",
+        "gap": "The native backend pins a named agent definition snapshot per conversation, revision-checks selection and locks changes during active runs. xMind uses its revision-bound request schema. Each successful selection atomically writes a typed agent-switched record to a separate SQLite event log; the owner-authenticated xMind cursor endpoint returns it across restart without adding it to model transcript history. This entry tracks a reference capability and does not define API compatibility.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

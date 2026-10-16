@@ -2,7 +2,7 @@
 
 The user's subsequent requirement is native C++ platform implementation. LiteLLM is a reference only: implement model/provider adapters and routing in C++, rather than use its Python SDK as AgentFlow's core. The SDK dependency notes below are historical audit evidence, not an approved integration plan.
 
-The user requested LiteLLM as the reference for broad frontier-model support. This extends the existing OpenCode parity requirement. Model access belongs in the shared backend so single agents, graph nodes, CLI and editor clients use the same provider configuration and capability checks.
+LiteLLM is a reference for broad frontier-model coverage and provider behavior. It does not create an SDK or wire-compatibility requirement. Model access belongs in the shared backend so single agents, graph nodes, CLI and editor clients use the same provider configuration and capability checks.
 
 ## Pinned reference
 

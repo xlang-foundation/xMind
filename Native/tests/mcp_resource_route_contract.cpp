@@ -22,15 +22,14 @@ int main(int argc,char** argv){
         HttpServer server(persistence,token,nullptr,nullptr,{}, {},{},nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,&catalog);
         const auto port=server.bind(0);if(port<=0)throw std::runtime_error("MCP resource route server failed to bind");std::jthread listener([&]{server.listen();});
         httplib::Client client("127.0.0.1",port);client.set_connection_timeout(2,0);client.set_read_timeout(5,0);const httplib::Headers auth{{"Authorization","Bearer "+token}};
-        auto response=client.Get("/v1/mcp/resource",auth);require(response&&response->status==200,"Default MCP resource location must be readable");
-        auto result=Json::parse(response->body);require(result.size()==2&&result.contains("location")&&result.contains("data"),"Response envelope must contain exactly location and data");
-        require(result["location"].size()==1&&result["location"].contains("directory")&&result["location"]["directory"].is_string(),"Default location must identify an absolute directory");
-        require(result["data"].size()==2&&result["data"]["resources"].size()==1&&result["data"]["templates"].size()==1,"MCP resource and template catalogues must be present");
-        const auto& resource=result["data"]["resources"][0];require(resource.size()==5&&resource["server"]=="peer"&&resource["name"]=="readme"&&resource["uri"]=="fixture://readme"&&resource["description"]=="fixture"&&resource["mimeType"]=="text/plain","Resource projection must match the public schema and omit native-only fields");
-        const auto& resource_template=result["data"]["templates"][0];require(resource_template.size()==5&&resource_template["server"]=="peer"&&resource_template["name"]=="record"&&resource_template["uriTemplate"]=="fixture://records/{id}"&&resource_template["description"]=="record template"&&resource_template["mimeType"]=="application/json","Template projection must match the public schema and omit native-only fields");
-        response=client.Get("/v1/mcp/resource?location%5Bdirectory%5D=C%3A%5C%5Cprojects%5C%5C..%5C%5Cworkspace",auth);require(response&&response->status==200,"Absolute location query must be accepted");result=Json::parse(response->body);require(result["location"]["directory"]=="C:\\workspace","Location paths must be normalized before returning them");
-        for(const auto* path:{"/v1/mcp/resource?unknown=value","/v1/mcp/resource?location%5Bdirectory%5D=relative","/v1/mcp/resource?location%5Bdirectory%5D=C%3A%5C%5Cone&location%5Bdirectory%5D=C%3A%5C%5Ctwo"}){response=client.Get(path,auth);require(response&&response->status==400,"Unknown, relative or duplicate location queries must be rejected");}
-        response=client.Get("/v1/mcp/resource",httplib::Headers{{"Authorization","Bearer wrong-token"}});require(response&&response->status==401,"MCP resource catalogue must require native bearer authentication");
-        server.stop();listener.join();persistence.close();std::cout<<"Native MCP resource route contract passed schema projection, location normalization, strict query validation and bearer authentication.\n";return 0;
+        auto response=client.Get("/v1/mcp/resources",auth);require(response&&response->status==200,"Native MCP resource catalog must be readable");
+        const auto result=Json::parse(response->body);require(result.size()==3&&result.contains("servers")&&result.contains("resources")&&result.contains("templates"),"Native catalog must keep its own envelope");
+        require(result["servers"].size()==1&&result["servers"][0]["id"]=="peer","Native catalog must preserve connected server metadata");
+        require(result["resources"].size()==1&&result["resources"][0]["server_id"]=="peer"&&result["resources"][0]["resource"]["uri"]=="fixture://readme","Native catalog must preserve its server-scoped resource records");
+        require(result["templates"].size()==1&&result["templates"][0]["server_id"]=="peer"&&result["templates"][0]["template"]["uriTemplate"]=="fixture://records/{id}","Native catalog must preserve its server-scoped templates");
+        response=client.Get("/v1/mcp/resources?cursor=client-supplied",auth);require(response&&response->status==400,"Native MCP pagination cannot be selected by a client");
+        response=client.Get("/v1/mcp/resource",auth);require(response&&response->status==404,"Foreign-shaped MCP resource routes are not part of the xMind API");
+        response=client.Get("/v1/mcp/resources",httplib::Headers{{"Authorization","Bearer wrong-token"}});require(response&&response->status==401,"Native MCP resource catalog must require bearer authentication");
+        server.stop();listener.join();persistence.close();std::cout<<"Native MCP catalog contract passed native schema, query rejection, foreign-route rejection and bearer authentication.\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

@@ -571,18 +571,24 @@ packaged managed local-view contract. Live TestProj pytest through a newly
 initialized xMind profile and installed VS Code UI acceptance remain open.
 [Native contract output](evidence/native-xlang3-default-process-20261013.log).
 
-## OpenCode-shaped MCP resource location route — 2026-10-13
+## Exploratory OpenCode-shaped MCP resource location route — removed 2026-10-15
 
-The native HTTP API now exposes `GET /v1/mcp/resource?location[directory]=...`
+At that point, the native HTTP API exposed `GET /v1/mcp/resource?location[directory]=...`
 with the pinned OpenCode `location` plus `data.resources`/`data.templates`
 shape, while retaining xMind's existing `/v1/mcp/resources` UI catalog. The
-native contract test verifies exact public fields, path normalization, rejection
+native contract test verified exact public fields, path normalization, rejection
 of unknown/duplicate/relative location queries, and bearer authentication. The
-full browser and VS Code Node suites pass **432/432**; the browser adapter only
-forwards the exact location query. This advances xMind only and does not claim
-full OpenCode interoperability or populated editor acceptance.
+full browser and VS Code Node suites passed **432/432** at the time. This was an
+exploratory reference experiment, not a product compatibility goal. The route,
+foreign payload projection, and browser forwarding were removed on 2026-10-15;
+xMind now exposes its native `/v1/mcp/resources` catalog only.
 [Native contract output](evidence/native-mcp-resource-location-contract-20261013.log),
 [browser/VS Code output](evidence/mcp-resource-location-browser-vscode-tests-20261013.log).
+
+OpenCode and LiteLLM guide feature selection and behavior research only. xMind
+does not target their API, wire, SDK, or client compatibility. The native MCP
+catalog and revision-bound session-agent request are covered by xMind-owned
+contracts.
 
 ## VS Code process validation on the xlang3 compatibility branch — 2026-10-13
 
