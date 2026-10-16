@@ -9,7 +9,7 @@ const root=resolve(import.meta.dirname,'..'),out=join(root,'build/ci-evidence/vi
 await mkdir(out,{recursive:true});
 const tracked=execFileSync('git',['ls-files','--','extensions/vscode','views/browser'],{cwd:root,encoding:'utf8'}).trim().split(/\r?\n/);
 const files=[...tracked,'extensions/vscode/node_modules/marked/lib/marked.umd.js','extensions/vscode/node_modules/dompurify/dist/purify.min.js'];
-if(tracked.length!==57||files.length!==59||new Set(files).size!==files.length)throw new Error('View source inventory differs; review and update the complete manifest.');
+if(tracked.length!==59||files.length!==61||new Set(files).size!==files.length)throw new Error('View source inventory differs; review and update the complete manifest.');
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const freeze=async()=>Object.fromEntries(await Promise.all(files.map(async p=>[p,sha(await readFile(join(root,p)))])));
 const before=await freeze();
@@ -29,7 +29,7 @@ const [extension,browser]=await Promise.all([
 const after=await freeze();await writeFile(join(out,'source-after.json'),JSON.stringify(after,null,2)+'\n');
 const assetsAfter=await assets();await writeFile(join(out,'assets-after.json'),JSON.stringify(assetsAfter,null,2)+'\n');
 const unchanged=JSON.stringify(before)===JSON.stringify(after)&&JSON.stringify(assetsBefore)===JSON.stringify(assetsAfter);
-const passed=unchanged&&extension.exitCode===0&&extension.tests===333&&extension.passed===333&&browser.exitCode===0&&browser.tests===106&&browser.passed===106&&[extension,browser].every(r=>r.failed===0&&r.skipped===0&&r.cancelled===0);
+const passed=unchanged&&extension.exitCode===0&&extension.tests===375&&extension.passed===375&&browser.exitCode===0&&browser.tests===127&&browser.passed===127&&[extension,browser].every(r=>r.failed===0&&r.skipped===0&&r.cancelled===0);
 const report={sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),scope:'Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance',sourceFiles:files.length,trackedSourceFiles:tracked.length,vendorFiles:2,browserAssets:assetNames.length,sourceAndAssetBytesUnchanged:unchanged,extension,browser,providerRequests:0,nativeExecuted:false,cpythonExecuted:false,passed};
 await writeFile(join(out,'gate.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 if(!passed)process.exitCode=1;

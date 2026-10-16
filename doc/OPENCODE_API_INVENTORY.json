@@ -20661,7 +20661,7 @@
         "sourceSha256": "e455b4ce2acda2d78a20a69c4f996a0074867a452fd00ccc3d5c4b8b229def14",
         "surface": "POST /v1/runs",
         "sourceAnchor": "executor->submit_with_attachments",
-        "gap": "Workspace file references from VS Code or the CLI are resolved under the admitted membership and their exact UTF-8 snapshots are persisted before the model call. Browser and graph attachments, queued input with attachments and upstream session input ordering remain incomplete.",
+        "gap": "Workspace file references from the browser, VS Code or the CLI are resolved under the admitted membership and their exact UTF-8 snapshots are persisted before the model call. Graph attachments, queued input with attachments and upstream session input ordering remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

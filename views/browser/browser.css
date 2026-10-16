@@ -16,6 +16,7 @@ body{background:#10141a}.browser-bar{height:52px;display:flex;align-items:center
 .workspace-label-open{display:inline-flex;align-items:center;gap:6px;height:32px;max-width:min(30vw,360px);padding:0 7px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--vscode-foreground);cursor:pointer;font:550 12px system-ui,sans-serif}.workspace-label-open:hover:not(:disabled){background:#232b37;border-color:#303947}.workspace-label-open:focus-visible{outline:1px solid var(--vscode-focusBorder);outline-offset:1px}.workspace-label-open:disabled{cursor:default;opacity:.7}#workspace-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.workspace-label-chevron{flex:none;color:#9ea9ba;font-size:16px;line-height:1}
 
 .file-tree .workspace-find button{width:auto;flex:none}
+.file-tree .workspace-file-row{display:flex;align-items:center;gap:2px}.file-tree .workspace-file-row>button:first-child{flex:1;min-width:0}.file-tree .workspace-file-row>.workspace-file-attach{width:28px;min-width:28px;flex:none;justify-content:center;padding:4px;color:#a8c4ff}.file-tree .workspace-file-attach[aria-pressed="true"]{background:#26344a;color:#fff}
 
 /* Keep narrow browser windows in chat-only mode after the workspace-pane
    component rules above. Earlier mobile declarations were overridden by the

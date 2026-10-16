@@ -386,3 +386,8 @@ test('browser MCP Settings explicitly loads the native resource catalog without 
  try{await view.handle({type:'mcp-resources-refresh'});assert.deepEqual(calls,['resources']);assert.deepEqual(posted,[{type:'mcp-resources',busy:true},{type:'mcp-resources',busy:false,catalog}]);}
  finally{view.dispose();}
 });
+test('browser file attachments carry workspace membership revision into native run admission',async()=>{
+ const posted=[],calls=[],files=[{path:'src/main.js',folder_id:'folder-main',name:'main.js'}],membership={revision:12,workspace_id:'workspace'};const client={workspaceMembership:async()=>membership,run:async(...args)=>{calls.push(args);return {id:'run-file',session_id:'session',state:'running'};}};const view=new BrowserController(client,value=>posted.push(value));view.session='session';view.health={agent_execution:true};view.model='model';view.present=()=>{};view.remember=()=>{};view.watch=()=>{};view.refreshSessions=async()=>{};
+ try{await view.handle({type:'send',prompt:'Review this source',files});assert.deepEqual(calls,[['session','Review this source','model',undefined,undefined,files,12]]);assert.deepEqual(posted.find(value=>value.type==='user'),{type:'user',text:'Review this source',files});assert.deepEqual(posted.find(value=>value.type==='prompt-files'),{type:'prompt-files',files:[]});}
+ finally{view.dispose();}
+});
