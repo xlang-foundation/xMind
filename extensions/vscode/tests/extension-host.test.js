@@ -230,6 +230,27 @@ test('a stale VS Code session selection falls back to the newest native catalogu
  assert.ok(h.requests.includes('/v1/sessions/latest/messages?limit=40'));assert.equal(h.state.get('agentflow.session').id,'latest');assert.deepEqual(h.errors,[]);
 });
 
+test('restored VS Code conversation renders its transcript and submits a coding turn to that same session',async()=>{
+ const admissions=[];const run={id:'coding-turn',session_id:'shared-testproj',state:'queued',graph_root:false,parent_id:'',node_id:''};
+ const h=harness({initialSessionId:run.session_id,sessions:[{id:run.session_id,title:'Shared TestProj session'}],onAdmission:body=>{admissions.push(body);return{ok:true,status:202,json:async()=>run};}});
+ await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='history')&&view.posted.some(message=>message.type==='sessions'));
+  const sessionState=view.posted.findLast(message=>message.type==='sessions');
+  const transcript=view.posted.findLast(message=>message.type==='history');
+  assert.equal(sessionState.selected,run.session_id);
+  assert.deepEqual(transcript.history.map(message=>message.role),['user','assistant']);
+  assert.ok(h.requests.includes(`/v1/sessions/${run.session_id}/messages?limit=40`));
+  view.receive({type:'send',prompt:'Update the project and run its build'});
+  await until(()=>admissions.length===1);
+  assert.equal(admissions[0].session_id,run.session_id);
+  assert.equal(admissions[0].prompt,'Update the project and run its build');
+  assert.equal(admissions[0].model_id,'synthetic-host-default');
+  assert.deepEqual(h.errors,[]);
+ }finally{view.close();}
+});
+
 test('a session saved for another workspace profile is never restored in the current VS Code workspace',async()=>{
  const scope={workspace_id:'windows-local-file-v1:1:0',profile_directory:'C:\\Profiles\\TestProj'};
  const h=harness({openOnStartup:true,stateScope:scope,initialSessionRecord:{url:'http://127.0.0.1:8765',id:'foreign',workspace_id:'windows-local-file-v1:1:other',profile_directory:'C:\\Profiles\\OtherProject'},sessions:[{id:'current',title:'TestProj session'}]});await h.activation;await h.bootstrapTasks[0]();await until(()=>h.views.length===1);
