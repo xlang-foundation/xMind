@@ -19,5 +19,18 @@
   "limits": [
     "The coding/model interaction was not repeated in this contract; separate live acceptance records cover one coding task in each client.",
     "This is client-to-backend integration evidence, not a rendered screenshot or live inspection of the same session in both UI surfaces."
-  ]
+  ],
+  "current_checkout_rerun": {
+    "date": "2026-10-15",
+    "revision": "c3dc7ef",
+    "build": "cmake --build build/a2a-native --config Release --target xmind --parallel 8",
+    "build_result": "passed",
+    "native_binary_sha256": "E793DC86B41E5D2C33D839CB84E5AAA8D481C64FCC9E67DA59836FCC1E57BECD",
+    "test_command": "ctest --test-dir build/a2a-native -C Release -R ^native_local_view_contract$ --output-on-failure",
+    "tests": 1,
+    "passed": 1,
+    "failed": 0,
+    "duration_seconds": 89.12,
+    "result": "passed against the rebuilt native executable and current local_view_contract.mjs"
+  }
 }
