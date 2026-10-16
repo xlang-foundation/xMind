@@ -1,0 +1,15 @@
+{
+  "evidence_id": "cross-client-shared-profile-20261016",
+  "observed_at": "2026-10-15T21:06:50-07:00",
+  "workspace": "TestProj",
+  "clients": ["webpage", "VS Code extension development host"],
+  "shared_native_backend_process": true,
+  "shared_profile_directory": true,
+  "vscode_profile_aware_view_started": true,
+  "vscode_xmind_webview_created": true,
+  "provider_request_sent_by_vscode": false,
+  "vscode_coding_turn_verified": false,
+  "cross_client_session_and_history_rendering_verified": false,
+  "credentials_or_tokens_included": false,
+  "scope": "The webpage and VS Code view adapters reported the same native backend owner and profile identity. This verifies shared backend attachment only. It does not verify that the VS Code view rendered the webpage's selected session/history or completed a coding turn."
+}

@@ -60,6 +60,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.processConfigPath` | Optional absolute trusted native process profile YAML path. Development Host automatically uses this repository's `.config/processes.yaml` when present; the extension never searches the opened project. |
 | `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles keep their stored policy until the user applies the setting through **xMind: Apply Trusted Runtime Configuration**, which restarts the same profile and preserves sessions/history. |
 | `agentflow.profileRoot` | Optional machine-level profile directory for sharing the same local workspace sessions with the webpage or console. Defaults to `%USERPROFILE%\.xMind\p`; keep custom paths outside every opened workspace. |
+| `agentflow.openOnStartup` | Optional machine-level setting that opens the xMind sidebar and connects the active workspace after VS Code starts. Defaults to `false`. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
 An unset provider path starts Native unconfigured so Settings can enroll a
@@ -125,8 +126,8 @@ token needs to be copied into the page. Closing that access view does not stop
 native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/browser-view.md).
 
 Client tests use labelled synthetic host, process, HTTP and DOM fixtures. Live
-and installed results are reported separately and do not establish complete
-coding feature parity. The persistent window retains VS Code's folder-trust
+and installed results are reported separately from xMind's own coding acceptance.
+The persistent window retains VS Code's folder-trust
 requirement. [Opened-folder evidence](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/vscode-opened-workspace.md).
 Earlier preview and editor evidence belongs to its recorded runtime.
 [Validation status](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/VALIDATION_STATUS.md),

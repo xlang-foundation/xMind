@@ -1133,6 +1133,12 @@ async function activate(context) {
     },0);
     context.subscriptions.push({dispose:()=>clearTimeout(bootstrap)});
   }
+  if(!previewReady&&machineSetting(vscode,'openOnStartup')===true) {
+    // Keep the normal VS Code startup quiet unless the user explicitly opts in.
+    // Defer until activation completes so the registered view can resolve.
+    const bootstrap=setTimeout(()=>open().catch(error=>vscode.window.showErrorMessage(error.message)),0);
+    context.subscriptions.push({dispose:()=>clearTimeout(bootstrap)});
+  }
   // Public observation API for real IDE acceptance/reconnection tooling. It
   // only re-reads the authenticated Native DTO; it does not start work or expose
   // owner tokens, provider configuration contents or private storage paths.

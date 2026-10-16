@@ -8,7 +8,8 @@ does not read or modify agent tables.
 Without `--port`, the console selects its current directory, or the explicit
 `--workspace DIR`, and resolves `%USERPROFILE%\.xMind\p`. The VS Code extension
 uses the same default; its machine-level `agentflow.profileRoot` setting can
-select a shared custom root. The browser launcher accepts the same root through
+select a shared custom root, and `agentflow.openOnStartup` can open its sidebar
+automatically when desired. The browser launcher accepts the same root through
 `--profile-root DIR`. If the default path exceeds 84 characters, console and
 VS Code use `%USERPROFILE%\p`; if that path also exceeds the limit, startup
 fails with a clear error. `--profile-root DIR` selects an explicit private

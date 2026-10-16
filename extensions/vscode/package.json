@@ -147,6 +147,12 @@
           "scope": "machine",
           "description": "Optional absolute local xMind profile directory shared with the webpage or console. Defaults to the per-user .xMind/p directory. Keep it outside opened workspaces."
         },
+        "agentflow.openOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "Open the xMind sidebar and connect to the active workspace when VS Code starts."
+        },
         "agentflow.providerConfigPath": {
           "type": "string",
           "default": "",

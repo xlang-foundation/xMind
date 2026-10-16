@@ -55,7 +55,7 @@ pass; real browser acceptance remains outstanding. The latest client suites
 pass **377/377** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
 agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
-VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The focused workspace-backend test and full client suite pass **379/379**. This setting has not yet been verified in a newly rendered VS Code host, so it does not close the live cross-client acceptance gate.
+VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The optional `agentflow.openOnStartup` setting opens the xMind view after extension activation when enabled; it defaults off. The focused extension-host and full client suites pass **380/380**. In the isolated TestProj acceptance host, the rendered xMind view started through its profile-aware adapter and attached to the same native backend process and profile identity as the webpage. This verifies shared-backend attachment; cross-client session/history visibility in the rendered VS Code view remains to be confirmed. [Sanitized evidence](evidence/cross-client-shared-profile-20261016.json).
 
 ## CLI attachment to native queued runs — 2026-10-15
 
