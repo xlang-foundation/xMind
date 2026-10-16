@@ -226,6 +226,7 @@ test('a stale VS Code session selection falls back to the newest native catalogu
  const h=harness({openOnStartup:true,initialSessionId:'removed',sessions:[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]});await h.activation;await h.bootstrapTasks[0]();await until(()=>h.views.length===1);
  const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='history'));
  const selected=view.posted.findLast(message=>message.type==='sessions');assert.equal(selected.selected,'latest');assert.deepEqual(selected.sessions,[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]);
+ assert.deepEqual(view.posted.findLast(message=>message.type==='history').history.map(message=>message.role),['user','assistant']);
  assert.ok(h.requests.includes('/v1/sessions/latest/messages?limit=40'));assert.equal(h.state.get('agentflow.session').id,'latest');assert.deepEqual(h.errors,[]);
 });
 
