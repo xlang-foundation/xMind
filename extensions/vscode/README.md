@@ -1,13 +1,16 @@
 # xMind for VS Code
 
-The current VSIX is **0.1.12** and is installed in the local VS Code profile.
-The full extension suite passes **385/385**. A VS Code development host opened a
-native TestProj view attached to the same saved profile used by the successful
-webpage coding run. This verifies startup and shared-backend attachment; it does
-not yet verify a coding turn submitted from the rendered VS Code sidebar. The
-default VS Code profile still has a webview service-worker failure, and xMind
-rendering has not been verified in the clean profile that passed the built-in
-Markdown preview. See the [shared-backend evidence](../../doc/evidence/vscode-shared-backend-20261015.json),
+The current local VSIX is **0.1.13**. The full extension suite passes
+**385/385**. In an isolated VS Code test profile, the extension created a native
+TestProj view, started its local backend, and imported four provider profiles
+from the configured YAML file. The matching Native `native_local_view_contract`
+passes **1/1**. This verifies current package startup and provider import; the
+newly started pane has not yet submitted a coding prompt. A separate live
+VS Code coding and build acceptance is recorded in
+[its evidence](../../doc/evidence/testproj-vscode-live-coding-20261015.json).
+The default VS Code profile still has a webview service-worker failure. See the
+[runtime refresh evidence](../../doc/evidence/vscode-runtime-refresh-20261016.json),
+[shared-backend evidence](../../doc/evidence/vscode-shared-backend-20261015.json),
 [webview diagnostic](../../doc/evidence/vscode-webview-clean-profile-20261015.json),
 and [validation status](../../doc/VALIDATION_STATUS.md).
 

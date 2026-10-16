@@ -33,6 +33,26 @@ This confirms workspace selection, file-explorer refresh, and persistence in
 the local webpage flow without provider configuration. It does not verify model
 inference or the VS Code selector. [Evidence](evidence/browser-workspace-switch-live-20261016.json).
 
+## VS Code package startup and provider import — 2026-10-16
+
+The locally installed VSIX is **0.1.13** and uses the verified 1,924-file
+Native/xlang3 runtime bundle at revision `dee2febe`. The Native
+`native_local_view_contract` passed **1/1** against the exact packaged xMind
+executable, and the extension suite passed **385/385**. In a clean VS Code
+isolated profile, xMind opened the `D:\CantorAI2026\TestProj` workspace, published its
+authenticated native-view readiness record, started the backend, and imported
+four provider profiles from the existing YAML configuration. SQLite counts and
+provider labels were checked with xlang3; secret values were not read. This
+confirms the installed host can start and connect with its saved provider
+configuration. No coding prompt was submitted from this newly opened pane, and
+its rendered contents were not visually inspected. The separate live VS Code
+coding/build run remains documented in
+[its acceptance evidence](evidence/testproj-vscode-live-coding-20261015.json).
+The runtime bundle provenance still marks the staged build as not release
+accepted; this checkpoint verifies the targeted view contract and live startup,
+not the complete native release suite.
+[Evidence](evidence/vscode-runtime-refresh-20261016.json).
+
 ## Live webpage coding acceptance — 2026-10-15
 
 Using the local TestProj browser workspace and its saved Claude profile, xMind
@@ -50,10 +70,10 @@ and the current VS Code extension suite passes **385/385**. New extension-host
 contracts show an immediate CSP-protected connecting state when the sidebar is
 created, render safe retry guidance after backend startup fails, and restore a
 saved conversation, load its transcript, then admit a coding prompt to that same
-session ID. These are controller contracts, not live VS Code UI evidence; the
-development host has not yet been reloaded to confirm the startup state or
-complete a same-conversation coding turn. The outstanding first-target gate is
-to inspect those behaviors in the live VS Code pane.
+session ID. These are controller contracts, not live UI evidence. The 0.1.13
+test profile now confirms native-view startup and provider import, while a
+coding turn from that freshly opened pane and its rendered contents remain
+unverified. The earlier live coding/build evidence is listed separately above.
 [Browser scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
 
 ## Backend-owned session inbox dispatch — 2026-10-15

@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-16",
+  "scope": "VS Code extension package refresh, native view startup, and provider import",
+  "vsix": {
+    "version": "0.1.13",
+    "file_count": 1970,
+    "size_bytes": 31117751,
+    "installed_in_test_profile": true
+  },
+  "runtime": {
+    "native_revision": "dee2febe1d43286af6d2a445b3554fa95aed773e",
+    "file_count": 1924,
+    "manifest_sha256": "c494d94b6e334741a650d726eb1f397fce9ab344b93a968da7a946705284125a",
+    "provenance_release_accepted": false
+  },
+  "validation": {
+    "extension_tests": "385/385 passed",
+    "native_local_view_contract": {
+      "result": "passed",
+      "count": "1/1",
+      "elapsed_seconds": 76.38,
+      "build": "build/native Release"
+    },
+    "native_runtime_inventory": "verified"
+  },
+  "installed_host": {
+    "vscode_version": "1.142.0",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "view_readiness_record": "created",
+    "backend_started": true,
+    "provider_configuration": "D:/CantorAI2026/xMind/.config/providers.yaml",
+    "provider_credential_rows_imported": 4,
+    "sqlite_inspection": "performed with xlang3; only table names, counts, and labels were inspected"
+  },
+  "limitations": [
+    "No coding prompt was submitted from the newly opened VS Code pane.",
+    "The new pane was not visually inspected.",
+    "The runtime provenance does not claim full release acceptance; the targeted Native view contract and live startup passed."
+  ]
+}
