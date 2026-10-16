@@ -1,10 +1,15 @@
 # xMind for VS Code
 
-The native shared-profile view adapter passes its focused Release integration
-contract, including authenticated process-profile metadata. The 0.1.8 VSIX was
-built from this source and installed locally. Rendered process approval and
-runtime-configuration handoff remain unverified; see
-[validation status](../../doc/VALIDATION_STATUS.md).
+The current VSIX is **0.1.12** and is installed in the local VS Code profile.
+The full extension suite passes **385/385**. A VS Code development host opened a
+native TestProj view attached to the same saved profile used by the successful
+webpage coding run. This verifies startup and shared-backend attachment; it does
+not yet verify a coding turn submitted from the rendered VS Code sidebar. The
+default VS Code profile still has a webview service-worker failure, and xMind
+rendering has not been verified in the clean profile that passed the built-in
+Markdown preview. See the [shared-backend evidence](../../doc/evidence/vscode-shared-backend-20261015.json),
+[webview diagnostic](../../doc/evidence/vscode-webview-clean-profile-20261015.json),
+and [validation status](../../doc/VALIDATION_STATUS.md).
 
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
 and the composer and model chooser at the bottom. C++ owns execution,
