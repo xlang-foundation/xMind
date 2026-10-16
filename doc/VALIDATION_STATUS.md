@@ -1,5 +1,16 @@
 # Current native validation
 
+## Product scope
+
+OpenCode 2, LiteLLM, and other tools are references for selected workflow ideas
+and provider-ecosystem research only. xMind implements its own runtime, APIs,
+provider adapters, and user experience. Compatibility, feature parity, and
+unmapped reference-inventory entries are not xMind acceptance requirements.
+The inventory audits below are research artifacts; remaining product work is
+measured against xMind's own architecture and live coding, CLI, webpage, and
+VS Code acceptance criteria. Older checkpoint notes retain the terminology
+used when they were recorded and should not be read as current parity goals.
+
 ## Backend-owned session inbox dispatch — 2026-10-15
 
 The native server now advertises `session_inbox_dispatch` and owns queue
@@ -33,24 +44,25 @@ pass **13/13**, and `native_local_view_contract` passes **1/1**, creating a
 fork through the real webpage gateway and checking its parent, full-history
 boundary, preserved message content and destination-local message IDs; the
 browser route tests enforce its exact POST-only method restriction. This is local rendered-page and native
-integration evidence; full OpenCode `Session.Info` parity and installed
-desktop acceptance remain open. Sanitized provider, fork, and test details are
+integration evidence for xMind's own session contract. OpenCode session
+compatibility is not a requirement. Sanitized provider, fork, and test details are
 in [the browser fork evidence](evidence/browser-session-fork-live-20261015.json).
 The current development browser is at `http://127.0.0.1:51880/ui/`.
 
 ## Refreshed pinned API evidence — 2026-10-15
 
 The CLI restore change updated `Native/apps/cli_main.cpp`, which invalidated
-the source hash in the prior `server.info` parity evidence. The Release build
+the source hash in the prior `server.info` inventory evidence. The Release build
 was refreshed and both declared contracts passed: `native_http_cli_contract`
 (3.67 seconds) and `native_local_profile_contract` (320.15 seconds). The
 managed-profile contract exercises the unified `xmind info` path after local
 profile startup and runtime upgrade. The evidence record now contains the
 current normalized source hashes and exact xMind, server, CLI, and xlang3
 runtime artifact hashes; each recorded binary hash was checked against disk.
-`node Tools/audit-opencode.mjs` passes against the pinned v2.0.26 revision:
-141 operations, 44 reviewed native source candidates, 97 unmapped, and 1
-verified operation-level behavior contract.
+`node Tools/audit-opencode.mjs` passes against the pinned v2.0.26 reference
+inventory: 141 operations, 44 reviewed native source candidates, 97 unmapped,
+and 1 audited behavior contract. These counts describe the reference audit,
+not xMind product gaps or acceptance criteria.
 
 ## Console restore for approved coding changes — 2026-10-15
 
@@ -248,11 +260,9 @@ xlang3 compatibility checkpoint is `9679dfbd` on `xmind-required-compat`.
 
 Remaining acceptance includes complete installed VS Code coding workflows,
 external MCP/A2A interoperability, release packaging, and the remaining
-in-scope xMind product capabilities. OpenCode 2 and LiteLLM are references for
-selected workflow ideas and provider-ecosystem research; compatibility or
-feature parity with either project is not an acceptance requirement. These
-results establish a local browser workflow and a targeted xlang3 compatibility
-fix, not completion of the full product goal.
+in-scope xMind product capabilities. These results establish a local browser
+workflow and a targeted xlang3 compatibility fix, not completion of the full
+product goal.
 
 The current VS Code extension regression suite also passes **353/353**. The
 running Extension Development Host command line points to this repository's
