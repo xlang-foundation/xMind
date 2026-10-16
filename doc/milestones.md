@@ -17,8 +17,12 @@ Acceptance requires an end-to-end coding prompt against TestProj in the actual
 webpage and VS Code, with file changes reviewed and approved in each client,
 plus restart/session persistence and cross-client visibility checks. Existing
 component tests and synthetic provider contracts are supporting evidence only;
-they do not satisfy this gate. This is the active first priority; OpenCode
-operation parity and broader provider/model coverage continue after it is met.
+they do not satisfy this gate. This is the active first priority.
+
+OpenCode v2 is a behavioral capability reference for the later audit. xMind
+keeps its own HTTP, CLI and client contracts: do not add OpenCode wire-compatible
+endpoints or copy its implementation. Build selected capabilities in xMind's
+native C++ backend and expose them through the webpage and VS Code extension.
 
 Current progress: separate live coding tasks now pass through both clients.
 The browser used its saved OpenAI profile to review and apply a focused
