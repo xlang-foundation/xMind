@@ -1,0 +1,21 @@
+{
+  "scope": "Rendered local xMind browser acceptance using an isolated native profile and two disposable folders. No TestProj profile or files were used.",
+  "profile": "isolated temporary local profile",
+  "workspaces": [
+    { "label": "folder-a", "sentinel": "A_ONLY.md" },
+    { "label": "folder-b", "sentinel": "B_ONLY.md" }
+  ],
+  "checks": [
+    "Configure Workspace reported that switching is unavailable while only one workspace is registered.",
+    "Created a new workspace from folder-b; the dialog selected it and showed its primary folder.",
+    "After closing the dialog, the page showed folder-b as current and rendered B_ONLY.md.",
+    "Switched the registered workspace to folder-a; the page rendered A_ONLY.md.",
+    "Reloaded the page and reconnected to the same local profile; folder-a remained selected and A_ONLY.md remained visible."
+  ],
+  "provider_key": "not configured or required for workspace switching",
+  "result": "passed",
+  "limitations": [
+    "This verifies rendered local browser workspace selection, file-explorer refresh, and persistence across page reload.",
+    "It does not verify model inference or the VS Code extension workspace selector."
+  ]
+}

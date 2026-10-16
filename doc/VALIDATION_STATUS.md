@@ -19,9 +19,19 @@ workspace dialog now explains this and directs the user to create a workspace
 from another folder or add folders to the current workspace. The rendered
 page displayed the guidance after reload. The focused browser connection suite
 passes **30/30**, including the disabled single-workspace state and enabled
-multiple-workspace state. This verifies the explanation and selector states;
-creating and switching between two persistent workspaces remains a separate
-live acceptance check. [Evidence](evidence/browser-workspace-switch-guidance-20261016.json).
+multiple-workspace state. That checkpoint verified the explanation and selector
+states; the live create/switch and persistence check is recorded below.
+[Guidance evidence](evidence/browser-workspace-switch-guidance-20261016.json).
+
+## Live browser workspace switching — 2026-10-16
+
+Using a separate local profile and two disposable folders, the rendered page
+created a workspace from Folder B, selected it, and showed `B_ONLY.md`. It then
+switched back to Folder A and showed `A_ONLY.md`. After reloading the page, the
+same profile reconnected with Folder A still selected and its file visible.
+This confirms workspace selection, file-explorer refresh, and persistence in
+the local webpage flow without provider configuration. It does not verify model
+inference or the VS Code selector. [Evidence](evidence/browser-workspace-switch-live-20261016.json).
 
 ## Backend-owned session inbox dispatch — 2026-10-15
 
