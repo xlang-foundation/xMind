@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-15",
+  "product": "xMind OSS browser client",
+  "scope": "One real local coding run against a user-selected workspace using an already saved provider profile.",
+  "workspace": "TestProj",
+  "provider": "Claude",
+  "model": "claude-sonnet-4-6",
+  "credential_entry_required": false,
+  "task": "Add responsive On this page navigation to the Model Zoo detail page while preserving data, routes, API behavior, copy action, and demo-data disclosures.",
+  "changed_files": [
+    "model-zoo/frontend/src/views/ModelDetailView.vue"
+  ],
+  "verification": {
+    "command": "npm run build",
+    "exit_code": 0,
+    "vite": "6.4.4",
+    "modules_transformed": 37,
+    "build_time_ms": 736,
+    "preview_http_status": 200,
+    "detail_route": "/models/whisper-small",
+    "section_link_verified": "#sec-benchmarks",
+    "viewport_width_px": 633,
+    "document_scroll_width_px": 633,
+    "section_top_after_navigation_px": 79.7
+  },
+  "limitations": [
+    "This is one scoped webpage coding acceptance, not broad project or editor acceptance.",
+    "File changes still required approval in the browser UI; those approvals were manually granted during this run.",
+    "One stale edit was rejected and retried against fresh file contents.",
+    "The live VS Code webview was not visually or interactively verified in this run."
+  ]
+}

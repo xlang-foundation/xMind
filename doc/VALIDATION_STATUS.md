@@ -33,6 +33,20 @@ This confirms workspace selection, file-explorer refresh, and persistence in
 the local webpage flow without provider configuration. It does not verify model
 inference or the VS Code selector. [Evidence](evidence/browser-workspace-switch-live-20261016.json).
 
+## Live webpage coding acceptance — 2026-10-15
+
+Using the local TestProj browser workspace and its saved Claude profile, xMind
+completed a scoped Model Zoo detail-page change without asking for another
+provider key. The run added accessible Overview/About/Benchmarks/Metadata/
+Tags/Links navigation, produced a successful Vite production build (37 modules,
+736 ms), and the rendered detail route returned HTTP 200. Clicking Benchmarks
+updated the hash and placed the section below the sticky header; at the tested
+633 px viewport, document width remained 633 px. File edits still required
+approval, and one stale edit was rejected before the agent reread and retried.
+This is a real browser coding result for one workspace and one task, not broad
+coding or VS Code acceptance. The VS Code extension test suite passes **382/382**;
+live editor code writing remains unverified. [Scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
+
 ## Backend-owned session inbox dispatch — 2026-10-15
 
 The native server now advertises `session_inbox_dispatch` and owns queue
