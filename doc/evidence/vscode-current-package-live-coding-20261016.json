@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-16",
+  "scope": "Fresh installed VS Code 0.1.13 live coding, approved file patch, and workspace build",
+  "vscode": {
+    "version": "1.142.0",
+    "extension_version": "0.1.13",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "isolated_user_data_profile": "xMind/.agentflow/vscode-cdp-acceptance-20261016/profile",
+    "webview": "Rendered xMind secondary-sidebar webview; inspected the live DOM through VS Code's DevTools Protocol"
+  },
+  "runtime": {
+    "revision": "dee2febe1d43286af6d2a445b3554fa95aed773e",
+    "sdk_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+    "manifest_sha256": "c494d94b6e334741a650d726eb1f397fce9ab344b93a968da7a946705284125a",
+    "file_count": 1924,
+    "launched_xmind_sha256_matches_manifest": true,
+    "provenance_release_accepted": false
+  },
+  "provider": {
+    "name": "Claude",
+    "model": "claude-sonnet-4-6",
+    "credential_source": "Existing local .config/providers.yaml profile; secret omitted",
+    "catalogue_models_fetched": 13,
+    "saved_key_used_without_reentry": true
+  },
+  "coding_run": {
+    "run_id": "9072c4b89b7ddb7da5aec08a75e74b24",
+    "run_state": "completed",
+    "operation": "patch_file",
+    "operation_state": "succeeded",
+    "approval": "Reviewed the exact one-file patch and approved it in the VS Code xMind sidebar",
+    "changed_files": [
+      "model-zoo/frontend/src/App.vue"
+    ],
+    "change": "Added aria-label=\"Open API documentation in a new tab\" to the header API docs link",
+    "observed_source_sha256": "96263ce883277ff0aea984e8212fb52e8e74285b8ba8006230f02e679fcf4299"
+  },
+  "build": {
+    "run_id": "748425c0ca8ca8f993c8210995304b07",
+    "command": "npm run build",
+    "working_directory": "model-zoo/frontend",
+    "exit_code": 0,
+    "vite": "6.4.4",
+    "transformed_modules": 37,
+    "vite_build_ms": 796,
+    "stderr_bytes": 0
+  },
+  "limitations": [
+    "One live coding task establishes the current installed package path, not broad coding coverage.",
+    "The native runtime bundle remains marked releaseAccepted=false; this test does not replace the complete native release gate.",
+    "The TestProj workspace is not a Git repository; its test edit and generated frontend build assets remain in that workspace.",
+    "The VS Code webview DOM was inspected, but no screenshot-based visual review was performed."
+  ]
+}

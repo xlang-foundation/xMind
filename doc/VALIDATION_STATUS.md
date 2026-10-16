@@ -53,6 +53,23 @@ accepted; this checkpoint verifies the targeted view contract and live startup,
 not the complete native release suite.
 [Evidence](evidence/vscode-runtime-refresh-20261016.json).
 
+## Fresh-package VS Code coding acceptance — 2026-10-16
+
+After that startup-only check, a fresh isolated VS Code 1.142.0 profile running
+the installed 0.1.13 extension opened TestProj and rendered the xMind sidebar.
+The existing saved Claude profile discovered 13 models, and
+`claude-sonnet-4-6` completed a live coding turn without asking for the key
+again. The model proposed a one-line accessibility improvement to
+`model-zoo/frontend/src/App.vue`; the exact patch was reviewed and approved in
+the VS Code sidebar, and the file was written by the native backend. The same
+workspace then ran `npm run build` successfully: 37 modules, Vite exit code 0,
+796 ms. The running executable hash matches the staged 1,924-file runtime
+manifest. This closes the fresh-pane coding gap recorded in the preceding
+section for this one task. It does not certify the bundle's complete native
+release gate: its provenance remains `releaseAccepted=false`. The live DOM was
+inspected through VS Code's DevTools Protocol; no screenshot visual review was
+performed. [Exact acceptance evidence](evidence/vscode-current-package-live-coding-20261016.json).
+
 ## Live webpage coding acceptance — 2026-10-15
 
 Using the local TestProj browser workspace and its saved Claude profile, xMind
