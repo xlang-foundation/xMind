@@ -29,6 +29,7 @@ struct Session {
 struct Run { std::string id, session_id; RunState state; std::string parent_id,node_id;bool graph_root=false;std::string provider_context_json; };
 struct Event { std::int64_t sequence; std::string run_id, kind, json; };
 struct Message { std::int64_t sequence; std::string role, json; };
+struct SessionAgentEvent { std::int64_t sequence; std::string session_id, agent_id; std::optional<std::string> previous_agent_id; std::int64_t created_ms=0; };
 struct SessionArchive { Session session; std::vector<Message> messages; std::optional<AgentDefinition> agent; };
 struct MessagePage { std::vector<Message> messages; std::optional<std::int64_t> next_before_sequence; };
 struct SessionInboxItem {std::string id,session_id,content,state,run_id;std::int64_t created_ms=0;std::string files_json="[]",workspace_id;std::int64_t workspace_revision=0;};

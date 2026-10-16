@@ -561,7 +561,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>31)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>32)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -590,7 +590,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>31) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>32) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -1002,6 +1002,12 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         if(!has_column("workspace_revision"))db.execute("ALTER TABLE session_inbox ADD COLUMN workspace_revision INTEGER NOT NULL DEFAULT 0 CHECK(workspace_revision>=0)");
         db.execute("PRAGMA user_version=31");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Queued attachment migration did not preserve repository ownership");
+    }
+    if(version<32){
+        db.execute("CREATE TABLE session_agent_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL REFERENCES sessions(id),agent_id TEXT NOT NULL CHECK(length(agent_id) BETWEEN 1 AND 64),previous_agent_id TEXT CHECK(previous_agent_id IS NULL OR length(previous_agent_id) BETWEEN 1 AND 64),created_ms INTEGER NOT NULL CHECK(created_ms>0))");
+        db.execute("CREATE INDEX session_agent_events_cursor ON session_agent_events(session_id,sequence)");
+        db.execute("PRAGMA user_version=32");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session agent event migration did not preserve repository ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -2173,7 +2179,12 @@ SessionAgentState Repository::replace_session_agent(const std::string& id,std::o
     const auto source=Json{{"version",1},{"agent",std::move(snapshot)}}.dump();
     if(expected==0)db.execute("INSERT INTO session_agents VALUES(?,?,1)",{id,source});
     else changed_one(db.execute("UPDATE session_agents SET selection_json=?,revision=revision+1 WHERE session_id=? AND revision=?",{source,id,expected}));
+    if(selected){const auto previous_id=previous.selected?std::optional<std::string>(previous.selected->id):std::nullopt;db.execute("INSERT INTO session_agent_events(session_id,agent_id,previous_agent_id,created_ms) VALUES(?,?,?,?)",{id,selected->id,previous_id?SqlValue(*previous_id):SqlValue(nullptr),now_ms()});}
     auto result=session_agent(id);tx.commit();return result;
+}
+std::vector<SessionAgentEvent> Repository::session_agent_events(const std::string& id,std::int64_t after,std::size_t count){
+    if(after<0||after>9007199254740991LL||count<1||count>256)throw std::invalid_argument("Invalid session agent event cursor or limit");session(id);std::vector<SessionAgentEvent> result;
+    for(const auto& row:impl_->database.execute("SELECT sequence,agent_id,previous_agent_id,created_ms FROM session_agent_events WHERE session_id=? AND sequence>? ORDER BY sequence LIMIT ?",{id,after,static_cast<std::int64_t>(count)}).rows){std::optional<std::string> previous;if(!std::holds_alternative<std::nullptr_t>(row[2]))previous=text(row[2]);const auto sequence=integer(row[0]),created=integer(row[3]);if(sequence<1||sequence>9007199254740991LL||created<1)throw DatabaseError("Stored session agent event is invalid");result.push_back({sequence,id,text(row[1]),std::move(previous),created});}return result;
 }
 SessionModelState Repository::session_model(const std::string& id){
     session(id);auto& db=impl_->database;SessionModelState result;

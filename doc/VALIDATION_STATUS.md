@@ -2834,10 +2834,19 @@ xMind now also accepts the OpenCode `{ "agent": "…" }` request body on its
 native route and returns `204`; the actual-server contract verifies snapshot
 persistence, rejection of extra fields and unknown agents. The native route
 remains different, and the pinned typed `agent-switched` message/event
-projection is not implemented. After rebuilding the native Release targets,
+projection is persisted in a dedicated SQLite log and can be read with
+`GET /v1/sessions/{id}/agent/events?after=N`; it survives a native backend
+restart and stays outside model transcript history. This xMind-only read route
+does not provide OpenCode's message or SSE publication. The migration is schema
+v32. After rebuilding the native Release targets,
 `native_graph_service_http_contract`, `native_unified_graph_http_contract`,
 `native_agent_service_contract`, and `native_graph_contract` passed **4/4**.
-The rebuilt `native_agent_http_contract` passed **1/1** with the new wire cases.
+The rebuilt `native_agent_http_contract` passed **1/1** with the selection,
+event shape, cursor, and restart-persistence cases. The rebuilt
+`native_backend_owner_contract` and direct xlang3-backed repository contract
+also pass. The final focused schema and agent suite passed **10/10**, and the
+live server-info run passed `native_http_cli_contract`,
+`native_local_profile_contract`, and `native_backend_owner_contract` (**3/3**).
 The VS Code agent-selection and renderer tests passed within the **99/99**
 client test run. `node Tools/audit-opencode.mjs` passes with 141 operations,
 44 reviewed native source candidates, 97 unmapped and 1 verified behavior
