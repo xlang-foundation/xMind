@@ -212,7 +212,9 @@ test('changing the shared profile root reconnects the active VS Code view',async
 test('opening the xMind sidebar on startup is opt-in and connects the active workspace',async()=>{
  const off=harness();await off.activation;assert.equal(off.bootstrapTasks.length,0);assert.equal(off.connectCalls.length,0);
  const on=harness({openOnStartup:true});await on.activation;assert.equal(on.bootstrapTasks.length,1);await on.bootstrapTasks[0]();await until(()=>on.views.length===1);
- assert.equal(on.connectCalls.length,1);assert.equal(on.backendOwners[0].metadata.root,'D:\\TestProj');assert.deepEqual(on.errors,[]);
+ assert.equal(on.connectCalls.length,1);assert.equal(on.backendOwners[0].metadata.root,'D:\\TestProj');
+ const view=on.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='sessions'));
+ assert.ok(on.requests.includes('/v1/sessions'));assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);assert.deepEqual(on.errors,[]);
 });
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{
