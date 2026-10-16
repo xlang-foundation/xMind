@@ -68,9 +68,11 @@ opens a real xterm.js terminal against the same native session-bound PTY as
 VS Code, with authenticated input/output/resize/close routes and cleanup on
 workspace or conversation changes. The browser page and PTY unit contracts
 pass; real browser PTY acceptance remains outstanding. The latest client suites
-pass **385/385** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
+pass **385/385** in VS Code and **133/133** in the browser; rebuilt native patch, patch-tool, edit-executor,
 agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
+The current source also passes the full extension and browser client suites
+385/385 and 133/133 respectively ([current-checkout evidence](evidence/client-suites-current-20261016.json)); these client contracts complement, but do not replace, the open rendered VS Code pane acceptance.
 VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The optional `agentflow.openOnStartup` setting opens the xMind view after extension activation when enabled; it defaults off. The VS Code client suite now passes **385/385**, including CSP-protected startup and safe connection-failure guidance, stale-selection recovery, workspace-profile isolation and a saved-session coding turn routed to the selected session. Those contracts use a fixture backend and do not prove live pane rendering. In the TestProj acceptance profile, the browser visibly rendered a saved coding conversation. The VS Code extension state selected the same conversation and workspace, and read-only inspection found its 31 saved messages in the shared SQLite profile. The VS Code host created the xMind webview; direct visual inspection of the native VS Code pane and a live same-conversation coding turn remain open. [Sanitized evidence](evidence/cross-client-shared-profile-20261016.json).
 
 The current VS Code package is **0.1.11**. Its 1,946-file VSIX passed the native runtime manifest check and installed in the local VS Code profile; the installed `extension.js` hash matches the repository source. This confirms packaging and local installation, not live pane rendering or activation in the already-open windows.

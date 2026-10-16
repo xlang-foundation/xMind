@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-16",
+  "revision": "e1507ee",
+  "scope": "Current xMind extension and browser client contract suites",
+  "tests": [
+    {
+      "client": "VS Code extension",
+      "command": "npm test",
+      "working_directory": "extensions/vscode",
+      "passed": 385,
+      "failed": 0,
+      "duration_ms": 5695
+    },
+    {
+      "client": "browser",
+      "command": "node --test views/browser/tests/*.test.cjs",
+      "working_directory": ".",
+      "passed": 133,
+      "failed": 0,
+      "duration_ms": 15786,
+      "output": "build/browser-client-current-20261016.log"
+    }
+  ],
+  "limits": [
+    "These are client contract tests and do not prove rendered live VS Code pane interaction.",
+    "Separate live webpage and VS Code coding acceptance records cover actual saved-provider edits and builds."
+  ]
+}
