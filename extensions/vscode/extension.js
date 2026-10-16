@@ -14,6 +14,11 @@ const { XMindPseudoterminal } = require('./terminal');
 const { LanguageServerEditor } = require('./language-server-editor');
 const { GitChangesTreeProvider } = require('./git-changes-tree');
 
+function startupHtml(message) {
+  const escaped=String(message).replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none';"></head><body><p role="status">${escaped}</p></body></html>`;
+}
+
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
   const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime);
@@ -185,9 +190,12 @@ async function activate(context) {
       // capability discovery happen asynchronously in openPanel(); leaving
       // this view empty makes a healthy extension look broken.
       view.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
-      view.webview.html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src \'none\';"></head><body><p role="status">Connecting to xMind…</p></body></html>';
+      view.webview.html = startupHtml('Connecting to xMind…');
       if (resolveSidebar) { const resolve = resolveSidebar; resolveSidebar = undefined; resolve(view); }
-      else open().catch(error => vscode.window.showErrorMessage(error.message));
+      else open().catch(error => {
+        if(sidebarView===view&&!panel)view.webview.html=startupHtml('xMind could not connect. Reopen the view to try again.');
+        vscode.window.showErrorMessage(error.message);
+      });
     }
   }, { webviewOptions: { retainContextWhenHidden: true } }));
   async function acquireSidebar() {

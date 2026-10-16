@@ -233,6 +233,15 @@ test('newly resolved xMind sidebar immediately shows a CSP-protected connecting 
  assert.deepEqual(h.errors,[]);view.close();
 });
 
+test('failed xMind startup replaces the connecting state with safe retry guidance',async()=>{
+ const h=harness({beforeConnect:async()=>{throw new Error('<synthetic runtime failure>');}});await h.activation;const view=h.resolveSidebarView();
+ await until(()=>view.webview.html.includes('could not connect'));
+ assert.match(view.webview.html,/default-src \'none\'/);
+ assert.match(view.webview.html,/xMind could not connect\. Reopen the view to try again\./);
+ assert.doesNotMatch(view.webview.html,/<synthetic runtime failure>/);
+ assert.ok(h.errors.includes('<synthetic runtime failure>'));
+});
+
 test('a stale VS Code session selection falls back to the newest native catalogue entry',async()=>{
  const h=harness({openOnStartup:true,initialSessionId:'removed',sessions:[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]});await h.activation;await h.bootstrapTasks[0]();await until(()=>h.views.length===1);
  const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='history'));

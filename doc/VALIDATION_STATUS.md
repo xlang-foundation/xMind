@@ -46,13 +46,14 @@ approval, and one stale edit was rejected before the agent reread and retried.
 This is a real browser coding result for one workspace and one task, not broad
 coding or same-session cross-client acceptance. A separate live VS Code coding
 and build run is recorded in [its acceptance evidence](evidence/testproj-vscode-live-coding-20261015.json),
-and the current VS Code extension suite passes **384/384**. New extension-host
+and the current VS Code extension suite passes **385/385**. New extension-host
 contracts show an immediate CSP-protected connecting state when the sidebar is
-created, and restore a saved conversation, load its transcript, then admit a
-coding prompt to that same session ID. These are controller contracts, not live
-VS Code UI evidence; the development host has not yet been reloaded to confirm
-the startup state or complete a same-conversation coding turn. The outstanding
-first-target gate is to inspect those behaviors in the live VS Code pane.
+created, render safe retry guidance after backend startup fails, and restore a
+saved conversation, load its transcript, then admit a coding prompt to that same
+session ID. These are controller contracts, not live VS Code UI evidence; the
+development host has not yet been reloaded to confirm the startup state or
+complete a same-conversation coding turn. The outstanding first-target gate is
+to inspect those behaviors in the live VS Code pane.
 [Browser scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
 
 ## Backend-owned session inbox dispatch — 2026-10-15
