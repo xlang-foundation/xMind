@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-15",
+  "revision": "7fb4300",
+  "scope": "Official MCP SDK peer interoperability on the current native build",
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.2.0"
+  },
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target agentflow_mcp_effect_contract xmind_server xmind_cli xmind_admin --parallel 8",
+    "result": "passed",
+    "binaries": {
+      "xmind_server.exe": "A9C83355AB9AD8E8C8BFCFAEAFDF8DD21275533AAA74A9E3DAE4121CB73EE38A",
+      "xmind_cli.exe": "CB4F2CF6EE680793B2394271978274FD4D9665BA0930582391945DF8373ED2D8",
+      "xmind_admin.exe": "2DA54EEF71FF07254E059D704A5EA08F0CC5EA91CED47DE970ABBBF30BDDE06E",
+      "agentflow_mcp_effect_contract.exe": "CA55C32C30CA453EED76EEC85D084EE0669D5C86D332D68A95401714200FFFD4",
+      "xlang3_runtime.dll": "294834B7567A4668C51489BD62894D0EEB34CFEF8EADAA9A2F32C0F71AEC0778"
+    }
+  },
+  "tests": {
+    "command": "ctest --test-dir build/a2a-native -C Release -R native_mcp_effect_contract|native_mcp_sdk_(modern|legacy)_contract --output-on-failure",
+    "passed": 3,
+    "failed": 0,
+    "duration_seconds": 18.79,
+    "cases": {
+      "native_mcp_effect_contract": {"result": "passed", "duration_seconds": 11.68},
+      "native_mcp_sdk_modern_contract": {"result": "passed", "duration_seconds": 4.12},
+      "native_mcp_sdk_legacy_contract": {"result": "passed", "duration_seconds": 2.97}
+    }
+  },
+  "verified": [
+    "Independent official modern and legacy SDK stdio peers completed native configuration, discovery, credential scoping, tool dispatch, exact numeric argument forwarding, approved and denied effects, continuation, and lost-reply uncertainty/restart checks.",
+    "The official modern SDK HTTP host exercised native MCP resource and prompt listing/reading/get operations with approved and denied effect paths through the xlang3-backed journal."
+  ],
+  "limitations": [
+    "Credential values are synthetic fixtures and model responses/inference are synthetic.",
+    "These tests cover the pinned SDK methods and transports only; they do not claim all MCP features, OAuth renewal, subscriptions, all interactive continuations, or rendered browser/VS Code acceptance."
+  ]
+}

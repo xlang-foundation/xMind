@@ -76,6 +76,12 @@ Native job budget semantics follow Microsoft's [extended limits](https://learn.m
 
 The subsequent official SDK interoperability checkpoint passed all **30 native contracts locally**. Actual modern `@modelcontextprotocol/server` 2.3.1 and legacy `@modelcontextprotocol/sdk` 1.32.1 peers use their own server/stdio transports and real file-effect handlers. The full native administrator/server/CLI/agent path verifies protocol selection, discovery, encrypted configured environment, exact incoming numeric bytes, approval, denial/cancellation, result continuation and lost-reply uncertainty after restart without replay. Inference is synthetic. [Fixture scope and pinned dependency lock](../Native/tests/sdk/README.md).
 
+On 2026-10-15, the current Release server/CLI/admin build passed both official
+SDK stdio peer contracts and the official SDK HTTP resource/prompt effect
+contract (**3/3**, 18.79 seconds). This rerun validates the current source
+against the pinned modern and legacy SDK packages; credentials and inference
+remain synthetic fixtures. [Current-source binary hashes and test results](evidence/native-mcp-sdk-current-checkout-20261015.json).
+
 The legacy SDK emits explicit Draft-07 schemas. The native adapter now admits canonical Draft-07 alongside the default/explicit 2020-12 dialect, validates each against its own built-in metaschema and compiles with the same dialect. It retains original schema bytes, no external resolver/default insertion, and the existing bounded native worker. Draft-07 tuple/dependency semantics and ignored `$ref` siblings are tested separately from 2020-12 sibling constraints. Unsupported root dialects remain explicit errors. This adds verified legacy tool interoperability without claiming full upstream conformance or other protocol features.
 
 Exact tested source is `bbeb4db077adcb5cbb86c9e91d3d3fe199886e0f`: [full local build/CTest output](evidence/native-mcp-sdk-local-build-ctest.log), [binary and pinned dependency provenance](evidence/native-mcp-sdk-local-provenance.json). Its [isolated CI](https://github.com/xlang-foundation/xMind/actions/runs/37619215608) is in progress.
