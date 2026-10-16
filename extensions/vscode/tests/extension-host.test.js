@@ -11,12 +11,12 @@ const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture')
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
-  const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[],openedDocuments=[],shownDocuments=[];
+  const commands=new Map(),secrets=new Map(),requests=[],views=[],connectCalls=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[],openedDocuments=[],shownDocuments=[];
   const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[],languageServerEditorCalls=[],backendUpgradeRequests=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
-  let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
+  let sidebarProvider,folderListener,saveListener,configurationListener,gitTreeProvider;const backendOwners=[];
   const renameRequests=[],forkRequests=[],decisions=[],sessionPermissionReplies=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[],commandRequests=[],restoreRequests=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const inboxItems=options.inboxItems||[];
@@ -146,7 +146,7 @@ function harness(options={}) {
     ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
     EventEmitter:TestEventEmitter,TreeItem:TestTreeItem,TreeItemCollapsibleState:{None:0,Expanded:2},ThemeIcon:class{constructor(id){this.id=id;}},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,workspaceFolders:options.workspaceFolders||[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},onDidSaveTextDocument:callback=>{saveListener=callback;return{dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,workspaceFolders:options.workspaceFolders||[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},onDidSaveTextDocument:callback=>{saveListener=callback;return{dispose(){}};},onDidChangeConfiguration:callback=>{configurationListener=callback;return{dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;if(commands.has(name))return await commands.get(name)(...args);assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
@@ -173,7 +173,7 @@ function harness(options={}) {
     signature(){return JSON.stringify(vscode.workspace.workspaceFolders.map(folder=>folder.uri.toString()));}
     requestBackendUpgrade(){backendUpgradeRequests.push(this.epoch);}
     stateFields(){return options.stateScope;}
-    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,canonical:root,roots:vscode.workspace.workspaceFolders.map(value=>({name:value.name,fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
+    async connect(){connectCalls.push(this.epoch);const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,canonical:root,roots:vscode.workspace.workspaceFolders.map(value=>({name:value.name,fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
@@ -191,8 +191,8 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,restoreRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
-    backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
+  return {token,commands,secrets,requests,views,connectCalls,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,sessionPermissionReplies,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,commandRequests,restoreRequests,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+    backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},changeConfiguration(names){configurationListener?.({affectsConfiguration:name=>names.includes(name)});},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -201,6 +201,12 @@ function harness(options={}) {
 
 test('applying trusted runtime configuration requires explicit confirmation before reconnecting',async()=>{
  let answer;const h=harness({cancelChoice:()=>answer});await h.activation;await h.commands.get('agentflow.applyRuntimeConfiguration')();assert.equal(h.backendUpgradeRequests.length,0);assert.equal(h.views.length,0);assert.match(h.warnings[0].message,/saved sessions and history/);answer='Apply and reconnect';await h.commands.get('agentflow.applyRuntimeConfiguration')();assert.equal(h.backendUpgradeRequests.length,1);assert.equal(h.backendUpgradeRequests[0],0);assert.equal(h.views.length,1);assert.ok(h.information.some(message=>/Trusted xMind runtime configuration applied/.test(message)));assert.deepEqual(h.errors,[]);
+});
+
+test('changing the shared profile root reconnects the active VS Code view',async()=>{
+ const h=harness();await h.activation;await h.commands.get('agentflow.open')();assert.equal(h.connectCalls.length,1);
+ h.changeConfiguration(['agentflow.profileRoot']);await until(()=>h.connectCalls.length===2);
+ assert.equal(h.backendOwners.length,1);assert.deepEqual(h.errors,[]);
 });
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{

@@ -1099,7 +1099,7 @@ async function activate(context) {
   }));
   if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{
     const policyChanged=event.affectsConfiguration('agentflow.workspaceEdits');
-    const runtimeChanged=['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','languageServerConfigPath','processConfigPath'].some(key=>event.affectsConfiguration('agentflow.'+key));
+    const runtimeChanged=['backendMode','backendUrl','runtimeDirectory','stdlibSource','profileRoot','providerConfigPath','languageServerConfigPath','processConfigPath'].some(key=>event.affectsConfiguration('agentflow.'+key));
     if(policyChanged){
       vscode.window.showInformationMessage('Workspace edit policy is stored with this local profile. Apply the policy to this backend to enable or disable approved file changes.','Apply now').then(choice=>{if(choice==='Apply now')vscode.commands.executeCommand('agentflow.applyRuntimeConfiguration');});
     }else if(runtimeChanged)reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
