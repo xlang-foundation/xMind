@@ -3,8 +3,8 @@
 const http = 'Native/src/http_server.cpp';
 const workspace = 'Native/src/workspace_tools.cpp';
 export const nativePartial = {
-  'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'Persisted ID, display name, description, revision, model, mode, hidden and default metadata are returned; permissions and source metadata are omitted from catalogue entries.'],
-  'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'Persisted ordered allow/deny rules are returned and enforced from session/graph snapshots; OpenCode interactive asks, saved grants, source metadata and complete permission lifecycle remain incomplete.'],
+  'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'The native catalogue returns ID, revision, model ID, name, description, mode, visibility, default state and ordered permissions. OpenCode uses provider-qualified model/request fields and also exposes system/source metadata; native listing omits private instructions/tools and does not implement location filtering. Response and CLI/editor parity remain unverified.'],
+  'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'The native detail returns model ID, instructions, tools, ordered permissions, mode, visibility and default state. Its model/request and source metadata do not match the pinned OpenCode response; location filtering and full permission lifecycle equivalence remain unverified. Native interactive asks and scoped reusable grants exist but are not yet operation-parity evidence.'],
   'session.list': [http, 'GET /v1/sessions', '"/v1/sessions"', 'Location/project scoping, filters and pagination remain to be compared.'],
   'session.active': [http, 'GET /v1/sessions/active', 'RunState::running', 'Returns the server-wide map of sessions with an executing persisted run; OpenCode uses a process-owned execution set, so ownership and cross-process semantics remain to be compared.'],
   'session.get': [http, 'GET /v1/sessions/{id}', 'persistence.session', 'The native single-record endpoint returns ID, title and fork ancestry; full OpenCode session metadata and response parity remain incomplete.'],

@@ -8267,7 +8267,7 @@
         "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
         "surface": "GET /v1/agents",
         "sourceAnchor": "executor->agent_definitions",
-        "gap": "Persisted ID, display name, description, revision, model, mode, hidden and default metadata are returned; permissions and source metadata are omitted from catalogue entries.",
+        "gap": "The native catalogue returns ID, revision, model ID, name, description, mode, visibility, default state and ordered permissions. OpenCode uses provider-qualified model/request fields and also exposes system/source metadata; native listing omits private instructions/tools and does not implement location filtering. Response and CLI/editor parity remain unverified.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -8377,7 +8377,7 @@
         "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
         "surface": "GET /v1/agents/{id}",
         "sourceAnchor": "executor->agent_definition",
-        "gap": "Persisted ordered allow/deny rules are returned and enforced from session/graph snapshots; OpenCode interactive asks, saved grants, source metadata and complete permission lifecycle remain incomplete.",
+        "gap": "The native detail returns model ID, instructions, tools, ordered permissions, mode, visibility and default state. Its model/request and source metadata do not match the pinned OpenCode response; location filtering and full permission lifecycle equivalence remain unverified. Native interactive asks and scoped reusable grants exist but are not yet operation-parity evidence.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
