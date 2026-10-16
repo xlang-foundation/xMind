@@ -834,7 +834,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; dynamic plans now support sealed resource/prompt aliases through actual subprocesses and dependent child runs. Modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. MCP `2026-07-28` list-change subscriptions are validated on both transports; AgentRunner fixtures and direct graph MCP fixtures over stdio and HTTP verify bounded sanitized events and listener shutdown before terminal state. Crash recovery/reconnect, OAuth renewal, other HTTP/SSE behavior, plugin lifecycle and complete command parity remain incomplete. AgentRunner refreshes a changed catalogue within the active run; a direct graph MCP node fails closed because its alias is pinned. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Named-agent ordered allow/ask/deny globs persist through session/archive/delegation/graph snapshots; direct-path evaluation uses the last match, while native authority and effect approvals remain separate. The native API lists up to 256 pending approvals across one session's runs and replies only when the operation belongs to that session; replies settle the existing durable operation journal. Uncertain replacement and patch add/update/delete/move effects support read-only before/after/different inspection with verified optional path fingerprints. A successful edit/create/patch operation can be reversed by the agent or a direct browser/VS Code restore action through the same approval journal, with exact saved hashes and live filesystem identity checks. Starting a client restore uses a native graph run and makes no model call. Direct redo, saved grants, session-level policy enforcement, global/location request listing, broad historical diff recovery and full export/sharing contracts remain incomplete. |
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 38 have reviewed native source candidates, one has a verified behavior contract, 37 remain unverified, and 103 are unmapped. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 44 have reviewed native source candidates, one has a verified behavior contract, 43 remain unverified, and 97 are unmapped. Native session transfer and full/before-message forking have HTTP/CLI contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 Current-source live browser coverage now verifies local automatic connection,
 workspace catalogue access, and actual Claude/Gemini/DeepSeek/OpenAI model
@@ -1411,9 +1411,9 @@ operations**, with upstream parameters/body/responses and acceptance requirement
 Earlier upstream audit snapshots counted 139; the pinned schema count is
 authoritative.
 
-Removed-prototype mappings are absent. The native mapping identifies **38
-reviewed C++ source candidates: one has a verified behavior contract, 37 remain
-unverified, and 103 operations are unmapped**. Each candidate
+Removed-prototype mappings are absent. The native mapping identifies **44
+reviewed C++ source candidates: one has a verified behavior contract, 43 remain
+unverified, and 97 operations are unmapped**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed
@@ -1524,6 +1524,6 @@ These are capability mappings, not operation-level parity claims. xMind uses
 revision-bound context and inbox records, and its permissions are native
 operation approvals; response shapes, upstream permission categories, global
 request discovery and automatic compaction policy remain incomplete or
-unverified. The refreshed inventory contains **43 reviewed native source
-candidates, 98 unmapped operations, and 1 operation-level behavior contract
+unverified. The refreshed inventory contains **44 reviewed native source
+candidates, 97 unmapped operations, and 1 operation-level behavior contract
 verified**.

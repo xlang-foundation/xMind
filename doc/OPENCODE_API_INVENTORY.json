@@ -12978,7 +12978,7 @@
         "scope": "Operation-level response shape and CLI behavior were exercised by the recorded native HTTP/CLI acceptance. xMind intentionally adds owner-token authentication to its local API.",
         "acceptance": {
           "evidence": "doc/evidence/server-info-opencode-parity-20261015.json",
-          "evidenceSha256": "076c5137a878d2e3049400cfd67f16a29755756709845ce1a5e1c69d1e26e29c",
+          "evidenceSha256": "a2b86a7aed0b5aeea88c069df182853d67be7af8d86a242bc3022c3c05a1e920",
           "tests": [
             {
               "name": "native_http_cli_contract",
@@ -17738,8 +17738,16 @@
         "session"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+        "surface": "GET/POST /v1/sessions/{id}/agent; xmind_cli session-agent/set-agent; browser and VS Code agent pickers",
+        "sourceAnchor": "executor->select_session_agent",
+        "gap": "The native backend pins a named agent definition snapshot per conversation, revision-checks selection/clear, and locks changes during active runs; CLI and both clients expose the selection. OpenCode accepts {agent} and returns 204 after a typed agent-switched event; xMind requires session and definition revisions and returns saved selection metadata. The API wire, switch event projection and operation-level parity remain unverified.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [

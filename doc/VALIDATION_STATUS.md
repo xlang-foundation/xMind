@@ -49,7 +49,7 @@ profile startup and runtime upgrade. The evidence record now contains the
 current normalized source hashes and exact xMind, server, CLI, and xlang3
 runtime artifact hashes; each recorded binary hash was checked against disk.
 `node Tools/audit-opencode.mjs` passes against the pinned v2.0.26 revision:
-141 operations, 38 reviewed native source candidates, 103 unmapped, and 1
+141 operations, 44 reviewed native source candidates, 97 unmapped, and 1
 verified operation-level behavior contract.
 
 ## Console restore for approved coding changes — 2026-10-15
@@ -2824,3 +2824,18 @@ the graph-runner fixed, the console assertion aligned to the current authority
 error, and the Rust Analyzer and local-view contracts passing in isolation.
 The graph-service and unified graph HTTP contracts also passed **2/2** after
 the fix. This is not a claim that a post-fix complete 149-contract run passed.
+
+## Session agent selection parity mapping — 2026-10-15
+
+The pinned OpenCode API inventory now maps `session.switchAgent` to xMind's
+revisioned session-agent selection across HTTP, CLI, browser and VS Code. The
+mapping remains a source candidate, not verified operation-level parity:
+xMind requires explicit session and agent-definition revisions and returns
+saved metadata, while the pinned OpenCode request/response and typed event
+projection are not yet matched. After rebuilding the native Release targets,
+`native_graph_service_http_contract`, `native_unified_graph_http_contract`,
+`native_agent_service_contract`, and `native_graph_contract` passed **4/4**.
+The VS Code agent-selection and renderer tests passed within the **99/99**
+client test run. `node Tools/audit-opencode.mjs` passes with 141 operations,
+44 reviewed native source candidates, 97 unmapped and 1 verified behavior
+contract. The full CTest suite was not rerun for this mapping.
