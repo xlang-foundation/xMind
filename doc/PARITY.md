@@ -1509,3 +1509,21 @@ modelID}}` body and a 204 response, while xMind uses `/v1/sessions/{id}/model`,
 provider and session revision bindings, and returns the resulting saved state.
 The durable model behavior is verified; full request/response parity remains
 open. See the [acceptance record](evidence/session-model-selection-20261015.json).
+
+## Context, queued-input and session-approval mappings — 2026-10-15
+
+The pinned operation inventory now records native candidates for session
+context inspection, explicit context compaction, durable inbox listing and
+cancellation. Session permission mappings now point to the conversation-wide
+request list and session-bound reply endpoints, including the scoped saved
+read-grant behavior. The focused Release CTest run passed **13/13** context,
+permission and agent HTTP contracts, and `node Tools/audit-opencode.mjs`
+validated all source anchors against the pinned OpenCode revision.
+
+These are capability mappings, not operation-level parity claims. xMind uses
+revision-bound context and inbox records, and its permissions are native
+operation approvals; response shapes, upstream permission categories, global
+request discovery and automatic compaction policy remain incomplete or
+unverified. The refreshed inventory contains **43 reviewed native source
+candidates, 98 unmapped operations, and 1 operation-level behavior contract
+verified**.

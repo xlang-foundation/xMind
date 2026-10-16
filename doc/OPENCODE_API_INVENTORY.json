@@ -14969,9 +14969,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
-        "surface": "GET /v1/runs/{id}/operations",
-        "sourceAnchor": "persistence.operations",
-        "gap": "Only run-scoped operations exist; a global/location pending permission catalogue is absent.",
+        "surface": "GET /v1/sessions/{id}/permissions",
+        "sourceAnchor": "pending_operations_for_session(session)",
+        "gap": "Conversation-scoped pending permission requests are available; the pinned upstream global/location pending-request catalogue is not implemented.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -18044,8 +18044,16 @@
         "session"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+        "surface": "POST /v1/sessions/{id}/context/compact",
+        "sourceAnchor": "context/compact",
+        "gap": "Native compaction is an explicit, provider-bound request against an observed history head and records its asynchronous request state. Trigger policy, user-visible summary semantics and response behavior differ from the pinned OpenCode operation and remain unverified.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -18178,8 +18186,16 @@
         "session"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+        "surface": "GET /v1/sessions/{id}/context",
+        "sourceAnchor": "context_status(identifier(request.matches[1])",
+        "gap": "Native context status exposes provider-specific token estimates, observed history head and revision-bound compaction state. The OpenCode response fields, automatic compaction policy and CLI/editor wire behavior are not operation-parity verified.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -19301,8 +19317,16 @@
         "session"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+        "surface": "GET /v1/sessions/{id}/inbox",
+        "sourceAnchor": "session_inbox(identifier(request.matches[1]))",
+        "gap": "The backend returns durable queued/claimed prompts and file-reference metadata; ordering, update semantics and the complete upstream inbox response are not verified.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -19388,8 +19412,16 @@
         "session"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+        "surface": "DELETE /v1/sessions/{id}/inbox/{input_id}",
+        "sourceAnchor": "cancel_session_input(session,input)",
+        "gap": "Queued input cancellation is idempotent and preserves claimed run linkage. Full upstream input-state transitions and response semantics remain unverified.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -20175,9 +20207,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
-        "surface": "GET /v1/runs/{id}/operations",
-        "sourceAnchor": "persistence.operations",
-        "gap": "Run-scoped effect proposals exist; full session permission categories and lifecycle remain incomplete.",
+        "surface": "GET /v1/sessions/{id}/permissions; GET /v1/runs/{id}/operations",
+        "sourceAnchor": "pending_operations_for_session(session)",
+        "gap": "Pending effect approvals are discoverable across a conversation, including older runs, with grant metadata for asked reads. Global/location discovery and complete upstream permission categories remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -20536,9 +20568,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
-        "surface": "POST /v1/operations/{id}/decision",
-        "sourceAnchor": "persistence.decide_operation",
-        "gap": "Single-use allow/deny exists; upstream saved rules and permission category behavior remain incomplete.",
+        "surface": "POST /v1/sessions/{id}/permissions/{operation_id}/reply; POST /v1/operations/{id}/decision",
+        "sourceAnchor": "decide_operation(operation_id",
+        "gap": "A session-bound reply settles the exact pending native operation and may create a conversation-scoped read grant; OpenCode permission rule categories and full response/lifecycle parity remain unverified.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
