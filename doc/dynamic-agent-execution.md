@@ -24,7 +24,7 @@ The initial native dependency-planning source checkpoint adds `plan_tasks`, `rev
 
 The complete guarded local **77-contract gate passed in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen source hashes** verified. The native engine contract performs actual parallel reads, observed failure, same-plan revision, human pause/reopen, separate edit approval, real coding and dependent verification using synthetic provider replies/signatures/keys. **119 extension and 26 browser contracts** passed at their renderer/controller scope. Model-free browser/native graph/human/auth/cookie/reconnect integration and verification of all **18 required VSIX assets** also passed, without rendered dynamic-planning or installed-editor acceptance. [Local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json). Schema-v11 installation, live planning and installed VS Code acceptance remain pending. Actual dynamic coding-child MCP peer effects are not established by these gates.
 
-This is consistent with [Cursor's documented coding-agent loop](https://prod.cursor.com/help/ai-features/coding-agents): each tool result informs the next action. Cursor is a behavior reference, not an implementation dependency. The pinned OpenCode inventory and full parity acceptance requirements remain unchanged.
+This is consistent with [Cursor's documented coding-agent loop](https://prod.cursor.com/help/ai-features/coding-agents): each tool result informs the next action. Cursor and OpenCode are behavior references, not implementation dependencies or compatibility targets. xMind defines its own coding and editor acceptance requirements.
 
 ## Remaining dynamic planning target
 

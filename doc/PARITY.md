@@ -12,17 +12,18 @@ history preserves them, but prototype checks and source mappings do not count
 as native delivery. See [native ownership](NATIVE_ARCHITECTURE.md) and
 [cleanup](cleanup.md).
 
-The operation inventory catalogs reference behavior surfaces so we can choose
-and track xMind capabilities. It is not a wire-compatibility target: xMind keeps
-its own routes, authentication, payloads, and client contracts.
+The operation inventory is historical reference material for selecting useful
+ideas. It does not define xMind's requirements, completion target, or a parity
+score; xMind does not need to implement every listed operation. xMind keeps its
+own routes, authentication, payloads, workflows, and client contracts.
 
-Baseline: `anomalyco/opencode` tag `v2.0.26`, commit
+Reference snapshot: `anomalyco/opencode` tag `v2.0.26`, commit
 `9b4ec5714d481559990db0a816d5dec19541a814`, verified against the remote tag and
 checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/v2.0.26),
 [release](https://github.com/anomalyco/opencode/releases/tag/v2.0.26), and
 [V2 documentation](https://opencode.ai/v2/docs) checked 2026-10-10. The docs
 track the current V2 surface and can move independently of the source tag;
-source-defined API contracts take precedence for this inventory.
+source-defined API contracts take precedence for this historical inventory.
 
 ## OpenCode API inventory refresh — 2026-10-14
 

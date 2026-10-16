@@ -109,11 +109,11 @@ same scheduler/worker boundary in Nexus, without changing the UI or duplicating
 the xMind agent engine. These are required acceptance contracts, not implemented
 distributed behavior.
 
-OpenCode parity applies to relevant core coding, CLI and editor behavior; it does
-not reintroduce excluded desktop/deployment products. Preserve the pinned inventory
-and identify exclusions rather than counting them as implemented. Historical
-checkpoints prove only their recorded scope. This revision changes requirements,
-not measured implementation status.
+OpenCode informs selected coding, CLI and editor design choices. Its API and feature
+inventory is reference material only: xMind does not target API compatibility,
+feature parity, or a completion score against another product. xMind defines and
+validates its own workflows and contracts. Historical checkpoints prove only their
+recorded scope.
 
 ## How the three inputs combine
 
@@ -127,7 +127,7 @@ A coding agent is a configured general agent: repository instructions, coding to
 
 Normal coding defaults to the dynamic agent/tool loop. Registered graphs are optional orchestration around the same engine. The initial schema-v11 source checkpoint adds model-selected agent/human dependencies, protected same-plan revisions, authenticated clean pauses and separately approved coding children under shared native budgets. It passed the complete guarded local **77-contract gate in 153.88 seconds**, with the exact manifest and **421 frozen source hashes** verified; shared-view source gates passed **119 extension and 26 browser contracts**. Provider replies/signatures/keys are synthetic; native engines, effects, approvals and xlang3 SQLite are real. [Initial implementation](native-dynamic-plan.md), [local evidence](evidence/native-dynamic-plan-local-provenance.json).
 
-Model-free browser/native graph/human/auth/cookie/reconnect integration and verification of all **18 required VSIX assets** passed. These checks establish neither rendered dynamic-planning nor installed-editor acceptance. The installed preview remains ace2460/schema v10; its live read-only delegation is separate from this local planning result. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. Deterministic dynamic tool/MCP/process nodes, recursive planning, skills, context compaction, outbound A2A and full coding/provider parity remain incomplete. See [dynamic-agent-execution.md](dynamic-agent-execution.md) for the broader requirements. Nexus team coordination and private deployment features remain outside OSS.
+Model-free browser/native graph/human/auth/cookie/reconnect integration and verification of all **18 required VSIX assets** passed. These checks establish neither rendered dynamic-planning nor installed-editor acceptance. The installed preview remains ace2460/schema v10; its live read-only delegation is separate from this local planning result. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. Deterministic dynamic tool/MCP/process nodes, recursive planning, skills, context compaction, and outbound A2A remain incomplete. See [dynamic-agent-execution.md](dynamic-agent-execution.md) for the broader requirements. Nexus team coordination and private deployment features remain outside OSS.
 
 ## Runtime components and ownership
 
