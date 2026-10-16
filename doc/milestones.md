@@ -46,6 +46,12 @@ persisted transcript records the provider/model and tool results. This confirms
 the console uses the same managed backend and workspace; the CLI coding-edit
 flow remains a separate acceptance item. [Evidence](evidence/xmind-cli-live-framework-inspection-20261016.json).
 
+2026-10-16 shared session catalogue check: read-only `sessions` requests through
+the managed CLI profile and the browser's authenticated local view adapter
+returned the same 24 TestProj session IDs. This confirms the adapter forwards
+to the profile's native session catalogue; it does not prove the selected
+session is rendered inside VS Code. [Evidence](evidence/cli-view-shared-session-catalogue-20261016.json).
+
 On 2026-10-16, a fresh local webpage run against TestProj also loaded the four
 saved providers from `.config/providers.yaml`, discovered 20 OpenAI models,
 completed a real coding turn, displayed provider token/timing metrics, showed

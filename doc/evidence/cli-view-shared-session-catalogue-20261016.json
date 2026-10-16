@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-16",
+  "revision": "e468fc8",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "managed_profile_origin": "http://127.0.0.1:50663",
+  "browser_view_adapter_origin": "http://127.0.0.1:63072",
+  "queries": [
+    "xmind --workspace TestProj --profile-root GoalBrowserProfiles sessions",
+    "xmind --port 63072 sessions"
+  ],
+  "view_adapter_authentication": "Machine-local access token supplied in the process environment; token omitted.",
+  "managed_session_count": 24,
+  "view_adapter_session_count": 24,
+  "sorted_session_ids_identical": true,
+  "scope": "Read-only live comparison of the managed profile session catalogue and the local browser view adapter. No session or workspace data was changed.",
+  "limits": [
+    "This confirms both routes expose the same native session catalogue for TestProj.",
+    "It does not prove live VS Code pane rendering or a coding turn from the selected shared session."
+  ]
+}
