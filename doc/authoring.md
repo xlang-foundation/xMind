@@ -117,16 +117,21 @@ conversation and graph node. For direct resources, the last matching agent
 rule wins. `ask` creates the same durable, exact-argument operation approval
 shown for other controller-reviewed operations; an asked read does not run
 until approved, and its operation records the actual read result. Directory
-enumeration is conservative when an asked descendant may be exposed. Saved
-grants and session-wide permission APIs are not implemented yet. `allow` only
+enumeration is conservative when an asked descendant may be exposed. A
+controller may turn an approved read into an “always allow” grant scoped to
+the conversation, workspace, permission-policy snapshot, read tool and
+normalized resource. Grants are listed and revision-revoked through the
+conversation permission UI and native API. The native API also lists pending
+permission requests across the selected conversation and accepts a
+session-bound decision for an older run. Global/location request discovery and
+broader session-level policy enforcement remain incomplete. `allow` only
 clears an earlier agent rule; it cannot widen the tool
 allowlist, workspace membership or native authorization, and it never skips an
 effect approval. Inherited policy ceilings are evaluated separately, so a
 child profile cannot clear a restriction inherited from its parent. Directory
 enumeration remains conservative: it is denied if a denied resource could be
-exposed. Interactive `ask` rules are not supported yet. A `run_process` rule
-is conservatively matched against `*`, since a process can access files beyond
-its working directory.
+exposed. A `run_process` rule is conservatively matched against `*`, since a
+process can access files beyond its working directory.
 
 Set `default: true` on one visible `all` or `primary` profile to make new
 conversations use it automatically. The backend pins that agent revision into
