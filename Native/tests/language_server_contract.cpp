@@ -100,7 +100,7 @@ int main(int argc,char** argv){
             if(definition.is_array()&&!definition.empty())break;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
-        require(definition.is_array()&&!definition.empty(),"Real rust-analyzer must resolve a call-site definition through the native editor query");
+        if(!definition.is_array()||definition.empty())throw std::runtime_error("Real rust-analyzer must resolve a call-site definition through the native editor query; received: "+definition.dump());
         const auto& target=definition.front();
         require((target.contains("targetUri")||target.contains("uri"))&&(target.contains("targetSelectionRange")||target.contains("range")),"Definition results must contain a VS Code-mappable workspace URI and selection range");
         const auto references=Json::parse(registry.query(LanguageServerRequest{path,"references",5,5}))["result"];
