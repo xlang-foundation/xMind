@@ -2,7 +2,7 @@
 
 xMind is being built as a general-purpose single-agent and graph platform with a shared coding runtime. The C++ backend owns execution, providers, tools, permissions, sessions and protocols. Embedded xlang3 runs compatible scripts/pure-Python libraries and performs SQLite database I/O. CLI, browser UI and VS Code clients use the same local backend. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded from xMind OSS and reserved for CantorAI’s closed-source Nexus product.
 
-OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [capability reference notes](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
+OpenCode 2 and similar coding tools are references for selected workflow ideas; LiteLLM informs provider-ecosystem coverage. xMind implements its own native engine and client contracts. Compatibility, API parity, and reproducing every referenced feature are not goals. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [historical capability reference notes](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
 The latest live coding-acceptance checkpoint passed **98 native, 215 extension
 and 39 browser contracts**. Native discovery and literal content search now share hierarchical

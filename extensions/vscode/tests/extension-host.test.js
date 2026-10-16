@@ -214,7 +214,10 @@ test('opening the xMind sidebar on startup is opt-in and connects the active wor
  const on=harness({openOnStartup:true});await on.activation;assert.equal(on.bootstrapTasks.length,1);await on.bootstrapTasks[0]();await until(()=>on.views.length===1);
  assert.equal(on.connectCalls.length,1);assert.equal(on.backendOwners[0].metadata.root,'D:\\TestProj');
  const view=on.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='sessions'));
- assert.ok(on.requests.includes('/v1/sessions'));assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);assert.deepEqual(on.errors,[]);
+ await until(()=>view.posted.some(message=>message.type==='transcript'));
+ assert.ok(on.requests.includes('/v1/sessions'));assert.ok(on.requests.includes('/v1/sessions/saved/messages?limit=40'));
+ assert.equal(view.posted.findLast(message=>message.type==='sessions').selected,'saved');assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);
+ assert.equal(on.state.get('agentflow.session').id,'saved');assert.deepEqual(on.errors,[]);
 });
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{

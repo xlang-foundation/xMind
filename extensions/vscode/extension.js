@@ -406,6 +406,13 @@ async function activate(context) {
       if(result){const data=result.data;if(!data||typeof data!=='object'||Array.isArray(data)||Object.entries(data).some(([id,value])=>!id||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||value.type!=='running'))throw new Error('Invalid active session map');const active=new Set(Object.keys(data));sessions=sessions.map(item=>({...item,active:active.has(item.id)}));}
     }
     if (version !== generation || !panel) return;
+    if(!sessions.some(item=>item.id===sessionId)){
+      sessionId=sessions.at(-1)?.id;
+      runId=undefined;sessionRuns=[];presentRuns();clearGraph();reviewed.clear();
+      const selectedState={...connectionState()};if(sessionId)selectedState.id=sessionId;
+      await context.workspaceState.update(stateKey,selectedState);
+      if(version!==generation||!panel)return;
+    }
     const signature=JSON.stringify([sessionId,sessions.map(item=>[item.id,item.title,item.active===true])]);if(signature!==sessionCatalogueSignature){sessionCatalogueSignature=signature;post({ type: 'sessions', sessions, selected: sessionId });}
   }
 
