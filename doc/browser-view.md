@@ -20,11 +20,10 @@ xMind has a local HTML view using the same sidebar renderer and native API clien
 Connect and Disconnect are accessible SVG icon buttons. The OSS page connects directly to the xMind runtime on the same computer; it has no server-token field. The local launcher enrolls the browser session with its private credential, while the durable session stays in an HttpOnly cookie. If a native restart invalidates that cookie, the local adapter renews it automatically from its private launch credential. If the local runtime cannot enroll the page, the dialog explains how to reopen it from xMind or VS Code. It never asks for a server token. Cancel, close and Escape leave an established session intact; a failed reconnect does not clear the current conversation. Team and remote authentication belong to private Nexus.
 
 When the local view is launched with the trusted `.config/providers.yaml`, it
-imports that file into another selected or added workspace profile only when
-that profile has no saved provider profiles. Each profile stores its own
-encrypted xlang3-backed credentials; existing non-empty provider settings are
-preserved. Import performs no provider request, and key values never pass
-through the browser.
+imports configured provider entries into the selected or added workspace
+profile, merging new entries while preserving existing saved settings and
+encrypted credentials. Import performs no provider request, and key values
+never pass through the browser.
 
 A profile with a blank `model` is key-only: the backend can discover models
 with its encrypted saved key, but a model must be selected before the agent
@@ -46,7 +45,7 @@ workspace review area. The right sidebar holds conversation history, the
 active chat, run activity and approvals; provider and discovered-model
 selection stay below the composer. Agent edits still appear as approval
 proposals, and full editor, multi-file diff and recovery workflows remain open
-coding-parity work.
+xMind implementation work.
 
 ## Workspace selection
 

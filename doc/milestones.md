@@ -19,10 +19,10 @@ plus restart/session persistence and cross-client visibility checks. Existing
 component tests and synthetic provider contracts are supporting evidence only;
 they do not satisfy this gate. This is the active first priority.
 
-OpenCode v2 is a behavioral capability reference for the later audit. xMind
-keeps its own HTTP, CLI and client contracts: do not add OpenCode wire-compatible
-endpoints or copy its implementation. Build selected capabilities in xMind's
-native C++ backend and expose them through the webpage and VS Code extension.
+OpenCode v2 is one reference for selecting useful coding capabilities. It is
+not an API, protocol, compatibility, or full-parity target. xMind implements
+the selected capabilities independently in its native C++ backend and exposes
+them through xMind's own HTTP, CLI, webpage, and VS Code contracts.
 
 Current progress: separate live coding tasks now pass through both clients.
 The browser used its saved OpenAI profile to review and apply a focused
@@ -34,6 +34,15 @@ and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
 capture those results. The first coding loop is therefore demonstrated in
 each client, but the first target remains active until restart persistence and
 the same session/change history is confirmed in both rendered clients.
+
+On 2026-10-16, a fresh local webpage run against TestProj also loaded the four
+saved providers from `.config/providers.yaml`, discovered 20 OpenAI models,
+completed a real coding turn, displayed provider token/timing metrics, showed
+the native patch for approval, applied it after approval, and built the Vue
+frontend successfully. The run's first model response arrived in 27.48 seconds
+and completed in 46.67 seconds; the follow-up edit and validation completed
+with 2.90 seconds to first token. See the [live browser record](evidence/testproj-webpage-coding-live-20261016.json).
+Cross-client history and restart persistence remain open.
 The strengthened `native_local_view_contract` now passes **1/1**: its real
 native SQLite server, production browser adapter and VS Code `BackendClient`
 share a session, restart the backend, then each read the exact same saved

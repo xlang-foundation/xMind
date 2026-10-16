@@ -2825,19 +2825,18 @@ error, and the Rust Analyzer and local-view contracts passing in isolation.
 The graph-service and unified graph HTTP contracts also passed **2/2** after
 the fix. This is not a claim that a post-fix complete 149-contract run passed.
 
-## Session agent selection parity mapping — 2026-10-15
+## Session agent selection reference mapping — 2026-10-15
 
 The pinned OpenCode API inventory now maps `session.switchAgent` to xMind's
 revisioned session-agent selection across HTTP, CLI, browser and VS Code. The
-mapping remains a source candidate, not verified operation-level parity:
-xMind now also accepts the OpenCode `{ "agent": "…" }` request body on its
-native route and returns `204`; the actual-server contract verifies snapshot
-persistence, rejection of extra fields and unknown agents. The native route
-remains different, and the pinned typed `agent-switched` message/event
-projection is persisted in a dedicated SQLite log and can be read with
+mapping tracks the reference capability, not API compatibility. The temporary
+OpenCode `{ "agent": "…" }` request-body alias was removed on 2026-10-15;
+xMind accepts its revision-bound request only. The actual-server contract
+verifies snapshot persistence, stale-definition rejection, event cursor
+behavior and restart persistence. The typed xMind `agent-switched` event is
+persisted in a dedicated SQLite log and can be read with
 `GET /v1/sessions/{id}/agent/events?after=N`; it survives a native backend
-restart and stays outside model transcript history. This xMind-only read route
-does not provide OpenCode's message or SSE publication. The migration is schema
+restart and stays outside model transcript history. The migration is schema
 v32. After rebuilding the native Release targets,
 `native_graph_service_http_contract`, `native_unified_graph_http_contract`,
 `native_agent_service_contract`, and `native_graph_contract` passed **4/4**.
