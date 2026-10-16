@@ -764,7 +764,14 @@ struct HttpServer::Impl {
         server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/agent)",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session agent request target or size");
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");
-            const auto value=body(request,{"agent_id","agent_revision","expected_revision"});
+            const auto value=body(request,{"agent","agent_id","agent_revision","expected_revision"});
+            const auto session=request.matches[1].str();
+            if(value.contains("agent")){
+                if(value.size()!=1||!value.at("agent").is_string())throw std::invalid_argument("OpenCode-compatible agent selection requires only a string agent ID");
+                const auto id=string_field(value,"agent",64);const auto catalogue=executor->agent_definitions();const auto found=std::find_if(catalogue.begin(),catalogue.end(),[&](const auto& item){return item.id==id;});
+                if(found==catalogue.end())throw NotFound("Named agent definition not found");
+                const auto current=executor->session_agent(session);executor->select_session_agent(session,*found,current.revision);response.status=204;return;
+            }
             if(value.size()!=3||!value.contains("agent_id")||!value.contains("agent_revision")||!value.at("agent_revision").is_number_integer()||value.at("agent_revision")<0||value.at("agent_revision")>9007199254740991LL||!value.contains("expected_revision")||!value.at("expected_revision").is_number_integer()||value.at("expected_revision")<0||value.at("expected_revision")>=9007199254740991LL)throw std::invalid_argument("Agent selection requires an ID, definition revision and expected session revision");
             std::optional<AgentDefinitionMetadata> selected;
             if(!value.at("agent_id").is_null()){
@@ -772,7 +779,7 @@ struct HttpServer::Impl {
                 const auto id=string_field(value,"agent_id",64);const auto revision=value.at("agent_revision").get<std::int64_t>();const auto catalogue=executor->agent_definitions();const auto found=std::find_if(catalogue.begin(),catalogue.end(),[&](const auto& item){return item.id==id;});
                 if(found==catalogue.end()||found->revision!=revision)throw Conflict("Named agent definition changed; refresh before selecting it");selected=*found;
             } else if(value.at("agent_revision").get<std::int64_t>()!=0)throw std::invalid_argument("Clearing agent selection requires definition revision zero");
-            const auto session=request.matches[1].str();reply(response,session_agent_metadata(session,executor->select_session_agent(session,std::move(selected),value.at("expected_revision").get<std::int64_t>())));
+            reply(response,session_agent_metadata(session,executor->select_session_agent(session,std::move(selected),value.at("expected_revision").get<std::int64_t>())));
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/model)",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session model selection does not accept query parameters");

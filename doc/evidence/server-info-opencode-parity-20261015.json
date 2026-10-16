@@ -14,17 +14,17 @@
     {
       "name": "native_http_cli_contract",
       "result": "passed",
-      "durationSeconds": 3.85
+      "durationSeconds": 3.66
     },
     {
       "name": "native_local_profile_contract",
       "result": "passed",
-      "durationSeconds": 322.99
+      "durationSeconds": 322.56
     }
   ],
   "execution": {
-    "command": "ctest --test-dir build/native -C Release -R \"^(native_http_cli_contract|native_local_profile_contract)$\" --output-on-failure",
-    "durationSeconds": 323.01,
+    "command": "ctest --test-dir build/a2a-native -C Release -R \"^(native_http_cli_contract|native_local_profile_contract)$\" --output-on-failure",
+    "durationSeconds": 326.23,
     "result": "passed"
   },
   "contractChecks": {
@@ -37,7 +37,7 @@
   },
   "intentionalDifference": "xMind requires its local owner bearer token; the upstream OpenAPI metadata route declares no authentication requirement.",
   "sourceSha256": {
-    "Native/src/http_server.cpp": "3c6d61c559e1ab865401b183f9475178fc850dd662abcf9ba13ebf0d7a1502e9",
+    "Native/src/http_server.cpp": "621170f6058bd46f82b9bfc2698a4a32d00d12e19bb32268a9714b7bd0486860",
     "Native/src/repository.cpp": "46ad723cab8349f18d0f11cdbab2699f6b67f94905bf94ab4aa4361db13d48d0",
     "Native/include/agentflow/pty_sessions.hpp": "2478b7622eaa70ff872b6f6fb05415c42bd7fc030ede69319b5f263067bd03fd",
     "Native/src/windows_pty_sessions.cpp": "e76c40347fe5f25ffbe44b3b3977b457aa63a926b5739da98345b9291259c02b",
@@ -48,9 +48,9 @@
     "Native/CMakeLists.txt": "725a9aba525972fe52fa1f923cd653dc220da1a5b34f86ccaaab2212f42392ff"
   },
   "buildArtifactSha256": {
-    "build/native/contract-bin/Release/xmind.exe": "da7a114bc8af5cd05774db13534b49ecfd9275f7517c076f6a29e725d2c8a4c5",
-    "build/native/contract-bin/Release/xmind_server.exe": "4fb4ff620188c8dcbf566e9a0489c46141e6de8d1ecfd9033e6c058718a195e5",
-    "build/native/contract-bin/Release/xmind_cli.exe": "b5d9c581ae360aee4a2467d9c2dc776e1825abe76ee1d55b6336e915aa137b63",
-    "../xlang3/build-pytest-pathaware/Release/xlang3_runtime.dll": "c6c318954cdced5ad731163a58acb34b4c0c16d01d37374a67e67d2f17a9985b"
+    "build/a2a-native/Release/xmind.exe": "c9f6cad2398eac196819b74035d69fd2d6cecd0f5fd5c5c45c920f45d9cca0bc",
+    "build/a2a-native/Release/xmind_server.exe": "fdc0facfb93ebc035ea4929d2d6a7473a7e25ba3be6eb517221a782d7b84e4fc",
+    "build/a2a-native/Release/xmind_cli.exe": "cb4f2cf6ee680793b2394271978274fd4d9665ba0930582391945df8373ed2d8",
+    "../xlang3/build/Release/xlang3_runtime.dll": "294834b7567a4668c51489bd62894d0eeb34cfef8ead9a2f32c0f71aec0778"
   }
 }

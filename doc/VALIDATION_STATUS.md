@@ -2830,11 +2830,14 @@ the fix. This is not a claim that a post-fix complete 149-contract run passed.
 The pinned OpenCode API inventory now maps `session.switchAgent` to xMind's
 revisioned session-agent selection across HTTP, CLI, browser and VS Code. The
 mapping remains a source candidate, not verified operation-level parity:
-xMind requires explicit session and agent-definition revisions and returns
-saved metadata, while the pinned OpenCode request/response and typed event
-projection are not yet matched. After rebuilding the native Release targets,
+xMind now also accepts the OpenCode `{ "agent": "…" }` request body on its
+native route and returns `204`; the actual-server contract verifies snapshot
+persistence, rejection of extra fields and unknown agents. The native route
+remains different, and the pinned typed `agent-switched` message/event
+projection is not implemented. After rebuilding the native Release targets,
 `native_graph_service_http_contract`, `native_unified_graph_http_contract`,
 `native_agent_service_contract`, and `native_graph_contract` passed **4/4**.
+The rebuilt `native_agent_http_contract` passed **1/1** with the new wire cases.
 The VS Code agent-selection and renderer tests passed within the **99/99**
 client test run. `node Tools/audit-opencode.mjs` passes with 141 operations,
 44 reviewed native source candidates, 97 unmapped and 1 verified behavior
