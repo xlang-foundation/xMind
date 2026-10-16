@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-15",
+  "revision": "4471525",
+  "sdk": "@a2a-js/sdk 1.3.0",
+  "build": {
+    "configuration": "Release",
+    "command": "cmake --build build/a2a-native --config Release --target xmind_server xmind_cli xmind_admin agentflow_a2a_client_sdk_contract agentflow_a2a_agent_registry_contract --parallel 8",
+    "result": "passed",
+    "binaries": {
+      "xmind_server.exe": "A9C83355AB9AD8E8C8BFCFAEAFDF8DD21275533AAA74A9E3DAE4121CB73EE38A",
+      "agentflow_a2a_client_sdk_contract.exe": "DD063589556F1F8E9D4A359A3982327BCCF06E2644B5B76EE69C4BB83E5ED990",
+      "agentflow_a2a_agent_registry_contract.exe": "16B55622D2BB951996EC4575773971729489E891B8D46A0637C35AE772EB32DC",
+      "xlang3_runtime.dll": "294834B7567A4668C51489BD62894D0EEB34CFEF8EADAA9A2F32C0F71AEC0778"
+    }
+  },
+  "test": {
+    "command": "ctest --test-dir build/a2a-native -C Release -R ^native_a2a_(client_sdk|v1_http|agent_registry)_contract$ --output-on-failure",
+    "passed": 3,
+    "failed": 0,
+    "duration_seconds": 3.18,
+    "cases": {
+      "native_a2a_client_sdk_contract": {"result": "passed", "duration_seconds": 0.53},
+      "native_a2a_v1_http_contract": {"result": "passed", "duration_seconds": 1.30},
+      "native_a2a_agent_registry_contract": {"result": "passed", "duration_seconds": 1.33}
+    }
+  },
+  "verified": [
+    "The native outbound client interoperated with the independent official A2A SDK 1.3.0 server for authenticated AgentCard discovery, SendMessage, GetTask, text artifact retrieval, wrapped SendStreamingMessage events, and CancelTask.",
+    "The official SDK client exercised xMind's inbound A2A 1.0 server, including task history, streaming, listing/cancellation, persistence across SQLite restart, and legacy 0.3 wire coverage.",
+    "The registered remote-agent contract exercised native discovery, durable approval binding, streaming event journaling, denial without dispatch, and post-dispatch uncertainty recovery without replay."
+  ],
+  "limitations": [
+    "Provider and peer task behavior are test fixtures; no live external agent or model was used.",
+    "The selected JSON-RPC cases do not establish every A2A transport, security scheme, content type, artifact mode, or rendered CLI/webpage/VS Code workflow."
+  ]
+}

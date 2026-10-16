@@ -33,6 +33,11 @@ only no-auth alternatives or HTTP Bearer, refuses unsupported requirements,
 and withholds a configured bearer from subsequent calls when the card does not
 advertise bearer authentication. Focused loopback assertions cover refusal and
 credential withholding; hosted native compilation and CTest remain pending.
+The current checkout rebuilt the Release server and outbound/registry
+contracts and passed the official-SDK outbound, inbound HTTP and registered
+agent tests (**3/3**, 3.18 seconds). This validates those pinned SDK paths on
+the current native source; peers and provider responses remain fixtures.
+[Current-source build and test evidence](evidence/native-a2a-current-checkout-20261015.json).
 An owner-managed native registry now persists peer IDs, card URLs, enabled
 state and revisions through xlang3 SQLite. Bearer bytes are stored in the
 scoped encrypted credential repository; catalog and API metadata contain only
