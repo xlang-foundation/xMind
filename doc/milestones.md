@@ -65,6 +65,8 @@ agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
 VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The optional `agentflow.openOnStartup` setting opens the xMind view after extension activation when enabled; it defaults off. The VS Code client suite now passes **382/382**, including stale-selection recovery and a workspace-profile isolation regression. In the TestProj acceptance profile, the browser visibly rendered a saved coding conversation. The VS Code extension state selected the same conversation and workspace, and read-only inspection found its 31 saved messages in the shared SQLite profile. The VS Code host created the xMind webview, and extension-host contracts verify transcript loading; direct visual inspection of the native VS Code pane remains open. This confirms shared session identity and stored history, not a VS Code coding turn. [Sanitized evidence](evidence/cross-client-shared-profile-20261016.json).
 
+The current VS Code package is **0.1.11**. Its 1,946-file VSIX passed the native runtime manifest check and installed in the local VS Code profile; the installed `extension.js` hash matches the repository source. This confirms packaging and local installation, not live pane rendering or activation in the already-open windows.
+
 ## CLI attachment to native queued runs — 2026-10-15
 
 When `/v1/health` advertises `session_inbox_dispatch`, the interactive console
