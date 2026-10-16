@@ -2,7 +2,7 @@
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 const patchReview=globalThis.XMindPatchReview.patchReview;
 const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
-let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
+let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null,promptFiles=[];
 let renameCapability=false,forkCapability=false,deleteCapability=false,deletePending=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
 let currentWorkspaceRoot;
@@ -546,8 +546,10 @@ function graphEvent(message){
   markdown(row.stream.querySelector('.message-body'),row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done')row.stream.firstChild.classList.remove('streaming');
 }
 byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});refreshSendControl();};
-function send(){if((activeRun||sessionBusy?!!byId('sessions').value:canExecute())&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
+function showPromptFiles(){const list=byId('prompt-files');list.replaceChildren();list.hidden=!promptFiles.length;for(const file of promptFiles){const item=node('span',file.path,'prompt-file');const remove=node('button','×');remove.type='button';remove.title='Remove '+file.path;remove.setAttribute('aria-label','Remove '+file.path);remove.onclick=()=>{promptFiles=promptFiles.filter(value=>value!==file);showPromptFiles();api.postMessage({type:'prompt-files-change',files:promptFiles});};item.append(remove);list.append(item);}}
+function send(){if((activeRun||sessionBusy?!!byId('sessions').value:canExecute())&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value,files:promptFiles});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
+byId('attach-files').onclick=()=>api.postMessage({type:'attach-files',files:promptFiles});
 const archiveExport=byId('session-export'),archiveImport=byId('session-import'),archiveFile=byId('session-archive-file');
 function refreshArchiveControls(){if(archiveExport)archiveExport.disabled=!byId('sessions').value||sessionBusy||activeRun;if(archiveImport)archiveImport.disabled=false;}
 if(archiveExport)archiveExport.onclick=()=>{if(!archiveExport.disabled)api.postMessage({type:'export-session',id:byId('sessions').value});};
@@ -644,7 +646,8 @@ window.addEventListener('message',event=>{
   const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80,priorHeight=scroll.scrollHeight,priorTop=scroll.scrollTop;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
-  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
+  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;promptFiles=[];showPromptFiles();clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
+  else if(m.type==='prompt-files'){if(Array.isArray(m.files)&&m.files.length<=32&&m.files.every(file=>file&&typeof file.path==='string'&&typeof file.folder_id==='string')){promptFiles=m.files;showPromptFiles();}}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;refreshSendControl();}
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='skills')renderSkills(m);
@@ -708,7 +711,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-resources'){renderMcpResources(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;deleteCapability=m.sessionDeletion===true;refreshRename();refreshForkControls();refreshDeleteControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
+  else if(m.type==='user'){const card=entry('user',{content:m.text});if(Array.isArray(m.files)&&m.files.length){const list=node('div',undefined,'message-files');for(const file of m.files)if(typeof file.path==='string')list.append(node('span',file.path,'prompt-file'));card.append(list);}resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
     if(!currentWorkspaceRoot||m.root!==currentWorkspaceRoot||typeof m.text!=='string'||!m.text||m.text.length>49152)return;

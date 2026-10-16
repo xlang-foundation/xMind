@@ -1,6 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
+const path = require('node:path');
 const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
@@ -39,6 +40,8 @@ async function activate(context) {
   let sessionId;
   let runId;
   let sessionRuns=[];
+  let promptFiles=[];
+  let promptWorkspaceRevision=0;
   let cursor = 0;
   let eventSubscription,snapshotTimer,snapshotPromise,permissionTimer,sessionRefreshTimer,sessionCatalogueSignature,inboxObservationTimer;
   let pendingTreeEvents=false;
@@ -707,8 +710,31 @@ async function activate(context) {
           await selectRun(message.id);
         } else if(message.type==='cancel-inbox'){
           await cancelQueuedPrompt(message.id);
+        } else if(message.type==='attach-files'){
+          promptFiles=Array.isArray(message.files)?message.files:[];if(!promptFiles.length)promptWorkspaceRevision=0;
+          const target=client,version=generation,selection=await target.workspaceMembership();
+          if(panel!==view||generation!==version||client!==target)return;
+          if(!selection.folders.length)throw new Error('Open a workspace folder before attaching files.');
+          if(promptFiles.length&&promptWorkspaceRevision&&promptWorkspaceRevision!==selection.revision)throw new Error('Workspace membership changed. Remove existing attachments and select them again.');
+          const selected=await vscode.window.showOpenDialog({canSelectMany:true,openLabel:'Attach to xMind',filters:{'Workspace files':['*']}});
+          if(panel!==view||generation!==version||client!==target||!selected?.length)return;
+          const roots=selection.folders.map(folder=>({folder_id:folder.folder_id,root:path.resolve(folder.root)}));
+          const attached=[];for(const uri of selected){
+            if(uri.scheme!=='file')throw new Error('Only files from the local VS Code workspace can be attached.');
+            const absolute=path.resolve(uri.fsPath);const match=roots.find(folder=>{const rel=path.relative(folder.root,absolute);return rel!==''&&!path.isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+path.sep);});
+            if(!match)throw new Error('Attach files from one of the folders registered in the current xMind workspace.');
+            const relative=path.relative(match.root,absolute).split(path.sep).join('/');
+            attached.push({path:relative,folder_id:match.folder_id,name:path.basename(absolute)});
+          }
+          const merged=[...promptFiles,...attached];
+          if(merged.length>32)throw new Error('A prompt can include up to 32 workspace files.');
+          promptFiles=merged;promptWorkspaceRevision=selection.revision;post({type:'prompt-files',files:promptFiles});
+        } else if(message.type==='prompt-files-change'){
+          promptFiles=Array.isArray(message.files)?message.files:[];if(!promptFiles.length)promptWorkspaceRevision=0;
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
+          const files=promptFiles;if(files.length>32)throw new Error('A prompt can include up to 32 workspace files.');
           if(sessionId&&busySession()){
+            if(files.length)throw new Error('File attachments cannot be queued yet. Wait for the current run to finish before sending them.');
             if(message.prompt.startsWith('/'))throw new Error('Workspace commands cannot be queued yet. Wait for the active run to finish, then send the command.');
             const selected=sessionRuns.find(run=>run.id===runId);
             if(selected&&!['queued','running','paused'].includes(selected.state))throw new Error('Select the active run before queuing another prompt.');
@@ -732,7 +758,9 @@ async function activate(context) {
           }
           if (panel !== view) return;
           const admissionClient=client,runVersion=generation;let run;
-          try{run=slashCommand?await admissionClient.runCommand(sessionId,slashCommand.id,slashCommand.arguments,selectedModel,binding,graph):graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding);}
+          if(files.length&&slashCommand)throw new Error('Workspace commands do not accept file attachments.');
+          if(files.length&&graph)throw new Error('Choose Agent (default) to send workspace file attachments.');
+          try{run=slashCommand?await admissionClient.runCommand(sessionId,slashCommand.id,slashCommand.arguments,selectedModel,binding,graph):graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding,undefined,files,promptWorkspaceRevision||undefined);}
           catch(error){
             if(panel!==view||generation!==runVersion||client!==admissionClient)return;
             const changed=await profileController.reconcileAdmission(binding,error).catch(()=>false);
@@ -753,7 +781,7 @@ async function activate(context) {
           await context.workspaceState.update(runStateKey,{...connectionState(),session_id:sessionId,id:run.id});
           if(panel!==view||client!==admissionClient) return;
           reviewed.clear(); post({ type: 'operations', operations: [] });
-          post({ type: 'user', text: message.prompt });
+          post({ type: 'user', text: message.prompt,files });promptFiles=[];promptWorkspaceRevision=0;post({type:'prompt-files',files:promptFiles});
           watch();
           await poll();
         } else if (message.type === 'cancel' && runId) {
@@ -944,7 +972,7 @@ async function activate(context) {
     languageServerEditor.disconnect();
     contextReadyView=undefined;pendingEditorContexts=[];
     workspaceBackend.invalidate();stop();mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
-    providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
+    providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];promptFiles=[];promptWorkspaceRevision=0;client=undefined;
     modelCatalogue={models:[],default_model:''};selectedModel=undefined;graphCatalogue=[];selectedGraph=undefined;
     clearTimeout(sessionRefreshTimer);sessionRefreshTimer=undefined;sessionCatalogueSignature=undefined;receiveSubscription?.dispose();receiveSubscription=undefined;disposeSubscription?.dispose();disposeSubscription=undefined;
     post({type:'workspace-clear'});post({type:'history',history:[]});post({type:'sessions',sessions:[]});post({type:'runs',runs:[],busy:false});post({type:'graphs',graphs:[]});post({type:'operations',operations:[]});post({type:'capabilities',execution:false,models:[]});post({type:'status',text:'Connecting the opened workspace…'});panel=undefined;

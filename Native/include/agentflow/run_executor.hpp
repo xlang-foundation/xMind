@@ -25,14 +25,15 @@ struct WorkspaceVcsFileStatus {std::string file;std::uint64_t additions=0,deleti
 struct WorkspaceVcsFileDiff {std::string file,patch,status;std::uint64_t additions=0,deletions=0;};
 struct WorkspaceVcsReviewBase {std::string name,ref,source;};
 struct WorkspaceVcsInfo {std::string current_branch,default_branch;std::vector<std::string> local_branches;bool repository=false;};
-struct WorkspaceAdmission {std::string workspace_id,authority_id;};
+struct WorkspaceAdmission {std::string workspace_id,authority_id;std::int64_t revision=0;};
 struct WorkspaceSessionSkills {ExecutionWorkspaceMetadata workspace;SessionSkillState state;};
 inline void validate_workspace_admission(const WorkspaceAdmission& expected,const ExecutionWorkspaceMetadata& actual){
     if(expected.workspace_id.empty()||expected.workspace_id.size()>256||expected.authority_id.size()!=32||
        expected.authority_id.find_first_not_of("0123456789abcdef")!=std::string::npos)
         throw std::invalid_argument("Invalid workspace admission binding");
-    if(!actual.configured||expected.workspace_id!=actual.workspace_id||expected.authority_id!=actual.authority_id)
-        throw Conflict("Execution workspace changed before admission");
+    if(!actual.configured)throw Conflict("Execution workspace is not configured at admission");
+    if(expected.workspace_id!=actual.workspace_id)throw Conflict("Execution workspace identity changed before admission");
+    if(expected.authority_id!=actual.authority_id)throw Conflict("Execution workspace authority changed before admission");
 }
 // Transport-neutral backend execution boundary; HTTP/CLI do not own run state.
 class RunExecutor {
@@ -41,6 +42,7 @@ public:
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
+    virtual WorkspaceMembershipSnapshot workspace_membership_snapshot()const{throw RunUnavailable("Workspace membership is unavailable");}
     virtual void initialize_vcs(std::string_view,std::string={}){throw RunUnavailable("Workspace version control initialization is unavailable");}
     virtual std::vector<WorkspaceVcsFileStatus> vcs_status(std::string={})const{throw RunUnavailable("Workspace version control status is unavailable");}
     virtual WorkspaceVcsInfo vcs_info(std::string={})const{throw RunUnavailable("Workspace version control metadata is unavailable");}
@@ -68,6 +70,14 @@ public:
     virtual WorkspaceSessionSkills replace_session_skills(const std::string&,std::vector<std::string>,std::int64_t,WorkspaceAdmission){throw RunUnavailable("Session skill controls are unavailable");}
     virtual Run submit_workspace(std::string,std::string,std::string,std::string,WorkspaceAdmission,
         std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Workspace-bound admission is unavailable");}
+    virtual Run submit_with_attachments(std::string id,std::string session,std::string prompt,std::string model,
+        std::vector<PromptFileAttachment> files,std::optional<WorkspaceAdmission> workspace={},
+        std::optional<ProviderProfileAdmission> profile={}){
+        if(!files.empty())throw RunUnavailable("Workspace file attachments are unavailable");
+        if(workspace)return submit_workspace(std::move(id),std::move(session),std::move(prompt),std::move(model),*workspace,std::move(profile));
+        if(profile)return submit_profile(std::move(id),std::move(session),std::move(prompt),std::move(model),*profile);
+        return submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
+    }
     virtual bool supports_profile_admission()const{return false;}
     virtual bool supports_delegation()const{return false;}
     virtual bool supports_dynamic_planning()const{return false;}

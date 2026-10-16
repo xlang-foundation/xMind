@@ -78,7 +78,8 @@ public:
         bool preserve_dynamic_child_planning_policy=false);
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
-        const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={});
+        const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={},
+        std::vector<PromptFileAttachment> attachments={},std::int64_t expected_workspace_revision=0);
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
         std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={},
         std::optional<std::vector<std::string>> tool_allowlist={},bool resume_dynamic_child=false,
@@ -89,6 +90,7 @@ public:
     void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={}) const;
     std::string admitted_dynamic_model(const std::string& root_id) const;
     std::vector<std::string> models() const;
+    WorkspaceMembershipSnapshot workspace_membership_snapshot()const;
     bool provider_bound_model_overrides()const{return settings_.provider_identity.has_value();}
     bool supports_context()const{return settings_.context.has_value();}
     ContextBinding context_binding(const std::string& model_id={})const;

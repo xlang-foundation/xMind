@@ -45,6 +45,13 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
     if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");
     return agents_->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
 }
+Run ExecutionPlatform::submit_with_attachments(std::string id,std::string session,std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){
+    if(!files.empty()&&!workspace)throw ToolAccessDenied("Workspace file attachments require workspace admission");
+    if(workspace)validate_workspace_admission(*workspace,execution_workspace());
+    if(profile)throw RunUnavailable("Provider profile authority must be checked by the profile runtime");
+    if(!agents_||!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");
+    return agents_->submit_with_attachments(std::move(id),std::move(session),std::move(prompt),std::move(model),std::move(files),workspace);
+}
 Run ExecutionPlatform::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){
     if(!agents_||!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");
     if(workspace)validate_workspace_admission(*workspace,execution_workspace());
@@ -55,6 +62,9 @@ Run ExecutionPlatform::submit_message(std::string id,std::string context,std::st
 Run ExecutionPlatform::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input,std::string human_request_id){if(const auto replay=store_.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("A2A task continuation is unavailable");return agents_->continue_a2a_task(std::move(task),std::move(message),std::move(context),std::move(identity),std::move(content),std::move(payload),std::move(input),std::move(human_request_id));}
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
+}
+WorkspaceMembershipSnapshot ExecutionPlatform::workspace_membership_snapshot()const{
+    auto membership=workspace_membership();return {membership->workspace_id(),membership->revision(),membership->folders()};
 }
 std::unique_ptr<WorkspaceToolSet> ExecutionPlatform::workspace_membership()const{
     if(!workspace_binding_)throw RunUnavailable("Version control requires an opened workspace");

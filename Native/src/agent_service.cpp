@@ -366,6 +366,7 @@ AgentService::AgentService(PersistenceService& store,AgentSettings settings,std:
 AgentService::~AgentService()=default;
 Run AgentService::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
+WorkspaceMembershipSnapshot AgentService::workspace_membership_snapshot()const{return impl_->runner.workspace_membership_snapshot();}
 std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
     for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions});return result;
@@ -427,6 +428,10 @@ ContextManualStatus AgentService::request_context(const std::string& session,con
     const auto result=ContextManualStatus{admitted.id,admitted.state};lock.unlock();impl_->context_changed.notify_one();return result;
 }
 Run AgentService::submit_model(std::string id,std::string session,std::string prompt,std::string model){
+    return submit_with_attachments(std::move(id),std::move(session),std::move(prompt),std::move(model),{});
+}
+Run AgentService::submit_with_attachments(std::string id,std::string session,std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> provider_profile){
+    if(provider_profile)throw RunUnavailable("Provider authority must be checked by the execution platform");
     auto job=std::make_shared<Impl::Job>();job->id=id;
     std::unique_lock lock(impl_->mutex);impl_->require_admission();
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
@@ -434,7 +439,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
-    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile);}
+    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }

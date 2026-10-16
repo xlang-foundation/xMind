@@ -113,12 +113,24 @@ std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
 std::optional<WorkspaceAdmission> workspace_admission(const Json& value){
     const bool named=value.contains("expected_workspace_id"),versioned=value.contains("expected_workspace_authority_id");
     if(named!=versioned)throw std::invalid_argument("Workspace identity and authority must be supplied together");
-    if(!named)return {};
+    if(!named){if(value.contains("expected_workspace_revision"))throw std::invalid_argument("Workspace revision requires workspace identity and authority");return {};}
     const auto id=string_field(value,"expected_workspace_id",256),authority=string_field(value,"expected_workspace_authority_id",32);
     if(id.empty()||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||
        authority.size()!=32||authority.find_first_not_of("0123456789abcdef")!=std::string::npos)
         throw std::invalid_argument("Invalid workspace admission identity");
-    return WorkspaceAdmission{id,authority};
+    std::int64_t revision=0;if(value.contains("expected_workspace_revision")){const auto& raw=value.at("expected_workspace_revision");if(!raw.is_number_integer()||raw<1||raw>9007199254740991LL)throw std::invalid_argument("Invalid workspace membership revision");revision=raw.get<std::int64_t>();}
+    return WorkspaceAdmission{id,authority,revision};
+}
+std::vector<PromptFileAttachment> prompt_file_attachments(const Json& value){
+    std::vector<PromptFileAttachment> result;if(!value.contains("files"))return result;
+    const auto& files=value.at("files");if(!files.is_array()||files.size()>32)throw std::invalid_argument("Prompt files must be an array of at most 32 workspace files");
+    result.reserve(files.size());for(const auto& file:files){
+        if(!file.is_object()||file.empty()||file.size()>5)throw std::invalid_argument("Invalid prompt file attachment");
+        for(auto it=file.begin();it!=file.end();++it)if(it.key()!="path"&&it.key()!="folder_id"&&it.key()!="name"&&it.key()!="description"&&it.key()!="mention")throw std::invalid_argument("Unknown prompt file attachment field");
+        const auto field=[&](const char* key,std::size_t limit){if(!file.contains(key))return std::string{};if(!file.at(key).is_string())throw std::invalid_argument("Invalid prompt file attachment metadata");const auto text=file.at(key).get<std::string>();if(text.size()>limit||text.find('\0')!=std::string::npos)throw std::invalid_argument("Prompt file attachment metadata exceeds limits");return text;};
+        PromptFileAttachment parsed;parsed.path=field("path",4096);if(parsed.path.empty())throw std::invalid_argument("Prompt file attachment path is required");
+        parsed.folder_id=field("folder_id",256);parsed.name=field("name",512);parsed.description=field("description",4096);parsed.mention=field("mention",512);result.push_back(std::move(parsed));
+    }return result;
 }
 std::string identifier(const std::string& value) {
     if(value.empty() || value.size()>128) throw std::invalid_argument("Invalid ID");
@@ -773,6 +785,14 @@ struct HttpServer::Impl {
             const auto actual=executor?executor->execution_workspace():ExecutionWorkspaceMetadata{};
             reply(response,{{"configured",actual.configured},{"root",actual.configured?Json(actual.root):Json(nullptr)},
                 {"workspace_id",actual.configured?Json(actual.workspace_id):Json(nullptr)},{"authority_id",actual.configured?Json(actual.authority_id):Json(nullptr)}});
+        }));
+        server.Get("/v1/workspace/membership",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace membership does not accept query parameters");
+            if(!executor)throw RunUnavailable("Workspace membership requires an opened root");
+            const auto snapshot=executor->workspace_membership_snapshot();auto folders=Json::array();
+            for(const auto& folder:snapshot.folders)folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
+            reply(response,{{"workspace_id",snapshot.workspace_id},{"revision",snapshot.revision},
+                {"primary_folder_id",snapshot.folders.empty()?std::string{}:snapshot.folders.front().folder_id},{"folders",std::move(folders)}});
         }));
         server.Post("/v1/vcs/init",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid VCS initialization request");
@@ -1580,11 +1600,13 @@ struct HttpServer::Impl {
             }));
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
                 if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Run admission does not accept query parameters");
-                const auto value=body(request,{"id","session_id","prompt","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","inbox_id"});
+                const auto value=body(request,{"id","session_id","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision","inbox_id"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
                 const auto binding=profile_admission(value);const auto workspace=workspace_admission(value);const auto session=identifier(string_field(value,"session_id",128)),prompt=string_field(value,"prompt",1024*1024);
-                const auto result=value.contains("inbox_id")?executor->submit_queued(id,session,prompt,model,string_field(value,"inbox_id",128),workspace,binding):workspace?executor->submit_workspace(id,session,prompt,model,*workspace,binding):binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model);
+                const auto files=prompt_file_attachments(value);if(!files.empty()&&value.contains("inbox_id"))throw std::invalid_argument("File attachments cannot be queued through the session inbox");if(!files.empty()&&(!workspace||workspace->revision<1))throw std::invalid_argument("File attachments require the observed workspace membership revision");
+                if(workspace)validate_workspace_admission(*workspace,executor?executor->execution_workspace():ExecutionWorkspaceMetadata{});
+                const auto result=!files.empty()?executor->submit_with_attachments(id,session,prompt,model,files,workspace,binding):value.contains("inbox_id")?executor->submit_queued(id,session,prompt,model,string_field(value,"inbox_id",128),workspace,binding):workspace?executor->submit_workspace(id,session,prompt,model,*workspace,binding):binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model);
                 reply(response,encode(result),202);
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {

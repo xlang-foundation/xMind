@@ -70,7 +70,7 @@ class BackendClient {
   }
   health() { return this.request('/v1/health'); }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
-  async workspaceMembership() { const workspace=await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspace/membership'),workspace); }
+  async workspaceMembership(workspace) { const identity=workspace||await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspace/membership'),identity); }
   async addWorkspaceFolder(root) {
     if(typeof root!=='string'||!root||root.length>32760||/[\x00-\x1f]/.test(root)||!(/^[A-Za-z]:[\\/]/.test(root)||/^\\\\[^\\/]+\\[^\\/]+(?:\\|$)/.test(root)))throw new Error('Choose an absolute local or UNC workspace folder.');
     const workspace=await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspaces/add',{workspace_id:workspace.workspace_id,root},30000),workspace);
@@ -296,7 +296,18 @@ class BackendClient {
     return value;
   }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
-  run(session_id, prompt, model_id,binding,inbox_id) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) }); }
+  run(session_id, prompt, model_id,binding,inbox_id,files=[],expectedWorkspaceRevision) {
+    if(!Array.isArray(files)||files.length>32)throw new Error('Invalid workspace file attachments.');
+    if(!files.length)return this.request('/v1/runs', { session_id, prompt,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
+    return this.runWithAttachments(session_id,prompt,model_id,binding,inbox_id,files,expectedWorkspaceRevision);
+  }
+  async runWithAttachments(session_id,prompt,model_id,binding,inbox_id,files,expectedWorkspaceRevision){
+    const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('File attachments require an opened backend workspace.');const membership=await this.workspaceMembership(workspace);
+    if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before sending.');
+    const workspaceFields={expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id,expected_workspace_revision:expectedWorkspaceRevision??membership.revision};
+    for(const file of files)if(!file||typeof file!=='object'||Array.isArray(file)||Object.keys(file).some(key=>!['path','folder_id','name','description','mention'].includes(key))||typeof file.path!=='string'||!file.path||file.path.length>4096||file.path.startsWith('/')||/^[A-Za-z]:/.test(file.path)||file.path.includes('\\')||file.path.split('/').some(part=>!part||part==='.'||part==='..')||file.folder_id!==undefined&&(typeof file.folder_id!=='string'||file.folder_id.length>256))throw new Error('Invalid workspace file attachment.');
+    return this.request('/v1/runs', { session_id, prompt,files,...workspaceFields,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
+  }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   async openEventStream(path,signal){
     signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();

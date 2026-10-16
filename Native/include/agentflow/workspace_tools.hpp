@@ -165,6 +165,10 @@ private:
 
 struct WorkspaceToolFolder {std::string folder_id,root;};
 struct WorkspaceMembershipSnapshot {std::string workspace_id;std::int64_t revision=0;std::vector<WorkspaceToolFolder> folders;};
+// A client may identify a workspace file, but never supplies its contents.
+// The backend snapshots the file from the admitted workspace before persisting
+// the prompt, so clients cannot attach data from outside that authority.
+struct PromptFileAttachment {std::string path,folder_id,name,description,mention;};
 // Immutable membership snapshot for one admitted tool catalogue. Each member
 // is independently opened and identity-checked; folder IDs never become paths.
 class WorkspaceToolSet {
