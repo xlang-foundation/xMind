@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-10-16",
+  "client": "xMind local webpage",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "registered_workspace_count": 1,
+  "selector_disabled": true,
+  "guidance_visible": true,
+  "guidance": "Only one workspace is registered on this computer. Create a new workspace from another folder to enable switching, or add folders to this workspace.",
+  "actions": {
+    "new_workspace_enabled": true,
+    "add_folder_enabled": true
+  },
+  "verification": {
+    "live_rendered_page_after_reload": "passed",
+    "focused_browser_connection_suite": "30/30 passed"
+  },
+  "scope": "The live profile has only one registered workspace. The dialog now explains why switching is unavailable and how to create or extend a workspace. Selecting between two persisted workspaces was not exercised.",
+  "credentials_included": false
+}

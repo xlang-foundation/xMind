@@ -11,6 +11,18 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Browser workspace selector guidance — 2026-10-16
+
+The live TestProj profile contains one registered workspace, so the switcher
+is correctly disabled until another workspace is created. The Configure
+workspace dialog now explains this and directs the user to create a workspace
+from another folder or add folders to the current workspace. The rendered
+page displayed the guidance after reload. The focused browser connection suite
+passes **30/30**, including the disabled single-workspace state and enabled
+multiple-workspace state. This verifies the explanation and selector states;
+creating and switching between two persistent workspaces remains a separate
+live acceptance check. [Evidence](evidence/browser-workspace-switch-guidance-20261016.json).
+
 ## Backend-owned session inbox dispatch — 2026-10-15
 
 The native server now advertises `session_inbox_dispatch` and owns queue
