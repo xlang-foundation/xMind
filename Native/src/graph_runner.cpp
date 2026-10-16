@@ -118,7 +118,7 @@ std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& 
     result.backend_identity=context_digest("native.graph.context.v1:"+plan.json()+":"+bindings.dump());return result;
 }
 std::optional<WorkspaceMembershipSnapshot> GraphRunner::workspace_membership_admission()const{
-    if(!workspace_)throw ToolAccessDenied("Graph workspace membership requires a verified primary folder");
+    if(!workspace_)return {};
     auto snapshot=settings_.workspace_membership_snapshot?settings_.workspace_membership_snapshot():WorkspaceMembershipSnapshot{
         workspace_->identity(),1,{{workspace_->identity(),workspace_->root_path()}}};
     if(snapshot.workspace_id!=workspace_->identity()||snapshot.folders.empty()||snapshot.folders.front().folder_id!=snapshot.workspace_id||snapshot.folders.front().root!=workspace_->root_path())

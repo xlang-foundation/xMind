@@ -2808,3 +2808,19 @@ contract passed **1/1** after rebuilding `xmind_server`, `xmind_cli` and
 `xmind_admin`. `git diff --check` passed. These focused contracts do not replace
 the full 145-test Release suite and do not establish live-provider behavior.
 The implementation and tests are in commit [`23250e9`](https://github.com/xlang-foundation/xMind/commit/23250e9).
+
+## Graph workspace membership admission — 2026-10-15
+
+Graph admission now captures the configured workspace membership even when the
+prompt has no attached files. Direct graph tools therefore use the same
+revision-pinned registered folders as single-agent and attached-file runs;
+workspace-less agent-only graph execution remains supported. The Release
+graph-runner contract exposed this gap: a secondary-folder read previously
+failed with `graph_tool_access_denied` because the root had no saved membership
+event. After the fix, the graph-runner, console workspace, MCP handshake, HTTP
+read-only and HTTP fallback contracts passed **5/5**. The original full
+149-contract run passed 145; the four failures were subsequently rerun, with
+the graph-runner fixed, the console assertion aligned to the current authority
+error, and the Rust Analyzer and local-view contracts passing in isolation.
+The graph-service and unified graph HTTP contracts also passed **2/2** after
+the fix. This is not a claim that a post-fix complete 149-contract run passed.

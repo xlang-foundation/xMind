@@ -181,7 +181,7 @@ Run GraphService::submit_graph_with_attachments(std::string id,std::string sessi
         const auto models=impl_->runner.models();if(agent && !models.empty())model=models.front();
     }
     impl_->runner.validate(entry->plan,model);
-    const auto membership=files.empty()?std::optional<WorkspaceMembershipSnapshot>{}:impl_->runner.workspace_membership_admission();
+    const auto membership=impl_->runner.workspace_membership_admission();
     if(!files.empty()&&(!membership||membership->revision!=expected_workspace_revision))throw Conflict("Workspace membership changed while selecting graph attachments");
     const auto budget=impl_->runner.execution_budget(entry->plan,model);
     const auto context_authority=impl_->runner.execution_context(entry->plan,model);
