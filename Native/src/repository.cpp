@@ -561,7 +561,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>30)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>31)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -590,7 +590,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>30) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>31) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -994,6 +994,14 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             throw DatabaseError("Existing session tombstone table has an incompatible schema");
         db.execute("PRAGMA user_version=30");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session tombstone migration did not preserve repository ownership");
+    }
+    if(version<31){
+        const auto columns=db.execute("PRAGMA table_info(session_inbox)").rows;auto has_column=[&](const std::string& name){return std::any_of(columns.begin(),columns.end(),[&](const auto& row){return text(row[1])==name;});};
+        if(!has_column("files_json"))db.execute("ALTER TABLE session_inbox ADD COLUMN files_json TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(files_json) AND json_type(files_json)='array' AND length(CAST(files_json AS BLOB))<=262144)");
+        if(!has_column("workspace_id"))db.execute("ALTER TABLE session_inbox ADD COLUMN workspace_id TEXT NOT NULL DEFAULT '' CHECK(length(workspace_id)<=256)");
+        if(!has_column("workspace_revision"))db.execute("ALTER TABLE session_inbox ADD COLUMN workspace_revision INTEGER NOT NULL DEFAULT 0 CHECK(workspace_revision>=0)");
+        db.execute("PRAGMA user_version=31");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Queued attachment migration did not preserve repository ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -1540,10 +1548,16 @@ Run Repository::start_prompt_run(const std::string& id,const std::string& sessio
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
     if(!inbox_id.empty()){
-        identifier(inbox_id);const auto queued=db.execute("SELECT content FROM session_inbox WHERE id=? AND session_id=? AND state='queued' AND run_id IS NULL",{inbox_id,session_id}).rows;
+        identifier(inbox_id);const auto queued=db.execute("SELECT content,files_json FROM session_inbox WHERE id=? AND session_id=? AND state='queued' AND run_id IS NULL",{inbox_id,session_id}).rows;
         if(queued.size()!=1)throw Conflict("Queued session input is no longer available");
         Json prompt;try{prompt=Json::parse(prompt_json);}catch(...){throw std::invalid_argument("Invalid queued session prompt");}
-        if(!prompt.is_object()||!prompt.contains("content")||!prompt["content"].is_string()||prompt["content"].get<std::string>()!=text(queued[0][0]))throw Conflict("Queued session input differs from the admitted prompt");
+        const auto saved_files=Json::parse(text(queued[0][1]));const auto prompt_files=prompt.value("files",Json::array());
+        if(!saved_files.is_array()||!prompt_files.is_array()||saved_files.size()!=prompt_files.size())throw Conflict("Queued session attachments differ from the admitted prompt");
+        if(!prompt.is_object()||!prompt.contains("content")||!prompt["content"].is_string())throw Conflict("Queued session input differs from the admitted prompt");
+        std::string expected_content=text(queued[0][0]);
+        if(!saved_files.empty()){expected_content+="\n\nAttached workspace files:";for(const auto& file:saved_files)expected_content+="\n- "+file.value("path",std::string{});}
+        if(prompt["content"].get<std::string>()!=expected_content)throw Conflict("Queued session input differs from the admitted prompt");
+        for(std::size_t i=0;i<saved_files.size();++i)if(!prompt_files[i].is_object()||prompt_files[i].value("path",std::string{})!=saved_files[i].value("path",std::string{})||prompt_files[i].value("folder_id",std::string{})!=saved_files[i].value("folder_id",std::string{})||prompt_files[i].value("name",std::string{})!=saved_files[i].value("name",std::string{}))throw Conflict("Queued session attachment identity changed before admission");
     }
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt_json}));
@@ -2456,23 +2470,26 @@ void Repository::append_message(const std::string& id,const std::string& role,co
     changed_one(impl_->database.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,?,?)",{id,role,json}));
     transaction.commit();
 }
-SessionInboxItem Repository::enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content) {
+SessionInboxItem Repository::enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content,const std::string& files_json,const std::string& workspace_id,std::int64_t workspace_revision) {
     identifier(id);bounded_identity(session_id,128);if(content.empty()||content.size()>1024*1024||content.find('\0')!=std::string::npos)throw std::invalid_argument("Queued session input must contain 1-1048576 UTF-8 bytes");
+    Json files;try{files=Json::parse(files_json);}catch(...){throw std::invalid_argument("Queued attachment metadata is invalid");}
+    if(!files.is_array()||files.size()>32||files_json.size()>262144||workspace_id.size()>256||workspace_id.find('\0')!=std::string::npos||workspace_revision<0||workspace_revision>9007199254740991LL||(!files.empty()&&(workspace_id.empty()||workspace_revision<1)))throw std::invalid_argument("Queued attachments require valid workspace admission metadata");
+    for(const auto& file:files)if(!file.is_object()||!file.contains("path")||!file["path"].is_string()||file["path"].get<std::string>().empty()||!file.contains("folder_id")||!file["folder_id"].is_string())throw std::invalid_argument("Queued attachment metadata is invalid");
     auto& db=impl_->database;Transaction transaction(db);session(session_id);
     if(!db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active'",{session_id}).rows.empty())throw Conflict("Session has an exclusive maintenance owner");
-    const auto existing=db.execute("SELECT session_id,content,state,created_ms,run_id FROM session_inbox WHERE id=?",{id}).rows;
+    const auto existing=db.execute("SELECT session_id,content,state,created_ms,run_id,files_json,workspace_id,workspace_revision FROM session_inbox WHERE id=?",{id}).rows;
     if(!existing.empty()){
-        if(text(existing[0][0])!=session_id||text(existing[0][1])!=content)throw Conflict("Queued session input identity was reused with different content");
+        if(text(existing[0][0])!=session_id||text(existing[0][1])!=content||text(existing[0][5])!=files_json||text(existing[0][6])!=workspace_id||integer(existing[0][7])!=workspace_revision)throw Conflict("Queued session input identity was reused with different content");
         if(text(existing[0][2])=="cancelled")throw Conflict("Cancelled session input identity cannot be reused");
-        SessionInboxItem item{id,session_id,content,text(existing[0][2]),{},integer(existing[0][3])};if(!std::holds_alternative<std::nullptr_t>(existing[0][4]))item.run_id=text(existing[0][4]);transaction.commit();return item;
+        SessionInboxItem item{id,session_id,content,text(existing[0][2]),{},integer(existing[0][3]),files_json,workspace_id,workspace_revision};if(!std::holds_alternative<std::nullptr_t>(existing[0][4]))item.run_id=text(existing[0][4]);transaction.commit();return item;
     }
-    const auto pending=db.execute("SELECT count(*),coalesce(sum(length(content)),0) FROM session_inbox WHERE session_id=? AND state='queued'",{session_id}).rows;
-    if(integer(pending[0][0])>=32||integer(pending[0][1])+static_cast<std::int64_t>(content.size())>4*1024*1024)throw RunBusy("Session input queue is full");
-    const auto created=now_ms();changed_one(db.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms) VALUES(?,?,?,'queued',?)",{id,session_id,content,created}));transaction.commit();return {id,session_id,content,"queued",{},created};
+    const auto pending=db.execute("SELECT count(*),coalesce(sum(length(content)+length(files_json)),0) FROM session_inbox WHERE session_id=? AND state='queued'",{session_id}).rows;
+    if(integer(pending[0][0])>=32||integer(pending[0][1])+static_cast<std::int64_t>(content.size()+files_json.size())>4*1024*1024)throw RunBusy("Session input queue is full");
+    const auto created=now_ms();changed_one(db.execute("INSERT INTO session_inbox(id,session_id,content,state,created_ms,files_json,workspace_id,workspace_revision) VALUES(?,?,?,'queued',?,?,?,?)",{id,session_id,content,created,files_json,workspace_id,workspace_revision}));transaction.commit();return {id,session_id,content,"queued",{},created,files_json,workspace_id,workspace_revision};
 }
 std::vector<SessionInboxItem> Repository::session_inbox(const std::string& session_id) {
     bounded_identity(session_id,128);session(session_id);std::vector<SessionInboxItem> items;
-    for(const auto& row:impl_->database.execute("SELECT id,content,state,created_ms,run_id FROM session_inbox WHERE session_id=? AND state!='cancelled' ORDER BY created_ms,id LIMIT 128",{session_id}).rows){SessionInboxItem item{text(row[0]),session_id,text(row[1]),text(row[2]),{},integer(row[3])};if(!std::holds_alternative<std::nullptr_t>(row[4]))item.run_id=text(row[4]);items.push_back(std::move(item));}
+    for(const auto& row:impl_->database.execute("SELECT id,content,state,created_ms,run_id,files_json,workspace_id,workspace_revision FROM session_inbox WHERE session_id=? AND state!='cancelled' ORDER BY created_ms,id LIMIT 128",{session_id}).rows){SessionInboxItem item{text(row[0]),session_id,text(row[1]),text(row[2]),{},integer(row[3]),text(row[5]),text(row[6]),integer(row[7])};if(!std::holds_alternative<std::nullptr_t>(row[4]))item.run_id=text(row[4]);items.push_back(std::move(item));}
     return items;
 }
 void Repository::cancel_session_input(const std::string& session_id,const std::string& input_id) {

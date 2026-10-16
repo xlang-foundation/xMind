@@ -110,6 +110,11 @@ int main(int argc,char** argv) {
             const auto inbox_after_claim=second.session_inbox("inbox");
             require(claimed.state==RunState::queued&&inbox_after_claim.size()==1&&inbox_after_claim[0].state=="claimed"&&inbox_after_claim[0].run_id==claimed.id,"Run admission must atomically claim its exact queued input");
             rejects<Conflict>([&]{second.start_prompt_run("inbox-replay-run","inbox",R"({"content":"Persisted prompt survives refresh and backend reopen"})",{}, {},queued.id);});
+            const auto attached=first.enqueue_session_input("queued-input-files","inbox","Queue a file",R"([{"path":"README.md","folder_id":"workspace","name":"README"}])","workspace",4);
+            const auto attached_replay=second.enqueue_session_input("queued-input-files","inbox","Queue a file",R"([{"path":"README.md","folder_id":"workspace","name":"README"}])","workspace",4);
+            require(attached.files_json==attached_replay.files_json&&attached.workspace_id=="workspace"&&attached.workspace_revision==4,"Queued attachment references and their workspace revision must survive inbox replay");
+            rejects<Conflict>([&]{second.enqueue_session_input("queued-input-files","inbox","Queue a file",R"([{"path":"src/changed.cpp","folder_id":"workspace","name":"changed.cpp"}])","workspace",4);});
+            rejects<Conflict>([&]{first.start_prompt_run("queued-input-files-mismatch","inbox",R"({"content":"Queue a file"})",{}, {},attached.id);});
             second.cancel_session_input("inbox",queued.id);
             first.transition("inbox-run",RunState::queued,RunState::cancelled,R"({"reason":"contract_cleanup"})");
             first.put_information("agents","coding",R"({"model":"test"})");

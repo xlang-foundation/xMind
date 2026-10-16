@@ -31,7 +31,7 @@ struct Event { std::int64_t sequence; std::string run_id, kind, json; };
 struct Message { std::int64_t sequence; std::string role, json; };
 struct SessionArchive { Session session; std::vector<Message> messages; std::optional<AgentDefinition> agent; };
 struct MessagePage { std::vector<Message> messages; std::optional<std::int64_t> next_before_sequence; };
-struct SessionInboxItem {std::string id,session_id,content,state,run_id;std::int64_t created_ms=0;};
+struct SessionInboxItem {std::string id,session_id,content,state,run_id;std::int64_t created_ms=0;std::string files_json="[]",workspace_id;std::int64_t workspace_revision=0;};
 struct ProcessOutputArtifact {
     std::string operation_id,run_id,state;
     std::uint64_t stdout_bytes=0,stderr_bytes=0;

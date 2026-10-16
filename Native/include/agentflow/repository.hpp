@@ -173,7 +173,7 @@ public:
     ProcessOutputArtifact finish_process_output(const std::string& operation_id,const std::string& run_id,bool complete);
     ProcessOutputPage read_process_output(const std::string& operation_id,const std::string& channel,std::uint64_t offset,std::size_t limit);
     void append_message(const std::string& id,const std::string& role,const std::string& json);
-    SessionInboxItem enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content);
+    SessionInboxItem enqueue_session_input(const std::string& id,const std::string& session_id,const std::string& content,const std::string& files_json="[]",const std::string& workspace_id={},std::int64_t workspace_revision=0);
     std::vector<SessionInboxItem> session_inbox(const std::string& session_id);
     void cancel_session_input(const std::string& session_id,const std::string& input_id);
     Message message(const std::string& id,std::int64_t sequence);

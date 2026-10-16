@@ -6,6 +6,10 @@ test('browser leaves persisted prompt admission to a backend advertising queue d
  const calls=[],view=new BrowserController({run:async(...args)=>calls.push(args),sessionInbox:async()=>({items:[{id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'}]})},()=>{});view.session='session';view.health={agent_execution:true,session_inbox_dispatch:true};
  try{await view.drainInbox();assert.deepEqual(calls,[]);}finally{view.dispose();}
 });
+test('browser queues selected workspace files with the prompt while another run is active',async()=>{
+ const files=[{path:'src/main.cpp',folder_id:'folder-main',name:'main.cpp'}],posted=[],saved={session_id:'session',content:'Review this while the build runs',state:'queued',files,workspace_revision:12};let inbox=[];const client={enqueueSessionInput:async(...args)=>{assert.equal(args[0],'session');assert.equal(args[1],saved.content);assert.match(args[2],/^inbox_/);assert.deepEqual(args[3],files);assert.equal(args[4],undefined);saved.id=args[2];inbox=[saved];return saved;},sessionInbox:async()=>({items:inbox})};const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runs=[{id:'active',session_id:'session',state:'running',parent_id:''}];view.health={agent_execution:true};
+ try{await view.handle({type:'send',prompt:saved.content,files});assert.equal(inbox[0].files[0].path,'src/main.cpp');assert.ok(posted.some(message=>message.type==='queued-input'&&message.item.id===saved.id));}finally{view.dispose();}
+});
 test('browser attaches to a run claimed by the backend after the active run settles',async()=>{
  const item={id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'},run={id:'backend-run',session_id:'session',parent_id:'',graph_root:false,state:'running'},posted=[],streams=[];let inbox=[item];
   const client={baseUrl:'http://127.0.0.1:60405',sessionInbox:async()=>({items:inbox}),status:async id=>{assert.equal(id,run.id);return run;},runs:async()=>[run],events:async()=>[],operations:async()=>[],history:async()=>[],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};

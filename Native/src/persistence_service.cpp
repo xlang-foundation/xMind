@@ -291,8 +291,8 @@ std::future<ProcessOutputPage> PersistenceService::read_process_output(std::stri
 std::future<void> PersistenceService::append_message(std::string id,std::string role,std::string json) {
     return impl_->submit([id=std::move(id),role=std::move(role),json=std::move(json)](Repository& repository){repository.append_message(id,role,json);});
 }
-std::future<SessionInboxItem> PersistenceService::enqueue_session_input(std::string id,std::string session_id,std::string content) {
-    return impl_->submit([id=std::move(id),session_id=std::move(session_id),content=std::move(content)](Repository& repository){return repository.enqueue_session_input(id,session_id,content);});
+std::future<SessionInboxItem> PersistenceService::enqueue_session_input(std::string id,std::string session_id,std::string content,std::string files_json,std::string workspace_id,std::int64_t workspace_revision) {
+    return impl_->submit([id=std::move(id),session_id=std::move(session_id),content=std::move(content),files_json=std::move(files_json),workspace_id=std::move(workspace_id),workspace_revision](Repository& repository){return repository.enqueue_session_input(id,session_id,content,files_json,workspace_id,workspace_revision);});
 }
 std::future<std::vector<SessionInboxItem>> PersistenceService::session_inbox(std::string session_id) {
     return impl_->submit([session_id=std::move(session_id)](Repository& repository){return repository.session_inbox(session_id);});

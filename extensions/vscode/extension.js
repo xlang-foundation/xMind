@@ -146,9 +146,9 @@ async function activate(context) {
       }catch(error){if(target===client&&session===sessionId&&version===generation&&panel)post({type:'error',text:error.message});}
     },250);
   }
-  async function queuePrompt(prompt){
+  async function queuePrompt(prompt,files=[],workspaceRevision){
     const target=client,session=sessionId,version=generation;if(!target||!session)throw new Error('Select a conversation before queuing a prompt.');
-    const id='inbox_'+crypto.randomBytes(16).toString('hex'),item=await target.enqueueSessionInput(session,prompt,id);
+    const id='inbox_'+crypto.randomBytes(16).toString('hex'),item=await target.enqueueSessionInput(session,prompt,id,files,workspaceRevision);
     if(target!==client||session!==sessionId||version!==generation||!panel)return;
     if(!item||item.id!==id||item.session_id!==session||item.content!==prompt||!['queued','claimed'].includes(item.state))throw new Error('Native inbox acknowledgement changed.');
     await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||!panel)return;
@@ -168,7 +168,7 @@ async function activate(context) {
       const item=items.find(value=>value.state==='queued');if(!item)return;
       const binding=health.provider_profile_admission===true?await profileController.admission():undefined;
       if(target!==client||session!==sessionId||version!==generation||busySession())return;
-      const run=await target.run(session,item.content,selectedModel,binding,item.id);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+      const run=await target.run(session,item.content,selectedModel,binding,item.id,item.files||[],item.workspace_revision);if(target!==client||session!==sessionId||version!==generation||busySession())return;
       stop();clearGraph();runId=run.id;cursor=0;sessionRuns=[...sessionRuns.filter(value=>value.id!==run.id),run];presentRuns();
       await context.workspaceState.update(runStateKey,{...connectionState(),session_id:session,id:run.id});
       if(!panel||target!==client||session!==sessionId)return;
@@ -734,11 +734,10 @@ async function activate(context) {
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
           const files=promptFiles;if(files.length>32)throw new Error('A prompt can include up to 32 workspace files.');
           if(sessionId&&busySession()){
-            if(files.length)throw new Error('File attachments cannot be queued yet. Wait for the current run to finish before sending them.');
             if(message.prompt.startsWith('/'))throw new Error('Workspace commands cannot be queued yet. Wait for the active run to finish, then send the command.');
             const selected=sessionRuns.find(run=>run.id===runId);
             if(selected&&!['queued','running','paused'].includes(selected.state))throw new Error('Select the active run before queuing another prompt.');
-            await queuePrompt(message.prompt);return;
+            await queuePrompt(message.prompt,files,promptWorkspaceRevision||undefined);if(files.length){promptFiles=[];promptWorkspaceRevision=0;post({type:'prompt-files',files:[]});}return;
           }
           const graph=selectedGraph?graphCatalogue.find(g=>g.id===selectedGraph&&g.executable):undefined;
           if(selectedGraph&&!graph)throw new Error('Graph is not executable on this backend.');

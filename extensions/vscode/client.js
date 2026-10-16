@@ -242,7 +242,7 @@ class BackendClient {
   }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
-  enqueueSessionInput(session_id,content,id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,{...(id?{id}:{}),content}); }
+  async enqueueSessionInput(session_id,content,id,files=[],expectedWorkspaceRevision) { const value={...(id?{id}:{}),content};if(files.length){const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('Queued file attachments require an opened workspace.');const membership=await this.workspaceMembership(workspace);if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before queuing.');value.files=files;value.expected_workspace_id=workspace.workspace_id;value.expected_workspace_authority_id=workspace.authority_id;value.expected_workspace_revision=expectedWorkspaceRevision??membership.revision;}return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,value); }
   cancelSessionInput(session_id,input_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox/${encodeURIComponent(input_id)}`,undefined,15000,'DELETE'); }
   async terminals(session) {
     executionIdentity(session);

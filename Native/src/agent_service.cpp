@@ -443,15 +443,15 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
-Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile){
-    if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(workspace||profile)throw RunUnavailable("Queued input authority must be validated by its backend profile");
+Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
+    if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(profile)throw RunUnavailable("Provider authority must be checked by the execution platform");if(!files.empty()&&(!workspace||workspace->revision<1))throw ToolAccessDenied("Queued attachments require workspace membership admission");
     auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
-    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id);}
+    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }

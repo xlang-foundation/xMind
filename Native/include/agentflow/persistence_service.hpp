@@ -157,7 +157,7 @@ public:
     std::future<ProcessOutputArtifact> finish_process_output(std::string operation_id,std::string run_id,bool complete);
     std::future<ProcessOutputPage> read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit);
     std::future<void> append_message(std::string id,std::string role,std::string json);
-    std::future<SessionInboxItem> enqueue_session_input(std::string id,std::string session_id,std::string content);
+    std::future<SessionInboxItem> enqueue_session_input(std::string id,std::string session_id,std::string content,std::string files_json="[]",std::string workspace_id={},std::int64_t workspace_revision=0);
     std::future<std::vector<SessionInboxItem>> session_inbox(std::string session_id);
     std::future<void> cancel_session_input(std::string session_id,std::string input_id);
     std::future<Message> message(std::string id,std::int64_t sequence);
