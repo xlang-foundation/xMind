@@ -157,9 +157,9 @@ function harness(options={}) {
       registerTreeDataProvider:(id,provider)=>{assert.equal(id,'xmind.gitChanges');gitTreeProvider=provider;return{dispose(){}};}}
   };
   function makeView(){
-        const view={posted:[],webview:{html:'',cspSource:'https://fixture-webview',asWebviewUri:uri=>({toString:()=>uri}),postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
+        const view={posted:[],showCalls:0,webview:{html:'',cspSource:'https://fixture-webview',asWebviewUri:uri=>({toString:()=>uri}),postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
           onDidReceiveMessage:callback=>{view.receive=callback;return {dispose(){}};}},
-          onDidDispose:callback=>{view.close=callback;return {dispose(){}};},show(){}};
+          onDidDispose:callback=>{view.close=callback;return {dispose(){}};},show(){view.showCalls++;}};
         views.push(view);return view;
       }
   const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
@@ -216,7 +216,7 @@ test('opening the xMind sidebar on startup is opt-in and connects the active wor
  const off=harness();await off.activation;assert.equal(off.bootstrapTasks.length,0);assert.equal(off.connectCalls.length,0);
  const on=harness({openOnStartup:true,beforeConnect:async()=>{assert.equal(on.views.length,1);assert.match(on.views[0].webview.html,/Connecting to xMind/);}});await on.activation;assert.equal(on.bootstrapTasks.length,1);await on.bootstrapTasks[0]();await until(()=>on.views.length===1);
  assert.equal(on.connectCalls.length,1);assert.equal(on.backendOwners[0].metadata.root,'D:\\TestProj');
- const view=on.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='sessions'));
+ const view=on.views[0];assert.ok(view.showCalls>0,'startup explicitly reveals the xMind sidebar');view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='sessions'));
  await until(()=>view.posted.some(message=>message.type==='transcript'));
  assert.ok(on.requests.includes('/v1/sessions'));assert.ok(on.requests.includes('/v1/sessions/saved/messages?limit=40'));
  assert.equal(view.posted.findLast(message=>message.type==='sessions').selected,'saved');assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);

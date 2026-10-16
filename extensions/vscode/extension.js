@@ -199,11 +199,11 @@ async function activate(context) {
     }
   }, { webviewOptions: { retainContextWhenHidden: true } }));
   async function acquireSidebar() {
-    if (sidebarView) return sidebarView;
+    if (sidebarView) { sidebarView.show(true); return sidebarView; }
     const available = new Promise(resolve => { resolveSidebar = resolve; });
     await vscode.commands.executeCommand('workbench.view.extension.xmind');
     await vscode.commands.executeCommand('xmind.workspace.focus');
-    return available;
+    const view=await available;view.show(true);return view;
   }
 
   async function refreshGraphs(){
