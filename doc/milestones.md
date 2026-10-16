@@ -32,8 +32,11 @@ profile to review and apply a focused frontend improvement and ran the same
 production build successfully. The [browser record](evidence/testproj-xmind-browser-coding-20261015.json)
 and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
 capture those results. The first coding loop is therefore demonstrated in
-each client, but the first target remains active until restart persistence and
-the same session/change history is confirmed in both rendered clients.
+each client. Native restart persistence passes its shared-backend contract, and
+the browser/VS Code profile check confirms the same selected session identity
+and 31 saved messages. The first target remains active until that transcript is
+visibly confirmed in the live VS Code pane and a coding turn is completed from
+the shared session there.
 
 On 2026-10-16, a fresh local webpage run against TestProj also loaded the four
 saved providers from `.config/providers.yaml`, discovered 20 OpenAI models,
@@ -42,17 +45,22 @@ the native patch for approval, applied it after approval, and built the Vue
 frontend successfully. The run's first model response arrived in 27.48 seconds
 and completed in 46.67 seconds; the follow-up edit and validation completed
 with 2.90 seconds to first token. See the [live browser record](evidence/testproj-webpage-coding-live-20261016.json).
-Cross-client history and restart persistence remain open.
+The native restart and history-persistence contract passes; the TestProj browser
+and VS Code state also identify the same saved conversation. Direct visual
+confirmation of that transcript in the VS Code pane and a coding turn from this
+shared conversation remain open.
 The strengthened `native_local_view_contract` now passes **1/1**: its real
 native SQLite server, production browser adapter and VS Code `BackendClient`
 share a session, restart the backend, then each read the exact same saved
-history. This proves the shared API and persistence layer, while rendered
-cross-client session selection remains to be verified. The browser now also
+history. This proves the shared API and persistence layer. The live TestProj
+profile check confirms that the browser selection matches VS Code's persisted
+session ID and saved history; visual confirmation inside the native VS Code
+pane remains open. The browser now also
 opens a real xterm.js terminal against the same native session-bound PTY as
 VS Code, with authenticated input/output/resize/close routes and cleanup on
 workspace or conversation changes. The browser page and PTY unit contracts
-pass; real browser acceptance remains outstanding. The latest client suites
-pass **377/377** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
+pass; real browser PTY acceptance remains outstanding. The latest client suites
+pass **381/381** in VS Code and **132/132** in the browser; rebuilt native patch, patch-tool, edit-executor,
 agent HTTP and unified HTTP contracts pass **5/5**. See the
 [cross-client restart evidence](evidence/cross-client-session-persistence-20261016.json).
 VS Code now also accepts the machine-level `agentflow.profileRoot` setting so it can use the same explicit local profile root as the webpage launcher. The optional `agentflow.openOnStartup` setting opens the xMind view after extension activation when enabled; it defaults off. The VS Code client suite now passes **381/381**, including a stale-selection regression that chooses the newest entry in the native catalogue and loads its saved history. In the TestProj acceptance profile, the browser visibly rendered a saved coding conversation. The VS Code extension state selected the same conversation and workspace, and read-only inspection found its 31 saved messages in the shared SQLite profile. The VS Code host created the xMind webview, and extension-host contracts verify transcript loading; direct visual inspection of the native VS Code pane remains open. This confirms shared session identity and stored history, not a VS Code coding turn. [Sanitized evidence](evidence/cross-client-shared-profile-20261016.json).
