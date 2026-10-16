@@ -93,15 +93,17 @@ function harness(options={}) {
         const value=JSON.parse(requestOptions.body);providerRequests.push(value);options.health={agent_execution:true,status:'ok'};options.catalogue={default_model:value.model,models:[{id:value.model}]};data={...options.providerSetup,revision:options.providerSetup.revision+1,configured:true,model:value.model};
       }else data=options.providerSetup;
     }
-    else if(target.pathname==='/v1/sessions') data=options.deletedSession?[]:[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
+    else if(target.pathname==='/v1/sessions') data=options.deletedSession?[]:(options.sessions||[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])]);
     else if(target.pathname==='/v1/sessions/saved'&&requestOptions.method==='DELETE'){options.deletedSession=true;return {ok:true,status:204,json:async()=>{throw Error('A 204 response must not be decoded as JSON');}};}
     else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
     else if(target.pathname==='/v1/sessions/forked/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/forked/runs') data=[];
     else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
     else if(target.pathname==='/v1/sessions/saved/messages') data=await pagedHistory(pendingHistory?pendingHistory:transcript);
+    else if(target.pathname==='/v1/sessions/latest/messages') data=await pagedHistory(transcript);
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
+    else if(target.pathname==='/v1/sessions/latest/runs') data=[];
     else if(options.ownedChildren&&target.pathname.endsWith('/children'))data=options.ownedChildren;
     else if(options.ownedChildren&&target.pathname.includes('/children/')&&target.pathname.endsWith('/history')){const child=options.ownedChildren.find(value=>value.run.id===target.pathname.split('/')[5]);assert.ok(child);assert.equal(target.pathname.split('/')[3],child.run.parent_id);data=options.ownedHistories?.[child.run.id]||[];}
     else if(options.ownedChildren&&target.pathname.endsWith('/tree-events'))data=target.search==='?after=0'?(options.treeEvents||[]):[];
@@ -162,7 +164,7 @@ function harness(options={}) {
       }
   const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
-  state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
+  state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:options.initialSessionId||'saved'});
   // Native ownership is a separate mock boundary here. Its actual host lifecycle
   // and authenticated HTTP admission races are exercised in workspace-backend.
   class TestWorkspaceBackend{
@@ -218,6 +220,13 @@ test('opening the xMind sidebar on startup is opt-in and connects the active wor
  assert.ok(on.requests.includes('/v1/sessions'));assert.ok(on.requests.includes('/v1/sessions/saved/messages?limit=40'));
  assert.equal(view.posted.findLast(message=>message.type==='sessions').selected,'saved');assert.deepEqual(view.posted.findLast(message=>message.type==='sessions').sessions,[{id:'saved',title:'Saved session'}]);
  assert.equal(on.state.get('agentflow.session').id,'saved');assert.deepEqual(on.errors,[]);
+});
+
+test('a stale VS Code session selection falls back to the newest native catalogue entry',async()=>{
+ const h=harness({openOnStartup:true,initialSessionId:'removed',sessions:[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]});await h.activation;await h.bootstrapTasks[0]();await until(()=>h.views.length===1);
+ const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='history'));
+ const selected=view.posted.findLast(message=>message.type==='sessions');assert.equal(selected.selected,'latest');assert.deepEqual(selected.sessions,[{id:'older',title:'Older session'},{id:'latest',title:'Newest session'}]);
+ assert.ok(h.requests.includes('/v1/sessions/latest/messages?limit=40'));assert.equal(h.state.get('agentflow.session').id,'latest');assert.deepEqual(h.errors,[]);
 });
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{
