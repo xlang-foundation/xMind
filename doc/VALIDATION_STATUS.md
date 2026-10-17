@@ -3205,3 +3205,14 @@ it does not certify a packaged release, installed-client acceptance, or live
 third-party provider and arbitrary-peer behavior. The exact commands, source
 revisions, hashes and scope limits are recorded in
 [the evidence record](evidence/native-release-150-20261017.json).
+
+## Browser and VS Code controller gate — 2026-10-17
+
+The isolated view gate passed **390/390 VS Code extension tests** and
+**134/134 browser controller tests**, with no skips and unchanged view source
+and generated browser assets. The gate itself expected the previous VS Code
+count of 388, so its expected count was corrected in commit 6f62661 and the
+gate was rerun successfully against that exact revision. These are synthetic,
+model-free adapter/controller contracts; they do not substitute for live
+provider runs, rendered browser inspection or installed VS Code acceptance.
+[Exact scope and results](evidence/view-contracts-20261017.json).

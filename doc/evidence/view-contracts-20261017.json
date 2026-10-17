@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-17",
+  "kind": "view-controller-test-gate",
+  "sourceRevision": "6f62661adda2bb1ffcde12121704fda2c961308a",
+  "releaseAccepted": false,
+  "sourceAndAssetsUnchanged": true,
+  "trackedSourceFiles": 61,
+  "vendoredFiles": 2,
+  "generatedBrowserAssets": 12,
+  "extension": { "tests": 390, "passed": 390, "failed": 0, "skipped": 0 },
+  "browser": { "tests": 134, "passed": 134, "failed": 0, "skipped": 0 },
+  "nativeExecuted": false,
+  "providerRequests": 0,
+  "cpythonExecuted": false,
+  "scope": "Synthetic model-free Node controller/adapter contracts; excludes live inference, rendered browser and installed VS Code acceptance",
+  "ciFix": "The view gate expected 388 VS Code tests; updated the pinned expected count to the actual 390-test suite and reran the complete gate successfully."
+}
