@@ -15,7 +15,7 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | The unified C++ `xmind` runtime and embedded-xlang3 SQLite passed 147/147 native Release contracts. | Fresh installed-package acceptance and managed startup on other hosts. |
+| Native backend and local persistence | The unified C++ `xmind` runtime and embedded-xlang3 SQLite passed 147/147 native Release contracts against xlang3 main `036f450`. xMind Windows CI is now pinned to the tested C++ LRPC host commit `ad7e740`; its native-host contract passes locally. | The hosted full Release gate against `ad7e740`, fresh installed-package acceptance, and managed startup on other hosts. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |

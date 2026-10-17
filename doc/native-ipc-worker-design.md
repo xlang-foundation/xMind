@@ -131,8 +131,10 @@ xMind-specific extension is now on
 at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. It adds
 `X::Runtime::RegisterRemoteObject` and `X::Runtime::LrpcListen`, with a native
 C++ host/second-runtime contract and same-runtime value checks. The branch is
-not merged or pinned by xMind yet. Its exact build, hashes and smoke results
-are in [xlang3 C++ host evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
+now pinned by the Windows native CI, which also runs the host contract before
+packaging. The first hosted run against this pin is pending. Its exact build,
+hashes and local smoke results are in
+[xlang3 C++ host evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
 This enables a C++-owned xlang3 LRPC endpoint; it does not solve the backend
 capability RPC, per-run authentication or execution-placement work described
 above.

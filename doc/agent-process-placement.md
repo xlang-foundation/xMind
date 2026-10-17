@@ -88,7 +88,8 @@ on [xlang3 branch `xmind-cpp-lrpc-host`](https://github.com/CantorAI/xlang3/tree
 at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`: `X::Runtime` can register a
 runtime-owned service object and start the shared-memory LRPC listener. Its
 native host/second-runtime contract passes, as does the existing xlang3-script
-server to C++ client smoke test. The branch is not yet pinned by xMind. This
-unblocks a supported native IPC boundary, but does not implement or validate
-the AgentRunner supervisor, per-run authentication, durable recovery, or
-client acceptance. [Exact build and test evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
+server to C++ client smoke test. The Windows native CI now pins this commit and
+runs the host contract before packaging; the hosted gate has not yet completed
+against the new pin. This unblocks a supported native IPC boundary, but does
+not implement or validate the AgentRunner supervisor, per-run authentication,
+durable recovery, or client acceptance. [Exact local build and test evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
