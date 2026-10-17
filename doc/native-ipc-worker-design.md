@@ -4,6 +4,24 @@ Target integration for the [xMind product architecture](runtime-product-design.m
 The first registered-tool worker path is implemented; the broader agent-worker
 scheduler and durable distributed execution described below remain pending.
 
+## Current execution boundary — 2026-10-17
+
+The native `AgentService` currently owns its C++ thread pool and constructs an
+`AgentRunner` on those in-process workers. There is no per-agent placement
+setting and no child-process execution of the model/tool loop. The existing
+`xmind worker` entry point hosts registered trusted xlang3 callables over LRPC;
+that path moves one tool implementation out of process, not an Agent or graph
+run. Its passing worker contracts must not be counted as out-of-process agent
+acceptance. The code references are
+[`AgentService`](../Native/src/agent_service.cpp),
+[`AgentRunner`](../Native/include/agentflow/agent_runner.hpp), and the
+[`xlang3 tool worker`](../Native/src/agent_worker.cpp).
+
+The remaining product work is a placement-aware execution path for the same
+agent/model/tool loop while preserving the parent backend's run identity,
+SQLite persistence, permissions, approvals, event stream and effect journal.
+The acceptance section below is required before that option can be advertised.
+
 ## Verified SDK foundation
 
 The existing pinned xlang3 SDK revision
