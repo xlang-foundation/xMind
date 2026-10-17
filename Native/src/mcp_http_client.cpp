@@ -37,7 +37,7 @@ struct McpHttpClient::Impl {
     std::size_t rejected=0;
     struct Tool {std::string schema,binding;};
     std::map<std::string,Tool> tools;
-    Impl(std::string url,std::optional<SecretBytes> secret,std::optional<McpBearerValidity> lifetime):endpoint(std::move(url)),bearer(std::move(secret)),validity(lifetime),handshake(requests) {
+    Impl(std::string url,std::optional<SecretBytes> secret,std::optional<McpBearerValidity> lifetime):endpoint(std::move(url)),bearer(std::move(secret)),validity(lifetime),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false}})"}) {
         validate_mcp_http_endpoint(endpoint);
         if(validity&&(!bearer||validity->acquired_unix_ms<=0||(validity->expires_unix_ms&&*validity->expires_unix_ms<=validity->acquired_unix_ms)))throw std::invalid_argument("Invalid native MCP bearer lifetime");
     }
@@ -194,17 +194,29 @@ McpSubscriptionAcknowledgement McpHttpClient::listen_subscriptions(const McpSubs
         return *tracker.acknowledgement();
     }catch(...){state.retire();throw;}
 }
-McpToolReply McpHttpClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel) {
+McpToolReply McpHttpClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel,const McpInputFulfillment& fulfill_input) {
     auto& state=*impl_;bool attempted=false;std::string request_id,response;
     try {
         if(!ready() || cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP HTTP tool stopped before dispatch");
         const auto found=state.tools.find(name);if(found==state.tools.end() || arguments.size()>65536)throw McpProtocolError("MCP HTTP tool was not discovered");
         // Validate/project before request admission and before the send boundary.
         (void)McpHttpToolHeaders(found->second.schema).project(arguments);
-        const auto params="{\"name\":"+Json(name).dump()+",\"arguments\":"+mcp_compact_object(arguments)+"}";
-        const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
-        const auto reply=state.exchange(request.frame,state.handshake.server().era,request_id,deadline,cancel,attempted,found->second.schema,false,&response);
-        response=reply->response.raw_json;return mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
+        auto params=mcp_tool_call_params(name,arguments);
+        for(std::size_t round=0;round<10;++round) {
+            const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
+            const auto reply=state.exchange(request.frame,state.handshake.server().era,request_id,deadline,cancel,attempted,found->second.schema,false,&response);
+            if(!reply)throw McpProtocolError("MCP HTTP tool call ended without a correlated reply");response=reply->response.raw_json;
+            auto result=mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
+            if(!result.input_required)return result;
+            if(round==9)return result;
+            std::map<std::string,std::string> responses;
+            for(const auto& [identity,raw]:result.input_required->input_requests_json){
+                if(!fulfill_input)return result;const auto input=fulfill_input(raw);if(!input)return result;
+                responses.emplace(identity,*input);
+            }
+            params=mcp_tool_call_params(name,arguments,responses,result.input_required->request_state);
+        }
+        throw McpProtocolError("MCP input-required round limit was exceeded");
     }catch(...){state.retire();throw McpDispatchFailure(attempted,std::move(request_id),std::move(response));}
 }
 bool McpHttpClient::ready() const {return impl_->live && !impl_->closed;}

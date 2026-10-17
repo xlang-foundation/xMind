@@ -129,6 +129,24 @@ McpToolReply mcp_decode_tool_reply(std::string request_id,const McpWireMessage& 
     for(const auto& block:value["content"])validate_content(block);
     return {std::move(request_id),message.raw_json,message.payload_json,value.value("isError",false)};
 }
+std::string mcp_tool_call_params(const std::string& name,std::string_view arguments,
+    const std::map<std::string,std::string>& input_responses,const std::optional<std::string>& request_state) {
+    if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||input_responses.size()>32)throw McpProtocolError("Invalid MCP tool continuation parameters");
+    const auto compact=mcp_compact_object(arguments);std::string result="{\"name\":"+Json(name).dump()+",\"arguments\":"+compact;
+    if(!input_responses.empty()) {
+        result+=",\"inputResponses\":{";bool first=true;
+        for(const auto& [identity,response]:input_responses) {
+            if(identity.empty()||identity.size()>128||identity.find('\0')!=std::string::npos)throw McpProtocolError("Invalid MCP input response identity");
+            if(!first)result.push_back(',');first=false;result+=Json(identity).dump();result.push_back(':');result+=mcp_compact_object(response);
+        }
+        result.push_back('}');
+    }
+    if(request_state) {
+        if(request_state->size()>65536||request_state->find('\0')!=std::string::npos)throw McpProtocolError("Invalid MCP opaque request state");
+        result+=",\"requestState\":"+Json(*request_state).dump();
+    }
+    result.push_back('}');(void)mcp_compact_object(result);return result;
+}
 McpMetadataPage mcp_decode_resource_page(const McpWireMessage& message){return metadata_page(message,"resources","uri");}
 McpMetadataPage mcp_decode_resource_template_page(const McpWireMessage& message){return metadata_page(message,"resourceTemplates","uriTemplate");}
 McpMetadataPage mcp_decode_prompt_page(const McpWireMessage& message){return metadata_page(message,"prompts","name");}

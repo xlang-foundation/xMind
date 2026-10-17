@@ -43,6 +43,20 @@ and the subsequent full subset passed. [Machine-readable evidence](evidence/nati
 [isolated rerun](evidence/native-mcp-input-required-effect-ctest-20261016.log),
 [failed repeat diagnostic](evidence/native-mcp-input-required-ctest-flaky-20261016.log).
 
+2026-10-16 workspace-root continuation: stdio and Streamable HTTP clients now
+answer a bounded `roots/list` request from the admitted active workspace,
+echo the opaque `requestState`, and retry the same operation with a fresh MCP
+request ID. The reply includes only that workspace root. Unsupported requests,
+including elicitation and sampling, remain unresolved and are never treated as
+success or replayed. A constructor override had been dropping the root
+capability from the negotiated client identity; the client constructors now
+preserve and advertise it. Release build passed; focused wire, stdio, HTTP,
+client and effect contracts pass **5/5**, and the broader MCP/agent/graph set
+passes **25/25**. This adds bounded automatic handling for workspace roots; it
+does not implement human input, durable restartable continuation or general
+multi-round-trip handling. [Build and test evidence](evidence/native-mcp-input-required-roots-20261016.json),
+[broad CTest output](evidence/native-mcp-input-required-roots-ctest-20261016.log).
+
 The native xMind route is `GET /v1/mcp/resources`; it returns xMind's server-scoped resource and prompt-template catalog. Clients cannot select peer pagination cursors. Resource content is fetched only through explicit MCP resource-read calls and their approval flow. The API intentionally does not expose OpenCode-shaped resource routes or payloads. The actual-server catalog contract verifies native schema, query rejection and bearer authentication. Full live-peer catalog rendering in the browser and VS Code remains open.
 
 Verified wire checkpoint: [CI run 37601682734](https://github.com/xlang-foundation/xMind/actions/runs/37601682734), revision `f0e44b029d6a28a57a80f77e921641301105a104`, passed all twenty native and twenty-seven extension contracts. [Complete CTest evidence](evidence/native-mcp-wire-ci-ctest.log), [provenance](evidence/native-mcp-wire-ci-provenance.json). `Native/src/mcp_wire.cpp` implements transport-neutral bounded newline framing and JSON-RPC envelope parsing. It retains original bytes and exact string/integer ID spelling, distinguishes request/notification/result/error, validates object parameters/results, rejects duplicate fields/deep JSON/invalid UTF-8, bounds each frame to 1 MiB, and fails closed after malformed input, consumer failure or incomplete EOF. Outgoing modern requests carry backend-owned metadata; legacy framing is explicit. The compiled contract exercises in-memory fragmented byte fixtures, including non-ASCII text and maximum 64-bit IDs. Request correlation, era selection, native process pipes, HTTP, schema/tool/policy integration and SDK interoperability are not established by that verified revision.

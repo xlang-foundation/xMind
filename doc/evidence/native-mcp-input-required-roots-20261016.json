@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-16",
+  "scope": "Native MCP roots/list fulfillment and bounded input_required continuation over stdio and HTTP",
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target ALL_BUILD",
+    "exit_code": 0
+  },
+  "focused_contracts": {
+    "filter": "native_mcp_wire_contract|native_mcp_stdio_contract|native_mcp_http_readonly_contract|native_mcp_effect_contract|native_mcp_client_contract",
+    "passed": 5,
+    "total": 5,
+    "exit_code": 0
+  },
+  "mcp_agent_graph_contracts": {
+    "filter": "native_mcp_|native_agent_mcp|native_graph_mcp|native_dynamic_plan_mcp",
+    "passed": 25,
+    "total": 25,
+    "elapsed_seconds": 86.39,
+    "exit_code": 0,
+    "output": "native-mcp-input-required-roots-ctest-20261016.log"
+  },
+  "behavior": {
+    "fulfilled_request_methods": ["roots/list"],
+    "root_scope": "The already admitted active workspace only",
+    "continuation": "Echoes opaque requestState and retries with a fresh request ID, bounded to ten rounds",
+    "unsupported_requests": "Remain unresolved; no success is reported and the tool is not replayed",
+    "remaining": ["human elicitation UI", "sampling fulfillment", "durable restartable continuation", "legacy input-required handling"]
+  },
+  "product_position": "OpenCode and LiteLLM are design and coverage references only; API compatibility and feature parity are not requirements."
+}

@@ -32,7 +32,7 @@ public:
     void shutdown() noexcept override;
 private:
     McpToolReply call_tool(const std::string& name,std::string_view arguments,
-        Deadline deadline,std::stop_token cancel) override;
+        Deadline deadline,std::stop_token cancel,const McpInputFulfillment& fulfill_input) override;
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

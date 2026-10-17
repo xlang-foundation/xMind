@@ -17,7 +17,7 @@ struct McpStdioClient::Impl {
     std::size_t queued_bytes=0,unsolicited=0;
     McpLineStream wire;
     bool started=false,live=false,closed=false;
-    explicit Impl(const McpStdioConfiguration& configuration):process(configuration),handshake(requests),wire([this](const auto& message){
+    explicit Impl(const McpStdioConfiguration& configuration):process(configuration),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false}})"}),wire([this](const auto& message){
         const auto size=message.raw_json.size()+message.payload_json.size();
         if(incoming.size()>=128 || size>4*1024*1024-queued_bytes)throw McpProtocolError("MCP incoming messages exceed owner limits");
         incoming.push_back(message);queued_bytes+=size;
@@ -191,27 +191,36 @@ bool McpStdioClient::ready() const {
     const auto observed=impl_->process.status();
     return !observed.closed && !observed.faulted && !observed.exit_code;
 }
-McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel) {
+McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel,const McpInputFulfillment& fulfill_input) {
     auto& state=*impl_;bool attempted=false;std::string request_id,response_json;
     try {
         if(!ready() || cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
         if(name.empty() || name.size()>128 || name.find('\0')!=std::string::npos || arguments.size()>65536)throw McpProtocolError("Invalid MCP tool call");
-        const auto params="{\"name\":"+Json(name).dump()+",\"arguments\":"+mcp_compact_object(arguments)+"}";
-        const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
-        if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
-        state.unsolicited=0;attempted=true;state.process.write(request.frame,deadline,cancel);
-        std::optional<McpToolReply> result;
-        while(!result) {
-            if(state.incoming.empty())state.read(deadline,cancel);
-            while(!state.incoming.empty()) {
-                const auto message=state.pop();if(state.peer_message(message,deadline,cancel))continue;
-                const auto reply=state.requests.receive(message);if(!reply)continue;
-                if(reply->request.id!=request_id)throw McpProtocolError("MCP tool response identity changed");
-                response_json=reply->response.raw_json;
-                result=mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
+        auto params=mcp_tool_call_params(name,arguments);
+        for(std::size_t round=0;round<10;++round) {
+            const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
+            if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
+            state.unsolicited=0;attempted=true;state.process.write(request.frame,deadline,cancel);
+            std::optional<McpCorrelatedReply> correlated;
+            while(!correlated) {
+                if(state.incoming.empty())state.read(deadline,cancel);
+                while(!state.incoming.empty()) {
+                    const auto message=state.pop();if(state.peer_message(message,deadline,cancel))continue;
+                    const auto reply=state.requests.receive(message);if(!reply)continue;
+                    if(reply->request.id!=request_id)throw McpProtocolError("MCP tool response identity changed");correlated=*reply;
+                }
             }
+            response_json=correlated->response.raw_json;auto result=mcp_decode_tool_reply(request_id,correlated->response,state.handshake.server().era);
+            if(!result.input_required)return result;
+            if(round==9)return result;
+            std::map<std::string,std::string> responses;
+            for(const auto& [identity,raw]:result.input_required->input_requests_json){
+                if(!fulfill_input)return result;const auto response=fulfill_input(raw);if(!response)return result;
+                responses.emplace(identity,*response);
+            }
+            params=mcp_tool_call_params(name,arguments,responses,result.input_required->request_state);
         }
-        return std::move(*result);
+        throw McpProtocolError("MCP input-required round limit was exceeded");
     }catch(...) {state.retire();throw McpDispatchFailure(attempted,std::move(request_id),std::move(response_json));}
 }
 const McpServerDescription& McpStdioClient::server() const {if(!ready())throw McpProtocolError("MCP client is not ready");return impl_->handshake.server();}

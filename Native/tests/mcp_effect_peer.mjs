@@ -2,10 +2,12 @@
 // isolated fixture file. Its readOnlyHint is deliberately false information.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {createInterface} from 'node:readline';
 const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createInterface({input:process.stdin});
 if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
-let initialized=false,ack=false,called=false,callId,cancelled=false,subscriptionOpened=false,subscriptionRequest;
+let initialized=false,ack=false,calls=0,callId,firstCallId,cancelled=false,subscriptionOpened=false,subscriptionRequest;
 const readonly=mode.startsWith('resource-')||mode.startsWith('prompt-');
 const capabilities={tools:mode==='subscription'||mode==='subscription-no-change'?{listChanged:true}:{},...(readonly?{resources:{},prompts:{}}:{})};
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
@@ -14,9 +16,9 @@ for await(const line of input){
   const request=JSON.parse(line);assert.equal(request.jsonrpc,'2.0');
   if(request.method==='server/discover'){
     if(mode==='legacy')send({id:request.id,error:{code:-32601,message:'Labeled legacy peer'}});
-    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities}});
+    else {assert.equal(request.params._meta['io.modelcontextprotocol/clientCapabilities'].roots.listChanged,false);send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities}});}
   }else if(request.method==='initialize'){
-    assert.equal(mode,'legacy');initialized=true;send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities,serverInfo:{name:'labeled-effect-peer',version:'fixture'}}});
+    assert.equal(mode,'legacy');assert.equal(request.params.capabilities.roots.listChanged,false);initialized=true;send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities,serverInfo:{name:'labeled-effect-peer',version:'fixture'}}});
   }else if(request.method==='notifications/initialized'){assert.ok(initialized);ack=true;}
   else if(request.method==='tools/list'){
     if(mode==='legacy')assert.ok(ack);
@@ -53,10 +55,16 @@ for await(const line of input){
   }else if(request.method==='prompts/get'){
     assert.ok(mode.startsWith('prompt-'));assert.equal(request.params.name,'fixture.prompt');assert.deepEqual(request.params.arguments,{topic:'AgentFlow'});send({id:request.id,result:{resultType:'complete',messages:[{role:'user',content:{type:'text',text:'Actual MCP prompt'}}]}});
   }else if(request.method==='tools/call'){
-    assert.equal(called,false,'Native operation must dispatch only once');called=true;callId=request.id;
+    calls++;assert.ok(calls<=2,'Native operation exceeded the bounded continuation rounds');callId=request.id;if(calls===1)firstCallId=request.id;
     assert.equal(request.params.name,'fixture.write');
     assert.ok(line.includes('1.00000000000000000001'),'Exact approved decimal token must reach the actual peer');
     if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    if(mode==='input-required-roots'&&calls===1){send({id:request.id,result:{resultType:'input_required',inputRequests:{workspace:{method:'roots/list',params:{}}},requestState:'roots-phase-1'}});continue;}
+    if(mode==='input-required-roots'){
+      assert.notEqual(request.id,firstCallId,'Every MCP continuation retry must use a fresh request ID');
+      assert.equal(request.params.requestState,'roots-phase-1','Opaque MCP requestState must be echoed on retry');
+      assert.deepEqual(request.params.inputResponses,{workspace:{roots:[{uri:pathToFileURL(path.dirname(file)).href,name:path.basename(path.dirname(file))}]}},'The response must contain only the admitted active workspace root');
+    }
     if(mode==='input-required'){
       send({id:request.id,result:{resultType:'input_required',inputRequests:{confirm:{method:'elicitation/create',params:{mode:'form',message:'Confirm the planned fixture action',requestedSchema:{type:'object',properties:{approved:{type:'boolean'}},required:['approved']}}}},requestState:'opaque-fixture-state'}});
       continue;
@@ -72,4 +80,4 @@ for await(const line of input){
   else throw new Error('Unexpected fixture effect method');
 }
 if(subscriptionOpened)fs.writeFileSync(marker+'.subscription-closed','peer observed listener EOF');
-if(called && (mode==='timeout' || mode==='cancel'))assert.ok(cancelled,'Owner must attempt cancellation after interrupted dispatched effect');
+if(calls===1 && (mode==='timeout' || mode==='cancel'))assert.ok(cancelled,'Owner must attempt cancellation after interrupted dispatched effect');

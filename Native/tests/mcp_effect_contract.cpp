@@ -130,6 +130,12 @@ int main(int argc,char** argv){
                 require(contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"An unhandled MCP continuation must never fabricate completion or replay the tool effect");store.transition(mode,RunState::running,RunState::failed).get();
             }
             {
+                const std::string mode="input-required-roots";const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);const auto proposal=proposed(store,mode);
+                require(proposal.state==OperationState::awaiting_approval&&contents(workspace/"effect.txt").empty(),"An automatically satisfiable MCP roots request must remain behind the original controller approval");
+                store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();const auto result=Json::parse(task.result.get());const auto operation=store.operation(mode).get();
+                require(operation.state==OperationState::succeeded&&result["acknowledged_by_peer"]==true&&contents(workspace/"effect.txt")=="actual native MCP effect\n","The approved MCP operation must resume only after replying with the exact admitted root and receiving a final result");store.transition(mode,RunState::running,RunState::completed).get();
+            }
+            {
                 const std::string mode="catalogue-changed-after-approval";const auto workspace=root(mode);auto invalidated=std::make_shared<std::atomic<bool>>(false);start(store,mode);Task task(store,argv,workspace,mode,mode,"normal",R"({"body":"must not dispatch","decimal":1})",{},invalidated);const auto proposal=proposed(store,mode);
                 require(proposal.state==OperationState::awaiting_approval&&contents(workspace/"effect.txt").empty(),"MCP effect must remain gated while approval is pending");invalidated->store(true,std::memory_order_release);store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpCatalogueChanged>([&]{task.result.get();});
                 const auto retired=store.operation(mode).get();require(retired.state==OperationState::failed&&Json::parse(retired.result_json)["reason"]=="mcp_catalogue_changed_before_dispatch"&&contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"A catalogue change during approval must durably retire the operation without invoking or replaying the peer effect");store.transition(mode,RunState::running,RunState::failed).get();

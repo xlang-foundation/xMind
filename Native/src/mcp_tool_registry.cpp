@@ -29,6 +29,15 @@ std::string prompt_schema(const Json& prompt){
     if(prompt.contains("arguments"))for(const auto& argument:prompt["arguments"]){Json property={{"type","string"}};if(argument.contains("description"))property["description"]=argument["description"];properties[argument.at("name").get<std::string>()]=std::move(property);if(argument.value("required",false))required.push_back(argument.at("name"));}
     return Json{{"type","object"},{"properties",std::move(properties)},{"required",std::move(required)},{"additionalProperties",false}}.dump();
 }
+std::string file_uri(std::string path){
+    std::replace(path.begin(),path.end(),'\\','/');std::string uri;
+    if(path.size()>=3&&path[1]==':'&&path[2]=='/')uri="file:///"+path;
+    else if(path.starts_with("//"))uri="file:"+path;
+    else uri="file://"+(path.starts_with('/')?path:"/"+path);
+    constexpr char hex[]="0123456789ABCDEF";std::string encoded;encoded.reserve(uri.size());
+    for(const auto byte:uri){const auto c=static_cast<unsigned char>(byte);if((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='-'||c=='_'||c=='.'||c=='~'||c=='/'||c==':' )encoded.push_back(static_cast<char>(c));else{encoded.push_back('%');encoded.push_back(hex[c>>4]);encoded.push_back(hex[c&15]);}}
+    return encoded;
+}
 }
 struct McpToolRegistry::Impl {
     struct Entry {
@@ -145,7 +154,13 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         throw McpCatalogueChanged("MCP catalogue changed before dispatch; no effect occurred");
     }
     McpToolReply reply;McpReadOnlyReply readonly;
-    try {if(entry.kind==EntryKind::tool)reply=state.client.call_tool(entry.peer_name,approved,deadline,cancel);else if(entry.kind==EntryKind::resource)readonly=state.client.read_resource(entry.resource_uri,deadline,cancel);else readonly=state.client.get_prompt(entry.peer_name,approved,deadline,cancel);}
+    const McpInputFulfillment fulfill_input=[&](std::string_view raw)->std::optional<std::string>{
+        const auto request=Json::parse(raw);if(!request.is_object()||!request.contains("method")||!request["method"].is_string())throw McpProtocolError("Invalid embedded MCP input request");
+        if(request["method"]!="roots/list")return std::nullopt;
+        const auto root=state.workspace.root_path();const auto slash=root.find_last_of("/\\");const auto name=slash==std::string::npos?root:root.substr(slash+1);
+        return Json{{"roots",Json::array({Json{{"uri",file_uri(root)},{"name",name}}})}}.dump();
+    };
+    try {if(entry.kind==EntryKind::tool)reply=state.client.call_tool(entry.peer_name,approved,deadline,cancel,fulfill_input);else if(entry.kind==EntryKind::resource)readonly=state.client.read_resource(entry.resource_uri,deadline,cancel);else readonly=state.client.get_prompt(entry.peer_name,approved,deadline,cancel);}
     catch(const McpDispatchFailure& failure) {
         if(entry.kind!=EntryKind::tool){finish(OperationState::failed,Json{{"reason","mcp_read_failed"},{"request_id",failure.request_id}}.dump());throw McpReadFailed("MCP read did not complete; no result was exposed");}
         finish(failure.possibly_sent?OperationState::uncertain:OperationState::failed,Json{{"reason",failure.possibly_sent?"mcp_dispatch_outcome_unknown":"mcp_not_dispatched"},{"request_id",failure.request_id},{"response_json",failure.response_json}}.dump());
