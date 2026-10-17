@@ -42,6 +42,62 @@
     "decision_actor": "trusted-process-profile:xlang3",
     "operation_state": "succeeded"
   },
+  "dynamic_plan": {
+    "root_run_id": "e7dd74981daedeb9ecf7100266af9c15",
+    "plan_id": "56f19e3255c595d155fc255e8f53ebe3",
+    "final_state": "completed",
+    "nodes": [
+      {
+        "id": "edit_smoke",
+        "type": "agent",
+        "preset": "workspace.coding",
+        "child_run_id": "ba01cef7d6f3da6f6e8354a1bbf38f6c",
+        "operation_id": "3e72ab7a50f7b764132fbb3faec07fa7",
+        "reviewed_in": "VS Code xMind sidebar operation card with exact Before/After content",
+        "decision_control": "Allow edit",
+        "decision_actor": "local-owner",
+        "state": "completed",
+        "effect_state": "succeeded",
+        "change": "Changed only the return string to xMind VS Code dynamic plan works",
+        "content_sha256": "aeb703b4f310a3d8bc9dc361e3738e27116147f4206affa7809e3bd23330621f"
+      },
+      {
+        "id": "run_smoke",
+        "type": "tool",
+        "tool": "run_process",
+        "depends_on": [{"task": "edit_smoke", "require": "success"}],
+        "child_run_id": "ff0a772cc942264703ab2d43b4595c64",
+        "operation_id": "a1bda8c429950ffe20dfa579cc0ddd57",
+        "profile": "xlang3",
+        "profile_arguments": ["xmind_vscode_coding_smoke.py"],
+        "working_directory": ".",
+        "exit_code": 0,
+        "elapsed_ms": 110,
+        "stdout": "xMind VS Code dynamic plan works\r\n",
+        "stderr_bytes": 0,
+        "process_tree_retired": true,
+        "state": "completed",
+        "effect_state": "succeeded"
+      }
+    ],
+    "ui_refresh": {
+      "before_client_sha256": "B5F696620EEB0BEB076A3B6F841CBB8C5CBDB483D5465EDA7A6E129BD5B77D4C",
+      "before_status": "Invalid deterministic planning tool despite native plan.call.accepted and both plan nodes completing",
+      "updated_client_source": "D:/CantorAI2026/xMind/extensions/vscode/client.js",
+      "updated_client_sha256": "FA0B74EB3B4EC21AE9D37B2037170198429E0EC9FDC281A4469517F58CB8FB5B",
+      "reload_command": "Developer: Reload Window",
+      "after_status": "The restored VS Code sidebar rendered the completed dynamic plan and both node results without Invalid deterministic planning tool."
+    }
+  },
+  "dynamic_plan_restoration": {
+    "run_id": "8a3a3241752a30a3fd0cf71215ad6674",
+    "operation_id": "82a4f70ee5daeea3ad233b72a05b0ad6",
+    "reviewed_in": "VS Code xMind sidebar operation card, with exact Before/After content visible",
+    "decision_control": "Allow edit",
+    "decision_actor": "local-owner",
+    "operation_state": "succeeded",
+    "restored_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84"
+  },
   "filesystem_verification": {
     "final_file_exists": true,
     "original_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84",

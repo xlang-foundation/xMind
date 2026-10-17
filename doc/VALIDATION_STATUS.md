@@ -98,6 +98,19 @@ browser and verifies the combined edit/run/restore path in VS Code. Exact runs,
 operation IDs, command, hashes, and scope are in the
 [VS Code sidebar evidence](evidence/vscode-sidebar-approval-live-20261017.json).
 
+The same extension host also completed a native two-node plan: a
+`workspace.coding` child proposed the focused edit, its `replace_file` operation
+was reviewed and approved in the sidebar, and a dependent `run_process` node
+ran through the trusted xlang3 profile. It exited 0 with the changed string.
+The old host bundle falsely reported `Invalid deterministic planning tool`
+because it rejected registered process nodes. After replacing its stale
+`client.js` with the current committed asset and reloading the window, the
+completed plan and both node results rendered without that error. The fixture
+was then restored with the sidebar approval and its original hash verified.
+This is live VS Code dynamic-plan coding acceptance for one bounded fixture,
+not general reliability or release-package acceptance; details are in the
+[same evidence record](evidence/vscode-sidebar-approval-live-20261017.json).
+
 ## Exact pinned xlang3 main Release gate — 2026-10-17
 
 Built xMind Release at source commit `2383376` against the exact xlang3 main
