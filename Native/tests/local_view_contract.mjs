@@ -5,6 +5,7 @@
 // fixtures; no live provider, installed editor or release acceptance is claimed.
 import fs from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import cp from 'node:child_process';import assert from 'node:assert/strict';import {createHash} from 'node:crypto';
 import {stageNativeRuntime} from '../../extensions/vscode/scripts/package-native-runtime.mjs';
+import {findPythonStdlibLicense} from './python-stdlib-license.mjs';
 import {existsSync} from 'node:fs';
 import {exerciseNativeSidebar} from './native_sidebar_subscription.mjs';
 const [program,dll,modules,stdlib]=process.argv.slice(2);assert.ok(stdlib);
@@ -15,7 +16,7 @@ for(const[name,source]of [['xmind.exe',program],['xlang3_runtime.dll',dll],['xla
 const notice=Buffer.from('Synthetic native profile contract provenance and notice. Not a release package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);files['licenses/NOTICE.txt']=sha(notice);
 const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
 cp.execFileSync(process.execPath,[new URL("../../views/browser/build.mjs",import.meta.url).pathname.slice(1),path.join(base,"browser-assets")],{windowsHide:true,stdio:"ignore"});
-await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:sha(source),stdlibSource:stdlib,stdlibLicense:await fs.access(path.join(path.dirname(stdlib),'LICENSE')).then(()=>path.join(path.dirname(stdlib),'LICENSE'),()=>path.join(path.dirname(stdlib),'licenses','Python-STDLIB-LICENSE')),out:runtime});
+await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:sha(source),stdlibSource:stdlib,stdlibLicense:await findPythonStdlibLicense(stdlib),out:runtime});
 const exe=path.join(runtime,'xmind.exe'),env={...process.env};for(const key of Object.keys(env))if(key==='XMIND_AUTH_TOKEN'||key==='XMIND_API_KEY'||key.startsWith('XMIND_UI_'))delete env[key];await fs.writeFile(processConfig,JSON.stringify({profiles:[{id:'fixture-node',executable:process.execPath,prefix_arguments:['--version'],max_timeout_ms:5000}]}));const pids=new Set();let passed=false;const managers=[],observationAborts=[];let browser;
 function invoke(args,{input='',root=profiles,cwd=workspace}={}){return new Promise((yes,no)=>{const child=cp.spawn(exe,['--profile-root',root,...args],{cwd,env,windowsHide:true});let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);child.once('error',no);const timer=setTimeout(()=>child.kill(),120000);child.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal,stdout,stderr});});child.stdin.end(input);});}
 async function command(...args){const result=await invoke(args);assert.equal(result.code,0,result.stderr);assert.equal(result.signal,null);return JSON.parse(result.stdout);}

@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash,randomBytes} from 'node:crypto';
 import {stageNativeRuntime} from '../../extensions/vscode/scripts/package-native-runtime.mjs';
+import {findPythonStdlibLicense} from './python-stdlib-license.mjs';
 import {createBrowserServer} from '../../views/browser/server.mjs';
 
 const [program,dll,modules,stdlib]=process.argv.slice(2);
@@ -47,7 +48,7 @@ try{
  files['licenses/NOTICE.txt']=createHash('sha256').update(notice).digest('hex');
  const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));
  const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
- await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:createHash('sha256').update(source).digest('hex'),stdlibSource:stdlib,stdlibLicense:await fs.access(path.join(path.dirname(stdlib),'LICENSE')).then(()=>path.join(path.dirname(stdlib),'LICENSE'),()=>path.join(path.dirname(stdlib),'licenses','Python-STDLIB-LICENSE')),out:runtime});
+ await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:createHash('sha256').update(source).digest('hex'),stdlibSource:stdlib,stdlibLicense:await findPythonStdlibLicense(stdlib),out:runtime});
  cp.execFileSync(process.execPath,[new URL('../../views/browser/build.mjs',import.meta.url).pathname.slice(1),assets],{windowsHide:true,stdio:'ignore'});
  const exe=path.join(runtime,'xmind.exe'),languageServers=path.join(base,'language-servers.json');await fs.writeFile(languageServers,JSON.stringify({profiles:[{id:'fixture-lsp',executable:exe,language_id:'fixture',extensions:['.txt'],request_timeout_ms:1000}]}));const seededProfile=await profilePid(exe,profiles,existing,languageServers,yaml);
  await fs.writeFile(yaml,'version: 1\nprofiles:\n  openai:\n    route: openai.responses\n    api_key: synthetic-openai-key-never-sent\n  claude:\n    route: anthropic.messages\n    api_key: synthetic-claude-key-never-sent\n');
