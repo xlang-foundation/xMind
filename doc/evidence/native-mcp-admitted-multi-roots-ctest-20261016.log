@@ -1,0 +1,425 @@
+Start testing: Oct 16 18:42 Pacific Daylight Time
+----------------------------------------------------------
+6/146 Testing: native_mcp_wire_contract
+6/146 Test: native_mcp_wire_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_wire_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_wire_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP wire codec, HTTP metadata and incremental JSON/SSE decoding passed bounded fixtures; no subprocess, network, remote tool or complete MCP support claimed
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_wire_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_mcp_wire_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+32/146 Testing: native_mcp_resource_route_contract
+32/146 Test: native_mcp_resource_route_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_resource_route_contract.exe" "D:/CantorAI2026/xMind/build/a2a-native/mcp-resource-route-contract.sqlite" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_resource_route_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP catalog contract passed native schema, query rejection, foreign-route rejection and bearer authentication.
+<end of output>
+Test time =   0.41 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_resource_route_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_mcp_resource_route_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/146 Testing: native_dynamic_plan_mcp_contract
+35/146 Test: native_dynamic_plan_mcp_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_mcp_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_dynamic_plan_mcp_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_dynamic_plan_mcp_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native dynamic plan contract passed for coding-child MCP effects, direct approved MCP tool/resource/prompt nodes, process and A2A nodes, dependent native reads, denial/cancellation, bounded automatic stream recovery, missing-cursor uncertainty, binding drift and uncertain effect recovery. Provider/credentials/peers are synthetic; native process, files, remote approvals, journals and embedded xlang3 SQLite are actual; no upstream SDK/live-provider claim.
+<end of output>
+Test time =  10.08 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_mcp_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_dynamic_plan_mcp_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/146 Testing: native_graph_mcp_contract
+46/146 Test: native_graph_mcp_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_graph_mcp_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_graph_mcp_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph MCP contract passed actual owned peer file writes, real GraphRunner/GraphService and embedded-xlang3 SQLite: exact enrollment/approval, raw literal precision, typed human references and pause/reopen, dependent native read, denied/cancelled/invalid/drift/stale paths, serialized root claims, lost-reply uncertainty, acknowledged output bounds, journal fail-stop and quarantine without replay. Peer descriptors/replies are synthetic; no live model, UI or independent peer acknowledgement verification claimed.
+<end of output>
+Test time =   6.47 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_graph_mcp_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+47/146 Testing: native_graph_mcp_http_contract
+47/146 Test: native_graph_mcp_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_http_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_graph_mcp_http_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph MCP HTTP/CLI passed offline alias discovery, no-model graph admission, paused SQLite reopen, exact decimal proposal/wire, controller-approved actual external write/dependent read, view history/events/cursor replay, denial/cancellation without tool dispatch, and stale connector inspection/input rejection/cancellation. MCP protocol replies are synthetic; no live model or rendered IDE acceptance.
+<end of output>
+Test time =   2.71 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_http_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_graph_mcp_http_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+48/146 Testing: native_graph_mcp_http_subscription_contract
+48/146 Test: native_graph_mcp_http_subscription_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_http_subscription_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_graph_mcp_http_subscription_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph HTTP MCP subscription contract passed: unexpected listener completion invalidates the pinned alias, retires any approved-but-undispatched operation, and closes the listener before the graph child fails. No peer tool effect is sent.
+<end of output>
+Test time =   0.67 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_http_subscription_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_graph_mcp_http_subscription_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+61/146 Testing: native_mcp_configuration_contract
+61/146 Test: native_mcp_configuration_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_configuration_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_configuration_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native stdio/HTTP configuration passed embedded-xlang3 persistence, backend revisions, encrypted endpoint/command purpose binding, invalid mixed/plaintext/URL/scope rejection, exact replacement preservation, reopen and retired identities. No peer/model/UI activation claimed
+<end of output>
+Test time =   0.24 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_configuration_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_mcp_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+62/146 Testing: native_mcp_oauth_credentials_contract
+62/146 Test: native_mcp_oauth_credentials_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_credentials_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_credentials_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native OAuth grant storage passed actual xlang3 SQLite encryption/reopen, atomic snapshot/rotation/rollback, resource/issuer/client/server binding, expiry/clock-rollback and factory pre-connect rejection, malformed/ciphertext relocation rejection and retired identity checks. Synthetic tokens; no trusted HTTPS login, refresh/revocation request or UI setup verified
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_credentials_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_mcp_oauth_credentials_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+63/146 Testing: native_mcp_oauth_refresh_storage_contract
+63/146 Test: native_mcp_oauth_refresh_storage_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_refresh_storage_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_refresh_storage_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native durable refresh storage passed actual xlang3 SQLite exclusive concurrent claims, no private snapshot on duplicate identity, dispatch retirement, generic credential and quiescence fences, exact configuration checks, complete ciphertext/receipt atomic rollback/publication, scope restriction, refresh retention, corruption rejection and new-generation prepared cancellation/dispatched uncertainty without replay. Synthetic grants; no network refresh, automatic renewal or client recovery verified
+Retained synthetic refresh fixture: C:\Users\shaw9\AppData\Local\Temp\xmind-durable-refresh-1994457086
+<end of output>
+Test time =   0.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_refresh_storage_contract" end time: Oct 16 18:42 Pacific Daylight Time
+"native_mcp_oauth_refresh_storage_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+64/146 Testing: native_mcp_oauth_service_contract
+64/146 Test: native_mcp_oauth_service_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_service_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_service_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib" "C:/Program Files/Git/usr/bin/openssl.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_service_contract" start time: Oct 16 18:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production native OAuth service passed actual asynchronous TLS-negative failure, request identity/CAS/terminal cancellation, existing encrypted grant status, native HTTP and origin-bound View authentication, actual browser adapter/shared client/controller setup and unified native console setup/watch/status/cancel, forbidden destinations/query/duplicate fields and zero untrusted-server HTTP dispatch. No trusted HTTPS login, positive token exchange, browser launch or installed/rendered UI acceptance verified.
+<end of output>
+Test time =  16.49 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_service_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_oauth_service_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+65/146 Testing: native_mcp_authorization_cli_contract
+65/146 Test: native_mcp_authorization_cli_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_authorization_cli_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_authorization_cli_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native unified console MCP commands passed exact authenticated CAS admission, generated/published request identity, status/cancellation/terminal non-dispatch, interactive detach, bounded observation and private/duplicate/foreign/unsafe-link rejection against an independent synthetic HTTP peer. No real OAuth login or browser launch verified.
+<end of output>
+Test time =   1.80 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_authorization_cli_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_authorization_cli_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+66/146 Testing: native_mcp_oauth_renewal_negative_contract
+66/146 Test: native_mcp_oauth_renewal_negative_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_renewal_negative.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_renewal_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib" "C:/Program Files/Git/usr/bin/openssl.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_renewal_negative_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native renewal service passed TLS-negative cancellation before dispatch, exact authenticated HTTP admission, durable duplicate observation and encrypted old-grant/receipt reopen. No trusted exchange verified.
+<end of output>
+Test time =  16.98 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_renewal_negative_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_oauth_renewal_negative_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+67/146 Testing: native_mcp_oauth_trusted_peer_contract
+67/146 Test: native_mcp_oauth_trusted_peer_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_trusted_peer_contract.mjs" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_trusted_peer_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.
+<end of output>
+Test time =   0.34 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_trusted_peer_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_oauth_trusted_peer_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+69/146 Testing: native_mcp_stdio_contract
+69/146 Test: native_mcp_stdio_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_stdio_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_stdio_peer.mjs" "D:/CantorAI2026/xMind/Native"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_stdio_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP stdio transport passed actual independent Node pipe/process fixtures, environment isolation, quoting, stderr draining, EOF, stalled-write timeout/cancellation, output bounds and owned descendant cleanup. No model/tool effect or full MCP integration claimed
+<end of output>
+Test time =   3.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_stdio_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_stdio_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+70/146 Testing: native_mcp_handshake_contract
+70/146 Test: native_mcp_handshake_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_handshake_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_handshake_peer.mjs" "D:/CantorAI2026/xMind/Native"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_handshake_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP negotiation passed actual independent stdio peers: modern discovery, legacy error/timeout fallback, retired late probe, acknowledgement ordering, post-connect metadata and unsupported/error rejection. No model/tool effect or full MCP integration claimed
+<end of output>
+Test time =   0.76 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_handshake_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_handshake_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+71/146 Testing: native_mcp_client_contract
+71/146 Test: native_mcp_client_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_client_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_client_peer.mjs" "D:/CantorAI2026/xMind/Native"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_client_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP stdio owner passed independent real subprocess catalogues, pagination, legacy ping/unsupported-method handling, bounded notifications, malformed results, cancellation/timeout/EOF and no reconnect/replay. No tool execution, schema validation or full MCP integration claimed
+<end of output>
+Test time =   1.36 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_client_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_client_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+72/146 Testing: native_mcp_http_readonly_contract
+72/146 Test: native_mcp_http_readonly_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_http_readonly_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_http_readonly_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_http_readonly_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP Streamable HTTP passed resources/resource templates/prompts, modern subscriptions/listen, SSE updates and graceful closure. No external service or credential was used.
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_http_readonly_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_http_readonly_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+73/146 Testing: native_mcp_http_fallback_contract
+73/146 Test: native_mcp_http_fallback_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_http_fallback_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_http_fallback_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_http_fallback_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+empty-404: MCP HTTP discovery fallback passed for fallback
+plain-405: MCP HTTP discovery fallback passed for fallback
+unknown-json-error: MCP HTTP discovery fallback passed for fallback
+modern-method-not-found: MCP HTTP discovery fallback passed for reject
+modern-header-error: MCP HTTP discovery fallback passed for reject
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_http_fallback_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_http_fallback_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+75/146 Testing: native_mcp_effect_contract
+75/146 Test: native_mcp_effect_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/sdk/http_effect_host.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_effect_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_effect_peer.mjs" "D:/CantorAI2026/xMind/Native" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_effect_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+Native approval-backed MCP registry passed actual subprocess and modern HTTP SDK file effects with embedded-xlang3 journal: approval, denial, duplicate rejection, JSON/SSE acknowledgement, lost replies and restart uncertainty. HTTP host separately verifies peer disk bytes. No live model or rendered UI acceptance claimed
+Official modern HTTP SDK independently verified approved JSON/SSE effects, denied zero dispatch and one lost-reply effect without replay. No model/UI acceptance claimed.
+<end of output>
+Test time =  12.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_effect_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_effect_contract" time elapsed: 00:00:12
+----------------------------------------------------------
+
+102/146 Testing: native_mcp_oauth_callback_contract
+102/146 Test: native_mcp_oauth_callback_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_callback_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_callback_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_callback_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native loopback callback passed valid; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed fixed; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed bad; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed duplicate; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed missing-issuer; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed encoded-target; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed denial; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed pre-cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed timeout; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed owner-expiry; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed binding; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed deadline; exclusive binding and socket retirement checked while the native process stayed alive.
+Synthetic browser redirects exercised the production native listener/authorization owner. No trusted HTTPS login, token exchange, persistence or product UI integration verified.
+<end of output>
+Test time =   0.92 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_callback_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_oauth_callback_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+103/146 Testing: native_mcp_oauth_refresh_contract
+103/146 Test: native_mcp_oauth_refresh_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_refresh_peer_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_oauth_refresh_contract.exe" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_oauth_refresh_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native refresh primitive passed independent form decoding, token rotation/retention and scope rejection, bound metadata, single-use cancellation/deadline and real untrusted HTTPS contact with zero HTTP dispatch. No trusted native refresh, durable grant publication, automatic refresh or UI acceptance.
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_refresh_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_oauth_refresh_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+109/146 Testing: native_agent_mcp_http_contract
+109/146 Test: native_agent_mcp_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_agent_mcp_http_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP agent/server/admin/CLI contract passed: encrypted configured environment, exact arguments, actual approved file effect, denial/cancellation, result continuation, persisted uncertainty without replay, and authenticated paginated resource discovery with credential-reflection suppression. Inference is synthetic.
+<end of output>
+Test time =   3.04 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_mcp_http_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_agent_mcp_http_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+110/146 Testing: native_agent_mcp_http_subscription_contract
+110/146 Test: native_agent_mcp_http_subscription_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_subscription_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_agent_mcp_http_subscription_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native HTTP MCP AgentRunner subscription lifecycle passed: list-change invalidation blocks stale aliases, refreshes the catalogue within the same run, and permits only the reconsidered approved effect. Notifications are bounded and sanitized; listener closure precedes terminal state.
+<end of output>
+Test time =   0.82 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_mcp_http_subscription_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_agent_mcp_http_subscription_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+111/146 Testing: native_mcp_sdk_modern_contract
+111/146 Test: native_mcp_sdk_modern_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib" "modern"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_sdk_modern_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Official MCP SDK tool contract passed: encrypted configured environment, selected protocol, exact arguments, actual approved file effect, denial/cancellation, result continuation and persisted uncertainty without replay. Inference is synthetic.
+<end of output>
+Test time =   3.67 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_sdk_modern_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_sdk_modern_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+112/146 Testing: native_mcp_sdk_legacy_contract
+112/146 Test: native_mcp_sdk_legacy_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/a2a-native/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib" "legacy"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_mcp_sdk_legacy_contract" start time: Oct 16 18:43 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Official MCP SDK tool contract passed: encrypted configured environment, selected protocol, exact arguments, actual approved file effect, denial/cancellation, result continuation and persisted uncertainty without replay. Inference is synthetic.
+<end of output>
+Test time =   2.94 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_sdk_legacy_contract" end time: Oct 16 18:43 Pacific Daylight Time
+"native_mcp_sdk_legacy_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Oct 16 18:43 Pacific Daylight Time

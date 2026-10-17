@@ -190,7 +190,8 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             catch(const Conflict&){throw McpCredentialUnavailable("Graph MCP credential binding is unavailable");}
             store_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",client->server().protocol_version},{"source","graph"}}.dump()).get();
             auto catalogue_invalidated=std::make_shared<std::atomic<bool>>(false);
-            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel,&private_credentials,catalogue_invalidated);
+            auto admitted_roots=workspace_tools?workspace_tools->folders():std::vector<WorkspaceToolFolder>{};
+            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel,&private_credentials,catalogue_invalidated,std::move(admitted_roots));
             const auto definitions=registry.definitions();
             store_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"source","graph"}}.dump()).get();
             if(std::none_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==name;}))return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_alias_unavailable"})").get();

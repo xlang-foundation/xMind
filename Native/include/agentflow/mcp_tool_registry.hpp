@@ -24,7 +24,8 @@ public:
     McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
         std::string config_id,std::int64_t config_revision,McpToolClient::Deadline deadline,
         std::stop_token cancel={},const std::vector<SecretBytes>* private_credentials=nullptr,
-        std::shared_ptr<std::atomic<bool>> catalogue_invalidated={});
+        std::shared_ptr<std::atomic<bool>> catalogue_invalidated={},
+        std::vector<WorkspaceToolFolder> admitted_roots={});
     ~McpToolRegistry();
     McpToolRegistry(const McpToolRegistry&)=delete;
     McpToolRegistry& operator=(const McpToolRegistry&)=delete;

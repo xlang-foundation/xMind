@@ -22,6 +22,24 @@ namespace {
 using Json=nlohmann::json;
 std::string identity(){std::random_device random;std::ostringstream result;result<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)result<<std::setw(8)<<random();return result.str();}
 std::int64_t now_ms(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
+std::vector<WorkspaceToolFolder> admitted_workspace_roots(PersistenceService& store,const std::string& owner,WorkspaceTools& workspace){
+    std::optional<WorkspaceMembershipSnapshot> snapshot;
+    for(const auto& event:store.events(owner).get())if(event.kind=="agent.workspace_membership"){
+        if(snapshot)throw ToolAccessDenied("Run contains duplicate workspace membership snapshots");
+        const auto value=Json::parse(event.json);
+        if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||
+            !value.contains("revision")||!value["revision"].is_number_integer()||!value.contains("folders")||
+            !value["folders"].is_array()||value["folders"].empty()||value["folders"].size()>256)
+            throw ToolAccessDenied("Saved workspace membership snapshot is invalid");
+        WorkspaceMembershipSnapshot parsed;parsed.workspace_id=value["workspace_id"].get<std::string>();parsed.revision=value["revision"].get<std::int64_t>();
+        for(const auto& folder:value["folders"]){if(!folder.is_object()||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string())throw ToolAccessDenied("Saved workspace folder binding is invalid");parsed.folders.push_back({folder["folder_id"].get<std::string>(),folder["root"].get<std::string>()});}
+        snapshot=std::move(parsed);
+    }
+    if(!snapshot)return {{workspace.identity(),workspace.root_path()}};
+    if(snapshot->workspace_id!=workspace.identity()||snapshot->folders.empty()||snapshot->folders.front().root!=workspace.root_path())
+        throw ToolAccessDenied("Saved workspace membership does not match the admitted primary folder");
+    WorkspaceToolSet verified(snapshot->workspace_id,snapshot->revision,snapshot->folders);return verified.folders();
+}
 bool terminal(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
 bool changed_process_precondition(const AgentSettings& settings){
     for(const auto& profile:settings.process_profiles)try{
@@ -104,7 +122,8 @@ Run execute_mcp_tool(PersistenceService& store,const std::string& child,const Dy
         store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
         std::vector<SecretBytes> private_credentials;
         auto client=connect_mcp_client(*server,store,budget->deadline(),cancel,&private_credentials);
-        McpToolRegistry registry(*client,store,workspace,server_id,revision,budget->deadline(),cancel,&private_credentials);
+        auto roots=admitted_workspace_roots(store,budget->root_id(),workspace);
+        McpToolRegistry registry(*client,store,workspace,server_id,revision,budget->deadline(),cancel,&private_credentials,{},std::move(roots));
         const auto bindings=Json::parse(registry.approval_bindings_json());const auto actual=std::find_if(bindings.begin(),bindings.end(),[&](const auto& item){return item.is_object()&&item.value("alias",std::string{})==definition.tool;});
         if(actual==bindings.end()||*actual!=binding)throw McpCatalogueChanged("Dynamic MCP catalogue differs from its accepted binding");
         if(!readonly)guidance.validate();

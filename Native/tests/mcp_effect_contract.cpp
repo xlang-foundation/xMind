@@ -47,11 +47,12 @@ Operation proposed(PersistenceService& store,const std::string& id){
 struct Task {
     std::stop_source cancel;std::promise<std::string> discovered_bindings;
     std::shared_future<std::string> bindings;std::future<std::string> result;
-    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={},std::shared_ptr<std::atomic<bool>> catalogue_invalidated={}):
-        bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root,catalogue_invalidated]{
+    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={},std::shared_ptr<std::atomic<bool>> catalogue_invalidated={},std::vector<WorkspaceToolFolder> admitted_roots={}):
+        bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root,catalogue_invalidated,admitted_roots=std::move(admitted_roots)]{
             const auto started=std::chrono::steady_clock::now();const char* phase="connect";
             const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
             WorkspaceTools workspace(root.string());McpStdioConfiguration client_config{argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}};std::vector<SecretBytes> private_credentials;
+            if(mode=="input-required-roots"&&admitted_roots.size()>1){client_config.arguments.emplace_back();for(std::size_t i=1;i<admitted_roots.size();++i)client_config.arguments.push_back(admitted_roots[i].root);}
             if(mode=="reflect-credential"||mode=="reflect-schema-credential"||mode=="tool-secret-response"){
                 const std::string fixture_key="synthetic-mcp-credential-fixture";client_config.arguments.push_back("credential-fixture");client_config.environment.push_back({"MCP_TEST_KEY",fixture_key});
                 private_credentials.emplace_back(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(fixture_key.data()),fixture_key.size()));
@@ -61,7 +62,7 @@ struct Task {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
                 phase="catalogue";
                 McpToolClient& owned_peer=client;
-                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token(),&private_credentials,catalogue_invalidated);
+                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token(),&private_credentials,catalogue_invalidated,std::move(admitted_roots));
                 const auto definitions=registry.definitions();const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);
                 const bool reading=mode.starts_with("resource-")||mode.starts_with("prompt-");const auto desired_kind=mode.starts_with("resource-")?"resource":mode.starts_with("prompt-")?"prompt":"tool";
                 require(definitions.size()==(reading?3u:1u),"Native registry must expose every advertised MCP kind with bounded aliases");
@@ -130,7 +131,9 @@ int main(int argc,char** argv){
                 require(contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"An unhandled MCP continuation must never fabricate completion or replay the tool effect");store.transition(mode,RunState::running,RunState::failed).get();
             }
             {
-                const std::string mode="input-required-roots";const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);const auto proposal=proposed(store,mode);
+                const std::string mode="input-required-roots";const auto workspace=root(mode),attached=root(mode+"-attached");WorkspaceTools primary_tools(workspace.string()),attached_tools(attached.string());
+                std::vector<WorkspaceToolFolder> admitted_roots{{primary_tools.identity(),primary_tools.root_path()},{attached_tools.identity(),attached_tools.root_path()}};
+                start(store,mode);Task task(store,argv,workspace,mode,mode,mode,R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",{},{},admitted_roots);const auto proposal=proposed(store,mode);
                 require(proposal.state==OperationState::awaiting_approval&&contents(workspace/"effect.txt").empty(),"An automatically satisfiable MCP roots request must remain behind the original controller approval");
                 store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();const auto result=Json::parse(task.result.get());const auto operation=store.operation(mode).get();
                 require(operation.state==OperationState::succeeded&&result["acknowledged_by_peer"]==true&&contents(workspace/"effect.txt")=="actual native MCP effect\n","The approved MCP operation must resume only after replying with the exact admitted root and receiving a final result");store.transition(mode,RunState::running,RunState::completed).get();

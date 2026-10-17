@@ -44,18 +44,22 @@ and the subsequent full subset passed. [Machine-readable evidence](evidence/nati
 [failed repeat diagnostic](evidence/native-mcp-input-required-ctest-flaky-20261016.log).
 
 2026-10-16 workspace-root continuation: stdio and Streamable HTTP clients now
-answer a bounded `roots/list` request from the admitted active workspace,
+answer a bounded `roots/list` request from the admitted workspace membership,
 echo the opaque `requestState`, and retry the same operation with a fresh MCP
-request ID. The reply includes only that workspace root. Unsupported requests,
-including elicitation and sampling, remain unresolved and are never treated as
-success or replayed. A constructor override had been dropping the root
-capability from the negotiated client identity; the client constructors now
-preserve and advertise it. Release build passed; focused wire, stdio, HTTP,
-client and effect contracts pass **5/5**, and the broader MCP/agent/graph set
-passes **25/25**. This adds bounded automatic handling for workspace roots; it
-does not implement human input, durable restartable continuation or general
-multi-round-trip handling. [Build and test evidence](evidence/native-mcp-input-required-roots-20261016.json),
-[broad CTest output](evidence/native-mcp-input-required-roots-ctest-20261016.log).
+request ID. The response contains every verified folder in the current
+membership, including attached folders, while keeping opaque folder IDs
+private. Agent, graph and dynamic-plan MCP paths pass the exact admitted folder
+snapshot to the registry; the registry reopens each root and checks that the
+primary folder still matches. Unsupported requests, including elicitation and
+sampling, remain unresolved and are never treated as success or replayed. A
+constructor override had been dropping the root capability from the negotiated
+client identity; the client constructors now preserve and advertise it. The
+Release effect contract uses a real stdio peer and two temporary roots to check
+the complete `inputResponses` reply. The full Release build passed, the focused
+effect contract passed **1/1**, and the broader MCP/agent/graph set passed
+**25/25**. Human input, durable restartable continuation and general
+multi-round-trip handling remain open. [Multi-root evidence](evidence/native-mcp-admitted-multi-roots-20261016.json),
+[CTest output](evidence/native-mcp-admitted-multi-roots-ctest-20261016.log).
 
 The native xMind route is `GET /v1/mcp/resources`; it returns xMind's server-scoped resource and prompt-template catalog. Clients cannot select peer pagination cursors. Resource content is fetched only through explicit MCP resource-read calls and their approval flow. The API intentionally does not expose OpenCode-shaped resource routes or payloads. The actual-server catalog contract verifies native schema, query rejection and bearer authentication. Full live-peer catalog rendering in the browser and VS Code remains open.
 

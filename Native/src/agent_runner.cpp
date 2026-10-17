@@ -353,7 +353,8 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     for(const auto& server:settings_.mcp_servers){
         if(!server.enabled)continue;check();
         check();McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,deadline,token,runtime.private_credentials.get());
-        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token,runtime.private_credentials.get());
+        auto roots=settings_.workspace_membership_snapshot?settings_.workspace_membership_snapshot().folders:std::vector<WorkspaceToolFolder>{};
+        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token,runtime.private_credentials.get(),std::shared_ptr<std::atomic<bool>>{},std::move(roots));
         for(const auto& definition:runtime.registry->definitions()){
             if(trusted.tools.size()>=64||!aliases.insert(definition.name).second)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits or has an alias collision");
             trusted.tools.push_back(definition);
@@ -623,7 +624,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
             McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token,runtime.private_credentials.get());
             persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
-            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get(),runtime.catalogue_invalidated);
+            auto roots=run_workspace_tools?run_workspace_tools->folders():std::vector<WorkspaceToolFolder>{};
+            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get(),runtime.catalogue_invalidated,std::move(roots));
             const auto definitions=runtime.registry->definitions();
             for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
             const auto bindings=Json::parse(runtime.registry->approval_bindings_json());

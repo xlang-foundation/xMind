@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-16",
+  "scope": "MCP roots/list continuation over the complete admitted workspace membership",
+  "implementation": {
+    "registry": "Reopens and validates every admitted folder, preserves the primary-root binding, and returns canonical file URIs with display names; opaque folder IDs are not disclosed.",
+    "call_sites": [
+      "AgentRunner run snapshot",
+      "AgentRunner idle-context snapshot",
+      "GraphRunner workspace tool set",
+      "Dynamic plan root-run membership event"
+    ]
+  },
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target ALL_BUILD --parallel 8",
+    "exit_code": 0
+  },
+  "focused_contract": {
+    "name": "native_mcp_effect_contract",
+    "assertion": "A real stdio peer requests roots/list and verifies that the continuation contains the primary and attached roots, with no unregistered roots.",
+    "passed": 1,
+    "total": 1,
+    "exit_code": 0
+  },
+  "mcp_agent_graph_contracts": {
+    "filter": "native_mcp_|native_agent_mcp|native_graph_mcp|native_dynamic_plan_mcp",
+    "passed": 25,
+    "total": 25,
+    "elapsed_seconds": 86.74,
+    "exit_code": 0,
+    "output": "native-mcp-admitted-multi-roots-ctest-20261016.log"
+  },
+  "remaining": "Human elicitation/sampling, durable restartable continuation, and general multi-round-trip handling are still incomplete."
+}

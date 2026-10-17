@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createInterface} from 'node:readline';
-const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createInterface({input:process.stdin});
+const [mode,file,marker,expectedCredential,...additionalRoots]=process.argv.slice(2),input=createInterface({input:process.stdin});
 if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
 let initialized=false,ack=false,calls=0,callId,firstCallId,cancelled=false,subscriptionOpened=false,subscriptionRequest;
 const readonly=mode.startsWith('resource-')||mode.startsWith('prompt-');
@@ -63,7 +63,8 @@ for await(const line of input){
     if(mode==='input-required-roots'){
       assert.notEqual(request.id,firstCallId,'Every MCP continuation retry must use a fresh request ID');
       assert.equal(request.params.requestState,'roots-phase-1','Opaque MCP requestState must be echoed on retry');
-      assert.deepEqual(request.params.inputResponses,{workspace:{roots:[{uri:pathToFileURL(path.dirname(file)).href,name:path.basename(path.dirname(file))}]}},'The response must contain only the admitted active workspace root');
+      const roots=[path.dirname(file),...additionalRoots].map(root=>({uri:pathToFileURL(root).href,name:path.basename(root)}));
+      assert.deepEqual(request.params.inputResponses,{workspace:{roots}},'The response must contain every admitted workspace folder and no unregistered roots');
     }
     if(mode==='input-required'){
       send({id:request.id,result:{resultType:'input_required',inputRequests:{confirm:{method:'elicitation/create',params:{mode:'form',message:'Confirm the planned fixture action',requestedSchema:{type:'object',properties:{approved:{type:'boolean'}},required:['approved']}}}},requestState:'opaque-fixture-state'}});

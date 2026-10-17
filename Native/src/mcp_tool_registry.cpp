@@ -48,9 +48,10 @@ struct McpToolRegistry::Impl {
     McpToolClient& client;PersistenceService& store;WorkspaceTools& workspace;
     const std::vector<SecretBytes>* private_credentials;
     std::shared_ptr<std::atomic<bool>> catalogue_invalidated;
+    std::vector<WorkspaceToolFolder> admitted_roots;
     std::string config_id,protocol_version;std::int64_t revision;
     std::map<std::string,Entry> entries;
-    Impl(McpToolClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version,const std::vector<SecretBytes>* credentials,std::shared_ptr<std::atomic<bool>> invalidated):client(peer),store(persistence),workspace(root),private_credentials(credentials),catalogue_invalidated(std::move(invalidated)),config_id(std::move(id)),revision(version) {}
+    Impl(McpToolClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version,const std::vector<SecretBytes>* credentials,std::shared_ptr<std::atomic<bool>> invalidated,std::vector<WorkspaceToolFolder> roots):client(peer),store(persistence),workspace(root),private_credentials(credentials),catalogue_invalidated(std::move(invalidated)),admitted_roots(std::move(roots)),config_id(std::move(id)),revision(version) {}
     Json approval_binding(const Entry& entry) const {
         if(entry.kind==EntryKind::tool)return {{"server_config_id",config_id},{"config_revision",revision},
             {"peer_tool",entry.peer_name},{"alias",entry.alias},{"catalogue_fingerprint",entry.fingerprint},
@@ -67,10 +68,16 @@ struct McpToolRegistry::Impl {
     }
 };
 McpToolRegistry::McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
-    std::string id,std::int64_t revision,McpToolClient::Deadline deadline,std::stop_token cancel,const std::vector<SecretBytes>* private_credentials,std::shared_ptr<std::atomic<bool>> catalogue_invalidated):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision,private_credentials,std::move(catalogue_invalidated))) {
+    std::string id,std::int64_t revision,McpToolClient::Deadline deadline,std::stop_token cancel,const std::vector<SecretBytes>* private_credentials,std::shared_ptr<std::atomic<bool>> catalogue_invalidated,std::vector<WorkspaceToolFolder> admitted_roots):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision,private_credentials,std::move(catalogue_invalidated),std::move(admitted_roots))) {
     auto& state=*impl_;
     if(state.config_id.empty() || state.config_id.size()>128 || state.config_id.find('\0')!=std::string::npos || revision<=0)throw std::invalid_argument("Invalid trusted MCP configuration identity");
     if(!client.ready())throw McpProtocolError("MCP discovery requires a ready owned client");
+    if(state.admitted_roots.empty())state.admitted_roots.push_back({workspace.identity(),workspace.root_path()});
+    // Re-open and identity-check every advertised folder. Membership IDs are
+    // opaque; the MCP peer sees only canonical file URIs and display names.
+    WorkspaceToolSet verified_roots(workspace.identity(),1,state.admitted_roots);
+    if(verified_roots.folders().front().folder_id!=workspace.identity()||verified_roots.folders().front().root!=workspace.root_path())
+        throw ToolAccessDenied("MCP roots do not match the admitted primary workspace folder");
     state.protocol_version=client.server().protocol_version;
     const auto capabilities=Json::parse(client.server().capabilities_json);
     std::set<std::string> identities;std::size_t bytes=0;
@@ -157,8 +164,11 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     const McpInputFulfillment fulfill_input=[&](std::string_view raw)->std::optional<std::string>{
         const auto request=Json::parse(raw);if(!request.is_object()||!request.contains("method")||!request["method"].is_string())throw McpProtocolError("Invalid embedded MCP input request");
         if(request["method"]!="roots/list")return std::nullopt;
-        const auto root=state.workspace.root_path();const auto slash=root.find_last_of("/\\");const auto name=slash==std::string::npos?root:root.substr(slash+1);
-        return Json{{"roots",Json::array({Json{{"uri",file_uri(root)},{"name",name}}})}}.dump();
+        auto roots=Json::array();for(const auto& folder:state.admitted_roots){
+            const auto slash=folder.root.find_last_of("/\\");const auto name=slash==std::string::npos?folder.root:folder.root.substr(slash+1);
+            roots.push_back({{"uri",file_uri(folder.root)},{"name",name}});
+        }
+        return Json{{"roots",std::move(roots)}}.dump();
     };
     try {if(entry.kind==EntryKind::tool)reply=state.client.call_tool(entry.peer_name,approved,deadline,cancel,fulfill_input);else if(entry.kind==EntryKind::resource)readonly=state.client.read_resource(entry.resource_uri,deadline,cancel);else readonly=state.client.get_prompt(entry.peer_name,approved,deadline,cancel);}
     catch(const McpDispatchFailure& failure) {
