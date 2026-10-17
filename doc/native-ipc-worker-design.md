@@ -122,6 +122,21 @@ against the exact runtime selected for xMind before production IPC admission.
 The existing probe returns endpoint process identity; endpoint discovery alone
 does not authenticate an xMind worker or grant a workspace capability.
 
+### Native C++ host API extension — 2026-10-17
+
+The xlang3 mainline SDK baseline above is historical: it includes the LRPC
+client and probe but has no supported C++ service-registration/listen API. The
+xMind-specific extension is now on
+[branch `xmind-cpp-lrpc-host`](https://github.com/CantorAI/xlang3/tree/xmind-cpp-lrpc-host)
+at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. It adds
+`X::Runtime::RegisterRemoteObject` and `X::Runtime::LrpcListen`, with a native
+C++ host/second-runtime contract and same-runtime value checks. The branch is
+not merged or pinned by xMind yet. Its exact build, hashes and smoke results
+are in [xlang3 C++ host evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
+This enables a C++-owned xlang3 LRPC endpoint; it does not solve the backend
+capability RPC, per-run authentication or execution-placement work described
+above.
+
 ## Integration boundary
 
 The backend launches its own `xmind worker` process and embeds xlang3 there.
