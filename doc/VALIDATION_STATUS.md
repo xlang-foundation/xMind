@@ -119,6 +119,10 @@ file operation and build also succeeded (37 modules, 789 ms). Both clients
 rendered the completed history, run state, model, supplied usage metrics and
 retained command output. Source hashes and run identities are recorded in the
 [paired acceptance evidence](evidence/live-coding-acceptance-20261016.json).
+The VS Code panel was also reloaded and checked at its narrow sidebar width:
+header controls wrap, the saved provider and model remain selectable, and the
+history has no horizontal scrollbar. The panel reconnected to TestProj and
+restored its saved run without another key prompt.
 This verifies one real Vue coding task in each client; it does not establish
 CLI coding acceptance, all-language behavior, or release-package certification.
 
