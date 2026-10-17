@@ -40,6 +40,12 @@ binary had not been produced (`ENOENT`); this is an incomplete-build result,
 not a failing graph assertion. D: had about 86 MB free at inspection. A full
 current-source native gate remains outstanding until the build can complete.
 
+Four complete Release binaries did remain in that isolated output. The A2A
+client, A2A SDK client, A2A agent registry and agent authority contracts passed
+**4/4** from current xMind source `b5c6cb8` against the xlang3 SDK compatibility
+branch. This selected subset does not replace the full gate or the missing
+graph context contract. [Exact CTest command and results](evidence/current-main-partial-native-contracts-20261017.json).
+
 ## Current-source native Release build and full CTest — 2026-10-17
 
 Built xMind Release serially in a fresh isolated directory at current source

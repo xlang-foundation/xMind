@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-17",
+  "source_revision": "b5c6cb8",
+  "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "scope": "Available current-source Release contract binaries from the interrupted isolated build",
+  "command": "ctest --test-dir D:/CantorAI2026/xMind/.agentflow/native-validation-current-20261017 -C Release --output-on-failure -R native_(a2a_client_contract|a2a_client_sdk_contract|a2a_agent_registry_contract|agent_authority_contract)",
+  "tests": [
+    {"name": "native_a2a_client_contract", "result": "passed"},
+    {"name": "native_a2a_client_sdk_contract", "result": "passed"},
+    {"name": "native_a2a_agent_registry_contract", "result": "passed"},
+    {"name": "native_agent_authority_contract", "result": "passed"}
+  ],
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "limitations": [
+    "This is a selected subset, not the full native Release gate.",
+    "The graph context contract binary was not produced by the interrupted build and was not run.",
+    "The binaries use the xlang3 compatibility SDK branch; release packaging and hosted CI are not covered."
+  ]
+}
