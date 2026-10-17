@@ -137,6 +137,14 @@ This enables a C++-owned xlang3 LRPC endpoint; it does not solve the backend
 capability RPC, per-run authentication or execution-placement work described
 above.
 
+An isolated xMind Release build at source `cab94b6` now links against that
+exact xlang3 branch runtime. `native_agent_runner_contract` passed (1/1), and
+`native_xlang3_shared_memory_worker_contract` passed (1/1) against the same
+runtime. This verifies existing AgentRunner contracts and the existing
+registered-xlang3-tool worker still work with the SDK extension; it does not
+test process-bound AgentRunner execution or make the xlang3 branch a release
+dependency. [Exact revisions, hashes and results](evidence/xmind-xlang3-cpp-host-integration-20261017.json).
+
 ## Integration boundary
 
 The backend launches its own `xmind worker` process and embeds xlang3 there.

@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-17",
+  "scope": "xMind Release integration against xlang3 native C++ LRPC host branch",
+  "xmind_source_revision": "cab94b6fb49c19d0f20d08c5092113ebcc8ef965",
+  "xlang3": {
+    "branch": "xmind-cpp-lrpc-host",
+    "revision": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "BEEC7E860B4A1E5088F28768275D2635988F14A494FE8973B66917C1791A4E47"
+  },
+  "build": {
+    "generator": "Visual Studio 18 2026",
+    "configuration": "Release",
+    "binary": "D:/CantorAI2026/xMind/.agentflow/xlang3-host-integration-20261017/Release/xmind.exe",
+    "xmind_sha256": "A7D1DEA32CBD704D4FC46CA4BE35BD3990C98EB8BC19E0BF83C1049F5E86E1C5",
+    "agent_runner_contract_sha256": "884BD8F26C223719F7A3D66B89157C370A90916A8273426EE8086FAA3CD9A91F"
+  },
+  "tests": [
+    {
+      "name": "native_agent_runner_contract",
+      "passed": 1,
+      "failed": 0,
+      "duration_seconds": 8.88
+    },
+    {
+      "name": "native_xlang3_shared_memory_worker_contract",
+      "passed": 1,
+      "failed": 0,
+      "duration_seconds": 1.14
+    }
+  ],
+  "limitations": [
+    "These contracts verify xMind Release compatibility with the branch SDK and preserve the existing xlang3 callable-worker path.",
+    "They do not exercise a process-bound AgentRunner or pin the branch as xMind's release dependency.",
+    "The rest of the full native Release gate was not run in this isolated integration build."
+  ]
+}
