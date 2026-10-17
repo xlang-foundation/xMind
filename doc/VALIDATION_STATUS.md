@@ -88,10 +88,14 @@ its exact before/after text and **Allow edit**, **Deny**, and **Compare changes*
 controls. The focused edit was approved with **Allow edit** in VS Code itself,
 then a second proposal restored the fixture through the same VS Code controls.
 The operation journal recorded both changes as successful; an independent
-filesystem check found the fixture restored to its original SHA-256. This
-closes the earlier question about whether the live VS Code approval flow needed
-the connected browser. The separate live coding acceptance above verifies
-xlang3 execution. Exact runs, operation IDs, hashes, and scope are in the
+filesystem check found the fixture restored to its original SHA-256. In the
+same VS Code session, xMind then ran the restored file with the pinned xlang3
+profile. It exited 0 with the expected stdout and no stderr; the process was
+retired and made no file changes. The command used the trusted xlang3 profile,
+so it did not require an extra per-command approval. This closes the earlier
+question about whether the live VS Code approval flow needed the connected
+browser and verifies the combined edit/run/restore path in VS Code. Exact runs,
+operation IDs, command, hashes, and scope are in the
 [VS Code sidebar evidence](evidence/vscode-sidebar-approval-live-20261017.json).
 
 ## Exact pinned xlang3 main Release gate — 2026-10-17

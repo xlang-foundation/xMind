@@ -1,6 +1,6 @@
 {
   "date": "2026-10-17",
-  "scope": "Live VS Code extension-host approval, file edit, and approved restoration",
+  "scope": "Live VS Code extension-host edit review, approval, xlang3 execution, and restoration",
   "workspace": "D:/CantorAI2026/TestProj",
   "window": "[Extension Development Host] xmind_vscode_coding_smoke.py - TestProj - Visual Studio Code",
   "session": "VS Code session",
@@ -27,6 +27,21 @@
     "decision_actor": "local-owner",
     "operation_state": "succeeded"
   },
+  "process_execution": {
+    "run_id": "6153a5968d2a5fddb254a9951002bd41",
+    "operation_id": "632bbfb80fce65edecf11f634abda786",
+    "executable": "D:/CantorAI/xlang3/build/Release/xlang3.exe",
+    "arguments": ["-B", "xmind_vscode_coding_smoke.py"],
+    "profile": "xlang3",
+    "working_directory": "D:/CantorAI2026/TestProj",
+    "exit_code": 0,
+    "stdout": "xMind VS Code coding works\r\n",
+    "stderr_bytes": 0,
+    "termination": "exited",
+    "process_tree_retired": true,
+    "decision_actor": "trusted-process-profile:xlang3",
+    "operation_state": "succeeded"
+  },
   "filesystem_verification": {
     "final_file_exists": true,
     "original_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84",
@@ -34,9 +49,8 @@
     "restored_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84",
     "final_content": "def main():\n    return 'xMind VS Code coding works'\n\n\nif __name__ == '__main__':\n    print(main())\n"
   },
-  "commands_run_during_this_acceptance": false,
+  "files_edited_by_process_execution": false,
   "limitations": [
-    "This live check proves direct VS Code sidebar review, approval, and restoration for one focused file edit; it is not broad coding reliability or release-package acceptance.",
-    "xlang3 process execution through VS Code was separately exercised in the linked live coding acceptance evidence."
+    "This live check proves the edit, approval, xlang3 process, and restoration path for one focused fixture; it is not broad coding reliability or release-package acceptance."
   ]
 }
