@@ -641,7 +641,7 @@ class EventStreamSubscription {
     if(!value.client||typeof value.client.eventStream!=='function'||!['run','tree','graph'].includes(value.scope)||!Number.isSafeInteger(value.generation)||value.generation<0)throw new Error('Invalid event subscription binding');
     if(this.matches(value))return;
     this.stop();const pin=Object.freeze({...value,origin:backendOrigin(value.client.baseUrl),after:value.after??0});if(!this.current(pin))return;
-    this.pin=pin;this.cursor=pin.after;this.failedAttempts=0;this.finished=false;this.connect(pin,this.epoch);
+    this.pin=pin;this.cursor=pin.after;this.failedAttempts=0;this.busyAttempts=0;this.finished=false;this.connect(pin,this.epoch);
   }
   stop(){this.epoch++;this.unschedule(this.timer);this.timer=undefined;this.abort?.abort();this.abort=undefined;this.pin=undefined;}
   dispose(){this.stop();this.disposed=true;}
@@ -649,7 +649,7 @@ class EventStreamSubscription {
     if(!this.valid(pin,epoch)||this.finished)return;const abort=new AbortController();this.abort=abort;
     try{
       const consume=async(callback,...values)=>{try{return await callback?.(...values);}catch(error){const rejected=new Error('Event observer rejected delivery',{cause:error});rejected.eventConsumerFailure=true;throw rejected;}};
-      const result=await pin.client.eventStream(pin.root,{scope:pin.scope,session_id:pin.session,after:this.cursor,signal:abort.signal,onObservation:async value=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onObservation,value,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');},onEvent:async event=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onEvent,event,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');this.cursor=event.seq;this.failedAttempts=0;}});
+      const result=await pin.client.eventStream(pin.root,{scope:pin.scope,session_id:pin.session,after:this.cursor,signal:abort.signal,onObservation:async value=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onObservation,value,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');this.busyAttempts=0;},onEvent:async event=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onEvent,event,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');this.cursor=event.seq;this.failedAttempts=0;this.busyAttempts=0;}});
       if(!this.valid(pin,epoch))return;
       if(!result||result.cursor!==this.cursor)throw new Error('Event subscription acknowledgement changed');
       if(result.reason==='terminal'){this.finished=true;await this.onEnd?.(result,pin);return;}
@@ -658,9 +658,12 @@ class EventStreamSubscription {
       this.retry(pin,epoch,0);
     }catch(error){
       if(!this.valid(pin,epoch)||abort.signal.aborted)return;
-      // Retry only bounded transport unavailability. Protocol/identity and
-      // consumer failures stop explicitly; a cursor cannot be silently skipped.
-      if(!this.finished&&!error.eventConsumerFailure&&(error.status===503||error.eventTransportUnavailable===true)){
+      // A full stream lease is released asynchronously. Keep its retry bounded
+      // in rate, while protocol/identity and consumer failures still stop.
+      if(!this.finished&&!error.eventConsumerFailure&&error.status===503){
+        this.busyAttempts=Math.min(5,this.busyAttempts+1);this.retry(pin,epoch,Math.min(8000,500*2**(this.busyAttempts-1)));return;
+      }
+      if(!this.finished&&!error.eventConsumerFailure&&error.eventTransportUnavailable===true){
         this.failedAttempts++;if(this.failedAttempts<=3){this.retry(pin,epoch,Math.min(4000,500*2**(this.failedAttempts-1)));return;}
       }
       this.finished=true;this.notifyError(error,pin);

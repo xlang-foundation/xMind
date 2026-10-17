@@ -56,9 +56,13 @@ and behavior:
    further conditions only with explicit native semantics and durable outcome
    rules; model output cannot expand permissions, credentials or endpoints.
 2. Extend live planning acceptance beyond the completed read-only agent plus
-   human scenario: exercise a native deterministic tool node, an approved code
-   change and a registered verification command in a plan, then refresh both
-   clients and verify the resulting shared plan/history and supplied metrics.
+   human scenario: a current webpage run now completed a read-only
+   `workspace.inspect` node followed by a dependent native `run_process` node;
+   `npm.cmd run build` exited 0. The exact plan and process records are in the
+   [live process-plan evidence](evidence/live-dynamic-plan-process-20261017.json).
+   A plan that combines an approved code change with its registered
+   verification command, and then refreshes both clients to verify shared
+   results and supplied metrics, remains outstanding.
 3. Rendered human questions, read-only child outcomes and shared conversation
    history are now verified in both development clients. Plan revisions,
    effect approvals and coding-child results still need current-backend live

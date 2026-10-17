@@ -13,6 +13,23 @@ used when they were recorded and should not be read as current parity goals.
 
 ## Current-source live planning and shared backend — 2026-10-17
 
+### Dependent deterministic process node in the webpage
+
+The current webpage client executed a two-node native plan in TestProj. A
+read-only `workspace.inspect` child read `model-zoo/frontend/src/views/HomeView.vue`;
+after its success, the registered `run_process` node ran
+`npm.cmd run build` from `model-zoo/frontend` and completed with exit code 0.
+The build transformed 37 Vite modules. The plan and parent run both reached
+`completed`, and no files were edited by the inspect node. The browser client
+tests pass 134/134 and the VS Code suite passes 392/392. During testing, a
+second view hit the native backend's two-stream capacity and received HTTP
+503. The shared client now retries that response at a capped rate until a
+stream slot opens; the extension contract verifies recovery after eight busy
+responses. This is one rendered webpage acceptance; an
+approved code effect and matching process node in a dynamic plan, plus a live
+VS Code process-plan run, remain separate acceptance work. [Exact run, plan,
+operation and hashes](evidence/live-dynamic-plan-process-20261017.json).
+
 At source `8bd7c63abf18246c8814bc32c70db3ade7b2fd1f`, the exact current
 `xmind.exe` was hash-verified across the webpage and VS Code development
 profiles. A live OpenAI Responses run in each rendered client created a
