@@ -11,6 +11,28 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Current-source live planning and shared backend — 2026-10-17
+
+At source `8bd7c63abf18246c8814bc32c70db3ade7b2fd1f`, the exact current
+`xmind.exe` was hash-verified across the webpage and VS Code development
+profiles. A live OpenAI Responses run in each rendered client created a
+two-step dependency plan: a read-only `workspace.inspect` child reported the
+Model Zoo page title and primary call to action, then a human node paused for
+input. Both runs resumed and completed after the test answer; neither edited a
+file nor ran a command. In the webpage, the waiting-human state and recorded
+child result remained visible after a full page reload.
+
+The VS Code **xMind: Open Browser View** command then opened the browser
+adapter against the VS Code backend. It restored the same TestProj conversation
+and completed plan, and its live browser follow-up appeared in the VS Code
+history after the sidebar reconnected. This verifies a shared local backend,
+session history and model configuration across those two attached views. The
+separately launched browser and VS Code preview profiles used for the initial
+plan runs were isolated; the shared-backend acceptance is the browser view
+opened from VS Code. It does not yet cover planned code effects, registered
+verification commands, dynamic MCP/A2A effects, or native-owner restart.
+[Exact run scope and hashes](evidence/live-planning-shared-backend-20261017.json).
+
 ## Exact pinned xlang3 main Release gate — 2026-10-17
 
 Built xMind Release at source commit `2383376` against the exact xlang3 main

@@ -24,8 +24,15 @@ rules. Nested plans share the root budget and are bounded to depth eight; the
 engine fixture exercises nested pauses, joins, restart and depth-two work.
 Current-source tests pass **4/4** for dynamic plan parsing, repository,
 execution and MCP/process/A2A nodes, and **10/10** for context/skill contracts.
-Their provider and peer responses are fixtures; rendered live planning in the
-webpage and installed VS Code remains separate. [Current-source evidence](evidence/agentflow-current-native-capabilities-20261017.json).
+Live OpenAI Responses planning now also passes in the rendered webpage and VS
+Code sidebar: a read-only `workspace.inspect` child completed, a human node
+paused both runs, and each run completed after the answer without file or
+command effects. The webpage pause survived reload. The VS Code **Open Browser
+View** command opened a browser attached to the same backend; a browser
+follow-up appeared in the VS Code history after sidebar refresh/reconnect.
+[Exact source, runtime hashes and scope](evidence/live-planning-shared-backend-20261017.json).
+The native test provider and peer responses remain fixtures; the UI planning
+checks use live OpenAI inference.
 
 Checkpoint `e353a37799530a234a6fa13e51f61a5c52d3ae6a` adds native `delegate_tasks` to eligible ordinary Agent roots. The parent model selects independent `workspace.inspect` revision 1 investigations; actual child AgentRunners make provider/tool calls with isolated histories, return observed outcomes, and share the root's deadline, cancellation, child/concurrency limits and durable model-call budget. Leaves are explicitly read-only; the general parent keeps its configured coding tools and exact approvals. A failed child can lead to a new parent-selected batch without replaying the old one.
 
@@ -48,13 +55,14 @@ and behavior:
 1. Dependency conditions currently support `success` and `observed`. Add any
    further conditions only with explicit native semantics and durable outcome
    rules; model output cannot expand permissions, credentials or endpoints.
-2. Complete real-provider planning acceptance in the webpage and installed
-   VS Code extension. Exercise a live plan with agent, human and tool steps,
-   review/approve a code change, run a registered verification command, refresh
-   both clients, and confirm shared plan/history state and actual metrics.
-3. Verify rendered plan revisions, human questions, child results and tool
-   approvals in both clients against the current backend. Existing controller
-   and DOM tests do not establish installed live planning acceptance.
+2. Extend live planning acceptance beyond the completed read-only agent plus
+   human scenario: exercise a native deterministic tool node, an approved code
+   change and a registered verification command in a plan, then refresh both
+   clients and verify the resulting shared plan/history and supplied metrics.
+3. Rendered human questions, read-only child outcomes and shared conversation
+   history are now verified in both development clients. Plan revisions,
+   effect approvals and coding-child results still need current-backend live
+   acceptance in the webpage and VS Code extension.
 4. Continue A2A acceptance against independent peers: live model-selected
    dispatch and continuation, reconnect/recovery, streaming and cancellation
    acknowledgement, and the relevant official-SDK paths. A local peer fixture

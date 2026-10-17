@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-17",
+  "xmind_source_revision": "8bd7c63abf18246c8814bc32c70db3ade7b2fd1f",
+  "xmind_executable_sha256": "813CB6B63E44FFB2F59ACC7C8966F4F3EB893C9CDF6AF47A6C8A778BBAE602A6",
+  "browser_adapter_server_sha256": "C2B3A195356EF6DB8281D63FC4E02ACF1AA990766D0B529C40CBC0C97C174BF2",
+  "browser_client_sha256": "B5F696620EEB0BEB076A3B6F841CBB8C5CBDB483D5465EDA7A6E129BD5B77D4C",
+  "model": {
+    "provider": "OpenAI Responses",
+    "id": "gpt-5.6-sol",
+    "credential_source": "existing local provider profile"
+  },
+  "workspace": "D:/CantorAI2026/TestProj",
+  "live_planning": {
+    "webpage": {
+      "run_id": "8d6cb171612404c075ae697295a900c3",
+      "plan_id": "4a270753b65d136138b79f1e9f865d60",
+      "steps": [
+        {
+          "label": "inspect_home",
+          "kind": "agent",
+          "preset": "workspace.inspect",
+          "outcome": "completed",
+          "observed_title": "Find the right model for your next idea",
+          "observed_primary_action": "Search the catalog"
+        },
+        {
+          "label": "ask_title_change",
+          "kind": "human",
+          "outcome": "answered",
+          "answer": "For this acceptance test, keep the current title unchanged. Do not edit files or run commands; report the plan outcome."
+        }
+      ],
+      "human_pause_survived_page_reload": true,
+      "final_plan_state": "completed",
+      "file_changes_or_commands": false
+    },
+    "vscode": {
+      "workflow": "same read-only workspace.inspect then human decision plan",
+      "human_pause": true,
+      "human_answer_resumed_run": true,
+      "final_run_state": "completed",
+      "file_changes_or_commands": false
+    }
+  },
+  "shared_backend": {
+    "entry_point": "VS Code command xMind: Open Browser View",
+    "browser_view_url": "http://127.0.0.1:54317/ui/",
+    "browser_view_connected_message": "xMind Browser is connected to this workspace and uses its models and history.",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "cross_client_check": "The browser displayed the VS Code conversation and its completed plan. A browser follow-up was then visible in VS Code after Refresh history reconnected the sidebar.",
+    "browser_follow_up_run_id": "a06355c00a0b79dd0a3c4964c5b7946b",
+    "browser_follow_up_state": "completed",
+    "vscode_reconnect_restored_history": true
+  },
+  "limitations": [
+    "The separately launched webpage and VS Code acceptance runs used isolated preview profiles; the shared-profile result is the additional browser opened from the VS Code backend.",
+    "The live plan used a read-only agent child and human decision. It did not exercise an approved code edit, registered verification command, external MCP effect, A2A call, or native-owner restart.",
+    "Provider inference was live; this does not establish broad coding reliability, release-package acceptance, or hosted CI."
+  ]
+}
