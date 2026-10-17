@@ -208,11 +208,20 @@ checks repeated and concurrent call behavior through IPC, then cancels a slow
 callable and checks prompt child retirement. A second contract sends the tool
 call through the real AgentRunner/model protocol fixture and verifies the
 persisted continuation.
-The PID check binds discovery to the spawned process but is not an
-authentication boundary against another process running as the same user.
-Durable leases, scoped capabilities, restart reconciliation, and OS sandboxing
-remain unimplemented; no completion or isolation guarantee for those features
-is implied.
+The parent verifies that the LRPC endpoint belongs to the spawned PID. It now
+also gives each trusted-tool worker a fresh 256-bit capability through a
+restricted inherited pipe; the secret is absent from command-line arguments
+and environment variables. Each invocation carries an HMAC-SHA256 over its
+monotonic sequence number and bounded JSON arguments. The worker rejects
+missing, invalid, and replayed requests before calling the bound function. A
+startup probe attempts an unauthenticated call, completes a signed handshake,
+and replays that handshake to confirm rejection before the normal contract
+proceeds. This protects the service from other callers that can find
+the local endpoint but cannot access the parent-held capability. It remains a
+trusted-tool worker contract, not process-bound AgentRunner execution.
+Durable leases, AgentRunner-scoped capabilities, restart reconciliation, and
+OS sandboxing remain unimplemented; no completion or isolation guarantee for
+those features is implied.
 
 ## Reusable trusted-tool workers — 2026-10-15
 
@@ -230,3 +239,20 @@ actual AgentRunner contract verifies tool-result continuation through the
 reused-worker path. This is an in-process scheduler-owned local pool only:
 leases, durable attempt journaling/reconciliation, worker identity beyond the
 spawned PID, remote distribution, and OS sandboxing remain open.
+
+### Local LRPC capability authentication — 2026-10-17
+
+The Windows parent now creates a 256-bit secret per worker session and sends it
+once over an anonymous pipe whose only inherited handles are the worker's
+stdin and NUL output handles. The worker keeps the secret in memory. Each call
+contains a strictly increasing sequence and an HMAC-SHA256 over that sequence
+and the exact bounded JSON argument string; the worker compares the tag in
+constant time and consumes each sequence once. The key is never in process
+arguments, environment variables, or the LRPC payload. Worker startup checks
+that unauthenticated and replayed requests are rejected before reporting the
+child ready.
+The Release worker contract then verifies authenticated repeated and concurrent
+calls, actual xlang3 execution, and cancellation. This capability belongs to a
+reusable trusted-tool worker session; it does not yet provide the fresh
+per-AgentRun capability or shared-backend authorization required by the
+AgentRunner process-placement design. [Build and test evidence](evidence/xmind-worker-capability-auth-20261017.json).

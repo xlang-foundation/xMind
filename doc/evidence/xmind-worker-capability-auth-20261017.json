@@ -1,0 +1,38 @@
+{
+  "evidence": "Windows Release xMind trusted-tool worker capability authentication",
+  "created_utc": "2026-10-17T22:17:00Z",
+  "xmind_base_revision": "99d7312f9ce636495317b58af9e3aad832b9830d",
+  "xlang3_revision": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
+  "xlang3_branch": "xmind-cpp-lrpc-host",
+  "changed_sources": {
+    "Native/src/agent_worker.cpp": "F3D3456263B39ED09A23D7BF4090FC27BAD0CC74B4236A2017CB7A371C6661C9",
+    "Native/worker/agent_worker.py": "EF0032C8D5C820174EF2ECEAB74C1D951724772B225482766E4D85ACF6133220"
+  },
+  "build": {
+    "configuration": "Release",
+    "directory": ".agentflow/xlang3-host-integration-20261017",
+    "target": "agentflow_xlang_worker_contract",
+    "result": "passed"
+  },
+  "test": {
+    "name": "native_xlang3_shared_memory_worker_contract",
+    "result": "passed",
+    "duration_seconds": 1.07,
+    "covers": [
+      "unauthenticated worker request rejected during worker startup",
+      "authenticated worker handshake and replay rejection",
+      "authenticated xlang3 callable invocation",
+      "repeated and concurrent calls serialized by the parent",
+      "worker process retired after cancellation"
+    ]
+  },
+  "integration_test": {
+    "name": "native_agent_runner_contract",
+    "result": "passed",
+    "duration_seconds": 8.66
+  },
+  "limitations": [
+    "This authenticates the reusable trusted-tool worker session only.",
+    "It does not implement process-bound AgentRunner execution, per-AgentRun capabilities, durable leases, or crash recovery."
+  ]
+}

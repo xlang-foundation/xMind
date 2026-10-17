@@ -16,6 +16,9 @@
 #include <mutex>
 #include <unordered_map>
 #include <exception>
+#include <limits>
+#include <cstddef>
+#include <utility>
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -69,6 +72,8 @@ struct WorkerSession {
     std::mutex invocation;
     HANDLE process=nullptr;
     std::uint32_t port=0;
+    std::array<unsigned char,32> secret{};
+    std::uint64_t next_sequence=0;
     ~WorkerSession(){retire();}
     bool alive() const { return process&&WaitForSingleObject(process,0)==WAIT_TIMEOUT; }
     void stop_process() const { if(process)TerminateProcess(process,1); }
@@ -76,12 +81,72 @@ struct WorkerSession {
         if(!process)return;
         if(WaitForSingleObject(process,0)==WAIT_TIMEOUT)TerminateProcess(process,1);
         WaitForSingleObject(process,5000);CloseHandle(process);process=nullptr;port=0;
+        SecureZeroMemory(secret.data(),secret.size());next_sequence=0;
     }
+};
+struct WorkerHandle {
+    HANDLE value=nullptr;
+    explicit WorkerHandle(HANDLE handle=nullptr):value(handle){}
+    ~WorkerHandle(){reset();}
+    WorkerHandle(const WorkerHandle&)=delete;
+    WorkerHandle& operator=(const WorkerHandle&)=delete;
+    void reset(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);value=nullptr;}
+};
+struct WorkerAttributes {
+    std::vector<std::byte> storage;
+    LPPROC_THREAD_ATTRIBUTE_LIST value=nullptr;
+    explicit WorkerAttributes(HANDLE* handles) {
+        SIZE_T size=0;InitializeProcThreadAttributeList(nullptr,1,0,&size);
+        if(!size)throw std::runtime_error("Cannot size worker handle attributes");
+        storage.resize(size);value=reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(storage.data());
+        if(!InitializeProcThreadAttributeList(value,1,0,&size)){value=nullptr;throw std::runtime_error("Cannot initialize worker handle attributes");}
+        if(!UpdateProcThreadAttribute(value,0,PROC_THREAD_ATTRIBUTE_HANDLE_LIST,handles,3*sizeof(HANDLE),nullptr,nullptr)){
+            DeleteProcThreadAttributeList(value);value=nullptr;throw std::runtime_error("Cannot restrict worker handle inheritance");
+        }
+    }
+    ~WorkerAttributes(){if(value)DeleteProcThreadAttributeList(value);}
 };
 std::uint32_t random_port() {
     std::uint32_t value=0;
     if(BCryptGenRandom(nullptr,reinterpret_cast<PUCHAR>(&value),sizeof(value),BCRYPT_USE_SYSTEM_PREFERRED_RNG)!=0)throw std::runtime_error("Cannot create agent worker endpoint");
     return 20000+(value%40000);
+}
+std::array<unsigned char,32> random_worker_secret() {
+    std::array<unsigned char,32> result{};
+    if(BCryptGenRandom(nullptr,result.data(),static_cast<ULONG>(result.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)!=0)
+        throw std::runtime_error("Cannot create xMind worker capability");
+    return result;
+}
+std::string hex(const unsigned char* bytes,std::size_t size) {
+    constexpr char digits[]="0123456789abcdef";std::string result(size*2,'0');
+    for(std::size_t i=0;i<size;++i){result[i*2]=digits[bytes[i]>>4];result[i*2+1]=digits[bytes[i]&15];}
+    return result;
+}
+std::string worker_signature(const std::array<unsigned char,32>& secret,std::uint64_t sequence,const std::string& arguments) {
+    BCRYPT_ALG_HANDLE algorithm=nullptr;BCRYPT_HASH_HANDLE hash=nullptr;std::vector<unsigned char> object;
+    DWORD object_size=0,hash_size=0,got=0;std::array<unsigned char,32> digest{};
+    auto close=[&]{if(hash)BCryptDestroyHash(hash);if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0);};
+    if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,BCRYPT_ALG_HANDLE_HMAC_FLAG)<0 ||
+       BCryptGetProperty(algorithm,BCRYPT_OBJECT_LENGTH,reinterpret_cast<PUCHAR>(&object_size),sizeof(object_size),&got,0)<0 ||
+       BCryptGetProperty(algorithm,BCRYPT_HASH_LENGTH,reinterpret_cast<PUCHAR>(&hash_size),sizeof(hash_size),&got,0)<0 || hash_size!=digest.size()){
+        close();throw std::runtime_error("Cannot initialize xMind worker authentication");
+    }
+    object.resize(object_size);
+    if(BCryptCreateHash(algorithm,&hash,object.data(),object_size,
+            const_cast<PUCHAR>(secret.data()),static_cast<ULONG>(secret.size()),0)<0){close();throw std::runtime_error("Cannot create xMind worker authentication tag");}
+    const auto message=std::to_string(sequence)+"\n"+arguments;
+    if(BCryptHashData(hash,reinterpret_cast<PUCHAR>(const_cast<char*>(message.data())),static_cast<ULONG>(message.size()),0)<0 ||
+       BCryptFinishHash(hash,digest.data(),static_cast<ULONG>(digest.size()),0)<0){close();throw std::runtime_error("Cannot sign xMind worker request");}
+    close();return hex(digest.data(),digest.size());
+}
+void write_worker_secret(HANDLE pipe,const std::array<unsigned char,32>& secret) {
+    std::size_t offset=0;
+    while(offset<secret.size()){
+        DWORD written=0;
+        if(!WriteFile(pipe,secret.data()+offset,static_cast<DWORD>(secret.size()-offset),&written,nullptr)||!written)
+            throw std::runtime_error("Cannot deliver private xMind worker capability");
+        offset+=written;
+    }
 }
 std::vector<wchar_t> worker_environment() {
     std::map<std::wstring,std::wstring> variables;
@@ -125,14 +190,40 @@ void start_worker(WorkerSession& session,const std::filesystem::path& binary,
     for(int attempt=0;attempt<8;++attempt){
         const auto port=random_port();std::wstring command=quote(binary.wstring())+L" worker";
         for(const auto& [key,value]:std::vector<std::pair<std::string,std::string>>{{"--agent-port",std::to_string(port)},{"--modules",modules_root},{"--stdlib",stdlib_root},{"--code-root",code_root},{"--module",module},{"--function",function}})command+=L" "+quote(wide(key))+L" "+quote(wide(value));
-        command.push_back(L'\0');STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION created{};auto environment=worker_environment();
-        if(!CreateProcessW(binary.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,environment.data(),binary.parent_path().c_str(),&startup,&created))throw std::runtime_error("Cannot start xMind agent worker");
-        CloseHandle(created.hThread);session.process=created.hProcess;session.port=port;
+        command.push_back(L'\0');
+        SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};HANDLE read_pipe=nullptr,write_pipe=nullptr;
+        if(!CreatePipe(&read_pipe,&write_pipe,&security,0))throw std::runtime_error("Cannot create private xMind worker channel");
+        WorkerHandle child_input(read_pipe),parent_output(write_pipe);
+        if(!SetHandleInformation(parent_output.value,HANDLE_FLAG_INHERIT,0))throw std::runtime_error("Cannot protect xMind worker channel");
+        WorkerHandle child_stdout(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));
+        WorkerHandle child_stderr(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));
+        if(child_stdout.value==INVALID_HANDLE_VALUE||child_stderr.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot create private worker output handles");
+        HANDLE inherited[]{child_input.value,child_stdout.value,child_stderr.value};WorkerAttributes attributes(inherited);
+        STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=inherited[0];startup.StartupInfo.hStdOutput=inherited[1];startup.StartupInfo.hStdError=inherited[2];startup.lpAttributeList=attributes.value;
+        PROCESS_INFORMATION created{};auto environment=worker_environment();auto secret=random_worker_secret();
+        if(!CreateProcessW(binary.c_str(),command.data(),nullptr,nullptr,TRUE,EXTENDED_STARTUPINFO_PRESENT|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,environment.data(),binary.parent_path().c_str(),&startup.StartupInfo,&created))throw std::runtime_error("Cannot start xMind agent worker");
+        CloseHandle(created.hThread);session.process=created.hProcess;session.port=port;session.secret=secret;session.next_sequence=0;child_input.reset();child_stdout.reset();child_stderr.reset();
+        try{write_worker_secret(parent_output.value,secret);parent_output.reset();}
+        catch(...){parent_output.reset();SecureZeroMemory(secret.data(),secret.size());session.retire();throw;}
+        SecureZeroMemory(secret.data(),secret.size());
         X::Runtime probe;const std::string endpoint="lrpc:"+std::to_string(port);const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
         while(std::chrono::steady_clock::now()<deadline){
             if(WaitForSingleObject(session.process,0)==WAIT_OBJECT_0){session.retire();break;}
             X3LrpcEndpointInfo info{};info.size=sizeof(info);
-            if(x3_runtime_probe_remote(probe.get(),endpoint.c_str(),100,&info)==X3_STATUS_OK&&info.pid==created.dwProcessId)return;
+            if(x3_runtime_probe_remote(probe.get(),endpoint.c_str(),100,&info)==X3_STATUS_OK&&info.pid==created.dwProcessId){
+                auto remote=probe.ImportRemote("xmind_agent_worker",endpoint.c_str());
+                const auto invoke=remote["invoke"];X::Value ignored;
+                const std::vector<X::Value> unauthenticated{X::Value(probe,std::int64_t{1}),X::Value(probe,""),X::Value(probe,"{}")};
+                if(invoke.Call(unauthenticated,ignored))throw std::runtime_error("xMind worker accepted an unauthenticated request");
+                const auto handshake=remote["handshake"];const std::string challenge="xMind worker handshake v1";
+                const auto signature=worker_signature(session.secret,1,challenge);
+                const std::vector<X::Value> handshake_args{X::Value(probe,std::int64_t{1}),X::Value(probe,signature)};X::Value accepted;
+                if(!handshake.Call(handshake_args,accepted)||accepted.ToInt64()!=1)throw std::runtime_error("xMind worker capability handshake failed");
+                X::Value replayed;
+                if(handshake.Call(handshake_args,replayed))throw std::runtime_error("xMind worker accepted a replayed request");
+                session.next_sequence=1;
+                return;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
         session.retire();
@@ -149,12 +240,19 @@ int run_agent_worker(int argc,char** argv) {
     const auto stdlib=required_arg(argc,argv,"--stdlib");
     const auto code_root=required_arg(argc,argv,"--code-root");
     const auto module_name=required_arg(argc,argv,"--module");const auto function_name=required_arg(argc,argv,"--function");
+    std::array<unsigned char,32> secret{};std::size_t offset=0;const auto input=GetStdHandle(STD_INPUT_HANDLE);
+    while(offset<secret.size()){
+        DWORD count=0;if(input==nullptr||input==INVALID_HANDLE_VALUE||!ReadFile(input,secret.data()+offset,static_cast<DWORD>(secret.size()-offset),&count,nullptr)||!count)
+            throw std::runtime_error("xMind worker did not receive its private capability");
+        offset+=count;
+    }
     X::Runtime runtime;runtime.AddImportRoot(modules);runtime.AddImportRoot(stdlib);runtime.AddImportRoot(code_root);
     const auto script=executable_path().parent_path()/L"worker"/L"agent_worker.py";
     if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
     runtime.AddImportRoot(path_text(script.parent_path()));
     X::Module worker(runtime,"agent_worker");const auto start=worker["start"];X::Value result;
-    const std::vector<X::Value> args{X::Value(runtime,static_cast<std::int64_t>(port)),X::Value(runtime,module_name),X::Value(runtime,function_name)};
+    const std::vector<X::Value> args{X::Value(runtime,static_cast<std::int64_t>(port)),X::Value(runtime,module_name),X::Value(runtime,function_name),X::Value(runtime,hex(secret.data(),secret.size()))};
+    SecureZeroMemory(secret.data(),secret.size());
     if(!start.Call(args,result))throw std::runtime_error("Cannot start xMind xlang3 agent worker");
     return 0;
 }
@@ -181,7 +279,9 @@ std::string invoke_xlang_python_worker(const std::string& modules_root,const std
         try{
             X::Runtime probe;const std::string endpoint="lrpc:"+std::to_string(session->port);
             auto remote=probe.ImportRemote("xmind_agent_worker",endpoint.c_str());const auto invoke=remote["invoke"];X::Value output;
-            const std::vector<X::Value> args{X::Value(probe,arguments.dump())};
+            if(session->next_sequence>=static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())){session->retire();throw std::runtime_error("xMind worker request sequence exhausted");}
+            const auto sequence=++session->next_sequence;const auto payload=arguments.dump();const auto signature=worker_signature(session->secret,sequence,payload);
+            const std::vector<X::Value> args{X::Value(probe,static_cast<std::int64_t>(sequence)),X::Value(probe,signature),X::Value(probe,payload)};
             if(!invoke.Call(args,output)||!output.IsString())throw std::runtime_error("xMind agent worker returned an invalid result");
             serialized=output.ToString();validate_json_result(serialized);
         }catch(...){failure=std::current_exception();}
