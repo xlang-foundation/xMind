@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live current-source VS Code coding acceptance in TestProj",
+  "xmind_revision": "86f2e31fb19ef9c3e304cb327f2194103228341b",
+  "sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "vscode": {
+    "version": "1.142.0",
+    "extension_version": "0.1.13",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "isolated_user_data_profile": "D:/CantorAI2026/xMind/.agentflow/vscode-current-acceptance/user-data",
+    "runtime_directory": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-current-86f2e31",
+    "managed_mode": true,
+    "workspace_edits": "approved",
+    "visible_secondary_sidebar": true,
+    "webview_dom_inspected_over_cdp": true
+  },
+  "runtime": {
+    "manifest_sha256": "e179236bd15586a1d6584cbbb2aea65c3c5e2b8ab1dd725f42ce7a280a3c54cc",
+    "native_executable_sha256": "7cc8fda364b8d95c26b34356a13822cc042b26d295a42ff2f9d328b52c4f4639",
+    "xlang_runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "xlang_runtime_source": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "managed_runtime_verification": "passed; 1,921 files including 1,869 pure Python source files",
+    "release_accepted": false
+  },
+  "provider": {
+    "name": "OpenAI",
+    "route": "Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing repository .config/providers.yaml profile; saved key reused without display or re-entry",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "prompt": "Create a new Python file named xmind_current_build_acceptance.py containing code that prints exactly 5. Do not modify any existing files.",
+    "run_id": "a3c2821da2f217b01fac862d7a9d4867",
+    "run_state": "completed",
+    "tool": "create_file",
+    "operation_id": "e867376721326bafcd8ee97acd7ec557",
+    "operation_state": "succeeded",
+    "approval": "Reviewed and approved the exact one-file creation in the VS Code sidebar",
+    "path": "D:/CantorAI2026/TestProj/xmind_current_build_acceptance.py",
+    "source_sha256": "082411d66dca409ce8602f74bbed4bd25e4bcd6f8eced3234d048ee3af672ce5",
+    "model_calls": [
+      {
+        "input_tokens": 5182,
+        "output_tokens": 60,
+        "total_tokens": 5242,
+        "reasoning_tokens": 26
+      },
+      {
+        "input_tokens": 5363,
+        "output_tokens": 31,
+        "total_tokens": 5394,
+        "cached_tokens": 5179,
+        "reasoning_tokens": 0,
+        "first_token_ms": 1280,
+        "elapsed_ms": 1620
+      }
+    ]
+  },
+  "xlang3_execution": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-current-86f2e31/xlang3.exe",
+    "stdout": "5",
+    "exit_code": 0
+  },
+  "cleanup": {
+    "test_file_removed_after_hash_and_execution_verification": true
+  },
+  "tests": {
+    "vscode_extension": {
+      "command": "npm.cmd test",
+      "passed": 391,
+      "failed": 0
+    },
+    "native_contracts": {
+      "passed": [
+        "native_approved_edit_http_contract",
+        "native_workspace_tools_contract",
+        "native_agent_edit_http_contract",
+        "native_agent_patch_http_contract",
+        "native_http_cli_contract",
+        "native_process_executor_contract",
+        "native_local_view_contract",
+        "native_local_profile_contract"
+      ],
+      "failed": []
+    }
+  },
+  "limitations": [
+    "This verifies one approved file creation and xlang3 execution in a live VS Code development host; it does not prove broad coding reliability or a full project build.",
+    "The full 147-test CTest invocation started before the all-target build had produced every contract executable. Its missing-executable results are invalid as a suite result; the focused native contracts listed above passed after the build.",
+    "The staged runtime is a local development bundle and is explicitly not marked release accepted."
+  ]
+}

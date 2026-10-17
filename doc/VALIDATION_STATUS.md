@@ -3455,3 +3455,28 @@ live-edit evidence is a separate run. These bounded runs establish that CLI
 and webpage coding work with saved provider configuration, but do not prove
 broad coding reliability or OpenCode feature parity.
 [Run details and hashes](evidence/cli-key-only-model-selection-and-live-coding-20261017.json).
+
+## Current-source live VS Code coding acceptance — 2026-10-17
+
+Built the full current xMind Release tree at `86f2e31` against xlang3 SDK
+`b4a53192` in an isolated output directory. Staged and hash-verified a managed
+VS Code runtime containing 1,921 files, including 1,869 pure Python source
+files; the bundle remains a local development runtime and is not marked
+release accepted. The current VS Code Development Host opened TestProj,
+reused the saved OpenAI key without re-entry, loaded 20 models, and selected
+`gpt-5.6-sol`. It completed a real response with displayed input/output usage
+and timing metrics, proposed one exact `create_file` operation, and completed
+it after approval in the sidebar. The created file's SHA-256 was checked,
+xlang3 ran it and printed `5` with exit code 0, then the temporary file was
+removed. The visible Development Host remains open on TestProj.
+
+The VS Code extension suite passed **391/391**. Focused native contracts
+passed for approved edits, workspace tools, agent edits and patches, the HTTP
+CLI, process execution, the local view, and managed local profiles. An initial
+full CTest invocation overlapped the all-target build and could not find many
+test executables, so it is not a valid full-suite result; the complete 147-test
+suite remains unverified. Previous rendered webpage coding acceptance remains
+recorded above; this turn's current-source live edit was verified through VS
+Code. These checks establish a bounded end-to-end coding flow, not broad
+coding reliability or OpenCode feature parity.
+[Exact current-source run, hashes, metrics, and test results](evidence/vscode-current-head-live-coding-20261017.json).
