@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-16",
+  "client": "xMind native CLI",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "shared_backend": {
+    "profile_info_origin": "http://127.0.0.1:65290",
+    "profile_info_process_id": 23744,
+    "started_by_cli": false,
+    "workspace_matches_vscode": true
+  },
+  "provider_profile": {
+    "provider": "openai",
+    "wire": "responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "saved local profile; no key entered during the CLI run"
+  },
+  "session_id": "dc5e448a52b95ff8f32f2b5a9738ed45",
+  "run_id": "9bb0b89c24396ec4027fe9843ac7c061",
+  "state": "completed",
+  "prompt": "Read model-zoo/frontend/package.json with read_file and return only its package name. Do not edit files or run commands.",
+  "tool": {
+    "name": "read_file",
+    "path": "model-zoo/frontend/package.json",
+    "result": "model-zoo-frontend"
+  },
+  "model_metrics": {
+    "input_tokens": 4013,
+    "output_tokens": 9,
+    "elapsed_ms": 1903,
+    "first_token_ms": 1711
+  },
+  "cli_exit_code": 0,
+  "file_operations_proposed": 0,
+  "commands_proposed": 0,
+  "scope": "A live packaged-native CLI agent turn on the same managed TestProj backend observed by VS Code. It verifies saved-profile Responses execution, native read_file dispatch, supplied usage and clean CLI exit. It does not claim a CLI coding edit or build in this run; approved CLI edit and patch flows are documented separately."
+}

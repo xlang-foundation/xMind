@@ -126,6 +126,18 @@ restored its saved run without another key prompt.
 This verifies one real Vue coding task in each client; it does not establish
 CLI coding acceptance, all-language behavior, or release-package certification.
 
+## Live CLI shared-profile agent turn — 2026-10-16
+
+The packaged native CLI attached to the same TestProj backend process used by
+the VS Code panel (`profile-info` reported `started: false` and the matching
+workspace). Using the saved OpenAI Responses profile, it called `read_file` on
+`model-zoo/frontend/package.json`, returned `model-zoo-frontend`, reported
+provider-supplied usage and exited **0**. No file operation or command was
+proposed. This verifies a current CLI model/tool turn against the shared
+backend; it is not a CLI coding-edit claim. Separate live approved CLI edit and
+patch evidence is listed in the [interactive CLI record](native-interactive-cli.md).
+[Run evidence](evidence/live-cli-shared-profile-20261016.json).
+
 ## Backend-owned session inbox dispatch — 2026-10-15
 
 The native server now advertises `session_inbox_dispatch` and owns queue
