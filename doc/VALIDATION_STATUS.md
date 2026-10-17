@@ -11,6 +11,28 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Live webpage coding acceptance — 2026-10-16
+
+The rendered local webpage completed a real OpenAI Responses coding task in
+`D:/CantorAI2026/TestProj`: it proposed and, after exact review, applied one
+Vue component edit, then ran `npm.cmd run build` in the frontend workspace.
+The patch operation succeeded and Vite transformed 37 modules and exited 0 in
+623 ms. The edited source and generated `dist/index.html` were independently
+checked on disk against their recorded SHA-256 hashes. This establishes the
+webpage's current edit-and-process path at one task scope; it does not establish
+broad coding reliability or runtime release provenance. The model's proposed
+dependency plan appeared as Markdown and did not use the native dynamic-plan
+tools, so rendered planning remains unverified. [Run, operations, hashes and
+limits](evidence/webpage-testproj-live-coding-20261016.json).
+
+The installed VS Code 0.1.13 extension has a separate live TestProj coding and
+build acceptance: an approved Vue edit followed by a successful Vite build.
+The current installed extension package also has a recorded current-source
+workspace and provider startup check. Those prove the basic VS Code edit/build
+path and the package's provider import at their recorded scopes; visual review
+of the live editor and rendered native planning remain open. [VS Code live
+coding evidence](evidence/vscode-current-package-live-coding-20261016.json).
+
 ## TestProj backend under current xlang3 — 2026-10-17
 
 Rebuilt the xlang3 Release executable from the current compatibility-branch
