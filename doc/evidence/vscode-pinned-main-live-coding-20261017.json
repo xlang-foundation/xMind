@@ -55,6 +55,16 @@
     "runtime": "Pinned xlang3 executable from the staged local development runtime",
     "observation": "Opened the workspace terminal from the xMind VS Code sidebar, ran the existing TestProj script with xlang3, and confirmed %ERRORLEVEL% was 0. The first attempt used PowerShell '&' syntax in cmd.exe and failed; the corrected CMD invocation succeeded."
   },
+  "project_build": {
+    "working_directory": "D:/CantorAI2026/TestProj/model-zoo/frontend",
+    "command": "npm.cmd run build",
+    "runner": "VS Code integrated xMind workspace terminal (cmd.exe)",
+    "toolchain": "Vite 6.4.4",
+    "transformed_modules": 37,
+    "vite_build_ms": 848,
+    "exit_code": 0,
+    "dist_index_html_sha256": "053203d2d8b60d3c984e0a3645a78d3212b6fdc7c317c1edd8f8a7a746b0d5a4"
+  },
   "cleanup": {
     "restore_run_id": "4ca2b06e62185e511aad8690aa8da81f",
     "restore_operation_id": "874e7b955ae114fe46ab82974f7056c1-0",
@@ -64,7 +74,7 @@
     "test_file_absent_after_restore": true
   },
   "limitations": [
-    "This verifies one bounded live VS Code task, approved file creation, token and timing display, manual integrated-terminal execution with xlang3, and journaled restore. It does not prove broad multi-file coding reliability or an extension-managed build workflow.",
+    "This verifies one bounded live VS Code task, approved file creation, token and timing display, manual integrated-terminal execution with xlang3, journaled restore, and a production build of the existing Vue project. It does not prove broad multi-file coding reliability or an extension-managed build workflow.",
     "The staged runtime is local development validated and explicitly not release accepted.",
     "The VS Code extension suite passed 391/391 separately; this live acceptance is not a full release-package gate."
   ]

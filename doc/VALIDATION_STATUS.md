@@ -3608,6 +3608,9 @@ TestProj!`; `%ERRORLEVEL%` returned `0`. The initial command used PowerShell
 syntax and failed in `cmd.exe`; the corrected CMD command succeeded. Runtime
 provenance matches xMind `cb0a219` and pinned xlang3 main `fcecf499`; the
 runtime remains a local development bundle (`releaseAccepted=false`). This
-verifies one bounded live coding and terminal path, not broad multi-file
+same terminal then ran `npm.cmd run build` in the TestProj Model Zoo Vue app.
+Vite 6.4.4 transformed 37 modules, generated `dist/index.html`, completed in
+848 ms, and `%ERRORLEVEL%` returned `0`. This verifies one bounded live coding
+and terminal path plus a production frontend build, not broad multi-file
 reliability or an extension-managed build. [Run, runtime hashes, metrics,
-execution, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
+execution, build, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
