@@ -50,7 +50,9 @@ runtime process request from VS Code completed; an independent direct xlang3
 invocation returned the expected string with exit code 0. This
 proves the live edit, approval and execution paths across both clients for this
 focused test; it does not establish broad coding reliability or release-package
-acceptance. Exact details and the remaining scope are in the
+acceptance. The smoke fixture was then restored through a second reviewed edit
+and its original output was verified under xlang3. Exact details and the
+remaining scope are in the
 [acceptance evidence](evidence/live-planning-shared-backend-20261017.json).
 
 ## Exact pinned xlang3 main Release gate — 2026-10-17

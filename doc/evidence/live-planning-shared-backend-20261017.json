@@ -78,6 +78,11 @@
       "independent_xlang3_verification": {
         "exit_code": 0,
         "stdout": "xMind VS Code approval-gated edit works"
+      },
+      "fixture_restored_to_original_after_test": true,
+      "restored_fixture_xlang3_verification": {
+        "exit_code": 0,
+        "stdout": "xMind VS Code coding works"
       }
     }
   },
