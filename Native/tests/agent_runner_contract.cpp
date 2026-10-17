@@ -71,7 +71,7 @@ int main(int argc,char** argv) {
         AgentSettings settings;settings.provider={base+"/main","fixture-deployment",Capability::supported,Capability::supported};
         settings.workspace=argv[4];settings.credential=CredentialReference{"test","provider","provider:chat"};
         store.create_session("main","Actual filesystem protocol fixture").get();
-        AgentRunner runner(store,settings);runner.start("main","main","Read README");
+        AgentRunner runner(static_cast<AgentRunJournal&>(store),store,settings);runner.start("main","main","Read README");
         require(runner.execute("main").state==RunState::completed,"Actual provider/tool loop must complete its protocol turn");
         const auto history=store.history("main").get();
         require(history.size()==4 && history[1].role=="assistant" && history[2].role=="tool" && history[3].role=="assistant","Actual tool conversation must be persisted");

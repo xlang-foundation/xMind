@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/agent_run_journal.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
@@ -76,6 +77,9 @@ public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
         bool preserve_dynamic_child_planning_policy=false);
+    AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        bool preserve_dynamic_child_planning_policy=false);
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={},
@@ -98,6 +102,7 @@ public:
     ContextProjection compact_idle_context(const IdleContextOwnerRecord& owner,
         std::chrono::steady_clock::time_point deadline,const std::string& model_id={},std::stop_token cancel={});
 private:
+    AgentRunJournal& journal_;
     PersistenceService& persistence_;
     AgentSettings settings_;
     std::unique_ptr<WorkspaceTools> workspace_;

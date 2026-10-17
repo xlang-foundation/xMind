@@ -100,7 +100,7 @@ std::string execution_identity(const AgentSettings& settings,const std::string& 
     else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     return identity.dump();
 }
-std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(PersistenceService& persistence,const std::string& owner){
+std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(AgentRunJournal& persistence,const std::string& owner){
     std::optional<WorkspaceMembershipSnapshot> result;
     for(const auto& event:persistence.events(owner).get())if(event.kind=="agent.workspace_membership"){
         if(result)throw ToolAccessDenied("Run contains duplicate workspace membership snapshots");
@@ -153,7 +153,11 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
-    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
+    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
+    :AgentRunner(persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy){}
+AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
+    bool preserve_dynamic_child_planning_policy):journal_(journal),persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if((settings_.provider.model.empty()&&!settings_.provider_identity) || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -248,7 +252,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
 }
 std::string AgentRunner::admitted_dynamic_model(const std::string& root_id)const{
     if(!settings_.planning||!planning_)throw DynamicPlanUnavailable("Native dynamic planning is unavailable");
-    const auto saved=persistence_.root_budget(root_id).get();
+    const auto saved=journal_.root_budget(root_id).get();
     const auto identity=Json::parse(saved.spec.provider_identity_json);
     if(!identity.contains("model_id")||!identity["model_id"].is_string())throw DynamicPlanUnavailable("Dynamic owner has no selected model identity");
     const auto model=identity["model_id"].get<std::string>();const auto configured=models();
@@ -256,14 +260,14 @@ std::string AgentRunner::admitted_dynamic_model(const std::string& root_id)const
     return model;
 }
 void AgentRunner::validate_dynamic_owner(const std::string& root_id,const std::string& model_id)const{
-    const auto root=persistence_.run(root_id).get();
+    const auto root=journal_.run(root_id).get();
     if(root.graph_root||!root.parent_id.empty()||!settings_.planning||!planning_)throw DynamicPlanUnavailable("Dynamic execution requires its ordinary root owner");
     const auto model=model_id.empty()?admitted_dynamic_model(root_id):model_id;
     std::optional<DynamicPlanCapabilities> current;
     try{current=execution_capabilities(model);}
     catch(const std::invalid_argument&){throw DynamicPlanUnavailable("Admitted dynamic credential metadata is unavailable");}
-    const auto saved=persistence_.dynamic_capabilities(root_id).get();
-    const auto budget=persistence_.root_budget(root_id).get();const auto expected=execution_budget(model);
+    const auto saved=journal_.dynamic_capabilities(root_id).get();
+    const auto budget=journal_.root_budget(root_id).get();const auto expected=execution_budget(model);
     if(!current||!expected||saved.backend_identity!=current->backend_identity||saved.workspace_identity!=current->workspace_identity||
         saved.provider_identity_json!=current->provider_identity_json||budget.spec.policy_id!=expected->policy_id||
         budget.spec.policy_revision!=expected->policy_revision||budget.spec.max_children!=expected->max_children||
@@ -306,7 +310,7 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,
     }
     if(selected_agent){const auto& agent=*selected_agent;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent snapshot");validate_agent_tool_allowlist(agent.tools);input["agent_profile"]={{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id}};if(agent.tools)input["agent_profile"]["tools"]=*agent.tools;}
     auto serialized=input.dump();if(serialized.size()>2*1024*1024)throw std::invalid_argument("Prompt and file attachments exceed the 2 MiB persisted input limit");
-    return persistence_.start_prompt_run(std::move(id),std::move(session_id),std::move(serialized),execution_budget(model_id),execution_capabilities(model_id),inbox_id).get();
+    return journal_.start_prompt_run(std::move(id),std::move(session_id),std::move(serialized),execution_budget(model_id),execution_capabilities(model_id),inbox_id).get();
 }
 ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
     if(!settings_.context)throw RunUnavailable("This provider has no registered context strategy");
@@ -318,11 +322,11 @@ ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
         policy.id,policy.revision,policy.strategy_id,policy.strategy_revision};
 }
 ContextControlSnapshot AgentRunner::context_status(const std::string& session,const std::string& model)const{
-    persistence_.session(session).get();ContextControlSnapshot result;result.session_id=session;
+    journal_.session(session).get();ContextControlSnapshot result;result.session_id=session;
     result.model_id=model.empty()?settings_.provider.model:model;result.enabled=settings_.context.has_value();
     if(!result.enabled)return result;
     const auto binding=context_binding(result.model_id);const ContextScope scope{ContextScopeKind::session,session};
-    const auto observation=persistence_.context_status_observation(scope,binding).get();
+    const auto observation=journal_.context_status_observation(scope,binding).get();
     result.automatic=settings_.context->compaction.automatic;result.head_revision=observation.head.revision;
     result.source_watermark=observation.source_watermark;
     if(const auto& manual=observation.current_manual)
@@ -335,7 +339,7 @@ ContextControlSnapshot AgentRunner::context_status(const std::string& session,co
 ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord& owner,
     std::chrono::steady_clock::time_point deadline,const std::string& model,std::stop_token token){
     const auto binding=context_binding(model);const auto before_read=std::chrono::steady_clock::now();
-    const auto current=persistence_.idle_context_owner(owner.spec.id).get();
+    const auto current=journal_.idle_context_owner(owner.spec.id).get();
     if(current.state!="active"||current.spec.scope.kind!=ContextScopeKind::session||
        current.spec.binding!=binding||current.spec.manual_request_id!=owner.spec.manual_request_id||
        current.spec.scope!=owner.spec.scope||current.remaining_active_ms<1)
@@ -406,7 +410,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     };
     auto execution_settings=settings_;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
     if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
-    const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
+    const auto admitted=journal_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(persistence_,id):
@@ -420,7 +424,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     }
     bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
-        const auto admission=persistence_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
+        const auto admission=journal_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
         graph_agent=admission.kind==ChildAdmissionKind::graph_agent;
         leaf=admission.kind==ChildAdmissionKind::delegated_leaf||dynamic_child;
         if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
@@ -428,7 +432,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(dynamic_child&&settings_.planning&&!planning_)throw std::invalid_argument("Planning-capable dynamic child requires the shared native planning executor");
         if(!dynamic_child&&leaf&&(admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.a2a_enabled||settings_.max_turns>4))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
         if(dynamic_child){
-            const auto plan=persistence_.dynamic_plan(admission.plan_id).get();
+            const auto plan=journal_.dynamic_plan(admission.plan_id).get();
             const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& value){return value.child_run_id==id;});
             const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& value){return value.id==admission.preset_id&&value.revision==admission.preset_revision;});
             if(node==plan.nodes.end()||preset==plan.capabilities.presets.end()||plan.root_run_id!=budget->root_id()||plan.state!="active"||
@@ -444,8 +448,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(!workspace_||workspace_->identity()!=child_caps->workspace_identity||
                     agent_authority_identity(settings_,settings_.provider.model,workspace_->identity(),agent_authority_credentials(persistence_,settings_))!=preset->backend_identity)
                     throw DynamicPlanUnavailable("Dynamic child authority changed before execution");
-            }catch(const DynamicPlanUnavailable&){return persistence_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
-             catch(const std::invalid_argument&){return persistence_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
+            }catch(const DynamicPlanUnavailable&){return journal_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
+             catch(const std::invalid_argument&){return journal_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
         }
         if(!leaf&&budget&&(!graph_agent||!settings_.context||budget->root_id()!=admission.root_run_id||
             budget->snapshot().spec.policy_id!="native.graph-context"))
@@ -460,7 +464,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     if(!selected.empty()) {const auto allowed=models();if(!settings_.provider_identity&&std::find(allowed.begin(),allowed.end(),selected)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=selected;}
     if(graph_agent&&settings_.context){
         if(!budget)throw std::invalid_argument("Context graph agent requires its owning shared budget");
-        const auto captured=persistence_.graph_context_owner(budget->root_id()).get();
+        const auto captured=journal_.graph_context_owner(budget->root_id()).get();
         const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),
             [&](const auto& value){return value.node_id==admitted.node_id;});
         bool compatible=node!=captured.authority.agents.end()&&node->model_id==provider.model&&
@@ -474,7 +478,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(profile.executable_id.empty()||ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id){compatible=false;break;}}
         catch(const ProcessBeforeDispatchError&){compatible=false;}
         catch(const std::filesystem::filesystem_error&){compatible=false;}
-        if(!compatible)return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"graph_child_configuration_changed"})").get();
+        if(!compatible)return journal_.transition(id,RunState::queued,RunState::failed,R"({"reason":"graph_child_configuration_changed"})").get();
     }
     // Claim outside the failure handler. A duplicate worker losing this update
     // must not fail the run that another worker already owns.
@@ -482,25 +486,25 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         // The service's owner mutex distinguishes an explicit controller cancel
         // from shutdown/fault stop. A stopped wake has claimed no new segment.
         if(resumed)return admitted;
-        if(resumed_dynamic_child)return persistence_.transition(id,RunState::running,RunState::cancelled,R"({"reason":"cancelled_before_nested_resume"})").get();
-        return persistence_.transition(id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
+        if(resumed_dynamic_child)return journal_.transition(id,RunState::running,RunState::cancelled,R"({"reason":"cancelled_before_nested_resume"})").get();
+        return journal_.transition(id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
     }
     std::optional<DynamicResumeRecord> resume;std::optional<DynamicPlanCapabilities> root_caps;
     const auto initial_active_started=std::chrono::steady_clock::now();
     if(resumed){
         validate_dynamic_owner(id,provider.model);
-        const auto plan=persistence_.dynamic_plan_for_root(id).get();if(!plan)throw DynamicPlanUnavailable("Paused dynamic owner has no plan");
-        const auto saved=persistence_.root_budget(id).get();
+        const auto plan=journal_.dynamic_plan_for_root(id).get();if(!plan)throw DynamicPlanUnavailable("Paused dynamic owner has no plan");
+        const auto saved=journal_.root_budget(id).get();
         DynamicResumeSpec spec{plan->id,operation_id(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,saved.revision};
-        spec.context_pin=persistence_.dynamic_context_pause(id).get();
+        spec.context_pin=journal_.dynamic_context_pause(id).get();
         if(settings_.context&&!spec.context_pin)throw DynamicPlanUnavailable("Context-enabled pause has no exact durable context pin");
         const auto active_started=std::chrono::steady_clock::now();
-        resume=persistence_.resume_dynamic_owner(std::move(spec)).get();root_caps=resume->plan.capabilities;
-        try{budget=std::make_shared<RootExecutionBudget>(persistence_,persistence_.root_budget(id).get(),
+        resume=journal_.resume_dynamic_owner(std::move(spec)).get();root_caps=resume->plan.capabilities;
+        try{budget=std::make_shared<RootExecutionBudget>(persistence_,journal_.root_budget(id).get(),
             active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity,resume->owner_runs);}
         catch(...){throw DynamicOutcomeUnrecorded("Resumed dynamic segment lacks its live clock owner; recovery is required");}
         if(resume->context_pin)budget->adopt_context_pin(*resume->context_pin);
-    }else if(!resumed_dynamic_child)persistence_.transition(id,RunState::queued,RunState::running).get();
+    }else if(!resumed_dynamic_child)journal_.transition(id,RunState::queued,RunState::running).get();
     std::stop_source linked;
     std::stop_callback external(token,[&]{linked.request_stop();});
     std::atomic<bool> timed_out=false;
@@ -510,24 +514,24 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     auto stop_mcp_observers=[&]{for(auto& observer:mcp_observers)observer->stop();mcp_observers.clear();};
     auto terminate=[&](RunState state,const Json& reason) {
         stop_mcp_observers();
-        if(dynamic_root)return persistence_.retire_dynamic_owner(id,state,reason.dump(),
+        if(dynamic_root)return journal_.retire_dynamic_owner(id,state,reason.dump(),
             budget&&budget->segment_open()?budget->segment_id():std::string{},
             budget&&budget->segment_open()?budget->active_elapsed_ms():0).get();
-        return persistence_.transition(id,RunState::running,state,reason.dump()).get();
+        return journal_.transition(id,RunState::running,state,reason.dump()).get();
     };
     try {
         if(run_workspace_tools&&!saved_workspace_membership(persistence_,id)){Json folders=Json::array();for(const auto& folder:run_workspace_tools->folders())folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
-            persistence_.append_event(id,"agent.workspace_membership",Json{{"workspace_id",run_workspace_tools->workspace_id()},{"revision",run_workspace_tools->revision()},{"primary_folder_id",run_workspace_tools->folders().front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();}
+            journal_.append_event(id,"agent.workspace_membership",Json{{"workspace_id",run_workspace_tools->workspace_id()},{"revision",run_workspace_tools->revision()},{"primary_folder_id",run_workspace_tools->folders().front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();}
         const auto local_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
         if(!leaf&&admitted.parent_id.empty()&&execution_budget(provider.model)){
-            const auto saved=persistence_.root_budget(id).get();const auto expected=execution_budget(provider.model);
+            const auto saved=journal_.root_budget(id).get();const auto expected=execution_budget(provider.model);
             if(saved.spec.workspace_identity!=expected->workspace_identity||saved.spec.policy_id!=expected->policy_id||saved.spec.policy_revision!=expected->policy_revision||saved.spec.provider_identity_json!=expected->provider_identity_json||saved.spec.max_children!=expected->max_children||saved.spec.max_parallel!=expected->max_parallel||saved.spec.max_model_calls!=expected->max_model_calls||saved.spec.wall_limit_ms!=expected->wall_limit_ms)throw Conflict("Root execution no longer matches its admitted immutable policy");
             if(dynamic_root){
-                validate_dynamic_owner(id,provider.model);root_caps=persistence_.dynamic_capabilities(id).get();
+                validate_dynamic_owner(id,provider.model);root_caps=journal_.dynamic_capabilities(id).get();
                 if(!resumed){
                     DynamicSegmentSpec spec{id,operation_id(),root_caps->backend_identity,saved.revision};
-                    const auto segment=persistence_.open_dynamic_budget_segment(std::move(spec)).get();
-                    try{budget=std::make_shared<RootExecutionBudget>(persistence_,persistence_.root_budget(id).get(),
+                    const auto segment=journal_.open_dynamic_budget_segment(std::move(spec)).get();
+                    try{budget=std::make_shared<RootExecutionBudget>(persistence_,journal_.root_budget(id).get(),
                         initial_active_started+std::chrono::milliseconds(segment.remaining_active_ms),token,segment,root_caps->backend_identity);}
                     catch(...){throw DynamicOutcomeUnrecorded("Opened dynamic segment lacks its live clock owner; recovery is required");}
                 }
@@ -535,7 +539,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         }
         if(leaf){const auto saved=budget->snapshot();if(!workspace_||workspace_->identity()!=saved.spec.workspace_identity)throw std::invalid_argument("Delegated leaf workspace identity changed");
             if(execution_identity(settings_,provider.model)!=saved.spec.provider_identity_json)throw std::invalid_argument("Delegated leaf provider identity changed");
-            persistence_.append_event(id,dynamic_child?"agent.plan.preset":"agent.delegation.preset",Json{{"preset_id",dynamic_child?child_preset->id:"workspace.inspect"},{"preset_revision",1},{"root_run_id",budget->root_id()},{"tool_policy",dynamic_child&&!child_preset->readonly?"approval_controlled":"read_only"}}.dump()).get();}
+            journal_.append_event(id,dynamic_child?"agent.plan.preset":"agent.delegation.preset",Json{{"preset_id",dynamic_child?child_preset->id:"workspace.inspect"},{"preset_revision",1},{"root_run_id",budget->root_id()},{"tool_policy",dynamic_child&&!child_preset->readonly?"approval_controlled":"read_only"}}.dump()).get();}
         const auto run_deadline=budget?budget->deadline():local_deadline;
         timer=std::jthread([&,run_deadline](std::stop_token ending) {
             std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);
@@ -585,19 +589,19 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             for(const auto& source:sources){
                 metadata.push_back({{"path",source.path},{"workspace_id",source.workspace_id},{"file_id",source.file_id},{"content_sha256",source.content_sha256},{"byte_count",source.content.size()}});
             }
-            persistence_.append_event(id,"agent.repository_instructions",Json{{"scope","workspace_root"},{"snapshot","run_start"},{"sources",std::move(metadata)}}.dump()).get();
+            journal_.append_event(id,"agent.repository_instructions",Json{{"scope","workspace_root"},{"snapshot","run_start"},{"sources",std::move(metadata)}}.dump()).get();
             repository_context=std::make_unique<RepositoryInstructionContext>(*workspace_,sources);
-            repository_context->skills().restore(persistence_.initialize_run_skills(id,workspace_->identity()).get(),token);
+            repository_context->skills().restore(journal_.initialize_run_skills(id,workspace_->identity()).get(),token);
             instructions+=repository_context->prepare(token);
         }
         if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
         if(instructions.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
         if(!instructions.empty()) request.messages.push_back({MessageRole::system,std::move(instructions)});
-        if(settings_.instruction_policy.revision>0)persistence_.append_event(id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
+        if(settings_.instruction_policy.revision>0)journal_.append_event(id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         const auto instruction_messages=request.messages.size();
         auto reload_history=[&]{
             request.messages.resize(instruction_messages);request.canonical_window.reset();
-            if(!settings_.context)for(const auto& stored:persistence_.run_history(id).get())request.messages.push_back(message(stored));
+            if(!settings_.context)for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
         if(workspace_){request.tools=run_workspace_tools?run_workspace_tools->definitions():workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
@@ -628,10 +632,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         close_mcp();request.tools=native_tools;
         for(const auto& server:settings_.mcp_servers) {
             if(!server.enabled)continue;cancelled(token);
-            persistence_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
+            journal_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
             McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token,runtime.private_credentials.get());
-            persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
+            journal_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
             auto roots=run_workspace_tools?run_workspace_tools->folders():std::vector<WorkspaceToolFolder>{};
             runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get(),runtime.catalogue_invalidated,std::move(roots));
             const auto definitions=runtime.registry->definitions();
@@ -639,7 +643,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const auto bindings=Json::parse(runtime.registry->approval_bindings_json());
             if(!bindings.is_array())throw DynamicPlanUnavailable("Native MCP registry returned invalid approval bindings");
             for(const auto& binding:bindings)approval_bindings.push_back(binding);
-            persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
+            journal_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
             if(const auto filter=mcp_run_subscription_filter(runtime.client->server())) {
                 try {
                     auto observer_client=connect_mcp_client(server,persistence_,run_deadline,token);
@@ -648,7 +652,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     observer->start();mcp_observers.push_back(std::move(observer));
                 } catch(const std::exception&) {
                     runtime.catalogue_invalidated->store(true,std::memory_order_release);
-                    persistence_.append_event(id,"mcp.subscription.unavailable",
+                    journal_.append_event(id,"mcp.subscription.unavailable",
                         Json{{"server_id",server.id},{"config_revision",server.revision},
                              {"reason","listener_unavailable"}}.dump()).get();
                 }
@@ -661,12 +665,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(run_deadline-std::chrono::steady_clock::now());
             if(remaining.count()<=0)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before A2A discovery");
             if(!a2a_tools)a2a_tools=std::make_unique<A2aAgentToolRegistry>(*a2a_registry_,persistence_,*workspace_,std::min(remaining,std::chrono::milliseconds(5000)),token);
-            for(const auto& agent:a2a_tools->unavailable_agent_ids())persistence_.append_event(id,"a2a.discovery_failed",Json{{"agent_id",agent},{"reason","peer_unavailable_or_invalid"}}.dump()).get();
+            for(const auto& agent:a2a_tools->unavailable_agent_ids())journal_.append_event(id,"a2a.discovery_failed",Json{{"agent_id",agent},{"reason","peer_unavailable_or_invalid"}}.dump()).get();
             const auto definitions=a2a_tools->definitions();
             for(const auto& definition:definitions){if(request.tools.size()>=64||std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& existing){return existing.name==definition.name;}))throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
             const auto bindings=Json::parse(a2a_tools->approval_bindings_json());if(!bindings.is_array())throw DynamicPlanUnavailable("Native A2A registry returned invalid approval bindings");
             for(const auto& binding:bindings)approval_bindings.push_back(binding);
-            if(!definitions.empty())persistence_.append_event(id,"a2a.discovered",Json{{"peer_count",definitions.size()}}.dump()).get();
+            if(!definitions.empty())journal_.append_event(id,"a2a.discovered",Json{{"peer_count",definitions.size()}}.dump()).get();
         };
         auto seal_catalogue=[&]{
             if(dynamic_child)verify_child_catalogue(request.tools,approval_bindings,*child_caps,*child_preset);
@@ -679,7 +683,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,agent_authority_credentials(persistence_,child));
                 }
-                root_caps=persistence_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,approval_bindings),std::move(presets)).get();
+                root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,approval_bindings),std::move(presets)).get();
             }
         };
         auto offer_orchestration=[&]{
@@ -709,7 +713,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         std::string planning_continuation;
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
             if(actual.paused||actual.root.id!=id||actual.call_id.empty()||actual.result_json.empty())throw DynamicOutcomeUnrecorded("Dynamic report does not match its actual running owner");
-            persistence_.commit_dynamic_tool_turn(id,actual.call_id).get();
+            journal_.commit_dynamic_tool_turn(id,actual.call_id).get();
             reload_history();planning_continuation=actual.call_id;
         };
         std::mutex planning_guidance_mutex;
@@ -726,7 +730,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const DynamicPlanCapabilities* capabilities=nullptr;
             if(resume){pending_call=resume->pending_call.id;capabilities=&*root_caps;}
             else{
-                const auto pending=persistence_.dynamic_plan_calls(budget->root_id()).get();
+                const auto pending=journal_.dynamic_plan_calls(budget->root_id()).get();
                 const auto found=std::find_if(pending.begin(),pending.end(),[&](const auto& call){return call.owner_run_id==id&&call.state=="accepted";});
                 if(found==pending.end()||std::count_if(pending.begin(),pending.end(),[&](const auto& call){return call.owner_run_id==id&&call.state=="accepted";})!=1)
                     throw DynamicPlanUnavailable("Resumed dynamic child has no unique accepted continuation");
@@ -758,7 +762,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(current.size()>65536)throw ToolFileError("Combined agent instructions exceed limits");
                 request.messages.front().content=std::move(current);
                 std::string encoded_metadata=repository_context->metadata();if(!active_attached_guidance.empty()){Json metadata={{"primary",Json::parse(encoded_metadata)},{"attached",Json::object()}};for(const auto& folder_id:active_attached_guidance)metadata["attached"][folder_id]=Json::parse(attached_repository_contexts.at(folder_id)->metadata());encoded_metadata=metadata.dump();}
-                if(encoded_metadata!=delivered_repository_metadata){persistence_.append_event(id,"agent.repository_scope",encoded_metadata).get();delivered_repository_metadata=encoded_metadata;}
+                if(encoded_metadata!=delivered_repository_metadata){journal_.append_event(id,"agent.repository_scope",encoded_metadata).get();delivered_repository_metadata=encoded_metadata;}
             }
             std::optional<SecretBytes> credential;
             if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
@@ -791,7 +795,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             ModelCompletion response;Json reply;
             bool durable_output=false,attempt_finished=false,rebuild_used=false;
             auto finish_context_attempt=[&](InferenceAttemptOutcome outcome,const std::optional<std::string>& actual={},const std::string& error_code={}){
-                try{persistence_.finish_inference_attempt({prepared_context->inference_step_id,reservation->attempt_id,outcome,
+                try{journal_.finish_inference_attempt({prepared_context->inference_step_id,reservation->attempt_id,outcome,
                     actual,error_code,std::chrono::ceil<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count()}).get();attempt_finished=true;}
                 catch(...){throw ContextOutcomeUnrecorded("Inference outcome could not be recorded");}
             };
@@ -801,7 +805,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             try{
             response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
                 if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta" || event.kind=="model.reasoning")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
-                cancelled(token);persistence_.append_event(id,event.kind,event.json).get();
+                cancelled(token);journal_.append_event(id,event.kind,event.json).get();
                 if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
             },token);
             }catch(const ProviderHttpError& error){
@@ -841,15 +845,15 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     continue;
                 }}
                 if(dynamic_plan_owner){
-                    const auto plan=persistence_.dynamic_plan_for_owner(id).get();
+                    const auto plan=journal_.dynamic_plan_for_owner(id).get();
                     if(plan&&!inspect_dynamic_plan(*plan).finished)return terminate(RunState::failed,{{"reason","dynamic_plan_incomplete"}});
                 }
                 if(dynamic_root){
                     stop_mcp_observers();
-                    return persistence_.complete_dynamic_owner(id,reply.dump(),budget->segment_id(),budget->active_elapsed_ms()).get();
+                    return journal_.complete_dynamic_owner(id,reply.dump(),budget->segment_id(),budget->active_elapsed_ms()).get();
                 }
                 stop_mcp_observers();
-                return persistence_.complete_run(id,reply.dump()).get();
+                return journal_.complete_run(id,reply.dump()).get();
             }
             if(response.finish_reason=="length")throw ModelProtocolError("Model output token limit reached before completing the agent turn");
             if(response.finish_reason!="tool_calls" || (!workspace_&&xlang_tools.empty())) throw ModelProtocolError("Model did not produce a complete supported turn");
@@ -857,14 +861,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(std::any_of(response.tool_calls.begin(),response.tool_calls.end(),is_planning)){
                 if(!dynamic_plan_owner||response.tool_calls.size()!=1)throw ModelProtocolError("Planning must be the sole tool call of its admitted planning owner turn");
                 const auto& call=response.tool_calls.front();const auto activity=id+":plan:"+call.id;
-                persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)},{"arguments_json",call.arguments_json}}.dump()).get();
+                journal_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)},{"arguments_json",call.arguments_json}}.dump()).get();
                 close_mcp();stop_mcp_observers();DynamicExecutionResult actual;
                 const auto& capabilities=dynamic_root?*root_caps:*child_caps;
                 const bool yielded_leaf=dynamic_child&&budget->yield_leaf();
                 try{actual=planning_->invoke(id,call,reply.dump(),reservation->attempt_id,execution_settings,capabilities,budget,token,planning_guidance);}
                 catch(const DynamicPlanRejected& error){
                     if(yielded_leaf)budget->reacquire_leaf(token);
-                    persistence_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
+                    journal_.record_rejected_dynamic_tool_turn(id,reservation->attempt_id,reply.dump(),error.code).get();
                     reload_history();refresh_tools();continue;
                 }catch(...){if(yielded_leaf)budget->reacquire_leaf(token);throw;}
                 if(yielded_leaf&&!actual.paused)budget->reacquire_leaf(token);
@@ -872,8 +876,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(!actual.call_id.empty())commit_plan_result(actual);
                 else{
                     const auto output=Json::parse(actual.result_json);
-                    persistence_.append_event(id,"tool.completed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
-                    persistence_.record_tool_turn(id,reply.dump(),{Json{{"content",output.dump()},{"tool_call_id",call.id}}.dump()}).get();reload_history();
+                    journal_.append_event(id,"tool.completed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
+                    journal_.record_tool_turn(id,reply.dump(),{Json{{"content",output.dump()},{"tool_call_id",call.id}}.dump()}).get();reload_history();
                 }
                 refresh_tools();continue;
             }
@@ -884,7 +888,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             for(const auto& call:response.tool_calls) {
                 cancelled(token);
                 const auto activity=id+":"+(reservation?reservation->attempt_id:std::to_string(turn))+":"+std::to_string(index++);
-                persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
+                journal_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
                 Json output;bool success=false;
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;std::vector<PreparedFolderPatch> prepared_folder_patches;
@@ -1005,7 +1009,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         const auto a2a_operation=operation_id();
                         output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
-                            cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];persistence_.append_a2a_task_event(id,a2a_operation,journal.dump()).get();
+                            cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];journal_.append_a2a_task_event(id,a2a_operation,journal.dump()).get();
                         }));
                     } else {
                         const bool askable_read=call.name=="read_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files";
@@ -1021,9 +1025,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             try{
                                 auto source=run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token);
                                 output=Json::parse(source);
-                                persistence_.finish_operation(approved.id,OperationState::succeeded,std::move(source)).get();
+                                journal_.finish_operation(approved.id,OperationState::succeeded,std::move(source)).get();
                             }catch(...){
-                                persistence_.finish_operation(approved.id,OperationState::failed,R"({"reason":"permission_asked_read_failed"})").get();
+                                journal_.finish_operation(approved.id,OperationState::failed,R"({"reason":"permission_asked_read_failed"})").get();
                                 throw;
                             }
                         }else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
@@ -1051,14 +1055,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}
                 catch(const std::invalid_argument&) {output={{"error",{{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}}}};}
                 cancelled(token);
-                persistence_.append_event(id,success?"tool.completed":"tool.failed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
+                journal_.append_event(id,success?"tool.completed":"tool.failed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
                 const auto content=output.dump();results.push_back(Json{{"content",content},{"tool_call_id",call.id}}.dump());
                 continuation.push_back({MessageRole::tool,content,{},call.id});
             }
             // The assistant call and all matching results commit together; a
             // cancelled/crashed read batch cannot leave dangling call messages.
             const bool delegated=std::any_of(response.tool_calls.begin(),response.tool_calls.end(),[](const auto& call){return call.name=="delegate_tasks";});
-            try{persistence_.record_tool_turn(id,reply.dump(),std::move(results),repository_context?std::optional<SkillSelections>{repository_context->skills().selections()}:std::nullopt).get();}
+            try{journal_.record_tool_turn(id,reply.dump(),std::move(results),repository_context?std::optional<SkillSelections>{repository_context->skills().selections()}:std::nullopt).get();}
             catch(...){if(delegated)throw DelegationOutcomeUnrecorded("Delegation parent conversation could not be committed; recovery is required");throw;}
             if(refresh_mcp_after_turn){refresh_tools();}
             if(!context_manager)for(auto& next:continuation) request.messages.push_back(std::move(next));

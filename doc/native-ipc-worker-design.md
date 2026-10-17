@@ -31,6 +31,21 @@ SQLite handles, workspace roots and backend runtime objects stay with the
 server owner. Only after both hosts pass the same AgentRunner contracts should
 trusted definitions be allowed to select process placement.
 
+The first code seam is now extracted as `AgentRunJournal`. Direct run history,
+event, budget, dynamic-plan, skill-selection and operation-journal calls from
+`AgentRunner` use this owned-value interface; `PersistenceService` is its
+current production implementation. The runner also accepts the journal
+separately from its backend services, and the real AgentRunner contract passes
+through that constructor. Release contracts for AgentService, GraphRunner and
+the A2A agent registry passed against the rebuilt libraries. This is a journal
+boundary only: process execution, context, workspace, MCP and A2A helper objects
+still receive concrete backend services. Credential resolution deliberately
+stays on `PersistenceService` and is excluded from the portable journal because
+it returns secret bytes. The interface does not enable out-of-process
+AgentRunner execution. The next extraction must route provider/tool and
+approval capabilities through the host while keeping credentials and durable
+effects with the owner.
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.
