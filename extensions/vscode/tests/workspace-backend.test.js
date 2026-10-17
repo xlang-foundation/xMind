@@ -3,18 +3,24 @@
 // covered by Native/tests/local_view_contract.mjs, not this host fixture.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {EventEmitter}=require('node:events');
-const {WorkspaceBackend}=require('../workspace-backend');
+const path=require('node:path');
+const {WorkspaceBackend,canonicalPath}=require('../workspace-backend');
 const {BackendClient}=require('../client');
 const folder=(name,fsPath)=>({name,uri:{scheme:'file',fsPath,toString:()=>`file:///${fsPath.replaceAll('\\','/')}`}});
+test('Windows volume-letter case normalizes without folding case-sensitive path components',()=>{
+ assert.equal(canonicalPath('d:\\CantorAI2026\\xMind\\.config\\language-servers.yaml'),'D:\\CantorAI2026\\xMind\\.config\\language-servers.yaml');
+ assert.notEqual(canonicalPath('D:\\Projects\\CaseSensitive'),canonicalPath('D:\\projects\\CaseSensitive'));
+});
 function harness(options={}){
  const state=new Map(),secrets=new Map(),launches=[],files=new Map(),directories=[],picks=[];
  const settings={providerConfigPath:'D:\\Trusted\\providers.yaml',languageServerConfigPath:'',processConfigPath:'',workspaceEdits:true,...options.settings};
  const defaults=require('../package.json').contributes.configuration.properties;
  const vscode={ExtensionMode:{Development:2},env:{remoteName:options.remote},workspace:{isTrusted:options.trusted!==false,workspaceFolders:options.folders||[folder('Example','D:\\Projects\\Example')],getConfiguration:()=>({inspect:key=>({globalValue:settings[key],defaultValue:defaults['agentflow.'+key]?.default,workspaceValue:'untrusted-project-value'})})},window:{showQuickPick:async items=>{picks.push(items);return items[options.pick??0];}}};
- const context={extensionMode:options.extensionMode??2,extensionUri:{fsPath:'D:\\CantorAI2026\\xMind\\extensions\\vscode'},workspaceState:{get:key=>state.get(key),update:async(key,value)=>state.set(key,value)},secrets:{get:async key=>secrets.get(key),store:async(key,value)=>secrets.set(key,value),delete:async key=>secrets.delete(key)},globalState:{get:()=>{throw Error('No editor owner registry');},update:()=>{throw Error('No editor owner registry');}}};
+ const extensionRoot=options.extensionRoot||'D:\\CantorAI2026\\xMind\\extensions\\vscode';
+ const context={extensionMode:options.extensionMode??2,extensionUri:{fsPath:extensionRoot},workspaceState:{get:key=>state.get(key),update:async(key,value)=>state.set(key,value)},secrets:{get:async key=>secrets.get(key),store:async(key,value)=>secrets.set(key,value),delete:async key=>secrets.delete(key)},globalState:{get:()=>{throw Error('No editor owner registry');},update:()=>{throw Error('No editor owner registry');}}};
  let time=0,sequence=0;
  const runtime={nativeProgram:'C:\\Runtime\\xmind.exe',qualified:true,providerConfig:settings.providerConfigPath,languageServerConfig:settings.languageServerConfigPath||undefined,processConfig:settings.processConfigPath||undefined,privateStateRoot:options.storage||'C:\\Private'};
- const configCandidate='D:\\CantorAI2026\\xMind\\.config\\providers.yaml',languageServerCandidate='D:\\CantorAI2026\\xMind\\.config\\language-servers.yaml',processConfigCandidate='D:\\CantorAI2026\\xMind\\.config\\processes.yaml';if(options.configFile)files.set(configCandidate,'private fixture only');if(options.languageServerConfigFile)files.set(languageServerCandidate,'trusted language-server fixture');if(options.processConfigFile)files.set(processConfigCandidate,'trusted process fixture');
+ const candidate=name=>path.win32.resolve(extensionRoot,'..','..','.config',name),configCandidate=candidate('providers.yaml'),languageServerCandidate=candidate('language-servers.yaml'),processConfigCandidate=candidate('processes.yaml');if(options.configFile)files.set(configCandidate,'private fixture only');if(options.languageServerConfigFile)files.set(languageServerCandidate,'trusted language-server fixture');if(options.processConfigFile)files.set(processConfigCandidate,'trusted process fixture');
  const requests=[];
  const deps={platform:'win32',arch:'x64',env:{PATH:'fixture-path',LOCALAPPDATA:'C:\\Local',USERPROFILE:'C:\\User',XMIND_AUTH_TOKEN:'stale-master',XMIND_API_KEY:'stale-provider',XMIND_UI_BOOTSTRAP_TOKEN:'stale-preview'},random:()=> 'c'.repeat(64),directoryNonce:()=> (++sequence).toString(16).padStart(32,'0'),now:()=>time,sleep:async ms=>{time+=ms;},fs:{realpath:async value=>options.alias?.(value)||value,mkdir:async value=>directories.push(value),mkdtemp:async prefix=>prefix+(++sequence),lstat:async file=>{if(!files.has(file)){const e=Error('pending');e.code='ENOENT';throw e;}return {isFile:()=>true,isSymbolicLink:()=>false,nlink:1,size:1000};},readFile:async file=>JSON.stringify(files.get(file))},spawn:(program,args,config)=>{
   const child=new EventEmitter();child.pid=2000+sequence;child.exitCode=null;child.kills=0;child.unref=()=>{};child.kill=()=>{child.kills++;child.exitCode=1;child.emit('exit',1);};
@@ -40,6 +46,7 @@ test('development extension discovers only the repository config and never searc
 test('trusted language-server configuration is passed to native without reading it',async()=>{
  const selected='D:\\Trusted\\language-servers.yaml',h=harness({settings:{languageServerConfigPath:selected}});await h.manager.connect();const launch=h.launches[0],flag=launch.args.indexOf('--language-server-config');assert.ok(flag>0);assert.equal(launch.args[flag+1],selected);assert.equal(h.requests.some(value=>String(value.url).includes('language-server')),false);
  const development=harness({settings:{languageServerConfigPath:''},languageServerConfigFile:true});await development.manager.connect();const devLaunch=development.launches[0],devFlag=devLaunch.args.indexOf('--language-server-config');assert.ok(devFlag>0);assert.equal(devLaunch.args[devFlag+1],development.languageServerCandidate);
+ const lower='d:\\CantorAI2026\\xMind\\.config\\language-servers.yaml',physical='D:\\CantorAI2026\\xMind\\.config\\language-servers.yaml',caseVariant=harness({extensionRoot:'d:\\CantorAI2026\\xMind\\extensions\\vscode',settings:{languageServerConfigPath:''},languageServerConfigFile:true,alias:value=>value===lower?physical:value});await caseVariant.manager.connect();const caseArgs=caseVariant.launches[0].args,caseFlag=caseArgs.indexOf('--language-server-config');assert.equal(caseArgs[caseFlag+1],physical,'VS Code drive-letter casing must not reach native configuration validation');
  const packaged=harness({settings:{languageServerConfigPath:''},languageServerConfigFile:true,extensionMode:1});await packaged.manager.connect();assert.ok(!packaged.launches[0].args.includes('--language-server-config'));
 });
 test('trusted process profiles reach native only through machine settings or the repository development config',async()=>{

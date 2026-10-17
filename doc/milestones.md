@@ -34,9 +34,25 @@ and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
 capture those results. The first coding loop is therefore demonstrated in
 each client. Native restart persistence passes its shared-backend contract, and
 the browser/VS Code profile check confirms the same selected session identity
-and 31 saved messages. The first target remains active until that transcript is
-visibly confirmed in the live VS Code pane and a coding turn is completed from
-the shared session there.
+and 31 saved messages. At the time of these earlier records, the shared transcript still awaited live VS Code confirmation. The 2026-10-16 live acceptance below has since closed that check.
+
+2026-10-16 live cross-client coding acceptance: VS Code and the external
+webpage both attached to the local TestProj profile and used its saved OpenAI
+configuration. In VS Code, xMind proposed a focused accessibility/usability
+change to `model-zoo/frontend/src/components/ModelCard.vue`; the user reviewed
+and approved it, and `npm run build` completed successfully (37 Vite modules,
+exit 0). The webpage then continued the shared conversation with a read-only
+follow-up, returned provider/model and token/timing metrics, and the refreshed
+conversation was visible in VS Code. No provider key or server token was
+requested. A `git diff` probe reported that TestProj has no Git repository;
+this did not affect the edit or successful build. This completes the first
+webpage/VS Code coding acceptance on the live machine. [Sanitized live evidence](evidence/xmind-cross-client-live-coding-20261016.json).
+
+The live VS Code acceptance also exposed a Windows path normalization bug:
+VS Code can report the development extension drive letter in lowercase while
+`realpath()` reports it uppercase. xMind now normalizes the volume letter
+without changing case-sensitive directory components, and the regression test
+covers both properties. The complete VS Code extension suite passes **386/386**.
 
 2026-10-16 unified CLI live profile check: the single `xmind` binary attached to
 the existing TestProj local profile, discovered its saved Claude model without

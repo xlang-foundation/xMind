@@ -10,7 +10,11 @@ function canonicalPath(value){
   if(typeof value!=='string'||!value||value.length>32760||/[\x00-\x1f]/.test(value))throw new Error('Invalid local workspace path.');
   const ordinary=value.startsWith('\\\\?\\UNC\\')?'\\\\'+value.slice(8):value.startsWith('\\\\?\\')?value.slice(4):value;
   if(!/^[A-Za-z]:[\\/]/.test(ordinary)&&!/^\\\\[^\\/]+\\[^\\/]+(?:\\|$)/.test(ordinary))throw new Error('Local xMind requires an absolute Windows workspace.');
-  return path.win32.normalize(ordinary);
+  const normalized=path.win32.normalize(ordinary);
+  // Windows volume letters are case-insensitive even when a directory has
+  // NTFS case sensitivity enabled. realpath() commonly uppercases this one
+  // character while VS Code's extensionUri may lowercase it.
+  return /^[A-Za-z]:[\\/]/.test(normalized)?normalized[0].toUpperCase()+normalized.slice(1):normalized;
 }
 // Canonical authority comparisons retain casing: NTFS can have two distinct
 // case-sensitive siblings. Storage exclusion is deliberately conservative.
@@ -29,7 +33,7 @@ function machineSetting(vscode,name){
   return inspected?.globalValue??inspected?.defaultValue;
 }
 async function providerConfigurationPath(context,vscode,io,setting){
-  if(setting)return setting;
+  if(setting)return canonicalPath(setting);
   // Development installs have a fixed source layout. Never search an opened
   // workspace for provider credentials.
   if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
@@ -39,11 +43,11 @@ async function providerConfigurationPath(context,vscode,io,setting){
   try{
     const info=await io.lstat(candidate);
     if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development provider configuration is aliased or not a regular file.');
-    return candidate;
+    return canonicalPath(candidate);
   }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
 async function languageServerConfigurationPath(context,vscode,io,setting){
-  if(setting)return setting;
+  if(setting)return canonicalPath(setting);
   if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
   const extensionRoot=context.extensionUri?.fsPath;
   if(typeof extensionRoot!=='string'||!path.isAbsolute(extensionRoot))return undefined;
@@ -51,11 +55,11 @@ async function languageServerConfigurationPath(context,vscode,io,setting){
   try{
     const info=await io.lstat(candidate);
     if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development language-server configuration is aliased or not a regular file.');
-    return candidate;
+    return canonicalPath(candidate);
   }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
 async function processConfigurationPath(context,vscode,io,setting){
-  if(setting)return setting;
+  if(setting)return canonicalPath(setting);
   if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
   const extensionRoot=context.extensionUri?.fsPath;
   if(typeof extensionRoot!=='string'||!path.isAbsolute(extensionRoot))return undefined;
@@ -63,7 +67,7 @@ async function processConfigurationPath(context,vscode,io,setting){
   try{
     const info=await io.lstat(candidate);
     if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development process configuration is aliased or not a regular file.');
-    return candidate;
+    return canonicalPath(candidate);
   }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
 
