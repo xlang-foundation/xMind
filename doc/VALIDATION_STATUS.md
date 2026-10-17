@@ -11,6 +11,20 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Current product acceptance matrix — 2026-10-17
+
+| Area | Current evidence | Remaining work |
+| --- | --- | --- |
+| Native backend and local persistence | The unified C++ `xmind` runtime and embedded-xlang3 SQLite passed 147/147 native Release contracts. | Fresh installed-package acceptance and managed startup on other hosts. |
+| Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
+| MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
+| A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
+| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. TestProj pytest passed 9/9; webpage Vite build passed. | Broader multi-file/editor workflows, long-task reliability, packaged acceptance, and full-screen CLI validation. |
+| Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. | Broader live-provider and failure/recovery coverage. |
+| OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+Primary evidence: [native Release gate](evidence/native-current-source-release-ctest-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [VS Code coding](evidence/vscode-current-source-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
+
 ## Current client contract re-run — 2026-10-17
 
 At source `2f49804`, the full VS Code extension suite passes **391/391** and
