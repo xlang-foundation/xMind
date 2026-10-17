@@ -198,8 +198,8 @@ McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view 
         if(name.empty() || name.size()>128 || name.find('\0')!=std::string::npos || arguments.size()>65536)throw McpProtocolError("Invalid MCP tool call");
         auto params=mcp_tool_call_params(name,arguments);
         for(std::size_t round=0;round<10;++round) {
-            const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
             if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
+            const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
             state.unsolicited=0;attempted=true;state.process.write(request.frame,deadline,cancel);
             std::optional<McpCorrelatedReply> correlated;
             while(!correlated) {
@@ -218,6 +218,8 @@ McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view 
                 if(!fulfill_input)return result;const auto response=fulfill_input(identity,raw);if(!response)return result;
                 responses.emplace(identity,*response);
             }
+            if(cancel.stop_requested())throw McpTransportError("MCP input continuation was cancelled before dispatch");
+            if(std::chrono::steady_clock::now()>=deadline)return result;
             params=mcp_tool_call_params(name,arguments,responses,result.input_required->request_state);
         }
         throw McpProtocolError("MCP input-required round limit was exceeded");

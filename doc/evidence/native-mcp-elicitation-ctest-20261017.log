@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/native
+    Start 74: native_language_server_rust_fixture_check
+1/4 Test #74: native_language_server_rust_fixture_check .......   Passed    0.10 sec
+    Start 75: native_language_server_rust_analyzer_contract
+2/4 Test #75: native_language_server_rust_analyzer_contract ...   Passed    7.12 sec
+    Start 78: native_mcp_effect_contract
+3/4 Test #78: native_mcp_effect_contract ......................   Passed   16.94 sec
+    Start 79: native_mcp_input_contract
+4/4 Test #79: native_mcp_input_contract .......................   Passed    0.54 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  24.73 sec

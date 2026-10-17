@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-17",
+  "xmind_base_revision": "b0828de18ecb7860547da4bb5d8a7ddcc2afef8d",
+  "tested_worktree_changes": [
+    "Native/CMakeLists.txt: agentflow_http links agentflow_schema_worker",
+    "Native/src/mcp_client.cpp: do not allocate request IDs for expired continuation rounds; retain the original input_required result when no continuation can be sent"
+  ],
+  "feature_source_revision": "45d7c4f9b22d505b5583775cb10bba801f5afa44",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "xlang3_runtime": "D:\\CantorAI2026\\xlang3\\build-xmind-import-diagnostic\\Release\\xlang3_runtime.dll",
+  "xlang3_runtime_sha256": "88a00148f42d55ce1ac21ed9bea96ff13c6a6993475680e1a5897ce862ed8448",
+  "native_contract": {
+    "name": "native_mcp_input_contract",
+    "passed": 1,
+    "failed": 0,
+    "elapsed_seconds": 0.40,
+    "executable_sha256": "eb8fb88dd806a05cee2fbd7bfc21e32847b44b28aca6b02c68e472c45361f07a",
+    "transcript": "native-mcp-elicitation-ctest-20261017.log",
+    "scope": "approved MCP operation, durable scoped elicitation form, validated local answer, same-peer continuation, and recorded outcome"
+  },
+  "native_build_and_retests": {
+    "all_build_targets": "passed",
+    "initial_full_ctest": {
+      "passed": 148,
+      "failed": 2,
+      "total": 150
+    },
+    "serial_retest": {
+      "passed": 4,
+      "failed": 0,
+      "total": 4,
+      "tests": [
+        "native_language_server_rust_fixture_check",
+        "native_language_server_rust_analyzer_contract",
+        "native_mcp_effect_contract",
+        "native_mcp_input_contract"
+      ],
+      "transcript": "native-mcp-elicitation-ctest-20261017.log"
+    },
+    "note": "The complete 150-test suite was not rerun after the two serially passing fixes."
+  },
+  "client_suites": {
+    "vscode": {
+      "passed": 388,
+      "failed": 0,
+      "elapsed_ms": 3542.913,
+      "transcript": "vscode-mcp-elicitation-20261017.log"
+    },
+    "browser": {
+      "passed": 134,
+      "failed": 0,
+      "elapsed_ms": 15758.154,
+      "transcript": "browser-mcp-elicitation-20261017.log"
+    }
+  },
+  "limitations": [
+    "The native MCP peer is a deterministic fixture; live third-party MCP elicitation interoperability was not tested.",
+    "The complete hosted native release and runtime-staging gate remains pending."
+  ]
+}

@@ -49,6 +49,25 @@ its result cannot certify the runtime now used by xMind. The updated hosted
 workflow must complete successfully before its staged runtime is considered
 release accepted.
 
+## MCP elicitation forms — current-source local checks, 2026-10-17
+
+The durable form-input implementation from `45d7c4f` builds against the pinned
+xlang3 runtime at `fcecf499`. Its focused native persistence contract passes
+**1/1** and verifies the approved MCP operation, durable request identity,
+validated local answer, same-peer continuation, and recorded outcome. The
+current VS Code suite passes **388/388** and browser suite **134/134**. Both
+client suites include elicitation renderer/route coverage. The peer is a
+deterministic fixture, so live third-party elicitation interoperability is not
+claimed. [Exact source, runtime hashes, scopes, and transcripts](evidence/mcp-elicitation-forms-local-20261017.json).
+
+The full native Release build also passes after adding the schema-worker link
+required by HTTP elicitation validation. The first full CTest run passed
+**148/150**; the MCP effect and Rust analyzer restoration failures both passed
+in a serial focused rerun (**4/4**, including the MCP input contract). The
+complete suite has not been rerun after those fixes, so this is not recorded as
+a full 150/150 result. The MCP client now preserves the last dispatched request
+ID when an elicitation deadline expires before continuation dispatch.
+
 ## Full native Release contract gate — 2026-10-16
 
 The current xMind Release build passed **149/149 CTest contracts** against the
