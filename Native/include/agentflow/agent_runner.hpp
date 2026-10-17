@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_run_journal.hpp"
+#include "agentflow/agent_context_journal.hpp"
 #include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
@@ -80,6 +81,9 @@ public:
     AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={});
+    AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& backend_services,AgentSettings settings,
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={},
@@ -103,6 +107,7 @@ public:
         std::chrono::steady_clock::time_point deadline,const std::string& model_id={},std::stop_token cancel={});
 private:
     AgentRunJournal& journal_;
+    AgentContextJournal& context_journal_;
     PersistenceService& persistence_;
     AgentSettings settings_;
     std::shared_ptr<AgentModelGateway> model_gateway_;

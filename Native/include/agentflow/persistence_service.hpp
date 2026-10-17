@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_run_journal.hpp"
+#include "agentflow/agent_context_journal.hpp"
 #include "agentflow/repository.hpp"
 #include <future>
 
@@ -10,7 +11,7 @@ struct PersistenceBusy : std::runtime_error {using std::runtime_error::runtime_e
 // Thread-safe request boundary for server/agent workers. The repository, runtime
 // and lease exist only on its private worker. Results contain owned C++ values.
 // Scope authorization belongs to the calling backend service.
-class PersistenceService : public AgentRunJournal {
+class PersistenceService : public AgentRunJournal, public AgentContextJournal {
 public:
     PersistenceService(std::string database,std::vector<std::string> import_roots,
         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},

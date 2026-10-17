@@ -1,5 +1,7 @@
 #pragma once
 #include "agentflow/context_selection.hpp"
+#include "agentflow/agent_context_journal.hpp"
+#include "agentflow/agent_run_journal.hpp"
 #include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/root_execution_budget.hpp"
@@ -38,6 +40,8 @@ public:
     using MessageDecoder=std::function<ModelMessage(const Message&)>;
     ContextManager(PersistenceService&,ChatProviderConfig,ContextRuntimePolicy,MessageDecoder);
     ContextManager(PersistenceService&,AgentModelGateway&,ChatProviderConfig,ContextRuntimePolicy,MessageDecoder);
+    ContextManager(AgentRunJournal&,AgentContextJournal&,ChatProviderConfig,ContextRuntimePolicy,MessageDecoder);
+    ContextManager(AgentRunJournal&,AgentContextJournal&,AgentModelGateway&,ChatProviderConfig,ContextRuntimePolicy,MessageDecoder);
     PreparedModelContext prepare(const ContextOwner&,const ModelRequest& trusted_current,
         RootExecutionBudget&,const SecretBytes* bearer,std::stop_token cancel={});
     PreparedModelContext rebuild(const ContextOwner&,const ModelRequest& trusted_current,
@@ -48,7 +52,8 @@ public:
         const SecretBytes* bearer,std::stop_token cancel={},
         std::optional<std::chrono::steady_clock::time_point> owner_deadline={});
 private:
-    PersistenceService& store_;
+    AgentRunJournal& run_journal_;
+    AgentContextJournal& context_journal_;
     AgentModelGateway* model_gateway_=nullptr;
     ChatProviderConfig provider_;
     ContextRuntimePolicy policy_;

@@ -37,7 +37,8 @@ struct EngineResult {
     std::optional<ContextProjection> projection;
 };
 class Preparation {
-    PersistenceService& store;
+    AgentRunJournal& run_journal;
+    AgentContextJournal& store;
     ChatProviderConfig provider;
     const ContextRuntimePolicy& policy;
     const ContextManager::MessageDecoder& decode;
@@ -156,7 +157,7 @@ class Preparation {
         const auto attempt=member?member->attempt_id:owned_attempt_id;
         try{
             std::optional<InferenceStepRecord> step;
-            try{step=store.inference_step(owned_step_id).get();}
+            try{step=run_journal.inference_step(owned_step_id).get();}
             catch(const NotFound&){}
             if(step){
                 const auto actual=std::find_if(step->physical_attempts.begin(),step->physical_attempts.end(),
@@ -166,7 +167,7 @@ class Preparation {
                     throw ContextOutcomeUnrecorded("Preparation lost its exact inference reservation");
                 if(actual->state=="finished"||actual->state=="interrupted")return;
                 if(actual->state!="reserved")throw ContextOutcomeUnrecorded("Preparation cannot retire dispatched inference");
-                store.finish_inference_attempt({step->id,actual->attempt_id,
+                run_journal.finish_inference_attempt({step->id,actual->attempt_id,
                     cancel.stop_requested()?InferenceAttemptOutcome::cancelled:InferenceAttemptOutcome::failed,
                     {},"",0}).get();
             }else{
@@ -182,11 +183,11 @@ class Preparation {
          catch(...){throw ContextOutcomeUnrecorded("Undispatched inference retirement could not be recorded");}
     }
 public:
-    Preparation(PersistenceService& persistence,ChatProviderConfig configured,const ContextRuntimePolicy& configured_policy,
+    Preparation(AgentRunJournal& runs,AgentContextJournal& contexts,ChatProviderConfig configured,const ContextRuntimePolicy& configured_policy,
         const ContextManager::MessageDecoder& decoder,const ContextOwner& context_owner,RootExecutionBudget* root,
         const SecretBytes* credential,AgentModelGateway* gateway,std::stop_token stopped,
         std::optional<std::chrono::steady_clock::time_point> owner_deadline={})
-        :store(persistence),provider(std::move(configured)),policy(configured_policy),decode(decoder),owner(context_owner),
+        :run_journal(runs),store(contexts),provider(std::move(configured)),policy(configured_policy),decode(decoder),owner(context_owner),
          budget(root),bearer(credential),model_gateway(gateway),cancel(stopped),deadline(std::chrono::steady_clock::now()+std::chrono::milliseconds(configured_policy.compaction.maintenance_deadline_ms)){
         if(root)deadline=std::min(deadline,root->deadline());
         if(owner_deadline)deadline=std::min(deadline,*owner_deadline);
@@ -209,7 +210,7 @@ public:
         if(failed&&(!budget||!policy.compaction.automatic))throw ContextUnavailable("Automatic context rebuild is unavailable");
         if(budget){
             if(owner.root_run_id!=budget->root_id()||owner.owner_run_id.empty())throw ContextBindingChanged("Context owner differs from its root budget");
-            const auto run=store.run(owner.owner_run_id).get();
+            const auto run=run_journal.run(owner.owner_run_id).get();
             if(run.state!=RunState::running||run.graph_root||
                (owner.scope.kind==ContextScopeKind::session&&(owner.scope.id!=run.session_id||!run.parent_id.empty()||owner.role!=ModelCallRole::parent||owner.root_run_id!=run.id))||
                (owner.scope.kind==ContextScopeKind::execution&&(owner.scope.id!=run.id||run.parent_id.empty()||owner.role!=ModelCallRole::leaf))||
@@ -218,7 +219,7 @@ public:
         }else if(!owner.root_run_id.empty()||owner.planning_call_id||owner.scope.kind!=ContextScopeKind::session||owner.owner_run_id.empty())
             throw ContextBindingChanged("Idle context requires its exclusive session maintenance owner");
         if(failed){
-            const auto step=store.inference_step(failed->inference_step_id).get();
+            const auto step=run_journal.inference_step(failed->inference_step_id).get();
             const auto member=std::find_if(step.physical_attempts.begin(),step.physical_attempts.end(),[&](const auto& value){return value.attempt_id==failed->inference.attempt_id;});
             if(step.root_run_id!=owner.root_run_id||step.owner_run_id!=owner.owner_run_id||step.scope!=owner.scope||
                step.binding!=owner.binding||step.planning_call_id!=owner.planning_call_id||step.state!="context_overflow"||
@@ -375,7 +376,13 @@ std::string context_route_identity(const ChatProviderConfig& provider,const std:
     return context_digest("native.context.route.v1:"+std::to_string(provider.endpoint.size())+":"+provider.endpoint+":9:responses:"+std::to_string(route.size())+":"+route);
 }
 ContextManager::ContextManager(PersistenceService& store,ChatProviderConfig provider,ContextRuntimePolicy policy,MessageDecoder decoder)
-    :store_(store),provider_(std::move(provider)),policy_(std::move(policy)),decode_(std::move(decoder)){
+    :ContextManager(store,store,std::move(provider),std::move(policy),std::move(decoder)){}
+ContextManager::ContextManager(PersistenceService& store,AgentModelGateway& gateway,ChatProviderConfig provider,
+    ContextRuntimePolicy policy,MessageDecoder decoder)
+    :ContextManager(store,store,gateway,std::move(provider),std::move(policy),std::move(decoder)){}
+ContextManager::ContextManager(AgentRunJournal& runs,AgentContextJournal& contexts,ChatProviderConfig provider,
+    ContextRuntimePolicy policy,MessageDecoder decoder)
+    :run_journal_(runs),context_journal_(contexts),provider_(std::move(provider)),policy_(std::move(policy)),decode_(std::move(decoder)){
     const auto& p=policy_.compaction;
     if(provider_.wire!=ProviderWire::responses||!decode_||p.id!="native.context"||p.revision!=1||
        p.strategy_id!="responses.compact"||p.strategy_revision!=1||p.max_groups<1||p.max_groups>4096||
@@ -385,18 +392,18 @@ ContextManager::ContextManager(PersistenceService& store,ChatProviderConfig prov
        p.retain_recent_groups<1||p.retain_recent_groups>64||policy_.buffer_tokens<0||policy_.model_capacities.size()>256)
         throw std::invalid_argument("Invalid registered native context runtime policy");
 }
-ContextManager::ContextManager(PersistenceService& store,AgentModelGateway& gateway,ChatProviderConfig provider,
-    ContextRuntimePolicy policy,MessageDecoder decoder)
-    :ContextManager(store,std::move(provider),std::move(policy),std::move(decoder)){model_gateway_=&gateway;}
+ContextManager::ContextManager(AgentRunJournal& runs,AgentContextJournal& contexts,AgentModelGateway& gateway,
+    ChatProviderConfig provider,ContextRuntimePolicy policy,MessageDecoder decoder)
+    :ContextManager(runs,contexts,std::move(provider),std::move(policy),std::move(decoder)){model_gateway_=&gateway;}
 PreparedModelContext ContextManager::prepare(const ContextOwner& owner,const ModelRequest& trusted,RootExecutionBudget& budget,
     const SecretBytes* bearer,std::stop_token cancel){
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted);
+    auto actual=Preparation(run_journal_,context_journal_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted);
     if(!actual.inference)throw ContextOutcomeUnrecorded("Prepared context has no inference reservation");
     return {std::move(actual.request),std::move(*actual.inference),std::move(actual.step_id),std::move(actual.snapshot),std::move(actual.measure)};
 }
 PreparedModelContext ContextManager::rebuild(const ContextOwner& owner,const ModelRequest& trusted,const PreparedModelContext& failed,
     RootExecutionBudget& budget,const SecretBytes* bearer,std::stop_token cancel){
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted,&failed);
+    auto actual=Preparation(run_journal_,context_journal_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted,&failed);
     if(!actual.inference)throw ContextOutcomeUnrecorded("Rebuilt context has no physical inference member");
     return {std::move(actual.request),std::move(*actual.inference),std::move(actual.step_id),std::move(actual.snapshot),std::move(actual.measure)};
 }
@@ -404,7 +411,7 @@ ContextProjection ContextManager::compact_idle(const ContextScope& scope,const C
     const ModelRequest& trusted,const SecretBytes* bearer,std::stop_token cancel,
     std::optional<std::chrono::steady_clock::time_point> owner_deadline){
     ContextOwner owner;owner.scope=scope;owner.binding=binding;owner.owner_run_id=id;
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,nullptr,bearer,model_gateway_,cancel,owner_deadline).run(trusted);
+    auto actual=Preparation(run_journal_,context_journal_,provider_,policy_,decode_,owner,nullptr,bearer,model_gateway_,cancel,owner_deadline).run(trusted);
     if(!actual.projection)throw ContextOutcomeUnrecorded("Idle maintenance returned without a checkpoint");
     return std::move(*actual.projection);
 }

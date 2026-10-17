@@ -27,6 +27,7 @@ public:
     virtual std::future<std::vector<Event>> events(std::string id,std::int64_t after=0)=0;
     virtual std::future<DynamicPlanCapabilities> finalize_dynamic_capabilities(std::string root,std::string backend_identity,std::string catalogue_json,std::vector<DynamicPresetCapability> presets)=0;
     virtual std::future<InferenceStepRecord> finish_inference_attempt(InferenceAttemptResult result)=0;
+    virtual std::future<InferenceStepRecord> inference_step(std::string id)=0;
     virtual std::future<Operation> finish_operation(std::string id,OperationState outcome,std::string result_json)=0;
     virtual std::future<GraphContextOwnerRecord> graph_context_owner(std::string root)=0;
     virtual std::future<IdleContextOwnerRecord> idle_context_owner(std::string id)=0;

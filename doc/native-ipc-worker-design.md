@@ -31,20 +31,20 @@ SQLite handles, workspace roots and backend runtime objects stay with the
 server owner. Only after both hosts pass the same AgentRunner contracts should
 trusted definitions be allowed to select process placement.
 
-The first code seam is now extracted as `AgentRunJournal`. Direct run history,
+The first code seam is extracted as `AgentRunJournal`. Direct run history,
 event, budget, dynamic-plan, skill-selection and operation-journal calls from
 `AgentRunner` use this owned-value interface; `PersistenceService` is its
-current production implementation. The runner also accepts the journal
-separately from its backend services, and the real AgentRunner contract passes
-through that constructor. Release contracts for AgentService, GraphRunner and
-the A2A agent registry passed against the rebuilt libraries. This is a journal
-boundary only: process execution, context, workspace, MCP and A2A helper objects
-still receive concrete backend services. Credential resolution deliberately
-stays on `PersistenceService` and is excluded from the portable journal because
-it returns secret bytes. The interface does not enable out-of-process
-AgentRunner execution. The next extraction must route provider/tool and
-approval capabilities through the host while keeping credentials and durable
-effects with the owner.
+current production implementation. Context snapshots and maintenance outcomes
+now use the separate `AgentContextJournal`. `ContextManager` and `AgentRunner`
+accept the two journals independently, while the SQLite-backed service remains
+the current adapter for both. The real AgentRunner and context-engine contracts
+exercise those overloads. Credential resolution deliberately stays on
+`PersistenceService` and is excluded from the portable journals because it
+returns secret bytes. This is still a persistence seam only: process execution,
+workspace, MCP and A2A helpers and approval/effect authority remain with the
+backend. The interfaces do not enable out-of-process AgentRunner execution. The
+next extraction must route provider/tool and approval capabilities through the
+host while keeping credentials and durable effects with the owner.
 
 The model-call slice is now extracted as `AgentModelGateway`. `AgentRunner`
 passes validated provider configuration, model request values and a stream

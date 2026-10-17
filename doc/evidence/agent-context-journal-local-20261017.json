@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-17",
+  "kind": "native-agent-context-journal-boundary",
+  "xmind_base_revision": "94e9d01b91fc36dd7258860f580f0197220cac5a",
+  "implementation": {
+    "run_journal": "AgentRunJournal",
+    "context_journal": "AgentContextJournal",
+    "current_adapter": "PersistenceService implements both owned-value interfaces",
+    "consumers": [
+      "ContextManager accepts run and context journals separately",
+      "AgentRunner accepts run and context journals separately"
+    ],
+    "credential_bytes_cross_journal_boundary": false
+  },
+  "build": {
+    "configuration": "Release",
+    "directory": ".agentflow/xlang3-host-integration-20261017",
+    "command": "cmake --build .agentflow/xlang3-host-integration-20261017 --config Release --target agentflow_context_engine_contract agentflow_agent_runner_contract --parallel 1",
+    "result": "passed"
+  },
+  "tests": {
+    "command": "ctest --test-dir .agentflow/xlang3-host-integration-20261017 -C Release -R native_context_engine_contract|native_agent_runner_contract --output-on-failure",
+    "registered": 2,
+    "passed": 2,
+    "failed": 0,
+    "results": {
+      "native_context_engine_contract": "passed",
+      "native_agent_runner_contract": "passed"
+    }
+  },
+  "limitations": [
+    "PersistenceService is still the concrete adapter for both journals.",
+    "AgentRunner still receives backend services for workspace, MCP, A2A, approval and effect capabilities.",
+    "No AgentRunner execution was moved to a worker process by this change."
+  ]
+}

@@ -155,11 +155,15 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
     std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy,
     std::shared_ptr<AgentModelGateway> model_gateway)
-    :AgentRunner(persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway)){}
+    :AgentRunner(persistence,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway)
-    :journal_(journal),persistence_(persistence),settings_(std::move(settings)),
+    :AgentRunner(journal,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway)){}
+AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& persistence,AgentSettings settings,
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
+    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway)
+    :journal_(journal),context_journal_(context_journal),persistence_(persistence),settings_(std::move(settings)),
      model_gateway_(model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings_.credential)),
      delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
@@ -200,7 +204,7 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistenc
     }
     if(settings_.context&&!settings_.provider.model.empty()){
         if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
-        ContextManager validate(persistence_,settings_.provider,*settings_.context,message);
+        ContextManager validate(journal_,context_journal_,settings_.provider,*settings_.context,message);
     }
 }
 AgentRunner::~AgentRunner()=default;
@@ -378,7 +382,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(const auto planning=execution_capabilities(provider.model))for(auto& definition:context_dynamic_plan_tool_definitions(*planning))trusted.tools.push_back(std::move(definition));
     if(trusted.tools.size()>64)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits");
     if(context_binding(provider.model)!=binding)throw ContextBindingChanged("Idle context authority changed during preparation");
-    check();ContextManager manager(persistence_,*model_gateway_,provider,*settings_.context,message);
+    check();ContextManager manager(journal_,context_journal_,*model_gateway_,provider,*settings_.context,message);
     return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,nullptr,token,deadline);
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
@@ -747,7 +751,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         std::string delivered_repository_metadata;
         std::vector<std::string> joined_process_notes;
         std::unique_ptr<ContextManager> context_manager;
-        if(settings_.context)context_manager=std::make_unique<ContextManager>(persistence_,*model_gateway_,provider,*settings_.context,message);
+        if(settings_.context)context_manager=std::make_unique<ContextManager>(journal_,context_journal_,*model_gateway_,provider,*settings_.context,message);
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
