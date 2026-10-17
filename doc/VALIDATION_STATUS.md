@@ -125,6 +125,28 @@ and its original output was verified under xlang3. Exact details and the
 remaining scope are in the
 [acceptance evidence](evidence/live-planning-shared-backend-20261017.json).
 
+## Fresh webpage session coding and restore — 2026-10-17
+
+In a new browser conversation attached to TestProj, the saved local OpenAI
+Responses profile discovered 20 models and ran a focused coding task without
+re-entering its key. The model proposed one edit to
+`xmind_web_coding_smoke.py`; the webpage displayed the exact before/after and
+required approval. The approved edit added `normalize_project_name`, and the
+same run completed both the script and assertions through the configured
+xlang3 process profile. The original `main()` output stayed unchanged. The
+native restore control then proposed the inverse patch; after its separate
+approval, the restore run completed and the file's original SHA-256 was
+confirmed. Exact run IDs, commands, usage metrics, runtime hashes, and
+limitations are in [the evidence record](evidence/webpage-fresh-session-coding-20261017.json).
+
+This fresh run's five observed model inputs were 3,810–4,931 tokens. The older
+long conversation visible in the same UI had model inputs from 42,967 to
+56,784 tokens. This is evidence that conversation history materially enlarges
+provider requests; it does not by itself establish a general latency cause or
+prove a latency improvement. The rendered view used a locally built xMind
+binary from ancestor revision `c1528ed`, not a binary built from current main
+or an installed release package.
+
 ## Live VS Code sidebar approval — 2026-10-17
 
 The extension-host sidebar directly displayed the pending TestProj edit with

@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-17",
+  "client": {
+    "type": "rendered webpage",
+    "url": "http://127.0.0.1:60419/ui/",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "backend_profile": "local node",
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.5-2026-04-23",
+    "credential_source": "saved local xMind provider profile; no key was re-entered"
+  },
+  "source": {
+    "xmind_checkout_head": "37c0bd8b3ef65057f5473f791fc71434fb4d2f4e",
+    "served_runtime_revision": "c1528ed261058e2ffcc3250672856053d2d83e38",
+    "served_runtime_revision_is_checkout_ancestor": true,
+    "xmind_executable": "D:\\CantorAI2026\\xMind\\.agentflow\\current-source-browser-runtime-20261017b\\xmind.exe",
+    "xmind_executable_sha256": "2b5676bf53999920a1a45fef437d18034a0e36f5db8f3c22879b53cc0fc7fd02",
+    "xlang3_executable": "C:\\Users\\shaw9\\.xMind\\p\\status-browser-profile-20261017\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-e4b264ccf40871247fb2911c5250b2fe6fe04c0919a253cf6e26a3c9482633d5\\xlang3.exe",
+    "xlang3_executable_sha256": "570b22225d39554b6d594c89389a77a0155bc9864aa83ef8dff1b39ece0e500f",
+    "xlang3_runtime_dll_sha256": "88a00148f42d55ce1ac21ed9bea96ff13c6a6993475680e1a5897ce862ed8448"
+  },
+  "coding_run": {
+    "run_id": "f07e00a8238f2014e4a891cc122ee9dc",
+    "state": "completed",
+    "approval_operation_id": "e2694a8d2dc2a9ee25338da08279b8d8",
+    "edited_file": "xmind_web_coding_smoke.py",
+    "change": "Added normalize_project_name(value), preserving main() and its original output.",
+    "model_calls": [
+      {"input_tokens": 3810, "output_tokens": 39, "first_token_seconds": 1.21},
+      {"input_tokens": 3982, "output_tokens": 110, "first_token_seconds": 1.55},
+      {"input_tokens": 4226, "output_tokens": 225, "first_token_seconds": 2.93},
+      {"input_tokens": 4631, "output_tokens": 99, "first_token_seconds": 2.02},
+      {"input_tokens": 4931, "output_tokens": 87, "first_token_seconds": 0.78}
+    ],
+    "xlang3_commands": [
+      {
+        "argv": ["xlang3.exe", "-B", "xmind_web_coding_smoke.py"],
+        "exit_code": 0,
+        "stdout": "xMind web coding works\\n"
+      },
+      {
+        "argv": [
+          "xlang3.exe", "-B", "-c",
+          "import xmind_web_coding_smoke as smoke\\nassert smoke.normalize_project_name(' Model Zoo Demo ') == 'model-zoo-demo'\\nassert smoke.main() == 'xMind web coding works'\\nprint(smoke.normalize_project_name(' Model Zoo Demo '))\\nprint(smoke.main())"
+        ],
+        "exit_code": 0,
+        "stdout": "model-zoo-demo\\nxMind web coding works\\n"
+      }
+    ]
+  },
+  "restore": {
+    "run_id": "24fe0b40acd90c79a42efef1496532a2",
+    "state": "completed",
+    "inverse_operation_id": "450d23ef58b64a8beec6c84bad4a2ab0",
+    "original_sha256": "947653f1c271e3241d12bba215200500de901b0454cae3ee566f588bcbe2daf5",
+    "restored_sha256": "947653f1c271e3241d12bba215200500de901b0454cae3ee566f588bcbe2daf5",
+    "note": "The original file content and SHA-256 were verified after the approved inverse patch."
+  },
+  "context_observation": {
+    "fresh_session_model_input_tokens": [3810, 3982, 4226, 4631, 4931],
+    "older_long_conversation_observed_model_input_tokens": [42967, 43239, 43817, 44421, 44836, 46006, 46626, 47248, 49086, 49803, 53741, 54248, 55052, 55435, 55832, 56000, 56318, 56602, 56626, 56784],
+    "interpretation": "The long conversation carried substantially more context into model calls. A fresh session lowered observed input size for this short coding task; this single test does not establish overall latency causes or a general latency improvement."
+  },
+  "scope": "One approved single-file webpage coding task, two successful xlang3 process checks, and native restoration in a local development view. This is not latest-main binary, installed-package, broad coding-reliability, or latency acceptance."
+}
