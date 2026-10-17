@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current xMind main webpage coding acceptance in TestProj",
+  "xmind_revision": "cb0a2195f85b0704e32cd090fda16aca59c665d8",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "runtime": {
+    "kind": "local development runtime",
+    "release_accepted": false,
+    "xmind_executable_sha256": "da17992c6ab204daf9b26b50ed0c00517d6aad1851d5976ee8b916f8b692d0fd",
+    "xlang3_executable_sha256": "77ddc9901615d6f48238b17418a579dbbd6bf7a1dcb4c30be626400710f7bcd0",
+    "xlang3_runtime_dll_sha256": "9dc0e5406ddc5c31f590224d02b8eb5b6e13e87c951ffba7f997b2334737dacd"
+  },
+  "webpage": {
+    "url": "http://127.0.0.1:53299/ui/",
+    "backend_origin": "http://127.0.0.1:53294",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "asset_directory": ".agentflow/browser-assets",
+    "client_source_sha256": "b5f696620ee0b0eb076a3b6f841cbb8c5cbdb483d5465eda7a6e129bd5b77d4c",
+    "served_client_sha256": "b5f696620ee0b0eb076a3b6f841cbb8c5cbdb483d5465eda7a6e129bd5b77d4c",
+    "provider": "OpenAI Responses",
+    "credential_source": "Existing .config/providers.yaml profile; secret omitted",
+    "model": "gpt-5.6-sol",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "run_id": "f943ad9a07bf36f8add8571253470c70",
+    "run_state": "completed",
+    "prompt": "Create exactly one new file named xmind_browser_acceptance_20261017.py in this workspace. It must define greet(name) and print greet('xMind browser acceptance') when run as a script. Do not modify or create any other files. Return the exact path and contents.",
+    "tool": "create_file",
+    "operation_id": "69b83f9d244d9cec52f12bc363de4284",
+    "operation_state": "succeeded",
+    "approval": "Exact one-file creation reviewed and approved in the webpage UI",
+    "path": "D:/CantorAI2026/TestProj/xmind_browser_acceptance_20261017.py",
+    "source_sha256": "5678a4e6bfc8d082d139951647db692b3cc562dca203803db6bb609f13df781a",
+    "contents": "def greet(name):\n    return f\"Hello, {name}!\"\n\n\nif __name__ == \"__main__\":\n    print(greet(\"xMind browser acceptance\"))\n",
+    "model_calls": [
+      {
+        "input_tokens": 5211,
+        "output_tokens": 148,
+        "total_tokens": 5359,
+        "reasoning_tokens": 72,
+        "first_token_seconds": 2.40,
+        "elapsed_seconds": 3.22
+      },
+      {
+        "input_tokens": 5484,
+        "output_tokens": 53,
+        "total_tokens": 5537,
+        "cached_tokens": 5208,
+        "first_token_seconds": 1.06,
+        "elapsed_seconds": 1.53
+      }
+    ]
+  },
+  "execution": {
+    "runtime": "Pinned xlang3 executable from the staged local development runtime",
+    "stdout": "Hello, xMind browser acceptance!",
+    "exit_code": 0,
+    "observation": "The exact created file was invoked directly with xlang3 after the UI run. A command was also submitted in the webpage terminal, but its output was not conclusively observable in the narrow terminal viewport."
+  },
+  "cleanup": {
+    "restore_run_id": "09e56efda4966480ceee1f826013073e",
+    "restore_operation_id": "c0065e3d4ff3c2ad4ef75dd76eba1a3c-0",
+    "restore_state": "succeeded",
+    "approval": "Exact inverse patch reviewed and approved in the webpage UI",
+    "test_file_absent_after_restore": true
+  },
+  "limitations": [
+    "This proves one bounded live browser coding task, model discovery, approved file creation, token/timing display, xlang3 execution, and native restore; it is not broad coding reliability or a full Vue build.",
+    "The staged runtime is local development validated and explicitly not release accepted.",
+    "A new live VS Code task was not run against this exact pinned-main runtime in this check; the current VS Code suite and earlier live coding evidence are separate validation."
+  ]
+}

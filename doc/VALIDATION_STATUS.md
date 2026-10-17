@@ -3564,5 +3564,28 @@ The local webpage adapter responds at `http://127.0.0.1:61227/ui/` with HTTP
 200 and no server-token prompt. Its running process captured its asset snapshot
 before the current source changes: the served `client.js` hash differs from
 `extensions/vscode/client.js`. The earlier live webpage coding acceptance is
-still valid for that earlier asset bundle, but current-source webpage coding
-has not yet been reverified. [Observed page and asset hashes](evidence/webpage-running-assets-current-source-gap-20261017.json).
+still valid for that earlier asset bundle. A fresh pinned-main webpage coding
+acceptance subsequently passed; see the checkpoint below.
+[Observed stale-process hashes](evidence/webpage-running-assets-current-source-gap-20261017.json).
+
+## Pinned-main webpage coding acceptance — 2026-10-17
+
+Started a fresh local browser adapter from the current `cb0a219` xMind source
+and its exact-pinned-xlang3 Release runtime. The served browser client SHA-256
+matches `extensions/vscode/client.js`; the page connected to the local
+TestProj profile, reused the saved OpenAI key, discovered 20 models, and
+completed a live `gpt-5.6-sol` coding run. After reviewing the exact proposal,
+the webpage created one Python file and rendered provider token counts and
+measured first-token/elapsed timings. The exact file ran with the staged
+xlang3 executable and returned the requested greeting. xMind's restore flow
+then proposed and applied the inverse change after review; filesystem
+verification confirmed the test file was absent. [Run, hashes, metrics and
+limits](evidence/webpage-pinned-main-live-coding-20261017.json).
+
+The direct xlang3 invocation verifies the generated script. A command was
+submitted through the webpage terminal, but its output could not be read
+conclusively from the narrow terminal viewport, so integrated-terminal output
+remains an open check. This is one bounded live browser coding task on a local
+development runtime (`release_accepted=false`), not broad coding reliability
+or a full Vue project build. The VS Code suite passes **391/391**; a new live
+VS Code task against this exact pinned-main runtime remains unverified.
