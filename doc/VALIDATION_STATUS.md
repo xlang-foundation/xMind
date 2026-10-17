@@ -89,6 +89,21 @@ This verifies browser workspace/run isolation
 on the current source; it is not another model inference or coding edit, and
 the development runtime is not release accepted. [Evidence](evidence/browser-workspace-run-isolation-20261017.json).
 
+## Live current-source webpage coding acceptance — 2026-10-17
+
+The rendered local webpage served a browser bundle whose client hash matches
+the current xMind source, connected to a protected local profile for TestProj,
+restored the saved OpenAI credential without re-entry, and fetched 20 models.
+A live `gpt-5.6-sol` run proposed one new Python file; the exact creation was
+reviewed and approved in the webpage, and the completed run displayed provider
+token counts and measured timings. The webpage terminal then ran the file with
+the bundled xlang3 executable and printed `Hello, xMind web UI!`; a separate
+exit-code check returned 0. The workspace settings dialog also opened and showed
+TestProj as the sole registered workspace, with new-workspace and add-folder
+controls available. The runtime is a local development bundle from xMind
+`86f2e31` and xlang3 SDK `b4a53192`, not a release-accepted package or a full
+Vue project build. [Evidence](evidence/webpage-current-source-live-coding-20261017.json).
+
 ## Live webpage coding acceptance — 2026-10-16
 
 The rendered local webpage completed a real OpenAI Responses coding task in
