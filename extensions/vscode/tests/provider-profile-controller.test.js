@@ -52,6 +52,16 @@ test('saved-key discovery refreshes one stale profile revision and retries witho
  finally{controller.dispose();}
 });
 
+test('saved-profile first-use discovery retries one transient native/provider failure and exposes persistent errors',async()=>{
+ const posted=[],calls=[];let first=true;
+ const controller=new ProviderProfileController({providerProfiles:async()=>registry(),discoverProfileModels:async(...args)=>{calls.push(args);if(first){first=false;throw Object.assign(new Error('Provider temporarily unavailable'),{status:503});}return {models:[{id:'recovered-model'}]};}},value=>posted.push(value));
+ try{await controller.discover();assert.equal(calls.length,2);assert.deepEqual(controller.savedCatalogue.ids,['recovered-model']);assert.ok(posted.some(value=>value.type==='status'&&/Fetched 1 openai models/.test(value.text)));}
+ finally{controller.dispose();}
+ const rejected=[],permanent=new ProviderProfileController({providerProfiles:async()=>registry(),discoverProfileModels:async()=>{throw Object.assign(new Error('Provider rejected the saved credential'),{status:401});}},value=>rejected.push(value));
+ try{await assert.rejects(permanent.discover(),/rejected the saved credential/);assert.match(rejected.findLast(value=>value.type==='status').text,/Model discovery failed: Provider rejected the saved credential.*Open Settings to retry/);}
+ finally{permanent.dispose();}
+});
+
 test('saved-key discovery does not retry after the selected profile identity changes',async()=>{
  let state=registry();const calls=[],controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(args);state={...state,revision:5,active:''};throw Object.assign(new Error('Provider profile discovery revision changed'),{status:409});}},()=>{});
  try{await assert.rejects(controller.discover(),/Review the selected profile/);assert.equal(calls.length,1);assert.equal(controller.state.active,'');assert.equal(controller.savedCatalogue,undefined);}

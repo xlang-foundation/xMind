@@ -3398,3 +3398,20 @@ This validates a bounded live webpage edit and confirms the VS Code host can
 attach to the same current native profile. The initial model-discovery failure
 and the lack of a second sidebar-originated run remain open usability checks.
 [Exact current-main evidence](evidence/current-main-webpage-vscode-profile-20261017.json).
+
+## Saved provider first-selection discovery recovery — 2026-10-17
+
+The provider model catalogue could fail on the first saved-profile selection,
+leaving the sidebar with no models until the user opened Settings and fetched
+again. Saved-profile discovery now retries one transport error or HTTP
+502/503/504 after a short delay and verifies that the same provider profile is
+still active. Persistent failures are announced in the sidebar as well as
+Settings. A fresh rendered xMind webpage reused the trusted local OpenAI key,
+retried its first-selection discovery, loaded 20 models, and selected
+`gpt-5.6-sol` without opening Settings or entering a key. A live response then
+completed in 1.11 seconds with provider-reported usage of 5,003 input and 12
+output tokens and no workspace file operations. Provider controller tests
+passed 18/18, VS Code tests passed 391/391, and webpage tests passed 134/134.
+This checks provider setup, selection and inference; it does not add broad
+coding reliability or a new live VS Code run.
+[Exact retest and limits](evidence/webpage-provider-discovery-retry-20261017.json).

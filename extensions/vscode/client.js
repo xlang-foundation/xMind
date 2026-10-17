@@ -1028,14 +1028,23 @@ class ProviderProfileController {
         // Another xMind view can update provider metadata while this page is
         // open. Saved-key discovery is read-only, so refresh once and retry
         // only while the selected profile identity and route are unchanged.
-        if(error.status!==409||!savedCredential)throw error;
-        const active=captured.active;
-        const refreshed=await this.refresh();if(!this.current(epoch))return true;if(!refreshed)throw error;
-        const latest=this.state.profiles.find(value=>value.id===id);
-        if(this.state.active!==active||!latest||latest.route_id!==saved.route_id||latest.provider!==saved.provider)
-          throw new Error('Provider settings changed. Review the selected profile and fetch models again.');
-        captured=this.binding(id);
-        catalogue=await this.client.discoverProfileModels(id,latest.route_id,undefined,this.state.revision);
+        if(error.status===409&&savedCredential){
+          const active=captured.active;
+          const refreshed=await this.refresh();if(!this.current(epoch))return true;if(!refreshed)throw error;
+          const latest=this.state.profiles.find(value=>value.id===id);
+          if(this.state.active!==active||!latest||latest.route_id!==saved.route_id||latest.provider!==saved.provider)
+            throw new Error('Provider settings changed. Review the selected profile and fetch models again.');
+          captured=this.binding(id);
+          catalogue=await this.client.discoverProfileModels(id,latest.route_id,undefined,this.state.revision);
+        }else if(savedCredential&&(!Number.isInteger(error.status)||[502,503,504].includes(error.status))){
+          // A just-selected saved profile can race native/provider readiness on
+          // first use. Retry only transient discovery failures, once, and only
+          // while the same saved profile remains selected.
+          await new Promise(resolve=>setTimeout(resolve,250));
+          if(!this.current(epoch))return true;
+          if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
+          catalogue=await this.client.discoverProfileModels(id,saved.route_id,undefined,this.state.revision);
+        }else throw error;
       }
       if(!this.current(epoch))return true;
       if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
@@ -1045,7 +1054,7 @@ class ProviderProfileController {
       this.models(saved?.model);const confirmation=savedCredential?`Fetched ${this.draft.ids.length} ${saved.provider} models using this profile's saved key. The key stays in local xMind.`:'Choose a model below to save this profile';this.post({type:'settings-state',busy:false,complete:true,text:confirmation});if(savedCredential)this.post({type:'status',text:confirmation});
       if(this.draft.key!==undefined)this.timer=setTimeout(()=>{if(this.current(epoch)){this.invalidate();this.post({type:'settings-state',busy:false,text:'Unsaved key expired · fetch models again'});}},300000);
       return true;
-    }catch(error){if(this.current(epoch))this.post({type:'settings-state',busy:false,text:error.message});throw error;}finally{key=undefined;}
+    }catch(error){if(this.current(epoch)){this.post({type:'settings-state',busy:false,text:error.message});this.post({type:'status',text:`Model discovery failed: ${error.message} Open Settings to retry.`});}throw error;}finally{key=undefined;}
   }
   async save(model){
     const draft=this.choice();if(!draft)return false;

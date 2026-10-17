@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-17",
+  "scope": "Saved provider first-selection model discovery recovery in the current xMind browser view",
+  "base_commit": "9c22b4717cf0b30c425c60b19dee8ac11824ab40",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "webpage": {
+    "url": "http://127.0.0.1:51283/ui/",
+    "native_backend": "http://127.0.0.1:61591",
+    "profile": "isolated temporary local profile",
+    "provider": "OpenAI Responses",
+    "credentials": "Existing trusted provider configuration reused; secret omitted and not entered in the page",
+    "first_selection": "OpenAI was selected in the sidebar; the updated view retried a transient discovery failure and loaded the catalogue without opening Settings",
+    "models_discovered": 20,
+    "model_selected": "gpt-5.6-sol",
+    "live_inference": {
+      "run_id": "328ddb31f32a48e517319e13b1bc6c9e",
+      "state": "completed",
+      "response": "xMind model discovery recovery check passed.",
+      "input_tokens": 5003,
+      "output_tokens": 12,
+      "total_tokens": 5015,
+      "first_token_seconds": 0.91,
+      "elapsed_seconds": 1.11,
+      "workspace_file_operations": 0
+    },
+    "workspace_code_changed": false
+  },
+  "change": {
+    "file": "extensions/vscode/client.js",
+    "behavior": "Saved-profile discovery retries once after a transport error or HTTP 502/503/504, after revalidating the selected profile binding. A persistent discovery error is shown in the sidebar and Settings.",
+    "security": "No key is copied into the model list; failed discovery does not activate a different profile or enroll a model."
+  },
+  "validation": {
+    "provider_profile_controller_tests": "18 passed",
+    "vscode_extension_tests": "391 passed",
+    "browser_tests": "134 passed",
+    "live_page": "Selected saved OpenAI profile returned 20 models automatically and allowed gpt-5.6-sol selection"
+  },
+  "limitations": [
+    "The HTTP status from the earlier first-use failure was not captured; the retry is bounded to transport errors and HTTP 502/503/504.",
+    "This acceptance verifies saved-key model discovery, selection and a minimal live response; it does not add broad task reliability or a new live VS Code run."
+  ]
+}
