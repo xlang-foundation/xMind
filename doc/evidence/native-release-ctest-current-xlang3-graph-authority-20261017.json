@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-17",
+  "scope": "Isolated current-source native Release build and complete sequential CTest suite",
+  "source": {
+    "repository": "xlang-foundation/xMind",
+    "native_build_revision": "e9c490ea9d7b37ffd62543dc0fbb64206b07a86d",
+    "tested_revision": "6a598903499909463976a39b1ee2d3ebda3d0c63",
+    "post_build_source_change": "The Python standard-library license resolver used by three Node.js packaging contracts was added and exercised by the final CTest run. Native C++ sources and built executables were unchanged."
+  },
+  "runtime": {
+    "repository": "CantorAI/xlang3",
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "61AD2BB1F38EE5BF7867B2F20955B7B3095542A952F1F2822EC3AF13AC864874",
+    "python_library_source": "C:/Python/Python314/Lib; pure source only, no interpreter executed"
+  },
+  "build": {
+    "directory": "C:/xMindNativeValidation/native-verify-e9c490e",
+    "command": "Tools/native-milestone.ps1 -Action Build -BuildDirectory C:/xMindNativeValidation/native-verify-e9c490e -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib",
+    "generator": "Visual Studio 18 2026",
+    "platform": "x64",
+    "result": "Build and complete CTest succeeded",
+    "xmind_executable_sha256": "A4EE2B4616FA9DFA720E066F3FFCCD0F876AA0728333C8595F194978779BCBD5"
+  },
+  "ctest": {
+    "configuration": "Release",
+    "command": "ctest --test-dir C:/xMindNativeValidation/native-verify-e9c490e -C Release --output-on-failure",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 865.07,
+    "transcript": "native-release-ctest-current-xlang3-graph-authority-20261017.log",
+    "transcript_sha256": "3E1F811308C6EA6E02DDCA05A43369ED7155EE8D0A2DEB35839E3B17349B1F66"
+  },
+  "limitations": [
+    "The suite uses native contract fixtures and does not establish broad live-provider or external-peer interoperability.",
+    "This local build does not establish an accepted VSIX or release package."
+  ]
+}

@@ -11,6 +11,24 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Current-source native Release gate — 2026-10-17
+
+Built the current native backend and unified `xmind.exe` in an isolated C:
+directory against the pinned xlang3 runtime, then ran the complete sequential
+CTest inventory. All **147/147 tests passed**, with no failures or skips, in
+865.07 seconds. This includes the current registered-graph turn-authority fix,
+CLI and process execution, agent/dynamic-plan execution, MCP, A2A, xlang3
+workers, provider adapters, SQLite persistence and local-profile/view lifecycle
+contracts. The source-to-test workflow was also corrected to discover the
+standard-library license in common source layouts (`LICENSE`, `LICENSE.txt`,
+or the packaged `licenses/Python-STDLIB-LICENSE`). The tests stage pure Python
+source only; no CPython interpreter was run. The executable was built from
+`e9c490e`; the committed license resolver in `6a59890` was loaded by the final
+CTest run. This is local Release build/contract acceptance, not a release
+package or broad live-peer/provider acceptance. Exact revisions, hashes,
+commands and transcript are in the [machine-readable evidence](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.json)
+and [full CTest log](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.log).
+
 ## Current-source live planning and shared backend — 2026-10-17
 
 ### Dependent deterministic process node in the webpage
