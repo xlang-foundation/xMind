@@ -11,6 +11,16 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Hosted runtime pin alignment — 2026-10-17
+
+The hosted Windows workflow and both CI source/provenance checks now pin
+`CantorAI/xlang3` to `fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8`, the same
+revision used by the current local 149/149 native Release gate and the current
+xlang3 `main`. The preceding hosted workflow still checked out `f6bbc561`;
+its result cannot certify the runtime now used by xMind. The updated hosted
+workflow must complete successfully before its staged runtime is considered
+release accepted.
+
 ## Full native Release contract gate — 2026-10-16
 
 The current xMind Release build passed **149/149 CTest contracts** against the
