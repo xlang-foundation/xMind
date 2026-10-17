@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live unified CLI code creation and xlang3 execution using the saved local TestProj profile, followed by journaled cleanup of both temporary webpage and CLI smoke files",
+  "source": {
+    "repository": "xlang-foundation/xMind",
+    "recorded_main_commit_before_evidence": "e98711b1d9172f0e12ec5bec34d15a29e80abec5",
+    "runtime_bundle_revision": "86f2e31",
+    "xlang3_sdk_revision": "b4a53192"
+  },
+  "profile": {
+    "workspace": "D:/CantorAI2026/TestProj",
+    "profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/xmind-coding-web-current-20261017",
+    "provider": "openai",
+    "model": "gpt-5.6-sol",
+    "credential_entry": "reused from saved local profile; no credential value recorded or re-entered"
+  },
+  "cli_acceptance": {
+    "session_id": "9e6cdd4bd8a56cccd6b0d552a24b8496",
+    "creation_run_id": "b7ac3bd7902dcf8573caa2e5d13c8305",
+    "creation_operation_id": "40e70b72bde866ef43014795288322d4",
+    "file": "xmind_cli_current_acceptance.py",
+    "creation_approval": "reviewed and approved in the xMind web UI",
+    "process_run_id": "7a48e19dc98c2f9655df11b3b27e572d",
+    "process_operation_id": "64f83c5843853a18c5eaef40ad721dd4",
+    "command": "xlang3 -B xmind_cli_current_acceptance.py",
+    "stdout": "Hello, xMind CLI!",
+    "exit_code": 0,
+    "provider_responses": [
+      {
+        "input_tokens": 5200,
+        "output_tokens": 101,
+        "total_tokens": 5301,
+        "cached_tokens": 5147,
+        "reasoning_tokens": 29,
+        "first_token_seconds": 2.92,
+        "elapsed_seconds": 3.47
+      },
+      {
+        "input_tokens": 5424,
+        "output_tokens": 33,
+        "total_tokens": 5457,
+        "cached_tokens": 5197,
+        "reasoning_tokens": 0,
+        "first_token_seconds": 0.99,
+        "elapsed_seconds": 1.33
+      },
+      {
+        "input_tokens": 5496,
+        "output_tokens": 107,
+        "total_tokens": 5603,
+        "cached_tokens": 5421,
+        "reasoning_tokens": 63,
+        "first_token_seconds": 1.86,
+        "elapsed_seconds": 2.24
+      },
+      {
+        "input_tokens": 5796,
+        "output_tokens": 125,
+        "total_tokens": 5921,
+        "cached_tokens": 5493,
+        "reasoning_tokens": 76,
+        "first_token_seconds": 1.85,
+        "elapsed_seconds": 2.34
+      }
+    ]
+  },
+  "cleanup": {
+    "cli_file": {
+      "restore_graph_run_id": "aa35d408dd258310f2b3db44f9307936",
+      "restore_operation_run_id": "6cf991c0e474843258a40634139ded83",
+      "restore_operation_id": "0425108a70c701b4550a4c424315692a-0",
+      "inverse": "delete xmind_cli_current_acceptance.py",
+      "approval": "approved in xMind UI",
+      "result": "restore graph completed and the file is absent from the refreshed TestProj tree"
+    },
+    "webpage_file": {
+      "original_session_id": "08ec8e0c50ae30722c6848fbb33d0489",
+      "original_create_run_id": "eea9c371c0e03d2c91289c01a27011e5",
+      "original_create_operation_id": "d8adbf6bbe72265832c51bbef5dba7ba",
+      "restore_graph_run_id": "c85f954e7751394104cf22573d597f13",
+      "restore_operation_run_id": "0a2874b3475aa67bcd78d1a6be3ef046",
+      "restore_operation_id": "c6dbbf84e1b67426ab118abbc15e932d-0",
+      "file": "xmind_web_ui_acceptance.py",
+      "inverse": "delete xmind_web_ui_acceptance.py",
+      "approval": "approved in xMind UI",
+      "result": "restore graph completed and the file is absent from the refreshed TestProj tree"
+    },
+    "independent_filesystem_check": {
+      "cli_file_exists": false,
+      "webpage_file_exists": false
+    }
+  },
+  "limits": [
+    "This is one bounded live CLI coding run, not broad coding reliability or a project-wide build.",
+    "The staged development runtime is not release accepted.",
+    "No provider key, server token, or other credential value is recorded."
+  ]
+}

@@ -104,6 +104,21 @@ controls available. The runtime is a local development bundle from xMind
 `86f2e31` and xlang3 SDK `b4a53192`, not a release-accepted package or a full
 Vue project build. [Evidence](evidence/webpage-current-source-live-coding-20261017.json).
 
+## Live current-profile CLI coding acceptance and smoke cleanup — 2026-10-17
+
+The unified xMind CLI attached to the same saved local TestProj profile and
+reused its OpenAI `gpt-5.6-sol` configuration without another key prompt. It
+created one reviewed Python smoke file, then ran it with the profile's bundled
+xlang3 process binding: `xlang3 -B xmind_cli_current_acceptance.py` printed
+`Hello, xMind CLI!` and exited 0. The UI showed provider-reported token usage
+and backend-measured timings for all four model responses. Afterwards, the
+CLI-created file and the webpage acceptance file were each removed through
+xMind's journaled restore flow; both exact inverse operations completed and a
+refreshed TestProj file listing plus filesystem checks confirmed both files
+absent. This verifies one CLI edit/run path and its existing local-profile
+reuse, not broad coding reliability, release packaging, or a full project
+build. [Run, metrics, restore IDs, and cleanup evidence](evidence/xmind-cli-current-profile-coding-20261017.json).
+
 ## Live webpage coding acceptance — 2026-10-16
 
 The rendered local webpage completed a real OpenAI Responses coding task in
