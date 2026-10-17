@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-17",
+  "kind": "native coding edit reformulation",
+  "xmind_base_revision": "4ec6b80a8719c4ee230f2e1d089a9063598dfa85",
+  "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "baseline_failure": {
+    "profile": "xmind-focused-read-20261017",
+    "run_id": "1473de8310eeef133b250aa8ca8aeb9e",
+    "state": "failed",
+    "reason": "execution_budget_exhausted",
+    "active_elapsed_ms": 401151,
+    "parent_model_calls": 16,
+    "max_parent_turns": 16,
+    "max_model_calls": 32,
+    "whole_file_operations": {
+      "count": 12,
+      "by_path": {
+        "model-zoo/frontend/src/App.vue": 2,
+        "model-zoo/frontend/src/components/ModelCard.vue": 6,
+        "model-zoo/frontend/src/views/HomeView.vue": 4
+      },
+      "largest_before_bytes": 54516
+    },
+    "followup_build": "The requested npm run build passed in a separate run; the original agent run ended before starting it."
+  },
+  "change": {
+    "rule": "edit_file rejects replacing an entire file when the current file exceeds 4096 bytes",
+    "error_code": "edit_requires_patch",
+    "recovery": "The agent receives a direct instruction to submit focused unified hunks through apply_patch; bounded literal edits in the same large file remain available.",
+    "no_file_effect_before_reformulation": true
+  },
+  "validation": {
+    "release_build": {
+      "target": "xmind_server and agentflow_edit_executor_contract",
+      "exit_code": 0,
+      "server_sha256": "37C7E3E34E19455115A9E5844B104940A8067D2A4B5C7B23979396F48AAC2E2C"
+    },
+    "focused_contracts": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        "native_edit_executor_contract",
+        "native_agent_edit_http_contract",
+        "native_approved_edit_http_contract",
+        "native_agent_patch_http_contract"
+      ]
+    },
+    "agent_graph_regression_subset": {
+      "passed": 22,
+      "failed": 0,
+      "excluded": ["native_unified_graph_http_contract"],
+      "reason_excluded": "The active unified xmind.exe could not be relinked; the relevant freshly built xmind_server path was tested."
+    },
+    "synthetic_end_to_end": {
+      "first_call": "A full-file edit on a 600-line file was refused without an operation or byte change.",
+      "second_call": "The model submitted one focused apply_patch, which waited for controller approval.",
+      "third_call": "After approval, the patch succeeded and the model completed the run."
+    }
+  },
+  "source_sha256": {
+    "Native/include/agentflow/edit_executor.hpp": "ABCFBFF68103EC4E08E197C17DC618E6BD908331929AEFC767ACB819B16FD271",
+    "Native/src/edit_executor.cpp": "37F3185CB1B6D6E4ACAE1F50BA99C470088CDE3EB4C0E6E66D4786F0C15B987D",
+    "Native/src/agent_runner.cpp": "D7C931A13691844AFE3DDDD4B3BA81AC79502360BCF1479AA45A5053986E0587",
+    "Native/tests/edit_executor_contract.cpp": "62F3891A643F33005C6A08BDA92553FB2AD9C5793A9E99705B3FF5F497C60281",
+    "Native/tests/agent_edit_http_contract.mjs": "F3B3A21B9372EE294739410D5CA7A4EEDF078FB75A9093B2910AC8FCA691E363",
+    "xlang3_runtime.dll": "B7339D078F81BA02E4931918238B2B3A7D3F97CFA9CFFFFDE1C2D7EEC0F517BC"
+  },
+  "limitations": [
+    "Inference was synthetic in the regression test; no live provider coding run is claimed.",
+    "The whole-file threshold is a routing rule for edit_file; apply_patch remains the approved path for larger changes.",
+    "The live TestProj agent run has not yet been repeated against a newly staged current-source webpage runtime."
+  ]
+}

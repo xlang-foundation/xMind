@@ -27,6 +27,25 @@ runtime hash, source hashes, and focused test list are recorded in
 [the evidence record](evidence/native-release-mcp-peer-20261017.json) and
 [CTest transcript](evidence/native-release-mcp-peer-20261017.log).
 
+## Large-file coding edit reformulation — 2026-10-17
+
+A failed live TestProj redesign run used all 16 allowed parent turns while
+proposing 12 whole-file replacements, including repeated 54 KB replacements
+of `HomeView.vue`. The earlier system guidance already recommended focused
+patches but did not enforce them. The native `edit_file` adapter now refuses a
+whole-file replacement when the source exceeds 4 KiB and returns the distinct
+`edit_requires_patch` result with instructions to use focused `apply_patch`
+hunks. Small literal edits in large files retain the existing approval path.
+The executor contract verifies rejection creates no operation and does not
+change bytes, then approves and applies a focused literal edit in that file.
+The agent HTTP contract drives a 600-line file through rejection, one approved
+focused patch and successful completion in three model turns. Release build
+and the focused edit, agent, approved-edit and patch contracts passed **4/4**;
+the broader agent/graph regression subset passed **22/22**. This deterministic
+provider fixture does not claim a live-provider redesign retest. The exact
+failed run, budgets, source hashes and limits are recorded in
+[the evidence record](evidence/native-large-file-edit-reformulation-20261017.json).
+
 ## Provider-profile model selection with dynamic planning — 2026-10-16
 
 Workspace-backed provider profiles expose the native planning tools to the

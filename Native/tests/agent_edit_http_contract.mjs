@@ -16,6 +16,7 @@ const continuations=new Map();
 const scopeSteps=new Map();
 const approvalSteps=new Map();
 const recoverySteps=new Map();
+const largeEditSteps=new Map();
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',async()=>{
     try {
@@ -34,6 +35,23 @@ const peer=createServer((request,response)=>{
         else if(step===2){const outcome=JSON.parse(tool.content);assert.equal(outcome.error.code,'content_conflict');assert.match(outcome.error.message,/No file effect was applied/);assert.match(outcome.error.message,/read_file/);assert.equal(await readFile(join(workspace,'stale-recovery.txt'),'utf8'),'original\n');delta={tool_calls:[call('read_file',{path:'stale-recovery.txt'})]};finish='tool_calls';}
         else if(step===3){const current=JSON.parse(tool.content);assert.equal(current.content,'original\n','Recovery must use the exact bytes returned by the fresh read');delta={tool_calls:[call('edit_file',{path:current.path,old_text:current.content,new_text:'recovered edit'})]};finish='tool_calls';}
         else {const outcome=JSON.parse(tool.content);assert.ok(outcome.operation_id&&outcome.content_sha256,'The fresh retry must reach normal exact approval');continuations.set(prompt,outcome);delta={content:'Synthetic continuation after reread, fresh proposal, approval and actual edit'};finish='stop';}
+      }else if(prompt==='large-reformulation'){
+        const step=(largeEditSteps.get(prompt)??0)+1;largeEditSteps.set(prompt,step);
+        if(step===1){
+          const before=await readFile(join(workspace,'large-source.txt'),'utf8');assert.ok(Buffer.byteLength(before)>4096);
+          delta={tool_calls:[{index:0,id:`${prompt}-${step}`,type:'function',function:{name:'edit_file',arguments:JSON.stringify({path:'large-source.txt',old_text:before,new_text:before.replace('TARGET','EDITED')})}}]};finish='tool_calls';
+        }else if(step===2){
+          const outcome=JSON.parse(tool.content);assert.equal(outcome.error.code,'edit_requires_patch');assert.match(outcome.error.message,/apply_patch/);
+          assert.ok(body.tools.find(item=>item.function.name==='edit_file').function.description.includes('backend rejects large whole-file replacements'));
+          assert.ok(body.tools.find(item=>item.function.name==='apply_patch'));
+          assert.match(await readFile(join(workspace,'large-source.txt'),'utf8'),/TARGET/,'The rejected full-file proposal must not change disk bytes');
+          const patch='*** Begin Patch\n*** Update File: large-source.txt\n@@\n-TARGET\n+EDITED\n*** End Patch\n';
+          delta={tool_calls:[{index:0,id:`${prompt}-${step}`,type:'function',function:{name:'apply_patch',arguments:JSON.stringify({patch_text:patch,create_parents:true})}}]};finish='tool_calls';
+        }else{
+          assert.equal(step,3);const outcome=JSON.parse(tool.content);assert.equal(outcome.state,'succeeded');assert.equal(outcome.succeeded_files,1);
+          assert.equal(await readFile(join(workspace,'large-source.txt'),'utf8'),Array.from({length:600},(_,index)=>`line-${index}\n`).join('')+'EDITED\n');
+          continuations.set(prompt,outcome);delta={content:'The focused patch was approved and applied.'};finish='stop';
+        }
       }else if(prompt.startsWith('approval-')){
         const step=(approvalSteps.get(prompt)??0)+1;approvalSteps.set(prompt,step);const creation=prompt==='approval-create';
         const call={index:0,id:`${prompt}-${step}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path:`${prompt}/target.txt`,content:'approval create applied\n'}:{path:`${prompt}/target.txt`,old_text:'original',new_text:'approval edit applied'})}};
@@ -136,6 +154,7 @@ async function stop() {
 }
 try {
   await mkdir(workspace);await Promise.all(['allowed','denied','stale','cancelled','interrupted','stale-recovery'].map(name=>writeFile(join(workspace,`${name}.txt`),'original\n')));
+  await writeFile(join(workspace,'large-source.txt'),Array.from({length:600},(_,index)=>`line-${index}\n`).join('')+'TARGET\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start();
   assert.equal((await api('/v1/health')).file_edit_proposals,true,'Advertised native permission must match the actual create/edit tool catalogue and approval execution below');
   assert.deepEqual(cli('models'),{default_model:'synthetic-edit-protocol-model',models:[{id:'synthetic-edit-protocol-model'},{id:'synthetic-edit-alternate'}]});
@@ -148,6 +167,13 @@ try {
   const recoveryEvents=await api(`/v1/runs/${recoveryRun.id}/events`);assert.equal(recoveryEvents.filter(event=>event.kind==='tool.failed'&&event.data.data.error?.code==='content_conflict').length,1);assert.ok(recoveryEvents.some(event=>event.kind==='tool.completed'&&event.data.name==='read_file'));
   cli('decide',recoveryProposal.id,'allow');await until(()=>api(`/v1/runs/${recoveryRun.id}`),value=>value.state==='completed');
   assert.equal(recoverySteps.get('stale-recover'),4);assert.equal((await api(`/v1/operations/${recoveryProposal.id}`)).state,'succeeded');assert.equal(await readFile(join(workspace,'stale-recovery.txt'),'utf8'),'recovered edit');
+  await api('/v1/sessions',{id:'large-reformulation',title:'Use a focused patch for a large file'});
+  const largeRun=cli('run','large-reformulation','large-reformulation');
+  const [largeProposal]=await until(()=>api(`/v1/runs/${largeRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
+  assert.equal(largeEditSteps.get('large-reformulation'),2,'The rejected whole-file edit must be reissued as one focused patch');
+  assert.equal(largeProposal.tool,'patch_file');
+  cli('decide',largeProposal.id,'allow');await until(()=>api(`/v1/runs/${largeRun.id}`),value=>value.state==='completed');
+  assert.equal(largeEditSteps.get('large-reformulation'),3,'The model must stop after the approved patch result');
   for(const [name,decision] of [['allowed','allow'],['denied','deny']]){
     const records=await approvedChat(name,decision),proposal=records.find(record=>record.type==='operation_review').operation;
     assert.equal((await api(`/v1/operations/${proposal.id}`)).state,decision==='allow'?'succeeded':'denied');
@@ -268,7 +294,7 @@ try {
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
   const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */ + 4 /* stale edit, exact reread, fresh approved retry and actual outcome continuation */ + 2 /* model-selected restore tool and actual approval result */;
   const parentCreationRequests=3;assert.equal(scopeSteps.get('scope-create-parents'),parentCreationRequests,'New parent creation has exactly guidance discovery, one effect request and actual continuation');
-  assert.equal(requests,48+additionalConsoleRequests+parentCreationRequests,'Original scenario baseline plus checked console-control and parent-creation calls');if(peerError) throw peerError;
+  assert.equal(requests,48+additionalConsoleRequests+parentCreationRequests+3,'Original scenario baseline plus checked console-control, parent-creation and large-file patch reformulation calls');if(peerError) throw peerError;
   console.log('Compiled native agent edit and restore loop passed: approved restore, actual inverse approval, denial, stale content, cancellation, tool continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();

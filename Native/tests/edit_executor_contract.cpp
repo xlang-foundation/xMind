@@ -56,6 +56,19 @@ int main(int argc,char** argv) {
             catch(const std::invalid_argument& error) {require(std::string(error.what())=="Edit argument nesting exceeds limits","Deep JSON must be rejected during bounded parsing");}
             rejects<NotFound>([&]{store.operation("invalid-depth").get();});
             require(workspace.read_file("actual.txt").content=="original\n","Invalid model edit arguments must not create a proposal or modify bytes");
+            const auto large_before=std::string(8192,'a')+"TARGET"+std::string(8192,'b');
+            {std::ofstream output(root/"large-source.txt",std::ios::binary);output<<large_before;output.close();require(bool(output),"Large edit fixture must be written");}
+            const auto whole_after=large_before+"\nwhole-file change";
+            rejects<ToolEditNeedsPatch>([&]{executor.invoke("large-whole-file","run",nlohmann::json{{"path","large-source.txt"},{"old_text",large_before},{"new_text",whole_after}}.dump(),expiry());});
+            rejects<NotFound>([&]{store.operation("large-whole-file").get();});
+            require(workspace.read_file("large-source.txt").content==large_before,"Large whole-file edit rejection must create no approval proposal and preserve exact bytes");
+            auto focused=std::async(std::launch::async,[&]{return executor.invoke("large-focused-edit","run",nlohmann::json{{"path","large-source.txt"},{"old_text","TARGET"},{"new_text","UPDATED"}}.dump(),expiry());});
+            const auto focused_proposal=proposed(store,"large-focused-edit");
+            const auto focused_payload=nlohmann::json::parse(focused_proposal.spec.arguments_json);
+            require(focused_payload["before_content"].get<std::string>()==large_before&&focused_payload["after_content"].get<std::string>()==std::string(8192,'a')+"UPDATED"+std::string(8192,'b'),"A bounded literal edit remains reviewable in a large file");
+            store.decide_operation("large-focused-edit",OperationDecision::allow,"test-controller").get();
+            (void)focused.get();
+            require(workspace.read_file("large-source.txt").content==focused_payload["after_content"].get<std::string>(),"Approved focused edit must apply exact intended bytes");
             const auto plan=workspace.plan_replacement("actual.txt","original","native change");
             Task denied(executor,"denied",plan);proposed(store,"denied");
             require(workspace.read_file("actual.txt").content=="original\n","Proposal must not apply edits");

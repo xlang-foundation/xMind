@@ -2,9 +2,12 @@
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
+#include <cstddef>
 
 namespace agentflow {
 struct EditOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
+struct ToolEditNeedsPatch : std::runtime_error {using std::runtime_error::runtime_error;};
+inline constexpr std::size_t edit_file_full_replacement_limit=4096;
 enum class EditSnapshotMatch {before,after,different};
 struct EditRecoveryInspection {
     Operation operation;
