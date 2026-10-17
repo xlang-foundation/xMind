@@ -3252,3 +3252,16 @@ gate was rerun successfully against that exact revision. These are synthetic,
 model-free adapter/controller contracts; they do not substitute for live
 provider runs, rendered browser inspection or installed VS Code acceptance.
 [Exact scope and results](evidence/view-contracts-20261017.json).
+
+## Live webpage coding follow-up — 2026-10-17
+
+A second rendered TestProj run selected the saved OpenAI Responses profile in
+the xMind webpage, approved a CSS-only `HomeView.vue` hero adjustment, and ran
+`npm.cmd run build` through xMind's workspace process operation. Vite 6.4.4
+transformed 37 modules and exited 0 in 711 ms. The xlang3-backed TestProj API
+then returned health `ok` and 12 catalog models; the built page rendered in the
+browser without API errors. The agent continued proposing redundant full-file
+replacements after the build, so the run was stopped; no later replacement was
+approved. This confirms a successful webpage edit/build and rendered API-backed
+page, while recording that the run still needs better completion behavior.
+[Run details and hashes](evidence/webpage-testproj-css-hero-20261017.json).
