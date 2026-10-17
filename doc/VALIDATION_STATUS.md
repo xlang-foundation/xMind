@@ -32,6 +32,14 @@ source revisions, and the complete transcript are in the
 [evidence record](evidence/native-release-ctest-pinned-xlang3-main-20261017.json)
 and [CTest transcript](evidence/native-release-ctest-pinned-xlang3-main-20261017.log).
 
+The later graph turn-authority checkpoint at xMind `b5c6cb8` was compiled far
+enough to link the unified `xmind.exe`, but the isolated full build ran out of
+D: drive space while producing the remaining contract targets. The graph
+CTest selector then could not start its contract executable because that
+binary had not been produced (`ENOENT`); this is an incomplete-build result,
+not a failing graph assertion. D: had about 86 MB free at inspection. A full
+current-source native gate remains outstanding until the build can complete.
+
 ## Current-source native Release build and full CTest — 2026-10-17
 
 Built xMind Release serially in a fresh isolated directory at current source
@@ -230,6 +238,18 @@ re-entry: Claude **13**, Gemini **11**, DeepSeek **2**, and OpenAI **20**. The
 OpenAI list includes the configured GPT-5.6 and GPT-6 models, resolving the
 earlier live-page issue where only one model appeared. No inference was sent
 for these catalogue checks. [Sanitized catalogue counts](evidence/webpage-provider-catalogues-live-20261017.json).
+
+## Live webpage coding on staged xlang3 runtime — 2026-10-17
+
+The webpage completed a fresh coding smoke in TestProj: one reviewed Python
+file was created, run with the saved `xlang3` process profile, and returned
+`42` with exit code 0. The inverse operation was reviewed and approved through
+the native restore flow; the refreshed workspace tree and an independent path
+check confirmed the file was absent. Four provider responses reported token
+usage and timings. An initial `gpt-5.6-sol` request timed out before any file
+operation; retrying the bounded task with saved `gpt-5.6-luna` completed. This
+runtime was staged from xMind `4bd0dcb`, so it is live development evidence,
+not current-main acceptance or release acceptance. [Run and cleanup record](evidence/webpage-staged-runtime-live-coding-20261017.json).
 
 ## Live local webpage-backend planning smoke — 2026-10-17
 

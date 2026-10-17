@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live webpage coding run on the staged local xMind development runtime, including native file approval, xlang3 execution, and journaled restore",
+  "client": {
+    "surface": "xMind webpage",
+    "url": "http://127.0.0.1:58471/ui/",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "profile": "Existing local profile; credential omitted"
+  },
+  "runtime": {
+    "xmind_revision": "4bd0dcbf6b79a876d4e32602891764868283a560",
+    "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "release_accepted": false
+  },
+  "provider_timeout_attempt": {
+    "run_id": "4de1010201083bc9b725c62c23b1a818",
+    "model": "gpt-5.6-sol",
+    "state": "failed",
+    "reason": "provider_timeout",
+    "elapsed_ms": 19241,
+    "file_operation": false
+  },
+  "coding_run": {
+    "run_id": "7abfcb6434d8477177989cad0873ddae",
+    "state": "completed",
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-luna",
+    "prompt_scope": "Create exactly one Python file defining add(a, b), execute it with xlang3, and print 42; do not modify other files",
+    "model_responses": 4,
+    "provider_usage": {
+      "input_tokens": 22206,
+      "output_tokens": 282,
+      "total_tokens": 22488,
+      "cached_input_tokens": 16278,
+      "reasoning_tokens": 44,
+      "first_token_seconds": [1.81, 0.91, 1.95, 0.98],
+      "elapsed_seconds": [2.02, 1.51, 3.60, 1.32]
+    },
+    "file_operation": {
+      "tool": "create_file",
+      "operation_id": "9f78c30e4787b838720cbc938d9b93c4",
+      "path": "xmind_live_coding_20261017.py",
+      "approval": "Reviewed and allowed in the webpage UI",
+      "state": "succeeded"
+    },
+    "process_operation": {
+      "tool": "run_process",
+      "operation_id": "d6fc089c53b362f7b7e7f629c80b3299",
+      "profile": "xlang3",
+      "exit_code": 0,
+      "elapsed_ms": 176,
+      "stdout": "42\r\n",
+      "stderr": ""
+    },
+    "restore": {
+      "graph_run_id": "0b2371b1d660b0847d4b73acfc4e90f1",
+      "child_run_id": "a6eb44b444dd4a9e02cfebb3e412b6e5",
+      "operation_id": "c116933e4175daf31a21609c56a741ba-0",
+      "approval": "Reviewed and allowed in the webpage UI",
+      "state": "succeeded",
+      "after_exists": false,
+      "refreshed_workspace_tree_excludes_file": true
+    }
+  },
+  "limits": [
+    "This validates one bounded webpage create-and-run coding task on xMind 4bd0dcb; it is not a live acceptance run against current main b5c6cb8.",
+    "The staged development runtime is not release accepted.",
+    "A separate current-main full build stopped under low disk space before all contract executables were produced; its focused CTest invocation therefore could not run the contract binary."
+  ]
+}
