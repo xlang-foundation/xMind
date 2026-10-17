@@ -3621,3 +3621,32 @@ The run card displayed provider token usage and measured timings. This proves
 the Agent's configured process path for this build; broader multi-file
 reliability and general build behavior remain to be tested. [Run, runtime
 hashes, coding metrics, execution, process output, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
+
+## Current-source graph-agent acceptance in VS Code and webpage — 2026-10-17
+
+A live graph run exposed a mismatch when a graph-agent node inherited the
+ordinary 32-turn agent setting while registered graph authority permits at
+most 16 turns. `GraphRunner` now caps the actual graph child runner and its
+captured authority to the same 16-turn limit. The native context-graph
+contract sets the parent limit to 32 and verifies that both child execution
+and persisted authority use 16. Its Release build and CTest passed **1/1**.
+
+The local browser launcher now forwards an explicit trusted `--graphs-config`
+to the profile-aware native view and rejects that option in attach-only mode,
+where the backend already owns its configuration. A separately staged and
+hash-verified development runtime used the current xMind source and xlang3
+SDK `b4a53192`; it is not release accepted. A real two-node graph completed
+through both the VS Code Development Host and rendered local webpage, using
+the saved OpenAI profile and discovered `gpt-5.6-sol` model. In both surfaces,
+the agent returned `GRAPH_AGENT_OK`, rendered provider token and timing
+metrics, paused for the human JSON confirmation, and completed after
+`{"confirmed":true}`. No TestProj files were edited. The combined browser
+and VS Code UI suites passed **525/525**. This verifies this graph flow and
+the launcher path, not full coding reliability or OpenCode feature parity.
+[Run IDs, metrics, runtime hashes and scope](evidence/graph-agent-live-ui-acceptance-20261017.json).
+
+The full 150-test native CTest suite is not claimed for this checkpoint. A
+diagnostic run used a temporary isolated CMake output directory before all
+contract executables had been rebuilt there, so many tests could not start;
+the normal output directory has since been restored. The last complete native
+gate remains the 147/147 run recorded above at the preceding source revision.

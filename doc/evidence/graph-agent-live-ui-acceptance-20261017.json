@@ -1,0 +1,53 @@
+{
+  "kind": "local-live-graph-ui-acceptance",
+  "date": "2026-10-17",
+  "baseXmindRevision": "4bd0dcbf6b79a876d4e32602891764868283a560",
+  "sdkRevision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "runtimeManifestSha256": "db4e4a3834b83884d913c0b1e0a29446efd67a6c5c702b4816ce0228e1a7f28c",
+  "xmindExecutableSha256": "66bdefe3f6707d6ed2a5fd2e3d7dad7be6c21ea56f6fd543655c1249aca71381",
+  "releaseAccepted": false,
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "graph": "live.agent.confirm",
+  "graphNodes": 2,
+  "agentOutput": "GRAPH_AGENT_OK",
+  "humanConfirmation": "{\"confirmed\":true}",
+  "surfaces": [
+    {
+      "name": "VS Code Development Host",
+      "runId": "f3e98b30fd11f917d155b64fefdd2c47",
+      "status": "completed",
+      "provider": "OpenAI Responses",
+      "model": "gpt-5.6-sol",
+      "inputTokens": 2619,
+      "outputTokens": 7,
+      "totalTokens": 2626,
+      "firstTokenMs": 1270,
+      "elapsedMs": 1370
+    },
+    {
+      "name": "local webpage",
+      "runId": "e36ead91150ca0928fd73915cead14c4",
+      "status": "completed",
+      "provider": "OpenAI Responses",
+      "model": "gpt-5.6-sol",
+      "inputTokens": 3684,
+      "outputTokens": 7,
+      "totalTokens": 3691,
+      "firstTokenMs": 2180,
+      "elapsedMs": 2410
+    }
+  ],
+  "nativeContract": "native_context_graph_engine_contract",
+  "nativeContractPassed": 1,
+  "nativeContractTotal": 1,
+  "uiTestsPassed": 525,
+  "uiTestsFailed": 0,
+  "changes": [
+    "Native/src/graph_runner.cpp caps registered graph-agent execution and captured authority to 16 turns",
+    "Native/tests/context_graph_engine_contract.cpp verifies the common 16-turn cap when parent settings allow 32",
+    "Tools/start-browser.mjs passes an explicit trusted graph catalog into local native view startup and rejects it in attach-only mode"
+  ],
+  "launcherTestPassed": 1,
+  "launcherTestTotal": 1,
+  "fullNativeGateCurrentRevision": "Not claimed: an initial full CTest invocation used an isolated output directory before the remaining test binaries were built. The normal output path was restored; the focused native graph contract and 525 browser/VS Code tests pass."
+}

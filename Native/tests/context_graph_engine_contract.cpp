@@ -25,7 +25,7 @@ AgentSettings settings(const std::string& workspace,const std::string& endpoint)
     AgentSettings result;result.workspace=workspace;result.provider.model="graph-context-left";result.selectable_models={"graph-context-right"};
     result.provider.endpoint=endpoint;result.provider.wire=ProviderWire::responses;result.provider.tools=Capability::supported;
     result.provider.stream_usage=Capability::supported;result.provider.output_limit=Capability::supported;result.provider.deadline=10s;result.provider.idle_timeout=10s;
-    result.credential=CredentialReference{"provider","graph-fixture","model-api"};result.max_turns=5;result.max_output_tokens=32;result.run_timeout=20s;
+    result.credential=CredentialReference{"provider","graph-fixture","model-api"};result.max_turns=32;result.max_output_tokens=32;result.run_timeout=20s;
     ContextRuntimePolicy runtime;runtime.buffer_tokens=100;runtime.compaction.retain_recent_groups=1;
     for(const auto* model:{"graph-context-left","graph-context-right"}){
         VerifiedContextCapacity capacity;capacity.provider_identity_json=provider_identity(model);capacity.wire="responses";capacity.model_id=model;
@@ -88,7 +88,7 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
         const auto children=store.children("main-root").get();require(children.size()==2&&store.history("main").get().size()==1,"Child contexts must remain isolated from root visible history");
         for(const auto& child:children){
             const auto admission=store.child_admission(child.id).get();const auto captured=std::find_if(closed.authority.agents.begin(),closed.authority.agents.end(),[&](const auto& a){return a.node_id==child.node_id;});
-            require(captured!=closed.authority.agents.end()&&captured->turn_limit==5&&admission.backend_identity==captured->backend_identity,"Actual graph child must retain its configured model and five-turn authority");
+            require(captured!=closed.authority.agents.end()&&captured->turn_limit==16&&admission.backend_identity==captured->backend_identity,"Graph children must share the registered 16-turn cap between their runner and captured authority");
             const auto history=store.run_history(child.id).get();require(child.state==RunState::completed&&history.size()==10,"Compaction must not remove original child tool groups or final response");std::int64_t responses=0;
             for(const auto& item:history)if(item.role=="assistant"){
                 ++responses;const auto actual=Json::parse(item.json);const auto input=20+responses+(child.node_id=="right"?30:0);

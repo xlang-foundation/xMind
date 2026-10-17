@@ -25,6 +25,7 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+constexpr std::size_t max_registered_graph_agent_turns=16;
 std::string identifier(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}
 bool terminal(RunState state){return state==RunState::completed || state==RunState::failed || state==RunState::cancelled;}
 bool configuration_id(const std::string& value){return !value.empty() && value.size()<=64 && value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")==std::string::npos;}
@@ -75,7 +76,9 @@ GraphRunner::GraphRunner(PersistenceService& store,AgentSettings settings,std::s
         settings_.process_profiles=process_->profiles();
     }
     if(!settings_.provider.model.empty()){
-        auto graph_agent=settings_;graph_agent.delegation.reset();graph_agent.planning.reset();
+        auto graph_agent=settings_;
+        if(graph_agent.context)graph_agent.max_turns=std::min(graph_agent.max_turns,max_registered_graph_agent_turns);
+        graph_agent.delegation.reset();graph_agent.planning.reset();
         agents_=std::make_unique<AgentRunner>(store_,std::move(graph_agent));
     }
 }
@@ -107,6 +110,7 @@ std::optional<RootBudgetSpec> GraphRunner::execution_budget(const GraphPlan& pla
 std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& plan,const std::string& model)const{
     if(!execution_budget(plan,model))return {};
     auto child=settings_;child.delegation.reset();child.planning.reset();
+    child.max_turns=std::min(child.max_turns,max_registered_graph_agent_turns);
     const auto credentials=agent_authority_credentials(store_,child);const auto workspace=workspace_?workspace_->identity():"workspace:none";
     GraphContextSpec result;auto bindings=Json::array();
     for(const auto& node:plan.nodes())if(node.kind==GraphNodeKind::agent){
