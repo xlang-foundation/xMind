@@ -78,7 +78,7 @@
     "transformed_modules": 37,
     "vite_build_ms": 749,
     "stderr_bytes": 0,
-    "summary": "Production build generated dist/. Largest bundle assets/index-Bi58jXYP.js was 122.43 kB (46.25 kB gzip).",
+    "summary": "Captured stdout shows the production build generated dist/. Largest bundle assets/index-Bi58jXYP.js was 122.43 kB (46.25 kB gzip); stderr was empty.",
     "model_calls": [
       {
         "input_tokens": 5210,
