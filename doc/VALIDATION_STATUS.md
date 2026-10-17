@@ -3415,3 +3415,26 @@ passed 18/18, VS Code tests passed 391/391, and webpage tests passed 134/134.
 This checks provider setup, selection and inference; it does not add broad
 coding reliability or a new live VS Code run.
 [Exact retest and limits](evidence/webpage-provider-discovery-retry-20261017.json).
+
+## Coding-first CLI and browser acceptance — 2026-10-17
+
+The interactive CLI rejected explicit model selection when a saved provider
+profile contained a key but no default model. It now accepts the selected
+session model and gives a clear, non-mutating explanation if `/model` is used
+to reset without a configured default. The native CLI contract now covers both
+cases and passes. In a temporary workspace, the CLI reused the saved OpenAI
+profile, selected `gpt-5.6-sol`, completed a coding run and applied an approved
+`greeting.py` edit.
+
+The rendered local webpage also reused that saved profile, discovered 20
+models, selected `gpt-5.6-sol`, displayed provider usage and timings, requested
+approval for a precise `replace_file` operation, and completed the approved
+edit in a separate temporary workspace. Browser tests passed **134/134** and
+the current VS Code extension suite passed **391/391**. A prior live VS Code
+Development Host edit and xlang3 execution is recorded in
+[VS Code acceptance evidence](evidence/vscode-current-source-coding-20261017.json).
+The current-turn real file edits were isolated scratch checks; the VS Code
+live-edit evidence is a separate run. These bounded runs establish that CLI
+and webpage coding work with saved provider configuration, but do not prove
+broad coding reliability or OpenCode feature parity.
+[Run details and hashes](evidence/cli-key-only-model-selection-and-live-coding-20261017.json).

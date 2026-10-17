@@ -1,11 +1,15 @@
 // Real native HTTP/profile/agent/store fixture for the independently driven CLI.
 // Only the provider sockets and credentials are synthetic.
 #include "agentflow/provider_profile_runtime.hpp"
+#include "agentflow/secret_protection.hpp"
+#include "agentflow/provider_yaml_config.hpp"
 #include "agentflow/http_server.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -106,6 +110,15 @@ int main(int argc,char** argv){
                     XlangSqlite sql(database,imports);
                     sql.execute(name=="arm_cas_failure"?"CREATE TRIGGER reject_cli_profile BEFORE UPDATE ON information WHEN NEW.category='native-provider-profiles' BEGIN SELECT RAISE(ABORT,'synthetic CLI profile CAS failure'); END":"DROP TRIGGER reject_cli_profile");
                     std::cout<<Json{{"type","fixture_fault"},{"armed",name=="arm_cas_failure"}}.dump()<<'\n'<<std::flush;continue;
+                }
+                if(name=="save_key_only"){
+                    const auto revision=command.at("revision").get<std::int64_t>();require(runtime.configuration().revision==revision,"Key-only profile fixture must use the observed revision");
+                    const auto path=root/"key-only-provider.yaml";{std::ofstream file(path,std::ios::binary);file<<"version: 1\nactive_profile: openai-key-only\nprofiles:\n  openai-key-only:\n    route: openai.chat\n    api_key: synthetic-profile-cli-openai-key-not-live\n";require(static_cast<bool>(file),"Synthetic key-only profile fixture must be written");}
+                    const auto saved=runtime.import_yaml_configuration(path,revision);std::filesystem::remove(path);
+                    require(saved.revision==revision+1&&saved.active=="openai-key-only","Native fixture must save and activate a key-only profile");
+                    const auto profile=std::find_if(saved.profiles.begin(),saved.profiles.end(),[](const auto& value){return value.id=="openai-key-only";});
+                    require(profile!=saved.profiles.end()&&profile->model.empty(),"Key-only fixture must have no default model");
+                    std::cout<<Json{{"type","fixture_profile_saved"},{"revision",saved.revision},{"active",saved.active}}.dump()<<'\n'<<std::flush;continue;
                 }
                 if(name=="abort"){stopped=true;break;}
                 require(name=="check"||name=="stop","Unknown independent fixture control");

@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-17",
+  "xmind_base_commit": "927eea8",
+  "scope": "Explicit CLI model selection for key-only provider profiles and live browser coding acceptance",
+  "native_change": {
+    "file": "Native/apps/cli_main.cpp",
+    "behavior": "An explicit /model MODEL_ID works when the active saved provider profile has a key but no default model. /model reset explains that no default exists and does not write a model reset.",
+    "release_executable_sha256": "2bf6f306ecc7a494d090ca06abb36bab89bad232240c8133148822701b92ba45"
+  },
+  "automated_validation": {
+    "native_contract": "native_provider_profile_cli_contract",
+    "native_contract_result": "passed",
+    "coverage": "A key-only OpenAI profile selects and persists an explicit session model; a reset without a default is rejected and leaves the explicit model intact.",
+    "vscode_client_tests": {
+      "command": "npm test",
+      "passed": 391,
+      "failed": 0
+    },
+    "browser_tests": {
+      "command": "node --test views/browser/tests/*.test.cjs",
+      "passed": 134,
+      "failed": 0
+    }
+  },
+  "live_cli": {
+    "workspace": "Temporary isolated scratch workspace",
+    "profile": "Saved local OpenAI profile; secret omitted",
+    "model": "gpt-5.6-sol",
+    "model_selection_persisted": true,
+    "run_id": "4559206831cbac445d447730cee1b711",
+    "operation_id": "8681a41eccb6d4c3b6aa6dbb833014c6",
+    "operation": "replace_file",
+    "operation_state": "succeeded",
+    "file": "greeting.py",
+    "file_sha256_after": "6dbdc139c43a84b0b2dcd736a41e98c2655da710a16910d7ac565e4667aba209"
+  },
+  "live_browser": {
+    "url": "http://127.0.0.1:61704/ui/",
+    "workspace": "Temporary isolated scratch workspace",
+    "provider": "Saved OpenAI profile; secret omitted",
+    "route": "openai.responses",
+    "model": "gpt-5.6-sol",
+    "models_discovered": 20,
+    "run_id": "d7054805895ee6ef27f6470ea37b1b04",
+    "state": "completed",
+    "operation_id": "d746966547f1445f7d3bbf70020b8bc2",
+    "operation": "replace_file",
+    "approval": "Approved in browser UI",
+    "file": "greeting.py",
+    "file_sha256_after": "53926f8217124e2ed6809aeec73ff92869a0c3bfa363121b19a80434a00b00af",
+    "provider_usage": [
+      {"input_tokens": 5189, "output_tokens": 31, "total_tokens": 5220, "cached_tokens": 0, "reasoning_tokens": 9},
+      {"input_tokens": 5338, "output_tokens": 132, "total_tokens": 5470, "cached_tokens": 5186, "reasoning_tokens": 22},
+      {"input_tokens": 5587, "output_tokens": 54, "total_tokens": 5641, "cached_tokens": 5335, "reasoning_tokens": 0}
+    ]
+  },
+  "vscode_live_reference": "vscode-current-source-coding-20261017.json",
+  "limits": [
+    "These are bounded single-file coding acceptances, not broad reliability or OpenCode feature-parity evidence.",
+    "The current-turn live file edits were made in temporary scratch workspaces; no TestProj files were changed."
+  ]
+}
