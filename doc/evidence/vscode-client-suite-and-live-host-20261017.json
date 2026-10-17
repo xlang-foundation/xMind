@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-17",
+  "repository_revision": "6194f4b85a815098249d7e30595fffd3ac7ab545",
+  "scope": "Current VS Code client contract suite and live Extension Development Host attachment state",
+  "extension": {
+    "version": "0.1.13",
+    "node_version": "v22.19.0",
+    "package_json_sha256": "05afead7e95cba80e304500854a1293e341874367af1a4225585ebc54388b91b",
+    "extension_js_sha256": "b980b3672ac1fa92fb66d2378ee68e53c212502036e8335b10c033a393c5fe55",
+    "workspace_backend_js_sha256": "cf775fb80ea30b028f6a0b8c81e75d712a982638249f8fd2c14c85d2d4aaaa6b"
+  },
+  "test": {
+    "command": "npm test",
+    "result": "passed",
+    "tests": 390,
+    "passed": 390,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "duration_milliseconds": 5549.6937
+  },
+  "live_host": {
+    "host": "VS Code Extension Development Host",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "development_extension_path": "D:\\CantorAI2026\\xMind\\extensions\\vscode",
+    "native_view_ready_record": ".agentflow/vscode-cdp-acceptance-20261016/profile/User/globalStorage/agentflow-local.agentflow/native-view-e8bd4da3c40b1bb87c574bd260215c9a/ready.json",
+    "registered_workspace_matches_open_folder": true
+  },
+  "visual_verification": {
+    "result": "inconclusive",
+    "observation": "Windows Computer Use returned a fully black screenshot for both the VS Code window and the Edge window during the same session. The xMind browser tab remained inspectable through browser accessibility state.",
+    "conclusion": "The capture result is consistent with a desktop capture issue; it neither proves nor disproves the VS Code webview rendering state."
+  },
+  "limits": [
+    "The client suite verifies extension behavior contracts, not a rendered live webview.",
+    "The Oct 16 live VS Code edit-and-build acceptance is recorded separately in doc/evidence/live-coding-acceptance-20261016.json.",
+    "This record does not claim OpenCode feature parity or full coding coverage."
+  ]
+}
