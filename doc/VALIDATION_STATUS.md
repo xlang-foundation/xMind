@@ -25,6 +25,8 @@ used when they were recorded and should not be read as current parity goals.
 
 Primary evidence: [native Release gate](evidence/native-current-source-release-ctest-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [current-main VS Code development host](evidence/vscode-current-main-live-coding-20261017.json), [current-main packaged VSIX](evidence/vscode-current-main-packaged-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
 
+The latest focused webpage retest is recorded separately in [current-main webpage coding](evidence/webpage-current-main-live-coding-20261017.json). It uses current-main browser assets and passes a real approval, xlang3 execution and reviewed restore, while explicitly identifying the older development backend runtime used for that run.
+
 ## Current client contract re-run — 2026-10-17
 
 At source `2f49804`, the full VS Code extension suite passes **391/391** and
@@ -3694,6 +3696,20 @@ the current native coding path and bounded instruction. It does not establish
 reliability across large changes, and this turn did not perform a new live
 VS Code edit; the extension suite passed 390/390.
 [Exact runtime and run evidence](evidence/current-source-webpage-coding-20261017.json).
+
+## Current-main webpage client retest — 2026-10-17
+
+The browser assets built from current xMind main connected to the saved local
+TestProj backend, reused the saved OpenAI Responses profile and discovered 20
+models. The webpage approved creation of a focused Python smoke file and ran
+it through the configured xlang3 process profile with exit code 0 and the
+expected output. A reviewed restore then removed the file, and an independent
+filesystem check confirmed it was absent. The browser client contract suite
+passes **134/134**. This run used an existing development backend at revision
+`86f2e31`, so it does not establish current-main native-binary or release-package
+acceptance. The corresponding live VS Code coding acceptance remains recorded
+above; broader multi-file and long-task reliability remain open.
+[Exact run, hashes and limits](evidence/webpage-current-main-live-coding-20261017.json).
 
 ## Live VS Code coding acceptance — 2026-10-17
 

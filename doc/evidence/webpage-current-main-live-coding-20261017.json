@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh current-main browser client run against an existing local development backend",
+  "repository_revision": "359d9ecb7d48d6c124bc0d9e5ac0cb01dd2e1d6a",
+  "browser_client": {
+    "url": "http://127.0.0.1:50412/ui/",
+    "backend": "http://127.0.0.1:62232",
+    "source_assets": {
+      "browser.js_sha256": "93B28D2FDDE083B4A2560B334671C1ABFBD6B1B76E4DB1757E2A87FAC46B8CF5",
+      "index.html_sha256": "8FA07839179137583633C56A15AB72F9616A1AE64A66543C5338C3F1F2254E8A"
+    }
+  },
+  "workspace": "D:/CantorAI2026/TestProj",
+  "provider": {
+    "profile": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "saved_key_reused": true,
+    "models_discovered": 20
+  },
+  "runtime": {
+    "xmind_revision": "86f2e31",
+    "xmind_executable_sha256": "7CC8FDA364B8D95C26B34356A13822CC042B26D295A42FF2F9D328B52C4F4639",
+    "release_accepted": false
+  },
+  "coding_run": {
+    "id": "a25a23e13398138a8743b3797d7836b5",
+    "state": "completed",
+    "edit": {
+      "operation_id": "96e9138bff4f4d9979d88f640198e353-0",
+      "tool": "replace_file",
+      "approval": "approved in the webpage",
+      "path": "xmind_goal_live_smoke_20261017.py",
+      "content": "print('Hello, xMind webpage!')"
+    },
+    "process": {
+      "profile": "xlang3",
+      "command": "xlang3 -B xmind_goal_live_smoke_20261017.py",
+      "exit_code": 0,
+      "stdout": "Hello, xMind webpage!",
+      "stderr": ""
+    },
+    "model_calls": [
+      { "input_tokens": 5267, "output_tokens": 104, "total_tokens": 5371, "first_token_ms": 2020, "elapsed_ms": 2610 },
+      { "input_tokens": 5500, "output_tokens": 90, "total_tokens": 5590, "first_token_ms": 2620, "elapsed_ms": 3090 },
+      { "input_tokens": 5786, "output_tokens": 60, "total_tokens": 5846, "first_token_ms": 1170, "elapsed_ms": 1830 }
+    ]
+  },
+  "restore": {
+    "run_id": "e832a5396a588de937e4add3e779402f",
+    "child_run_id": "4e11fcff8aa87d0c599a80d0032af347",
+    "operation_id": "96e9138bff4f4d9979d88f640198e353-0",
+    "approval": "approved in the webpage",
+    "restored": true,
+    "file_absent_after_restore": true
+  },
+  "browser_contract_tests": {
+    "command": "node --test views/browser/tests/*.test.cjs",
+    "passed": 134,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 15766
+  },
+  "limitations": [
+    "The browser client assets were built from current xMind main; the live backend executable came from an existing development profile at revision 86f2e31 rather than the current-main release build.",
+    "One bounded single-file test does not establish broad multi-file or long-task reliability.",
+    "The smoke file was approved for deletion through the UI and independently confirmed absent afterward.",
+    "No release-package acceptance is claimed."
+  ]
+}
