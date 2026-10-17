@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live current-source webpage edit and xlang3 execution in TestProj",
+  "repository_revision": "961968e914d26ff1fee6f13e78b45150fa963457",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "browser": {
+    "url": "http://127.0.0.1:49456/ui/",
+    "backend": "http://127.0.0.1:49451",
+    "launcher": "Tools/start-browser.mjs",
+    "runtime_staging": "Tools/stage-browser-dev-runtime.mjs",
+    "runtime_inventory_hash_verified": true,
+    "release_accepted": false,
+    "xmind_sha256": "3bdc75e462bb5da98a3b8b1ae24cbf7a9de1cef24f474732fe84cbe3196d7f78",
+    "xlang3_sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f"
+  },
+  "provider": {
+    "profile": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "saved_key_reused": true,
+    "models_discovered": 20,
+    "credential": "Existing local provider config; secret omitted"
+  },
+  "coding_run": {
+    "id": "af18bd983ecc46cd72dd1f4744893d47",
+    "state": "completed",
+    "edit": {
+      "operation_id": "12ca2a9e62ccca03f18bda00bd2ef4d3",
+      "tool": "replace_file",
+      "approval": "approved in the webpage",
+      "path": "xmind_coding_smoke.py",
+      "change": "Changed the greet return value to Hello from current xMind, {name}!",
+      "independent_sha256": "A1FD7717746684D6A988DE8435D0E69307946DC6D439BB22291DD246569613B3"
+    },
+    "process": {
+      "operation_id": "71174f10356d032fcd8e75d293160f48",
+      "profile": "xlang3",
+      "executable": "D:/CantorAI2026/xlang3/build/Release/xlang3.exe",
+      "arguments": ["-B", "xmind_coding_smoke.py"],
+      "exit_code": 0,
+      "stdout": "Hello from current xMind, TestProj!\r\n",
+      "stderr": "",
+      "elapsed_ms": 60
+    }
+  },
+  "vscode_extension_tests": {
+    "command": "npm test",
+    "passed": 390,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 3496
+  },
+  "limitations": [
+    "One bounded task does not establish reliability for broad multi-file coding requests.",
+    "A live edit from VS Code was not performed in this turn; existing VS Code live edit acceptance is documented separately.",
+    "TestProj is not a Git repository, so its smoke file is not part of an xMind Git diff."
+  ]
+}

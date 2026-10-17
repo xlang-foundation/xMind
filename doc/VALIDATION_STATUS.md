@@ -3294,6 +3294,20 @@ test does not establish that a live provider will follow the guidance or that
 the TestProj redesign can complete within its run budget.
 [Exact test evidence](evidence/native-coding-workflow-guidance-20261017.json).
 
+## Current-source webpage coding acceptance — 2026-10-17
+
+A fresh local browser service was staged from the Release xMind executable at
+revision `961968e` and the paired xlang3 SDK runtime; the runtime inventory was
+hash-verified and matched the selected build. The page reused the saved
+provider configuration, fetched 20 OpenAI models without re-entering a key,
+approved one precise edit to `xmind_coding_smoke.py`, and ran that file using
+the configured `xlang3` profile. The command exited 0 and printed
+`Hello from current xMind, TestProj!`. This is a live-provider acceptance of
+the current native coding path and bounded instruction. It does not establish
+reliability across large changes, and this turn did not perform a new live
+VS Code edit; the extension suite passed 390/390.
+[Exact runtime and run evidence](evidence/current-source-webpage-coding-20261017.json).
+
 ## Bounded webpage coding and xlang3 execution — 2026-10-17
 
 A fresh TestProj webpage session created the approved `xmind_coding_smoke.py`
