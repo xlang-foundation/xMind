@@ -50,11 +50,40 @@
     "cross_client_check": "The browser displayed the VS Code conversation and its completed plan. A browser follow-up was then visible in VS Code after Refresh history reconnected the sidebar.",
     "browser_follow_up_run_id": "a06355c00a0b79dd0a3c4964c5b7946b",
     "browser_follow_up_state": "completed",
-    "vscode_reconnect_restored_history": true
+    "vscode_reconnect_restored_history": true,
+    "cross_client_approval_check": "A VS Code-originated replace_file request appeared in the connected browser approval queue. The reviewed exact change was approved there, then the updated file was reopened and visible in VS Code after reconnect."
+  },
+  "live_coding_acceptance": {
+    "webpage": {
+      "plan_run_id": "b654333a2fc1f8a72dfc165baaccd1",
+      "file": "model-zoo/frontend/src/views/HomeView.vue",
+      "change": "Removed the nested Updating results span's redundant role=status; retained its text and the parent status/aria-live region.",
+      "change_approval": "Reviewed in webpage and approved.",
+      "verification_command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "exit_code": 0,
+      "elapsed_ms": 1895,
+      "stderr_bytes": 0,
+      "dist_index_timestamp_observed": "2026-10-17T08:01:18"
+    },
+    "vscode": {
+      "workspace": "D:/CantorAI2026/TestProj",
+      "file": "xmind_vscode_coding_smoke.py",
+      "change": "Changed only the main() return string to xMind VS Code approval-gated edit works.",
+      "change_approval": "Reviewed in the connected webpage approval queue and approved.",
+      "reopened_file_visible_in_vscode": true,
+      "xmind_process_request_status": "completed",
+      "xlang3_executable": "D:/CantorAI/xlang3/build/Release/xlang3.exe",
+      "xlang3_script": "D:/CantorAI2026/TestProj/xmind_vscode_coding_smoke.py",
+      "independent_xlang3_verification": {
+        "exit_code": 0,
+        "stdout": "xMind VS Code approval-gated edit works"
+      }
+    }
   },
   "limitations": [
     "The separately launched webpage and VS Code acceptance runs used isolated preview profiles; the shared-profile result is the additional browser opened from the VS Code backend.",
-    "The live plan used a read-only agent child and human decision. It did not exercise an approved code edit, registered verification command, external MCP effect, A2A call, or native-owner restart.",
-    "Provider inference was live; this does not establish broad coding reliability, release-package acceptance, or hosted CI."
+    "The live coding checks cover one focused Vue accessibility edit plus a frontend build, and one VS Code-originated smoke-file edit plus xlang3 execution; they do not establish broad coding reliability, a full redesign, release-package acceptance, or hosted CI.",
+    "Dynamic MCP/A2A effects and native-owner restart remain unverified in this live acceptance."
   ]
 }

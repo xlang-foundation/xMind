@@ -33,6 +33,26 @@ opened from VS Code. It does not yet cover planned code effects, registered
 verification commands, dynamic MCP/A2A effects, or native-owner restart.
 [Exact run scope and hashes](evidence/live-planning-shared-backend-20261017.json).
 
+## Live webpage and VS Code coding acceptance — 2026-10-17
+
+The shared TestProj backend completed an approval-gated edit through each
+client. The webpage applied one focused accessibility patch to
+`model-zoo/frontend/src/views/HomeView.vue`, then xMind's registered process
+tool ran `npm.cmd run build` in `model-zoo/frontend`; it completed with exit
+code 0 and no stderr. The generated `dist/index.html` timestamp advanced during
+that build.
+
+From the VS Code extension, xMind proposed a one-string edit to the existing
+`xmind_vscode_coding_smoke.py` fixture. The proposal appeared in the connected
+webpage approval queue, where the exact before/after was reviewed and approved.
+After reconnect, the edited source was visible in VS Code. The installed xlang3
+runtime process request from VS Code completed; an independent direct xlang3
+invocation returned the expected string with exit code 0. This
+proves the live edit, approval and execution paths across both clients for this
+focused test; it does not establish broad coding reliability or release-package
+acceptance. Exact details and the remaining scope are in the
+[acceptance evidence](evidence/live-planning-shared-backend-20261017.json).
+
 ## Exact pinned xlang3 main Release gate — 2026-10-17
 
 Built xMind Release at source commit `2383376` against the exact xlang3 main
