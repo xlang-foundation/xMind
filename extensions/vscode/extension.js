@@ -941,6 +941,7 @@ async function activate(context) {
   function open() {
     if (!opening) opening = openPanel().catch(error=>{
       if(sidebarView&&!panel)sidebarView.webview.html=startupHtml('xMind could not connect. Run “xMind: Open Workspace” to retry.');
+      if(previewReady)try{require('node:fs').writeFileSync(previewReady+'.error.json',JSON.stringify({opened:false,backend_mode:previewOrigin?'attached':'managed-local',error:String(error?.message||error).slice(0,1024),stack:String(error?.stack||'').slice(0,4096)})+'\n');}catch{}
       throw error;
     }).finally(() => { opening = undefined; });
     return opening;

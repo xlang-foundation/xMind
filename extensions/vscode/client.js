@@ -453,11 +453,16 @@ function parseWorkspaceCommand(input,catalogue){
   return {id:command.id,arguments:match[2]??''};
 }
 function validateWorkspaceMembership(value,workspace){
-  exactFields(value,['workspace_id','name','root','revision','primary_folder_id','folders']);
-  if(value.workspace_id!==workspace.workspace_id||typeof value.name!=='string'||!value.name||typeof value.root!=='string'||value.root!==workspace.root||!Number.isSafeInteger(value.revision)||value.revision<1||value.primary_folder_id!==workspace.workspace_id||!Array.isArray(value.folders)||!value.folders.length||value.folders.length>256)throw new Error('The native host returned invalid workspace membership.');
-  const ids=new Set();for(let ordinal=0;ordinal<value.folders.length;ordinal++){const folder=value.folders[ordinal];exactFields(folder,['folder_id','name','root','ordinal']);if(typeof folder.folder_id!=='string'||!folder.folder_id||ids.has(folder.folder_id)||typeof folder.name!=='string'||!folder.name||typeof folder.root!=='string'||!folder.root||!Number.isSafeInteger(folder.ordinal)||folder.ordinal!==ordinal)throw new Error('The native host returned an invalid workspace folder.');ids.add(folder.folder_id);}
-  if(value.folders[0].folder_id!==value.primary_folder_id||value.folders[0].root!==workspace.root)throw new Error('The native host changed the workspace primary folder.');
-  return value;
+  exactFields(value,['workspace_id','revision','primary_folder_id','folders']);
+  if(value.workspace_id!==workspace.workspace_id||!Number.isSafeInteger(value.revision)||value.revision<1||value.primary_folder_id!==workspace.workspace_id||!Array.isArray(value.folders)||!value.folders.length||value.folders.length>256)throw new Error('The native host returned invalid workspace membership.');
+  const nameOf=root=>root.split(/[\\/]+/).filter(Boolean).at(-1)||root,ids=new Set(),roots=new Set();
+  const folders=value.folders.map((folder,ordinal)=>{
+    exactFields(folder,['folder_id','root']);
+    if(typeof folder.folder_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(folder.folder_id)||ids.has(folder.folder_id)||typeof folder.root!=='string'||!folder.root||folder.root.length>32760||/[\x00-\x1f]/.test(folder.root)||(!/^[A-Za-z]:[\\/]/.test(folder.root)&&!/^\\\\[^\\/]+[\\/][^\\/]+(?:[\\/]|$)/.test(folder.root))||roots.has(folder.root))throw new Error('The native host returned an invalid workspace folder.');
+    ids.add(folder.folder_id);roots.add(folder.root);return {...folder,name:nameOf(folder.root),ordinal};
+  });
+  if(folders[0].folder_id!==value.primary_folder_id||folders[0].root!==workspace.root)throw new Error('The native host changed the workspace primary folder.');
+  return {...value,name:nameOf(workspace.root),root:workspace.root,folders};
 }
 function validateVcsFolderId(value){if(typeof value!=='string'||!value||value.length>256||/[\x00-\x1f]/.test(value))throw new Error('Invalid Git workspace folder selection.');return value;}
 function vcsFolderQuery(folderId){return folderId===undefined?'':'?'+new URLSearchParams({folder_id:validateVcsFolderId(folderId)}).toString();}
@@ -863,7 +868,7 @@ class McpAuthorizationController {
   }
   open(serverId,link){mcpServerIdentity(serverId);const value=this.attempts.get(serverId)?.value;if(!this.active()||!value||value.state!=='awaiting_callback'||value.cancellation_requested||Date.now()>=value.expires_unix_ms)throw new Error('Wait for the current MCP authorization link.');validateMcpAuthorizationAttempt(value);return link(value.authorization_url);}
 }
-function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid provider profile metadata');}
+function exactFields(value,fields,message='Invalid metadata field set'){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error(message);}
 function validateSessionArchive(value){
   exactFields(value,['format','version','session','messages']);if(value.format!=='xmind.session'||![1,2].includes(value.version)||!value.session||typeof value.session!=='object'||Array.isArray(value.session)||!Array.isArray(value.messages)||value.messages.length>1000)throw new Error('Invalid xMind session archive');
   exactFields(value.session,value.version===1?['title']:['title','agent']);if(typeof value.session.title!=='string'||!value.session.title||value.session.title.length>512)throw new Error('Invalid xMind session title');
@@ -935,13 +940,13 @@ function profileRevision(value){if(!Number.isSafeInteger(value)||value<0)throw n
 function profileKey(value){if(value!==undefined&&(typeof value!=='string'||!/^[\x21-\x7e]{1,32768}$/.test(value)))throw new Error('Enter a provider API key without spaces');}
 function profileBindingFields(binding){if(binding===undefined)return {};exactFields(binding,['provider_profile_id','expected_provider_revision']);if(binding.provider_profile_id!=='')profileIdentity(binding.provider_profile_id);profileRevision(binding.expected_provider_revision);return {...binding};}
 function validateProviderProfiles(value,withRoutes=true){
-  exactFields(value,withRoutes?['revision','active','profiles','routes']:['revision','active','profiles']);profileRevision(value.revision);
+  exactFields(value,withRoutes?['revision','active','profiles','routes']:['revision','active','profiles'],'Invalid provider profile metadata');profileRevision(value.revision);
   if(typeof value.active!=='string'||!Array.isArray(value.profiles)||value.profiles.length>32)throw new Error('Invalid provider profile metadata');
   if(value.revision===0?(value.profiles.length!==0||value.active!==''):value.profiles.length===0)throw new Error('Invalid provider profile metadata');
-  const ids=new Set();for(const profile of value.profiles){exactFields(profile,['id','route_id','provider','model','revision']);profileIdentity(profile.id);profileIdentity(profile.route_id);profileIdentity(profile.provider);if(profile.model!=='')profileIdentity(profile.model);profileRevision(profile.revision);if(profile.revision<1||profile.revision>value.revision||ids.has(profile.id))throw new Error('Invalid provider profile metadata');ids.add(profile.id);}
+  const ids=new Set();for(const profile of value.profiles){exactFields(profile,['id','route_id','provider','model','revision'],'Invalid provider profile metadata');profileIdentity(profile.id);profileIdentity(profile.route_id);profileIdentity(profile.provider);if(profile.model!=='')profileIdentity(profile.model);profileRevision(profile.revision);if(profile.revision<1||profile.revision>value.revision||ids.has(profile.id))throw new Error('Invalid provider profile metadata');ids.add(profile.id);}
   if(value.active&&!ids.has(value.active))throw new Error('Invalid active provider profile');
   if(withRoutes){if(!Array.isArray(value.routes)||!value.routes.length||value.routes.length>64)throw new Error('Invalid provider profile routes');
-    const routes=new Map();for(const route of value.routes){exactFields(route,['id','provider','wire','discovery']);profileIdentity(route.id);profileIdentity(route.provider);if(routes.has(route.id)||!['chat-completions','responses','anthropic-messages','gemini-generate-content'].includes(route.wire)||typeof route.discovery!=='boolean')throw new Error('Invalid provider profile routes');routes.set(route.id,route);}
+    const routes=new Map();for(const route of value.routes){exactFields(route,['id','provider','wire','discovery'],'Invalid provider profile routes');profileIdentity(route.id);profileIdentity(route.provider);if(routes.has(route.id)||!['chat-completions','responses','anthropic-messages','gemini-generate-content'].includes(route.wire)||typeof route.discovery!=='boolean')throw new Error('Invalid provider profile routes');routes.set(route.id,route);}
     for(const profile of value.profiles)if(routes.get(profile.route_id)?.provider!==profile.provider)throw new Error('Provider profile route changed');
   }
   return value;

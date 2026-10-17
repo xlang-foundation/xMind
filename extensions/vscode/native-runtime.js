@@ -67,6 +67,10 @@ function validateManifest(manifest) {
 async function enumerate(root, io = fs, prefix = '') {
   const result = [];
   for (const item of await io.readdir(path.join(root, prefix), { withFileTypes: true })) {
+    // xlang3 may create these transient Python bytecode caches while importing
+    // bundled pure-Python modules. They are not part of the package manifest
+    // and must not make an otherwise verified runtime unusable on next launch.
+    if (item.isDirectory() && item.name === '__pycache__') continue;
     const name = prefix ? prefix + '/' + item.name : item.name;
     check(relativeFile(name) && !item.isSymbolicLink(), 'The native runtime contains an unsupported path.');
     if (item.isDirectory()) { await regular(path.join(root, ...name.split('/')), true, io); result.push(...await enumerate(root, io, name)); }

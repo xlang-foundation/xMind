@@ -97,6 +97,12 @@ test('manifest forbids unknown executables, native Python extensions, traversal 
 test('unexpected files are rejected even when every expected hash is unchanged', async t => {
   const f = await fixture(t); await fs.writeFile(path.join(f.runtime, 'python.exe'), 'Synthetic extra file'); await assert.rejects(verifyNativeRuntime(f.runtime), /inventory changed/);
 });
+test('transient xlang3 bytecode caches do not invalidate the verified runtime inventory', async t => {
+  const f = await fixture(t), cache = path.join(f.runtime, 'modules', 'sample', '__pycache__');
+  await fs.mkdir(cache, { recursive: true });
+  await fs.writeFile(path.join(cache, 'pure_module.cpython-314.pyc'), 'Transient generated cache');
+  assert.equal((await verifyNativeRuntime(f.runtime)).manifest.schemaVersion, 1);
+});
 test('relative, controlled or malformed configuration paths are rejected without reading keys', async t => {
   const f = await fixture(t);
   for (const setting of ['providerConfigPath','languageServerConfigPath','processConfigPath'])for (const value of ['.config/config.yaml', path.join(f.root, 'config\nkey'), path.join(f.root, 'bad\ud800')])

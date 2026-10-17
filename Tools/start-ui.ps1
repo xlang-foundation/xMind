@@ -165,9 +165,14 @@ try {
     $uiCodeArgs=@('--new-window','--skip-welcome','--skip-release-notes',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiOpenWorkspace+'"'))
     if($DisableWorkspaceTrust){$uiCodeArgs+='--disable-workspace-trust'}
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
+    $uiFailure=$uiReady+'.error.json'
     $uiSidebarDeadline=[DateTime]::UtcNow.AddSeconds(60)
-    while([DateTime]::UtcNow -lt $uiSidebarDeadline -and -not(Test-Path -LiteralPath $uiReady)){
+    while([DateTime]::UtcNow -lt $uiSidebarDeadline -and -not(Test-Path -LiteralPath $uiReady) -and -not(Test-Path -LiteralPath $uiFailure)){
         Start-Sleep -Milliseconds 100
+    }
+    if(Test-Path -LiteralPath $uiFailure){
+        try{$uiFailureDetail=(Get-Content -LiteralPath $uiFailure -Raw|ConvertFrom-Json).error}catch{$uiFailureDetail='xMind could not open the VS Code sidebar.'}
+        throw ('The xMind VS Code sidebar failed to connect: '+$uiFailureDetail)
     }
     if(-not(Test-Path -LiteralPath $uiReady)){
         throw ('VS Code did not report a ready xMind secondary sidebar within 60 seconds. Inspect the Development Host for an activation error or workspace-trust prompt. Isolated smoke tests may use -DisableWorkspaceTrust. Ready marker: '+$uiReady)

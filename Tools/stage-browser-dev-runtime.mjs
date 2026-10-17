@@ -50,6 +50,17 @@ try{await lstat(output);throw new Error('Development runtime output already exis
 catch(error){if(error.code!=='ENOENT')throw error;}
 await mkdir(dirname(output),{recursive:true});
 await cp(source,output,{recursive:true,errorOnExist:true,force:false});
+const pruneBytecodeCaches=async directory=>{
+  for(const entry of await readdir(directory,{withFileTypes:true})){
+    const child=join(directory,entry.name);
+    if(entry.isSymbolicLink())throw new Error('The staged runtime contains a symbolic link.');
+    if(entry.isDirectory()){
+      if(entry.name==='__pycache__')await rm(child,{recursive:true,force:false});
+      else await pruneBytecodeCaches(child);
+    }
+  }
+};
+await pruneBytecodeCaches(output);
 await copyFile(server,join(output,'xmind.exe'));
 if(sdkRuntime){
   await copyFile(join(sdkRuntime,'xlang3_runtime.dll'),join(output,'xlang3_runtime.dll'));
