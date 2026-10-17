@@ -24,7 +24,10 @@ standard-library license in common source layouts (`LICENSE`, `LICENSE.txt`,
 or the packaged `licenses/Python-STDLIB-LICENSE`). The tests stage pure Python
 source only; no CPython interpreter was run. The executable was built from
 `e9c490e`; the committed license resolver in `6a59890` was loaded by the final
-CTest run. This is local Release build/contract acceptance, not a release
+CTest run. The tested xlang3 runtime code revision `b4a53192` is now included
+in [xlang3 main at `036f450`](https://github.com/CantorAI/xlang3/commit/036f450af15426a25758087e8ea6bc70637a9a13); that follow-up commit adds
+the required performance evidence and does not change the tested runtime
+sources. This is local Release build/contract acceptance, not a release
 package or broad live-peer/provider acceptance. Exact revisions, hashes,
 commands and transcript are in the [machine-readable evidence](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.json)
 and [full CTest log](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.log).
