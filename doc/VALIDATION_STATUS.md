@@ -126,6 +126,21 @@ and its automatic completion display; it does not establish installed VS Code
 planning, general coding reliability, or release acceptance. [Exact sanitized
 run evidence](evidence/webpage-user-submitted-plan-e9c970c-20261017.json).
 
+## Current-source VS Code user-submitted coding — 2026-10-16
+
+The VS Code Extension Development Host opened `D:/CantorAI2026/TestProj` with
+the exact `e9c970c` xMind Release executable paired with xlang3
+`fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8`. From the xMind sidebar, the user
+submitted a focused ModelZoo accessibility task using the saved OpenAI profile.
+The agent proposed one `HomeView.vue` patch; the patch was reviewed and approved
+in the VS Code UI, then the agent ran `npm.cmd run build` in
+`model-zoo/frontend` through the workspace process path. The patch operation
+succeeded, and Vite 6.4.4 transformed 37 modules and exited 0 (718 ms reported
+build time). The exact run, operations, executable provenance, and source/output
+hashes are recorded in [the evidence record](evidence/vscode-user-submitted-coding-e9c970c-20261016.json).
+This verifies one current-source VS Code coding and build run; it does not
+establish broad coding reliability or release acceptance.
+
 ## Workspace Agent planning exposure — 2026-10-16
 
 Workspace-backed provider-profile Agents now register the bounded native
