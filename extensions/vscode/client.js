@@ -453,12 +453,16 @@ function parseWorkspaceCommand(input,catalogue){
   return {id:command.id,arguments:match[2]??''};
 }
 function validateWorkspaceMembership(value,workspace){
-  exactFields(value,['workspace_id','revision','primary_folder_id','folders']);
+  const baseFields=['workspace_id','revision','primary_folder_id','folders'],enrichedFields=[...baseFields,'name','root'];
+  if(!value||typeof value!=='object'||Array.isArray(value)||![baseFields,enrichedFields].some(fields=>Object.keys(value).length===fields.length&&fields.every(field=>Object.hasOwn(value,field))))throw new Error('Invalid metadata field set');
   if(value.workspace_id!==workspace.workspace_id||!Number.isSafeInteger(value.revision)||value.revision<1||value.primary_folder_id!==workspace.workspace_id||!Array.isArray(value.folders)||!value.folders.length||value.folders.length>256)throw new Error('The native host returned invalid workspace membership.');
   const nameOf=root=>root.split(/[\\/]+/).filter(Boolean).at(-1)||root,ids=new Set(),roots=new Set();
+  if(Object.hasOwn(value,'name')&&(value.root!==workspace.root||value.name!==nameOf(workspace.root)))throw new Error('The native host changed the workspace identity.');
   const folders=value.folders.map((folder,ordinal)=>{
-    exactFields(folder,['folder_id','root']);
+    const fields=['folder_id','root'],enriched=['folder_id','root','name','ordinal'];
+    if(!folder||typeof folder!=='object'||Array.isArray(folder)||![fields,enriched].some(expected=>Object.keys(folder).length===expected.length&&expected.every(field=>Object.hasOwn(folder,field))))throw new Error('Invalid metadata field set');
     if(typeof folder.folder_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(folder.folder_id)||ids.has(folder.folder_id)||typeof folder.root!=='string'||!folder.root||folder.root.length>32760||/[\x00-\x1f]/.test(folder.root)||(!/^[A-Za-z]:[\\/]/.test(folder.root)&&!/^\\\\[^\\/]+[\\/][^\\/]+(?:[\\/]|$)/.test(folder.root))||roots.has(folder.root))throw new Error('The native host returned an invalid workspace folder.');
+    if(Object.hasOwn(folder,'name')&&(folder.name!==nameOf(folder.root)||folder.ordinal!==ordinal))throw new Error('The native host returned inconsistent workspace folder metadata.');
     ids.add(folder.folder_id);roots.add(folder.root);return {...folder,name:nameOf(folder.root),ordinal};
   });
   if(folders[0].folder_id!==value.primary_folder_id||folders[0].root!==workspace.root)throw new Error('The native host changed the workspace primary folder.');
