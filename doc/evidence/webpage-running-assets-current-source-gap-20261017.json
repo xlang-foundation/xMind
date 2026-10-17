@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current local webpage service availability and source freshness check",
+  "xmind_revision": "c9d4f05",
+  "page": {
+    "url": "http://127.0.0.1:61227/ui/",
+    "http_status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "workspace_ui_present": true,
+    "provider_ui_present": true,
+    "server_token_prompt_present": false
+  },
+  "asset_freshness": {
+    "current_source": "extensions/vscode/client.js",
+    "current_source_sha256": "b5f696620ee0b0beb076a3b6f841cbb8c5cdb483d5465eda7a6e129bd5b77d4c",
+    "running_adapter_asset": ".agentflow/live-ui-assets-8ba6a9b/client.js",
+    "running_adapter_asset_sha256": "cdee9f04c40420324e0e34db4c602c154f6e5afa00a88f47b7936a73833e1d93",
+    "matches_current_source": false,
+    "reason": "The browser adapter snapshots its assets at startup; the existing local process predates the current client source."
+  },
+  "result": "The webpage is reachable and does not request a server token, but this process cannot establish current-source browser coding acceptance.",
+  "next_validation": "Restart the local browser adapter with the freshly built browser assets, then repeat the approved TestProj coding smoke test."
+}

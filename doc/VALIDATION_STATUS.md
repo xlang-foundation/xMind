@@ -3480,3 +3480,10 @@ recorded above; this turn's current-source live edit was verified through VS
 Code. These checks establish a bounded end-to-end coding flow, not broad
 coding reliability or OpenCode feature parity.
 [Exact current-source run, hashes, metrics, and test results](evidence/vscode-current-head-live-coding-20261017.json).
+
+The local webpage adapter responds at `http://127.0.0.1:61227/ui/` with HTTP
+200 and no server-token prompt. Its running process captured its asset snapshot
+before the current source changes: the served `client.js` hash differs from
+`extensions/vscode/client.js`. The earlier live webpage coding acceptance is
+still valid for that earlier asset bundle, but current-source webpage coding
+has not yet been reverified. [Observed page and asset hashes](evidence/webpage-running-assets-current-source-gap-20261017.json).
