@@ -147,6 +147,18 @@ prove a latency improvement. The rendered view used a locally built xMind
 binary from ancestor revision `c1528ed`, not a binary built from current main
 or an installed release package.
 
+## TestProj FastAPI tests under xlang3 — 2026-10-17
+
+The TestProj Model Zoo backend's full pytest suite passed **9/9** under the
+paired xlang3 executable, with no failures or skips. The command used `-B -m
+pytest -q`, the runtime's packaged modules and the workspace's `.xlang3-site`;
+no CPython interpreter was invoked. This validates the current pure-Python
+FastAPI dependency path for that project, including its Pydantic schemas and
+Starlette `TestClient`. One existing Starlette deprecation warning remains.
+The check launched xlang3 directly; it is separate from the approval-gated
+webpage/VS Code process receipts above. Exact source/runtime hashes and command
+are in the [evidence record](evidence/testproj-fastapi-pytest-xlang3-20261017.json).
+
 ## Live VS Code sidebar approval — 2026-10-17
 
 The extension-host sidebar directly displayed the pending TestProj edit with

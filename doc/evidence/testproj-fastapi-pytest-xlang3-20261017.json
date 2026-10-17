@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-17",
+  "scope": "TestProj Model Zoo FastAPI backend tests under the xMind-paired xlang3 runtime",
+  "xmind_source_revision": "eea4ef635d7a4119467b3f356ac3c1c52dce2b23",
+  "xlang3_runtime_source_revision": "7ece93949d8c1054e87fdb5a4df3ccbe4fbb71d0",
+  "xlang3_sdk_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+  "runtime_manifest_sha256": "33fee3852f2a25cf6c1f7f42e1c613e51a5f0ca69197658dedaf8997c54c95c4",
+  "runtime_files": {
+    "xlang3.exe": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "xlang3_runtime.dll": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874"
+  },
+  "workspace": "D:\\CantorAI2026\\TestProj\\model-zoo\\backend",
+  "command": ["xlang3.exe", "-B", "-m", "pytest", "-q"],
+  "pythonpath": ["<paired-runtime>\\modules", ".xlang3-site"],
+  "result": {
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 3.13,
+    "warnings": 1
+  },
+  "limitations": [
+    "This directly validates the registered xlang3 runtime and installed pure-Python project packages; it is not a UI-dispatched process receipt.",
+    "The TestClient transport produced one Starlette deprecation warning for anyio.abc.BlockingPortal."
+  ]
+}
