@@ -107,6 +107,21 @@ coding turn from that freshly opened pane and its rendered contents remain
 unverified. The earlier live coding/build evidence is listed separately above.
 [Browser scope and results](evidence/live-browser-modelzoo-coding-acceptance-20261015.json).
 
+## Paired live webpage and VS Code coding acceptance — 2026-10-16
+
+The rendered local webpage and VS Code extension host both completed a new
+TestProj coding task using the saved OpenAI Responses profile without prompting
+for its key. The webpage presented the exact `HomeView.vue` patch for review;
+after approval, the native `patch_file` operation succeeded and its `npm run
+build` command exited 0 (Vite 6.4.4, 37 modules, 747 ms). The VS Code sidebar
+completed a separate accessibility improvement in `ModelCard.vue`; its native
+file operation and build also succeeded (37 modules, 789 ms). Both clients
+rendered the completed history, run state, model, supplied usage metrics and
+retained command output. Source hashes and run identities are recorded in the
+[paired acceptance evidence](evidence/live-coding-acceptance-20261016.json).
+This verifies one real Vue coding task in each client; it does not establish
+CLI coding acceptance, all-language behavior, or release-package certification.
+
 ## Backend-owned session inbox dispatch — 2026-10-15
 
 The native server now advertises `session_inbox_dispatch` and owns queue
