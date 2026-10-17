@@ -11,6 +11,27 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Exact pinned xlang3 main Release gate — 2026-10-17
+
+Built xMind Release at source commit `2383376` against the exact xlang3 main
+pin `fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8`. The xlang3 runtime DLL,
+import library, and executable were freshly built from that source. xMind's
+checked local development bundle supplied the matching pinned native modules
+and pure Python standard-library sources. The complete sequential CTest gate
+passed **147/147**, with zero failures or skips, in 858.38 seconds. The run
+covers the native coding backend, CLI, graph and agent execution, MCP, A2A,
+provider profiles, workspace editing, and local profile/view lifecycles.
+
+The full run exposed three test-fixture paths that assumed the Python license
+was beside the stdlib directory. The packaged bundle stores it at
+`licenses/Python-STDLIB-LICENSE`; the local-profile, local-view, and provider
+configuration fixtures now use that bundled path. All three passed in the
+full rerun. This is local source/build/test acceptance, not a hosted CI run or
+release-package acceptance. Runtime and executable hashes, exact commands,
+source revisions, and the complete transcript are in the
+[evidence record](evidence/native-release-ctest-pinned-xlang3-main-20261017.json)
+and [CTest transcript](evidence/native-release-ctest-pinned-xlang3-main-20261017.log).
+
 ## Current-source native Release build and full CTest — 2026-10-17
 
 Built xMind Release serially in a fresh isolated directory at current source

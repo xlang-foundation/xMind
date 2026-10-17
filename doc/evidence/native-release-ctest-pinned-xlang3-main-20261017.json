@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "result": "passed",
+  "xmindRevision": "238337647c3ec29eea7211d7bf4467638f1553a0",
+  "xmindWorkingTreeChanges": [
+    "Native/tests/local_profile_contract.mjs",
+    "Native/tests/local_view_contract.mjs",
+    "Native/tests/local_view_provider_config_contract.mjs"
+  ],
+  "xlang3Revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "cmakeGenerator": "Visual Studio 18 2026 x64",
+  "buildConfiguration": "Release",
+  "buildDirectory": ".agentflow/full-release-ctest-pinned-xlang-main-fcecf-20261017",
+  "runtimeDirectory": ".agentflow/xlang3-pinned-fcecf-sdk-20261017",
+  "pythonLibrarySource": "extensions/vscode/native-runtime/stdlib",
+  "buildCommand": "cmake --build <buildDirectory> --config Release --parallel 1",
+  "testCommand": "ctest --test-dir <buildDirectory> -C Release --output-on-failure",
+  "registeredTests": 147,
+  "passed": 147,
+  "failed": 0,
+  "skipped": 0,
+  "ctestSeconds": 858.38,
+  "runtimeManifestSha256": "C494D94B6E334741A650D726EB1F397FCE9AB344B93A968DA7A946705284125A",
+  "artifacts": {
+    "xlang3_runtime.dll": "9DC0E5406DDC5C31F590224D02B8EB5B6E13E87C951FFBA7F997B2334737DACD",
+    "xlang3_runtime.lib": "5E032BA66A91FAEE60902D256750010D42EAB18CEBB749E1D394C0BC0492C479",
+    "xlang3.exe": "77DDC9901615D6F48238B17418A579DBBD6BF7A1DCB4C30BE626400710F7BCD0",
+    "xmind.exe": "DA17992C6AB204DAF9B26B50ED0C00517D6AAD1851D5976EE8B916F8B692D0FD",
+    "xmind_server.exe": "7B032E17CD1B43E6EB5B80D8AE522480DDE19DFD74EA259C078A3440F62F7412",
+    "xmind_cli.exe": "CF69C2DF02CDA7797DAB6F79DB503E05587E7480A73BB62518BDFCA4D58D6713"
+  },
+  "ctestLog": {
+    "file": "native-release-ctest-pinned-xlang3-main-20261017.log",
+    "sha256": "B2E5B0B4D2E539F26C9DAA0DF10DF64115E3BE8BDAE70D329EA4B70CAB58CBCC"
+  },
+  "notes": "The xlang3 runtime DLL, import library, and executable were built from the exact xlang3 main pin. The package module DLLs and pure standard-library sources came from the checked local development bundle whose SDK revision is the same pin. The three local-profile/view contracts were corrected to read the Python license from the bundle license path."
+}
