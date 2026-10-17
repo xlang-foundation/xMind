@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-17",
+  "scope": "Local Release verification of permission wait through AgentRunJournal",
+  "xmind_base_revision": "aa26765",
+  "xlang3_runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+  "build": {
+    "configuration": "Release",
+    "targets": [
+      "agentflow_agent_runner_contract",
+      "agentflow_permission_waiter_contract"
+    ],
+    "result": "passed"
+  },
+  "contracts": {
+    "registered": 2,
+    "passed": 2,
+    "failed": 0,
+    "result": "passed"
+  },
+  "verified_paths": [
+    "The real AgentRunner proposal-to-approval-to-read path executes with its journal-backed permission waiter.",
+    "The permission waiter contract covers persisted decisions, denial, cancellation, expiry, one-shot claims and workspace exclusion.",
+    "The selected runtime is used only for the native contract harness; no live model request or workspace product effect ran."
+  ],
+  "limitations": [
+    "Permission grant lookup and writes still use AgentPermissionGrantStore over PersistenceService.",
+    "File, process, MCP and A2A effect executors still receive backend persistence directly.",
+    "This boundary is not an IPC approval or tool-dispatch implementation and is not a packaged CLI/web/VS Code acceptance run."
+  ]
+}

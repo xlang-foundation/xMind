@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/persistence_service.hpp"
+#include "agentflow/agent_run_journal.hpp"
 #include <stop_token>
 
 namespace agentflow {
@@ -13,10 +13,10 @@ struct PermissionExpired : std::runtime_error {using std::runtime_error::runtime
 // before physical dispatch and durably record a known pre-effect stop.
 class PermissionWaiter {
 public:
-    explicit PermissionWaiter(PersistenceService& persistence):persistence_(persistence) {}
+    explicit PermissionWaiter(AgentRunJournal& journal):journal_(journal) {}
     Operation acquire(const std::string& id,const OperationSpec& actual,
         std::int64_t expires_unix_ms,std::stop_token cancel={},std::string trusted_actor={});
 private:
-    PersistenceService& persistence_;
+    AgentRunJournal& journal_;
 };
 }

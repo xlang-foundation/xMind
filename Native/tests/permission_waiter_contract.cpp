@@ -1,4 +1,5 @@
 #include "agentflow/permission_waiter.hpp"
+#include "agentflow/persistence_service.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include <chrono>
 #include <filesystem>

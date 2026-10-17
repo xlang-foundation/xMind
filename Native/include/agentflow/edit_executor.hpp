@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/permission_waiter.hpp"
+#include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
 #include <cstddef>

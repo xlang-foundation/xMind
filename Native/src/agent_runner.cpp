@@ -1021,7 +1021,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             const bool reusable=grants.allows(admitted.session_id,selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource);
                             if(!reusable)grants.record_request({pending_id,admitted.session_id,selected_workspace->identity(),permission_policy_binding,
                                 call.name,normalized_resource,agent_permission_grant_identifier(selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource)});
-                            auto approved=PermissionWaiter(persistence_).acquire(pending_id,spec,expiry,token,reusable?"agent-permission-grant":std::string{});
+                            auto approved=PermissionWaiter(journal_).acquire(pending_id,spec,expiry,token,reusable?"agent-permission-grant":std::string{});
                             try{
                                 auto source=run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token);
                                 output=Json::parse(source);

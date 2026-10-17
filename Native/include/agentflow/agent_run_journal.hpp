@@ -48,6 +48,12 @@ public:
     virtual std::future<ModelCallReservation> reserve_dynamic_continuation(std::string call,std::string attempt)=0;
     virtual std::future<std::vector<OwnedChildRecord>> owned_children(std::string parent)=0;
     virtual std::future<Run> suspend_dynamic_owner(DynamicPauseSpec spec)=0;
+    virtual std::future<Operation> request_operation(std::string id,OperationSpec spec,std::int64_t expires_unix_ms)=0;
+    virtual std::future<Operation> operation(std::string id)=0;
+    virtual std::future<Operation> decide_operation(std::string id,OperationDecision decision,std::string actor)=0;
+    virtual std::future<Operation> claim_operation(std::string id,OperationSpec actual)=0;
+    virtual std::future<Operation> cancel_operation(std::string id,OperationSpec actual)=0;
+    virtual std::future<Operation> expire_operation(std::string id)=0;
     virtual std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={})=0;
     virtual std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}")=0;
 };

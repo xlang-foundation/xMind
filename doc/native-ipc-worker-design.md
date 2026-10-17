@@ -69,6 +69,17 @@ local invocation and limits are recorded in
 This narrows the persistence dependency for eventual worker hosting; it does
 not move the runner, workspace tools or effect authority into another process.
 
+Permission waits now also depend on `AgentRunJournal`: proposing an operation,
+reading its durable decision, claiming it once, and recording denial, expiry or
+cancellation no longer require the waiter to hold `PersistenceService`. The
+agent-runner contract exercises the real approval path, and the dedicated
+waiter contract covers durable decisions, cancellation, expiry and one-shot
+claims. Evidence is recorded in
+[`agent-approval-journal-local-20261017.json`](evidence/agent-approval-journal-local-20261017.json).
+Permission grant lookup still uses the local persistence adapter, and effect
+executors still receive backend persistence directly; approvals and effect
+dispatch have not yet become a worker RPC.
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.

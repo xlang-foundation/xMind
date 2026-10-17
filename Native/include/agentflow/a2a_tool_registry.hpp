@@ -4,6 +4,7 @@
 #include "agentflow/instruction_precondition.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/permission_waiter.hpp"
+#include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include <chrono>
 #include <functional>
