@@ -42,7 +42,7 @@ The historical e353 webpage failed classic-script startup; its separate local re
 
 The initial native dependency-planning source checkpoint adds `plan_tasks`, `revise_plan` and `inspect_plan` to eligible ordinary roots. The model selects agent/human dependency tasks and may revise only never-claimed work. Real `workspace.inspect` and approval-controlled `workspace.coding` children share the same root budget and child pool; clean human pauses retain that owner and its once-only signed continuation. Schema v11 durably records capabilities, revisions, claims, human input, active-time segments and observed outcomes. Registered graphs keep their separate immutable identity and APIs. [Initial implementation](native-dynamic-plan.md).
 
-The complete guarded local **77-contract gate passed in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen source hashes** verified. The native engine contract performs actual parallel reads, observed failure, same-plan revision, human pause/reopen, separate edit approval, real coding and dependent verification using synthetic provider replies/signatures/keys. **119 extension and 26 browser contracts** passed at their renderer/controller scope. Model-free browser/native graph/human/auth/cookie/reconnect integration and verification of all **18 required VSIX assets** also passed, without rendered dynamic-planning or installed-editor acceptance. [Local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json). Schema-v11 installation, live planning and installed VS Code acceptance remain pending. Actual dynamic coding-child MCP peer effects are not established by these gates.
+The complete guarded local **77-contract gate passed in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen source hashes** verified. The native engine contract performs actual parallel reads, observed failure, same-plan revision, human pause/reopen, separate edit approval, real coding and dependent verification using synthetic provider replies/signatures/keys. **119 extension and 26 browser contracts** passed at their renderer/controller scope. Model-free browser/native graph/human/auth/cookie/reconnect integration and verification of all **18 required VSIX assets** also passed at that checkpoint. Later current-source live planning and code-effect acceptance are recorded in [current validation](VALIDATION_STATUS.md); this historical gate alone does not establish installed-editor acceptance. Actual dynamic coding-child MCP peer effects are not established by these gates.
 
 This is consistent with [Cursor's documented coding-agent loop](https://prod.cursor.com/help/ai-features/coding-agents): each tool result informs the next action. Cursor and OpenCode are behavior references, not implementation dependencies or compatibility targets. xMind defines its own coding and editor acceptance requirements.
 
@@ -55,17 +55,19 @@ and behavior:
 1. Dependency conditions currently support `success` and `observed`. Add any
    further conditions only with explicit native semantics and durable outcome
    rules; model output cannot expand permissions, credentials or endpoints.
-2. A live webpage dynamic plan now completed an approval-gated coding child
-   followed by a dependent registered xlang3 `run_process` node. A follow-up
-   plan on the refreshed current-client bundle completed a read-only inspect
-   plus `run_process` without the stale client's false validator warning. The
-   same code-effect plan still needs acceptance from the VS Code-attached view,
-   with both clients refreshed to verify shared plan/history and metrics.
-   [Exact live evidence](evidence/live-dynamic-plan-coding-20261017.json).
-3. Rendered human questions, read-only child outcomes and shared conversation
-   history are verified in both development clients. Current-backend live
-   dynamic code-effect approval and its dependent process are verified in the
-   webpage; the corresponding VS Code-attached plan acceptance remains open.
+2. Current-source webpage and VS Code Development Host dynamic plans have each
+   completed an approval-gated coding child followed by a dependent xlang3
+   `run_process` node. In both clients the changed fixture was run successfully
+   and restored through a reviewed inverse edit. The earlier served browser and
+   VS Code host bundles displayed a false validator error; refreshing to the
+   committed client removed it. These are focused local development-host
+   acceptances, not installed release-package acceptance. Exact evidence is in
+   [webpage plan acceptance](evidence/live-dynamic-plan-coding-20261017.json)
+   and [VS Code sidebar acceptance](evidence/vscode-sidebar-approval-live-20261017.json).
+3. Rendered human questions, read-only child outcomes and shared session history
+   are verified in both development clients. Broader multi-session load,
+   installed-package behavior and recovery under real provider/peer failures
+   remain open.
 4. Continue A2A acceptance against independent peers: live model-selected
    dispatch and continuation, reconnect/recovery, streaming and cancellation
    acknowledgement, and the relevant official-SDK paths. A local peer fixture
