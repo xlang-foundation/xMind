@@ -3192,3 +3192,16 @@ full CLI fixture suite remains blocked by its existing `memoryview()`/mmap
 native capability gap, and this does not replace the separate VS Code
 acceptance. Details and artifact hashes are in
 [the evidence record](evidence/testproj-webpage-coding-xlang3-20261017.json).
+
+## Current-source native Release gate — 2026-10-17
+
+Rebuilt every configured native Release target from xMind 260efcc against
+xlang3 b4a5319 on the isolated compatibility branch, then ran the complete
+CTest suite: **150/150 passed, 0 failed** in 356.95 seconds. The gate covers
+the unified xmind binary, single-agent and graph execution, SQLite/xlang3
+persistence, CLI/local-profile lifecycle, MCP and A2A contracts, provider
+adapters, workspace effects and recovery. This is native contract acceptance;
+it does not certify a packaged release, installed-client acceptance, or live
+third-party provider and arbitrary-peer behavior. The exact commands, source
+revisions, hashes and scope limits are recorded in
+[the evidence record](evidence/native-release-150-20261017.json).

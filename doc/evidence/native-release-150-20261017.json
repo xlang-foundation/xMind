@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-17",
+  "kind": "native-release-contract-gate",
+  "releaseAccepted": false,
+  "source": {
+    "xmindRevision": "260efcc0b4934a5108be43c5365281770186211d",
+    "xlang3Revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "xlang3Branch": "fix/pytest-pathaware-hook-proxy",
+    "xmindExecutable": "build/native/contract-bin/Release/xmind.exe",
+    "xmindExecutableSha256": "24c5a009be34320ad4b2af7b76ab499f8bf6eec94769bb31b35ec9b0fb17f41f",
+    "xlang3RuntimeDllSha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc"
+  },
+  "build": {
+    "configuration": "Release",
+    "generator": "Visual Studio 18 2026",
+    "command": "cmake --build build/native --config Release --parallel 8",
+    "exitCode": 0,
+    "targets": "All configured native targets, including xmind and contract executables"
+  },
+  "test": {
+    "command": "ctest --test-dir build/native --build-config Release --output-on-failure --parallel 4",
+    "passed": 150,
+    "failed": 0,
+    "total": 150,
+    "durationSeconds": 356.95,
+    "coverageGroups": [
+      "single-agent execution and provider adapters",
+      "registered and dynamic graph execution",
+      "MCP client, SDK, OAuth, effects, subscriptions and graph integration",
+      "A2A JSON-RPC, official SDK peer, task lifecycle, streaming and graph integration",
+      "embedded xlang3 SQLite, repository, encrypted credentials and recovery",
+      "unified CLI, local profile ownership and backend lifecycle",
+      "workspace tools, approvals, patch operations and process execution"
+    ]
+  },
+  "limits": [
+    "This proves the current-source native Release contract gate only; it does not certify a packaged release or installed-client acceptance.",
+    "The native tests use deterministic local provider and protocol peers where identified by their contract output; this is not a claim of live third-party model or arbitrary-peer acceptance.",
+    "The xlang3 compatibility revision is on its isolated pushed branch and has not been merged into xlang3 main."
+  ]
+}
