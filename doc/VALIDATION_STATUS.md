@@ -11,6 +11,21 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Current-source native Release build and full CTest — 2026-10-17
+
+Built xMind Release serially in a fresh isolated directory at current source
+`86f2e31` using the xlang3 compatibility branch `b4a53192`. The full native
+gate completed successfully: **147/147 tests passed**, with zero failures or
+skips; CTest took 871.85 seconds. This replaces the earlier overlapping
+build/test attempt, which was invalid. The run covers the native agent and
+graph services, provider gateway, workspace coding tools, SQLite persistence,
+MCP, A2A, managed local profiles, and the unified CLI. It uses the xlang3
+Release runtime and Python pure-library source, not CPython. The exact build
+command, hashes, and full CTest transcript are in
+[the evidence record](evidence/native-release-ctest-current-xlang3-20261017.json).
+This is source/build/test acceptance, not release-package or broad live-provider
+acceptance.
+
 ## Legacy MCP server-initiated form elicitation — 2026-10-17
 
 The stdio MCP client now declares form-elicitation support in its legacy

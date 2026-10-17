@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh isolated xMind native Release build followed by the complete sequential CTest suite",
+  "source": {
+    "repository": "xlang-foundation/xMind",
+    "tested_source_revision": "86f2e31fb19ef9c3e304cb327f2194103228341b",
+    "documentation_head_when_recorded": "b9e81e7c90b7c4a516ec568993c571811516706f",
+    "source_changes_after_tested_revision": "none; commits after this revision only changed validation documentation and evidence"
+  },
+  "runtime": {
+    "repository": "CantorAI/xlang3",
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "python_library_source": "C:/Python/Python314/Lib; pure source executed by xlang3"
+  },
+  "build": {
+    "command": "Tools/native-milestone.ps1 -Action Build -BuildDirectory D:/CantorAI2026/xMind/.agentflow/full-release-ctest-current-source-20261017 -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib",
+    "generator": "Visual Studio 18 2026",
+    "platform": "x64",
+    "result": "build and test helper exited 0",
+    "xmind_executable_sha256": "f1bbe07c74dcc3aa5c467df8e8684ca0e1f291f49b492c15caa366391e6b6d16",
+    "notes": [
+      "The build ran after configure and completed before CTest started; no build/test overlap occurred.",
+      "MSVC reported existing C++20 deprecation warnings for std::filesystem::u8path and shared_ptr atomic free functions; there were no build errors."
+    ]
+  },
+  "ctest": {
+    "configuration": "Release",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 871.85,
+    "command": "ctest --test-dir D:/CantorAI2026/xMind/.agentflow/full-release-ctest-current-source-20261017 -C Release --output-on-failure",
+    "summary": "100% tests passed, 0 tests failed out of 147",
+    "transcript": "native-release-ctest-current-xlang3-20261017.log",
+    "transcript_sha256": "41a7d5bafd6ea41ec8c7ad84521d5c2042828fab5857ae23822eee3acdee83f6"
+  },
+  "limits": [
+    "This proves the complete native contract suite for the recorded xMind source and xlang3 runtime pair; it does not establish an accepted VSIX or release package.",
+    "The suite uses contract fixtures and is not broad live-provider interoperability acceptance."
+  ]
+}
