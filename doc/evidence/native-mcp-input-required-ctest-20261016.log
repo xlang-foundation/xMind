@@ -1,0 +1,55 @@
+Test project D:/CantorAI2026/xMind/build/a2a-native
+      Start   6: native_mcp_wire_contract
+ 1/25 Test   #6: native_mcp_wire_contract ......................   Passed    0.02 sec
+      Start  32: native_mcp_resource_route_contract
+ 2/25 Test  #32: native_mcp_resource_route_contract ............   Passed    0.11 sec
+      Start  35: native_dynamic_plan_mcp_contract
+ 3/25 Test  #35: native_dynamic_plan_mcp_contract ..............   Passed    9.84 sec
+      Start  46: native_graph_mcp_contract
+ 4/25 Test  #46: native_graph_mcp_contract .....................   Passed    6.32 sec
+      Start  47: native_graph_mcp_http_contract
+ 5/25 Test  #47: native_graph_mcp_http_contract ................   Passed    2.58 sec
+      Start  48: native_graph_mcp_http_subscription_contract
+ 6/25 Test  #48: native_graph_mcp_http_subscription_contract ...   Passed    0.72 sec
+      Start  61: native_mcp_configuration_contract
+ 7/25 Test  #61: native_mcp_configuration_contract .............   Passed    0.24 sec
+      Start  62: native_mcp_oauth_credentials_contract
+ 8/25 Test  #62: native_mcp_oauth_credentials_contract .........   Passed    0.21 sec
+      Start  63: native_mcp_oauth_refresh_storage_contract
+ 9/25 Test  #63: native_mcp_oauth_refresh_storage_contract .....   Passed    0.23 sec
+      Start  64: native_mcp_oauth_service_contract
+10/25 Test  #64: native_mcp_oauth_service_contract .............   Passed   16.48 sec
+      Start  65: native_mcp_authorization_cli_contract
+11/25 Test  #65: native_mcp_authorization_cli_contract .........   Passed    1.85 sec
+      Start  66: native_mcp_oauth_renewal_negative_contract
+12/25 Test  #66: native_mcp_oauth_renewal_negative_contract ....   Passed   16.82 sec
+      Start  67: native_mcp_oauth_trusted_peer_contract
+13/25 Test  #67: native_mcp_oauth_trusted_peer_contract ........   Passed    0.33 sec
+      Start  69: native_mcp_stdio_contract
+14/25 Test  #69: native_mcp_stdio_contract .....................   Passed    3.16 sec
+      Start  70: native_mcp_handshake_contract
+15/25 Test  #70: native_mcp_handshake_contract .................   Passed    0.78 sec
+      Start  71: native_mcp_client_contract
+16/25 Test  #71: native_mcp_client_contract ....................   Passed    1.33 sec
+      Start  72: native_mcp_http_readonly_contract
+17/25 Test  #72: native_mcp_http_readonly_contract .............   Passed    0.17 sec
+      Start  73: native_mcp_http_fallback_contract
+18/25 Test  #73: native_mcp_http_fallback_contract .............   Passed    0.38 sec
+      Start  75: native_mcp_effect_contract
+19/25 Test  #75: native_mcp_effect_contract ....................   Passed   11.81 sec
+      Start 102: native_mcp_oauth_callback_contract
+20/25 Test #102: native_mcp_oauth_callback_contract ............   Passed    0.93 sec
+      Start 103: native_mcp_oauth_refresh_contract
+21/25 Test #103: native_mcp_oauth_refresh_contract .............   Passed    0.38 sec
+      Start 109: native_agent_mcp_http_contract
+22/25 Test #109: native_agent_mcp_http_contract ................   Passed    3.06 sec
+      Start 110: native_agent_mcp_http_subscription_contract
+23/25 Test #110: native_agent_mcp_http_subscription_contract ...   Passed    0.85 sec
+      Start 111: native_mcp_sdk_modern_contract
+24/25 Test #111: native_mcp_sdk_modern_contract ................   Passed    3.55 sec
+      Start 112: native_mcp_sdk_legacy_contract
+25/25 Test #112: native_mcp_sdk_legacy_contract ................   Passed    2.85 sec
+
+100% tests passed, 0 tests failed out of 25
+
+Total Test time (real) =  85.05 sec

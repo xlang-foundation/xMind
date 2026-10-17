@@ -1,0 +1,185 @@
+Test project D:/CantorAI2026/xMind/build/a2a-native
+      Start   6: native_mcp_wire_contract
+ 1/25 Test   #6: native_mcp_wire_contract ......................   Passed    0.02 sec
+      Start  32: native_mcp_resource_route_contract
+ 2/25 Test  #32: native_mcp_resource_route_contract ............   Passed    0.09 sec
+      Start  35: native_dynamic_plan_mcp_contract
+ 3/25 Test  #35: native_dynamic_plan_mcp_contract ..............   Passed   10.06 sec
+      Start  46: native_graph_mcp_contract
+ 4/25 Test  #46: native_graph_mcp_contract .....................   Passed    6.44 sec
+      Start  47: native_graph_mcp_http_contract
+ 5/25 Test  #47: native_graph_mcp_http_contract ................   Passed    2.57 sec
+      Start  48: native_graph_mcp_http_subscription_contract
+ 6/25 Test  #48: native_graph_mcp_http_subscription_contract ...   Passed    0.64 sec
+      Start  61: native_mcp_configuration_contract
+ 7/25 Test  #61: native_mcp_configuration_contract .............   Passed    0.23 sec
+      Start  62: native_mcp_oauth_credentials_contract
+ 8/25 Test  #62: native_mcp_oauth_credentials_contract .........   Passed    0.19 sec
+      Start  63: native_mcp_oauth_refresh_storage_contract
+ 9/25 Test  #63: native_mcp_oauth_refresh_storage_contract .....   Passed    0.24 sec
+      Start  64: native_mcp_oauth_service_contract
+10/25 Test  #64: native_mcp_oauth_service_contract .............   Passed   16.51 sec
+      Start  65: native_mcp_authorization_cli_contract
+11/25 Test  #65: native_mcp_authorization_cli_contract .........   Passed    1.86 sec
+      Start  66: native_mcp_oauth_renewal_negative_contract
+12/25 Test  #66: native_mcp_oauth_renewal_negative_contract ....   Passed   16.67 sec
+      Start  67: native_mcp_oauth_trusted_peer_contract
+13/25 Test  #67: native_mcp_oauth_trusted_peer_contract ........   Passed    0.32 sec
+      Start  69: native_mcp_stdio_contract
+14/25 Test  #69: native_mcp_stdio_contract .....................   Passed    3.07 sec
+      Start  70: native_mcp_handshake_contract
+15/25 Test  #70: native_mcp_handshake_contract .................   Passed    0.76 sec
+      Start  71: native_mcp_client_contract
+16/25 Test  #71: native_mcp_client_contract ....................   Passed    1.32 sec
+      Start  72: native_mcp_http_readonly_contract
+17/25 Test  #72: native_mcp_http_readonly_contract .............   Passed    0.20 sec
+      Start  73: native_mcp_http_fallback_contract
+18/25 Test  #73: native_mcp_http_fallback_contract .............   Passed    0.35 sec
+      Start  75: native_mcp_effect_contract
+19/25 Test  #75: native_mcp_effect_contract ....................***Failed   16.06 sec
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_effect_contract.exe C:/Program Files/nodejs/node.exe D:/CantorAI2026/xMind/Native/tests/mcp_effect_peer.mjs D:/CantorAI2026/xMind/Native D:/CantorAI2026/xlang3/build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51961 C:\Users\shaw9\AppData\Local\Temp\xmind-official-http-effects-79oSZH
+MCP fixture mode=skill-changed phase=invoke elapsed_ms=241 actual_effect_marker=0
+MCP fixture operation_state=failed recorded_result={"reason":"repository_instructions_changed_before_mcp_dispatch"}
+MCP fixture mode=normal phase=invoke elapsed_ms=113 actual_effect_marker=1
+MCP fixture operation_state=succeeded recorded_result={"acknowledged_by_peer":true,"config_revision":7,"independently_verified":false,"operation_id":"normal","request_id":"xmind-6f33eb178ce7bfc7c87ad410feb6ea69-3","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-6f33eb178ce7bfc7c87ad410feb6ea69-3\",\"result\":{\"resultType\":\"complete\",\"content\":[{\"type\":\"text\",\"text\":\"Labeled peer acknowledgement\"}],\"structuredContent\":{\"bytes\":25}}}","server_config_id":"fixture-server-normal"}
+MCP fixture mode=legacy phase=invoke elapsed_ms=106 actual_effect_marker=1
+MCP fixture operation_state=succeeded recorded_result={"acknowledged_by_peer":true,"config_revision":7,"independently_verified":false,"operation_id":"legacy","request_id":"xmind-1c5645638260267da5c04968c7db2800-4","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-1c5645638260267da5c04968c7db2800-4\",\"result\":{\"resultType\":\"complete\",\"content\":[{\"type\":\"text\",\"text\":\"Labeled peer acknowledgement\"}],\"structuredContent\":{\"bytes\":25}}}","server_config_id":"fixture-server-legacy"}
+MCP fixture mode=input-required phase=invoke elapsed_ms=227 actual_effect_marker=0
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_additional_input_required","request_id":"xmind-0e96d3e9ddd34f27326a91dc4fe6d455-3","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-0e96d3e9ddd34f27326a91dc4fe6d455-3\",\"result\":{\"resultType\":\"input_required\",\"inputRequests\":{\"confirm\":{\"method\":\"elicitation/create\",\"params\":{\"mode\":\"form\",\"message\":\"Confirm the planned fixture action\",\"requestedSchema\":{\"type\":\"object\",\"properties\":{\"approved\":{\"type\":\"boolean\"}},\"required\":[\"approved\"]}}}},\"requestState\":\"opaque-fixture-state\"}}"}
+MCP fixture mode=normal phase=invoke elapsed_ms=237 actual_effect_marker=0
+MCP fixture operation_state=failed recorded_result={"reason":"mcp_catalogue_changed_before_dispatch"}
+MCP fixture mode=resource-denied phase=invoke elapsed_ms=262 actual_effect_marker=0
+MCP fixture operation_state=denied recorded_result={}
+MCP fixture mode=tool-secret-response phase=invoke elapsed_ms=231 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_secret_reflection","request_id":"xmind-0791218a6fe372fd259ec0f6fc07ea08-3"}
+MCP fixture mode=denied phase=invoke elapsed_ms=220 actual_effect_marker=0
+MCP fixture operation_state=denied recorded_result={}
+MCP fixture mode=cancel-wait phase=invoke elapsed_ms=129 actual_effect_marker=0
+MCP fixture operation_state=cancelled recorded_result={}
+MCP fixture mode=stopped-before-dispatch phase=invoke elapsed_ms=1747 actual_effect_marker=0
+MCP fixture operation_state=failed recorded_result={"reason":"stopped_before_mcp_dispatch"}
+MCP fixture mode=bad-catalog-schema phase=catalogue elapsed_ms=92 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=duplicate-page phase=catalogue elapsed_ms=113 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=cursor-cycle phase=catalogue elapsed_ms=50 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=unknown-alias phase=invoke elapsed_ms=88 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=invalid-arguments phase=invoke elapsed_ms=111 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=reflect-credential phase=catalogue elapsed_ms=47 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=reflect-schema-credential phase=catalogue elapsed_ms=49 actual_effect_marker=0
+MCP fixture operation_not_created
+MCP fixture mode=disconnect phase=invoke elapsed_ms=239 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-3424fc41f9596f87b865ac31dcb4615e-3","response_json":""}
+MCP fixture mode=timeout phase=invoke elapsed_ms=1618 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-ec21de476fc2f04d92b6ad83edfa68ba-3","response_json":""}
+MCP fixture mode=cancel phase=invoke elapsed_ms=236 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-7b0622ac2db229d9750cc283c9781485-3","response_json":""}
+MCP fixture mode=rpc-error phase=invoke elapsed_ms=254 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-d361c5dfd33e17b68a88dba8edc09bed-3","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-d361c5dfd33e17b68a88dba8edc09bed-3\",\"error\":{\"code\":-32603,\"message\":\"Labeled error after actual effect\"}}"}
+MCP fixture mode=tool-error phase=invoke elapsed_ms=253 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_peer_reported_tool_error","request_id":"xmind-5ed1383bdd5d2410f502f4686981c6d7-3","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-5ed1383bdd5d2410f502f4686981c6d7-3\",\"result\":{\"resultType\":\"complete\",\"content\":[{\"type\":\"text\",\"text\":\"Labeled peer acknowledgement\"}],\"structuredContent\":{\"bytes\":25},\"isError\":true}}"}
+MCP fixture mode=bad-output phase=invoke elapsed_ms=283 actual_effect_marker=1
+MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_output_schema_rejected","request_id":"xmind-cc18ab4332e972873c92e00e3f55acff-3","response_json":"{\"jsonrpc\":\"2.0\",\"id\":\"xmind-cc18ab4332e972873c92e00e3f55acff-3\",\"result\":{\"resultType\":\"complete\",\"content\":[{\"type\":\"text\",\"text\":\"Labeled peer acknowledgement\"}],\"structuredContent\":{\"bytes\":\"invalid\"}}}"}
+MCP fixture mode=normal phase=invoke elapsed_ms=249 actual_effect_marker=1
+MCP fixture operation_state=cancelled recorded_result={}
+MCP fixture mode=normal phase=invoke elapsed_ms=222 actual_effect_marker=1
+MCP fixture operation_state=cancelled recorded_result={}
+MCP proposal timed out
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_mcp_effect_contract.exe C:/Program Files/nodejs/node.exe D:/CantorAI2026/xMind/Native/tests/mcp_effect_peer.mjs D:/CantorAI2026/xMind/Native D:/CantorAI2026/xlang3/build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51961 C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-official-http-effects-79oSZH',
+  stdout: '',
+  stderr: 'MCP fixture mode=skill-changed phase=invoke elapsed_ms=241 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=failed recorded_result={"reason":"repository_instructions_changed_before_mcp_dispatch"}\r\n' +
+    'MCP fixture mode=normal phase=invoke elapsed_ms=113 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=succeeded recorded_result={"acknowledged_by_peer":true,"config_revision":7,"independently_verified":false,"operation_id":"normal","request_id":"xmind-6f33eb178ce7bfc7c87ad410feb6ea69-3","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-6f33eb178ce7bfc7c87ad410feb6ea69-3\\",\\"result\\":{\\"resultType\\":\\"complete\\",\\"content\\":[{\\"type\\":\\"text\\",\\"text\\":\\"Labeled peer acknowledgement\\"}],\\"structuredContent\\":{\\"bytes\\":25}}}","server_config_id":"fixture-server-normal"}\r\n' +
+    'MCP fixture mode=legacy phase=invoke elapsed_ms=106 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=succeeded recorded_result={"acknowledged_by_peer":true,"config_revision":7,"independently_verified":false,"operation_id":"legacy","request_id":"xmind-1c5645638260267da5c04968c7db2800-4","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-1c5645638260267da5c04968c7db2800-4\\",\\"result\\":{\\"resultType\\":\\"complete\\",\\"content\\":[{\\"type\\":\\"text\\",\\"text\\":\\"Labeled peer acknowledgement\\"}],\\"structuredContent\\":{\\"bytes\\":25}}}","server_config_id":"fixture-server-legacy"}\r\n' +
+    'MCP fixture mode=input-required phase=invoke elapsed_ms=227 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_additional_input_required","request_id":"xmind-0e96d3e9ddd34f27326a91dc4fe6d455-3","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-0e96d3e9ddd34f27326a91dc4fe6d455-3\\",\\"result\\":{\\"resultType\\":\\"input_required\\",\\"inputRequests\\":{\\"confirm\\":{\\"method\\":\\"elicitation/create\\",\\"params\\":{\\"mode\\":\\"form\\",\\"message\\":\\"Confirm the planned fixture action\\",\\"requestedSchema\\":{\\"type\\":\\"object\\",\\"properties\\":{\\"approved\\":{\\"type\\":\\"boolean\\"}},\\"required\\":[\\"approved\\"]}}}},\\"requestState\\":\\"opaque-fixture-state\\"}}"}\r\n' +
+    'MCP fixture mode=normal phase=invoke elapsed_ms=237 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=failed recorded_result={"reason":"mcp_catalogue_changed_before_dispatch"}\r\n' +
+    'MCP fixture mode=resource-denied phase=invoke elapsed_ms=262 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=denied recorded_result={}\r\n' +
+    'MCP fixture mode=tool-secret-response phase=invoke elapsed_ms=231 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_secret_reflection","request_id":"xmind-0791218a6fe372fd259ec0f6fc07ea08-3"}\r\n' +
+    'MCP fixture mode=denied phase=invoke elapsed_ms=220 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=denied recorded_result={}\r\n' +
+    'MCP fixture mode=cancel-wait phase=invoke elapsed_ms=129 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=cancelled recorded_result={}\r\n' +
+    'MCP fixture mode=stopped-before-dispatch phase=invoke elapsed_ms=1747 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_state=failed recorded_result={"reason":"stopped_before_mcp_dispatch"}\r\n' +
+    'MCP fixture mode=bad-catalog-schema phase=catalogue elapsed_ms=92 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=duplicate-page phase=catalogue elapsed_ms=113 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=cursor-cycle phase=catalogue elapsed_ms=50 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=unknown-alias phase=invoke elapsed_ms=88 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=invalid-arguments phase=invoke elapsed_ms=111 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=reflect-credential phase=catalogue elapsed_ms=47 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=reflect-schema-credential phase=catalogue elapsed_ms=49 actual_effect_marker=0\r\n' +
+    'MCP fixture operation_not_created\r\n' +
+    'MCP fixture mode=disconnect phase=invoke elapsed_ms=239 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-3424fc41f9596f87b865ac31dcb4615e-3","response_json":""}\r\n' +
+    'MCP fixture mode=timeout phase=invoke elapsed_ms=1618 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-ec21de476fc2f04d92b6ad83edfa68ba-3","response_json":""}\r\n' +
+    'MCP fixture mode=cancel phase=invoke elapsed_ms=236 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-7b0622ac2db229d9750cc283c9781485-3","response_json":""}\r\n' +
+    'MCP fixture mode=rpc-error phase=invoke elapsed_ms=254 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_dispatch_outcome_unknown","request_id":"xmind-d361c5dfd33e17b68a88dba8edc09bed-3","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-d361c5dfd33e17b68a88dba8edc09bed-3\\",\\"error\\":{\\"code\\":-32603,\\"message\\":\\"Labeled error after actual effect\\"}}"}\r\n' +
+    'MCP fixture mode=tool-error phase=invoke elapsed_ms=253 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_peer_reported_tool_error","request_id":"xmind-5ed1383bdd5d2410f502f4686981c6d7-3","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-5ed1383bdd5d2410f502f4686981c6d7-3\\",\\"result\\":{\\"resultType\\":\\"complete\\",\\"content\\":[{\\"type\\":\\"text\\",\\"text\\":\\"Labeled peer acknowledgement\\"}],\\"structuredContent\\":{\\"bytes\\":25},\\"isError\\":true}}"}\r\n' +
+    'MCP fixture mode=bad-output phase=invoke elapsed_ms=283 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=uncertain recorded_result={"reason":"mcp_output_schema_rejected","request_id":"xmind-cc18ab4332e972873c92e00e3f55acff-3","response_json":"{\\"jsonrpc\\":\\"2.0\\",\\"id\\":\\"xmind-cc18ab4332e972873c92e00e3f55acff-3\\",\\"result\\":{\\"resultType\\":\\"complete\\",\\"content\\":[{\\"type\\":\\"text\\",\\"text\\":\\"Labeled peer acknowledgement\\"}],\\"structuredContent\\":{\\"bytes\\":\\"invalid\\"}}}"}\r\n' +
+    'MCP fixture mode=normal phase=invoke elapsed_ms=249 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=cancelled recorded_result={}\r\n' +
+    'MCP fixture mode=normal phase=invoke elapsed_ms=222 actual_effect_marker=1\r\n' +
+    'MCP fixture operation_state=cancelled recorded_result={}\r\n' +
+    'MCP proposal timed out\r\n'
+}
+
+Node.js v22.19.0
+
+      Start 102: native_mcp_oauth_callback_contract
+20/25 Test #102: native_mcp_oauth_callback_contract ............   Passed    0.93 sec
+      Start 103: native_mcp_oauth_refresh_contract
+21/25 Test #103: native_mcp_oauth_refresh_contract .............   Passed    1.20 sec
+      Start 109: native_agent_mcp_http_contract
+22/25 Test #109: native_agent_mcp_http_contract ................   Passed    3.04 sec
+      Start 110: native_agent_mcp_http_subscription_contract
+23/25 Test #110: native_agent_mcp_http_subscription_contract ...   Passed    0.79 sec
+      Start 111: native_mcp_sdk_modern_contract
+24/25 Test #111: native_mcp_sdk_modern_contract ................   Passed    4.07 sec
+      Start 112: native_mcp_sdk_legacy_contract
+25/25 Test #112: native_mcp_sdk_legacy_contract ................   Passed    2.92 sec
+
+96% tests passed, 1 tests failed out of 25
+
+Total Test time (real) =  90.59 sec
+
+The following tests FAILED:
+	 75 - native_mcp_effect_contract (Failed)
+Errors while running CTest

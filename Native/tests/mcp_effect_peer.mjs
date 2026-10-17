@@ -57,6 +57,10 @@ for await(const line of input){
     assert.equal(request.params.name,'fixture.write');
     assert.ok(line.includes('1.00000000000000000001'),'Exact approved decimal token must reach the actual peer');
     if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    if(mode==='input-required'){
+      send({id:request.id,result:{resultType:'input_required',inputRequests:{confirm:{method:'elicitation/create',params:{mode:'form',message:'Confirm the planned fixture action',requestedSchema:{type:'object',properties:{approved:{type:'boolean'}},required:['approved']}}}},requestState:'opaque-fixture-state'}});
+      continue;
+    }
     fs.appendFileSync(file,request.params.arguments.body);fs.writeFileSync(marker,'actual effect complete');
     if(mode==='disconnect')process.exit(0);
     if(mode==='timeout' || mode==='cancel')continue;

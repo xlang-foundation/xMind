@@ -204,7 +204,7 @@ McpToolReply McpHttpClient::call_tool(const std::string& name,std::string_view a
         const auto params="{\"name\":"+Json(name).dump()+",\"arguments\":"+mcp_compact_object(arguments)+"}";
         const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
         const auto reply=state.exchange(request.frame,state.handshake.server().era,request_id,deadline,cancel,attempted,found->second.schema,false,&response);
-        response=reply->response.raw_json;return mcp_decode_tool_reply(request_id,reply->response);
+        response=reply->response.raw_json;return mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
     }catch(...){state.retire();throw McpDispatchFailure(attempted,std::move(request_id),std::move(response));}
 }
 bool McpHttpClient::ready() const {return impl_->live && !impl_->closed;}

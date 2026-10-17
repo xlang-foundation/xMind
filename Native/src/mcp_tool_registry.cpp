@@ -154,6 +154,10 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     }
     catch(...) {if(entry.kind!=EntryKind::tool){finish(OperationState::failed,R"({"reason":"mcp_read_failed"})");throw McpReadFailed("MCP read did not complete; no result was exposed");}finish(OperationState::uncertain,R"({"reason":"unexpected_mcp_dispatch_failure"})");throw McpEffectUncertain("Unexpected MCP dispatch failure; quarantine remains in force");}
     if(entry.kind==EntryKind::tool&&reflects_credential(reply.response_json,state.private_credentials)){finish(OperationState::uncertain,Json{{"reason","mcp_secret_reflection"},{"request_id",reply.request_id}}.dump());throw McpEffectUncertain("MCP peer reflected a configured credential; quarantine remains in force");}
+    if(entry.kind==EntryKind::tool&&reply.input_required){
+        finish(OperationState::uncertain,Json{{"reason","mcp_additional_input_required"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());
+        throw McpEffectUncertain("MCP requested additional input; xMind has recorded the unresolved operation and will not replay it without a continuation owner");
+    }
     if(entry.kind!=EntryKind::tool&&reflects_credential(readonly.response_json,state.private_credentials)){finish(OperationState::failed,Json{{"reason","mcp_secret_reflection"},{"request_id",readonly.request_id}}.dump());throw McpReadFailed("MCP peer reflected a configured credential; no result was exposed");}
     if(entry.kind!=EntryKind::tool){
         try{const auto result=Json{{"operation_id",id},{"request_id",readonly.request_id},{"server_config_id",state.config_id},{"config_revision",state.revision},{"kind",kind_name(entry.kind)},{"acknowledged_by_peer",true},{"independently_verified",false},{"response_json",readonly.response_json}}.dump();finish(OperationState::succeeded,result);return result;}

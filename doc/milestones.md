@@ -32,6 +32,19 @@ validates the current suite and does not claim all planned xMind capabilities
 are complete. [Build and test evidence](evidence/native-release-suite-20261016.json),
 [CTest output](evidence/native-full-release-ctest-20261016.log).
 
+2026-10-16 MCP additional-input safety slice: native decoding now recognizes a
+valid modern `input_required` tool result and preserves its bounded embedded
+requests and opaque state. The journal records the operation as unresolved when
+no continuation owner exists, and a real peer contract verifies that the
+external tool is not replayed or marked successful. The focused Release wire,
+stdio, HTTP and effect contracts pass **4/4**. User input, per-round retry,
+durable resume and legacy request handling remain open. [MCP implementation
+boundary](native-mcp.md).
+The same 25-contract MCP/agent/graph subset passed on the subsequent full run;
+one intervening repeat hit a proposal timeout in the broad MCP effect fixture.
+The isolated effect test and full subset passed afterward. [Evidence and the
+repeat diagnostic](evidence/native-mcp-input-required-20261016.json).
+
 Current progress: separate live coding tasks now pass through both clients.
 The browser used its saved OpenAI profile to review and apply a focused
 Model Zoo accessibility change, ran the frontend production build, and passed

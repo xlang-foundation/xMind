@@ -24,6 +24,25 @@ validation and remaining protocol gaps below retain their documented scope.
 
 Current implementation: C++ MCP clients owned by xMind Server support stdio and Streamable HTTP and share the native tool registry, approval journal and C++/xlang3 persistence. The registry exposes tools, resource reads and prompt retrieval to single-agent and graph runs; resource/prompt calls require controller approval. The authenticated resource catalog enumerates both concrete resources and URI templates over both transports, and Browser/VS Code Settings can explicitly list the bounded metadata. Focused real stdio peers cover modern/legacy list/read/get/templates, and the pinned official MCP server SDK 2.3.1 exercises native HTTP resource/prompt discovery, allowed/denied calls and SQLite reopen. Modern `2026-07-28` list-change subscriptions are validated on both transports. In a run, catalogue notifications and unplanned listener loss invalidate the registry; AgentRunner safely reports a blocked stale call, rediscovers the catalogue, and continues with current definitions. Direct graph nodes fail closed because their aliases are pinned. Registry checks before proposal and after approval prevent a changed entry from reaching remote dispatch. Held-open fixtures verify bounded sanitized events and listener closure before terminal state. SDK packages remain test fixtures only; none run in the product core. Remaining MCP work includes crash recovery/reconnection, broader HTTP/SSE and OAuth renewal behavior, live coding interoperability and full installed-client acceptance.
 
+2026-10-16 modern additional-input boundary: the native tool-reply decoder now
+recognizes MCP `2026-07-28` `input_required` results, bounds and validates the
+embedded request identities/methods and opaque `requestState`, and preserves the
+payload for the operation journal. If no continuation owner can answer it, the
+registry records the call as unresolved and quarantines it; it never reports
+success or replays the tool. The Release wire/stdio/HTTP/effect contracts pass
+**4/4**, including a real stdio peer that requests input before making an
+external effect. Durable input collection, `inputResponses` retries, human
+elicitation UI, restartable continuation, and legacy input-request handling are
+still unimplemented, so this is an explicit fail-safe boundary rather than full
+multi-round-trip support. See the [official MCP multi-round-trip description](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
+and [current TypeScript SDK protocol guide](https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28).
+The Release build and the 25-contract MCP/agent/graph subset passed. One repeat
+hit a proposal timeout in `native_mcp_effect_contract`; the isolated contract
+and the subsequent full subset passed. [Machine-readable evidence](evidence/native-mcp-input-required-20261016.json),
+[passing subset output](evidence/native-mcp-input-required-ctest-20261016.log),
+[isolated rerun](evidence/native-mcp-input-required-effect-ctest-20261016.log),
+[failed repeat diagnostic](evidence/native-mcp-input-required-ctest-flaky-20261016.log).
+
 The native xMind route is `GET /v1/mcp/resources`; it returns xMind's server-scoped resource and prompt-template catalog. Clients cannot select peer pagination cursors. Resource content is fetched only through explicit MCP resource-read calls and their approval flow. The API intentionally does not expose OpenCode-shaped resource routes or payloads. The actual-server catalog contract verifies native schema, query rejection and bearer authentication. Full live-peer catalog rendering in the browser and VS Code remains open.
 
 Verified wire checkpoint: [CI run 37601682734](https://github.com/xlang-foundation/xMind/actions/runs/37601682734), revision `f0e44b029d6a28a57a80f77e921641301105a104`, passed all twenty native and twenty-seven extension contracts. [Complete CTest evidence](evidence/native-mcp-wire-ci-ctest.log), [provenance](evidence/native-mcp-wire-ci-provenance.json). `Native/src/mcp_wire.cpp` implements transport-neutral bounded newline framing and JSON-RPC envelope parsing. It retains original bytes and exact string/integer ID spelling, distinguishes request/notification/result/error, validates object parameters/results, rejects duplicate fields/deep JSON/invalid UTF-8, bounds each frame to 1 MiB, and fails closed after malformed input, consumer failure or incomplete EOF. Outgoing modern requests carry backend-owned metadata; legacy framing is explicit. The compiled contract exercises in-memory fragmented byte fixtures, including non-ASCII text and maximum 64-bit IDs. Request correlation, era selection, native process pipes, HTTP, schema/tool/policy integration and SDK interoperability are not established by that verified revision.

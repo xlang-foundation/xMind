@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-16",
+  "scope": "Native MCP 2026-07-28 input_required decoding and fail-safe operation journaling",
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target ALL_BUILD",
+    "exit_code": 0
+  },
+  "focused_contracts": {
+    "passed": 4,
+    "total": 4,
+    "exit_code": 0
+  },
+  "mcp_agent_graph_contracts": {
+    "filter": "native_mcp_|native_agent_mcp|native_graph_mcp|native_dynamic_plan_mcp",
+    "passed": 25,
+    "total": 25,
+    "elapsed_seconds": 85.05,
+    "exit_code": 0,
+    "output": "native-mcp-input-required-ctest-20261016.log"
+  },
+  "repeat_diagnostic": {
+    "failed_contract": "native_mcp_effect_contract",
+    "failure": "A repeated broad run timed out waiting for a proposal.",
+    "isolated_rerun": "native-mcp-input-required-effect-ctest-20261016.log",
+    "broad_run": "native-mcp-input-required-ctest-flaky-20261016.log",
+    "resolution": "The isolated contract and a subsequent full 25-contract run passed."
+  },
+  "product_boundary": "The client does not yet collect user input or resume the MCP request; the acknowledged input_required response is durably retained as unresolved and the remote call is not replayed."
+}

@@ -2,6 +2,7 @@
 // No MCP subprocess, provider, remote tool effect or full interoperability claim.
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/mcp_requests.hpp"
+#include "agentflow/mcp_tool_codec.hpp"
 #include "agentflow/mcp_http_metadata.hpp"
 #include "agentflow/mcp_http_stream.hpp"
 #include "nlohmann/json.hpp"
@@ -45,6 +46,21 @@ int main() {
         }
         require(messages[4].kind==McpMessageKind::error && messages[4].id_json.empty(),"Malformed-request diagnostics cannot be mistaken for results");
         stream.finish();rejected([&]{stream.feed("\n");});
+
+        const auto input_required=mcp_decode_tool_reply("continuation-1",mcp_decode_message(
+            R"({"jsonrpc":"2.0","id":"wire-1","result":{"resultType":"input_required","inputRequests":{"confirm":{"method":"elicitation/create","params":{"message":"Continue?"}},"roots":{"method":"roots/list","params":{}}},"requestState":"opaque\u002fstate"}})"),McpWireEra::modern);
+        require(input_required.request_id=="continuation-1"&&input_required.input_required.has_value()&&!input_required.is_error,"Modern input-required result must be represented as an interactive response, not a protocol failure");
+        require(input_required.input_required->input_requests_json.size()==2&&Json::parse(input_required.input_required->input_requests_json.at("confirm"))["method"]=="elicitation/create","Embedded MCP input requests must remain individually addressable");
+        require(input_required.input_required->request_state=="opaque/state","Opaque MCP state must be decoded without interpretation");
+        const auto state_only=mcp_decode_tool_reply("continuation-2",mcp_decode_message(
+            R"({"jsonrpc":"2.0","id":"wire-2","result":{"resultType":"input_required","requestState":"phase-2"}})"),McpWireEra::modern);
+        require(state_only.input_required&&state_only.input_required->input_requests_json.empty()&&state_only.input_required->request_state=="phase-2","A state-only continuation is valid");
+        rejected([&]{(void)mcp_decode_tool_reply("bad",mcp_decode_message(R"({"jsonrpc":"2.0","id":"bad","result":{"resultType":"input_required"}})"),McpWireEra::modern);});
+        rejected([&]{(void)mcp_decode_tool_reply("bad",mcp_decode_message(R"({"jsonrpc":"2.0","id":"bad","result":{"resultType":"input_required","inputRequests":{"x":{"method":"tools/call","params":{}}}}})"),McpWireEra::modern);});
+        rejected([&]{(void)mcp_decode_tool_reply("bad",mcp_decode_message(R"({"jsonrpc":"2.0","id":"bad","result":{"content":[{"type":"text","text":"missing discriminator"}]}})"),McpWireEra::modern);});
+        const auto complete_tool=mcp_decode_tool_reply("complete-1",mcp_decode_message(R"({"jsonrpc":"2.0","id":"complete-1","result":{"resultType":"complete","content":[{"type":"text","text":"done"}]}})"),McpWireEra::modern);
+        require(!complete_tool.input_required&&complete_tool.result_json.find("done")!=std::string::npos,"Modern complete result remains an ordinary tool reply");
+        rejected([&]{(void)mcp_decode_tool_reply("legacy",mcp_decode_message(R"({"jsonrpc":"2.0","id":"legacy","result":{"resultType":"input_required","requestState":"opaque"}})"),McpWireEra::legacy);});
 
         const auto modern=mcp_request("probe-1","server/discover","{}",McpWireEra::modern);
         require(modern.back()=='\n' && modern.find('\n')==modern.size()-1,"Outgoing frames contain only one delimiter");

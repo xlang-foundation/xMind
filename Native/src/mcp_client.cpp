@@ -208,7 +208,7 @@ McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view 
                 const auto reply=state.requests.receive(message);if(!reply)continue;
                 if(reply->request.id!=request_id)throw McpProtocolError("MCP tool response identity changed");
                 response_json=reply->response.raw_json;
-                result=mcp_decode_tool_reply(request_id,reply->response);
+                result=mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
             }
         }
         return std::move(*result);

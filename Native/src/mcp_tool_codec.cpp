@@ -90,10 +90,41 @@ McpToolPage mcp_decode_tool_page(const McpWireMessage& message) {
     if(value.contains("nextCursor"))page.next_cursor=bounded_text(value,"nextCursor",4096);
     return page;
 }
-McpToolReply mcp_decode_tool_reply(std::string request_id,const McpWireMessage& message) {
+McpToolReply mcp_decode_tool_reply(std::string request_id,const McpWireMessage& message,McpWireEra era) {
     if(message.kind!=McpMessageKind::result)throw McpProtocolError("MCP tool returned an RPC error");
     const auto value=Json::parse(message.payload_json);
-    if(value.contains("resultType") && value["resultType"]!="complete")throw McpProtocolError("MCP interactive result requires an unsupported continuation owner");
+    if(era==McpWireEra::modern) {
+        if(!value.contains("resultType")||!value["resultType"].is_string())throw McpProtocolError("Modern MCP tool result is missing its result type");
+        if(value["resultType"]=="input_required") {
+            McpInputRequired input;
+            if(value.contains("inputRequests")) {
+                const auto& requests=value["inputRequests"];
+                if(!requests.is_object()||requests.size()>32)throw McpProtocolError("Invalid MCP input-required requests");
+                for(auto it=requests.begin();it!=requests.end();++it) {
+                    if(it.key().empty()||it.key().size()>128||it.key().find('\\0')!=std::string::npos||!it.value().is_object())throw McpProtocolError("Invalid MCP input request identity or shape");
+                    const auto raw=mcp_object_member(message.payload_json,"inputRequests");
+                    if(!raw)throw McpProtocolError("MCP input-required requests are missing");
+                    const auto encoded=mcp_object_member(*raw,it.key());
+                    if(!encoded||encoded->size()>65536)throw McpProtocolError("MCP input request exceeds limits");
+                    if(!it.value().contains("method")||!it.value()["method"].is_string())throw McpProtocolError("MCP input request has no method");
+                    const auto method=it.value()["method"].get<std::string>();
+                    if(method!="elicitation/create"&&method!="sampling/createMessage"&&method!="roots/list")throw McpProtocolError("Unsupported MCP input request method");
+                    if(it.value().contains("params")&&!it.value()["params"].is_object())throw McpProtocolError("Invalid MCP input request parameters");
+                    input.input_requests_json.emplace(it.key(),*encoded);
+                }
+            }
+            if(value.contains("requestState")) {
+                if(!value["requestState"].is_string()||value["requestState"].get_ref<const std::string&>().size()>65536)throw McpProtocolError("Invalid MCP opaque request state");
+                input.request_state=value["requestState"].get<std::string>();
+            }
+            if(input.input_requests_json.empty()&&!input.request_state)throw McpProtocolError("MCP input-required result contains no continuation state");
+            return {std::move(request_id),message.raw_json,message.payload_json,false,std::move(input)};
+        }
+        if(value["resultType"]!="complete")throw McpProtocolError("Unsupported modern MCP tool result type");
+    } else if(value.contains("resultType")) {
+        // The discriminator is not part of the legacy result contract. Ignore
+        // it as an extension field; a legacy result still needs normal content.
+    }
     if(!value.contains("content") || !value["content"].is_array() || value["content"].size()>128 || (value.contains("isError") && !value["isError"].is_boolean()))throw McpProtocolError("Invalid MCP tool result");
     for(const auto& block:value["content"])validate_content(block);
     return {std::move(request_id),message.raw_json,message.payload_json,value.value("isError",false)};

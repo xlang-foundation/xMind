@@ -3,6 +3,7 @@
 #include "agentflow/mcp_transport.hpp"
 #include <optional>
 #include <functional>
+#include <map>
 #include <stop_token>
 #include <string>
 #include <string_view>
@@ -13,7 +14,14 @@ struct McpToolDescription {
     std::string name,description,input_schema_json,annotations_json;
     std::optional<std::string> output_schema_json;
 };
-struct McpToolReply {std::string request_id,response_json,result_json;bool is_error;};
+struct McpInputRequired {
+    // Each value is the raw, validated embedded request object keyed by the
+    // peer's opaque response identity. request_state is opaque and must only
+    // be echoed by a continuation owner; it is not interpreted here.
+    std::map<std::string,std::string> input_requests_json;
+    std::optional<std::string> request_state;
+};
+struct McpToolReply {std::string request_id,response_json,result_json;bool is_error=false;std::optional<McpInputRequired> input_required;};
 struct McpDispatchFailure : McpTransportError {
     bool possibly_sent;
     std::string request_id,response_json;
