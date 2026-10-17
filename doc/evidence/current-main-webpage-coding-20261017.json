@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-17",
+  "source": {
+    "xmind_checkout_head": "7ece93949d8c1054e87fdb5a4df3ccbe4fbb71d0",
+    "compiled_product_code_revision": "37c0bd8b3ef65057f5473f791fc71434fb4d2f4e",
+    "code_diff_after_compiled_revision": "The only later xMind commit changes validation documentation; Native, Tools, extensions and views are unchanged.",
+    "xlang3_sdk_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+    "xmind_executable_sha256": "14168fd9bee2f93ce5adf8617b1ac40a0a1c3d9701e065da2165e35f913e580d",
+    "xlang3_runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "xlang3_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "browser_runtime_manifest_sha256": "33fee3852f2a25cf6c1f7f42e1c613e51a5f0ca69197658dedaf8997c54c95c4",
+    "runtime_kind": "Hash-verified local development runtime; releaseAccepted=false"
+  },
+  "native_release": {
+    "build_directory": "C:\\xMindNativeValidation\\native-main-37c0bd8-20261017",
+    "build_result": "passed",
+    "ctest_command": "ctest --test-dir C:/xMindNativeValidation/native-main-37c0bd8-20261017 -C Release --output-on-failure",
+    "registered": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 875.78
+  },
+  "extension_tests": {
+    "command": "npm test",
+    "passed": 391,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 4.583
+  },
+  "webpage_coding": {
+    "url": "http://127.0.0.1:60451/ui/",
+    "http_status": 200,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "provider": "OpenAI Responses",
+    "model": "gpt-4.1-mini",
+    "credential_source": "Saved local provider profile; key was not re-entered",
+    "discovered_model_count": 20,
+    "edit_run_id": "1482093511aa1e1416729e7cb29740e3",
+    "edit_operation_id": "1d4d57e003c7f91daa922de80f83ed12",
+    "file": "xmind_web_coding_smoke.py",
+    "change": "Added normalize_project_name(value), preserving main() and its output.",
+    "xlang3_script_run": {
+      "argv": ["xlang3.exe", "-B", "xmind_web_coding_smoke.py"],
+      "exit_code": 0,
+      "stdout": "xMind web coding works\\r\\n",
+      "stderr_bytes": 0
+    },
+    "xlang3_assertion_run_id": "b35c6a9cb9723aec0435054755f84be9",
+    "xlang3_assertion_command": "import xmind_web_coding_smoke as smoke; assert smoke.normalize_project_name(\" Model Zoo Demo \") == \"model-zoo-demo\"; assert smoke.main() == \"xMind web coding works\"; print(\"assertions passed\")",
+    "xlang3_assertion_exit_code": 0,
+    "xlang3_assertion_stdout": "assertions passed\\r\\n",
+    "restore_run_id": "98b95a2f875edea6a0ef6173fe489af1",
+    "restore_method": "Approved inverse replace_file operation",
+    "original_sha256": "947653f1c271e3241d12bba215200500de901b0454cae3e566f588bcbe2daf5",
+    "restored_sha256": "947653f1c271e3241d12bba215200500de901b0454cae3e566f588bcbe2daf5",
+    "observed_model_metrics": [
+      {"input_tokens": 5212, "output_tokens": 27},
+      {"input_tokens": 5392, "output_tokens": 215},
+      {"input_tokens": 5727, "output_tokens": 29},
+      {"input_tokens": 5951, "output_tokens": 71},
+      {"input_tokens": 6097, "output_tokens": 73},
+      {"input_tokens": 6360, "output_tokens": 33},
+      {"input_tokens": 6448, "output_tokens": 121}
+    ]
+  },
+  "vscode_package_acceptance": {
+    "extension_version": "0.1.13",
+    "vscode_version": "1.142.0",
+    "vsix": "extensions/vscode/agentflow-0.1.13.vsix",
+    "vsix_sha256": "B311911C89E2C490E652A86EAC5A3758FDD37EEDD605BBDE2B1F18E257838449",
+    "native_runtime_manifest_sha256": "b3543b3252cfe9d8641c82de507013127b79a7c84a19988426c6da8dd8ad5902",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "credential_source": "Saved local provider profile; key was not re-entered",
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "edit_run_id": "ff99d481a850eb774f89c40d0dc74511",
+    "edit_operation_id": "c95ff69f60a7126a4b1e25b60ad540a9",
+    "file": "xmind_vscode_coding_smoke.py",
+    "change": "Added normalize_name(value) and an inline assertion for whitespace trimming and kebab-case normalization.",
+    "xlang3_script_run": {
+      "argv": ["xlang3.exe", "-B", "xmind_vscode_coding_smoke.py"],
+      "exit_code": 0,
+      "stdout": "xMind VS Code coding works\\r\\n"
+    },
+    "restore_run_id": "a89fbed01d366750f8fea46e80dc6ab5",
+    "restore_operation_id": "bfc5694e4eb5c3eb874dbc6bfd3eb304-0",
+    "restore_result": "The original main() behavior was restored and independently executed through the same xlang3 runtime.",
+    "restored_sha256": "E45E9C9306CAD8D53289AB357745A27B9C73FDE7EB2ED1875A22774DCC6D17E2",
+    "live_approval": "The two single-file edits each required and received explicit UI approval."
+  },
+  "open_hosted_runs": [
+    {"run_id": 39058872785, "source_revision": "433ab7011350f9a94748a9c491d1a6a5c51e8d6f", "result": "failed", "failing_step": "Build native xlang3 and xMind; run complete contract set"},
+    {"run_id": 39059210384, "source_revision": "6e02ce4e85475e19bc36b3f7727a57ef0e06328a", "result": "failed", "failing_step": "Build native xlang3 and xMind; run complete contract set"},
+    {"run_id": 39059210368, "source_revision": "6e02ce4e85475e19bc36b3f7727a57ef0e06328a", "result": "passed", "scope": "Browser and VS Code contracts"}
+  ],
+  "limitations": [
+    "The live webpage run uses a local development profile and runtime, not a release-accepted package.",
+    "This verifies one approval-gated single-file coding task and its restore; it is not a broad multi-file reliability claim.",
+    "The VS Code extension suite passed, but clean installation and live acceptance of the latest packaged VS Code runtime remain open.",
+    "GitHub's job-log download endpoint returned HTTP 403 in this session; the two hosted native failures have not been diagnosed."
+  ]
+}

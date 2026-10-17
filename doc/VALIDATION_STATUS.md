@@ -3871,3 +3871,36 @@ diagnostic run used a temporary isolated CMake output directory before all
 contract executables had been rebuilt there, so many tests could not start;
 the normal output directory has since been restored. The last complete native
 gate remains the 147/147 run recorded above at the preceding source revision.
+
+## Current-main native and webpage recertification — 2026-10-17
+
+Rebuilt the unified Release executable at source `37c0bd8` with the xlang3
+runtime built from the local SDK checkout at `036f450`; all **147/147 native
+CTest contracts passed** sequentially in **875.78 seconds**. The current xMind
+`main` head is `7ece939`; its only change after `37c0bd8` is validation
+documentation, with no changes under `Native/`, `Tools/`, `extensions/`, or
+`views/`. This revalidates the current product code. The staged browser runtime
+is hash-verified local development output with `releaseAccepted=false`, not a
+release package.
+
+The current-main webpage adapter was opened in external Edge at
+`http://127.0.0.1:60451/ui/` against `D:\CantorAI2026\TestProj`. It reused the
+saved OpenAI profile, discovered 20 models, selected `gpt-4.1-mini`, and
+completed an approval-gated edit to `xmind_web_coding_smoke.py`. The file ran
+through the managed xlang3 process profile; a second xlang3 command asserted
+the new helper's behavior and the unchanged `main()` result. An approved
+inverse edit restored the original content, and the original SHA-256 was
+verified. The VS Code extension's current-source test suite passed **391/391**.
+
+Packaged and installed `agentflow-0.1.13.vsix` into VS Code **1.142.0** and
+opened its installed xMind sidebar on the same `TestProj` workspace. A fresh
+conversation used the saved OpenAI profile and xlang3 runtime profile to add
+`normalize_name(value)` plus an inline assertion in
+`xmind_vscode_coding_smoke.py`; the file completed under xlang3 with exit code
+0. The inverse change restored its prior `main()` behavior, which was then
+executed successfully. This live installed-package run is recorded with the
+VSIX and run hashes in the evidence JSON.
+
+These are bounded local UI checks, not a broad coding-reliability claim. Exact
+revisions, binary hashes, run IDs, token counts and restored file hashes are in
+[machine-readable evidence](evidence/current-main-webpage-coding-20261017.json).
