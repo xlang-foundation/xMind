@@ -52,17 +52,20 @@ ProviderModelPolicy documented_openai_model_policy(ProviderWire wire){
     return result;
 }
 ProviderModelPolicy documented_xai_model_policy(){
-    // xAI's Grok 4.7 documentation (consulted 2026-10-10) identifies Responses
-    // as its primary API and documents custom function calling, streaming and
-    // configurable reasoning. Catalogue entries alone cannot confer tools.
+    // Exact text model pages documenting function calling and Responses
+    // reasoning settings; reviewed 2026-10-16. Catalogue entries alone cannot
+    // confer tools. Each generation keeps only its documented reasoning set.
     // https://docs.x.ai/developers/grok-4-7
+    // https://docs.x.ai/developers/models/grok-4.6
+    // https://docs.x.ai/developers/models/grok-4.5
+    // https://docs.x.ai/developers/models/grok-4.3
     // https://docs.x.ai/developers/tools/function-calling
     // https://docs.x.ai/developers/model-capabilities/text/streaming
+    struct Fact {const char* id;bool no_reasoning;bool xhigh;};
+    constexpr std::array facts{Fact{"grok-4.7",false,true},Fact{"grok-4.6",false,true},Fact{"grok-4.5",false,false},Fact{"grok-4.3",true,false}};
     ProviderModelPolicy result;result.wire=ProviderWire::responses;
-    NativeModelCapabilities grok;
-    grok.tools=Capability::supported;grok.stream_usage=Capability::supported;grok.output_limit=Capability::supported;
-    grok.reasoning_efforts={ReasoningEffort::low,ReasoningEffort::medium,ReasoningEffort::high,ReasoningEffort::xhigh};
-    result.models.emplace("grok-4.7",std::move(grok));
+    for(const auto& fact:facts){NativeModelCapabilities grok;grok.tools=Capability::supported;grok.stream_usage=Capability::supported;grok.output_limit=Capability::supported;
+        grok.reasoning_efforts={ReasoningEffort::low,ReasoningEffort::medium,ReasoningEffort::high};if(fact.xhigh)grok.reasoning_efforts.insert(ReasoningEffort::xhigh);if(fact.no_reasoning)grok.reasoning_efforts.insert(ReasoningEffort::none);result.models.emplace(fact.id,std::move(grok));}
     return result;
 }
 ProviderModelPolicy documented_mistral_model_policy(){

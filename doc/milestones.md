@@ -39,6 +39,18 @@ and 31 saved messages. At the time of these earlier records, the shared transcri
 VS Code confirmation. The 2026-10-16 live acceptance below has since closed
 that check.
 
+2026-10-16 xAI native model policy: xMind's `xai.responses` workspace
+catalogue now admits the exact documented text tool models `grok-4.3`,
+`grok-4.5`, `grok-4.6` and `grok-4.7`. Reasoning choices are scoped per model:
+Grok 4.3 allows `none` through `high`, 4.5 allows `low` through `high`, and
+4.6/4.7 also allow `xhigh`. Unknown and non-text catalogue entries remain
+filtered. The Release request-policy and actual-server profile-runtime
+contracts pass **2/2**. The runtime contract discovers the models, runs a
+streamed Grok 4.6 `read_file` call against a real workspace file, and reopens
+the embedded xlang3/SQLite profile. Provider HTTP and responses are synthetic;
+this does not claim live xAI account acceptance. [Contract output](evidence/native-xai-reviewed-model-policy-ctest-20261016.log),
+[source and binary evidence](evidence/native-xai-reviewed-model-policy-20261016.json).
+
 2026-10-16 live cross-client coding acceptance: VS Code and the external
 webpage both attached to the local TestProj profile and used its saved OpenAI
 configuration. In VS Code, xMind proposed a focused accessibility/usability

@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-10-16",
+  "source_base_revision": "a2efd830994362e0d6b2aaa968f17e46d4cde383",
+  "provider_route": "xai.responses",
+  "reviewed_text_models": [
+    {
+      "tools": "supported",
+      "reasoning": [
+        "none",
+        "low",
+        "medium",
+        "high"
+      ],
+      "id": "grok-4.3"
+    },
+    {
+      "tools": "supported",
+      "reasoning": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "id": "grok-4.5"
+    },
+    {
+      "tools": "supported",
+      "reasoning": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "id": "grok-4.6"
+    },
+    {
+      "tools": "supported",
+      "reasoning": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "id": "grok-4.7"
+    }
+  ],
+  "official_sources": [
+    "https://docs.x.ai/developers/models/grok-4.3",
+    "https://docs.x.ai/developers/models/grok-4.5",
+    "https://docs.x.ai/developers/models/grok-4.6",
+    "https://docs.x.ai/developers/grok-4-7",
+    "https://docs.x.ai/developers/model-capabilities/text/reasoning"
+  ],
+  "release_contracts": {
+    "request_contract_exe_sha256": "67ED9898850A19ECC602F0DB0307325ED972285FF3BE6FBE73FC0B675619CD44",
+    "runtime_contract_exe_sha256": "43E5A33A2B05527D37537FF4736BA02BEB4C98559AF7F4B41B3BB21C1CC60771",
+    "native_provider_model_policy_runtime_contract": "passed",
+    "model_request_contract": "passed",
+    "count": "2/2"
+  },
+  "runtime_scope": "Actual native C++ provider policy, HTTP/SSE peer, workspace read tool, protected local profile, embedded xlang3 SQLite and reopen; provider transport and replies are synthetic.",
+  "live_xai_account_inference": "not tested",
+  "unreviewed_catalogue_models": "remain filtered from tool-capable workspace discovery"
+}

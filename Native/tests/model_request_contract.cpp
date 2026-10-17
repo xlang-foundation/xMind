@@ -26,6 +26,23 @@ int main() {
         require(mistral_payload.at("stream_options").at("include_usage")==true&&mistral_payload.at("tools").size()==1,"Mistral streaming usage and function tools must survive native serialization");
         rejects([&]{bind_provider_model_policy(mistral_policy,mistral,"mistral-future-model",true);});
         auto mistral_wrong=mistral;mistral_wrong.wire=ProviderWire::responses;rejects([&]{serialize_mistral_request(mistral_wrong,mistral_probe);});
+        const auto xai_policy=documented_xai_model_policy();validate_provider_model_policy(xai_policy);
+        require(xai_policy.wire==ProviderWire::responses&&xai_policy.models.size()==4,"xAI must declare only the individually reviewed text tool models");
+        ChatProviderConfig xai;xai.endpoint="https://api.x.ai/v1/responses";xai.wire=ProviderWire::responses;
+        auto xai_bound=bind_provider_model_policy(xai_policy,xai,"grok-4.6",true);
+        require(xai_bound.tools==Capability::supported&&xai_bound.reasoning_effort==std::nullopt,"Reviewed xAI model must bind its native Responses tool capabilities");
+        auto xai_request=ModelRequest{{{MessageRole::user,"Synthetic xAI request"}},{{"inspect","Synthetic inspection",R"({"type":"object"})"}}};
+        xai_request.include_usage=true;xai_request.max_output_tokens=64;
+        const auto xai_payload=Json::parse(serialize_responses_request(xai_bound,xai_request));
+        require(xai_payload.at("model")=="grok-4.6"&&xai_payload.at("tools").size()==1&&xai_payload.at("max_output_tokens")==64,"xAI model capabilities must reach native Responses serialization");
+        auto xai_high=xai;xai_high.reasoning_effort=ReasoningEffort::xhigh;
+        require(bind_provider_model_policy(xai_policy,xai_high,"grok-4.6",true).reasoning_effort==ReasoningEffort::xhigh,"Grok 4.6 must allow its documented xhigh reasoning setting");
+        rejects([&]{bind_provider_model_policy(xai_policy,xai_high,"grok-4.5",true);});
+        auto xai_none=xai;xai_none.reasoning_effort=ReasoningEffort::none;
+        require(bind_provider_model_policy(xai_policy,xai_none,"grok-4.3",true).reasoning_effort==ReasoningEffort::none,"Grok 4.3 must preserve its documented no-reasoning option");
+        rejects([&]{bind_provider_model_policy(xai_policy,xai_none,"grok-4.6",true);});
+        rejects([&]{bind_provider_model_policy(xai_policy,xai_high,"grok-4.3",true);});
+        rejects([&]{bind_provider_model_policy(xai_policy,xai,"grok-future",true);});
         for(const auto wire:{ProviderWire::responses,ProviderWire::chat_completions}){
             const auto policy=documented_openai_model_policy(wire);validate_provider_model_policy(policy);
             ChatProviderConfig selected;selected.endpoint="https://fixture.example.invalid/owned";selected.wire=wire;

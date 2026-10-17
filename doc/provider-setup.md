@@ -8,12 +8,17 @@ to belong to their existing route. Discovery does not rotate credentials or
 activate a model. [Policy, declarations and validation](native-model-eligibility.md).
 
 The native route registry also includes `xai.responses` for the xAI Responses
-API. Its documented tool-capable model allowlist currently admits `grok-4.7`;
-other catalogue entries remain unavailable for tool runs until their model
-capabilities are reviewed. The native xAI contract passed against a synthetic
-Responses peer, including model discovery, a streamed `read_file` call, actual
+API. Its tool-capable model policy admits the exact reviewed text models
+`grok-4.3`, `grok-4.5`, `grok-4.6` and `grok-4.7`. Reasoning settings are
+model-specific: 4.3 permits `none`, `low`, `medium` and `high`; 4.5 permits
+`low`, `medium` and `high`; 4.6 and 4.7 also permit `xhigh`. Other catalogue
+entries remain unavailable for tool runs until their model capabilities are
+reviewed. The native xAI contract passed against a synthetic Responses peer,
+including discovery, a streamed `read_file` call using Grok 4.6, actual
 workspace access and xlang3 SQLite reopen. No xAI account, API key or live
-inference was used, and the 58 pinned xAI entries are not individually accepted.
+inference was used; this contract does not establish live model acceptance.
+See xAI's [model pages](https://docs.x.ai/developers/models) and
+[reasoning guide](https://docs.x.ai/developers/model-capabilities/text/reasoning).
 
 `mistral.chat` uses Mistral's native Chat Completions endpoint with its
 `max_tokens` output-limit field and streaming usage opt-in. Account discovery is

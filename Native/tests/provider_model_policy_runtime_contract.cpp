@@ -69,7 +69,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(responses==Json{{"models",Json::array({{{"id","gpt-4.1"}},{{"id","gpt-6-astra"}},{{"id","gpt-6-sol"}},{{"id","gpt-6.1-sol"}}})}},"Responses catalogue must retain all documented current tools without granting future identities");
         const Json xai_draft={{"id","xai"},{"route_id","xai.responses"},{"api_key",fixture_key},{"expected_revision",0}};
         const auto xai_models=post("/v1/provider/profiles/models",xai_draft,200);
-        require(xai_models==Json{{"models",Json::array({{{"id","grok-4.7"}}})}},"xAI discovery must expose only the exact natively declared tool-capable Grok frontier model");
+        require(xai_models==Json{{"models",Json::array({{{"id","grok-4.3"}},{{"id","grok-4.5"}},{{"id","grok-4.6"}},{{"id","grok-4.7"}}})}},"xAI discovery must expose only exact natively declared tool-capable text models");
         const Json mistral_draft={{"id","mistral"},{"route_id","mistral.chat"},{"api_key",fixture_key},{"expected_revision",0}};
         const auto mistral_models=post("/v1/provider/profiles/models",mistral_draft,200);
         require(mistral_models==Json{{"models",Json::array({{{"id","codestral-latest"}},{{"id","mistral-large-latest"}}})}},"Mistral discovery must filter account models through exact native tool-capability policy");
@@ -101,7 +101,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(store.operations("read-run").get().empty(),"Read-only tool execution cannot dispatch effects");
         for(;;){try{runtime.save_profile("responses","openai.responses","gpt-6.1-sol",key(fixture_key),2,false);break;}catch(const Conflict&){require(std::chrono::steady_clock::now()<until,"Native worker did not retire");std::this_thread::sleep_for(5ms);}}
         require(runtime.configuration().revision==3&&runtime.configuration().active=="openai","Responses enrollment must preserve the selected Chat owner");
-        require(runtime.save_profile("xai","xai.responses","grok-4.7",key(fixture_key),3,true).revision==4&&runtime.configuration().active=="xai","Reviewed xAI frontier model must activate on native Responses for execution");
+        require(runtime.save_profile("xai","xai.responses","grok-4.6",key(fixture_key),3,true).revision==4&&runtime.configuration().active=="xai","Reviewed xAI tool model must activate on native Responses for execution");
         store.create_session("xai-read","Synthetic native xAI model policy read").get();
         post("/v1/runs",{{"id","xai-read-run"},{"session_id","xai-read"},{"prompt","Read marker.txt using Grok through the native Responses route."},{"provider_profile_id","xai"},{"expected_provider_revision",4}},202);
         const auto xai_until=std::chrono::steady_clock::now()+8s;
@@ -131,7 +131,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         ProviderProfileRuntime reopened(store,base,allowed,1,8);require(reopened.available()&&reopened.configuration().revision==6,"Valid stored profiles must reopen without publication");
         const auto current=store.history("read").get();require(current.size()==history.size(),"Restart changed conversation size");for(std::size_t i=0;i<history.size();++i)require(current[i].json==history[i].json,"Restart changed original native tool/model history");
         require(reopened.discover_models("responses","openai.responses",key(""),6)==std::vector<std::string>{"gpt-4.1","gpt-6-astra","gpt-6-sol","gpt-6.1-sol"},"Reopened saved-key Responses discovery must retain exact route capabilities");
-        require(reopened.discover_models("xai","xai.responses",key(""),6)==std::vector<std::string>{"grok-4.7"},"Reopened saved-key xAI discovery must retain the native Grok model policy");
+        require(reopened.discover_models("xai","xai.responses",key(""),6)==std::vector<std::string>{"grok-4.3","grok-4.5","grok-4.6","grok-4.7"},"Reopened saved-key xAI discovery must retain exact native Grok model policy");
         require(reopened.discover_models("mistral","mistral.chat",key(""),6)==std::vector<std::string>{"codestral-latest","mistral-large-latest"},"Reopened saved-key Mistral discovery must retain exact native tool models");
         require(reopened.discover_models("openrouter","openrouter.chat",key(""),6)==std::vector<std::string>{"google/gemini-3.8-flash","openai/gpt-6-sol"},"Reopened saved-key OpenRouter discovery must retain only tool-capable catalogue entries");
     }
