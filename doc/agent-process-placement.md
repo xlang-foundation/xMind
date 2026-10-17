@@ -69,3 +69,16 @@ execution.
 No process-placement config, C++ AgentRunner worker, or acceptance for this
 contract is implemented yet. This document records the requested direction and
 the testable boundary; it is not a completion claim.
+
+### xlang3 native-host prerequisite — 2026-10-17
+
+The pinned xlang3 C++ SDK previously exposed an LRPC client but no supported
+native C++ service-host calls. The xMind-specific prerequisite is now available
+on [xlang3 branch `xmind-cpp-lrpc-host`](https://github.com/CantorAI/xlang3/tree/xmind-cpp-lrpc-host)
+at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`: `X::Runtime` can register a
+runtime-owned service object and start the shared-memory LRPC listener. Its
+native host/second-runtime contract passes, as does the existing xlang3-script
+server to C++ client smoke test. The branch is not yet pinned by xMind. This
+unblocks a supported native IPC boundary, but does not implement or validate
+the AgentRunner supervisor, per-run authentication, durable recovery, or
+client acceptance. [Exact build and test evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).

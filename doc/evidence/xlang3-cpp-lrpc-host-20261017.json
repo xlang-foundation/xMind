@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-17",
+  "scope": "xlang3 SDK prerequisite for native C++ xMind worker hosting",
+  "repository": "https://github.com/CantorAI/xlang3",
+  "branch": "xmind-cpp-lrpc-host",
+  "commit": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
+  "parent": "036f450af15426a25758087e8ea6bc70637a9a13",
+  "changes": [
+    "Added C ABI calls for registering a runtime-owned remote object and starting an LRPC listener.",
+    "Added X::Runtime::RegisterRemoteObject and X::Runtime::LrpcListen with same-runtime object validation.",
+    "Listener startup rejects ports outside 1..65535; runtime destruction owns listener detachment."
+  ],
+  "build": {
+    "configuration": "Release",
+    "targets": ["xlang3_runtime", "xlang3_ipc_native_host_tests"],
+    "native_host_contract": {
+      "name": "xlang3_ipc_native_host_tests",
+      "passed": 1,
+      "failed": 0,
+      "duration_seconds": 0.17,
+      "dll_sha256": "BEEC7E860B4A1E5088F28768275D2635988F14A494FE8973B66917C1791A4E47",
+      "test_executable_sha256": "685077F583444402C1CB9D81C94FBCC2AC88B39D1416D7C71340A6BD76B514C9"
+    },
+    "existing_xlang3_server_cpp_client_smoke": {
+      "server": "xlang3.exe tests/ipc/server.py <port>",
+      "client": "xlang3_cpp_ipc_client.exe <port>",
+      "passed": true,
+      "result": "C++ shared-memory IPC passed"
+    }
+  },
+  "limitations": [
+    "The LRPC endpoint is transport, not application authentication; a worker still needs process-bound per-run authority.",
+    "xMind has not yet pinned this branch or implemented process-bound AgentRunner execution.",
+    "No xlang3 engine performance gate is required or claimed for this SDK/API-only change."
+  ]
+}
