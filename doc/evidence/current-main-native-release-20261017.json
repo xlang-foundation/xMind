@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-17",
+  "source_revision": "f6c36012550a2c2a7e7a6bc74fca07c3169790ba",
+  "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "configuration": "Windows x64 Release; current xMind source; xlang3 runtime and modules from D:/CantorAI2026/xlang3/build/Release",
+  "build": {
+    "result": "passed",
+    "command": "cmake --build C:/Users/shaw9/AppData/Local/xMind/native-validation-current-20261017 --config Release --parallel 1",
+    "products": ["xmind.exe", "xmind_cli.exe", "xmind_server.exe", "xmind_admin.exe", "147 registered test executables"]
+  },
+  "test_runs": [
+    {
+      "command": "ctest --test-dir C:/Users/shaw9/AppData/Local/xMind/native-validation-current-20261017 -C Release --output-on-failure",
+      "result": "144 passed, 3 failed",
+      "duration_seconds": 390.01,
+      "failure_cause": "The package guard rejected the Python license path under .agentflow; the validation input path also resolved through the Windows AppData alias."
+    },
+    {
+      "command": "ctest --test-dir C:/Users/shaw9/AppData/Local/xMind/native-validation-current-20261017 -C Release --rerun-failed --output-on-failure",
+      "result": "3 passed, 0 failed",
+      "duration_seconds": 519.36,
+      "standard_library_source": "C:/xMindNativeValidation/stdlib",
+      "standard_library_license": "C:/xMindNativeValidation/licenses/Python-STDLIB-LICENSE"
+    }
+  ],
+  "aggregate": {
+    "registered": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "interpretation": "All 147 current-source tests passed across the full run and rerun of its three environment-sensitive failures."
+  },
+  "ui_evidence": {
+    "webpage_javascript_tests": "134/134 passed",
+    "vscode_javascript_tests": "391/391 passed",
+    "live_webpage_coding_smoke": "one Python file created with approval, run through the configured xlang3 process profile with exit code 0 and stdout 42, then restored with approval",
+    "evidence_files": [
+      "doc/evidence/current-main-webpage-vscode-contracts-20261017.json",
+      "doc/evidence/webpage-staged-runtime-live-coding-20261017.json"
+    ]
+  },
+  "limitations": [
+    "The live webpage coding smoke used the staged runtime and is not an exact current-source UI acceptance run.",
+    "The local-profile contract itself passed but took 386.36 seconds; local-view contracts took 83.39 and 49.53 seconds.",
+    "This native gate does not certify release packaging, hosted CI, or complete OpenCode-referenced feature parity."
+  ]
+}
