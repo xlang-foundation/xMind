@@ -24,24 +24,24 @@ rendered live coding acceptance recorded below.
 
 ## Current-source native Release gate — 2026-10-17
 
-Built the current native backend and unified `xmind.exe` in an isolated C:
-directory against the pinned xlang3 runtime, then ran the complete sequential
-CTest inventory. All **147/147 tests passed**, with no failures or skips, in
-865.07 seconds. This includes the current registered-graph turn-authority fix,
-CLI and process execution, agent/dynamic-plan execution, MCP, A2A, xlang3
-workers, provider adapters, SQLite persistence and local-profile/view lifecycle
-contracts. The source-to-test workflow was also corrected to discover the
-standard-library license in common source layouts (`LICENSE`, `LICENSE.txt`,
-or the packaged `licenses/Python-STDLIB-LICENSE`). The tests stage pure Python
-source only; no CPython interpreter was run. The executable was built from
-`e9c490e`; the committed license resolver in `6a59890` was loaded by the final
-CTest run. The tested xlang3 runtime code revision `b4a53192` is now included
-in [xlang3 main at `036f450`](https://github.com/CantorAI/xlang3/commit/036f450af15426a25758087e8ea6bc70637a9a13); that follow-up commit adds
-the required performance evidence and does not change the tested runtime
-sources. This is local Release build/contract acceptance, not a release
-package or broad live-peer/provider acceptance. Exact revisions, hashes,
-commands and transcript are in the [machine-readable evidence](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.json)
-and [full CTest log](evidence/native-release-ctest-current-xlang3-graph-authority-20261017.log).
+Rebuilt the native backend and unified `xmind.exe` from current xMind main
+(`93e8ae0a0bce69bf683e381996f3203e8e6969cc`) in an isolated C: directory,
+then ran the complete sequential Release CTest inventory. All **147/147 tests
+passed**, with no failures or skips, in **883.46 seconds**. The exact tested
+executable SHA-256 is
+`EF069C80471DDC6A0663AD65B7B394978293A2AEF5390B9DE97D79E4B1C98E0F`.
+The tests cover the current agent and graph runners, CLI, process execution,
+MCP, A2A, xlang3 workers, provider adapters, SQLite persistence, local-profile
+startup/recovery, and view lifecycles. xlang3 runtime code revision `b4a53192`
+was selected from the local fix checkout; it is an ancestor of
+[xlang3 main `036f450`](https://github.com/CantorAI/xlang3/commit/036f450af15426a25758087e8ea6bc70637a9a13),
+and the DLL hash was
+`61AD2BB1F38EE5BF7867B2F20955B7B3095542A952F1F2822EC3AF13AC864874`.
+Python test libraries were source files under xlang3; no CPython interpreter
+was run. This is local Release build/contract acceptance, not release-package
+or broad live-peer/provider acceptance. Exact revisions, paths, hashes,
+commands and results are in the [machine-readable evidence](evidence/native-current-source-release-ctest-20261017.json)
+and [complete CTest log](evidence/native-current-source-release-ctest-20261017.log).
 
 ## Current-source live planning and shared backend — 2026-10-17
 

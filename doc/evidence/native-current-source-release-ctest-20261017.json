@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current xMind main native Release build and complete sequential CTest inventory",
+  "source": {
+    "repository": "https://github.com/xlang-foundation/xMind",
+    "branch": "main",
+    "revision": "93e8ae0a0bce69bf683e381996f3203e8e6969cc",
+    "working_tree_clean_at_build": true
+  },
+  "runtime": {
+    "repository": "https://github.com/CantorAI/xlang3",
+    "tested_code_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "pinned_main_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+    "tested_code_is_ancestor_of_pinned_main": true,
+    "build_runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "61AD2BB1F38EE5BF7867B2F20955B7B3095542A952F1F2822EC3AF13AC864874",
+    "python_library_source": "C:/Python/Python314/Lib; source files only",
+    "cpython_interpreter_executed": false
+  },
+  "build": {
+    "directory": "C:/xMindNativeValidation/native-current-93e8ae0",
+    "command": "Tools/native-milestone.ps1 -Action Build -BuildDirectory C:/xMindNativeValidation/native-current-93e8ae0 -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib",
+    "generator": "Visual Studio 18 2026",
+    "platform": "x64",
+    "configuration": "Release",
+    "xmind_executable": "C:/xMindNativeValidation/native-current-93e8ae0/Release/xmind.exe",
+    "xmind_executable_sha256": "EF069C80471DDC6A0663AD65B7B394978293A2AEF5390B9DE97D79E4B1C98E0F"
+  },
+  "ctest": {
+    "command": "ctest --test-dir C:/xMindNativeValidation/native-current-93e8ae0 -C Release --output-on-failure",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 883.46,
+    "profile_contract_seconds": 382.06,
+    "log": "native-current-source-release-ctest-20261017.log",
+    "log_sha256": "B71C63D44542A335F81A6A5C26CC818B137B8351EF198CF2C23E9F2CDA530240"
+  },
+  "limitations": [
+    "This verifies local native Release contracts, not release-package or installed VS Code acceptance.",
+    "Provider and peer fixtures do not establish broad live external MCP/A2A interoperability."
+  ]
+}
