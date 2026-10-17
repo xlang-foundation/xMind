@@ -33,6 +33,12 @@ and backend-measured first-token and elapsed timings; no file operations ran.
 This supplements the separate approved coding/build acceptance; it does not
 claim another code edit. [Run and metrics](evidence/webpage-saved-model-live-20261017.json).
 
+The same rendered webpage fetched all four saved provider catalogues without
+re-entry: Claude **13**, Gemini **11**, DeepSeek **2**, and OpenAI **20**. The
+OpenAI list includes the configured GPT-5.6 and GPT-6 models, resolving the
+earlier live-page issue where only one model appeared. No inference was sent
+for these catalogue checks. [Sanitized catalogue counts](evidence/webpage-provider-catalogues-live-20261017.json).
+
 ## Hosted runtime pin alignment — 2026-10-17
 
 The hosted Windows workflow and both CI source/provenance checks now pin

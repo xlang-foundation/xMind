@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live model discovery through the rendered xMind webpage and existing saved provider profiles",
+  "ui_url": "http://127.0.0.1:53036/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "profiles": "Existing trusted provider configuration; secrets omitted and not re-entered",
+  "catalogues": [
+    {
+      "provider": "Claude Messages",
+      "models_returned": 13,
+      "sample_models": ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-5-5"]
+    },
+    {
+      "provider": "Gemini GenerateContent",
+      "models_returned": 11,
+      "sample_models": ["models/gemini-2.5-flash", "models/gemini-3.1-pro-preview", "models/gemini-3.8-flash"]
+    },
+    {
+      "provider": "DeepSeek",
+      "models_returned": 2,
+      "models": ["deepseek-flash", "deepseek-v4-pro"]
+    },
+    {
+      "provider": "OpenAI Responses",
+      "models_returned": 20,
+      "sample_models": ["gpt-5.6-sol", "gpt-5.6-luna", "gpt-6-astra", "gpt-6.1-sol"]
+    }
+  ],
+  "model_selection_is_in_sidebar": true,
+  "openai_models_are_not_limited_to_one": true,
+  "inference_used_for_catalogue_checks": false,
+  "credentials_or_tokens_included": false
+}
