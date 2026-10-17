@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/graph_runner.hpp"
 #include "agentflow/run_executor.hpp"
+#include "agentflow/root_admission_pool.hpp"
 
 namespace agentflow {
 struct GraphExecutionMetadata {
@@ -44,7 +45,8 @@ public:
 class GraphService final : public GraphExecution {
 public:
     GraphService(PersistenceService& store,AgentSettings settings,
-        std::size_t workers=2,std::size_t capacity=128,std::size_t node_parallel=2);
+        std::size_t workers=2,std::size_t capacity=128,std::size_t node_parallel=2,
+        std::shared_ptr<RootAdmissionPool> root_admission={});
     ~GraphService();
     std::vector<GraphExecutionMetadata> graphs() const override;
     Run submit_graph(std::string id,std::string session,std::string graph,

@@ -23,6 +23,7 @@ struct ExecutionPlatform::LanguageServerWorkspace {
     std::unique_ptr<LanguageServerToolRegistry> registry;
 };
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
+    if(workers<1||workers>16||capacity<1||capacity>4096)throw std::invalid_argument("Invalid shared execution capacity");
     workspace_membership_snapshot_=settings.workspace_membership_snapshot;
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
     if(workspace_binding_&&!settings.language_servers.empty()){
@@ -35,8 +36,11 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
     file_edit_proposals_=workspace_binding_&&settings.approved_edits;
     // A provider-bound profile may intentionally have no default model yet:
     // browser/VS Code sessions supply their selected model at run admission.
-    if(!settings.provider.model.empty()||settings.provider_identity)agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
-    graphs_=std::make_unique<GraphService>(store,std::move(settings),std::min<std::size_t>(workers,8),capacity);
+    const bool has_agent_executor=!settings.provider.model.empty()||settings.provider_identity.has_value();
+    const auto graph_workers=std::min<std::size_t>(workers,8);
+    root_admission_=std::make_shared<RootAdmissionPool>(capacity+(has_agent_executor?workers:0)+graph_workers);
+    if(has_agent_executor)agents_=std::make_unique<AgentService>(store,settings,workers,capacity,root_admission_);
+    graphs_=std::make_unique<GraphService>(store,std::move(settings),graph_workers,capacity,2,root_admission_);
 }
 ExecutionPlatform::~ExecutionPlatform()=default;
 Run ExecutionPlatform::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}

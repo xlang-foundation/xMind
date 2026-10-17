@@ -871,7 +871,7 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
     set_tests_properties(native_xlang3_shared_memory_worker_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_agent_service_contract tests/agent_service_contract.cpp)
-    target_link_libraries(agentflow_agent_service_contract PRIVATE agentflow_agent)
+    target_link_libraries(agentflow_agent_service_contract PRIVATE agentflow_agent agentflow_graph_execution)
     add_custom_command(TARGET agentflow_agent_service_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_service_contract>")
     if(AGENTFLOW_NODE_EXECUTABLE)

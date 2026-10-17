@@ -23,8 +23,9 @@ void controller(const std::string& actor) {
 }
 struct GraphService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;};
+    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;std::unique_ptr<RootAdmissionPool::Lease> admission;};
     PersistenceService& store;
+    std::shared_ptr<RootAdmissionPool> root_admission;
     GraphRunner runner;
     GraphCatalog catalog;
     std::size_t capacity;
@@ -37,8 +38,8 @@ struct GraphService::Impl {
     bool accepting=true,faulted=false;
 
     Impl(PersistenceService& persistence,AgentSettings settings,std::size_t count,
-        std::size_t limit,std::size_t parallel)
-        :store(persistence),runner(store,std::move(settings),parallel),
+        std::size_t limit,std::size_t parallel,std::shared_ptr<RootAdmissionPool> budget)
+        :store(persistence),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(limit)),runner(store,std::move(settings),parallel),
          catalog(GraphCatalogStore(store).load()),capacity(limit) {
         if(count<1 || count>8 || limit<1 || limit>4096)
             throw std::invalid_argument("Invalid graph service capacity");
@@ -71,6 +72,7 @@ struct GraphService::Impl {
                 !decision.running.empty() || !decision.skippable.empty())throw DatabaseError("Paused graph has executable or inconsistent work");
             for(const auto& child:store.children(run.id).get())if(!terminal(child.state))throw DatabaseError("Paused graph has an unfinished child");
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
+            job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
             active.emplace(run.id,std::move(job));
         }
         try {for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});}
@@ -149,7 +151,8 @@ struct GraphService::Impl {
     }
 };
 GraphService::GraphService(PersistenceService& store,AgentSettings settings,std::size_t workers,
-    std::size_t capacity,std::size_t parallel):impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity,parallel)) {}
+    std::size_t capacity,std::size_t parallel,std::shared_ptr<RootAdmissionPool> root_admission)
+    :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity,parallel,std::move(root_admission))) {}
 GraphService::~GraphService(){impl_->close();}
 std::vector<GraphExecutionMetadata> GraphService::graphs() const {
     std::lock_guard lock(impl_->mutex);std::vector<GraphExecutionMetadata> result;
@@ -188,7 +191,7 @@ Run GraphService::submit_graph_with_attachments(std::string id,std::string sessi
     auto input_record=Json{{"content",std::move(prompt)},{"model_id",model}};
     if(!files.empty()){input_record["files"]=Json::parse(impl_->runner.capture_prompt_attachments_json(files,expected_workspace_revision));std::string summary="Attached workspace files:";for(const auto& file:input_record["files"])summary+="\n- "+file.at("path").get<std::string>();input_record["content"]=input_record["content"].get<std::string>()+"\n\n"+summary;}
     const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();if(input.size()>2*1024*1024)throw std::invalid_argument("Graph prompt and file attachments exceed the 2 MiB persisted input limit");
-    auto job=std::make_shared<Impl::Job>();job->id=id;
+    auto job=std::make_shared<Impl::Job>();job->id=id;job->admission=impl_->root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
     try {impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
     Run result;
@@ -214,7 +217,7 @@ Run GraphService::restore_operation(std::string id,std::string session,std::stri
     const GraphPlan plan(specification.dump());impl_->runner.validate(plan);
     const auto membership=impl_->runner.workspace_membership_admission();
     const auto input=Json{{"content","Restore saved file operation "+operation_id},{"model_id",""}}.dump();
-    auto job=std::make_shared<Impl::Job>();job->id=id;
+    auto job=std::make_shared<Impl::Job>();job->id=id;job->admission=impl_->root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
     Run result;

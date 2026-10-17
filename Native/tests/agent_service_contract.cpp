@@ -1,5 +1,6 @@
 #include "agentflow/agent_service.hpp"
 #include "agentflow/agent_definitions.hpp"
+#include "agentflow/graph_service.hpp"
 #include <iostream>
 #include <thread>
 #include <filesystem>
@@ -81,8 +82,37 @@ int main(int argc,char** argv) {
             }
             repeated.close();require(!repeated.healthy(),"Repeated notifier service must join both worker and expiry waiters");
         }
+        {
+            const auto budget=std::make_shared<RootAdmissionPool>(1);
+            const auto graphs=GraphCatalogStore(store).apply(R"({"graphs":[{"id":"shared.wait","spec":{"nodes":[{"id":"human","type":"human","prompt":"Wait for a controller answer"}]}}]})");
+            store.create_session("shared-agent","Agent sharing the root budget").get();
+            store.create_session("shared-graph","Graph sharing the root budget").get();
+            AgentService shared_agent(store,settings,1,1,budget);
+            GraphService shared_graph(store,settings,1,1,2,budget);
+            shared_graph.submit_graph("shared-graph-root","shared-graph","shared.wait",graphs.entries.at(0).revision,"Pause for controller input");
+            const auto pause_deadline=std::chrono::steady_clock::now()+5s;
+            while(store.run("shared-graph-root").get().state!=RunState::paused&&std::chrono::steady_clock::now()<pause_deadline)std::this_thread::sleep_for(10ms);
+            require(store.run("shared-graph-root").get().state==RunState::paused&&budget->occupied()==1,"A waiting graph must retain one backend-wide root reservation");
+            rejects<RunBusy>([&]{shared_agent.submit("agent-blocked-by-graph","shared-agent","hold-stream");});
+            require(store.history("shared-agent").get().empty(),"A graph-owned root slot must reject an agent before storing its prompt");
+            auto paused=store.graph_run("shared-graph-root").get();
+            shared_graph.human_input("shared-graph-root","human",R"({"answer":"ready"})","fixture-controller",paused.checkpoint_revision);
+            const auto finish_deadline=std::chrono::steady_clock::now()+5s;
+            while((store.run("shared-graph-root").get().state!=RunState::completed||!shared_graph.idle())&&std::chrono::steady_clock::now()<finish_deadline)std::this_thread::sleep_for(10ms);
+            require(store.run("shared-graph-root").get().state==RunState::completed&&budget->occupied()==0,"A terminal graph must release its shared root reservation");
+            shared_agent.submit("shared-agent-root","shared-agent","hold-stream");streaming(store,"shared-agent-root");
+            const auto graph_history_before_rejection=store.history("shared-graph").get().size();
+            rejects<RunBusy>([&]{shared_graph.submit_graph("graph-blocked-by-agent","shared-graph","shared.wait",graphs.entries.at(0).revision,"Must not persist while the agent owns capacity");});
+            rejects<NotFound>([&]{store.run("graph-blocked-by-agent").get();});
+            require(store.history("shared-graph").get().size()==graph_history_before_rejection,"An agent-owned root slot must reject a graph before storing its prompt");
+            shared_agent.cancel("shared-agent-root");cancelled(store,"shared-agent-root");
+            const auto release_deadline=std::chrono::steady_clock::now()+5s;
+            while((!shared_agent.idle()||budget->occupied()!=0)&&std::chrono::steady_clock::now()<release_deadline)std::this_thread::sleep_for(10ms);
+            require(shared_agent.idle()&&budget->occupied()==0,"A cancelled agent must release the shared root reservation");
+            shared_graph.close();shared_agent.close();
+        }
         store.close();
-        std::cout<<"Native agent service contract passed: parallel native streams, bounded admission, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";
+        std::cout<<"Native agent service contract passed: parallel native streams, cross-service agent/graph capacity isolation across queued, active and paused roots, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";
         return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

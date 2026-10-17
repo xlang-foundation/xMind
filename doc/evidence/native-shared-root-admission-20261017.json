@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-17",
+  "repository": "xMind",
+  "base_revision": "9cdc4565a747627c0f04edc4c027d1d45d7de3ca",
+  "scope": "Shared bounded root admission for standalone-agent and graph services inside ExecutionPlatform",
+  "behavior": {
+    "reservation_lifetime": "Queued, running, and durably paused roots retain a slot; terminal or failed admission releases it.",
+    "capacity": "ExecutionPlatform configures queue limit plus agent and graph worker slots.",
+    "dispatch_boundary": "Agent and graph services retain separate worker loops; cross-service fairness, ordering, and worker placement remain future work."
+  },
+  "validation": {
+    "build": "CMake Release targets agentflow_agent_service_contract and agentflow_runtime passed.",
+    "ctest": {
+      "configuration": "Release",
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        "native_responses_agent_http_contract",
+        "native_graph_service_http_contract",
+        "native_graph_runner_contract",
+        "native_agent_service_contract"
+      ]
+    },
+    "regression": "A paused graph blocks standalone-agent admission; a streaming agent blocks graph admission; rejection persists neither the new run nor prompt; completion and cancellation release capacity."
+  }
+}

@@ -88,6 +88,9 @@ private:
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     mutable std::mutex language_server_workspaces_mutex_;
     mutable std::map<std::string,std::shared_ptr<LanguageServerWorkspace>> language_server_workspaces_;
+    // Agent and graph services retain independent executors, but all top-level
+    // roots reserve from this one backend-wide ownership budget.
+    std::shared_ptr<RootAdmissionPool> root_admission_;
     std::unique_ptr<AgentService> agents_;
     std::unique_ptr<GraphService> graphs_;
 };

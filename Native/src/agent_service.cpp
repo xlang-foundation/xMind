@@ -49,10 +49,11 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
+    std::shared_ptr<RootAdmissionPool> root_admission;
     std::string provider_context;
     bool planning_enabled;
     std::optional<ContextPolicy> context_policy;
@@ -90,10 +91,10 @@ struct AgentService::Impl {
         return persistence.replace_session_agent(session,*configured,selected.revision).get().selected;
     }
 
-    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity)
-        :Impl(store,ordinary_settings(std::move(settings)),count,capacity,Prepared{}){}
-    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,Prepared)
-        :persistence(store),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
+    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget)
+        :Impl(store,ordinary_settings(std::move(settings)),count,capacity,std::move(budget),Prepared{}){}
+    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,Prepared)
+        :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
          children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
          delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
@@ -108,6 +109,7 @@ struct AgentService::Impl {
             if(active.size()>=limit)throw RunBusy("Paused agent ownership exceeds service capacity");
             verify_pause(run,*plan);
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
+            job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
             const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;}
@@ -169,6 +171,7 @@ struct AgentService::Impl {
     void require_admission()const{
         require_available();if(active.size()>=owned_limit||pending.size()+waiting_count()>=limit)throw RunBusy("Agent ownership queue is full");
     }
+    void reserve_root(const std::shared_ptr<Job>& job){job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");}
     void retire_waiting(const std::shared_ptr<Job>& job,RunState state,const std::string& reason){
         persistence.retire_dynamic_owner(job->id,state,reason).get();remove_ticket(job);active.erase(job->id);
     }
@@ -361,8 +364,9 @@ struct AgentService::Impl {
         if(children)children->close();
     }
 };
-AgentService::AgentService(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity)
-    :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity)){}
+AgentService::AgentService(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity,
+    std::shared_ptr<RootAdmissionPool> root_admission)
+    :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity,std::move(root_admission))){}
 AgentService::~AgentService()=default;
 Run AgentService::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
@@ -433,7 +437,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
 Run AgentService::submit_with_attachments(std::string id,std::string session,std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> provider_profile){
     if(provider_profile)throw RunUnavailable("Provider authority must be checked by the execution platform");
     auto job=std::make_shared<Impl::Job>();job->id=id;
-    std::unique_lock lock(impl_->mutex);impl_->require_admission();
+    std::unique_lock lock(impl_->mutex);impl_->require_admission();impl_->reserve_root(job);
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
@@ -445,7 +449,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
 }
 Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(profile)throw RunUnavailable("Provider authority must be checked by the execution platform");if(!files.empty()&&(!workspace||workspace->revision<1))throw ToolAccessDenied("Queued attachments require workspace membership admission");
-    auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();
+    auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();impl_->reserve_root(job);
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
@@ -458,7 +462,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
 Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;
-    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
     auto prompt=Json{{"content",content},{"a2a_message_id",message}};if(!impl_->provider_context.empty())prompt["provider_context"]=Json::parse(impl_->provider_context);
     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}

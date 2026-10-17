@@ -94,6 +94,12 @@ model and graph dependencies. Scheduling decides **when and where** eligible
 work runs. Graph readiness and scheduling are distinct responsibilities, even
 when their initial implementation is inside the same native service.
 
+The native execution platform shares one bounded root admission budget between
+standalone agents and graph runs. Queued, running and durably paused roots all
+hold a reservation; terminal runs and rejected admissions release or avoid
+reservations. Agent and graph services still dispatch through separate worker
+loops, so global ordering, fairness and worker placement remain incomplete.
+
 The coding default is a single-agent model/tool loop. Explicit planning is
 optional; predefined graphs do not require a planning LLM call. A planner can
 propose a structured graph, which the runtime validates before scheduling.
