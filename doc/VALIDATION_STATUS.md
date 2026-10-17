@@ -3322,6 +3322,18 @@ manifest records the same revisions. This is one bounded task, not broad
 reliability or parity evidence; the staged runtime is development-validated,
 not release-accepted. [Exact run evidence](evidence/vscode-current-source-coding-20261017.json).
 
+## xlang3 TestProj dependency regression — 2026-10-17
+
+The TestProj FastAPI backend suite passed under xlang3 revision `b4a5319` with
+pytest 8.4.2, FastAPI 0.120.4 and Pydantic 2.13.5 imported from its installed
+pure-Python `.xlang3-site` path. `xlang3 -B -m pytest -q` completed with 9
+passes and one upstream Starlette/AnyIO deprecation warning. The tested xlang3
+branch is one cached-property inline lookup fix ahead of xlang3 main; the pytest
+hook and AST compatibility fixes are already in main ancestry. No CPython
+runtime or native CPython package is used in this acceptance. This tests the TestProj
+dependency set, not the full Python ecosystem or all xlang3 APIs.
+[Exact binary, dependency and test evidence](evidence/xlang3-testproj-backend-pytest-20261017.json).
+
 ## Bounded webpage coding and xlang3 execution — 2026-10-17
 
 A fresh TestProj webpage session created the approved `xmind_coding_smoke.py`

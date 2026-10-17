@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-17",
+  "scope": "TestProj FastAPI backend dependency and regression suite under the xlang3 runtime",
+  "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "xlang3_branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3_main_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "branch_delta": "One cached-property inline lookup fix beyond xlang3 main; the pytest hook and AST compatibility fixes are already in main ancestry.",
+  "binary": "D:/CantorAI2026/xlang3/build/Release/xlang3.exe",
+  "binary_sha256": "D3FBC91E94EA065639407437B799C01F8772C92D3EA82EB64789CE33CC64DAEB",
+  "runtime_dll_sha256": "B7339D078F81BA02E4931918238B2B3A7D3F97CFA9CFFFFDE1C2D7EEC0F517BC",
+  "workspace": "D:/CantorAI2026/TestProj/model-zoo/backend",
+  "pure_python_dependencies": {
+    "installation": ".xlang3-site populated from configured xlang3 pip profile",
+    "pytest": "8.4.2",
+    "fastapi": "0.120.4",
+    "pydantic": "2.13.5",
+    "import_path": "D:/CantorAI2026/TestProj/model-zoo/backend/.xlang3-site"
+  },
+  "command": "xlang3 -B -m pytest -q",
+  "result": {
+    "passed": 9,
+    "failed": 0,
+    "warnings": 1,
+    "elapsed_seconds": 2.86,
+    "warning": "Starlette uses deprecated anyio.abc.BlockingPortal alias"
+  },
+  "limitations": [
+    "The TestProj backend is a FastAPI reference application; xMind itself remains a C++ native server.",
+    "This validates the TestProj dependency set and pytest runtime path, not the full CPython standard library or every native xlang3 API."
+  ]
+}
