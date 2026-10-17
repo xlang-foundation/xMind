@@ -272,6 +272,7 @@ function operations(items){
     }
     if(previous)previous.section.remove();operationSections.delete(item.id);
     const section=node('section',undefined,'operation');section.append(node('h4',(item.node_id?'Node '+item.node_id+' · ':'')+(item.tool==='run_process'?'Command':item.tool)+' · '+item.state+(item.run_id?' · run '+item.run_id:'')));
+    const fileReviewActions=['replace_file','create_file','patch_file'].includes(item.tool)?node('div',undefined,'operation-actions'):null;
     const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Run: '+item.run_id+'\nWorkspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);
     let reviewable=true;
     if(item.tool==='run_process')reviewable=processProposal(section,item);
@@ -311,14 +312,14 @@ function operations(items){
         const labels={replace_file:'Allow edit',create_file:'Allow creation',run_process:'Allow command',patch_file:({add:'Allow patch creation',update:'Allow patch edit',delete:'Allow deletion',move:'Allow move'})[patch?.action]||'Allow patch'};
         const button=node('button',decision==='allow'?(labels[item.tool]||'Allow tool'):'Deny',decision==='allow'?'primary':'');
         button.disabled=Date.now()>=item.expires_unix_ms||(decision==='allow'&&!reviewable);
-        button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);
+        button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};(fileReviewActions||section).append(button);
       }
       const permission=item.agent_permission_request;
       if(permission?.grantable===true&&typeof permission.action==='string'&&typeof permission.resource==='string'){
         section.append(node('p','Applies only to '+permission.action+' on '+permission.resource+' in this workspace and permission policy.'));
         const grant=node('button','Always allow this resource in this conversation');
         grant.disabled=Date.now()>=item.expires_unix_ms||(item.tool==='patch_file'&&!reviewable);
-        grant.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision:'allow',grantResource:true});};section.append(grant);
+        grant.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision:'allow',grantResource:true});};(fileReviewActions||section).append(grant);
       }
     }else{
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
@@ -337,13 +338,15 @@ function operations(items){
         reconcile.onclick=()=>{reconcile.disabled=true;api.postMessage({type:'reconcile-process',id:item.id,note:note.value.trim()});};section.append(reconcile);
       }
     }
-    operationExtras(section,item,reviewable);operationRows.set(item.id,{signature,section});sections.push(section);
+    operationExtras(section,item,reviewable,fileReviewActions);
+    if(fileReviewActions?.childElementCount){const before=section.querySelector('pre.before'),anchor=before?.previousSibling||section.querySelector('.inspection-note')||null;section.insertBefore(fileReviewActions,anchor);}
+    operationRows.set(item.id,{signature,section});sections.push(section);
   }
   for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);
   pendingOperations=items.filter(item=>item.state==='awaiting_approval');
   refreshPendingApprovals();
 }
-function operationExtras(section,item,reviewable=true){
+function operationExtras(section,item,reviewable=true,fileReviewActions=null){
   if(item.tool==='a2a_delegate'&&item.state==='uncertain'){
     let receipt;try{receipt=JSON.parse(item.result_json);}catch{}
     if(receipt?.reason==='a2a_dispatch_outcome_unknown'&&typeof receipt.agent_id==='string'&&typeof receipt.task_id==='string'&&receipt.task_id){
@@ -386,7 +389,7 @@ function operationExtras(section,item,reviewable=true){
     const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
   }
   if(['replace_file','create_file','patch_file'].includes(item.tool)&&item.state==='awaiting_approval'){
-    const button=node('button','Compare changes');button.disabled=!reviewable||Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});section.append(button);
+    const button=node('button','Compare changes');button.disabled=!reviewable||Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});(fileReviewActions||section).append(button);
   }
   if(item.tool==='create_file'){
     try{const plan=JSON.parse(item.arguments_json);if(Array.isArray(plan.create_directories)&&plan.create_directories.length){section.append(node('p','This approval also creates these missing parent folders:'));const folders=node('ul');for(const directory of plan.create_directories)if(typeof directory==='string')folders.append(node('li',directory));section.append(folders);}}catch{}
