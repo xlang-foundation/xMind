@@ -61,6 +61,51 @@ OpenAI list includes the configured GPT-5.6 and GPT-6 models, resolving the
 earlier live-page issue where only one model appeared. No inference was sent
 for these catalogue checks. [Sanitized catalogue counts](evidence/webpage-provider-catalogues-live-20261017.json).
 
+## Live local webpage-backend planning smoke — 2026-10-17
+
+The refreshed webpage connected to the saved TestProj local profile, restored
+its OpenAI model catalogue, and exposed the planning verification conversation.
+A live OpenAI backend run called native `plan_tasks`, admitted one
+`workspace.inspect` child, and completed a read of
+`model-zoo/frontend/src/views/HomeView.vue`. The child and parent completed;
+the child used only `read_file`, its effect state was `none`, and the run had no
+operations. Four model calls were reserved across the two parent and two child
+turns. The synthetic dynamic-plan engine contract also now includes an
+optional language-server tool on the root and verifies that the read-only
+child receives only its admitted preset tools. [Sanitized run evidence](evidence/native-planning-live-webpage-20261017.json).
+
+This validates one live local-backend planning and read path on a development
+runtime (`releaseAccepted=false`). The prompt was admitted through the local
+backend API while the webpage was connected; this does not establish a
+user-submitted browser message, installed VS Code planning, broad coding
+reliability, or release acceptance. Separate live webpage and installed VS
+Code edit/build runs remain the coding acceptance evidence.
+
+## Workspace Agent planning exposure — 2026-10-16
+
+Workspace-backed provider-profile Agents now register the bounded native
+planning tools by default. The model still runs as the ordinary Agent and may
+choose `plan_tasks`, `inspect_plan`, or `revise_plan`; planner-owned parent
+model calls are capped at 16 while ordinary coding runs retain their 32-turn
+loop. Graph child tool sets remain scoped to their registered node policies.
+The native Release build is paired with xlang3 `fcecf499`; the focused dynamic
+plan, AgentRunner, and provider-profile contracts pass **3/3**, including the
+actual provider-request fixture asserting that the planning schemas are sent
+for workspace Agent runs. The dynamic-plan engine integration contract also
+passes with an optional language-server tool: the root retains it while a
+read-only child receives only the tools in its sealed preset.
+
+The updated development runtime was loaded in the saved TestProj browser
+profile and the current VS Code extension development host, preserving the
+active OpenAI profile and workspace. The rendered browser returned HTTP 200;
+its native backend reports `agent_planning: true` and the three tool names, and
+the model catalogue remains available without re-entering a key. VS Code
+started its managed native view from the same verified local runtime. This
+proves capability registration and client startup, but a real provider has not
+yet completed a plan from a user-submitted webpage message. The later local
+backend smoke above completes one live plan; the staged development runtime
+remains `releaseAccepted=false`.
+
 ## Hosted runtime pin alignment — 2026-10-17
 
 The hosted Windows workflow and both CI source/provenance checks now pin

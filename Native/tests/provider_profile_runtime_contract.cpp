@@ -78,7 +78,9 @@ void workspace_binding_contract(const std::filesystem::path& owned,const std::ve
         const auto lm=metadata(left_client),rm=metadata(right_client);previous_left=lm;
         require(std::filesystem::u8path(lm["root"].get<std::string>()).lexically_normal()==std::filesystem::canonical(left_root).lexically_normal()&&std::filesystem::u8path(rm["root"].get<std::string>()).lexically_normal()==std::filesystem::canonical(right_root).lexically_normal(),"Effective roots must identify the actual opened directories rather than a requested path");
         require(lm["workspace_id"]!=rm["workspace_id"]&&lm["authority_id"]!=rm["authority_id"],"Independent physical roots must have distinct identities and authority generations");
+        require(left_runtime.supports_dynamic_planning()&&right_runtime.supports_dynamic_planning(),"Workspace-backed provider-profile Agents must admit bounded native planning by default");
         require(select(left_runtime,"claude",1).revision==2&&metadata(left_client)==lm,"Provider selection must not replace the immutable workspace generation");
+        const auto planning=left_client.Get("/v1/agent/planning",auth);require(planning&&planning->status==200&&Json::parse(planning->body)==Json{{"enabled",true},{"tools",Json::array({"inspect_plan","plan_tasks","revise_plan"})}},"Authenticated workspace Agent metadata must publish its available native planning tools");
         left.create_session("workspace-rejected","Rejected wrong-root admission").get();
         const auto run=Json{{"id","workspace-rejected-run"},{"session_id","workspace-rejected"},{"prompt","Wrong-root work must not start"},{"provider_profile_id","claude"},{"expected_provider_revision",2}};
         auto graph=run;graph["graph_id"]="read-local";graph["graph_revision"]=1;

@@ -25,8 +25,8 @@ void controller(const std::string& actor){
         throw std::invalid_argument("Invalid authenticated plan controller");
 }
 AgentSettings ordinary_settings(AgentSettings settings){
-    // Ordinary agents use the direct model/tool loop. Planning is enabled only
-    // when the caller explicitly selects a DynamicPlanningPolicy.
+    // Ordinary agents retain the direct model/tool loop unless their registered
+    // workspace policy exposes the bounded planning tools for model selection.
     return settings;
 }
 bool runnable(const DynamicPlanRecord& plan){const auto decision=inspect_dynamic_plan(plan);return !decision.halted&&(!decision.ready.empty()||decision.report_ready);}

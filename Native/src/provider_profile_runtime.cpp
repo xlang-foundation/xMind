@@ -105,6 +105,12 @@ struct ProviderProfileRuntime::Impl {
         :store(persistence),base(std::move(settings)),policy(std::move(allowed)),workers(count),capacity(limit),profiles(store,routes(policy)){
         if(count<1||count>16||limit<1||limit>4096)throw std::invalid_argument("Invalid provider execution capacity");
         if(base.workspace){workspace_binding=std::make_unique<WorkspaceTools>(*base.workspace);base.workspace=workspace_binding->root_path();workspace_authority=workspace_nonce();}
+        // A workspace-backed Agent can choose the bounded native planning
+        // tools when the task benefits from dependencies, human checkpoints,
+        // or deterministic tool nodes. It remains an ordinary Agent run; the
+        // model decides whether to plan, and native authority/approvals still
+        // bound every child and effect.
+        if(workspace_binding&&!base.planning)base.planning.emplace();
         state=profiles.snapshot();
         try{
             for(const auto& profile:state.profiles){

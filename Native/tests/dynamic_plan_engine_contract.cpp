@@ -4,10 +4,12 @@
 #include "agentflow/a2a_task_control.hpp"
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/http_server.hpp"
+#include "agentflow/process_executor.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <chrono>
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -40,9 +42,13 @@ DynamicPlanRecord paused(PersistenceService& store,const std::string& root){
 }
 DynamicHumanRequest question(PersistenceService& store,const DynamicPlanRecord& plan){const auto requests=store.dynamic_human_requests(plan.id).get();require(requests.size()==1&&requests[0].state=="waiting","One actual owned human question must be published");return requests[0];}
 void metrics(const Message& row,std::int64_t input,std::int64_t output){const auto data=Json::parse(row.json);require(data.at("usage").at("input_tokens")==input&&data.at("usage").at("output_tokens")==output,"Each actual response retains its own supplied usage");require(data.contains("elapsed_ms")&&data.contains("first_token_ms"),"Measured native response timing must remain present");require(!data.at("usage").contains("total_tokens"),"Absent provider totals must not be invented");}
-AgentSettings settings(const std::string& endpoint,const std::string& workspace){
+AgentSettings settings(const std::string& endpoint,const std::string& workspace,const std::string& lsp_executable){
     AgentSettings result;result.provider={endpoint,"synthetic-dynamic-engine",Capability::supported,Capability::supported,Capability::supported};result.provider.wire=ProviderWire::anthropic_messages;result.provider.deadline=8s;result.provider.idle_timeout=6s;
     result.workspace=workspace;result.approved_edits=true;result.max_turns=8;result.max_output_tokens=256;result.run_timeout=30s;
+    if(!lsp_executable.empty()){
+        LanguageServerProfile language_server;language_server.id="fixture-language-server";language_server.executable=lsp_executable;language_server.executable_id=ForegroundProcess::executable_identity(lsp_executable);language_server.language_id="cpp";language_server.revision=1;language_server.extensions={".cpp"};
+        result.language_servers.push_back(std::move(language_server));
+    }
     result.planning=DynamicPlanningPolicy{};
     result.instructions="Explicit synthetic dynamic-plan provider fixture; only actual native outcomes are evidence.";
     result.credential=CredentialReference{"fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine"};return result;
@@ -87,7 +93,7 @@ CliProcessResult run_cli(const std::filesystem::path& executable,const std::file
 int main(int argc,char** argv){
     if(argc!=7)return 2;
     try{
-        const std::filesystem::path folder=argv[1],workspace=argv[5];const auto database=(folder/"state.sqlite").string();const std::vector<std::string> imports={argv[2],argv[3]};const auto frozen=settings(argv[4],workspace.string());
+        const std::filesystem::path folder=argv[1],workspace=argv[5];const auto database=(folder/"state.sqlite").string();const std::vector<std::string> imports={argv[2],argv[3]};const auto frozen=settings(argv[4],workspace.string(),argv[6]);
         DynamicPlanRecord before;std::vector<Message> paused_history;std::vector<OwnedChildRecord> original_children;
         {
             PersistenceService store(database,imports);const std::string key=fixture_key;store.put_credential("fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine","Synthetic fixture credential",SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()}),0).get();

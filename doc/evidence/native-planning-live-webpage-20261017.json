@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-17",
+  "scope": "one live read-only planning smoke against the local TestProj backend",
+  "submission_path": "authenticated local native API while the rendered browser view was connected",
+  "browser_view": "http://127.0.0.1:60431/ui/",
+  "runtime": {
+    "release_accepted": false,
+    "inventory_hash_verified": true,
+    "xmind_source_head": "0614aeace8f2cf5ef83a60bd77cf08ce7085c48e",
+    "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8"
+  },
+  "workspace": "D:/CantorAI2026/TestProj",
+  "session_id": "planner-live-fix-20261017",
+  "run_id": "planner-live-fix-run-20261017",
+  "run_state": "completed",
+  "provider": "openai",
+  "model": "gpt-5.6-sol",
+  "accepted_plan_calls": 1,
+  "model_calls_reserved": 4,
+  "child": {
+    "preset": "workspace.inspect",
+    "state": "completed",
+    "effect_state": "none",
+    "workspace_path_read": "model-zoo/frontend/src/views/HomeView.vue",
+    "tools_started": ["read_file"],
+    "operations": 0,
+    "response": {
+      "input_tokens": 20657,
+      "output_tokens": 278,
+      "elapsed_ms": 4133,
+      "first_token_ms": 1364
+    }
+  },
+  "parent_final_response": {
+    "input_tokens": 5853,
+    "output_tokens": 268,
+    "elapsed_ms": 3238,
+    "first_token_ms": 1235
+  },
+  "verification": {
+    "root_and_child_completed": true,
+    "child_used_only_read_file": true,
+    "no_effect_operations": true,
+    "secrets_or_provider_payloads_recorded": false
+  }
+}

@@ -181,11 +181,14 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
     for(const auto& model:models()) if(model.empty() || model.size()>256 || model.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid configured model ID");
     if(settings_.delegation){const auto& policy=*settings_.delegation;if(!workspace_||policy.preset_id!="workspace.inspect"||policy.preset_revision!=1||policy.max_children<1||policy.max_children>8||policy.max_parallel<1||policy.max_parallel>2||policy.max_model_calls<1||policy.max_model_calls>32||policy.max_leaf_turns<1||policy.max_leaf_turns>4)throw std::invalid_argument("Invalid registered agent delegation policy");}
     if(settings_.planning){auto& policy=*settings_.planning;
-        if(!workspace_||!planning_||settings_.max_turns>16||policy.max_nodes<1||policy.max_nodes>32||policy.max_revisions<1||policy.max_revisions>16||
+        if(!workspace_||!planning_||policy.max_nodes<1||policy.max_nodes>32||policy.max_revisions<1||policy.max_revisions>16||
             policy.max_humans<1||policy.max_humans>8||policy.change_bytes<1||policy.change_bytes>262144||
             policy.human_expiry_ms<1||policy.human_expiry_ms>900000)throw std::invalid_argument("Invalid registered dynamic planning policy");
-        // This allowance is inherited from the native agent configuration.
-        if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
+        // Planning has its own bounded parent-call allowance. Keep the normal
+        // coding loop's larger turn limit, while never granting a planner more
+        // than the native policy ceiling. Child settings may preserve the
+        // parent policy because their run limits are already captured.
+        if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{16}));
     }
     if(settings_.context&&!settings_.provider.model.empty()){
         if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
@@ -684,7 +687,19 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(require_all)for(const auto& name:allowed)if(std::none_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Agent binds an unavailable tool: "+name);
             request.tools.erase(std::remove_if(request.tools.begin(),request.tools.end(),[&](const auto& tool){return !allowed.contains(tool.name);}),request.tools.end());
         };
-        auto refresh_tools=[&]{discover_mcp();discover_a2a();apply_tool_allowlist(false);seal_catalogue();offer_orchestration();apply_tool_allowlist(true);};
+        auto refresh_tools=[&]{
+            discover_mcp();discover_a2a();apply_tool_allowlist(false);
+            if(dynamic_child){
+                // A dynamic child may inherit optional workspace extensions
+                // (language servers and xlang tools) from the root runtime.
+                // Its frozen preset is the authority for what the model can
+                // call, so remove tools outside that exact admitted surface
+                // before validating and sealing the child catalogue.
+                const std::set<std::string> allowed(child_preset->tools.begin(),child_preset->tools.end());
+                request.tools.erase(std::remove_if(request.tools.begin(),request.tools.end(),[&](const auto& tool){return !allowed.contains(tool.name);}),request.tools.end());
+            }
+            seal_catalogue();offer_orchestration();apply_tool_allowlist(true);
+        };
         refresh_tools();
         std::string planning_continuation;
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){

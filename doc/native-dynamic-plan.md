@@ -256,12 +256,13 @@ The registered contracts cover distinct boundaries:
 - Shared renderer/controller fixtures validate backend identity, stale input,
   escaping and supplied metrics; they do not establish an installed IDE result.
 
-None of these fixtures establishes live-provider planning, installed VS Code
-acceptance, rendered process-plan acceptance, recursive planning,
-full coding/provider parity or private Nexus execution. The separate
-browser/native integration uses disposable model-free state to check graph,
-human, authentication, durable cookie and reconnect boundaries; it does not
-establish end-to-end dynamic planning in a live webpage or installed VS Code.
+These synthetic fixtures do not establish live provider behavior, rendered
+process-plan execution in an IDE, recursive planning, full coding/provider
+parity or private Nexus execution. A separate live OpenAI smoke completed one
+read-only plan through the connected local webpage backend; its exact scope and
+remaining UI/IDE limits are recorded in [validation status](VALIDATION_STATUS.md).
+The separate browser/native integration uses disposable model-free state to
+check graph, human, authentication, durable cookie and reconnect boundaries.
 The actual modern/legacy MCP registry checks and SQLite binding negatives do
 not establish a real dynamic coding-child MCP peer effect on their own. The later local 78-contract
 contract does: its coding child rediscovers the exact nine-field private MCP
