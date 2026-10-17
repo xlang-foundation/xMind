@@ -198,4 +198,15 @@ Actual browser acceptance covered Cancel with and without an existing connection
 
 At that historical checkpoint, repeated development reconnect prompts came from restarting the access adapter to load UI changes. Validated asset reload then removed that cause for UI refreshes. The later durable-session checkpoint also preserves login across same-origin adapter/backend restarts. Expiry, authority rotation and explicit Disconnect still revoke access. Reconnect cancellation aborts in-flight requests and permits an immediate new attempt; stale cleanup cannot unlock or overwrite a newer attempt. Provider model discovery is asynchronous after native state restoration.
 
-The current workspace pane supports operation comparison, not a complete file explorer/editor. Full coding acceptance, actual IDE invocation of the shared browser command and broad frontier-provider coverage remain outstanding. Remote/team view policy belongs to private Nexus.
+2026-10-16 live webpage coding acceptance: the browser UI reviewed and approved
+a one-file `HomeView.vue` change in TestProj, then ran the Vite production build
+through xMind's native process tool (37 modules, exit 0). The browser reused
+the configured OpenAI profile without asking for a key or server token. During
+the separate rendered-page check, the frontend served successfully but the
+TestProj API on port 8000 was unavailable, so catalog stats and results did not
+load. See the [sanitized record](evidence/xmind-webpage-live-coding-20261016.json).
+
+The current workspace pane supports operation comparison, not a complete file
+explorer/editor. Actual IDE invocation of the shared browser command and broad
+frontier-provider coverage remain outstanding. Remote/team view policy belongs
+to private Nexus.

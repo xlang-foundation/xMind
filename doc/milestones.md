@@ -61,17 +61,30 @@ opaque ciphertext are synthetic, so live xAI acceptance remains open. [Contract
 output](evidence/native-xai-reasoning-replay-ctest-20261016.log), [test
 evidence](evidence/native-xai-reasoning-replay-20261016.json).
 
-2026-10-16 live cross-client coding acceptance: VS Code and the external
-webpage both attached to the local TestProj profile and used its saved OpenAI
-configuration. In VS Code, xMind proposed a focused accessibility/usability
-change to `model-zoo/frontend/src/components/ModelCard.vue`; the user reviewed
-and approved it, and `npm run build` completed successfully (37 Vite modules,
-exit 0). The webpage then continued the shared conversation with a read-only
-follow-up, returned provider/model and token/timing metrics, and the refreshed
-conversation was visible in VS Code. No provider key or server token was
-requested. A `git diff` probe reported that TestProj has no Git repository;
-this did not affect the edit or successful build. This completes the first
-webpage/VS Code coding acceptance on the live machine. [Sanitized live evidence](evidence/xmind-cross-client-live-coding-20261016.json).
+2026-10-16 live cross-client continuity and VS Code coding acceptance: VS Code
+and the external webpage attached to the local TestProj profile and used its
+saved OpenAI configuration. In VS Code, xMind proposed a focused
+accessibility/usability change to `model-zoo/frontend/src/components/ModelCard.vue`;
+the user reviewed and approved it, and `npm run build` completed successfully
+(37 Vite modules, exit 0). The webpage continued the shared conversation with
+a read-only follow-up, returned provider/model and token/timing metrics, and the
+refreshed conversation was visible in VS Code. No provider key or server token
+was requested. TestProj has no Git repository, so a full source diff against a
+tracked baseline was unavailable. [Sanitized evidence](evidence/xmind-cross-client-live-coding-20261016.json).
+
+2026-10-16 live webpage coding acceptance: from the browser UI on TestProj,
+xMind proposed a one-file Model Zoo hero refinement, showed the diff, and
+waited for approval. After review, the page's **Allow patch edit** control
+approved the change to `model-zoo/frontend/src/views/HomeView.vue`; the same
+webpage run then executed `npm run build` through the native process tool.
+Vite 6.4.4 transformed 37 modules and exited 0. The saved OpenAI profile and
+`gpt-5.6-sol` model were reused without asking for a provider key or server
+token. Vite served the updated frontend at `127.0.0.1:4174`; the TestProj API
+on port 8000 was unavailable during visual review, so its seeded stats and
+catalog results could not load. This proves the webpage's reviewed edit and
+build loop, while full page data rendering still depends on the TestProj API.
+[Sanitized acceptance evidence](evidence/xmind-webpage-live-coding-20261016.json)
+and [run screenshot](evidence/xmind-webpage-live-coding-20261016.png).
 
 The live VS Code acceptance also exposed a Windows path normalization bug:
 VS Code can report the development extension drive letter in lowercase while
