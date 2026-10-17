@@ -14,6 +14,19 @@ An earlier selector-only webpage check reconnected with its selected model/histo
 
 Agent nodes inside a registered graph invoke this same dynamic engine. The graph determines dependencies between nodes; the model still chooses the tool steps inside an agent node. Human/tool nodes provide explicit decisions or deterministic tool execution. Registered workflows remain useful for repeatable processes, review gates and parallel independent work.
 
+Current native source also accepts model-authored dependency plans with `agent`,
+`human`, and deterministic `tool` nodes. Tool nodes are checked against the
+owner's sealed catalogue and admitted workspace. Supported routes include
+workspace reads, approved synchronous `run_process`, registered MCP tools,
+resources and prompts, and registered outbound A2A calls. MCP, process, A2A,
+and coding effects retain their normal native approval and durable outcome
+rules. Nested plans share the root budget and are bounded to depth eight; the
+engine fixture exercises nested pauses, joins, restart and depth-two work.
+Current-source tests pass **4/4** for dynamic plan parsing, repository,
+execution and MCP/process/A2A nodes, and **10/10** for context/skill contracts.
+Their provider and peer responses are fixtures; rendered live planning in the
+webpage and installed VS Code remains separate. [Current-source evidence](evidence/agentflow-current-native-capabilities-20261017.json).
+
 Checkpoint `e353a37799530a234a6fa13e51f61a5c52d3ae6a` adds native `delegate_tasks` to eligible ordinary Agent roots. The parent model selects independent `workspace.inspect` revision 1 investigations; actual child AgentRunners make provider/tool calls with isolated histories, return observed outcomes, and share the root's deadline, cancellation, child/concurrency limits and durable model-call budget. Leaves are explicitly read-only; the general parent keeps its configured coding tools and exact approvals. A failed child can lead to a new parent-selected batch without replaying the old one.
 
 The [local delegation evidence](evidence/native-delegation-local-provenance.json) records a complete **71/71 native gate in 142.36 seconds**, **103 extension contracts** and **19 browser contracts**, plus browser/native integration and 18 verified VSIX assets. The same exact e353 checkpoint passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native in 175.51 seconds**, **103 extension in 2.9668103 seconds** and **19 browser in 1.426115 seconds**, plus native/browser integration and all 18 VSIX assets, with zero failures/skips. [Exact hosted source/artifact/pin evidence](evidence/native-delegation-hosted-provenance.json). The delegation contracts use labelled synthetic provider replies with real native engines, filesystem effects, approvals, xlang3 SQLite, HTTP/CLI and thin controllers. [native-delegation.md](native-delegation.md) describes the implemented boundary.
@@ -26,22 +39,36 @@ The complete guarded local **77-contract gate passed in 153.88 seconds**, with t
 
 This is consistent with [Cursor's documented coding-agent loop](https://prod.cursor.com/help/ai-features/coding-agents): each tool result informs the next action. Cursor and OpenCode are behavior references, not implementation dependencies or compatibility targets. xMind defines its own coding and editor acceptance requirements.
 
-## Remaining dynamic planning target
+## Remaining product acceptance
 
-Bounded independent delegation and the initial agent/human dependency-planning slice are locally validated. The broader target extends that native implementation; clients continue to render observed records rather than generate or mutate plans:
+The native plan engine and deterministic execution routes are implemented and
+covered by current-source contracts. The remaining work is broader acceptance
+and behavior:
 
-1. Registered planning tools select agent tasks and human questions with backend-offered presets. Provider, workspace, resource bounds and capability bindings come from the owning backend. Additional deterministic tool/MCP/process node kinds remain unimplemented; model output cannot choose arbitrary execution destinations.
-2. The C++ planner validates identifiers, acyclic dependencies, task/concurrency limits and capability/policy constraints. The first slice supports `success` and `observed` dependencies. Broader conditional/reference behavior remains required; model output cannot expand authority or create credentials/endpoints.
-3. Revision-checked repository transactions record accepted revisions and their events together. Completed, failed, published, effect-linked and claimed work stays protected; revisions cannot replay or replace it. Wider recursive orchestration must preserve those same invariants.
-4. The shared native scheduler owns dependency-aware child admission and independent conversations. Joins use observed results, activity identities and supplied per-child metrics. Coding children retain exact controller approvals and journals. Future deterministic effect nodes must do the same. Human answers cannot grant effect authority, and uncertain effects cannot become successful dependency outputs.
-5. Initial replanning adds, replaces or skips undispatched tasks and can request human input under the remaining shared budget. Final-human-only wake, cancellation and native expiry are included in the local contract scope. Broader planning still must preserve the same owner, active-time/deadline limits and once-only held continuation.
-6. Remote A2A delegation records peer/task identity, scoped credentials and observed status. Timeout or disconnection cannot be fabricated as remote completion. Outbound delegation remains incomplete.
-7. CLI, VS Code and the webpage render the same committed plan revisions, human requests and child events. They do not own planning or scheduling. Nexus clients can consume that protocol separately; private team-server/Electron features remain outside the OSS implementation scope.
+1. Dependency conditions currently support `success` and `observed`. Add any
+   further conditions only with explicit native semantics and durable outcome
+   rules; model output cannot expand permissions, credentials or endpoints.
+2. Complete real-provider planning acceptance in the webpage and installed
+   VS Code extension. Exercise a live plan with agent, human and tool steps,
+   review/approve a code change, run a registered verification command, refresh
+   both clients, and confirm shared plan/history state and actual metrics.
+3. Verify rendered plan revisions, human questions, child results and tool
+   approvals in both clients against the current backend. Existing controller
+   and DOM tests do not establish installed live planning acceptance.
+4. Continue A2A acceptance against independent peers: live model-selected
+   dispatch and continuation, reconnect/recovery, streaming and cancellation
+   acknowledgement, and the relevant official-SDK paths. A local peer fixture
+   proves the native contract only.
+5. Finish provider/context acceptance. Native skills have source contracts and
+   separate live provider activation evidence; rendered installed skill
+   controls still need acceptance. Responses context compaction has native
+   implementation/contracts, while installed/live execution and compatible
+   Claude, Gemini and Chat Completions strategies remain incomplete.
 
-Native skills and context compaction also remain required. Skills must preserve backend instruction/tool authority, and compaction must preserve same-provider continuation fidelity and observed effect/history ownership. Neither is supplied by the new delegation tool.
-
-The [broader native planning design](native-dynamic-plan-design.md) maps these requirements to revisioned transactions, a distinct dynamic-plan ledger, shared budgets and generic child observations. The [initial implementation guide](native-dynamic-plan.md) distinguishes the locally validated agent/human slice from its remaining design; neither the design nor a passing fixture establishes complete parity.
-
-The local planning gate proves its labelled synthetic-provider/native-execution scope, including dependency changes after observed failure, independent child histories, human input and a real approved coding effect. Live-provider planning, installed clients, further node kinds and the complete coding/provider/protocol matrix need their own acceptance.
-
-Current next work retains the complete coding/provider/protocol goal. Broader node kinds, recursive execution, skills, context compaction, outbound A2A and full live coding acceptance remain required. The initial dependency-planning slice and registered `read.repository.file` utility workflow do not replace them. Nexus team-server, PostgreSQL, WebRTC and Electron implementation stays separate from OSS.
+The planner, scheduler, event journal and client boundaries are described in
+the [broader native planning design](native-dynamic-plan-design.md). Historical
+implementation notes remain useful for their exact checkpoints; current
+capabilities and evidence are recorded in the [current-source validation
+record](evidence/agentflow-current-native-capabilities-20261017.json).
+Nexus team-server, PostgreSQL, WebRTC and Electron implementation stays outside
+xMind OSS.

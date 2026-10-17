@@ -1,0 +1,25 @@
+Test project D:/CantorAI2026/xMind/build/native
+      Start  13: native_context_selection_contract
+ 1/10 Test  #13: native_context_selection_contract ......   Passed    0.02 sec
+      Start  25: native_context_repository_contract
+ 2/10 Test  #25: native_context_repository_contract .....   Passed    2.99 sec
+      Start  26: native_context_control_contract
+ 3/10 Test  #26: native_context_control_contract ........   Passed    4.24 sec
+      Start  27: native_context_cli_contract
+ 4/10 Test  #27: native_context_cli_contract ............   Passed    0.42 sec
+      Start  28: native_context_engine_contract
+ 5/10 Test  #28: native_context_engine_contract .........   Passed    4.13 sec
+      Start  29: native_context_graph_engine_contract
+ 6/10 Test  #29: native_context_graph_engine_contract ...   Passed    1.57 sec
+      Start  88: native_skill_state_contract
+ 7/10 Test  #88: native_skill_state_contract ............   Passed    0.29 sec
+      Start  89: native_skill_catalogue_contract
+ 8/10 Test  #89: native_skill_catalogue_contract ........   Passed    5.72 sec
+      Start  99: native_skill_context_contract
+ 9/10 Test  #99: native_skill_context_contract ..........   Passed    0.52 sec
+      Start 108: native_responses_context_contract
+10/10 Test #108: native_responses_context_contract ......   Passed    1.05 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Total Test time (real) =  20.97 sec

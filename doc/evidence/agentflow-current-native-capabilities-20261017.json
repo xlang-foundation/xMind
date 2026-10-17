@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-17",
+  "xmind_revision": "47221f081b5f44ae0126ee9f936add888c6373db",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "validation": {
+    "dynamic_planning": {
+      "passed": 4,
+      "failed": 0,
+      "total": 4,
+      "tests": [
+        "native_dynamic_plan_contract",
+        "native_dynamic_plan_repository_contract",
+        "native_dynamic_plan_engine_contract",
+        "native_dynamic_plan_mcp_contract"
+      ],
+      "transcript": "native-dynamic-plan-current-20261017.log",
+      "verified_scope": [
+        "revisioned agent, human, and deterministic tool plans",
+        "nested planning and human pause/reopen under the bounded shared owner",
+        "approved workspace process and MCP tool/resource/prompt nodes",
+        "registered outbound A2A nodes and actual file/SQLite journals"
+      ]
+    },
+    "context_and_skills": {
+      "passed": 10,
+      "failed": 0,
+      "total": 10,
+      "tests": [
+        "native_context_selection_contract",
+        "native_context_repository_contract",
+        "native_context_control_contract",
+        "native_context_cli_contract",
+        "native_context_engine_contract",
+        "native_context_graph_engine_contract",
+        "native_skill_state_contract",
+        "native_skill_catalogue_contract",
+        "native_skill_context_contract",
+        "native_responses_context_contract"
+      ],
+      "transcript": "native-context-skills-current-20261017.log"
+    }
+  },
+  "scope_and_limits": [
+    "These are current-source native contracts; planning provider replies and remote peer services are controlled fixtures.",
+    "Dynamic planning has not been exercised as a live model-driven workflow in the installed webpage or VS Code client.",
+    "Responses context compaction has native implementation and contract coverage, but installed/live use and complete Claude, Gemini, and Chat Completions strategies remain unverified.",
+    "Workspace skill activation has separate live provider evidence; rendered skill controls and installed current-source client acceptance remain separate checks."
+  ]
+}
