@@ -30,8 +30,13 @@ through a coding child and ran it through a dependent model-free xlang3 process
 node; the process exited 0 with the expected output. The live page's older
 client bundle showed a false `Invalid deterministic planning tool` status
 despite backend success. The current client bundle accepts the registered
-`run_process` alias and completed a follow-up inspect/process plan without that
-status. A same-plan refresh in the VS Code-attached view remains open. [Exact
+`run_process` alias and completed both a follow-up inspect/process plan and a
+second approval-gated code-edit/process plan without that status. The second
+plan changed one greeting string, ran it under xlang3 with exit code 0, then
+restored the original smoke file through a reviewed inverse patch; its original
+SHA-256 was verified. The old page still has stale assets; the page at
+`54426` serves the current client. A same-plan refresh in the VS Code-attached
+view remains open. [Exact
 run, plan, operation, file and client hashes](evidence/live-dynamic-plan-coding-20261017.json).
 
 At source `8bd7c63abf18246c8814bc32c70db3ade7b2fd1f`, the exact current

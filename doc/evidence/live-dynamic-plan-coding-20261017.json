@@ -90,6 +90,60 @@
     ],
     "ui_observation": "The current client rendered the complete plan and process result without the stale validator error."
   },
+  "current_client_coding_plan": {
+    "url": "http://127.0.0.1:54426/ui/",
+    "served_client_sha256": "FA0B74EB3B4EC21AE9D37B2037170198429E0EC9FDC281A4469517F58CB8FB5B",
+    "root_run_id": "05085c864694523f025887c25f9d13e7",
+    "plan_id": "05b25f04f89e9ba45f9af14384d176a7",
+    "final_plan_state": "completed",
+    "coding_node": {
+      "id": "update_smoke",
+      "type": "agent",
+      "preset": "workspace.coding",
+      "child_run_id": "43fe6225fa48040ef0f779a772b40237",
+      "state": "completed",
+      "approved_operation_id": "87a7c6726b63d696671931c102dbbad6-0",
+      "path": "xmind_dynamic_plan_smoke.py",
+      "change": "Changed only the greeting return string to Hello from xMind dynamic plan, {name}!",
+      "usage_calls": [
+        { "input_tokens": 4971, "output_tokens": 46, "total_tokens": 5017 },
+        { "input_tokens": 5159, "output_tokens": 75, "total_tokens": 5234 },
+        { "input_tokens": 5579, "output_tokens": 50, "total_tokens": 5629 }
+      ]
+    },
+    "verification_node": {
+      "id": "run_smoke",
+      "type": "tool",
+      "tool": "run_process",
+      "child_run_id": "55df79c26b8c1632b6fd6821779bc684",
+      "depends_on": [{ "task": "update_smoke", "require": "success" }],
+      "state": "completed",
+      "operation_id": "ce706bb7ed966b0ebf1c8ef9030bccd2",
+      "profile_id": "xlang3",
+      "effective_arguments": ["-B", "xmind_dynamic_plan_smoke.py"],
+      "working_directory": ".",
+      "exit_code": 0,
+      "elapsed_ms": 100,
+      "stdout": "Hello from xMind dynamic plan, xMind dynamic plan!\r\n",
+      "stderr_bytes": 0
+    },
+    "final_response_usage": {
+      "input_tokens": 6524,
+      "output_tokens": 232,
+      "total_tokens": 6756,
+      "first_token_ms": 2060,
+      "elapsed_ms": 3150
+    },
+    "ui_observation": "The current client rendered both successful nodes and their actual results without Invalid deterministic planning tool."
+  },
+  "restore": {
+    "run_id": "37e76be3dadf7d5fa2b8aabb4f1e557d",
+    "source_operation_id": "87a7c6726b63d696671931c102dbbad6-0",
+    "restore_operation_id": "1c827d080d54fcf8b6d786c09c9a20e2-0",
+    "approval": "Reviewed and approved the exact inverse patch through the webpage UI.",
+    "state": "succeeded",
+    "restored_sha256": "767AA5BCC5BAAD6BDB7FB6EBCB1528EDFBE5AD02F157319BD93AEC7FEFABC067"
+  },
   "independent_file_check": {
     "path": "D:/CantorAI2026/TestProj/xmind_dynamic_plan_smoke.py",
     "exists": true,
@@ -99,8 +153,7 @@
   },
   "limitations": [
     "The integrated code-effect plan used an outdated webpage client bundle and displayed a false validator status even though its authoritative native plan, coding operation, dependent process and root run all completed successfully.",
-    "The current-client plan verifies run_process validation and rendered results separately using a read-only agent node; the approval-gated code-effect plan has not yet been repeated with that current bundle.",
     "The same dynamic code-effect plan has not yet been verified in a VS Code-attached view with shared refresh/history.",
-    "The smoke file remains in TestProj for user inspection; the runtime is a development bundle and is not release accepted."
+    "The smoke file remains in TestProj with its original verified content; the runtime is a development bundle and is not release accepted."
   ]
 }
