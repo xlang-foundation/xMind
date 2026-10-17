@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live read-only provider model discovery through the managed xMind CLI profile",
+  "xmind_source_revision": "7ece93949d8c1054e87fdb5a4df3ccbe4fbb71d0",
+  "xmind_executable_sha256": "14168fd9bee2f93ce5adf8617b1ac40a0a1c3d9701e065da2165e35f913e580d",
+  "xlang3_sdk_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "commands": {
+    "models": {
+      "purpose": "Read backend-enabled execution models",
+      "default_model": "gpt-4.1-mini",
+      "model_count": 1,
+      "model_ids": ["gpt-4.1-mini"]
+    },
+    "provider-models": {
+      "purpose": "Discover account models using the saved OpenAI profile credential",
+      "saved_key_reused": true,
+      "model_count": 20,
+      "model_ids": [
+        "gpt-4.1",
+        "gpt-4.1-2025-04-14",
+        "gpt-4.1-mini",
+        "gpt-4.1-mini-2025-04-14",
+        "gpt-4.1-nano",
+        "gpt-4.1-nano-2025-04-14",
+        "gpt-4o",
+        "gpt-4o-2024-08-06",
+        "gpt-4o-2024-11-20",
+        "gpt-5.4",
+        "gpt-5.4-2026-03-05",
+        "gpt-5.5",
+        "gpt-5.5-2026-04-23",
+        "gpt-5.6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-6-astra",
+        "gpt-6-luna",
+        "gpt-6-sol",
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "inference_submitted": false,
+  "limitations": [
+    "This verifies managed CLI profile discovery and saved-key reuse, not an interactive coding run through the CLI.",
+    "The `models` command lists backend-enabled execution models; it is distinct from account discovery through `provider-models`.",
+    "The tested xMind binary is a local validation runtime, not an installed release package."
+  ]
+}

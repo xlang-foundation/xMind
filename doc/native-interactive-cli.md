@@ -313,6 +313,15 @@ on a profile-capable backend. The older
 a generic provider-profile enrollment command. The legacy
 `configure-provider MODEL KEY_ENV REVISION` retains its existing scope.
 
+### Live managed-profile discovery — 2026-10-17
+
+The managed CLI attached to the TestProj local profile without key entry.
+`provider-models` reused its saved OpenAI credential and returned 20 account
+models. `models` returned one backend-enabled execution model,
+`gpt-4.1-mini`; that command's result is intentionally narrower than provider
+account discovery. Neither command submitted inference. Exact binary, model
+catalogues and limitations are recorded in the [live evidence](evidence/cli-openai-model-discovery-20261017.json).
+
 Between chat turns, the new controls are:
 
 | Command | Profile/admission effect |
