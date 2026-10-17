@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-17",
+  "xlang3_commit": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "runtime": "Release",
+  "executable": {
+    "path": "build/native/contract-bin/Release/xmind.exe",
+    "sha256": "7443eb725e322d0f54766330a36911bff58f2ca7bff3157eb10b174695c0df93"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/native --build-config Release --output-on-failure --parallel 4",
+    "passed": 150,
+    "failed": 0,
+    "total_seconds": 360.09,
+    "transcript": "native-release-mcp-peer-20261017.log",
+    "transcript_sha256": "e552900f894b81024b0d05ed58db6502c45c4a3b89ded6f6f0022ef928763d17"
+  },
+  "focused_mcp_contracts": {
+    "passed": 3,
+    "failed": 0,
+    "tests": [
+      "native_mcp_wire_contract",
+      "native_mcp_client_contract",
+      "native_mcp_effect_contract"
+    ]
+  },
+  "changed_source_hashes": [
+    {
+      "path": "Native/include/agentflow/mcp_wire.hpp",
+      "sha256": "046abdfe1927dccddc1cd2f0c8f05e030438ea3cec96dd4b4ec36c3b513dbcf7"
+    },
+    {
+      "path": "Native/src/mcp_client.cpp",
+      "sha256": "42cf1bcc1029ad9255733786c2dc60cdd4aa20e4a481de80da75b8ec924e88d4"
+    },
+    {
+      "path": "Native/src/mcp_wire.cpp",
+      "sha256": "a2697268f3ed1846f6cc2525560cee2e8b4a1b1f9459e944b7a0977606c314ff"
+    },
+    {
+      "path": "Native/tests/mcp_client_peer.mjs",
+      "sha256": "1cf8298d221fcb63ad8de68365e592251999618039f4844004f30d9f526f8752"
+    },
+    {
+      "path": "Native/tests/mcp_effect_contract.cpp",
+      "sha256": "39744d4930a48174c3fa01cd53d965f75590693adbc21501168c17f73e0d8324"
+    },
+    {
+      "path": "Native/tests/mcp_effect_peer.mjs",
+      "sha256": "687abd611877ce3b3dcb211e1916681a06049d17a66c43e8e836e7662a02bfcf"
+    },
+    {
+      "path": "Native/tests/mcp_wire_contract.cpp",
+      "sha256": "f6bc62b5f99054e144da3319aa49f52dea9631d235c09a656c4996cff91879a6"
+    },
+    {
+      "path": "doc/VALIDATION_STATUS.md",
+      "sha256": "d2f8e892c78210da94f395471e74c7dde4692f27d31944ef8f40de864f1b7d96"
+    }
+  ],
+  "source_base_commit": "940f6ffd09a84dc23fb9f29fe8862ac3df16bd29",
+  "working_tree_changes_included": true
+}

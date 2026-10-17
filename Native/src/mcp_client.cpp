@@ -17,7 +17,7 @@ struct McpStdioClient::Impl {
     std::size_t queued_bytes=0,unsolicited=0;
     McpLineStream wire;
     bool started=false,live=false,closed=false;
-    explicit Impl(const McpStdioConfiguration& configuration):process(configuration),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false}})"}),wire([this](const auto& message){
+    explicit Impl(const McpStdioConfiguration& configuration):process(configuration),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false},"elicitation":{"form":{}}})"}),wire([this](const auto& message){
         const auto size=message.raw_json.size()+message.payload_json.size();
         if(incoming.size()>=128 || size>4*1024*1024-queued_bytes)throw McpProtocolError("MCP incoming messages exceed owner limits");
         incoming.push_back(message);queued_bytes+=size;
@@ -41,12 +41,18 @@ struct McpStdioClient::Impl {
             }
         }
     }
-    bool peer_message(const McpWireMessage& message,Deadline deadline,std::stop_token cancel) {
+    bool peer_message(const McpWireMessage& message,Deadline deadline,std::stop_token cancel,const McpInputFulfillment& fulfill_input={}) {
         if(message.kind==McpMessageKind::notification || message.kind==McpMessageKind::request) {
             if(++unsolicited>256)throw McpProtocolError("MCP unsolicited message limit exceeded");
             if(message.kind==McpMessageKind::request) {
                 if(!handshake.ready())throw McpProtocolError("MCP client request arrived before negotiation");
-                process.write(mcp_peer_reply(message,handshake.server().era),deadline,cancel);
+                std::optional<std::string> result;
+                if(handshake.server().era==McpWireEra::legacy && fulfill_input &&
+                    (message.method=="elicitation/create" || message.method=="roots/list")) {
+                    const auto request=std::string("{\"method\":")+Json(message.method).dump()+",\"params\":"+message.payload_json+"}";
+                    result=fulfill_input("peer:"+message.id_json,request);
+                }
+                process.write(result?mcp_peer_reply(message,handshake.server().era,*result):mcp_peer_reply(message,handshake.server().era),deadline,cancel);
             }
             // Notifications are not persisted, exposed to a model or treated as
             // effects. Subscription/progress routing requires separate owners.
@@ -205,7 +211,7 @@ McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view 
             while(!correlated) {
                 if(state.incoming.empty())state.read(deadline,cancel);
                 while(!state.incoming.empty()) {
-                    const auto message=state.pop();if(state.peer_message(message,deadline,cancel))continue;
+                    const auto message=state.pop();if(state.peer_message(message,deadline,cancel,fulfill_input))continue;
                     const auto reply=state.requests.receive(message);if(!reply)continue;
                     if(reply->request.id!=request_id)throw McpProtocolError("MCP tool response identity changed");correlated=*reply;
                 }

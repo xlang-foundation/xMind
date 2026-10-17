@@ -72,7 +72,7 @@ struct Task {
                 require(metadata.is_array()&&metadata.size()==(reading?3u:1u),"Private approval snapshot must contain exact bounded metadata for each advertised kind");
                 if(desired_kind==std::string("tool")){require(binding->size()==9,"Tool approval binding preserves its existing durable contract");for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})require(binding->contains(field),"Tool approval metadata must bind its exact immutable description");}
                 else{for(const auto* field:{"server_config_id","config_revision","kind","peer_name","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json","metadata_json"})require(binding->contains(field),"Read-only approval metadata must bind the full immutable peer description");}
-                require(binding->at("alias")==selected->name&&binding->at("input_schema_json")==selected->input_schema_json&&binding->at("protocol_version")== (mode=="legacy"?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
+                require(binding->at("alias")==selected->name&&binding->at("input_schema_json")==selected->input_schema_json&&binding->at("protocol_version")== ((mode=="legacy"||mode=="peer-elicitation")?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
                 discovered_bindings.set_value(snapshot);
                 phase="invoke";
                 const auto alias=mode=="unknown-alias"?"fixture.write":selected->name;
@@ -129,6 +129,18 @@ int main(int argc,char** argv){
                 const auto unresolved=store.operation(mode).get();const auto outcome=Json::parse(unresolved.result_json);const auto response=Json::parse(outcome.at("response_json").get<std::string>());
                 require(unresolved.state==OperationState::uncertain&&outcome["reason"]=="mcp_additional_input_required"&&response["result"]["resultType"]=="input_required"&&response["result"]["requestState"]=="opaque-fixture-state"&&response["result"]["inputRequests"].contains("confirm"),"Valid additional input must be durably distinguished from malformed protocol and retain the bounded continuation data");
                 require(contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"An unhandled MCP continuation must never fabricate completion or replay the tool effect");store.transition(mode,RunState::running,RunState::failed).get();
+            }
+            {
+                const std::string mode="peer-elicitation";const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);const auto proposal=proposed(store,mode);
+                require(proposal.state==OperationState::awaiting_approval&&contents(workspace/"effect.txt").empty(),"A peer-initiated elicitation must remain behind local MCP operation approval");
+                store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();
+                std::vector<McpInputRequest> pending;
+                for(int i=0;i<500&&pending.empty();++i){pending=store.mcp_input_requests(mode).get();if(pending.empty())std::this_thread::sleep_for(5ms);}
+                require(pending.size()==1&&pending.front().peer_tool=="fixture.write"&&pending.front().request_key=="peer:\"peer-elicitation-1\"","Server-initiated elicitation must be durably tied to its peer request ID and approved operation");
+                store.answer_mcp_input_request(mode,pending.front().id,R"({"action":"accept","content":{"approved":true}})","fixture-controller").get();
+                const auto outcome=Json::parse(task.result.get());
+                require(outcome["acknowledged_by_peer"]==true&&contents(workspace/"effect.txt")=="actual native MCP effect\n"&&store.operation(mode).get().state==OperationState::succeeded,"The peer must receive the validated persisted elicitation response before completing the approved effect");
+                store.transition(mode,RunState::running,RunState::completed).get();
             }
             {
                 const std::string mode="input-required-roots";const auto workspace=root(mode),attached=root(mode+"-attached");WorkspaceTools primary_tools(workspace.string()),attached_tools(attached.string());

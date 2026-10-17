@@ -11,6 +11,22 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Legacy MCP server-initiated form elicitation — 2026-10-17
+
+The stdio MCP client now declares form-elicitation support in its legacy
+handshake. During an already approved tool call, incoming `elicitation/create`
+requests use the same durable, run-scoped user-input store as elicitation
+returned through the modern input-required continuation; `roots/list` is
+answered from admitted workspace roots. Replies preserve the exact JSON-RPC
+request ID. Wire, client, and subprocess effect contracts pass **3/3**, including
+a real fixture peer that cannot complete its file effect until the persisted
+form is answered. This is deterministic contract coverage, not a claim of live
+third-party server interoperability. The current-source Release build passed
+the complete **150/150** CTest gate against xlang3 `b4a53192`; the full transcript,
+runtime hash, source hashes, and focused test list are recorded in
+[the evidence record](evidence/native-release-mcp-peer-20261017.json) and
+[CTest transcript](evidence/native-release-mcp-peer-20261017.log).
+
 ## Provider-profile model selection with dynamic planning — 2026-10-16
 
 Workspace-backed provider profiles expose the native planning tools to the

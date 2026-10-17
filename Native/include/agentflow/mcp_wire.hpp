@@ -48,6 +48,9 @@ std::string mcp_notification(std::string method,std::string_view params_json="{}
 // result; unimplemented methods return -32601 without invoking model/tool/UI
 // work. Modern peers cannot send requests and must never receive responses.
 std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era);
+// Respond to a supported legacy peer request using an already validated JSON
+// result object. The original request ID spelling is preserved exactly.
+std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era,std::string_view result_json);
 // Strict bounded object validation plus removal of insignificant whitespace.
 // Preserves every string escape and number token; never parse/dump arguments.
 std::string mcp_compact_object(std::string_view json);

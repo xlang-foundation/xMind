@@ -36,7 +36,7 @@ for await(const line of input){
   }
   if(request.method==='server/discover'){
     assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
-    assert.deepEqual(request.params._meta['io.modelcontextprotocol/clientCapabilities'],{roots:{listChanged:false}});
+    assert.deepEqual(request.params._meta['io.modelcontextprotocol/clientCapabilities'],{roots:{listChanged:false},elicitation:{form:{}}});
     if(mode==='legacy')send({id:request.id,error:{code:-32601,message:'Labeled legacy fixture'}});
     else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:mode.startsWith('subscription')?{tools:{listChanged:true},resources:{subscribe:true,listChanged:true},prompts:{}}:{tools:{},resources:{},prompts:{}}}});
   }else if(request.method==='initialize'){

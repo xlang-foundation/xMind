@@ -154,6 +154,18 @@ std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era) {
     else reply["error"]={{"code",-32601},{"message","Client method is not supported"}};
     return frame(reply);
 }
+std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era,std::string_view result_json) {
+    if(era!=McpWireEra::legacy) throw McpProtocolError("Modern MCP peers cannot send client requests");
+    const auto decoded=decode(request.raw_json);
+    if(decoded.kind!=McpMessageKind::request || request.kind!=decoded.kind || request.id_json!=decoded.id_json ||
+        request.method!=decoded.method || request.payload_json!=decoded.payload_json) throw McpProtocolError("Invalid MCP peer request");
+    if(decoded.method!="elicitation/create" && decoded.method!="roots/list") throw McpProtocolError("MCP peer method has no client result handler");
+    const auto compact=mcp_compact_object(result_json);
+    auto response="{\"jsonrpc\":\"2.0\",\"id\":"+decoded.id_json+",\"result\":"+compact+"}";
+    (void)decode(response);
+    response.push_back('\n');
+    return response;
+}
 std::string mcp_compact_object(std::string_view source) {
     parameters(source);std::string result;result.reserve(source.size());
     bool quoted=false,escaped=false;

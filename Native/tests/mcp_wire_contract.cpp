@@ -37,6 +37,11 @@ int main() {
         require(messages[3].kind==McpMessageKind::request && messages[3].id_json=="-9","Legacy incoming requests remain distinguishable from responses");
         const auto unsupported=Json::parse(mcp_peer_reply(messages[3],McpWireEra::legacy));
         require(unsupported["id"]==-9 && unsupported["error"]["code"]==-32601 && !unsupported.contains("result"),"Unsupported peer methods must receive a correlated error without executing work");
+        const auto elicitation=mcp_decode_message(R"({"jsonrpc":"2.0","id":18446744073709551615,"method":"elicitation/create","params":{"mode":"form","message":"Continue?","requestedSchema":{"type":"object"}}})");
+        const auto elicitation_reply=Json::parse(mcp_peer_reply(elicitation,McpWireEra::legacy,R"({"action":"accept","content":{"approved":true}})"));
+        require(elicitation_reply["id"].get<std::uint64_t>()==18446744073709551615ULL&&elicitation_reply["result"]["action"]=="accept","Handled peer requests must preserve exact IDs and return the supplied validated result");
+        rejected([&]{mcp_peer_reply(elicitation,McpWireEra::legacy,R"([])");});
+        rejected([&]{mcp_peer_reply(messages[3],McpWireEra::legacy,R"({"action":"accept"})");});
         rejected([&]{mcp_peer_reply(messages[3],McpWireEra::modern);});
         auto forged=messages[3];forged.id_json="123";rejected([&]{mcp_peer_reply(forged,McpWireEra::legacy);});
         rejected([&]{mcp_peer_reply(messages[1],McpWireEra::legacy);});
