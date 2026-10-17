@@ -17,6 +17,20 @@ acceptance. The code references are
 [`AgentRunner`](../Native/include/agentflow/agent_runner.hpp), and the
 [`xlang3 tool worker`](../Native/src/agent_worker.cpp).
 
+The source review confirms the ownership boundary that the implementation must
+preserve: `AgentRunner` holds a direct `PersistenceService&`, while
+`AgentService` owns root admission, cancellation and the durable run lifecycle.
+Starting the current runner in another process would therefore create a second
+SQLite writer and give that process direct effect authority. That is not the
+worker architecture described here. The first implementation step must extract
+a capability-scoped execution host for provider requests, tool discovery and
+calls, approval waits, and durable event/run writes. An in-process host will
+retain the current behavior; the worker host will carry only bounded,
+versioned request/result values over authenticated xlang3 IPC. Provider keys,
+SQLite handles, workspace roots and backend runtime objects stay with the
+server owner. Only after both hosts pass the same AgentRunner contracts should
+trusted definitions be allowed to select process placement.
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.
