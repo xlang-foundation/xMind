@@ -78,7 +78,7 @@ test('coding children are observed through actual dynamic ownership without a re
  const context={profile_id:'public_profile',route_id:'openai.responses',provider:'openai',wire:'responses',model_id:'synthetic-model',profile_revision:1};const profileChild={...child,run:{...child.run,provider_context:context}};await observeOwnedRun({...client,ownedChildren:async()=>[profileChild]},run,'session',0);assert.equal(histories,2);
  await assert.rejects(observeOwnedRun({...client,ownedChildren:async()=>[{...profileChild,run:{...profileChild.run,provider_context:{...context,credential_id:'private'}}}]},run,'session',0));assert.equal(histories,2);
 });
-test('deterministic dynamic tool nodes and owned runs keep exact model-free metadata',async()=>{
+test('dynamic tool nodes and owned runs keep exact model-free metadata',async()=>{
  const record=snapshot(),definition={id:'read-bytes',type:'tool',tool:'read_file',arguments_json:' {"path":"README.md"} ',depends_on:[]};
  const runtime={...definition,backend_node_id:'node-read-bytes',definition_revision:1,state:'settled',protected:true,effect_state:'none',claim_revision:1,claim_id:'tool-claim',child_run_id:'tool-child',child_state:'completed',outcome_json:'{"content":"actual bytes"}',settled_event_seq:13};
  record.plan.nodes.push(runtime);record.revisions[0].spec.nodes.push(definition);
@@ -87,6 +87,6 @@ test('deterministic dynamic tool nodes and owned runs keep exact model-free meta
  const client={treeEvents:async()=>[{seq:1,run_id:'tool-child',kind:'tool.completed',data:{}}],ownedChildren:async()=>[child],ownedChildHistory:async()=>[{role:'assistant',data:{content:'actual bytes'}}],operations:async()=>[]};
  const observed=await observeOwnedRun(client,record.run,'session',0);assert.equal(observed.children[0].kind,'dynamic_tool');assert.equal(observed.histories['tool-child'][0].data.content,'actual bytes');
  for(const changed of [{preset_id:'workspace.inspect'},{preset_revision:1},{claim_revision:2},{node_label:'../foreign'}])await assert.rejects(observeOwnedRun({...client,ownedChildren:async()=>[{...child,...changed}]},record.run,'session',0));
-  for(const tool of ['run_process','mcp_'+'a'.repeat(48),'a2a_delegate_'+'b'.repeat(24)]){const accepted=snapshot(),call={...definition,tool,arguments_json:'{}'},node={...runtime,...call};accepted.plan.nodes.push(node);accepted.revisions[0].spec.nodes.push(call);assert.doesNotThrow(()=>validatePlanObservation(accepted,'owner'),`Valid registered tool alias rejected: ${tool}`);}
-  for(const tool of ['mcp_tool','mcp_'+'z'.repeat(48),'a2a_delegate_bad','edit_file']){const invalid=snapshot(),bad={...definition,tool};invalid.plan.nodes.push({...runtime,tool});invalid.revisions[0].spec.nodes.push(bad);assert.throws(()=>validatePlanObservation(invalid,'owner'));}
+ for(const tool of ['run_process','mcp_'+'a'.repeat(48),'a2a_delegate_'+'b'.repeat(24)]){const supported=snapshot(),node={...definition,tool};supported.plan.nodes.push({...runtime,tool});supported.revisions[0].spec.nodes.push(node);assert.equal(validatePlanObservation(supported,'owner').plan.nodes.at(-1).tool,tool);}
+ for(const tool of ['mcp_tool','mcp_'+'a'.repeat(47),'a2a_delegate_invalid','edit_file']){const invalid=snapshot(),bad={...definition,tool};invalid.plan.nodes.push({...runtime,tool});invalid.revisions[0].spec.nodes.push(bad);assert.throws(()=>validatePlanObservation(invalid,'owner'));}
 });
