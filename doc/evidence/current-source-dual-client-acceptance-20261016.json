@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-16",
+  "scope": "Current-source VS Code sidebar and external Edge browser coding acceptance in TestProj",
+  "xmind_repository_revision": "09beabb",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "project": "model-zoo/frontend",
+  "provider": {
+    "profile": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing local .config/providers.yaml profile; secret omitted",
+    "models_discovered_in_webpage": 20
+  },
+  "vscode_current_source": {
+    "host": "VS Code Extension Development Host",
+    "view": "Native right-hand secondary sidebar; Explorer remains on the left",
+    "run_id": "56758c869a56ce4da5cd895cdf05345b",
+    "state": "completed",
+    "actions": [
+      "Read model-zoo/frontend/src/views/HomeView.vue from the opened workspace",
+      "Ran npm.cmd run build through xMind run_process from model-zoo/frontend"
+    ],
+    "verified_ctas": {
+      "primary": "Search the catalog",
+      "secondary": "Jump to catalog results"
+    },
+    "build": {
+      "operation_id": "9f91e5d143904d59ddfcdd860c98468b",
+      "operation_state": "succeeded",
+      "command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "exit_code": 0,
+      "vite_version": "6.4.4",
+      "modules_transformed": 37,
+      "vite_build_milliseconds": 800,
+      "stderr_bytes": 0
+    },
+    "response_metrics": {
+      "input_tokens": 13113,
+      "output_tokens": 81,
+      "total_tokens": 13194,
+      "first_token_milliseconds": 957,
+      "elapsed_milliseconds": 1696
+    },
+    "edit_in_this_run": false
+  },
+  "external_edge_webpage": {
+    "url": "http://127.0.0.1:60353/ui/",
+    "http_status": 200,
+    "page_title": "xMind · Browser",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "run_id": "38df19f279a3ddfa6971c19b52874322",
+    "state": "completed",
+    "task": "Read the Vue view and report the primary and secondary hero CTA text; do not edit files",
+    "response": {
+      "primary": "Search the catalog",
+      "secondary": "Jump to catalog results",
+      "files_edited": false
+    },
+    "response_metrics": {
+      "input_tokens": 16988,
+      "output_tokens": 34,
+      "total_tokens": 17022,
+      "cached_tokens": 16647,
+      "reasoning_tokens": 0,
+      "first_token_milliseconds": 2093,
+      "elapsed_milliseconds": 2406
+    }
+  },
+  "live_file_write_acceptance": "See doc/evidence/vscode-current-package-live-coding-20261016.json for the separately recorded approved VS Code file edit and successful build.",
+  "limitations": [
+    "This acceptance verifies one Vue file read and production build through the current-source VS Code host, plus a read-only run through external Edge.",
+    "The current-source VS Code run made no file edits; the linked package-preview evidence records the approved file-write workflow.",
+    "This does not establish broad workspace coverage, graph-agent behavior, or OpenCode feature parity."
+  ]
+}
