@@ -11,6 +11,18 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## TestProj backend under current xlang3 — 2026-10-17
+
+Rebuilt the xlang3 Release executable from the current compatibility-branch
+source at `fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8`, then ran the TestProj
+backend suite with pytest 8.4.2 under xlang3: **9 passed, 0 failed**. The
+stack used the installed pure-Python packages and xlang3 native modules; no
+CPython interpreter or native extension was used. One existing Starlette/
+AnyIO deprecation warning remains. This is backend test acceptance, separate
+from the webpage/VS Code coding tests and hosted runtime packaging gate.
+[Transcript](evidence/testproj-xlang3-pytest-20261017.log),
+[runtime hash and command](evidence/testproj-xlang3-pytest-20261017.json).
+
 ## Hosted runtime pin alignment — 2026-10-17
 
 The hosted Windows workflow and both CI source/provenance checks now pin

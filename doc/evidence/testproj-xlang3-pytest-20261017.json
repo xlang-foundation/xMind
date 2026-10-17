@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-17",
+  "scope": "TestProj Model Zoo backend pytest suite using the current xlang3 compatibility branch",
+  "xmind_revision": "fcf289901c08e8c5d34ea9eef9bf57f275c98b1d",
+  "xlang3_branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "runtime": "xlang3 3.14 Release",
+  "runtime_executable": "D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release\\xlang3.exe",
+  "runtime_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+  "runtime_build": "cmake --build build-pytest-pathaware --config Release --target xlang3 --parallel 8",
+  "command": "xlang3.exe -m pytest -q",
+  "working_directory": "D:\\CantorAI2026\\TestProj\\model-zoo\\backend",
+  "python_path": [
+    "D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release\\modules",
+    "D:\\CantorAI2026\\TestProj\\model-zoo\\backend",
+    "D:\\CantorAI2026\\TestProj\\model-zoo\\backend\\.xlang3-site"
+  ],
+  "pytest": "8.4.2",
+  "tests_passed": 9,
+  "tests_failed": 0,
+  "duration_seconds": 1.75,
+  "warnings": [
+    "Starlette/AnyIO deprecation: anyio.abc.BlockingPortal alias"
+  ],
+  "cpython_interpreter_used": false,
+  "native_python_extensions_used": false,
+  "transcript": "testproj-xlang3-pytest-20261017.log"
+}

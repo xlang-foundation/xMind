@@ -1,0 +1,8 @@
+.........                                                                [100%]
+============================== warnings summary ===============================
+.xlang3-site\starlette\testclient.py:51
+  D:\CantorAI2026\TestProj\model-zoo\backend\.xlang3-site\starlette\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+9 passed, 1 warning in 1.75s
