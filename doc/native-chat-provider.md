@@ -36,10 +36,12 @@ The native model library now has source for a separate Claude Messages request
 component, `serialize_anthropic_request`. It reuses our common native validation
 and writes Claude text/system, tool-use and tool-result blocks with original
 content and call ownership. Consecutive same-role blocks retain their order;
-tool schemas and arguments reject duplicate keys and excessive nesting. An
-explicit supported output limit is required. Unsupported reasoning controls,
-developer-role authority mapping, refusal metadata, late system instructions and
-foreign provider continuation data are rejected rather than silently discarded.
+tool schemas and arguments reject duplicate keys and excessive nesting. Leading
+trusted system and developer instructions map to separate, ordered top-level
+Claude system text blocks because the Messages API has no developer message
+role. Late trusted instructions remain rejected. An explicit supported output
+limit is required. Unsupported reasoning controls, refusal metadata and foreign
+provider continuation data are rejected rather than silently discarded.
 
 Its new C++ contract has exact wire-shape cases and rejection cases for pending
 or foreign call results, ambiguous JSON and incompatible history. Compilation

@@ -26,10 +26,13 @@ int main(){try{
     auto tools=config;tools.tools=Capability::unsupported;rejects([&]{serialize_anthropic_request(tools,request);});
     auto reasoning=config;reasoning.reasoning_effort=ReasoningEffort::medium;rejects([&]{serialize_anthropic_request(reasoning,request);});
     auto adaptive=config;adaptive.model="claude-sonnet-5-fixture";adaptive.reasoning_effort=ReasoningEffort::medium;const auto adaptive_wire=Json::parse(serialize_anthropic_request(adaptive,request));require(adaptive_wire["thinking"]==Json{{"type","adaptive"}}&&adaptive_wire["output_config"]==Json{{"effort","medium"}},"Adaptive Claude families must receive bounded native effort settings");
+    auto trusted=request;trusted.messages.insert(trusted.messages.begin()+1,{MessageRole::developer,"Workspace coding policy"});trusted.messages.insert(trusted.messages.begin()+2,{MessageRole::system,"Additional backend constraints"});
+    const auto trusted_wire=Json::parse(serialize_anthropic_request(config,trusted));
+    require(trusted_wire["system"]==Json::array({{{"type","text"},{"text","Backend instructions 🌍"}},{{"type","text"},{"text","Workspace coding policy"}},{{"type","text"},{"text","Additional backend constraints"}}}),"Trusted system/developer instructions map to ordered Claude system blocks without merging their boundaries");
     auto invalid=request;invalid.messages.pop_back();rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages.back().tool_call_id="foreign-call";rejects([&]{serialize_anthropic_request(config,invalid);});
-    invalid=request;invalid.messages[0].role=MessageRole::developer;rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages.push_back({MessageRole::system,"Late policy"});rejects([&]{serialize_anthropic_request(config,invalid);});
+    invalid=request;invalid.messages.push_back({MessageRole::developer,"Late workspace policy"});rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages[2].provider_items_json=R"([{"type":"reasoning","encrypted_content":"opaque"}])";rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages[2].refusal="Refusal metadata";rejects([&]{serialize_anthropic_request(config,invalid);});
     invalid=request;invalid.messages[2].tool_calls[0].arguments_json=R"({"path":"first","path":"second"})";rejects([&]{serialize_anthropic_request(config,invalid);});

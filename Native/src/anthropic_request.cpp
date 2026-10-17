@@ -86,8 +86,10 @@ std::string serialize_anthropic_request(const ChatProviderConfig& config,const M
     for(std::size_t index=0;index<request.messages.size();++index){
         const auto& message=request.messages[index];
         if(!message.refusal.empty())throw IncompatibleProviderHistory("Claude refusal history requires an explicit native mapping");
-        if(message.role==MessageRole::developer)throw IncompatibleProviderHistory("Claude developer-role authority mapping is not implemented");
-        if(message.role==MessageRole::system){
+        // The Messages API has no developer role. Both trusted instruction
+        // roles are represented as ordered top-level system text blocks; keep
+        // them separate so callers can inspect and preserve their boundaries.
+        if(message.role==MessageRole::system||message.role==MessageRole::developer){
             if(conversational||message.content.empty())throw IncompatibleProviderHistory("Claude system instructions must precede conversation content");
             if(!body.contains("system"))body["system"]=Json::array();
             body["system"].push_back({{"type","text"},{"text",message.content}});continue;
