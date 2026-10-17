@@ -1,6 +1,6 @@
 {
   "evidence": "Windows Release xMind trusted-tool worker capability authentication",
-  "created_utc": "2026-10-17T22:17:00Z",
+  "created_utc": "2026-10-17T22:16:05Z",
   "xmind_base_revision": "99d7312f9ce636495317b58af9e3aad832b9830d",
   "xlang3_revision": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
   "xlang3_branch": "xmind-cpp-lrpc-host",
