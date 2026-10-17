@@ -791,13 +791,17 @@ function planUsage(value){
   for(const [key,count] of Object.entries(value))if(numbers.includes(key))planInteger(count);else {planFields(count,[],['cached_tokens','reasoning_tokens','audio_tokens','accepted_prediction_tokens','rejected_prediction_tokens']);for(const number of Object.values(count))planInteger(number);}
 }
 function planResponse(value){planFields(value,[],['model','usage','elapsed_ms','first_token_ms']);if(value.model!==undefined)planText(value.model,256,true);if(value.usage!==undefined)planUsage(value.usage);for(const key of ['elapsed_ms','first_token_ms'])if(value[key]!==undefined)planInteger(value[key]);}
+const dynamicPlanReadTools=new Set(['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files']);
+function isDynamicPlanTool(value){
+  return dynamicPlanReadTools.has(value)||value==='run_process'||/^mcp_[a-f0-9]{48}$/.test(value)||/^a2a_delegate_[a-f0-9]{24}$/.test(value);
+}
 function planDefinition(value,runtime=false){
   const fields=['id','type','depends_on'];if(value?.type==='agent')fields.push('objective','preset');else if(value?.type==='human')fields.push('question');else if(value?.type==='tool')fields.push('tool','arguments_json');else throw new Error('Invalid planning node type');
   if(runtime)fields.push('backend_node_id','definition_revision','state','protected','effect_state',...(value.type==='agent'?['preset_revision']:[]));
   planFields(value,fields,runtime?['claim_revision','claim_id','child_run_id','child_state','human_request_id','outcome_json','settled_event_seq']:[]);planLabel(value.id);
   if(value.type==='agent'){planText(value.objective,8192);if(!['workspace.inspect','workspace.coding'].includes(value.preset))throw new Error('Invalid planning preset');}
   else if(value.type==='human')planText(value.question,8192);
-  else {if(!['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files'].includes(value.tool))throw new Error('Invalid deterministic planning tool');planText(value.arguments_json,65536);const args=JSON.parse(value.arguments_json);if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Invalid deterministic planning arguments');}
+  else {if(typeof value.tool!=='string'||!isDynamicPlanTool(value.tool))throw new Error('Invalid deterministic planning tool');planText(value.arguments_json,65536);const args=JSON.parse(value.arguments_json);if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Invalid deterministic planning arguments');}
   if(!Array.isArray(value.depends_on)||value.depends_on.length>32)throw new Error('Invalid planning dependencies');const unique=new Set();for(const edge of value.depends_on){planFields(edge,['task','require']);planLabel(edge.task);if(unique.has(edge.task)||edge.task===value.id||!['success','observed'].includes(edge.require))throw new Error('Invalid planning dependency');unique.add(edge.task);}
   if(runtime){executionIdentity(value.backend_node_id);planInteger(value.definition_revision,1);if(typeof value.protected!=='boolean'||!['pending','blocked','claimed','waiting_human','settled','skipped','cancelled','uncertain'].includes(value.state)||!['none','succeeded','failed','cancelled','uncertain'].includes(value.effect_state))throw new Error('Invalid actual planning node state');if(value.type==='agent')planInteger(value.preset_revision,1);
     if(value.claim_revision!==undefined){if(value.claim_revision!==value.definition_revision)throw new Error('Planning claim revision changed');executionIdentity(value.claim_id);}else if(value.claim_id!==undefined)throw new Error('Planning claim is unbound');
