@@ -23,6 +23,16 @@ from the webpage/VS Code coding tests and hosted runtime packaging gate.
 [Transcript](evidence/testproj-xlang3-pytest-20261017.log),
 [runtime hash and command](evidence/testproj-xlang3-pytest-20261017.json).
 
+## Live webpage provider and usage check — 2026-10-17
+
+The rendered TestProj webpage discovered 13 Claude models from its existing
+saved provider profile. Selecting `claude-sonnet-4-6` and sending a no-tool,
+no-file prompt completed successfully without another key prompt. The page
+rendered the exact provider reply, **5,704 input tokens**, **11 output tokens**,
+and backend-measured first-token and elapsed timings; no file operations ran.
+This supplements the separate approved coding/build acceptance; it does not
+claim another code edit. [Run and metrics](evidence/webpage-saved-model-live-20261017.json).
+
 ## Hosted runtime pin alignment — 2026-10-17
 
 The hosted Windows workflow and both CI source/provenance checks now pin

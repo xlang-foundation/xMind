@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-17",
+  "acceptance": "live saved-provider discovery, model selection, response, and usage rendering in the xMind webpage",
+  "ui_url": "http://127.0.0.1:53036/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "profile": "local xMind profile; credentials reused from the trusted provider configuration; secret omitted",
+  "provider": "Claude Messages",
+  "model": "claude-sonnet-4-6",
+  "catalogue_models_fetched": 13,
+  "run_id": "e2bd4433a04b344707b99249ce0312d0",
+  "run_state": "completed",
+  "prompt": "Reply exactly: xMind webpage provider check passed. Do not call tools or inspect workspace files.",
+  "response": "xMind webpage provider check passed.",
+  "file_operations": 0,
+  "metrics": {
+    "input_tokens_uncached": 5704,
+    "output_tokens": 11,
+    "total_tokens": null,
+    "cache_write_tokens": 0,
+    "cached_tokens": 0,
+    "first_token_seconds": 0.92,
+    "elapsed_seconds": 1.04,
+    "provider_reported": true
+  },
+  "credential_entry_prompted": false,
+  "native_runtime_or_cpython_fallback": false
+}
