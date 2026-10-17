@@ -3768,6 +3768,15 @@ and webpage coding work with saved provider configuration, but do not prove
 broad coding reliability or OpenCode feature parity.
 [Run details and hashes](evidence/cli-key-only-model-selection-and-live-coding-20261017.json).
 
+The current-profile CLI coding path was also exercised against TestProj with
+the saved OpenAI profile and no credential re-entry. After reviewing and
+approving one exact `replace_file` proposal, the CLI ran the edited module and
+an assertion in two xlang3 processes; both exited 0. A reviewed inverse patch
+restored the smoke file, and its on-disk SHA-256 matches the original. This
+confirms a focused live CLI edit, approval, and verification cycle. It does not
+establish broad project coding reliability or packaged-runtime acceptance.
+[Exact runs, process outputs, and hashes](evidence/xmind-cli-approval-gated-coding-20261017.json).
+
 ## Current-source live VS Code coding acceptance — 2026-10-17
 
 Built the full current xMind Release tree at `86f2e31` against xlang3 SDK

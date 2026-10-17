@@ -147,9 +147,11 @@ The installed browser preview retains native `19d69dd` and view `6f32d215`
 snapshots. It has not been upgraded to the newer enrollment/profile CLI source.
 Earlier installed CLI/browser checks below retain their historical scope.
 [Current validation](VALIDATION_STATUS.md), [provider setup](provider-setup.md).
-The CLI still needs broader interactive coding and full-screen terminal
-acceptance, including live Gemini CLI coverage. Private team-server
-implementation belongs to Nexus.
+The CLI has passed one current-profile, approval-gated TestProj edit followed
+by two successful xlang3 checks and a hash-verified restore. Broader interactive
+coding and full-screen terminal acceptance, including live Gemini CLI coverage,
+remain open. [Exact TestProj run evidence](evidence/xmind-cli-approval-gated-coding-20261017.json).
+Private team-server implementation belongs to Nexus.
 
 ## Conversations, observation and approvals
 

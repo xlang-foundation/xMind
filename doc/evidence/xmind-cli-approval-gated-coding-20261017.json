@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-17",
+  "client": "unified native xMind CLI",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "profile": {
+    "profile_info_state": "started:false",
+    "provider": "openai",
+    "backend_enabled_models": ["gpt-4.1-mini"],
+    "saved_provider_models_discovered": 20,
+    "credentials_reentered": false
+  },
+  "runtime": {
+    "xmind_revision": "7ece93949d8c1054e87fdb5a4df3ccbe4fbb71d0",
+    "xmind_executable": "D:/CantorAI2026/xMind/.agentflow/current-main-browser-runtime-20261017/xmind.exe",
+    "xmind_executable_sha256": "14168fd9bee2f93ce5adf8617b1ac40a0a1c3d9701e065da2165e35f913e580d",
+    "xlang3_executable": "C:/xMindNativeValidation/profiles/native-main-browser-20261017/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-4636293b9151d552d1ace569d4ba166da11c48c3adaeefc93d069ecdc530d761/xlang3.exe",
+    "xlang3_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfaea02ca4",
+    "xlang3_runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874"
+  },
+  "session_id": "3cc26406e97d6f7d80eeeaf2267d9cf7",
+  "runs": {
+    "read_only_inspection": {
+      "run_id": "257292b50c4f3f0bb01d1794ca8b143e",
+      "state": "completed",
+      "model": "gpt-4.1-mini",
+      "route": "openai.responses",
+      "usage": {
+        "input_tokens": 5569,
+        "output_tokens": 76,
+        "total_tokens": 5645
+      },
+      "attached_file": "model-zoo/backend/app/main.py"
+    },
+    "approved_coding": {
+      "run_id": "0ffe9395f822bde6170c995e2ffc7206",
+      "state": "completed",
+      "model": "gpt-4.1-mini",
+      "approval": {
+        "operation_id": "24b515f1ee0a792bc6b2ef30ff417838",
+        "state": "succeeded",
+        "actor": "local-owner",
+        "tool": "replace_file",
+        "path": "xmind_coding_smoke.py",
+        "before_sha256": "3e5b1404aec12ee3f6bf49000caad042b3fa05a1954917f5bb6b1501f05d71be",
+        "after_sha256": "162c9b9085069b1c75d027eaf1c3bf8d29c94a420c17c598b417abd90aaab2be",
+        "change": "Added normalize_project_name(value), preserving greet() and the existing main output."
+      },
+      "xlang3_processes": [
+        {
+          "operation_id": "97542787a62040b4dfdaf18a960c76f8",
+          "argv": ["xlang3.exe", "-B", "-m", "xmind_coding_smoke"],
+          "exit_code": 0,
+          "stdout": "Hello from current xMind VS Code, TestProj!\n",
+          "stderr": ""
+        },
+        {
+          "operation_id": "7dbbb939bd6d2637e49ac419670d2015",
+          "argv": ["xlang3.exe", "-B", "-c", "from xmind_coding_smoke import normalize_project_name; print(normalize_project_name(' Model Zoo Demo ') == 'model-zoo-demo')"],
+          "exit_code": 0,
+          "stdout": "True\n",
+          "stderr": ""
+        }
+      ]
+    }
+  },
+  "restore": {
+    "graph_run_id": "f48658295e1b65321286702f2eb46fb7",
+    "child_run_id": "e2ae1b29ddef5f2a8fc048cb4bee2ab7",
+    "inverse_operation_id": "c3fd9e89c8d137eb4846ec86e7a43d44-0",
+    "state": "succeeded",
+    "original_sha256": "3e5b1404aec12ee3f6bf49000caad042b3fa05a1954917f5bb6b1501f05d71be",
+    "restored_sha256": "3e5b1404aec12ee3f6bf49000caad042b3fa05a1954917f5bb6b1501f05d71be"
+  },
+  "scope": "One provider-backed CLI inspection and one approval-gated single-file coding run with two successful xlang3 process checks and reviewed restoration. This does not establish broad coding reliability, release-package acceptance, or AgentRunner process isolation."
+}
