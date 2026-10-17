@@ -11,6 +11,17 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Current client contract re-run — 2026-10-17
+
+At source `2f49804`, the full VS Code extension suite passes **391/391** and
+the browser client suite passes **134/134**. The extension contracts cover
+native dynamic-plan tool identifiers for `run_process`, MCP and A2A alongside
+rejection of malformed or unsupported identifiers. They also verify that a
+busy event stream retries with capped exponential backoff, remains able to
+recover when a lease becomes available, and stops its scheduled retry on
+disposal. These are client contract tests; they do not substitute for the
+rendered live coding acceptance recorded below.
+
 ## Current-source native Release gate — 2026-10-17
 
 Built the current native backend and unified `xmind.exe` in an isolated C:
