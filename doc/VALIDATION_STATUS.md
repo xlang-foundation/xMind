@@ -3174,3 +3174,21 @@ The VS Code agent-selection and renderer tests passed within the **99/99**
 client test run. `node Tools/audit-opencode.mjs` passes with 141 operations,
 44 reviewed native source candidates, 97 unmapped and 1 verified behavior
 contract. The full CTest suite was not rerun for this mapping.
+
+## TestProj webpage coding acceptance — 2026-10-17
+
+The fresh local browser profile successfully used the saved OpenAI provider
+configuration, discovered 20 models, and selected `gpt-5.6-sol` without
+re-entering a provider key. In the `D:/CantorAI2026/TestProj` workspace, xMind
+proposed a focused pagination accessibility edit in
+`model-zoo/frontend/src/views/HomeView.vue`; after review, the UI applied it
+and ran the configured workspace process `npm.cmd run build` successfully.
+Vite 6.4.4 transformed 37 modules and completed in 636 ms. A fresh browser tab
+then served the Model Zoo page with 12 models and the new accessible button
+labels. This confirms the local webpage coding path through model selection,
+workspace process execution, patch review, file write, and build. It is a
+development acceptance only; the TestProj change is not committed, the xlang3
+full CLI fixture suite remains blocked by its existing `memoryview()`/mmap
+native capability gap, and this does not replace the separate VS Code
+acceptance. Details and artifact hashes are in
+[the evidence record](evidence/testproj-webpage-coding-xlang3-20261017.json).
