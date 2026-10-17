@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live VS Code extension-host approval, file edit, and approved restoration",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "window": "[Extension Development Host] xmind_vscode_coding_smoke.py - TestProj - Visual Studio Code",
+  "session": "VS Code session",
+  "provider": "OpenAI Responses",
+  "model": "gpt-5.6-sol",
+  "edit": {
+    "run_id": "0155d1f122fcefa59474da36ec68111a",
+    "operation_id": "456fac835bdfabbb95ebfd2e7488be50",
+    "file": "xmind_vscode_coding_smoke.py",
+    "before": "return 'xMind VS Code coding works'",
+    "after": "return 'xMind VS Code sidebar approval works'",
+    "reviewed_in": "VS Code xMind sidebar operation card, with exact Before/After content visible",
+    "decision_control": "Allow edit",
+    "decision_actor": "local-owner",
+    "operation_state": "succeeded"
+  },
+  "restore": {
+    "run_id": "3689379383e441989738dee2b4b05029",
+    "operation_id": "f5e5e8c12fc8721aa565991bf0b8d6cb",
+    "before": "return 'xMind VS Code sidebar approval works'",
+    "after": "return 'xMind VS Code coding works'",
+    "reviewed_in": "VS Code xMind sidebar operation card, with exact Before/After content visible",
+    "decision_control": "Allow edit",
+    "decision_actor": "local-owner",
+    "operation_state": "succeeded"
+  },
+  "filesystem_verification": {
+    "final_file_exists": true,
+    "original_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84",
+    "edited_sha256": "4e6e2fe28f1942be7a51ed70af15030dda9cd6e8d741ca91a67a6742b686614a",
+    "restored_sha256": "431257b66969eace194053dbd9cb5ae52e5da726a442403cc33bfe3e4b1a2d84",
+    "final_content": "def main():\n    return 'xMind VS Code coding works'\n\n\nif __name__ == '__main__':\n    print(main())\n"
+  },
+  "commands_run_during_this_acceptance": false,
+  "limitations": [
+    "This live check proves direct VS Code sidebar review, approval, and restoration for one focused file edit; it is not broad coding reliability or release-package acceptance.",
+    "xlang3 process execution through VS Code was separately exercised in the linked live coding acceptance evidence."
+  ]
+}

@@ -15,8 +15,15 @@ contributing to the notice. Run/workspace reset clears the old controls.
 This addresses the observed installed-editor test where expanded activity pushed
 the pending `hello.py` proposal out of view. The actual creation succeeded on the
 older installed runtime. This renderer is now installed in client 0.1.3 and the
-idle sidebar has been observed after reload. Pending-approval layout and
-navigation still require live acceptance in that editor.
+idle sidebar has been observed after reload. The renderer's pending-approval
+layout and navigation were subsequently checked in a live VS Code
+extension-host session. A TestProj file edit appeared in the sidebar with exact
+before/after content and Allow edit, Deny, and Compare changes controls. Both
+the edit and its reviewed inverse completed through Allow edit inside VS Code,
+and the original file hash was restored. This verifies that focused approval
+path in the live extension host; it does not establish broad coding reliability
+or release-package acceptance. Exact evidence is in
+`evidence/vscode-sidebar-approval-live-20261017.json`.
 
 The candidate passed 66 renderer contracts and the complete isolated client gate:
 217 extension and 39 browser contracts, with zero failures, skips or cancellations.

@@ -81,6 +81,19 @@ and its original output was verified under xlang3. Exact details and the
 remaining scope are in the
 [acceptance evidence](evidence/live-planning-shared-backend-20261017.json).
 
+## Live VS Code sidebar approval — 2026-10-17
+
+The extension-host sidebar directly displayed the pending TestProj edit with
+its exact before/after text and **Allow edit**, **Deny**, and **Compare changes**
+controls. The focused edit was approved with **Allow edit** in VS Code itself,
+then a second proposal restored the fixture through the same VS Code controls.
+The operation journal recorded both changes as successful; an independent
+filesystem check found the fixture restored to its original SHA-256. This
+closes the earlier question about whether the live VS Code approval flow needed
+the connected browser. The separate live coding acceptance above verifies
+xlang3 execution. Exact runs, operation IDs, hashes, and scope are in the
+[VS Code sidebar evidence](evidence/vscode-sidebar-approval-live-20261017.json).
+
 ## Exact pinned xlang3 main Release gate — 2026-10-17
 
 Built xMind Release at source commit `2383376` against the exact xlang3 main
