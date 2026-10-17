@@ -336,6 +336,24 @@ extension-path check against the staged xMind runtime at `ffd41a1`; that runtime
 is explicitly not release accepted and is not the current source revision.
 [Detailed evidence](evidence/vscode-live-current-extension-coding-20261017.json).
 
+## Live webpage Model Zoo coding run — 2026-10-17
+
+The local xMind webpage completed a real catalog redesign task in
+`D:/CantorAI2026/TestProj/model-zoo/frontend/src/views/HomeView.vue`. The
+reviewed edits added a registry overview, task/framework/modality metrics and
+quick modality filters. The page rendered in the external browser, and the
+production build completed with Vite 6.4.4 after transforming 37 modules.
+The backend tests ran through the trusted xlang3 process profile. The first
+test attempt exposed a mismatch between Pydantic 2.13.5 and the profile's
+`pydantic-core` 2.50.1; installing all dev requirements also failed while
+building `pydantic-core`. Installing pure-Python Pydantic 2.14.1 with xlang3
+pip, without dependencies, matched the existing core and the backend suite
+then passed **9/9**, with one AnyIO deprecation warning. No CPython interpreter
+or native runtime change was used. This is one real project run and does not
+establish broad coding reliability; TestProj is not a Git repository and its
+changes remain in the user's workspace. [Run, source/build hashes and
+dependency recovery evidence](evidence/webpage-modelzoo-coding-20261017.json).
+
 ## TestProj backend under current xlang3 — 2026-10-17
 
 Rebuilt the xlang3 Release executable from the current compatibility-branch

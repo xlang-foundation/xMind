@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live xMind webpage coding task in TestProj Model Zoo, followed by frontend production build and backend tests under xlang3",
+  "xmind_repository_revision": "433ab70",
+  "client": {
+    "webpage": "http://127.0.0.1:60419/ui/",
+    "preview": "http://127.0.0.1:5173/",
+    "run_id": "566ac506e5a96823d0679520ab0dbc31",
+    "session_id": "c99ed0f9cdbdff50a481e8c34b8de0ac",
+    "state": "completed",
+    "provider_credential": "Existing local provider profile; secret omitted"
+  },
+  "workspace": {
+    "root": "D:/CantorAI2026/TestProj",
+    "project": "model-zoo",
+    "git_repository": false,
+    "edited_file": "model-zoo/frontend/src/views/HomeView.vue",
+    "edited_file_sha256": "0284537CFAD62CF353F19BE0F49411C4811739040D466A967C26D4AA3BF94A9C",
+    "change_summary": "Redesigned the Model Zoo catalog landing page with a registry overview, task/framework/modality metrics and quick modality filters, preserving existing routes and catalog data disclosures."
+  },
+  "frontend_build": {
+    "command": "npm run build",
+    "working_directory": "model-zoo/frontend",
+    "tool": "xMind run_process",
+    "exit_code": 0,
+    "vite": "6.4.4",
+    "transformed_modules": 37,
+    "vite_build_ms": 741,
+    "dist_index_html_sha256": "9B6F545DFB316947F6E3AA0387201B100C3036C860DE02EA4E91C238D46167B9"
+  },
+  "backend_tests": {
+    "runtime": "xlang3 trusted process profile",
+    "command": "xlang3 -B -m pytest -q",
+    "working_directory": "model-zoo/backend",
+    "final_exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "warnings": 1,
+    "pytest_elapsed_ms": 3242,
+    "dependency_recovery": {
+      "initial_failure": "Pydantic 2.13.5 rejected the xlang3 profile's pydantic-core 2.50.1 as an incompatible version; a full requirements install attempted and failed while building pydantic-core.",
+      "resolution": "Installed pure-Python pydantic 2.14.1 into the workspace .xlang3-site with xlang3 -m pip --no-deps, matching the profile's existing pydantic-core 2.50.1.",
+      "native_runtime_change": false,
+      "cpython_used": false
+    }
+  },
+  "limits": [
+    "This acceptance covers one live webpage coding task, one Vue production build and the Model Zoo backend test suite; it does not establish broad coding reliability across repositories or languages.",
+    "The TestProj workspace is not a Git repository. Its source changes and generated build output remain in that workspace.",
+    "The initial complete dependency installation did not succeed; the final passing tests used the compatible pure-Python Pydantic pin described above."
+  ]
+}
