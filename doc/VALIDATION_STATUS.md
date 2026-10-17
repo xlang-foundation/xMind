@@ -111,6 +111,19 @@ path and the package's provider import at their recorded scopes; visual review
 of the live editor and rendered native planning remain open. [VS Code live
 coding evidence](evidence/vscode-current-package-live-coding-20261016.json).
 
+## Live VS Code current-extension coding acceptance — 2026-10-17
+
+The current extension source connected to TestProj in a visible VS Code
+secondary sidebar, reused the saved OpenAI profile, fetched 20 models, and
+completed a live coding run. After reviewing and approving the exact proposal,
+the backend created one Python file; the bundled xlang3 executable ran it and
+printed `5`. The two displayed model responses reported actual provider token
+usage and timings. The temporary acceptance file was removed after verifying
+its hash and execution. The VS Code suite passes **391/391**. This is a live
+extension-path check against the staged xMind runtime at `ffd41a1`; that runtime
+is explicitly not release accepted and is not the current source revision.
+[Detailed evidence](evidence/vscode-live-current-extension-coding-20261017.json).
+
 ## TestProj backend under current xlang3 — 2026-10-17
 
 Rebuilt the xlang3 Release executable from the current compatibility-branch

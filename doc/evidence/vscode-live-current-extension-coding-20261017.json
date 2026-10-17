@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live VS Code current-extension coding acceptance in TestProj",
+  "vscode": {
+    "version": "1.142.0",
+    "extension_version": "0.1.13",
+    "source_revision": "aa271704ae0b6b461b9f61bde429c448f55faa55",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "isolated_user_data_profile": "D:/CantorAI2026/xMind/.agentflow/vscode-live-acceptance-20261017/user-data",
+    "visible_secondary_sidebar": true,
+    "webview_dom_inspected_over_cdp": true,
+    "runtime_directory": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-ffd41a1"
+  },
+  "runtime": {
+    "xmind_revision": "ffd41a1732da32937c894cc8a945b5ac367715e1",
+    "sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "manifest_sha256": "62d099733957b63008c543893a25fadcfaf577b9d4784ccbba9249736dc2803a",
+    "native_executable_sha256": "3bdc75e462bb5da98a3b8b1ae24cbf7a9de1cef24f474732fe84cbe3196d7f78",
+    "xlang_runtime_source": "D:/CantorAI2026/xlang3/build/Release",
+    "xlang_runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+    "release_accepted": false
+  },
+  "provider": {
+    "name": "OpenAI",
+    "route": "Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing repository .config/providers.yaml profile; key was reused and omitted",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "run_id": "145505e6901e2cbb97c9105a7d4b189b",
+    "run_state": "completed",
+    "tool": "create_file",
+    "operation_id": "457a245a5010dd8404bc52b2c83874b5",
+    "operation_state": "succeeded",
+    "approval": "Reviewed the exact proposed one-file content and approved creation in the VS Code sidebar",
+    "path": "xmind_vscode_acceptance_smoke.py",
+    "source_sha256": "be9d8fd72b0b37c989c531df5278a0ef044296b3938dba6bfc1ab44dc4b46db2",
+    "model_calls": [
+      {
+        "input_tokens": 5037,
+        "output_tokens": 88,
+        "total_tokens": 5125,
+        "cached_tokens": 4976,
+        "reasoning_tokens": 12,
+        "first_token_ms": 1990,
+        "elapsed_ms": 2480
+      },
+      {
+        "input_tokens": 5254,
+        "output_tokens": 27,
+        "total_tokens": 5281,
+        "cached_tokens": 5034,
+        "reasoning_tokens": 0,
+        "first_token_ms": 1350,
+        "elapsed_ms": 1650
+      }
+    ]
+  },
+  "xlang3_execution": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-ffd41a1/xlang3.exe",
+    "script": "D:/CantorAI2026/TestProj/xmind_vscode_acceptance_smoke.py",
+    "stdout": "5",
+    "exit_code": 0
+  },
+  "cleanup": {
+    "test_file_removed_after_hash_and_execution_verification": true
+  },
+  "tests": {
+    "command": "npm.cmd test",
+    "suite": "extensions/vscode",
+    "passed": 391,
+    "failed": 0
+  },
+  "limitations": [
+    "This verifies the current VS Code extension source against the staged xMind runtime at ffd41a1; the runtime is not the current HEAD runtime and is explicitly marked releaseAccepted=false.",
+    "The live task verifies saved-key discovery, one approved new-file effect, actual usage metrics and xlang3 execution; it does not establish broad coding reliability or a full project build."
+  ]
+}
