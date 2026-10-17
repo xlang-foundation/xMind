@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-16",
+  "client": "unified xMind CLI",
+  "binary": "build/a2a-native/Release/xmind.exe",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/live-acceptance-20261016",
+  "provider": "openai",
+  "route": "openai.responses",
+  "model": "gpt-5.6-sol",
+  "credentials_reentered": false,
+  "session_id": "6574b7dd6140d896eeae44ddbdde0a8b",
+  "runs": {
+    "inspection_and_proposal": {
+      "run_id": "0a142bea8ea5d9dcca49c72faf2ec236",
+      "state": "completed",
+      "workspace_tools": ["list_files", "read_file", "search_files"],
+      "user_reviewed_exact_diff_before_edit": true
+    },
+    "approved_edit": {
+      "run_id": "13876570723e06d6e25889b4ee78a38d",
+      "state": "completed",
+      "operation_id": "05066736fc5b78aa497d84fa8ab9e96c",
+      "operation_state": "succeeded",
+      "operation_actor": "local-owner",
+      "tool": "replace_file",
+      "path": "model-zoo/frontend/src/App.vue",
+      "change": "Added aria-label announcing the API reference opens in a new tab.",
+      "file_sha256": "d21d8f847503cd2da4835c9cdbdfeadb30361e5070a7741290f698b7b98bdfff",
+      "disk_hash_matches_native_receipt": true
+    },
+    "build": {
+      "run_id": "dc823be22943c6a50b7ef71cb27d56d7",
+      "state": "completed",
+      "tool": "run_process",
+      "profile": "powershell",
+      "working_directory": "model-zoo/frontend",
+      "command": "npm run build",
+      "exit_code": 0,
+      "vite_modules_transformed": 37,
+      "duration_ms": 613
+    }
+  },
+  "preserved": ["API behavior", "sample-data disclosure"],
+  "notes": ["TestProj has no Git repository; the acceptance is recorded in the xMind repository.", "No provider key, server token, or private credential was recorded."]
+}

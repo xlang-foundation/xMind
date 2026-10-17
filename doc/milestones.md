@@ -1,6 +1,6 @@
 # Reviewable milestones
 
-## First target: usable local coding in the webpage and VS Code — active
+## First target: usable local coding in the webpage and VS Code — passed 2026-10-16
 
 The first product acceptance gate is a complete local coding task through both
 clients, using the same xMind backend and a real opened project such as
@@ -17,7 +17,8 @@ Acceptance requires an end-to-end coding prompt against TestProj in the actual
 webpage and VS Code, with file changes reviewed and approved in each client,
 plus restart/session persistence and cross-client visibility checks. Existing
 component tests and synthetic provider contracts are supporting evidence only;
-they do not satisfy this gate. This is the active first priority.
+they do not satisfy this gate. This first priority is now accepted; work
+continues against the wider OSS objective.
 
 OpenCode v2 is one reference for selecting useful coding capabilities. It is
 not an API, protocol, compatibility, or full-parity target. xMind implements
@@ -34,7 +35,9 @@ and [VS Code record](evidence/testproj-vscode-live-coding-20261015.json)
 capture those results. The first coding loop is therefore demonstrated in
 each client. Native restart persistence passes its shared-backend contract, and
 the browser/VS Code profile check confirms the same selected session identity
-and 31 saved messages. At the time of these earlier records, the shared transcript still awaited live VS Code confirmation. The 2026-10-16 live acceptance below has since closed that check.
+and 31 saved messages. At the time of these earlier records, the shared transcript still awaited live
+VS Code confirmation. The 2026-10-16 live acceptance below has since closed
+that check.
 
 2026-10-16 live cross-client coding acceptance: VS Code and the external
 webpage both attached to the local TestProj profile and used its saved OpenAI
@@ -59,8 +62,20 @@ the existing TestProj local profile, discovered its saved Claude model without
 re-entering credentials, and completed a read-only framework inspection using
 real workspace `list_files` and `read_file` calls. The run completed and its
 persisted transcript records the provider/model and tool results. This confirms
-the console uses the same managed backend and workspace; the CLI coding-edit
-flow remains a separate acceptance item. [Evidence](evidence/xmind-cli-live-framework-inspection-20261016.json).
+the console uses the same managed backend and workspace; the CLI coding-edit flow was a separate acceptance item at that checkpoint; the live CLI coding
+acceptance below has since closed it. [Evidence](evidence/xmind-cli-live-framework-inspection-20261016.json).
+
+2026-10-16 unified CLI live coding acceptance: the interactive `xmind` console
+attached to the existing TestProj local profile and reused its saved OpenAI
+Responses configuration (`gpt-5.6-sol`). The model inspected the frontend,
+proposed a one-line accessible name for the API reference link, and xMind
+presented the native `replace_file` operation with its exact diff. The CLI
+approved that exact operation through `/allow`; the journal recorded
+`operation.succeeded` with actor `local-owner`. The resulting `App.vue` was
+independently read from disk and its SHA-256 matched the native receipt. A
+separate approved `run_process` call ran only `npm run build` from
+`model-zoo/frontend`; it exited 0, transformed 37 Vite modules, and completed in
+613 ms. The sample-data disclosure remained intact. [Sanitized CLI coding evidence](evidence/xmind-cli-live-coding-20261016.json).
 
 2026-10-16 shared session catalogue check: read-only `sessions` requests through
 the managed CLI profile and the browser's authenticated local view adapter
@@ -76,9 +91,7 @@ frontend successfully. The run's first model response arrived in 27.48 seconds
 and completed in 46.67 seconds; the follow-up edit and validation completed
 with 2.90 seconds to first token. See the [live browser record](evidence/testproj-webpage-coding-live-20261016.json).
 The native restart and history-persistence contract passes; the TestProj browser
-and VS Code state also identify the same saved conversation. Direct visual
-confirmation of that transcript in the VS Code pane and a coding turn from this
-shared conversation remain open.
+and VS Code state also identify the same saved conversation. At that checkpoint, direct visual confirmation and a coding turn from the shared conversation remained open. The live cross-client acceptance above has since closed both checks.
 The strengthened `native_local_view_contract` now passes **1/1**: its real
 native SQLite server, production browser adapter and VS Code `BackendClient`
 share a session, restart the backend, then each read the exact same saved
