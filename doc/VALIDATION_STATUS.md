@@ -11,6 +11,22 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Provider-profile model selection with dynamic planning — 2026-10-16
+
+Workspace-backed provider profiles expose the native planning tools to the
+ordinary coding Agent. When a conversation selected a model from a key-only
+profile, planning capability construction compared that admitted run model
+against the profile's empty default and rejected the run. `AgentRunner` now
+binds the already admitted model into a copy of its settings before computing
+the planning authority digest. The general authority binder still rejects
+unconfigured models. Gemini and DeepSeek profile fixtures now assert the full
+workspace tool set, including `plan_tasks`, `revise_plan`, and `inspect_plan`.
+The focused Release contracts passed **5/5**, and the complete native Release
+gate passed **147/147** in 363.02 seconds against xlang3 `fcecf499`. The exact
+CTest transcript, source/runtime revisions, executable hash, and command are
+in [the evidence record](evidence/provider-profile-planning-20261016.json) and
+[full test log](evidence/provider-profile-planning-20261016.log).
+
 ## Native runtime inventory with xlang3 bytecode caches — 2026-10-17
 
 xlang3 can create `.pyc` files inside `__pycache__` directories in the bundled

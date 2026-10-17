@@ -229,8 +229,10 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     DynamicPlanCapabilities caps;static_cast<DynamicPlanningPolicy&>(caps)=*settings_.planning;
     caps.tool_catalog_json="{}";
     caps.workspace_identity=workspace_->identity();caps.provider_identity_json=execution_identity(settings_,model);
-    caps.backend_identity=agent_authority_identity(settings_,model,caps.workspace_identity,
-        agent_authority_credentials(persistence_,settings_));
+    auto admitted_settings=settings_;
+    admitted_settings.provider.model=model;
+    caps.backend_identity=agent_authority_identity(admitted_settings,model,caps.workspace_identity,
+        agent_authority_credentials(persistence_,admitted_settings));
     DynamicPresetCapability inspect;inspect.id="workspace.inspect";
     for(const auto& definition:workspace_->definitions())inspect.tools.push_back(definition.name);
     for(const auto& definition:SkillContext::definitions())inspect.tools.push_back(definition.name);

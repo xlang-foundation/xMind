@@ -59,7 +59,7 @@ const peer=createServer((request,response)=>{
   }
   assert.equal(request.url,'/v1beta/models/fixture-gemini:streamGenerateContent?alt=sse');
   assert.deepEqual(Object.keys(body).sort(),['contents','generationConfig','systemInstruction','tools']);
-  assert.deepEqual(body.tools[0].functionDeclarations.map(tool=>tool.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill']);
+  assert.deepEqual(body.tools[0].functionDeclarations.map(tool=>tool.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','plan_tasks','revise_plan','inspect_plan']);
   if(prompt==='Selected model in key-only Gemini profile'){
    assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);reply(response,[{text:'Synthetic key-only Gemini selected-model reply.'}],5,2,'synthetic-key-only-selected-model');return;
   }

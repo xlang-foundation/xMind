@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-16",
+  "scope": "Provider-profile session-selected models with dynamic planning capabilities",
+  "source": {
+    "xmind_base_commit": "7bcd835",
+    "changed_files": [
+      "Native/src/agent_runner.cpp",
+      "Native/tests/deepseek_profile_runtime_peer.mjs",
+      "Native/tests/gemini_profile_runtime_peer.mjs"
+    ],
+    "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+    "release_executable_sha256": "0B23BD43E4B9DEE5FE13CFEA8786CCC513E99BF4D76D487EB08B9B50C8D45EFF"
+  },
+  "change": "Planning authority now seals the model admitted for the current run while preserving the general configured-model allowlist.",
+  "verification": {
+    "release_build": "cmake --build .agentflow/runtime-generation-fix-build --config Release --parallel 10",
+    "focused_contracts": {
+      "passed": 5,
+      "failed": 0,
+      "tests": [
+        "native_agent_authority_contract",
+        "native_agent_runner_contract",
+        "native_deepseek_profile_runtime_contract",
+        "native_gemini_profile_runtime_contract",
+        "native_provider_profile_runtime_contract"
+      ]
+    },
+    "full_release_ctest": {
+      "command": "ctest --test-dir .agentflow/runtime-generation-fix-build -C Release --output-on-failure --parallel 4",
+      "passed": 147,
+      "failed": 0,
+      "elapsed_seconds": 363.02,
+      "log": "provider-profile-planning-20261016.log"
+    }
+  },
+  "limits": [
+    "This validates local Release source contracts, not hosted runtime provenance or a new installed VS Code package."
+  ]
+}
