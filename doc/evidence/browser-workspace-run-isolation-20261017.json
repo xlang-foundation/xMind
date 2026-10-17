@@ -40,6 +40,7 @@
   },
   "automated_tests": {
     "browser_connection_suite": {"passed": 30, "failed": 0},
+    "full_browser_side_suite": {"command": "node --test views/browser/tests/*.test.cjs", "passed": 134, "failed": 0, "duration_milliseconds": 15744.0522},
     "vscode_extension_suite": {"passed": 390, "failed": 0}
   },
   "limits": [

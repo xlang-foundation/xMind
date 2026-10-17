@@ -64,8 +64,9 @@ TestProj run selected, switching to the existing `frontend` workspace (two
 registered folders, no sessions) cleared the run selector and detail view; no
 TestProj run metadata remained visible. Switching back restored the same
 TestProj conversation and completed run. The backend process stayed live across
-the adapter refresh. The workspace regression suite passes **30/30** and the
-VS Code suite passes **390/390**. This verifies browser workspace/run isolation
+the adapter refresh. The workspace regression suite passes **30/30**, the full
+browser-side suite passes **134/134**, and the VS Code suite passes **390/390**.
+This verifies browser workspace/run isolation
 on the current source; it is not another model inference or coding edit, and
 the development runtime is not release accepted. [Evidence](evidence/browser-workspace-run-isolation-20261017.json).
 
