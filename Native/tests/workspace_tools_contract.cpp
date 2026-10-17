@@ -196,7 +196,9 @@ int main(int argc,char** argv) {
         for(const auto* source:{R"({"path":"README.txt","offset":0})",R"({"path":"README.txt","offset":-1})",R"({"path":"README.txt","offset":1.0})",R"({"path":"README.txt","offset":true})",R"({"path":"README.txt","offset":67108865})",R"({"path":"README.txt","offset":18446744073709551615})",R"({"path":"README.txt","limit":null})",R"({"path":"README.txt","limit":0})",R"({"path":"README.txt","limit":2001})",R"({"path":"README.txt","offset":1,"offset":2})"})rejects<std::invalid_argument>([&]{tools.invoke("read_file",source);});
         rejects<std::invalid_argument>([&]{tools.invoke("list_files",R"({"path":"sub","offset":1})");});
         rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",0);});rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",1,2001);});
-        require(tools.definitions().size()==6,"Available definitions must match implemented tools");
+        const auto definitions=tools.definitions();require(definitions.size()==6,"Available definitions must match implemented tools");
+        const auto read_definition=std::find_if(definitions.begin(),definitions.end(),[](const auto& definition){return definition.name=="read_file";});
+        require(read_definition!=definitions.end()&&read_definition->description.find("use search_files to locate the relevant symbol")!=std::string::npos&&read_definition->description.find("focused limit around the match")!=std::string::npos,"Model guidance must lead with targeted source reads for focused coding work");
         const auto glob=tools.glob_files("glob-src/**/*.{cpp,hpp}");
         require(glob.paths==std::vector<std::string>{"glob-src/main.cpp","glob-src/main.hpp","glob-src/nested/item1.cpp","glob-src/nested/item2.hpp","glob-src/nested/\xe4\xb8\xad\xe6\x96\x87\xf0\x9f\x98\x80.cpp"},"Glob must support zero/multiple directory levels and brace alternatives with actual UTF-8 filenames");
         require(glob.truncated&&glob.skipped_entries>=2,"Unsafe hard links and junctions must be skipped with explicit incomplete coverage");
