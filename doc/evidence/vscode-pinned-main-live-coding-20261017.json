@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live VS Code coding, restore, and integrated workspace-terminal acceptance on pinned xlang3 main",
+  "xmind_revision": "cb0a2195f85b0704e32cd090fda16aca59c665d8",
+  "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "vscode": {
+    "extension_host_window": "[Extension Development Host] Welcome - TestProj - Visual Studio Code",
+    "isolated_user_data_profile": "xMind/.agentflow/vscode-current-acceptance/user-data",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "backend_root": "D:/CantorAI2026/TestProj",
+    "provider": "OpenAI Responses",
+    "credential_source": "Existing .config/providers.yaml profile; secret omitted",
+    "model": "gpt-5.6-sol",
+    "discovered_model_count": 20
+  },
+  "runtime": {
+    "kind": "local development runtime",
+    "release_accepted": false,
+    "runtime_manifest_sha256": "c494d94b6e334741a650d726eb1f397fce9ab344b93a968da7a946705284125a",
+    "xmind_executable_sha256": "da17992c6ab204daf9b26b50ed0c00517d6aad1851d5976ee8b916f8b692d0fd",
+    "xlang3_executable_sha256": "77ddc9901615d6f48238b17418a579dbbd6bf7a1dcb4c30be626400710f7bcd0",
+    "xlang3_runtime_dll_sha256": "9dc0e5406ddc5c31f590224d02b8eb5b6e13e87c951ffba7f997b2334737dacd"
+  },
+  "coding_run": {
+    "run_id": "7a505f75482a3e2dbfe8f8cd8eb1df3b",
+    "run_state": "completed",
+    "prompt": "Create exactly one new file named xmind_vscode_pinned_runtime_acceptance.py in this workspace. It must print exactly 5 when run as a script. Do not modify any existing files or create any other files. Return its exact path and contents.",
+    "operation": "create_file",
+    "operation_id": "6af353067ca79fdad4dbd85634c2cf2a",
+    "operation_state": "succeeded",
+    "approval": "Exact one-file creation reviewed and approved in the VS Code xMind sidebar",
+    "path": "D:/CantorAI2026/TestProj/xmind_vscode_pinned_runtime_acceptance.py",
+    "contents": "print(5)\n",
+    "source_sha256": "082411d66dca409ce8602f74bbed4bd25e4bcd6f8eced3234d048ee3af672ce5",
+    "model_calls": [
+      {
+        "input_tokens": 5205,
+        "output_tokens": 61,
+        "total_tokens": 5266,
+        "first_token_seconds": 1.88
+      },
+      {
+        "input_tokens": 5392,
+        "output_tokens": 28,
+        "total_tokens": 5420,
+        "first_token_seconds": 0.94
+      }
+    ]
+  },
+  "execution": {
+    "terminal": "VS Code integrated xMind workspace terminal (cmd.exe), working directory D:/CantorAI2026/TestProj",
+    "command": "D:/CantorAI2026/xMind/.agentflow/webpage-current-source-runtime-20261017/xlang3.exe D:/CantorAI2026/TestProj/xmind_coding_smoke.py",
+    "stdout": "Hello from current xMind VS Code, TestProj!",
+    "exit_code": 0,
+    "runtime": "Pinned xlang3 executable from the staged local development runtime",
+    "observation": "Opened the workspace terminal from the xMind VS Code sidebar, ran the existing TestProj script with xlang3, and confirmed %ERRORLEVEL% was 0. The first attempt used PowerShell '&' syntax in cmd.exe and failed; the corrected CMD invocation succeeded."
+  },
+  "cleanup": {
+    "restore_run_id": "4ca2b06e62185e511aad8690aa8da81f",
+    "restore_operation_id": "874e7b955ae114fe46ab82974f7056c1-0",
+    "restore_child_run_id": "13a991a044906d3fb854bcbbdab6d120",
+    "restore_state": "succeeded",
+    "approval": "Exact inverse deletion reviewed and approved in the VS Code xMind sidebar",
+    "test_file_absent_after_restore": true
+  },
+  "limitations": [
+    "This verifies one bounded live VS Code task, approved file creation, token and timing display, manual integrated-terminal execution with xlang3, and journaled restore. It does not prove broad multi-file coding reliability or an extension-managed build workflow.",
+    "The staged runtime is local development validated and explicitly not release accepted.",
+    "The VS Code extension suite passed 391/391 separately; this live acceptance is not a full release-package gate."
+  ]
+}

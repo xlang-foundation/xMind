@@ -3587,5 +3587,27 @@ submitted through the webpage terminal, but its output could not be read
 conclusively from the narrow terminal viewport, so integrated-terminal output
 remains an open check. This is one bounded live browser coding task on a local
 development runtime (`release_accepted=false`), not broad coding reliability
-or a full Vue project build. The VS Code suite passes **391/391**; a new live
-VS Code task against this exact pinned-main runtime remains unverified.
+or a full Vue project build. The VS Code suite passes **391/391**. A matching
+live VS Code task against the exact pinned-main runtime and its integrated
+terminal check are recorded below.
+
+## Pinned-main VS Code coding and terminal acceptance — 2026-10-17
+
+The current VS Code extension connected to TestProj in its secondary sidebar,
+reused the saved OpenAI profile, discovered 20 models, and completed a fresh
+`gpt-5.6-sol` coding run. After reviewing and approving the exact proposal,
+the backend created one Python file with `print(5)` and rendered provider
+token counts and measured first-token timings. The native restore flow applied
+the exact inverse deletion after approval; the UI showed the restore succeeded
+and filesystem verification confirmed the temporary file was absent.
+
+The xMind workspace-terminal button opened a VS Code integrated `cmd.exe`
+terminal rooted at TestProj. Running the existing `xmind_coding_smoke.py` with
+the staged xlang3 executable printed `Hello from current xMind VS Code,
+TestProj!`; `%ERRORLEVEL%` returned `0`. The initial command used PowerShell
+syntax and failed in `cmd.exe`; the corrected CMD command succeeded. Runtime
+provenance matches xMind `cb0a219` and pinned xlang3 main `fcecf499`; the
+runtime remains a local development bundle (`releaseAccepted=false`). This
+verifies one bounded live coding and terminal path, not broad multi-file
+reliability or an extension-managed build. [Run, runtime hashes, metrics,
+execution, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
