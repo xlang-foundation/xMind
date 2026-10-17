@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live VS Code xMind coding edit, approval, and xlang3 execution in TestProj",
+  "xmind_repository_revision": "903ebda83b13cf3e8c9fd75a9a0c4228c827dc32",
+  "extension": {
+    "version": "0.1.13",
+    "loaded_from": "D:/CantorAI2026/xMind/extensions/vscode",
+    "provider_profile_configured": true,
+    "provider": "OpenAI",
+    "route": "openai.responses",
+    "model": "gpt-5.6-sol",
+    "catalogue_models_fetched": 20,
+    "credential_source": "Saved local provider profile; secret omitted"
+  },
+  "workspace": {
+    "client": "VS Code Extension Development Host",
+    "root": "D:/CantorAI2026/TestProj"
+  },
+  "native_runtime": {
+    "revision": "e9c970c08d7f18f7b42ef3683c981af89b52f2fa",
+    "release_accepted": false,
+    "note": "The live VS Code host used its existing staged runtime. Current-source browser acceptance separately used the 961968e native build."
+  },
+  "coding_run": {
+    "run_id": "7a1b40f8b1d55e81c5cc2bb9e40df75a",
+    "operation_id": "1d4d57e003c7f91daa922de80f83ed12",
+    "approved_change": {
+      "path": "xmind_coding_smoke.py",
+      "before": "return f'Hello from current xMind, {name}!'",
+      "after": "return f'Hello from current xMind VS Code, {name}!'",
+      "sha256_after": "3E5B1404AEC12EE3F6BF49000CAAD042B3FA05A1954917F5BB6B1501F05D71BE"
+    },
+    "process_operation_id": "8be8d819632dce4ec89436d4863ca1e8",
+    "profile": "xlang3",
+    "command": [
+      "D:/CantorAI2026/xlang3/build/Release/xlang3.exe",
+      "-B",
+      "xmind_coding_smoke.py"
+    ],
+    "exit_code": 0,
+    "elapsed_ms": 70,
+    "stdout": "Hello from current xMind VS Code, TestProj!\r\n",
+    "stderr_bytes": 0
+  },
+  "provider_usage": {
+    "input_tokens": 5613,
+    "output_tokens": 41,
+    "total_tokens": 5654,
+    "cached_tokens": 5367,
+    "reasoning_tokens": 0
+  },
+  "limitations": [
+    "This is one bounded live coding acceptance, not broad coding-task reliability or OpenCode feature parity.",
+    "The VS Code run used the existing e9c970c staged Native runtime; a repeat against the current 961968e Native runtime is still required."
+  ]
+}

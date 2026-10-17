@@ -3308,6 +3308,19 @@ reliability across large changes, and this turn did not perform a new live
 VS Code edit; the extension suite passed 390/390.
 [Exact runtime and run evidence](evidence/current-source-webpage-coding-20261017.json).
 
+## Live VS Code coding acceptance — 2026-10-17
+
+The VS Code Extension Development Host opened `D:/CantorAI2026/TestProj`,
+reused the saved OpenAI profile and fetched 20 models. A bounded prompt changed
+one greeting in `xmind_coding_smoke.py`; after the approval card was reviewed,
+the extension ran `xlang3 -B xmind_coding_smoke.py` with exit code 0 and printed
+`Hello from current xMind VS Code, TestProj!`. This proves the live VS Code
+edit, approval and process flow. The host used its existing staged Native
+runtime at revision `e9c970c`; current-source webpage acceptance used the
+`961968e` Native build, so repeating the VS Code acceptance on that runtime is
+still required. This is one bounded task, not broad reliability or parity
+evidence. [Exact run evidence](evidence/vscode-current-source-coding-20261017.json).
+
 ## Bounded webpage coding and xlang3 execution — 2026-10-17
 
 A fresh TestProj webpage session created the approved `xmind_coding_smoke.py`
