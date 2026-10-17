@@ -1,6 +1,7 @@
 // Actual native pool and xlang3 SQLite; no model transport is used. Repository
 // task metadata below is explicitly synthetic and does not claim inference.
 #include "agentflow/native_child_executor.hpp"
+#include "agentflow/persistence_service.hpp"
 #include "nlohmann/json.hpp"
 #include <atomic>
 #include <chrono>
