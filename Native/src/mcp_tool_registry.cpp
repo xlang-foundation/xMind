@@ -8,6 +8,9 @@
 #include <set>
 #include <sstream>
 #include <iomanip>
+#include <chrono>
+#include <random>
+#include <thread>
 
 namespace agentflow {
 namespace {
@@ -37,6 +40,23 @@ std::string file_uri(std::string path){
     constexpr char hex[]="0123456789ABCDEF";std::string encoded;encoded.reserve(uri.size());
     for(const auto byte:uri){const auto c=static_cast<unsigned char>(byte);if((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='-'||c=='_'||c=='.'||c=='~'||c=='/'||c==':' )encoded.push_back(static_cast<char>(c));else{encoded.push_back('%');encoded.push_back(hex[c>>4]);encoded.push_back(hex[c&15]);}}
     return encoded;
+}
+std::string mcp_input_id(){std::random_device source;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<static_cast<std::uint32_t>(source());return out.str();}
+std::int64_t unix_ms(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
+void validate_elicitation_request(const Json& request,McpToolClient::Deadline deadline,std::stop_token cancel){
+    if(!request.is_object()||request.value("method",std::string{})!="elicitation/create"||!request.contains("params")||!request["params"].is_object())throw McpProtocolError("Unsupported embedded MCP input request");
+    const auto& params=request["params"];
+    if(params.value("mode",std::string("form"))!="form"||!params.contains("message")||!params["message"].is_string()||params["message"].get<std::string>().empty()||params["message"].get<std::string>().size()>8192||!params.contains("requestedSchema")||!params["requestedSchema"].is_object())throw McpProtocolError("Invalid MCP form elicitation");
+    SchemaWorker().evaluate(params["requestedSchema"].dump(),std::nullopt,deadline,cancel);
+}
+std::string validate_elicitation_response(const Json& request,std::string_view source,McpToolClient::Deadline deadline,std::stop_token cancel){
+    const auto response=Json::parse(source);if(!response.is_object()||!response.contains("action")||!response["action"].is_string())throw McpProtocolError("Invalid MCP elicitation response");
+    const auto action=response["action"].get<std::string>();if(action!="accept"&&action!="decline"&&action!="cancel")throw McpProtocolError("Invalid MCP elicitation action");
+    if(action=="accept"){
+        if(response.size()!=2||!response.contains("content")||!response["content"].is_object())throw McpProtocolError("Accepted MCP elicitation requires object content");
+        const auto& params=request.at("params");SchemaWorker().evaluate(params.at("requestedSchema").dump(),response["content"].dump(),deadline,cancel);
+    }else if(response.size()!=1)throw McpProtocolError("Declined MCP elicitation cannot contain content");
+    return response.dump();
 }
 }
 struct McpToolRegistry::Impl {
@@ -161,8 +181,23 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         throw McpCatalogueChanged("MCP catalogue changed before dispatch; no effect occurred");
     }
     McpToolReply reply;McpReadOnlyReply readonly;
-    const McpInputFulfillment fulfill_input=[&](std::string_view raw)->std::optional<std::string>{
+    const McpInputFulfillment fulfill_input=[&](std::string_view request_key,std::string_view raw)->std::optional<std::string>{
         const auto request=Json::parse(raw);if(!request.is_object()||!request.contains("method")||!request["method"].is_string())throw McpProtocolError("Invalid embedded MCP input request");
+        if(request["method"]=="elicitation/create"){
+            validate_elicitation_request(request,deadline,cancel);
+            const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count();
+            if(remaining<=0||cancel.stop_requested())return std::nullopt;
+            McpInputRequestSpec pending;pending.id=mcp_input_id();pending.run_id=run;pending.operation_id=id;pending.server_config_id=state.config_id;pending.config_revision=state.revision;pending.peer_tool=entry.peer_name;pending.request_key=std::string(request_key);pending.request_json=request.dump();pending.expires_unix_ms=unix_ms()+std::min<std::int64_t>(remaining,3600000);
+            const auto pending_id=pending.id;state.store.publish_mcp_input_request(std::move(pending)).get();
+            for(;;){
+                if(cancel.stop_requested()){state.store.retire_mcp_input_request(pending_id,"cancelled").get();return Json{{"action","cancel"}}.dump();}
+                if(std::chrono::steady_clock::now()>=deadline){state.store.retire_mcp_input_request(pending_id,"expired").get();return Json{{"action","cancel"}}.dump();}
+                const auto current=state.store.mcp_input_request(pending_id).get();
+                if(current.state=="answered")return validate_elicitation_response(request,current.response_json,deadline,cancel);
+                if(current.state!="waiting")return Json{{"action","cancel"}}.dump();
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+        }
         if(request["method"]!="roots/list")return std::nullopt;
         auto roots=Json::array();for(const auto& folder:state.admitted_roots){
             const auto slash=folder.root.find_last_of("/\\");const auto name=slash==std::string::npos?folder.root:folder.root.substr(slash+1);

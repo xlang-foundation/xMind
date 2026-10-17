@@ -114,6 +114,16 @@ class BackendClient {
     executionIdentity(root);executionIdentity(request);planPreconditions(expected_revision,expected_state_sequence);validatePlanInputText(input_json);
     return validatePlanOwner(await this.request(`/v1/runs/${root}/plan/human/${request}`,{input_json,expected_revision,expected_state_sequence}),root);
   }
+  async mcpInputs(run) {
+    executionIdentity(run);const value=await this.request(`/v1/runs/${run}/mcp-inputs`);
+    if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||!Array.isArray(value.requests)||value.requests.length>32)throw new Error('Invalid MCP input request list.');
+  const seen=new Set();for(const item of value.requests){if(!item||typeof item!=='object'||Array.isArray(item)||Object.keys(item).sort().join(',')!=='config_revision,expires_unix_ms,id,operation_id,peer_tool,published_event_seq,request_json,run_id,server_config_id,state'||item.run_id!==run||item.state!=='waiting'||typeof item.peer_tool!=='string'||!item.peer_tool||item.peer_tool.length>128||!Number.isSafeInteger(item.config_revision)||item.config_revision<1||!Number.isSafeInteger(item.expires_unix_ms)||item.expires_unix_ms<=0||!Number.isSafeInteger(item.published_event_seq)||item.published_event_seq<1||typeof item.request_json!=='string'||new TextEncoder().encode(item.request_json).length>65536)throw new Error('Invalid MCP input request ownership.');executionIdentity(item.id);executionIdentity(item.operation_id);mcpServerIdentity(item.server_config_id);if(seen.has(item.id))throw new Error('Duplicate MCP input request.');seen.add(item.id);let request;try{request=JSON.parse(item.request_json);}catch{throw new Error('Invalid MCP input form.');}if(!request||typeof request!=='object'||Array.isArray(request)||request.method!=='elicitation/create'||!request.params||typeof request.params!=='object'||Array.isArray(request.params)||request.params.mode!==undefined&&request.params.mode!=='form'||typeof request.params.message!=='string'||!request.params.requestedSchema||typeof request.params.requestedSchema!=='object'||Array.isArray(request.params.requestedSchema))throw new Error('Unsupported MCP input form.');}
+    return value.requests;
+  }
+  async answerMcpInput(run,id,response_json) {
+    executionIdentity(run);executionIdentity(id);if(typeof response_json!=='string'||new TextEncoder().encode(response_json).length>16384)throw new Error('MCP input response exceeds limits.');const response=JSON.parse(response_json);if(!response||typeof response!=='object'||Array.isArray(response))throw new Error('MCP input response must be an object.');
+    const value=await this.request(`/v1/runs/${run}/mcp-inputs/${id}`,{response_json});if(!value||value.id!==id||value.run_id!==run||value.state!=='answered')throw new Error('MCP input response ownership changed.');return value;
+  }
   async resumePlan(root,expected_revision,expected_state_sequence) {
     executionIdentity(root);planPreconditions(expected_revision,expected_state_sequence);
     return validatePlanOwner(await this.request(`/v1/runs/${root}/plan/resume`,{expected_revision,expected_state_sequence}),root);

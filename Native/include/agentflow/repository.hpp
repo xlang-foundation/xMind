@@ -11,6 +11,7 @@
 #include "agentflow/session_model_records.hpp"
 #include "agentflow/backend_owner.hpp"
 #include "agentflow/mcp_oauth_refresh_records.hpp"
+#include "agentflow/mcp_input_records.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include <memory>
 #include <vector>
@@ -197,6 +198,11 @@ public:
     Operation cancel_operation(const std::string& id,const OperationSpec& actual);
     Operation expire_operation(const std::string& id);
     Operation finish_operation(const std::string& id,OperationState outcome,const std::string& result_json);
+    McpInputRequest publish_mcp_input_request(const McpInputRequestSpec& spec);
+    McpInputRequest mcp_input_request(const std::string& id);
+    std::vector<McpInputRequest> mcp_input_requests(const std::string& run_id);
+    McpInputRequest answer_mcp_input_request(const std::string& run_id,const std::string& id,const std::string& response_json,const std::string& actor);
+    McpInputRequest retire_mcp_input_request(const std::string& id,const std::string& reason);
     // Explicitly releases a retired, fully captured run_process quarantine.
     // The operator note is durable audit data; this never claims the command
     // had no side effects or retries it.

@@ -21,7 +21,7 @@ struct McpInputRequired {
     std::map<std::string,std::string> input_requests_json;
     std::optional<std::string> request_state;
 };
-using McpInputFulfillment=std::function<std::optional<std::string>(std::string_view request_json)>;
+using McpInputFulfillment=std::function<std::optional<std::string>(std::string_view request_key,std::string_view request_json)>;
 struct McpToolReply {std::string request_id,response_json,result_json;bool is_error=false;std::optional<McpInputRequired> input_required;};
 struct McpDispatchFailure : McpTransportError {
     bool possibly_sent;

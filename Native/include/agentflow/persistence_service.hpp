@@ -185,6 +185,11 @@ public:
     std::future<Operation> cancel_operation(std::string id,OperationSpec actual);
     std::future<Operation> expire_operation(std::string id);
     std::future<Operation> finish_operation(std::string id,OperationState outcome,std::string result_json);
+    std::future<McpInputRequest> publish_mcp_input_request(McpInputRequestSpec spec);
+    std::future<McpInputRequest> mcp_input_request(std::string id);
+    std::future<std::vector<McpInputRequest>> mcp_input_requests(std::string run_id);
+    std::future<McpInputRequest> answer_mcp_input_request(std::string run_id,std::string id,std::string response_json,std::string actor);
+    std::future<McpInputRequest> retire_mcp_input_request(std::string id,std::string reason);
     std::future<Operation> reconcile_interrupted_process(std::string id,std::string actor,std::string note);
     std::future<CredentialMetadata> put_credential(std::string scope,std::string id,
         std::string purpose,std::string label,SecretBytes secret,std::int64_t expected_revision);

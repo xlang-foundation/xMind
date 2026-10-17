@@ -384,6 +384,21 @@ std::future<Operation> PersistenceService::claim_operation(std::string id,Operat
 std::future<Operation> PersistenceService::finish_operation(std::string id,OperationState outcome,std::string result) {
     return impl_->submit([id=std::move(id),outcome,result=std::move(result)](Repository& repository){return repository.finish_operation(id,outcome,result);});
 }
+std::future<McpInputRequest> PersistenceService::publish_mcp_input_request(McpInputRequestSpec spec) {
+    return impl_->submit([spec=std::move(spec)](Repository& repository){return repository.publish_mcp_input_request(spec);});
+}
+std::future<McpInputRequest> PersistenceService::mcp_input_request(std::string id) {
+    return impl_->observe([id=std::move(id)](Repository& repository){return repository.mcp_input_request(id);});
+}
+std::future<std::vector<McpInputRequest>> PersistenceService::mcp_input_requests(std::string run_id) {
+    return impl_->observe([run_id=std::move(run_id)](Repository& repository){return repository.mcp_input_requests(run_id);});
+}
+std::future<McpInputRequest> PersistenceService::answer_mcp_input_request(std::string run_id,std::string id,std::string response,std::string actor) {
+    return impl_->submit([run_id=std::move(run_id),id=std::move(id),response=std::move(response),actor=std::move(actor)](Repository& repository){return repository.answer_mcp_input_request(run_id,id,response,actor);});
+}
+std::future<McpInputRequest> PersistenceService::retire_mcp_input_request(std::string id,std::string reason) {
+    return impl_->submit([id=std::move(id),reason=std::move(reason)](Repository& repository){return repository.retire_mcp_input_request(id,reason);});
+}
 std::future<Operation> PersistenceService::cancel_operation(std::string id,OperationSpec spec) {
     return impl_->submit([id=std::move(id),spec=std::move(spec)](Repository& repository){return repository.cancel_operation(id,spec);});
 }

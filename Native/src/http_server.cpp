@@ -17,6 +17,7 @@
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/command_context.hpp"
 #include "agentflow/agent_permission_grants.hpp"
+#include "agentflow/schema_worker.hpp"
 #if defined(_WIN32)
 #include "agentflow/a2a_client.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
@@ -191,6 +192,16 @@ std::string new_id() {
     std::random_device random;std::ostringstream value;
     value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();
     return value.str();
+}
+Json encode(const McpInputRequest& value){return {{"id",value.id},{"run_id",value.run_id},{"operation_id",value.operation_id},{"server_config_id",value.server_config_id},{"config_revision",value.config_revision},{"peer_tool",value.peer_tool},{"request_json",value.request_json},{"state",value.state},{"expires_unix_ms",value.expires_unix_ms},{"published_event_seq",value.published_event_seq}};}
+void validate_mcp_input_response(const McpInputRequest& pending,const std::string& source){
+    const auto response=Json::parse(source);if(!response.is_object()||!response.contains("action")||!response["action"].is_string())throw std::invalid_argument("MCP response requires an action");
+    const auto action=response["action"].get<std::string>();if(action!="accept"&&action!="decline"&&action!="cancel")throw std::invalid_argument("MCP response action must be accept, decline or cancel");
+    const auto request=Json::parse(pending.request_json);if(request.value("method",std::string{})!="elicitation/create"||!request.contains("params")||!request["params"].is_object()||!request["params"].contains("requestedSchema")||!request["params"]["requestedSchema"].is_object())throw Conflict("MCP elicitation request is no longer valid");
+    if(action=="accept"){
+        if(response.size()!=2||!response.contains("content")||!response["content"].is_object())throw std::invalid_argument("Accepted MCP response requires object content");
+        SchemaWorker().evaluate(request["params"]["requestedSchema"].dump(),response["content"].dump(),std::chrono::steady_clock::now()+std::chrono::seconds(2));
+    }else if(response.size()!=1)throw std::invalid_argument("Declined MCP response cannot contain content");
 }
 Json encode(const Session& value) {Json result={{"id",value.id},{"title",value.title}};if(!value.parent_id.empty()){result["parent_id"]=value.parent_id;result["fork"]={{"session_id",value.parent_id},{"boundary_type",value.fork_boundary_type},{"message_id",value.fork_boundary_sequence?Json("msg_"+std::to_string(*value.fork_boundary_sequence)):Json(nullptr)}};}return result;}
 Json encode(const SessionInboxItem& value){Json result={{"id",value.id},{"session_id",value.session_id},{"content",value.content},{"state",value.state},{"created_ms",value.created_ms}};const auto files=Json::parse(value.files_json);if(!files.empty())result["files"]=files;if(!value.workspace_id.empty()){result["workspace_id"]=value.workspace_id;result["workspace_revision"]=value.workspace_revision;}if(!value.run_id.empty())result["run_id"]=value.run_id;return result;}
@@ -528,6 +539,7 @@ struct HttpServer::Impl {
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
+            static const std::regex run_mcp_input_route(R"(^/v1/runs/[A-Za-z0-9_-]+/mcp-inputs(/[A-Za-z0-9_-]+)?$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
@@ -536,7 +548,7 @@ struct HttpServer::Impl {
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
             const bool view_session_delete=request.method=="DELETE"&&std::regex_match(request.path,view_session_delete_route);
             const bool view_session_fork=request.method=="POST"&&std::regex_match(request.path,session_fork_route);
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||mcp_authorized||(stream&&request.method=="GET")||view_session_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||(stream&&request.method=="GET")||view_session_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -659,7 +671,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}});
         }));
         server.Get("/v1/info",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty())
@@ -1334,6 +1346,8 @@ struct HttpServer::Impl {
             reply(response,result);
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/mcp-inputs)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP input listing does not accept query parameters");Json items=Json::array();for(const auto& pending:persistence.mcp_input_requests(identifier(request.matches[1])).get())items.push_back(encode(pending));reply(response,{{"requests",std::move(items)}});}));
+        server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/mcp-inputs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>32768)throw std::invalid_argument("MCP input response exceeds limits");const auto input=body(request,{"response_json"});const auto raw=string_field(input,"response_json",16384);const auto run=identifier(request.matches[1]),id=identifier(request.matches[2]);const auto pending=persistence.mcp_input_request(id).get();if(pending.run_id!=run)throw NotFound("MCP input request does not belong to this run");validate_mcp_input_response(pending,raw);const auto answered=persistence.answer_mcp_input_request(run,id,raw,"local-owner").get();reply(response,encode(answered));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,false,false);}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/tree-events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,false,true);}));
         server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,true,true);}));

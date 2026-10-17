@@ -29,12 +29,18 @@ recognizes MCP `2026-07-28` `input_required` results, bounds and validates the
 embedded request identities/methods and opaque `requestState`, and preserves the
 payload for the operation journal. If no continuation owner can answer it, the
 registry records the call as unresolved and quarantines it; it never reports
-success or replays the tool. The Release wire/stdio/HTTP/effect contracts pass
+success or replays the tool. Form-mode `elicitation/create` requests now pause
+the owning tool operation, persist the exact request against its run and
+operation, and publish a durable event. The authenticated local webpage and
+VS Code view render bounded primitive fields and submit, decline or cancel one
+run-owned request. Accepted content is evaluated against the peer's requested
+schema in the native schema worker before it is returned. Pending forms expire
+with the operation, and interrupted runs retire them instead of replaying them.
+URL-mode elicitation, MCP sampling and `inputResponses` retries remain separate
+unsupported protocol work. The Release wire/stdio/HTTP/effect contracts pass
 **4/4**, including a real stdio peer that requests input before making an
-external effect. Durable input collection, `inputResponses` retries, human
-elicitation UI, restartable continuation, and legacy input-request handling are
-still unimplemented, so this is an explicit fail-safe boundary rather than full
-multi-round-trip support. See the [official MCP multi-round-trip description](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
+external effect. General restartable continuation and legacy input-request
+handling are not implemented, so unsupported requests fail closed. See the [official MCP multi-round-trip description](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
 and [current TypeScript SDK protocol guide](https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28).
 The Release build and the 25-contract MCP/agent/graph subset passed. One repeat
 hit a proposal timeout in `native_mcp_effect_contract`; the isolated contract
@@ -50,8 +56,8 @@ request ID. The response contains every verified folder in the current
 membership, including attached folders, while keeping opaque folder IDs
 private. Agent, graph and dynamic-plan MCP paths pass the exact admitted folder
 snapshot to the registry; the registry reopens each root and checks that the
-primary folder still matches. Unsupported requests, including elicitation and
-sampling, remain unresolved and are never treated as success or replayed. A
+primary folder still matches. Unsupported requests, including sampling, remain
+unresolved and are never treated as success or replayed. A
 constructor override had been dropping the root capability from the negotiated
 client identity; the client constructors now preserve and advertise it. The
 Release effect contract uses a real stdio peer and two temporary roots to check

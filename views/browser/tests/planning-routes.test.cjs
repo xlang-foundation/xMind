@@ -34,6 +34,12 @@ test('planning view allowlist exposes only scoped observation, human input and r
  for(const path of ['/v1/runs/owner/plan/human/question','/v1/runs/owner/plan/resume']){assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/runs/owner/plan/spawn','/v1/runs/owner/plan/state','/v1/runs/owner/plan/spec','/v1/runs/owner/plan/revise','/v1/runs/owner/plan/human/question/extra','/v1/runs/owner/plan/human/foreign%2Fid','/v1/runs/owner/plan/human/..','/v1/plans/plan/human/question'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
 });
+test('MCP elicitation routes are limited to run-scoped reads and one request answer',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ for(const path of ['/v1/runs/owner/mcp-inputs']){assert.equal(allowedApiRoute(path,'GET'),true);for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
+ for(const path of ['/v1/runs/owner/mcp-inputs/request']){assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
+ for(const path of ['/v1/runs/owner/mcp-inputs/','/v1/runs/owner/mcp-inputs/foreign%2Fid','/v1/runs/owner/mcp-inputs/request/extra','/v1/operations/request/mcp-inputs'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
+});
 test('view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication',async()=>{
  const {createBrowserServer}=await import('../server.mjs'),directory=await mkdtemp(join(tmpdir(),'xmind-planning-view-')),observed=[];
  for(const name of ['patch-review.js','index.html','browser.js','terminal.js','browser.css','xterm.css','xterm.js','xterm-fit.js','chat.js','chat.css','client.js','marked.js','purify.js'])await writeFile(join(directory,name),'/* Synthetic access adapter asset */');
@@ -50,6 +56,9 @@ test('view forwards only allowed planning requests at the configured native orig
   const enrollment=await fetch(expectedOrigin+'/ui/session',{method:'POST',headers:{...sameOrigin,Authorization:'Bearer '+master},body:'{}'});assert.equal(enrollment.status,200);const cookie=enrollment.headers.get('set-cookie').split(';')[0];
   const raw=' {"number":18446744073709551617,"decimal":1.00000000000000000001} ';const body=JSON.stringify({input_json:raw,expected_revision:2,expected_state_sequence:7});
   for(const path of ['/v1/agent/planning','/v1/runs/owner/plan'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
+  assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/mcp-inputs',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
+  const mcpResponse=JSON.stringify({response_json:'{"action":"accept","content":{"answer":"safe"}}'});assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/mcp-inputs/input-1',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:mcpResponse})).status,200);
+  const forwardedInput=observed.find(value=>value.path==='/v1/runs/owner/mcp-inputs/input-1');assert.equal(forwardedInput.method,'POST');assert.equal(forwardedInput.input,mcpResponse);assert.equal(forwardedInput.authorization,'View '+credential);assert.equal(forwardedInput.viewOrigin,expectedOrigin);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/human/question',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body})).status,200);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/resume',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:'{"expected_revision":2,"expected_state_sequence":8}'})).status,200);
   for(const path of ['/v1/sessions/session/context?model_id=model%3Avariant%2Fv1','/v1/sessions/session/context/requests/request?model_id=model%3Avariant%2Fv1'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);

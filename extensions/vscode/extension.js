@@ -230,7 +230,7 @@ async function activate(context) {
     graphSnapshot=root;graphChildren=owned;
     post({type:'graph',record:root,children,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
     for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
-    publishOperations(operations);post({type:'status',text:root.run.state});
+    publishOperations(operations);post({type:'status',text:root.run.state});await readMcpInputs(id,version);if(version!==generation||!panel)return;
     sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
     if(['completed','failed','cancelled'].includes(root.run.state)){
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
@@ -273,6 +273,7 @@ async function activate(context) {
       const operations = await client.operations(id);
       if (version !== generation) return;
       publishOperations(operations);
+      await readMcpInputs(id,version);if(version!==generation)return;
       if (['completed', 'cancelled', 'failed'].includes(run.state)) {
         // A terminal transition can occur between the event query and status query.
         const finalEvents = await client.events(id, cursor);
@@ -301,7 +302,7 @@ async function activate(context) {
     run=await client.status(id);if(version!==generation||!panel)return;
     validRoot(run);
     if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);await refreshGitChangesSnapshot().catch(()=>{});}
-    await readPlan(id,version);if(version!==generation||!panel)return;
+    await readPlan(id,version);if(version!==generation||!panel)return;await readMcpInputs(id,version);if(version!==generation||!panel)return;
     const history=await historyPager.refresh(),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
     sessionRuns=runs;presentRuns();post({type:'transcript',...history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version);
     pendingTreeEvents=!snapshot.caughtUp;
@@ -316,6 +317,7 @@ async function activate(context) {
     if(record.run.session_id!==sessionId)throw new Error('Plan conversation identity changed');
     planReadConflicts=0;pendingPlanRead=false;planSnapshot=JSON.parse(JSON.stringify(record));post({type:'plan',record:planSnapshot});return planSnapshot;
   }
+  async function readMcpInputs(root,version){if(health?.mcp_elicitation!==true)return;const requests=[];for(const owner of new Set([root,...graphChildren.keys()])){requests.push(...await client.mcpInputs(owner));if(version!==generation||!panel||runId!==root)return;}post({type:'mcp-inputs',requests});}
   function planOwner(record,id){if(record?.plan?.id===id)return record;return record?.nested_plans?.find(owner=>owner.plan.id===id);}
   function readyPlan(record){const owners=[record,...(record?.nested_plans||[])];return record?.enabled&&record.run.state==='paused'&&record.plan&&!record.plan.halted&&owners.some(owner=>!owner.plan.halted&&(owner.plan.ready.length>0||owner.plan.report_ready))&&owners.some(owner=>owner.calls.some(call=>call.pending))&&owners.some(owner=>owner.questions.some(question=>question.state==='answered'));}
   async function controlPlan(message){
@@ -697,6 +699,10 @@ async function activate(context) {
           if(!vscode.workspace.isTrusted||!contextObservation)throw new Error('The current backend has no available context controls.');await readContext();await contextController.compact(message);
         }
         else if(message.type==='plan-input'||message.type==='plan-resume'){await controlPlan(message);}
+        else if(message.type==='mcp-input-answer'){
+          if(!vscode.workspace.isTrusted||typeof message.run_id!=='string'||typeof message.id!=='string'||typeof message.response_json!=='string'||(message.run_id!==runId&&!graphChildren.has(message.run_id)))throw new Error('Select the run that owns this MCP request.');
+          const root=runId,version=generation,target=client,available=await target.mcpInputs(message.run_id);if(panel!==view||version!==generation||target!==client||root!==runId||!available.some(item=>item.id===message.id))throw new Error('This MCP request has changed or expired.');await target.answerMcpInput(message.run_id,message.id,message.response_json);if(panel===view&&version===generation)await poll();
+        }
         else if (message.type === 'new') {
           const session = await client.createSession('VS Code session');
           await selectSession(session.id);

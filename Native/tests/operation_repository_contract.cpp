@@ -174,7 +174,7 @@ int main(int argc,char** argv) {
 #if defined(_WIN32)
          require(upgraded.credentials("local").size()==1,"v2 migration must preserve encrypted credential metadata");
 #endif
-         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==32,"Operation schema migration must advance to current version");}
+         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==33,"Operation schema migration must advance to current version");}
         const auto resource_database=(folder.path/"resources.sqlite").string();
         {
             Repository store(resource_database,roots);start(store,"a");start(store,"b");start(store,"c");
@@ -206,6 +206,17 @@ int main(int argc,char** argv) {
             start(migrated,"after-migration");OperationSpec next{"after-migration","another-workspace","mcp_tool",R"({"server_config_id":"shared-server"})",{"mcp-server:shared-server"}};
             migrated.request_operation("after-migration",next,expiry());migrated.decide_operation("after-migration",OperationDecision::allow,"fixture-controller");rejects<WorkspaceEffectUncertain>([&]{migrated.claim_operation("after-migration",next);});
             require(migrated.operation("resource-b").state==OperationState::uncertain,"Migration must not release or resolve an uncertain remote effect");
+        }
+        const auto input_database=(folder.path/"mcp-inputs.sqlite").string();
+        {
+            Repository store(input_database,roots);start(store,"input-run");OperationSpec mcp{"input-run",folder.path.string(),"mcp_tool",R"({"server_config_id":"server"})",{"mcp-server:server"}};
+            store.request_operation("input-operation",mcp,expiry());store.decide_operation("input-operation",OperationDecision::allow,"fixture-controller");store.claim_operation("input-operation",mcp);
+            McpInputRequestSpec request;request.id="input-request";request.run_id="input-run";request.operation_id="input-operation";request.server_config_id="server";request.config_revision=1;request.peer_tool="ask_user";request.request_key="opaque-peer-key";request.request_json=R"({"method":"elicitation/create","params":{"mode":"form","message":"Confirm the target","requestedSchema":{"type":"object","properties":{"target":{"type":"string"}},"required":["target"]}}})";request.expires_unix_ms=expiry();
+            const auto published=store.publish_mcp_input_request(request);require(published.state=="waiting"&&store.mcp_input_requests("input-run").size()==1,"A peer form must be durable and visible only while pending");
+            rejects<NotFound>([&]{store.answer_mcp_input_request("foreign-run","input-request",R"({"action":"decline"})","fixture-controller");});
+            const auto answered=store.answer_mcp_input_request("input-run","input-request",R"({"action":"accept","content":{"target":"TestProj"}})","fixture-controller");require(answered.state=="answered"&&answered.actor=="fixture-controller"&&answered.response_json==R"({"action":"accept","content":{"target":"TestProj"}})","One authenticated response must settle the exact peer request");
+            rejects<Conflict>([&]{store.answer_mcp_input_request("input-run","input-request",R"({"action":"cancel"})","fixture-controller");});require(store.mcp_input_requests("input-run").empty(),"Answered forms must leave the pending view");
+            const auto events=store.events("input-run");require(std::count_if(events.begin(),events.end(),[](const auto& event){return event.kind=="mcp.input.requested";})==1&&std::count_if(events.begin(),events.end(),[](const auto& event){return event.kind=="mcp.input.answered";})==1,"Request and answer must each have one durable run event");
         }
         std::cout<<"Native operation journal contracts passed: exact approvals, one-shot claims, expiry, atomic faults, concurrent decisions, real fixture effect and uncertain recovery. Production effect tools are not integrated.\n";
         return 0;

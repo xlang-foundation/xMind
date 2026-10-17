@@ -215,7 +215,7 @@ McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view 
             if(round==9)return result;
             std::map<std::string,std::string> responses;
             for(const auto& [identity,raw]:result.input_required->input_requests_json){
-                if(!fulfill_input)return result;const auto response=fulfill_input(raw);if(!response)return result;
+                if(!fulfill_input)return result;const auto response=fulfill_input(identity,raw);if(!response)return result;
                 responses.emplace(identity,*response);
             }
             params=mcp_tool_call_params(name,arguments,responses,result.input_required->request_state);

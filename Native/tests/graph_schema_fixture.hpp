@@ -74,6 +74,7 @@ inline void remove_dynamic_plan_multiplicity_fixture(agentflow::XlangSqlite& dat
 }
 inline void remove_dynamic_plan_owner_scope_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
+    if(scalar("PRAGMA user_version")>=33){if(scalar("SELECT count(*) FROM mcp_input_requests")!=0)throw std::runtime_error("Legacy fixture cannot discard actual pending MCP input requests");database.execute("DROP TRIGGER retain_mcp_input_requests");database.execute("DROP TRIGGER mcp_input_request_settlement");database.execute("DROP TRIGGER mcp_input_request_identity");database.execute("DROP TRIGGER mcp_input_request_insert");database.execute("DROP INDEX mcp_input_requests_run");database.execute("DROP TABLE mcp_input_requests");database.execute("PRAGMA user_version=32");}
     if(scalar("PRAGMA user_version")>=32){if(scalar("SELECT count(*) FROM session_agent_events")!=0)throw std::runtime_error("Legacy fixture cannot discard actual agent-switch events");database.execute("DROP INDEX session_agent_events_cursor");database.execute("DROP TABLE session_agent_events");database.execute("PRAGMA user_version=31");}
     if(scalar("PRAGMA user_version")>=29){database.execute("DROP TRIGGER IF EXISTS retain_dynamic_owner_pause_waits");database.execute("DROP TABLE IF EXISTS dynamic_owner_pause_waits");}
     remove_dynamic_plan_multiplicity_fixture(database);

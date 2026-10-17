@@ -312,6 +312,13 @@ Operation decode_operation(const std::vector<SqlValue>& row,XlangSqlite& databas
     for(const auto& resource:database.execute("SELECT resource FROM operation_resources WHERE operation_id=? AND position>=0 ORDER BY position",{result.id}).rows)result.spec.resources.push_back(text(resource[0]));
     return result;
 }
+McpInputRequest decode_mcp_input_request(const std::vector<SqlValue>& row){
+    McpInputRequest result;result.id=text(row[0]);result.run_id=text(row[1]);result.operation_id=text(row[2]);result.server_config_id=text(row[3]);
+    result.config_revision=integer(row[4]);result.peer_tool=text(row[5]);result.request_key=text(row[6]);result.request_json=text(row[7]);
+    result.state=text(row[8]);if(!std::holds_alternative<std::nullptr_t>(row[9]))result.response_json=text(row[9]);
+    result.actor=text(row[10]);result.expires_unix_ms=integer(row[11]);result.published_event_seq=integer(row[12]);
+    if(!std::holds_alternative<std::nullptr_t>(row[13]))result.answered_event_seq=integer(row[13]);return result;
+}
 std::string dynamic_effect_state(const std::vector<Operation>& operations){
     std::string effect="none";
     for(const auto& op:operations){
@@ -561,7 +568,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>32)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>33)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -590,7 +597,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>32) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>33) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -1008,6 +1015,16 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE INDEX session_agent_events_cursor ON session_agent_events(session_id,sequence)");
         db.execute("PRAGMA user_version=32");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Session agent event migration did not preserve repository ownership");
+    }
+    if(version<33){
+        db.execute("CREATE TABLE mcp_input_requests(id TEXT PRIMARY KEY NOT NULL,run_id TEXT NOT NULL REFERENCES runs(id),operation_id TEXT NOT NULL REFERENCES operations(id),server_config_id TEXT NOT NULL,config_revision INTEGER NOT NULL CHECK(config_revision>0),peer_tool TEXT NOT NULL,request_key TEXT NOT NULL,request_json TEXT NOT NULL CHECK(length(CAST(request_json AS BLOB))<=65536 AND json_valid(request_json) AND json_type(request_json)='object'),state TEXT NOT NULL CHECK(state IN ('waiting','answered','cancelled','expired')),response_json TEXT CHECK(response_json IS NULL OR (length(CAST(response_json AS BLOB))<=16384 AND json_valid(response_json) AND json_type(response_json)='object')),actor TEXT NOT NULL DEFAULT '',expires_ms INTEGER NOT NULL CHECK(expires_ms>0),published_event_seq INTEGER NOT NULL REFERENCES events(seq),settled_event_seq INTEGER REFERENCES events(seq),CHECK((state='waiting')=(settled_event_seq IS NULL)),CHECK((state='answered')=(response_json IS NOT NULL)),CHECK(state!='answered' OR length(actor)>0),CHECK(state='answered' OR actor=''))");
+        db.execute("CREATE INDEX mcp_input_requests_run ON mcp_input_requests(run_id,state,expires_ms)");
+        db.execute("CREATE TRIGGER mcp_input_request_insert BEFORE INSERT ON mcp_input_requests BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM operations o JOIN runs r ON r.id=o.run_id JOIN events e ON e.seq=NEW.published_event_seq WHERE o.id=NEW.operation_id AND o.run_id=NEW.run_id AND o.tool='mcp_tool' AND o.state='executing' AND r.state='running' AND e.run_id=NEW.run_id AND e.kind='mcp.input.requested' AND json_extract(e.payload,'$.request_id')=NEW.id AND json_extract(e.payload,'$.operation_id')=NEW.operation_id AND json_extract(e.payload,'$.request_key')=NEW.request_key) THEN RAISE(ABORT,'MCP input request must be published by its executing run operation') END; END");
+        db.execute("CREATE TRIGGER mcp_input_request_identity BEFORE UPDATE OF id,run_id,operation_id,server_config_id,config_revision,peer_tool,request_key,request_json,expires_ms,published_event_seq ON mcp_input_requests BEGIN SELECT RAISE(ABORT,'published MCP input binding is immutable'); END");
+        db.execute("CREATE TRIGGER mcp_input_request_settlement BEFORE UPDATE OF state,response_json,actor,settled_event_seq ON mcp_input_requests BEGIN SELECT CASE WHEN OLD.state!='waiting' OR NEW.state='waiting' OR NOT EXISTS(SELECT 1 FROM events e WHERE e.seq=NEW.settled_event_seq AND e.run_id=OLD.run_id AND e.kind='mcp.input.'||NEW.state AND json_extract(e.payload,'$.request_id')=OLD.id AND json_extract(e.payload,'$.operation_id')=OLD.operation_id) THEN RAISE(ABORT,'MCP input response must be owned and write once') END; END");
+        db.execute("CREATE TRIGGER retain_mcp_input_requests BEFORE DELETE ON mcp_input_requests BEGIN SELECT RAISE(ABORT,'MCP input request evidence cannot be deleted'); END");
+        db.execute("PRAGMA user_version=33");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("MCP input request migration did not preserve repository ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -2856,6 +2873,49 @@ Operation Repository::finish_operation(const std::string& id,OperationState outc
     changed_one(db.execute("UPDATE operations SET state=?,result=? WHERE id=? AND state='executing'",{to_string(outcome),result_json,id}));
     result.state=outcome;result.result_json=result_json;impl_->operation_state_event(result);transaction.commit();return result;
 }
+McpInputRequest Repository::publish_mcp_input_request(const McpInputRequestSpec& input){
+    auto spec=input;identifier(spec.id);identifier(spec.run_id);identifier(spec.operation_id);identifier(spec.server_config_id);identifier(spec.peer_tool);identifier(spec.request_key);
+    if(spec.id.size()>128||spec.server_config_id.size()>128||spec.peer_tool.size()>128||spec.request_key.size()>128||spec.config_revision<=0)
+        throw std::invalid_argument("MCP input identity exceeds its limit");
+    spec.request_json=object_json(spec.request_json,65536);const auto now=now_ms();
+    if(spec.expires_unix_ms<=now||spec.expires_unix_ms>now+3600000)throw std::invalid_argument("MCP input expiry must be within one hour");
+    auto& db=impl_->database;Transaction transaction(db);const auto operation_record=operation(spec.operation_id);
+    if(operation_record.spec.run_id!=spec.run_id||operation_record.spec.tool!="mcp_tool"||operation_record.state!=OperationState::executing||run(spec.run_id).state!=RunState::running)
+        throw Conflict("MCP input requires its executing operation and active run");
+    const auto pending=integer(db.execute("SELECT count(*) FROM mcp_input_requests WHERE run_id=? AND state='waiting'",{spec.run_id}).rows.at(0).at(0));
+    if(pending>=32)throw Conflict("Run has too many pending MCP input requests");
+    const auto payload=Json{{"request_id",spec.id},{"operation_id",spec.operation_id},{"server_config_id",spec.server_config_id},
+        {"config_revision",spec.config_revision},{"peer_tool",spec.peer_tool},{"request_key",spec.request_key},
+        {"request_json",spec.request_json},{"expires_unix_ms",spec.expires_unix_ms}}.dump();
+    const auto published=impl_->event(spec.run_id,"mcp.input.requested",payload);
+    changed_one(db.execute("INSERT INTO mcp_input_requests(id,run_id,operation_id,server_config_id,config_revision,peer_tool,request_key,request_json,state,expires_ms,published_event_seq) VALUES(?,?,?,?,?,?,?,?,'waiting',?,?)",
+        {spec.id,spec.run_id,spec.operation_id,spec.server_config_id,spec.config_revision,spec.peer_tool,spec.request_key,spec.request_json,spec.expires_unix_ms,published.sequence}));
+    const auto rows=db.execute("SELECT id,run_id,operation_id,server_config_id,config_revision,peer_tool,request_key,request_json,state,response_json,actor,expires_ms,published_event_seq,settled_event_seq FROM mcp_input_requests WHERE id=?",{spec.id}).rows;
+    transaction.commit();return decode_mcp_input_request(rows.at(0));
+}
+McpInputRequest Repository::mcp_input_request(const std::string& id){
+    identifier(id);const auto rows=impl_->database.execute("SELECT id,run_id,operation_id,server_config_id,config_revision,peer_tool,request_key,request_json,state,response_json,actor,expires_ms,published_event_seq,settled_event_seq FROM mcp_input_requests WHERE id=?",{id}).rows;
+    if(rows.empty())throw NotFound("MCP input request not found");return decode_mcp_input_request(rows[0]);
+}
+std::vector<McpInputRequest> Repository::mcp_input_requests(const std::string& run_id){
+    run(run_id);std::vector<McpInputRequest> result;for(const auto& row:impl_->database.execute("SELECT id,run_id,operation_id,server_config_id,config_revision,peer_tool,request_key,request_json,state,response_json,actor,expires_ms,published_event_seq,settled_event_seq FROM mcp_input_requests WHERE run_id=? AND state='waiting' ORDER BY rowid LIMIT 33",{run_id}).rows){if(result.size()>=32)throw Conflict("Run has too many pending MCP input requests");result.push_back(decode_mcp_input_request(row));}return result;
+}
+McpInputRequest Repository::answer_mcp_input_request(const std::string& run_id,const std::string& id,const std::string& source,const std::string& actor){
+    identifier(run_id);identifier(id);identifier(actor);if(actor.size()>256)throw std::invalid_argument("MCP input actor exceeds its limit");const auto response=object_json(source,16384);
+    auto& db=impl_->database;Transaction transaction(db);auto request=mcp_input_request(id);
+    if(request.run_id!=run_id)throw NotFound("MCP input request does not belong to this run");if(request.state!="waiting")throw Conflict("MCP input request is no longer waiting");
+    if(request.expires_unix_ms<=now_ms())throw Conflict("MCP input request expired");
+    if(run(run_id).state!=RunState::running||operation(request.operation_id).state!=OperationState::executing)throw Conflict("MCP input owner is no longer active");
+    const auto event=impl_->event(run_id,"mcp.input.answered",Json{{"request_id",id},{"operation_id",request.operation_id},{"actor",actor},{"response_json",response}}.dump());
+    changed_one(db.execute("UPDATE mcp_input_requests SET state='answered',response_json=?,actor=?,settled_event_seq=? WHERE id=? AND run_id=? AND state='waiting'",{response,actor,event.sequence,id,run_id}));
+    request.state="answered";request.response_json=response;request.actor=actor;request.answered_event_seq=event.sequence;transaction.commit();return request;
+}
+McpInputRequest Repository::retire_mcp_input_request(const std::string& id,const std::string& reason){
+    identifier(id);if(reason!="cancelled"&&reason!="expired"&&reason!="server_restart"&&reason!="owner_ended")throw std::invalid_argument("Invalid MCP input retirement reason");
+    auto& db=impl_->database;Transaction transaction(db);auto request=mcp_input_request(id);if(request.state!="waiting"){transaction.commit();return request;}
+    const std::string next=reason=="expired"?"expired":"cancelled";const auto event=impl_->event(request.run_id,"mcp.input."+next,Json{{"request_id",id},{"operation_id",request.operation_id},{"reason",reason}}.dump());
+    changed_one(db.execute("UPDATE mcp_input_requests SET state=?,settled_event_seq=? WHERE id=? AND state='waiting'",{next,event.sequence,id}));request.state=next;request.answered_event_seq=event.sequence;transaction.commit();return request;
+}
 Operation Repository::reconcile_interrupted_process(const std::string& id,const std::string& actor,const std::string& note) {
     identifier(actor);if(actor.size()>4096)throw std::invalid_argument("Controller identity exceeds its limit");
     if(note.size()<16||note.size()>1024||note.find_first_of("\r\n")!=std::string::npos||note.find('\0')!=std::string::npos)throw std::invalid_argument("Reconciliation note must be 16 to 1,024 characters on one line");
@@ -2898,6 +2958,10 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
             changed_one(db.execute("UPDATE operations SET state='uncertain',result=? WHERE id=? AND state='executing'",{std::string(R"({"reason":"server_restart"})"),operation.id}));
             db.execute("UPDATE process_output_artifacts SET state='incomplete' WHERE operation_id=? AND state='capturing'",{operation.id});
             operation.state=OperationState::uncertain;impl_->operation_state_event(operation);
+        }
+        for(const auto& request:db.execute("SELECT id,operation_id FROM mcp_input_requests WHERE run_id=? AND state='waiting'",{id}).rows){
+            const auto request_id=text(request[0]),operation_id=text(request[1]);const auto event=impl_->event(id,"mcp.input.cancelled",Json{{"request_id",request_id},{"operation_id",operation_id},{"reason","server_restart"}}.dump());
+            changed_one(db.execute("UPDATE mcp_input_requests SET state='cancelled',settled_event_seq=? WHERE id=? AND state='waiting'",{event.sequence,request_id}));
         }
         impl_->cancel_waiting(id);
     }
