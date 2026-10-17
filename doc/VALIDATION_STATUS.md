@@ -22,6 +22,18 @@ recover when a lease becomes available, and stops its scheduled retry on
 disposal. These are client contract tests; they do not substitute for the
 rendered live coding acceptance recorded below.
 
+## Hosted browser and VS Code gate — 2026-10-17
+
+The complete [Browser and VS Code contracts workflow](https://github.com/xlang-foundation/xMind/actions/runs/39059210368)
+passed on `6e02ce4e85475e19bc36b3f7727a57ef0e06328a`. The gate installed the
+locked view dependencies without lifecycle scripts, built the browser assets,
+verified the complete source and asset manifests, then passed **391/391 VS Code
+extension tests** and **134/134 browser tests** with zero failures or skips.
+The preceding run failed because the CI verifier still expected 390 extension
+tests after the suite had grown to 391; `Tools/ci-views.mjs` now pins the
+current count. This hosted source gate uses synthetic fixtures and does not
+replace the live coding or installed-runtime evidence below.
+
 ## Current-source native Release gate — 2026-10-17
 
 Rebuilt the native backend and unified `xmind.exe` from current xMind main
