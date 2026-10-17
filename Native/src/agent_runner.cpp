@@ -548,6 +548,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             request.max_output_tokens=anthropic_default_output_tokens(provider.model);
         auto agent_instructions=settings_.instructions;
         if(settings_.approved_edits&&workspace_){
+            agent_instructions.append("\n\nTrusted native coding workflow: inspect only the files and bounded sections needed for the request; use search or a bounded read instead of repeatedly loading a large file. For related changes, make one `apply_patch` call with a `patches` array of unified diffs when practical; use `edit_file` for a short exact replacement and avoid repeated whole-file rewrites. Run the requested existing validation after edits, repair only reported failures, and stop once it passes.");
+        }
+        if(settings_.approved_edits&&workspace_){
             agent_instructions.append("\n\nTrusted workspace edit recovery policy: If an edit/create/patch call returns content_conflict, reread the current file or target state before retrying. When the user's requested outcome remains clear from the current contents, make a fresh tool call based on those contents and preserve unrelated intervening changes; do not ask the user to restate the request only because an old precondition changed. The fresh proposal still requires the normal approval. Stop and explain or ask only when the new state makes the requested outcome genuinely ambiguous. Never repeat stale arguments or claim a write occurred before approval and a successful tool result.");
         }
         if(!graph_instructions.empty()){

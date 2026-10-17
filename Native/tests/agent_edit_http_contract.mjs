@@ -23,6 +23,7 @@ const peer=createServer((request,response)=>{
       assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill','edit_file','create_file','apply_patch','restore_operation','run_process','wait_process','stop_process','delegate_tasks']);
       const latestUser=body.messages.findLastIndex(message=>message.role==='user');const prompt=body.messages[latestUser].content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
+      assert.match(body.messages.findLast(message=>message.role==='system').content,/Trusted native coding workflow/,'Workspace coding requests should encourage bounded reads and batched diffs');
       const tool=body.messages.slice(latestUser+1).findLast(message=>message.role==='tool');let delta,finish;
       if(prompt==='stale-recover'){
         assert.match(body.messages.findLast(message=>message.role==='system').content,/Trusted workspace edit recovery policy/);

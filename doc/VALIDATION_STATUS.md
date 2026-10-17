@@ -3267,6 +3267,33 @@ model-free adapter/controller contracts; they do not substitute for live
 provider runs, rendered browser inspection or installed VS Code acceptance.
 [Exact scope and results](evidence/view-contracts-20261017.json).
 
+## TestProj webpage coding retest — 2026-10-17
+
+The local xMind webpage used the saved OpenAI Responses profile to edit the
+Model Zoo Vue app in the opened TestProj workspace. The approved changes render
+in the Vite page; searching for `gpt2`, resetting the catalog and opening GPT-2
+details all worked. The initial broad redesign run failed before its requested
+build with `execution_budget_exhausted` after repeated full-file edit
+proposals. A separate xMind run invoked the trusted PowerShell workspace
+profile and completed `npm run build` with exit code 0; an independent build
+also passed. The current xMind 0.1.13 extension suite passed **390/390**, and
+the Extension Development Host log confirms the extension activated with
+TestProj open. This does not claim a completed single-run redesign, a new live
+VS Code edit, or a Git-tracked TestProj diff. The run-budget failure remains a
+coding-flow issue to address. [Exact results and limits](evidence/testproj-webpage-redesign-run-20261017.json).
+
+## Bounded coding workflow guidance — 2026-10-17
+
+To reduce excessive context and edit churn in trusted workspace coding runs,
+the native agent now instructs the model to inspect bounded file sections,
+batch related unified diffs, avoid repeated whole-file rewrites, and stop after
+requested validation passes. The Release `xmind_server` target built and the
+focused `native_agent_edit_http_contract` passed (1/1), including an assertion
+that the guidance reaches the provider as a system instruction. This contract
+test does not establish that a live provider will follow the guidance or that
+the TestProj redesign can complete within its run budget.
+[Exact test evidence](evidence/native-coding-workflow-guidance-20261017.json).
+
 ## Live webpage coding follow-up — 2026-10-17
 
 A second rendered TestProj run selected the saved OpenAI Responses profile in

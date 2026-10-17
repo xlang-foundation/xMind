@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-17",
+  "scope": "Native trusted workspace coding workflow instruction",
+  "base_revision": "f9f7c0a",
+  "change": {
+    "file": "Native/src/agent_runner.cpp",
+    "behavior": "For trusted workspace edits, ask the model to inspect bounded sections, batch related unified diffs, avoid repeated whole-file rewrites, run requested validation, repair only reported failures, and stop once validation passes."
+  },
+  "validation": {
+    "build": {
+      "command": "cmake.exe --build build/native --config Release --target xmind_server --parallel 1",
+      "exit_code": 0
+    },
+    "contract_test": {
+      "command": "ctest --test-dir build/native -C Release -R ^native_agent_edit_http_contract$ --output-on-failure",
+      "passed": 1,
+      "failed": 0,
+      "elapsed_seconds": 9.31,
+      "assertion": "The latest provider system message for trusted workspace edits includes the bounded coding workflow instruction."
+    }
+  },
+  "limitations": [
+    "This verifies the instruction is sent by the native runtime; it does not prove a live model follows it.",
+    "The earlier TestProj broad coding run exhausted its execution budget. No live-provider retest using this change is included here."
+  ]
+}
