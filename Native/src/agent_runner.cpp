@@ -502,7 +502,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.context&&!spec.context_pin)throw DynamicPlanUnavailable("Context-enabled pause has no exact durable context pin");
         const auto active_started=std::chrono::steady_clock::now();
         resume=journal_.resume_dynamic_owner(std::move(spec)).get();root_caps=resume->plan.capabilities;
-        try{budget=std::make_shared<RootExecutionBudget>(persistence_,journal_.root_budget(id).get(),
+        try{budget=std::make_shared<RootExecutionBudget>(journal_,journal_.root_budget(id).get(),
             active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity,resume->owner_runs);}
         catch(...){throw DynamicOutcomeUnrecorded("Resumed dynamic segment lacks its live clock owner; recovery is required");}
         if(resume->context_pin)budget->adopt_context_pin(*resume->context_pin);
@@ -533,11 +533,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(!resumed){
                     DynamicSegmentSpec spec{id,operation_id(),root_caps->backend_identity,saved.revision};
                     const auto segment=journal_.open_dynamic_budget_segment(std::move(spec)).get();
-                    try{budget=std::make_shared<RootExecutionBudget>(persistence_,journal_.root_budget(id).get(),
+                    try{budget=std::make_shared<RootExecutionBudget>(journal_,journal_.root_budget(id).get(),
                         initial_active_started+std::chrono::milliseconds(segment.remaining_active_ms),token,segment,root_caps->backend_identity);}
                     catch(...){throw DynamicOutcomeUnrecorded("Opened dynamic segment lacks its live clock owner; recovery is required");}
                 }
-            }else budget=std::make_shared<RootExecutionBudget>(persistence_,saved,local_deadline,token);
+            }else budget=std::make_shared<RootExecutionBudget>(journal_,saved,local_deadline,token);
         }
         if(leaf){const auto saved=budget->snapshot();if(!workspace_||workspace_->identity()!=saved.spec.workspace_identity)throw std::invalid_argument("Delegated leaf workspace identity changed");
             if(execution_identity(settings_,provider.model)!=saved.spec.provider_identity_json)throw std::invalid_argument("Delegated leaf provider identity changed");

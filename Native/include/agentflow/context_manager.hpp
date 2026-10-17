@@ -7,6 +7,7 @@
 #include <map>
 
 namespace agentflow {
+class PersistenceService;
 std::string context_route_identity(const ChatProviderConfig&,const std::string& provider_identity_json);
 struct ContextRuntimePolicy {
     ContextPolicy compaction;

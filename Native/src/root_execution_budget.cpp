@@ -12,17 +12,17 @@ namespace agentflow {
 namespace {
 std::string attempt_id(){std::random_device source;std::ostringstream out;out<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)out<<std::setw(8)<<source();return out.str();}
 thread_local const RootExecutionBudget* yielded_leaf=nullptr;
-std::vector<std::string> wait_owner_path(PersistenceService& store,const DynamicPlanRecord& plan,const std::string& root){
+std::vector<std::string> wait_owner_path(AgentRunJournal& journal,const DynamicPlanRecord& plan,const std::string& root){
     std::vector<std::string> reverse;auto current=plan;std::size_t depth=0;
-    while(current.owner_run_id!=root){if(current.root_run_id!=root||current.parent_plan_id.empty()||++depth>8)throw DynamicPlanUnavailable("Human wait lost its complete dynamic owner path");reverse.push_back(current.owner_run_id);current=store.dynamic_plan(current.parent_plan_id).get();}
+    while(current.owner_run_id!=root){if(current.root_run_id!=root||current.parent_plan_id.empty()||++depth>8)throw DynamicPlanUnavailable("Human wait lost its complete dynamic owner path");reverse.push_back(current.owner_run_id);current=journal.dynamic_plan(current.parent_plan_id).get();}
     std::reverse(reverse.begin(),reverse.end());return reverse;
 }
 bool finished(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
 }
-RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRecord record,
+RootExecutionBudget::RootExecutionBudget(AgentRunJournal& journal,RootBudgetRecord record,
     std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
     std::optional<DynamicBudgetSegment> segment,std::string backend_identity,std::vector<std::string> resumable_owners)
-    :store_(store),root_(std::move(record.root_run_id)),policy_(record.spec.policy_id),deadline_(deadline),cancel_(cancel),parallel_(static_cast<std::size_t>(record.spec.max_parallel)),
+    :journal_(journal),root_(std::move(record.root_run_id)),policy_(record.spec.policy_id),deadline_(deadline),cancel_(cancel),parallel_(static_cast<std::size_t>(record.spec.max_parallel)),
       segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),resumable_owners_(std::move(resumable_owners)),active_started_(std::chrono::steady_clock::now()){
     if(root_.empty() || record.spec.max_parallel<0 || record.spec.max_parallel>2||
        (record.spec.max_parallel==0&&record.spec.policy_id!="native.context"&&record.spec.policy_id!="native.direct-agent"))throw std::invalid_argument("Invalid root execution budget");
@@ -43,32 +43,32 @@ void RootExecutionBudget::check(std::stop_token cancel)const{
     if(segment_&&segment_->state!="open")throw DynamicPlanUnavailable("Planning active segment is closed");
     if(std::chrono::steady_clock::now()>=deadline_)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed");
 }
-RootBudgetRecord RootExecutionBudget::snapshot()const{return store_.root_budget(root_).get();}
+RootBudgetRecord RootExecutionBudget::snapshot()const{return journal_.root_budget(root_).get();}
 ModelCallReservation RootExecutionBudget::reserve(const std::string& owner,ModelCallRole role,std::stop_token cancel){
-    check(cancel);return store_.reserve_model_call(root_,owner,attempt_id(),role).get();
+    check(cancel);return journal_.reserve_model_call(root_,owner,attempt_id(),role).get();
 }
 void RootExecutionBudget::start(const ModelCallReservation& reservation,std::stop_token cancel){
     check(cancel);
     if(reservation.root_run_id!=root_)throw Conflict("Model call belongs to another execution budget");
-    store_.start_model_call(root_,reservation.owner_run_id,reservation.attempt_id).get();
+    journal_.start_model_call(root_,reservation.owner_run_id,reservation.attempt_id).get();
 }
 void RootExecutionBudget::finish(const ModelCallReservation& reservation,const std::string& actual_assistant_json){
     if(reservation.root_run_id!=root_)throw Conflict("Model call belongs to another execution budget");
-    try{store_.finish_model_call(root_,reservation.owner_run_id,reservation.attempt_id,
+    try{journal_.finish_model_call(root_,reservation.owner_run_id,reservation.attempt_id,
         actual_assistant_json.empty()?std::nullopt:std::optional<std::string>(actual_assistant_json)).get();}
     catch(...){throw BudgetOutcomeUnrecorded("Model call retirement could not be recorded; stop execution and recover ownership");}
 }
 ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string& call,std::stop_token cancel){
     check(cancel);
     if(!segment_||policy_!="native.dynamic-plan")throw Conflict("A planning continuation requires its active root segment");
-    const auto accepted=store_.dynamic_plan_call(call).get();
+    const auto accepted=journal_.dynamic_plan_call(call).get();
     if(accepted.root_run_id!=root_)throw Conflict("Planning call belongs to another root budget");
     // A repeated native wake can inspect the old binding, never mint an attempt.
     const auto attempt=accepted.continuation_attempt_id.empty()?attempt_id():accepted.continuation_attempt_id;
-    return store_.reserve_dynamic_continuation(call,attempt).get();
+    return journal_.reserve_dynamic_continuation(call,attempt).get();
 }
 void RootExecutionBudget::pin_context(const ContextSnapshot& snapshot){
-    check();const auto root=store_.run(root_).get();
+    check();const auto root=journal_.run(root_).get();
     if(policy_!="native.dynamic-plan"||root.graph_root||!root.parent_id.empty()||snapshot.head.scope.kind!=ContextScopeKind::session||snapshot.head.scope.id!=root.session_id)
         throw ContextBindingChanged("Paused context does not belong to the ordinary root");
     std::vector<std::int64_t> users;for(const auto& user:snapshot.protected_users)users.push_back(user.ordinal);
@@ -76,7 +76,7 @@ void RootExecutionBudget::pin_context(const ContextSnapshot& snapshot){
         context_source_binding(snapshot,snapshot.source_watermark),context_user_binding(snapshot,users)};
 }
 void RootExecutionBudget::adopt_context_pin(const ContextPausePin& pin){
-    check();const auto root=store_.run(root_).get();
+    check();const auto root=journal_.run(root_).get();
     if(policy_!="native.dynamic-plan"||!segment_open()||root.graph_root||!root.parent_id.empty()||pin.head.scope.kind!=ContextScopeKind::session||
        pin.head.scope.id!=root.session_id||pin.head.binding.authority_identity!=backend_identity_)
         throw ContextBindingChanged("Resumed context pin does not belong to the exact dynamic owner");
@@ -95,7 +95,7 @@ Run RootExecutionBudget::suspend_for_human(const DynamicPlanRecord& plan,const s
     check();
     if(policy_!="native.dynamic-plan"||!segment_||plan.root_run_id!=root_||active_leaves_.load()!=0)
         throw Conflict("Human pause requires the exact drained planning owner");
-    const auto key=std::make_pair(plan.id,call);HumanWaitEntry entry{{plan.id,call,plan.revision,plan.state_sequence},wait_owner_path(store_,plan,root_)};
+    const auto key=std::make_pair(plan.id,call);HumanWaitEntry entry{{plan.id,call,plan.revision,plan.state_sequence},wait_owner_path(journal_,plan,root_)};
     {std::lock_guard lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;const auto [it,inserted]=human_waits_.emplace(key,std::move(entry));if(!inserted&&(it->second.wait.expected_revision!=plan.revision||it->second.wait.expected_state_sequence!=plan.state_sequence))throw DynamicPlanChanged("Repeated human wait changed its accepted plan revision");}
     human_wait_changed_.notify_all();
     for(;;){
@@ -103,14 +103,14 @@ Run RootExecutionBudget::suspend_for_human(const DynamicPlanRecord& plan,const s
         {std::unique_lock lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;if(human_pause_committing_){human_wait_changed_.wait_for(lock,std::chrono::milliseconds(10));continue;}for(const auto& [unused,value]:human_waits_){(void)unused;snapshot_entries.push_back(value);}}
         check();
         bool safe=active_leaves_.load()==0;std::set<std::string> owners;for(const auto& value:snapshot_entries)owners.insert(value.owner_runs.begin(),value.owner_runs.end());
-        if(safe)try{for(const auto& child:store_.owned_children(root_).get())if(!finished(child.run.state)&&(!owners.contains(child.run.id)||child.run.state!=RunState::running)){safe=false;break;}if(safe)for(const auto& plan:store_.dynamic_plans_for_root(root_).get()){for(const auto& node:plan.nodes)if(node.state==DynamicNodeState::claimed&&!node.child_run_id.empty()){const auto child=store_.run(node.child_run_id).get();if(finished(child.state)||!owners.contains(child.id)||child.state!=RunState::running){safe=false;break;}}if(!safe)break;}}catch(...){throw DynamicOutcomeUnrecorded("Could not verify every sibling owner before pausing the root");}
+        if(safe)try{for(const auto& child:journal_.owned_children(root_).get())if(!finished(child.run.state)&&(!owners.contains(child.run.id)||child.run.state!=RunState::running)){safe=false;break;}if(safe)for(const auto& plan:journal_.dynamic_plans_for_root(root_).get()){for(const auto& node:plan.nodes)if(node.state==DynamicNodeState::claimed&&!node.child_run_id.empty()){const auto child=journal_.run(node.child_run_id).get();if(finished(child.state)||!owners.contains(child.id)||child.state!=RunState::running){safe=false;break;}}if(!safe)break;}}catch(...){throw DynamicOutcomeUnrecorded("Could not verify every sibling owner before pausing the root");}
         if(!safe){std::unique_lock lock(human_wait_mutex_);human_wait_changed_.wait_for(lock,std::chrono::milliseconds(10));continue;}
         {std::unique_lock lock(human_wait_mutex_);if(human_pause_error_)std::rethrow_exception(human_pause_error_);if(human_pause_result_)return *human_pause_result_;if(human_pause_committing_)continue;human_pause_committing_=true;}
         try{
             const auto budget=snapshot();DynamicPauseSpec spec;spec.plan_id=snapshot_entries.front().wait.plan_id;spec.plan_call_id=snapshot_entries.front().wait.plan_call_id;spec.segment_id=segment_->id;
             spec.backend_identity=backend_identity_;spec.expected_budget_revision=budget.revision;spec.measured_active_elapsed_ms=active_elapsed_ms();spec.context_pin=context_pin_;
             for(const auto& value:snapshot_entries)spec.waits.push_back(value.wait);
-            const auto paused=store_.suspend_dynamic_owner(std::move(spec)).get();
+            const auto paused=journal_.suspend_dynamic_owner(std::move(spec)).get();
             {std::lock_guard lock(human_wait_mutex_);human_pause_result_=paused;human_pause_committing_=false;}human_wait_changed_.notify_all();return paused;
         }catch(...){
             {std::lock_guard lock(human_wait_mutex_);human_pause_error_=std::current_exception();human_pause_committing_=false;}human_wait_changed_.notify_all();throw;

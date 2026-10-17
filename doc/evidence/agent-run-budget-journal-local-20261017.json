@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-17",
+  "scope": "Local Release verification of root execution budget persistence through AgentRunJournal",
+  "xmind_base_revision": "4e5df1a",
+  "xlang3_runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+  "build": {
+    "configuration": "Release",
+    "targets": [
+      "agentflow_agent_runner_contract",
+      "agentflow_dynamic_plan_engine_contract",
+      "agentflow_dynamic_plan_repository_contract",
+      "agentflow_context_engine_contract",
+      "agentflow_graph_runner_contract",
+      "agentflow_a2a_agent_registry_contract"
+    ],
+    "result": "passed"
+  },
+  "contracts": {
+    "registered": 6,
+    "passed": 6,
+    "failed": 0,
+    "runner": "Invoked the exact CMake-registered native executables and Node peer harnesses because ctest was unavailable on PATH.",
+    "result": "passed"
+  },
+  "verified_paths": [
+    "RootExecutionBudget admits runs and reserves/completes model attempts through AgentRunJournal.",
+    "Dynamic-plan admission, continuation and human-pause suspension use the journal boundary.",
+    "AgentRunner, dynamic-plan engine/repository, context engine, GraphRunner and A2A agent registry contracts pass with the SQLite-backed production adapter."
+  ],
+  "limitations": [
+    "AgentRunner still executes in-process and AgentService still owns its thread pool.",
+    "Workspace, MCP, A2A, approval and other effect services are not yet transported through a worker host.",
+    "This is a focused contract set, not a full Release suite or packaged CLI/web/VS Code acceptance run."
+  ]
+}

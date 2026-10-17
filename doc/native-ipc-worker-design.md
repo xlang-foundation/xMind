@@ -57,6 +57,18 @@ keys out of its call values and creates an injectable provider boundary, but
 does not yet implement an IPC-backed gateway or move workspace/MCP/A2A tools,
 approval waits or the full AgentRunner loop into a worker.
 
+`RootExecutionBudget` now uses `AgentRunJournal` for durable root admission,
+model-call reservation and completion, dynamic-plan admission, continuation,
+and human-pause suspension. It no longer needs the concrete
+`PersistenceService`; the journal carries owned request/result values and the
+current SQLite adapter remains on the backend. The focused Release contracts
+for the real AgentRunner, dynamic-plan engine and repository, context engine,
+GraphRunner, and A2A agent registry all pass against this boundary. The exact
+local invocation and limits are recorded in
+[`agent-run-budget-journal-local-20261017.json`](evidence/agent-run-budget-journal-local-20261017.json).
+This narrows the persistence dependency for eventual worker hosting; it does
+not move the runner, workspace tools or effect authority into another process.
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.

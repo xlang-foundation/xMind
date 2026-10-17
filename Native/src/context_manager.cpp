@@ -1,5 +1,6 @@
 #include "agentflow/context_manager.hpp"
 #include "agentflow/model_provider.hpp"
+#include "agentflow/persistence_service.hpp"
 #include <algorithm>
 #include <chrono>
 #include <random>

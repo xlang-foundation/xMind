@@ -40,6 +40,14 @@ public:
     virtual std::future<Run> run(std::string id)=0;
     virtual std::future<std::vector<Message>> run_history(std::string id)=0;
     virtual std::future<Session> session(std::string id)=0;
+    virtual std::future<ModelCallReservation> reserve_model_call(std::string root,std::string owner,std::string attempt,ModelCallRole role)=0;
+    virtual std::future<ModelCallReservation> start_model_call(std::string root,std::string owner,std::string attempt)=0;
+    virtual std::future<ModelCallReservation> finish_model_call(std::string root,std::string owner,std::string attempt,std::optional<std::string> assistant_json={})=0;
+    virtual std::future<DynamicPlanCallRecord> dynamic_plan_call(std::string call)=0;
+    virtual std::future<std::vector<DynamicPlanRecord>> dynamic_plans_for_root(std::string root)=0;
+    virtual std::future<ModelCallReservation> reserve_dynamic_continuation(std::string call,std::string attempt)=0;
+    virtual std::future<std::vector<OwnedChildRecord>> owned_children(std::string parent)=0;
+    virtual std::future<Run> suspend_dynamic_owner(DynamicPauseSpec spec)=0;
     virtual std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={})=0;
     virtual std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}")=0;
 };

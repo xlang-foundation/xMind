@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/persistence_service.hpp"
+#include "agentflow/agent_run_journal.hpp"
 #include "agentflow/dynamic_plan_records.hpp"
 #include <chrono>
 #include <condition_variable>
@@ -18,7 +18,7 @@ struct RootBudgetDeadlineExceeded : std::runtime_error {using std::runtime_error
 // Durable counters/attempt ownership remain in Repository; no transport retry.
 class RootExecutionBudget {
 public:
-    RootExecutionBudget(PersistenceService& store,RootBudgetRecord record,
+    RootExecutionBudget(AgentRunJournal& journal,RootBudgetRecord record,
         std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
         std::optional<DynamicBudgetSegment> segment={},std::string backend_identity={},
         std::vector<std::string> resumable_owners={});
@@ -44,7 +44,7 @@ public:
     void release_leaf() noexcept;
 private:
     struct HumanWaitEntry {DynamicPauseWaitSpec wait;std::vector<std::string> owner_runs;};
-    PersistenceService& store_;
+    AgentRunJournal& journal_;
     std::string root_;
     std::string policy_;
     std::chrono::steady_clock::time_point deadline_;
