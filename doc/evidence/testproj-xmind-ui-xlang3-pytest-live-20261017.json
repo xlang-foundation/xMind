@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live xMind browser process-tool acceptance of TestProj backend pytest on xlang3",
+  "xmind_revision": "b952e716ed3733adafd9d2c3567a80516f52d878",
+  "xlang3": {
+    "branch": "fix/pytest-pathaware-hook-proxy",
+    "revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "executable_sha256": "d3fbc91e94ea065639407437b799c01f8772c92d3ea82eb64789ce33cc64daeb",
+    "xmind_runtime_inventory_sha256": "1d6bb28f6c9412d96764ecf77e67ade11f4ef9696333dfcb694679df80b17544"
+  },
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "provider": {
+    "profile": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing local xMind profile; secret omitted"
+  },
+  "browser_run": {
+    "origin": "http://127.0.0.1:63940/ui/",
+    "run_id": "337deac23e1b3a8c3836dc8c94d2c983",
+    "state": "completed",
+    "operation_id": "a9dcd1010c632274b166cb8d7dcc8dbc",
+    "process_profile": "xlang3",
+    "process_profile_revision": 1,
+    "working_directory": "model-zoo/backend",
+    "executable": "xlang3.exe in the xMind-managed focused-read runtime; SHA-256 recorded above",
+    "arguments": ["-B", "-m", "pytest", "-q"],
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "process_elapsed_seconds": 3.61,
+    "pytest_summary": "9 passed, 1 warning in 2.26s",
+    "warning": "Existing Starlette/AnyIO BlockingPortal deprecation warning",
+    "stdout_bytes": 600,
+    "stderr_bytes": 0,
+    "agent_file_edit_operations": 0,
+    "model_usage": {
+      "input_tokens": 10742,
+      "output_tokens": 319,
+      "total_tokens": 11061,
+      "first_token_seconds_by_call": [2.91, 1.84],
+      "elapsed_seconds_by_call": [3.32, 2.33]
+    }
+  },
+  "direct_xlang3_check": {
+    "command": "xlang3.exe -B -m pytest -q",
+    "working_directory": "D:\\CantorAI2026\\TestProj\\model-zoo\\backend",
+    "environment": "PYTHONPATH prepended with xlang3 Release modules and TestProj .xlang3-site; CPython was not invoked",
+    "exit_code": 0,
+    "pytest_summary": "9 passed, 1 warning in 1.94s"
+  },
+  "focused_xlang3_branch_fixture": {
+    "name": "cached_property_inline_method_fallback",
+    "command": "build/Release/xlang3.exe tests/fixtures/core/cached_property_inline_method_fallback.py",
+    "expected_output_comparison": "passed"
+  },
+  "limits": [
+    "The pytest deprecation warning remains in the TestProj dependency set.",
+    "The xlang3 branch was tested and left unchanged; this acceptance does not merge it into xlang3 main.",
+    "No TestProj source edit was proposed; pytest may refresh its local cache.",
+    "This verifies one FastAPI backend test suite and does not establish all Python package compatibility."
+  ]
+}
