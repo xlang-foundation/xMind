@@ -70,7 +70,45 @@ bool allowed(const std::string& name){if(std::find(native_files.begin(),native_f
 std::wstring child(const std::wstring& root,const std::string& name){auto result=wide(name);std::replace(result.begin(),result.end(),L'/',L'\\');return root+L"\\"+result;}
 std::set<std::string> inventory(const std::wstring& root,std::vector<Handle>* directories=nullptr,const std::string& prefix={},std::size_t depth=0,std::size_t* visited=nullptr){
     std::size_t local=0;if(!visited)visited=&local;require(depth<=32);
-    std::set<std::string> result;WIN32_FIND_DATAW data{};const auto parent=prefix.empty()?root:child(root,prefix);HANDLE search=FindFirstFileW((parent+L"\\*").c_str(),&data);require(search!=INVALID_HANDLE_VALUE);try{for(;;){const std::wstring leaf=data.cFileName;if(leaf!=L"."&&leaf!=L".."){require(++*visited<=40001);const auto name=(prefix.empty()?std::string{}:prefix+"/")+utf8(leaf);require(relative(name)&&!(data.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT));if(data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){Handle held(child(root,name),true);auto nested=inventory(root,directories,name,depth+1,visited);require(result.size()+nested.size()<=20001);result.insert(nested.begin(),nested.end());if(directories)directories->push_back(std::move(held));}else{require(!(data.dwFileAttributes&FILE_ATTRIBUTE_DEVICE)&&result.size()<20001);require(result.insert(name).second);}}if(!FindNextFileW(search,&data)){require(GetLastError()==ERROR_NO_MORE_FILES);break;}}FindClose(search);return result;}catch(...){FindClose(search);throw;}}
+    std::set<std::string> result;
+    WIN32_FIND_DATAW data{};
+    const auto parent=prefix.empty()?root:child(root,prefix);
+    HANDLE search=FindFirstFileW((parent+L"\\*").c_str(),&data);
+    require(search!=INVALID_HANDLE_VALUE);
+    try{
+        for(;;){
+            const std::wstring leaf=data.cFileName;
+            if(leaf!=L"."&&leaf!=L".."){
+                require(++*visited<=40001);
+                require(!(data.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT));
+                const bool cache_directory=leaf==L"__pycache__"&&(data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY);
+                if(!cache_directory){
+                    const auto name=(prefix.empty()?std::string{}:prefix+"/")+utf8(leaf);
+                    require(relative(name));
+                    if(data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
+                        Handle held(child(root,name),true);
+                        auto nested=inventory(root,directories,name,depth+1,visited);
+                        require(result.size()+nested.size()<=20001);
+                        result.insert(nested.begin(),nested.end());
+                        if(directories)directories->push_back(std::move(held));
+                    }else{
+                        require(!(data.dwFileAttributes&FILE_ATTRIBUTE_DEVICE)&&result.size()<20001);
+                        require(result.insert(name).second);
+                    }
+                }
+            }
+            if(!FindNextFileW(search,&data)){
+                require(GetLastError()==ERROR_NO_MORE_FILES);
+                break;
+            }
+        }
+        FindClose(search);
+        return result;
+    }catch(...){
+        FindClose(search);
+        throw;
+    }
+}
 }
 struct VerifiedRuntimeGeneration::Impl {
     RuntimeGenerationBinding binding;Handle root;std::vector<Handle> ancestors,directories,files;std::map<std::string,std::size_t> positions;std::set<std::string> expected;std::string manifest;std::size_t total=0;bool fast_copy=false;mutable std::mutex verification;

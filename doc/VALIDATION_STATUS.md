@@ -11,6 +11,19 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Native runtime inventory with xlang3 bytecode caches — 2026-10-17
+
+xlang3 can create `.pyc` files inside `__pycache__` directories in the bundled
+pure-library tree. The VS Code package verifier already excludes those transient
+caches; the C++ runtime generation verifier now applies the same rule while
+still rejecting reparse points. The exact checked-in VS Code runtime tree, which
+contains generated caches, now passes the rebuilt C++ verifier. The focused
+native generation contract passes **1/1**, including a cache-directory
+regression fixture, and the rebuilt runtime completes the actual managed-view
+contract with native workspace, sidebar approval, and process checks. This is a
+local development verification, not full native release acceptance or a live
+VS Code window reconnection. [Evidence](evidence/native-runtime-pycache-20261017.json).
+
 ## Live webpage coding acceptance — 2026-10-16
 
 The rendered local webpage completed a real OpenAI Responses coding task in
