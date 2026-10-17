@@ -57,11 +57,11 @@ execution.
    covering provider continuations, workspace reads, approved edits, process
    tools, MCP/A2A calls, metrics and durable events before adding another
    placement.
-3. Add the native worker supervisor and private IPC protocol on the pinned
-   xlang3 native-host API. Keep run admission, grants, credentials, journal
-   ownership and recovery in the backend. Bind every request and reply to the
-   run, immutable configuration revision, worker process identity and protocol
-   version.
+3. Pin the tested xlang3 native-host branch revision in the xMind integration,
+   then add the native worker supervisor and private IPC protocol. Keep run
+   admission, grants, credentials, journal ownership and recovery in the
+   backend. Bind every request and reply to the run, immutable configuration
+   revision, worker process identity and protocol version.
 4. Add backend-owned placement configuration for primary agents, subagents and
    graph agent nodes only when both hosts execute the same capability contract.
    Reject unknown values and keep `in_process` as the default. Then route opted
