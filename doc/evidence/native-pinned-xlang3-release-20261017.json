@@ -38,9 +38,18 @@
     "repeat_until_fail_3": { "passed": 3, "failed": 0, "elapsed_seconds": 28.71, "log": "native-agent-http-pinned-repeat-20261017.log", "log_sha256": "47AC67C9A1DDDDBDA80B2386DE7166375B061437F9A4169774C20645F1656481" },
     "interpretation": "The full-suite timeout was not reproduced in four consecutive focused runs; its cause under full-suite load remains unconfirmed."
   },
+  "successful_full_rerun": {
+    "command": "ctest --test-dir C:/xMindNativeValidation/pinned-main-1daa56d -C Release --output-on-failure --no-tests=error",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "elapsed_seconds": 878.03,
+    "log": "native-pinned-xlang3-release-ctest-rerun-20261017.log",
+    "log_sha256": "46317D51889E0908FBEA7A560C28C498C66EFD76D1FC585AACBD91BA5970FD4E"
+  },
   "limitations": [
-    "The full sequential run did not pass cleanly because one CLI queued-prompt admission timed out; isolated and repeated reruns passed.",
-    "Hosted CI against the pinned runtime remains pending.",
+    "The first full run had one CLI queued-prompt timeout; a second complete run passed 147/147 and the case also passed four focused runs. The first timeout's cause under suite load remains unconfirmed.",
+    "Hosted CI after the include fix is still running; a prior pin run predating that fix failed.",
     "This is native contract evidence, not installed-package or broad live-client release acceptance."
   ]
 }
