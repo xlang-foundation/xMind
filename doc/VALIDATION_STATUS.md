@@ -151,6 +151,19 @@ from the webpage/VS Code coding tests and hosted runtime packaging gate.
 [Transcript](evidence/testproj-xlang3-pytest-20261017.log),
 [runtime hash and command](evidence/testproj-xlang3-pytest-20261017.json).
 
+## xlang3 full CLI fixture retest — 2026-10-17
+
+The earlier full CLI fixture run stopped at `memoryview(mmap_object)` while
+using the stale `xlang3/build/Release` runtime from Oct 16. The complete
+`tests/run_fixtures.ps1` suite now passes against the branch-built runtime from
+`fix/pytest-pathaware-hook-proxy` at `b4a53192`, including `mmap_native` and all
+compatibility sections. The branch includes xlang3 main at `fcecf499`; its
+current mmap package exports the native buffer correctly. This was a stale
+binary selection issue, so no xlang3 source change was required. The TestProj
+pytest suite separately passes 9/9 on the same branch runtime. This validates
+the tested xMind dependency path and full xlang3 fixture suite, not every PyPI
+package or xlang3 API. [Exact runtime hashes and commands](evidence/xlang3-cli-fixtures-current-branch-20261017.json).
+
 ## Live webpage provider and usage check — 2026-10-17
 
 The rendered TestProj webpage discovered 13 Claude models from its existing
@@ -3264,11 +3277,11 @@ Vite 6.4.4 transformed 37 modules and completed in 636 ms. A fresh browser tab
 then served the Model Zoo page with 12 models and the new accessible button
 labels. This confirms the local webpage coding path through model selection,
 workspace process execution, patch review, file write, and build. It is a
-development acceptance only; the TestProj change is not committed, the xlang3
-full CLI fixture suite remains blocked by its existing `memoryview()`/mmap
-native capability gap, and this does not replace the separate VS Code
-acceptance. Details and artifact hashes are in
-[the evidence record](evidence/testproj-webpage-coding-xlang3-20261017.json).
+development acceptance only; the TestProj change is not committed, and this
+does not replace the separate VS Code acceptance. The memoryview/mmap failure
+observed during this test was later isolated to a stale xlang3 build and was
+superseded by the current-branch full fixture pass documented above. Details
+and artifact hashes are in [the evidence record](evidence/testproj-webpage-coding-xlang3-20261017.json).
 
 ## Current-source native Release gate — 2026-10-17
 

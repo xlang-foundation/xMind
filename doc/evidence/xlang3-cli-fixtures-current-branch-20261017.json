@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-17",
+  "scope": "Full xlang3 CLI fixture suite needed for the xMind runtime compatibility check",
+  "xmind_revision": "433fe7effe7973ef20d3b62b287319cbb7c6068f",
+  "xlang3_branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+  "xlang3_main_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+  "branch_includes_main": true,
+  "current_branch_build": {
+    "python_executable": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/python.exe",
+    "python_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "mmap_package_sha256": "9f873fe985d612c7abc558967c2a131251e8bf75670693932779e1b7ed903538"
+  },
+  "full_cli_fixture_suite": {
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_fixtures.ps1 -XLang3 D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/python.exe",
+    "exit_code": 0,
+    "core_and_compatibility_cases": "All cases in tests/run_fixtures.py and tests/run_fixtures.ps1 passed, including mmap_native, all compatibility sections, and expected-failure cases",
+    "mmap_native": "Passed: memoryview(mmap_object) exported the native mapping buffer and the fixture completed its read/write/close checks"
+  },
+  "stale_build_reproduction": {
+    "python_executable": "D:/CantorAI2026/xlang3/build/Release/python.exe",
+    "python_executable_sha256": "d3fbc91e94ea065639407437b799c01f8772c92d3ea82eb64789ce33cc64daeb",
+    "runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+    "mmap_package_sha256": "04da7cc3b67aa128ab09723a7cfdb0a916cd41f588153b91c443f089ac754a1f",
+    "fixture": "tests/fixtures/core/mmap_native.py",
+    "failure": "TypeError: memoryview() requires a bytes-like object",
+    "conclusion": "The failure was confined to the stale build; no xlang3 source change was needed for the current branch runtime."
+  },
+  "related_xmind_dependency_test": {
+    "suite": "TestProj FastAPI backend tests using installed pure-Python packages",
+    "result": "9 passed, 0 failed",
+    "runtime_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "evidence": "xlang3-testproj-backend-pytest-20261017.json"
+  },
+  "limitations": [
+    "This run validates the current branch-built xlang3 CLI fixture suite and the TestProj dependency set; it does not claim compatibility with all PyPI packages or every xlang3 API.",
+    "The stale build remains on disk and must not be used as evidence for current-branch native behavior.",
+    "The xlang3 branch was not modified by this retest; the branch already includes main and is pushed to origin."
+  ]
+}
