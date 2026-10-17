@@ -25,10 +25,14 @@ tests pass 134/134 and the VS Code suite passes 392/392. During testing, a
 second view hit the native backend's two-stream capacity and received HTTP
 503. The shared client now retries that response at a capped rate until a
 stream slot opens; the extension contract verifies recovery after eight busy
-responses. This is one rendered webpage acceptance; an
-approved code effect and matching process node in a dynamic plan, plus a live
-VS Code process-plan run, remain separate acceptance work. [Exact run, plan,
-operation and hashes](evidence/live-dynamic-plan-process-20261017.json).
+responses. A subsequent webpage dynamic plan created one reviewed smoke file
+through a coding child and ran it through a dependent model-free xlang3 process
+node; the process exited 0 with the expected output. The live page's older
+client bundle showed a false `Invalid deterministic planning tool` status
+despite backend success. The current client bundle accepts the registered
+`run_process` alias and completed a follow-up inspect/process plan without that
+status. A same-plan refresh in the VS Code-attached view remains open. [Exact
+run, plan, operation, file and client hashes](evidence/live-dynamic-plan-coding-20261017.json).
 
 At source `8bd7c63abf18246c8814bc32c70db3ade7b2fd1f`, the exact current
 `xmind.exe` was hash-verified across the webpage and VS Code development

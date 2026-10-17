@@ -55,18 +55,17 @@ and behavior:
 1. Dependency conditions currently support `success` and `observed`. Add any
    further conditions only with explicit native semantics and durable outcome
    rules; model output cannot expand permissions, credentials or endpoints.
-2. Extend live planning acceptance beyond the completed read-only agent plus
-   human scenario: a current webpage run now completed a read-only
-   `workspace.inspect` node followed by a dependent native `run_process` node;
-   `npm.cmd run build` exited 0. The exact plan and process records are in the
-   [live process-plan evidence](evidence/live-dynamic-plan-process-20261017.json).
-   A plan that combines an approved code change with its registered
-   verification command, and then refreshes both clients to verify shared
-   results and supplied metrics, remains outstanding.
+2. A live webpage dynamic plan now completed an approval-gated coding child
+   followed by a dependent registered xlang3 `run_process` node. A follow-up
+   plan on the refreshed current-client bundle completed a read-only inspect
+   plus `run_process` without the stale client's false validator warning. The
+   same code-effect plan still needs acceptance from the VS Code-attached view,
+   with both clients refreshed to verify shared plan/history and metrics.
+   [Exact live evidence](evidence/live-dynamic-plan-coding-20261017.json).
 3. Rendered human questions, read-only child outcomes and shared conversation
-   history are now verified in both development clients. Plan revisions,
-   effect approvals and coding-child results still need current-backend live
-   acceptance in the webpage and VS Code extension.
+   history are verified in both development clients. Current-backend live
+   dynamic code-effect approval and its dependent process are verified in the
+   webpage; the corresponding VS Code-attached plan acceptance remains open.
 4. Continue A2A acceptance against independent peers: live model-selected
    dispatch and continuation, reconnect/recovery, streaming and cancellation
    acknowledgement, and the relevant official-SDK paths. A local peer fixture

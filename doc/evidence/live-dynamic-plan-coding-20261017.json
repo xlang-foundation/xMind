@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-17",
+  "scope": "Rendered webpage approval-gated dynamic coding child followed by a dependent xlang3 process, plus current-client validator acceptance",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "runtime": {
+    "xmind_source_revision": "8bd7c63abf18246c8814bc32c70db3ade7b2fd1f",
+    "xmind_executable_sha256": "813CB6B63E44FFB2F59ACC7C8966F4F3EB893C9CDF6AF47A6C8A778BBAE602A6",
+    "xlang3_sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "xlang3_executable_sha256": "D3FBC91E94EA065639407437B799C01F8772C92D3EA82EB64789CE33CC64DAEB",
+    "release_accepted": false
+  },
+  "integrated_code_plan": {
+    "url": "http://127.0.0.1:61228/ui/",
+    "served_client_sha256": "B5F696620EEB0BEB076A3B6F841CBB8C5CBDB483D5465EDA7A6E129BD5B77D4C",
+    "served_client_accepts_run_process_alias": false,
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "root_run_id": "bfe7a8af3cc4318ec0a84dfe8b2052f9",
+    "plan_id": "2a4d57f96d9f0b0015fdbce252b612ff",
+    "final_plan_state": "completed",
+    "nodes": [
+      {
+        "id": "create_smoke",
+        "type": "agent",
+        "preset": "workspace.coding",
+        "child_run_id": "c0c9d542ed6d7e5eba4a0a688e23dbc8",
+        "state": "completed",
+        "effect_state": "succeeded",
+        "approved_operation_id": "7475aed76f99fc81df5dafe0cb3518ae",
+        "path": "xmind_dynamic_plan_smoke.py",
+        "content_sha256": "767AA5BCC5BAAD6BDB7FB6EBCB1528EDFBE5AD02F157319BD93AEC7FEFABC067",
+        "usage_calls": [
+          { "input_tokens": 4978, "output_tokens": 95, "total_tokens": 5073 },
+          { "input_tokens": 5192, "output_tokens": 36, "total_tokens": 5228 }
+        ]
+      },
+      {
+        "id": "verify_smoke",
+        "type": "tool",
+        "tool": "run_process",
+        "child_run_id": "46daceecb6945e64fcd89891497b828e",
+        "depends_on": [{ "task": "create_smoke", "require": "success" }],
+        "state": "completed",
+        "effect_state": "succeeded",
+        "operation_id": "b122198dd9f8c1b9a5b512fb705a4e9c",
+        "profile_id": "xlang3",
+        "effective_arguments": ["-B", "xmind_dynamic_plan_smoke.py"],
+        "working_directory": ".",
+        "exit_code": 0,
+        "elapsed_ms": 882,
+        "stdout": "Hello, xMind dynamic plan!\r\n",
+        "stderr_bytes": 0,
+        "process_tree_retired": true
+      }
+    ],
+    "ui_observation": "The old served client displayed Invalid deterministic planning tool despite plan.call.accepted, both nodes settling successfully, and root run.completed."
+  },
+  "current_client_plan": {
+    "url": "http://127.0.0.1:54426/ui/",
+    "served_client_sha256": "FA0B74EB3B4EC21AE9D37B2037170198429E0EC9FDC281A4469517F58CB8FB5B",
+    "served_client_matches_current_source": true,
+    "served_client_accepts_run_process_alias": true,
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "root_run_id": "78195919523dc24319d516219b8e9994",
+    "plan_id": "88faefa4cbffb710d96e52c3ee3f30de",
+    "final_plan_state": "completed",
+    "nodes": [
+      {
+        "id": "inspect_smoke",
+        "type": "agent",
+        "preset": "workspace.inspect",
+        "state": "completed",
+        "usage": { "input_tokens": 3147, "output_tokens": 88, "total_tokens": 3235 }
+      },
+      {
+        "id": "run_smoke",
+        "type": "tool",
+        "tool": "run_process",
+        "depends_on": [{ "task": "inspect_smoke", "require": "success" }],
+        "operation_id": "ab562a1dcc722d9b95790c4273c50abf",
+        "profile_id": "xlang3",
+        "effective_arguments": ["-B", "xmind_dynamic_plan_smoke.py"],
+        "working_directory": ".",
+        "exit_code": 0,
+        "elapsed_ms": 120,
+        "stdout": "Hello, xMind dynamic plan!\r\n",
+        "stderr_bytes": 0
+      }
+    ],
+    "ui_observation": "The current client rendered the complete plan and process result without the stale validator error."
+  },
+  "independent_file_check": {
+    "path": "D:/CantorAI2026/TestProj/xmind_dynamic_plan_smoke.py",
+    "exists": true,
+    "size_bytes": 114,
+    "sha256": "767AA5BCC5BAAD6BDB7FB6EBCB1528EDFBE5AD02F157319BD93AEC7FEFABC067",
+    "content": "def greet(name):\n    return f\"Hello, {name}!\"\n\n\nif __name__ == \"__main__\":\n    print(greet(\"xMind dynamic plan\"))\n"
+  },
+  "limitations": [
+    "The integrated code-effect plan used an outdated webpage client bundle and displayed a false validator status even though its authoritative native plan, coding operation, dependent process and root run all completed successfully.",
+    "The current-client plan verifies run_process validation and rendered results separately using a read-only agent node; the approval-gated code-effect plan has not yet been repeated with that current bundle.",
+    "The same dynamic code-effect plan has not yet been verified in a VS Code-attached view with shared refresh/history.",
+    "The smoke file remains in TestProj for user inspection; the runtime is a development bundle and is not release accepted."
+  ]
+}
