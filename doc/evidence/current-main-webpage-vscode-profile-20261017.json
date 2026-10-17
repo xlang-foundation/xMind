@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current-main TestProj webpage edit, xlang3 run, and VS Code shared-profile attachment",
+  "xmind_commit": "ffd41a1732da32937c894cc8a945b5ac367715e1",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "native_build": {
+    "release_executable_sha256": "3bdc75e462bb5da98a3b8b1ae24cbf7a9de1cef24f474732fe84cbe3196d7f78",
+    "development_package": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-ffd41a1",
+    "package_xmind_revision": "ffd41a1732da32937c894cc8a945b5ac367715e1",
+    "xlang3_sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "runtime_files_hash_verified": 1921,
+    "package_executable_matches_release_build": true,
+    "release_accepted": false
+  },
+  "webpage": {
+    "url": "http://127.0.0.1:52659/ui/",
+    "local_workspace_connected": true,
+    "workspace_edits": "approved",
+    "provider": {
+      "profile": "OpenAI Responses",
+      "model": "gpt-5.6-sol",
+      "models_discovered": 20,
+      "saved_local_key_reused": true,
+      "first_automatic_discovery": "failed",
+      "recovery": "Settings > Fetch models succeeded using the saved local provider key; no key was re-entered."
+    }
+  },
+  "coding_run": {
+    "run_id": "60587793dbed9169da00c6d081b216a6",
+    "state": "completed",
+    "edit": {
+      "operation_id": "57c67227f48b3cf8899f94c675d1e0b9",
+      "operation": "replace_file",
+      "approval": "approved in the webpage",
+      "path": "hello.py",
+      "before": "print(\"Hello from xMind\")",
+      "after": "print(\"Hello from current xMind browser\")"
+    },
+    "process": {
+      "operation_id": "bcb2f1c7a436a4ff6ec28d63d0d0cfe8",
+      "profile": "xlang3",
+      "arguments": ["-B", "hello.py"],
+      "exit_code": 0,
+      "stdout": "Hello from current xMind browser\r\n",
+      "stderr_bytes": 0,
+      "elapsed_ms": 140
+    },
+    "provider_usage": {
+      "input_tokens": 5630,
+      "output_tokens": 47,
+      "total_tokens": 5677,
+      "cached_tokens": 5379,
+      "reasoning_tokens": 0
+    }
+  },
+  "vscode": {
+    "extension_version": "0.1.13",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "runtime_directory_setting": "D:/CantorAI2026/xMind/.agentflow/coding-runtime-ffd41a1",
+    "shared_profile_attached": true,
+    "view_adapter_executable_sha256": "3bdc75e462bb5da98a3b8b1ae24cbf7a9de1cef24f474732fe84cbe3196d7f78",
+    "backend_executable_sha256": "3bdc75e462bb5da98a3b8b1ae24cbf7a9de1cef24f474732fe84cbe3196d7f78",
+    "client_tests": {
+      "command": "npm test",
+      "passed": 390,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sidebar_originated_prompt_in_this_retest": false,
+    "prior_live_coding_evidence": "vscode-current-source-coding-20261017.json"
+  },
+  "limitations": [
+    "This is one bounded webpage coding task and does not establish broad multi-file task reliability.",
+    "The first automatic model discovery failed and required the Settings Fetch models control; improve and retest this first-selection flow.",
+    "The current VS Code host attached to the shared profile, but this retest did not submit a second prompt from its sidebar.",
+    "TestProj is not a Git repository; hello.py contains the intentional live-test edit."
+  ]
+}

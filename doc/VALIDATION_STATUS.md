@@ -3378,3 +3378,23 @@ replacements after the build, so the run was stopped; no later replacement was
 approved. This confirms a successful webpage edit/build and rendered API-backed
 page, while recording that the run still needs better completion behavior.
 [Run details and hashes](evidence/webpage-testproj-css-hero-20261017.json).
+
+## Current-main webpage coding and VS Code shared profile — 2026-10-17
+
+The current xMind main build (`ffd41a1`) completed an approved edit in the
+TestProj webpage and ran the changed file with the saved `xlang3` process
+profile. The local OpenAI Responses key was reused from
+`.config/providers.yaml`; the first automatic model discovery attempt failed,
+but Settings → Fetch models loaded 20 models without re-entering the key.
+`hello.py` printed the requested output and xlang3 exited 0. The current-source
+VS Code Extension Development Host remained open on TestProj and attached its
+native view adapter to the same local SQLite profile; the adapter and backend
+executable hashes match the current Release build. The 390-test VS Code client
+suite passed. No additional prompt was submitted from the VS Code sidebar
+during this retest, so the live edit record remains [separate evidence]
+(evidence/vscode-current-source-coding-20261017.json).
+
+This validates a bounded live webpage edit and confirms the VS Code host can
+attach to the same current native profile. The initial model-discovery failure
+and the lack of a second sidebar-originated run remain open usability checks.
+[Exact current-main evidence](evidence/current-main-webpage-vscode-profile-20261017.json).
