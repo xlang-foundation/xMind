@@ -3294,6 +3294,19 @@ test does not establish that a live provider will follow the guidance or that
 the TestProj redesign can complete within its run budget.
 [Exact test evidence](evidence/native-coding-workflow-guidance-20261017.json).
 
+## Bounded webpage coding and xlang3 execution — 2026-10-17
+
+A fresh TestProj webpage session created the approved `xmind_coding_smoke.py`
+file with one `create_file` operation, then ran it through the saved `xlang3`
+profile. The effective command was `xlang3 -B xmind_coding_smoke.py`; it exited
+0 and printed `Hello, TestProj!`. The saved OpenAI Responses profile was reused
+without entering a provider key. The VS Code extension suite was rerun and
+passed **390/390**. This verifies bounded code creation and process execution
+through the webpage plus the VS Code client contract suite; it does not verify
+a new live VS Code edit or that the native coding-workflow guidance from the
+current source revision was present in the older live runtime used by this
+page. [Exact evidence](evidence/webpage-xlang3-coding-smoke-20261017.json).
+
 ## Live webpage coding follow-up — 2026-10-17
 
 A second rendered TestProj run selected the saved OpenAI Responses profile in
