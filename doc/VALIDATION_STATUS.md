@@ -3611,6 +3611,13 @@ runtime remains a local development bundle (`releaseAccepted=false`). This
 same terminal then ran `npm.cmd run build` in the TestProj Model Zoo Vue app.
 Vite 6.4.4 transformed 37 modules, generated `dist/index.html`, completed in
 848 ms, and `%ERRORLEVEL%` returned `0`. This verifies one bounded live coding
-and terminal path plus a production frontend build, not broad multi-file
-reliability or an extension-managed build. [Run, runtime hashes, metrics,
-execution, build, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
+and terminal path plus a production frontend build.
+
+In a fresh VS Code xMind conversation, the coding Agent then invoked the
+workspace process tool itself with `npm.cmd run build` and the same frontend
+working directory. The process run completed with exit code `0`, captured
+stdout, zero stderr bytes, 37 transformed modules, and a 749 ms Vite build.
+The run card displayed provider token usage and measured timings. This proves
+the Agent's configured process path for this build; broader multi-file
+reliability and general build behavior remain to be tested. [Run, runtime
+hashes, coding metrics, execution, process output, restore, and limits](evidence/vscode-pinned-main-live-coding-20261017.json).
