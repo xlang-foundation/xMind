@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live current-main VS Code coding and xlang3 execution acceptance in TestProj",
+  "source_revision": "80507a4f3b0c5490f348bbbb70790e8ff59c99fb",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "client": {
+    "vscode_version": "1.142.0",
+    "extension_version": "0.1.13",
+    "host": "VS Code extension development host using the repository extension source",
+    "visible_right_secondary_sidebar": true,
+    "workspace_edits": "approval-gated",
+    "rendered_sidebar": {
+      "viewport_width": 290,
+      "viewport_height": 798,
+      "provider_and_model_controls_visible": true,
+      "document_height": 798
+    }
+  },
+  "runtime": {
+    "xmind_revision": "80507a4f3b0c5490f348bbbb70790e8ff59c99fb",
+    "runtime_directory": "D:/CantorAI2026/xMind/.agentflow/goal-current-runtime-20261017",
+    "native_executable_sha256": "f3bfb8d6a4b919e0f75140079e2ba652d5f6f3d3e28e783b99af1d698d7a6cd4",
+    "xlang3_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+    "xlang3_runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "release_accepted": false
+  },
+  "provider": {
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing repository .config/providers.yaml profile; secret omitted",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "run_id": "b6c40aefc0bd91ff625f79f3e425d5ea",
+    "state": "completed",
+    "operation": {
+      "tool": "create_file",
+      "operation_id": "be144d8419b0a8411c4a3c4570fe2e18",
+      "state": "succeeded",
+      "approval": "Exact one-file creation reviewed and allowed in the VS Code sidebar",
+      "path": "xmind_current_main_vscode_smoke_20261017.py",
+      "content": "def result():\n    return \"xMind VS Code current-main\"\n\n\nif __name__ == \"__main__\":\n    print(result())\n"
+    },
+    "process": {
+      "operation_id": "7bcfa2e4278a9c4462dbd980a60f4a34",
+      "profile": "xlang3",
+      "executable": "C:/Users/shaw9/.xMind/p/coding-current-main-vscode-80507a4/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-18068bcb791c9bcb0e10a583ec2d0ec12b186291644762a3d6b34ce9e3039d94/xlang3.exe",
+      "exit_code": 0,
+      "stdout": "xMind VS Code current-main\r\n",
+      "stderr_bytes": 0
+    },
+    "usage": {
+      "final_response_input_tokens": 5747,
+      "final_response_output_tokens": 51,
+      "final_response_total_tokens": 5798,
+      "first_token_seconds": 1.09,
+      "elapsed_seconds": 1.74
+    }
+  },
+  "cleanup": {
+    "method": "Native restore run through the VS Code sidebar",
+    "parent_restore_run_id": "b678927bc1553e1ba6874311a48d0ce9",
+    "restore_run_id": "6d2cb7558197b76bf5e3f714f6b1e9bf",
+    "restore_operation_id": "489cb4084aaaac67012e289999c1606b-0",
+    "approval": "Deletion reviewed and allowed in the VS Code sidebar",
+    "file_absent_after_cleanup": true
+  },
+  "tests": {
+    "command": "npm.cmd test",
+    "working_directory": "extensions/vscode",
+    "passed": 391,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "This verifies one approved file creation, xlang3 process run, and approved cleanup in a live VS Code development host; it does not establish broad coding reliability or an installed release-package acceptance.",
+    "The current-main runtime is a local development bundle and is explicitly not marked release accepted."
+  ]
+}
