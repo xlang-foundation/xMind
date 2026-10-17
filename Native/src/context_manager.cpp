@@ -43,6 +43,7 @@ class Preparation {
     const ContextOwner& owner;
     RootExecutionBudget* budget;
     const SecretBytes* bearer;
+    AgentModelGateway* model_gateway;
     std::stop_token cancel;
     std::chrono::steady_clock::time_point deadline;
     ContextReadBound bound;
@@ -112,7 +113,7 @@ class Preparation {
         const auto started=std::chrono::steady_clock::now();
         try{
             check();store.start_context_measure(spec.id).get();
-            const auto actual=count_responses_context(selected,request,bearer,cancel);
+            const auto actual=model_gateway?model_gateway->count_context(selected,request,cancel):count_responses_context(selected,request,bearer,cancel);
             ContextInputMeasure measure;measure.id=spec.id;measure.owner_id=spec.owner_id;
             measure.scope=spec.scope;measure.binding=spec.binding;measure.head_revision=spec.head_revision;
             measure.source_watermark=spec.source_watermark;measure.payload_binding=spec.payload_binding;
@@ -182,10 +183,10 @@ class Preparation {
 public:
     Preparation(PersistenceService& persistence,ChatProviderConfig configured,const ContextRuntimePolicy& configured_policy,
         const ContextManager::MessageDecoder& decoder,const ContextOwner& context_owner,RootExecutionBudget* root,
-        const SecretBytes* credential,std::stop_token stopped,
+        const SecretBytes* credential,AgentModelGateway* gateway,std::stop_token stopped,
         std::optional<std::chrono::steady_clock::time_point> owner_deadline={})
         :store(persistence),provider(std::move(configured)),policy(configured_policy),decode(decoder),owner(context_owner),
-         budget(root),bearer(credential),cancel(stopped),deadline(std::chrono::steady_clock::now()+std::chrono::milliseconds(configured_policy.compaction.maintenance_deadline_ms)){
+         budget(root),bearer(credential),model_gateway(gateway),cancel(stopped),deadline(std::chrono::steady_clock::now()+std::chrono::milliseconds(configured_policy.compaction.maintenance_deadline_ms)){
         if(root)deadline=std::min(deadline,root->deadline());
         if(owner_deadline)deadline=std::min(deadline,*owner_deadline);
         bound.max_groups=policy.compaction.max_groups;bound.max_payload_bytes=policy.compaction.max_request_bytes;
@@ -294,7 +295,7 @@ public:
                 auto& spec=admission->first;auto& prefix=admission->second;
                 check();store.start_context_compaction(spec.id,spec.maintenance_attempt_id).get();
                 const auto started=std::chrono::steady_clock::now();maintenance_started=started;
-                const auto actual=compact_responses_context(transport_config(),prefix,bearer,cancel);
+                const auto actual=model_gateway?model_gateway->compact_context(transport_config(),prefix,cancel):compact_responses_context(transport_config(),prefix,bearer,cancel);
                 ContextCompactionCommit commit;commit.compaction_id=spec.id;commit.maintenance_attempt_id=spec.maintenance_attempt_id;
                 commit.binding=owner.binding;commit.expected_head_revision=result.snapshot.head.revision;
                 commit.source_watermark=result.snapshot.source_watermark;commit.source_manifest_binding=selection->source_manifest_binding;
@@ -383,15 +384,18 @@ ContextManager::ContextManager(PersistenceService& store,ChatProviderConfig prov
        p.retain_recent_groups<1||p.retain_recent_groups>64||policy_.buffer_tokens<0||policy_.model_capacities.size()>256)
         throw std::invalid_argument("Invalid registered native context runtime policy");
 }
+ContextManager::ContextManager(PersistenceService& store,AgentModelGateway& gateway,ChatProviderConfig provider,
+    ContextRuntimePolicy policy,MessageDecoder decoder)
+    :ContextManager(store,std::move(provider),std::move(policy),std::move(decoder)){model_gateway_=&gateway;}
 PreparedModelContext ContextManager::prepare(const ContextOwner& owner,const ModelRequest& trusted,RootExecutionBudget& budget,
     const SecretBytes* bearer,std::stop_token cancel){
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,cancel).run(trusted);
+    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted);
     if(!actual.inference)throw ContextOutcomeUnrecorded("Prepared context has no inference reservation");
     return {std::move(actual.request),std::move(*actual.inference),std::move(actual.step_id),std::move(actual.snapshot),std::move(actual.measure)};
 }
 PreparedModelContext ContextManager::rebuild(const ContextOwner& owner,const ModelRequest& trusted,const PreparedModelContext& failed,
     RootExecutionBudget& budget,const SecretBytes* bearer,std::stop_token cancel){
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,cancel).run(trusted,&failed);
+    auto actual=Preparation(store_,provider_,policy_,decode_,owner,&budget,bearer,model_gateway_,cancel).run(trusted,&failed);
     if(!actual.inference)throw ContextOutcomeUnrecorded("Rebuilt context has no physical inference member");
     return {std::move(actual.request),std::move(*actual.inference),std::move(actual.step_id),std::move(actual.snapshot),std::move(actual.measure)};
 }
@@ -399,7 +403,7 @@ ContextProjection ContextManager::compact_idle(const ContextScope& scope,const C
     const ModelRequest& trusted,const SecretBytes* bearer,std::stop_token cancel,
     std::optional<std::chrono::steady_clock::time_point> owner_deadline){
     ContextOwner owner;owner.scope=scope;owner.binding=binding;owner.owner_run_id=id;
-    auto actual=Preparation(store_,provider_,policy_,decode_,owner,nullptr,bearer,cancel,owner_deadline).run(trusted);
+    auto actual=Preparation(store_,provider_,policy_,decode_,owner,nullptr,bearer,model_gateway_,cancel,owner_deadline).run(trusted);
     if(!actual.projection)throw ContextOutcomeUnrecorded("Idle maintenance returned without a checkpoint");
     return std::move(*actual.projection);
 }

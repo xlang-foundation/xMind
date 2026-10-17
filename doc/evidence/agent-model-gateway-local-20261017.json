@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-17",
+  "scope": "Local Release verification of the AgentModelGateway extraction",
+  "xmind_base_revision": "2de630054fd1a566e4a1cab84caf4412288f7042",
+  "xlang3_runtime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+  "build": {
+    "configuration": "Release",
+    "targets": [
+      "agentflow_agent_runner_contract",
+      "agentflow_agent_service_contract",
+      "agentflow_graph_runner_contract",
+      "agentflow_context_engine_contract"
+    ],
+    "result": "passed"
+  },
+  "ctest": {
+    "command": "ctest --test-dir build/native-current -C Release -R '^(native_agent_runner_contract|native_agent_service_contract|native_graph_runner_contract|native_a2a_agent_registry_contract|native_context_engine_contract)$' --output-on-failure",
+    "registered": 5,
+    "passed": 5,
+    "failed": 0,
+    "result": "passed"
+  },
+  "verified_paths": [
+    "The real AgentRunner provider/tool loop uses an injected AgentModelGateway.",
+    "Responses context counting and compaction use the gateway in the context-engine contract.",
+    "The production local adapter resolves credential bytes internally and accepts no secret in the call values."
+  ],
+  "limitations": [
+    "This does not implement a worker or IPC gateway adapter.",
+    "Workspace, edit approvals, process, MCP, A2A and other effect services remain in-process backend dependencies.",
+    "This selected contract set is not a full 147-test Release rerun or packaged runtime acceptance."
+  ]
+}

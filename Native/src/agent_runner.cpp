@@ -153,11 +153,15 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
-    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
-    :AgentRunner(persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy){}
+    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy,
+    std::shared_ptr<AgentModelGateway> model_gateway)
+    :AgentRunner(persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
-    bool preserve_dynamic_child_planning_policy):journal_(journal),persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
+    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway)
+    :journal_(journal),persistence_(persistence),settings_(std::move(settings)),
+     model_gateway_(model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings_.credential)),
+     delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if((settings_.provider.model.empty()&&!settings_.provider_identity) || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -373,11 +377,9 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(delegation_&&settings_.delegation)trusted.tools.push_back(DelegationExecutor::definition());
     if(const auto planning=execution_capabilities(provider.model))for(auto& definition:context_dynamic_plan_tool_definitions(*planning))trusted.tools.push_back(std::move(definition));
     if(trusted.tools.size()>64)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits");
-    check();std::optional<SecretBytes> credential;
-    if(settings_.credential)credential=persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get();
     if(context_binding(provider.model)!=binding)throw ContextBindingChanged("Idle context authority changed during preparation");
-    check();ContextManager manager(persistence_,provider,*settings_.context,message);
-    return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,credential?&*credential:nullptr,token,deadline);
+    check();ContextManager manager(persistence_,*model_gateway_,provider,*settings_.context,message);
+    return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,nullptr,token,deadline);
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
     std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions,
@@ -745,7 +747,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         std::string delivered_repository_metadata;
         std::vector<std::string> joined_process_notes;
         std::unique_ptr<ContextManager> context_manager;
-        if(settings_.context)context_manager=std::make_unique<ContextManager>(persistence_,provider,*settings_.context,message);
+        if(settings_.context)context_manager=std::make_unique<ContextManager>(persistence_,*model_gateway_,provider,*settings_.context,message);
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
@@ -764,8 +766,6 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 std::string encoded_metadata=repository_context->metadata();if(!active_attached_guidance.empty()){Json metadata={{"primary",Json::parse(encoded_metadata)},{"attached",Json::object()}};for(const auto& folder_id:active_attached_guidance)metadata["attached"][folder_id]=Json::parse(attached_repository_contexts.at(folder_id)->metadata());encoded_metadata=metadata.dump();}
                 if(encoded_metadata!=delivered_repository_metadata){journal_.append_event(id,"agent.repository_scope",encoded_metadata).get();delivered_repository_metadata=encoded_metadata;}
             }
-            std::optional<SecretBytes> credential;
-            if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
             auto response_started=std::chrono::steady_clock::now();
             std::optional<std::int64_t> first_token_ms;
             std::optional<ModelCallReservation> reservation;
@@ -784,7 +784,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 const auto& p=settings_.context->compaction;owner.binding.policy_id=p.id;owner.binding.policy_revision=p.revision;
                 owner.binding.strategy_id=p.strategy_id;owner.binding.strategy_revision=p.strategy_revision;
                 if(!planning_continuation.empty())owner.planning_call_id=planning_continuation;
-                context_owner=owner;prepared_context=context_manager->prepare(owner,trusted_current,*budget,credential?&*credential:nullptr,token);
+                context_owner=owner;prepared_context=context_manager->prepare(owner,trusted_current,*budget,nullptr,token);
                 request=prepared_context->request;reservation=prepared_context->inference;
                 if(dynamic_root)budget->pin_context(prepared_context->snapshot);
                 planning_continuation.clear();
@@ -803,7 +803,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             response_started=std::chrono::steady_clock::now();first_token_ms.reset();durable_output=false;attempt_finished=false;
             if(reservation)budget->start(*reservation,token);
             try{
-            response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
+            response=model_gateway_->complete(provider,request,[&](const ModelEvent& event) {
                 if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta" || event.kind=="model.reasoning")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
                 cancelled(token);journal_.append_event(id,event.kind,event.json).get();
                 if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
@@ -812,7 +812,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(context_manager&&!rebuild_used&&settings_.context->compaction.automatic&&!durable_output&&
                    error.status==400&&error.code=="context_length_exceeded"){
                     finish_context_attempt(InferenceAttemptOutcome::context_overflow,{},"context_length_exceeded");
-                    prepared_context=context_manager->rebuild(*context_owner,trusted_current,*prepared_context,*budget,credential?&*credential:nullptr,token);
+                    prepared_context=context_manager->rebuild(*context_owner,trusted_current,*prepared_context,*budget,nullptr,token);
                     request=prepared_context->request;reservation=prepared_context->inference;rebuild_used=true;
                     if(dynamic_root)budget->pin_context(prepared_context->snapshot);
                     continue;

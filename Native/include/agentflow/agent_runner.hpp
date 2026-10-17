@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_run_journal.hpp"
+#include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
@@ -19,7 +20,6 @@ class DelegationExecutor;
 class DynamicPlanExecutor;
 class A2aRemoteAgentRegistry;
 class RootExecutionBudget;
-struct CredentialReference {std::string scope,id,purpose;};
 // Public, immutable profile identity; never contains credentials or destinations.
 struct ProviderExecutionIdentity {std::string profile_id,route_id,provider;std::int64_t profile_revision=0;};
 struct AgentDelegationPolicy {
@@ -76,10 +76,10 @@ class AgentRunner {
 public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
-        bool preserve_dynamic_child_planning_policy=false);
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={});
     AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
-        bool preserve_dynamic_child_planning_policy=false);
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={},
@@ -105,6 +105,7 @@ private:
     AgentRunJournal& journal_;
     PersistenceService& persistence_;
     AgentSettings settings_;
+    std::shared_ptr<AgentModelGateway> model_gateway_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<ProcessExecutor> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;

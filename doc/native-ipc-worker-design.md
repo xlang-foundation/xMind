@@ -46,6 +46,17 @@ AgentRunner execution. The next extraction must route provider/tool and
 approval capabilities through the host while keeping credentials and durable
 effects with the owner.
 
+The model-call slice is now extracted as `AgentModelGateway`. `AgentRunner`
+passes validated provider configuration, model request values and a stream
+callback to the gateway; it no longer resolves a secret or calls a provider
+transport itself. The local gateway captures only the saved credential
+reference, resolves its bytes inside the backend, and handles normal inference,
+Responses context counting and compaction. The context-engine and real
+AgentRunner provider/tool contracts pass through this gateway. This keeps API
+keys out of its call values and creates an injectable provider boundary, but
+does not yet implement an IPC-backed gateway or move workspace/MCP/A2A tools,
+approval waits or the full AgentRunner loop into a worker.
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.
