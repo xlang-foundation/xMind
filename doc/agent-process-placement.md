@@ -45,30 +45,40 @@ execution.
 
 ## Implementation and acceptance sequence
 
-1. Add a backend-owned execution-placement enum and revision-bound config for
-   primary agents, subagents and graph agent nodes. Reject unknown values and
-   preserve the default for existing records.
-2. Add a native worker supervisor and private IPC protocol. Keep run admission,
-   grants, credentials, durable journal ownership and recovery on the same
-   backend profile. Bind every request and reply to the run, profile revision,
-   worker identity and protocol version.
-3. Route only opted-in runs to the worker. The worker executes the same
-   `AgentRunner`; clients use the existing HTTP/SSE and CLI interfaces.
-4. Test in-process and process execution against the same provider and tool
-   fixtures. Verify actual event/history writes, workspace reads, approved
-   edits, model/tool continuations, provider metrics, graph child results and
-   process identity.
+1. Finish an `AgentExecutionHost` capability boundary for model calls, run and
+   context journals, tool discovery/invocation, approval waits, and effect
+   receipts. Commands and results carry owned bounded values; credentials,
+   SQLite handles and backend runtime objects stay in the owner. The
+   `AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` seams now
+   exist, while workspace, MCP/A2A and effect dispatch still use concrete
+   backend services.
+2. Keep the current in-process implementation as the first host adapter. Run
+   the same AgentRunner contract through this host and the existing path,
+   covering provider continuations, workspace reads, approved edits, process
+   tools, MCP/A2A calls, metrics and durable events before adding another
+   placement.
+3. Add the native worker supervisor and private IPC protocol on the pinned
+   xlang3 native-host API. Keep run admission, grants, credentials, journal
+   ownership and recovery in the backend. Bind every request and reply to the
+   run, immutable configuration revision, worker process identity and protocol
+   version.
+4. Add backend-owned placement configuration for primary agents, subagents and
+   graph agent nodes only when both hosts execute the same capability contract.
+   Reject unknown values and keep `in_process` as the default. Then route opted
+   in runs through the worker without changing the HTTP/SSE or CLI interfaces.
 5. Exercise cancellation during provider streaming, tool execution and human
-   pause; worker startup failure; crash before and after a durable effect;
-   lost replies; server shutdown; and restart/reconciliation. Prove completed
-   tools are never replayed and unresolved effects remain quarantined.
-6. Accept through the installed webpage and VS Code clients, and verify the
-   same process-bound run remains inspectable and controllable after either
+   pause; worker startup failure; crashes before and after durable effects; lost
+   replies; server shutdown; and restart/reconciliation. Prove completed tools
+   are never replayed and unresolved effects remain quarantined.
+6. Accept through the installed webpage and VS Code clients, and verify that
+   the same process-bound run remains inspectable and controllable after either
    view reconnects.
 
 No process-placement config, C++ AgentRunner worker, or acceptance for this
-contract is implemented yet. This document records the requested direction and
-the testable boundary; it is not a completion claim.
+contract is implemented yet. The run/context journals and model gateway are
+tested persistence/provider seams; they do not by themselves make AgentRunner
+portable. This document records the requested direction and the testable
+boundary; it is not a completion claim.
 
 ### xlang3 native-host prerequisite — 2026-10-17
 
