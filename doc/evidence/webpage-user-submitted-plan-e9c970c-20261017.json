@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-17",
+  "scope": "one live read-only plan submitted through the current-source TestProj webpage",
+  "submission_path": "rendered local xMind webpage composer",
+  "webpage": "http://127.0.0.1:52103/ui/",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "run_id": "02ba426a1e4174145dfc6c838e94610f",
+  "run_state": "completed",
+  "provider": "openai",
+  "route": "openai.responses",
+  "model": "gpt-5.6-sol",
+  "planning": {
+    "plan_id": "0c818b8b5d9dd1ac8c64cf5452da0fd4",
+    "state": "completed",
+    "accepted_plan_calls": 1,
+    "model_calls_reserved": 4,
+    "refresh_history_used": false
+  },
+  "child": {
+    "label": "inspect_home",
+    "preset": "workspace.inspect",
+    "state": "completed",
+    "workspace_path_read": "model-zoo/frontend/src/views/HomeView.vue",
+    "tools_started": ["read_file"],
+    "operations": 0,
+    "response": {
+      "input_tokens": 2922,
+      "output_tokens": 39,
+      "elapsed_ms": 1360,
+      "first_token_ms": 1120
+    }
+  },
+  "parent_final_response": {
+    "input_tokens": 5697,
+    "output_tokens": 85,
+    "elapsed_ms": 1710,
+    "first_token_ms": 1050
+  },
+  "page_result": {
+    "title": "Find the right model for your next idea",
+    "main_visible_text": "Explore a curated registry of model profiles. Filter by task, framework or modality, then open a model to review its capabilities and metadata.",
+    "displayed_final_response": true,
+    "displayed_completed_plan_and_child": true
+  },
+  "runtime": {
+    "xmind_revision": "e9c970c08d7f18f7b42ef3683c981af89b52f2fa",
+    "native_executable_sha256": "6910b335ca925109fb8438788375ce7e14a944778024ac49bcd56c034f873ced",
+    "xlang3_revision": "fcecf499c8ff2fd2a2a1f7d230ecda3445d7d9e8",
+    "release_accepted": false,
+    "runtime_inventory_hash_verified": true
+  },
+  "verification": {
+    "parent_and_child_completed": true,
+    "child_read_only": true,
+    "no_effect_operations": true,
+    "final_page_state_updated_automatically": true,
+    "provider_secrets_recorded": false
+  }
+}

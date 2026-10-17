@@ -110,6 +110,22 @@ user-submitted browser message, installed VS Code planning, broad coding
 reliability, or release acceptance. Separate live webpage and installed VS
 Code edit/build runs remain the coding acceptance evidence.
 
+## Current-source webpage-submitted planning — 2026-10-17
+
+The exact `e9c970c` Release executable was staged with its paired xlang3
+`fcecf499` runtime and hash-verified (`releaseAccepted=false`). From the
+rendered TestProj webpage, a user message selected native `plan_tasks` and
+created exactly one `workspace.inspect` child for
+`model-zoo/frontend/src/views/HomeView.vue`. The child used only `read_file`,
+completed with no effect operations, and reported the page title and visible
+copy. The parent and child responses, plan state, provider/model, token usage,
+and measured timings appeared in the page without using Refresh history. The
+same UI restored the saved OpenAI profile and model catalogue from the local
+configuration. This verifies one current-source, read-only planned webpage run
+and its automatic completion display; it does not establish installed VS Code
+planning, general coding reliability, or release acceptance. [Exact sanitized
+run evidence](evidence/webpage-user-submitted-plan-e9c970c-20261017.json).
+
 ## Workspace Agent planning exposure — 2026-10-16
 
 Workspace-backed provider-profile Agents now register the bounded native
