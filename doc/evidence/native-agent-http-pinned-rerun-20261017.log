@@ -1,0 +1,24 @@
+UpdateCTestConfiguration  from :C:/xMindNativeValidation/pinned-main-1daa56d/DartConfiguration.tcl
+Parse Config file:C:/xMindNativeValidation/pinned-main-1daa56d/DartConfiguration.tcl
+Test project C:/xMindNativeValidation/pinned-main-1daa56d
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 107
+    Start 107: native_agent_http_contract
+
+107: Test command: "C:\Program Files\nodejs\node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs" "C:/xMindNativeValidation/pinned-main-1daa56d/Release/xmind_server.exe" "C:/xMindNativeValidation/pinned-main-1daa56d/Release/xmind_cli.exe" "C:/xMindNativeValidation/pinned-main-1daa56d/Release/xmind_admin.exe" "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release/modules" "C:/Python/Python314/Lib"
+107: Working Directory: C:/xMindNativeValidation/pinned-main-1daa56d
+107: Test timeout computed to be: 90
+107: Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, durable prompt queue and automatic dispatch, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.
+1/1 Test #107: native_agent_http_contract .......   Passed    9.70 sec
+
+The following tests passed:
+	native_agent_http_contract
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   9.72 sec

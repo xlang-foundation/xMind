@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh xMind Windows x64 Release build and complete sequential native CTest against the pinned xlang3 C++ LRPC host",
+  "source": {
+    "repository": "https://github.com/xlang-foundation/xMind",
+    "revision": "b711612d59b098069cf30d213bb193715aba2f19",
+    "native_child_executor_contract_sha256": "28E0497A795A3A6088FCFA7E7A126C14E293A8FF28C77351F95CD65DDB014B78"
+  },
+  "runtime": {
+    "repository": "https://github.com/CantorAI/xlang3",
+    "branch": "xmind-cpp-lrpc-host",
+    "revision": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "BEEC7E860B4A1E5088F28768275D2635988F14A494FE8973B66917C1791A4E47"
+  },
+  "build": {
+    "command": "Tools/native-milestone.ps1 -Action Build -BuildDirectory C:/xMindNativeValidation/pinned-main-1daa56d -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib",
+    "generator": "Visual Studio 18 2026",
+    "configuration": "Release",
+    "completed": true,
+    "xmind_executable": "C:/xMindNativeValidation/pinned-main-1daa56d/Release/xmind.exe",
+    "xmind_executable_sha256": "7791B0D779E2A3ECCC1DA38DB0E9A01EBC588D231D21BCD0E73677BCD19A9657",
+    "cpython_interpreter_executed": false
+  },
+  "ctest": {
+    "command": "ctest --test-dir C:/xMindNativeValidation/pinned-main-1daa56d -C Release --output-on-failure --no-tests=error",
+    "total": 147,
+    "passed": 146,
+    "failed": 1,
+    "failed_test": "native_agent_http_contract",
+    "failure": "Timed out waiting for CLI automatic queued-prompt admission",
+    "elapsed_seconds": 909.70,
+    "log": "native-pinned-xlang3-release-ctest-20261017.log",
+    "log_sha256": "3005FBBB11183233B20FC569F495787FCBC2530846B30AD04A4D0CD9F720A171"
+  },
+  "failed_contract_follow_up": {
+    "isolated_run": { "passed": 1, "failed": 0, "elapsed_seconds": 9.72, "log": "native-agent-http-pinned-rerun-20261017.log", "log_sha256": "6CA2670E0EA2C899D9358C586BE62B194462EB676D843E0C4F15BC05E58B7528" },
+    "repeat_until_fail_3": { "passed": 3, "failed": 0, "elapsed_seconds": 28.71, "log": "native-agent-http-pinned-repeat-20261017.log", "log_sha256": "47AC67C9A1DDDDBDA80B2386DE7166375B061437F9A4169774C20645F1656481" },
+    "interpretation": "The full-suite timeout was not reproduced in four consecutive focused runs; its cause under full-suite load remains unconfirmed."
+  },
+  "limitations": [
+    "The full sequential run did not pass cleanly because one CLI queued-prompt admission timed out; isolated and repeated reruns passed.",
+    "Hosted CI against the pinned runtime remains pending.",
+    "This is native contract evidence, not installed-package or broad live-client release acceptance."
+  ]
+}

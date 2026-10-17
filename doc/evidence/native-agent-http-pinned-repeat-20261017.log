@@ -1,0 +1,11 @@
+Test project C:/xMindNativeValidation/pinned-main-1daa56d
+    Start 107: native_agent_http_contract
+    Test #107: native_agent_http_contract .......   Passed    9.73 sec
+    Start 107: native_agent_http_contract
+    Test #107: native_agent_http_contract .......   Passed    9.46 sec
+    Start 107: native_agent_http_contract
+1/1 Test #107: native_agent_http_contract .......   Passed    9.49 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  28.71 sec
