@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-10-16",
+  "source_base_revision": "aeed30671f6f9ed80b2e68aa001d8cead4480886",
+  "provider": "xai.responses",
+  "model": "grok-4.6",
+  "scenario": "Synthetic Responses stream emits a completed encrypted reasoning item plus read_file; the next request must replay the exact completed reasoning item before the tool output",
+  "contracts": {
+    "runtime_contract_exe_sha256": "43E5A33A2B05527D37537FF4736BA02BEB4C98559AF7F4B41B3BB21C1CC60771",
+    "count": "1/1",
+    "native_provider_model_policy_runtime_contract": "passed",
+    "synthetic_peer_sha256": "28B27AA30A897AB91074A8B54B6EA56724056C3B3B435AF5BEFE75CD503FDD60"
+  },
+  "scope": "Actual C++ Responses parser/request serializer, native workspace read tool, protected profile and xlang3 SQLite history. Peer HTTP/SSE events and opaque reasoning string are synthetic. No live xAI account or inference.",
+  "source": "https://docs.x.ai/developers/model-capabilities/text/reasoning"
+}

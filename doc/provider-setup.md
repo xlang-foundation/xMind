@@ -14,11 +14,12 @@ model-specific: 4.3 permits `none`, `low`, `medium` and `high`; 4.5 permits
 `low`, `medium` and `high`; 4.6 and 4.7 also permit `xhigh`. Other catalogue
 entries remain unavailable for tool runs until their model capabilities are
 reviewed. The native xAI contract passed against a synthetic Responses peer,
-including discovery, a streamed `read_file` call using Grok 4.6, actual
-workspace access and xlang3 SQLite reopen. No xAI account, API key or live
-inference was used; this contract does not establish live model acceptance.
-See xAI's [model pages](https://docs.x.ai/developers/models) and
-[reasoning guide](https://docs.x.ai/developers/model-capabilities/text/reasoning).
+including discovery, a streamed `read_file` call using Grok 4.6, exact replay
+of the opaque reasoning item on the tool follow-up, actual workspace access and
+xlang3 SQLite reopen. xAI documents replaying encrypted reasoning across tool
+turns in its [Responses reasoning guide](https://docs.x.ai/developers/model-capabilities/text/reasoning).
+No xAI account, API key or live inference was used; this contract does not
+establish live model acceptance. See xAI's [model pages](https://docs.x.ai/developers/models).
 
 `mistral.chat` uses Mistral's native Chat Completions endpoint with its
 `max_tokens` output-limit field and streaming usage opt-in. Account discovery is

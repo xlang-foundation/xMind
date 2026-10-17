@@ -51,6 +51,16 @@ the embedded xlang3/SQLite profile. Provider HTTP and responses are synthetic;
 this does not claim live xAI account acceptance. [Contract output](evidence/native-xai-reviewed-model-policy-ctest-20261016.log),
 [source and binary evidence](evidence/native-xai-reviewed-model-policy-20261016.json).
 
+2026-10-16 xAI reasoning continuation: the native provider runtime contract now
+streams a completed opaque reasoning item together with a Grok 4.6 tool call,
+executes the actual workspace read, and asserts that the next Responses request
+replays the exact completed reasoning item before the tool output. This covers
+the xAI-specific encrypted reasoning requirement in the real C++ parser and
+serializer. The focused Release contract passes **1/1**; the HTTP/SSE peer and
+opaque ciphertext are synthetic, so live xAI acceptance remains open. [Contract
+output](evidence/native-xai-reasoning-replay-ctest-20261016.log), [test
+evidence](evidence/native-xai-reasoning-replay-20261016.json).
+
 2026-10-16 live cross-client coding acceptance: VS Code and the external
 webpage both attached to the local TestProj profile and used its saved OpenAI
 configuration. In VS Code, xMind proposed a focused accessibility/usability
