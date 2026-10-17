@@ -1,0 +1,50 @@
+{
+  "recorded_date": "2026-10-17",
+  "scope": "Current-source rendered browser workspace switching clears prior workspace run selection and detail, and restores the prior workspace run on return.",
+  "xmind_source_revision": "81be8ca2a52ab9fc8fffe3e08df09dc92953d606",
+  "browser_asset_sha256": "93b28d2fde083b4a2560b334671c1abfbd6b1b76e4db1757e2a87fac46b8cf5",
+  "development_runtime": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/focused-read-runtime-20261017/xmind.exe",
+    "executable_sha256": "ca27d6afd8425f72736c54906528b61706dc6d70c242e6f42673dd572160713d",
+    "release_accepted": false,
+    "native_backend_pid": 51892,
+    "backend_origin": "http://127.0.0.1:63934"
+  },
+  "browser_adapter": {
+    "url": "http://127.0.0.1:59098/ui/",
+    "process_id": 19172,
+    "assets_rebuilt_from_current_source": true,
+    "backend_process_preserved_during_adapter_refresh": true
+  },
+  "initial_workspace": {
+    "name": "TestProj",
+    "root": "D:/CantorAI2026/TestProj",
+    "selected_run_id": "337deac23e1b3a8c3836dc8c94d2c983",
+    "selected_operation_id": "a9dcd1010c632274b166cb8d7dcc8dbc",
+    "run_status": "completed",
+    "process_exit_code": 0,
+    "command_result": "xlang3 -B -m pytest -q; 9 passed, 1 warning"
+  },
+  "switch_to_workspace": {
+    "name": "frontend",
+    "root": "D:/CantorAI2026/TestProj/model-zoo/frontend",
+    "registered_folders": ["frontend", "backend"],
+    "session_state": "No sessions yet",
+    "run_selector_visible": false,
+    "previous_workspace_run_detail_visible": false
+  },
+  "switch_back": {
+    "workspace": "TestProj",
+    "restored_run_id": "337deac23e1b3a8c3836dc8c94d2c983",
+    "conversation_and_run_restored": true
+  },
+  "automated_tests": {
+    "browser_connection_suite": {"passed": 30, "failed": 0},
+    "vscode_extension_suite": {"passed": 390, "failed": 0}
+  },
+  "limits": [
+    "One rendered browser workspace round trip was exercised; this does not establish broad coding reliability.",
+    "No provider inference or file edit was performed during this check.",
+    "The development runtime is not release accepted."
+  ]
+}

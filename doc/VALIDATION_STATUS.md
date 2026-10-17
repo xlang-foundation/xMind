@@ -56,6 +56,19 @@ contract with native workspace, sidebar approval, and process checks. This is a
 local development verification, not full native release acceptance or a live
 VS Code window reconnection. [Evidence](evidence/native-runtime-pycache-20261017.json).
 
+## Current-source webpage workspace/run isolation — 2026-10-17
+
+The webpage assets built from xMind `81be8ca` were loaded by a refreshed local
+adapter attached to the existing TestProj native backend. With the completed
+TestProj run selected, switching to the existing `frontend` workspace (two
+registered folders, no sessions) cleared the run selector and detail view; no
+TestProj run metadata remained visible. Switching back restored the same
+TestProj conversation and completed run. The backend process stayed live across
+the adapter refresh. The workspace regression suite passes **30/30** and the
+VS Code suite passes **390/390**. This verifies browser workspace/run isolation
+on the current source; it is not another model inference or coding edit, and
+the development runtime is not release accepted. [Evidence](evidence/browser-workspace-run-isolation-20261017.json).
+
 ## Live webpage coding acceptance — 2026-10-16
 
 The rendered local webpage completed a real OpenAI Responses coding task in
