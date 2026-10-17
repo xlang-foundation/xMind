@@ -251,6 +251,17 @@ operation; retrying the bounded task with saved `gpt-5.6-luna` completed. This
 runtime was staged from xMind `4bd0dcb`, so it is live development evidence,
 not current-main acceptance or release acceptance. [Run and cleanup record](evidence/webpage-staged-runtime-live-coding-20261017.json).
 
+## Current-main webpage and VS Code UI contracts — 2026-10-17
+
+At source `d3a4348`, the browser suite passed **134/134** and the VS Code
+extension suite passed **391/391**, with no failures or skips. These are
+synthetic client/controller tests and do not replace live UI or native Release
+acceptance. The browser workspace canvas remains a read-only preview; a full
+editor, multi-file diff and recovery workflows remain open coding UX work. The
+current-source native Release gate is still outstanding because the isolated
+build stopped before producing every contract executable. [Exact commands and
+counts](evidence/current-main-webpage-vscode-contracts-20261017.json).
+
 ## Live local webpage-backend planning smoke — 2026-10-17
 
 The refreshed webpage connected to the saved TestProj local profile, restored

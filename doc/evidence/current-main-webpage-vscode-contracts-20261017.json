@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-17",
+  "source_revision": "d3a4348",
+  "scope": "Current-source JavaScript browser and VS Code client/controller contract suites",
+  "browser": {
+    "command": "node --test views/browser/tests/*.test.cjs",
+    "tests": 134,
+    "passed": 134,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 15839
+  },
+  "vscode": {
+    "command": "node --test tests/*.test.js",
+    "tests": 391,
+    "passed": 391,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 3795
+  },
+  "native_executed": false,
+  "live_provider_requests": false,
+  "limitations": [
+    "These are synthetic frontend and controller contracts, not live browser or installed VS Code acceptance.",
+    "The current-source native Release build did not produce every contract executable because D: ran out of space; the full current-source native gate remains outstanding.",
+    "The browser workspace canvas is a read-only file preview. Full editor, multi-file diff and recovery workflows remain open product work."
+  ]
+}
