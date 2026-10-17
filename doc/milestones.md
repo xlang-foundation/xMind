@@ -25,6 +25,13 @@ not an API, protocol, compatibility, or full-parity target. xMind implements
 the selected capabilities independently in its native C++ backend and exposes
 them through xMind's own HTTP, CLI, webpage, and VS Code contracts.
 
+2026-10-16 native Release verification: the complete `ALL_BUILD` target
+completed successfully and CTest passed **146/146** contracts in 868.35 seconds.
+The long local-profile lifecycle and local-view contracts both passed. This
+validates the current suite and does not claim all planned xMind capabilities
+are complete. [Build and test evidence](evidence/native-release-suite-20261016.json),
+[CTest output](evidence/native-full-release-ctest-20261016.log).
+
 Current progress: separate live coding tasks now pass through both clients.
 The browser used its saved OpenAI profile to review and apply a focused
 Model Zoo accessibility change, ran the frontend production build, and passed

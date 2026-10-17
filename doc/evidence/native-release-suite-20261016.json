@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-16",
+  "scope": "Complete native Release build and CTest suite",
+  "build": {
+    "command": "cmake --build build/a2a-native --config Release --target ALL_BUILD",
+    "exit_code": 0
+  },
+  "tests": {
+    "command": "ctest --test-dir build/a2a-native -C Release --output-on-failure",
+    "passed": 146,
+    "failed": 0,
+    "total": 146,
+    "elapsed_seconds": 868.35,
+    "exit_code": 0,
+    "output": "native-full-release-ctest-20261016.log"
+  },
+  "notes": [
+    "The native local profile and local view lifecycle contracts passed.",
+    "This validates the current native Release test suite; it does not claim that all planned xMind product features are complete."
+  ]
+}
