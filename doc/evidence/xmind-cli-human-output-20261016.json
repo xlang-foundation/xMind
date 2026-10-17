@@ -22,7 +22,24 @@
       "approved file content and succeeded native tool result verified",
       "existing machine-readable JSON approval contract remained passing"
     ],
-    "live_provider": false
+    "live_provider": {
+      "result": "passed",
+      "workspace": "D:\\CantorAI2026\\TestProj",
+      "profile": "existing local profile; saved provider configuration reused without prompting for a key",
+      "invocation": "rebuilt unified xmind binary in an attached Windows terminal",
+      "request": "read the project README and frontend package scripts; report the frontend build command; make no edits",
+      "observed_tools": {
+        "find_files": 2,
+        "read_file": 2
+      },
+      "actual_provider_usage": {
+        "input_tokens_per_call": [3728, 4445, 7186],
+        "output_tokens_per_call": [81, 58, 44],
+        "cached_tokens_per_call": [3697, 3725, 4442]
+      },
+      "actual_effect_operations": 0,
+      "response": "Run npm run build from model-zoo/frontend; package script executes vite build."
+    }
   },
   "limitations": [
     "This checkpoint validates the CLI terminal renderer, not a new webpage or VS Code UI change.",

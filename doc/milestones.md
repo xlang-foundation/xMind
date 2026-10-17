@@ -87,7 +87,12 @@ and can explicitly select either format with `XMIND_CLI_OUTPUT=human|json`.
 Release builds of `xmind_cli` and unified `xmind` passed, and
 `native_agent_patch_http_contract` passed with synthetic provider data,
 including streamed text/usage, a real native approval and file receipt in the
-human renderer. [Evidence](evidence/xmind-cli-human-output-20261016.json).
+human renderer. The rebuilt binary then attached to the existing TestProj
+profile in a real terminal and completed a saved-provider read-only run: it
+streamed progress for two `find_files` and two `read_file` calls, displayed
+actual input/output/cache counters, and returned the frontend build command.
+The run's operation list was empty and no provider key was requested.
+[Evidence](evidence/xmind-cli-human-output-20261016.json).
 
 2026-10-16 shared session catalogue check: read-only `sessions` requests through
 the managed CLI profile and the browser's authenticated local view adapter
