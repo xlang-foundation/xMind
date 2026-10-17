@@ -17,9 +17,12 @@
     "root": "D:/CantorAI2026/TestProj"
   },
   "native_runtime": {
-    "revision": "e9c970c08d7f18f7b42ef3683c981af89b52f2fa",
+    "revision": "961968e914d26ff1fee6f13e78b45150fa963457",
+    "xlang3_sdk_revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "profile_root": "C:/Users/shaw9/.xMind/GoalBrowserProfiles/vscode-current-source-20261017",
+    "runtime_provenance": "The run ID is present in this profile's SQLite state; the copied runtime provenance manifest matches the revision and SDK above.",
     "release_accepted": false,
-    "note": "The live VS Code host used its existing staged runtime. Current-source browser acceptance separately used the 961968e native build."
+    "note": "The live VS Code host used the hash-verified staged runtime paired with the current-source browser acceptance."
   },
   "coding_run": {
     "run_id": "7a1b40f8b1d55e81c5cc2bb9e40df75a",
@@ -51,6 +54,6 @@
   },
   "limitations": [
     "This is one bounded live coding acceptance, not broad coding-task reliability or OpenCode feature parity.",
-    "The VS Code run used the existing e9c970c staged Native runtime; a repeat against the current 961968e Native runtime is still required."
+    "The staged runtime is development-validated and marked release_accepted=false; this evidence does not claim a release gate."
   ]
 }
