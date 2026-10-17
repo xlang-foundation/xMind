@@ -77,6 +77,18 @@ separate approved `run_process` call ran only `npm run build` from
 `model-zoo/frontend`; it exited 0, transformed 37 Vite modules, and completed in
 613 ms. The sample-data disclosure remained intact. [Sanitized CLI coding evidence](evidence/xmind-cli-live-coding-20261016.json).
 
+2026-10-16 terminal CLI rendering follow-up: ordinary interactive chat now
+renders assistant text, concise tool activity, actual provider token counts,
+and terminal run state without dumping backend event JSON. File changes retain
+their bounded diff and exact `/allow` decision; process proposals show the
+profile, working directory, command, timeout and environment variable names.
+TTY sessions select human output automatically. Piped consumers retain NDJSON
+and can explicitly select either format with `XMIND_CLI_OUTPUT=human|json`.
+Release builds of `xmind_cli` and unified `xmind` passed, and
+`native_agent_patch_http_contract` passed with synthetic provider data,
+including streamed text/usage, a real native approval and file receipt in the
+human renderer. [Evidence](evidence/xmind-cli-human-output-20261016.json).
+
 2026-10-16 shared session catalogue check: read-only `sessions` requests through
 the managed CLI profile and the browser's authenticated local view adapter
 returned the same 24 TestProj session IDs. This confirms the adapter forwards
@@ -429,14 +441,15 @@ remain open. See [validation status](VALIDATION_STATUS.md).
 
 ## Bounded unified diffs for console approvals
 
-The interactive console continues to emit its exact JSON `operation_review`
-record and now renders file proposals as bounded unified diffs with before/
-after paths, hunk counts and unchanged context. Lines and paths remain JSON-
-escaped so file content cannot inject terminal control sequences. Each side is
-limited to 40 lines and 8 KiB of encoded preview text; truncation is explicit,
-and the exact operation record remains the approval authority. The native edit
-and patch HTTP contracts verify updates, additions, moves and deletions before
-the same explicit approval flow. Full-screen TUI parity remains open.
+The console renders file proposals as bounded unified diffs with before/after
+paths, hunk counts and unchanged context. TTY users see a readable preview;
+JSON consumers receive the exact `operation_review` record. Lines and paths
+remain JSON-escaped so file content cannot inject terminal control sequences.
+Each side is limited to 40 lines and 8 KiB of encoded preview text; truncation
+is explicit, and the durable operation ID remains the approval authority.
+Process proposals also show the exact command and working directory. Native
+edit and patch HTTP contracts verify updates, additions, moves and deletions.
+Full-screen TUI parity remains open.
 
 ## Durable outbound A2A SSE cursor checkpoint (2026-10-14)
 
@@ -557,15 +570,11 @@ were removed. Live-model CLI `patch_file` acceptance remains open. See the
 
 ## Human-readable CLI edit and patch approval previews — 2026-10-13
 
-The interactive console still emits its exact JSON `operation_review` record
-for machine clients, and now also prints a readable per-file before/after
-preview for `create_file`, `replace_file` and `patch_file`. Paths and lines are
-JSON-escaped before terminal rendering, and each side is bounded to 40 lines
-and 8 KiB. The same durable operation ID remains the only approval target.
-Focused Release CTests for the native agent edit and patch HTTP flows passed
-2/2 with real temporary files and synthetic inference. Live-model CLI
-edit/patch acceptance remains open; prior live CLI acceptance covered a
-`create_file` approval.
+At the time, the interactive console emitted JSON `operation_review` records
+for machine clients and printed readable per-file previews for `create_file`,
+`replace_file` and `patch_file`. The 2026-10-16 terminal renderer milestone
+above now selects the human form for TTY sessions while preserving JSON for
+machine clients. The durable operation ID remains the only approval target.
 
 ## Batched coding-edit guidance after live TestProj run — 2026-10-13
 

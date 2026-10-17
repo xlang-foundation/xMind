@@ -32,9 +32,34 @@
 #include <bcrypt.h>
 #include <shellapi.h>
 #include "agentflow/mcp_http_transport.hpp"
+#else
+#include <unistd.h>
 #endif
 
 namespace {
+bool human_console_output(){
+    if(const auto* mode=std::getenv("XMIND_CLI_OUTPUT")){
+        const std::string_view selected(mode);
+        if(selected=="human")return true;
+        if(selected=="json")return false;
+    }
+#if defined(_WIN32)
+    DWORD mode{};return GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE),&mode)!=0;
+#else
+    return ::isatty(STDOUT_FILENO)!=0;
+#endif
+}
+std::string terminal_safe_text(std::string_view value){
+    std::string result;result.reserve(value.size());
+    for(const unsigned char byte:value)if(byte=='\n'||byte=='\t'||byte>=0x20&&byte!=0x7f)result.push_back(static_cast<char>(byte));
+    return result;
+}
+void print_human_history(const std::string& session,const nlohmann::json& history){
+    using Json=nlohmann::json;std::cout<<"Session "<<session<<"\n";
+    if(!history.is_array())return;
+    for(const auto& message:history){if(!message.is_object()||!message.contains("role")||!message["role"].is_string()||!message.contains("data")||!message["data"].is_object())continue;const auto role=message["role"].get<std::string>();if(role!="user"&&role!="assistant")continue;const auto& data=message["data"];if(!data.contains("content")||!data["content"].is_string()||data["content"].get_ref<const std::string&>().empty())continue;std::cout<<"\n"<<(role=="user"?"You":"xMind")<<":\n"<<terminal_safe_text(data["content"].get_ref<const std::string&>())<<"\n";if(role=="assistant"&&data.contains("usage")&&data["usage"].is_object()){const auto& usage=data["usage"];const auto input=usage.value("input_tokens",usage.value("prompt_tokens",Json(nullptr))),output=usage.value("output_tokens",usage.value("completion_tokens",Json(nullptr)));if(input.is_number_integer()&&output.is_number_integer())std::cout<<"Input "<<input<<" · Output "<<output;if(usage.contains("total_tokens")&&usage["total_tokens"].is_number_integer())std::cout<<" · Total "<<usage["total_tokens"];if(input.is_number_integer()&&output.is_number_integer())std::cout<<" tokens\n";}}
+    std::cout<<'\n'<<std::flush;
+}
 #if defined(_WIN32)
 std::string utf8_argument(std::wstring_view value){
     if(value.empty())return {};if(value.size()>32768)throw std::invalid_argument("Unicode CLI text exceeds limits");const auto length=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(length<1)throw std::invalid_argument("Invalid Unicode CLI text");std::string result(static_cast<std::size_t>(length),'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),result.data(),length,nullptr,nullptr)!=length)throw std::invalid_argument("Invalid Unicode CLI text");return result;
@@ -391,6 +416,18 @@ void print_operation_preview(const nlohmann::json& operation)noexcept{
         print_unified_preview(plan["path"].get<std::string>(),before,after,before_exists,after_exists);
     }catch(...){std::cerr<<"\nFile change preview unavailable; inspect the exact operation record before deciding.\n";}
 }
+void print_process_preview(const nlohmann::json& operation)noexcept{
+    using Json=nlohmann::json;
+    try{
+        if(!operation.is_object()||operation.value("tool",std::string{})!="run_process"||!operation.contains("arguments_json")||!operation["arguments_json"].is_string())return;
+        const auto plan=Json::parse(operation["arguments_json"].get<std::string>());if(!plan.is_object())return;
+        const auto executable=plan.value("executable",std::string{});const auto arguments=plan.value("arguments",Json::array());
+        if(executable.empty()||!arguments.is_array())return;
+        std::cerr<<"\nProcess approval preview · profile "<<Json(plan.value("profile_id",std::string{})).dump()<<"\n  Working directory: "<<Json(plan.value("workdir",std::string{})).dump()<<"\n  Command:";
+        const auto quote=[](const std::string& value){return Json(value).dump();};std::cerr<<" "<<quote(executable);for(const auto& argument:arguments){if(!argument.is_string())return;std::cerr<<" "<<quote(argument.get<std::string>());}if(plan.contains("timeout_ms")&&plan["timeout_ms"].is_number_integer())std::cerr<<"\n  Timeout: "<<plan["timeout_ms"]<<" ms";std::cerr<<"\n";
+        if(plan.contains("environment")&&plan["environment"].is_array()&&!plan["environment"].empty()){std::cerr<<"  Environment variables:";for(const auto& item:plan["environment"])if(item.is_object()&&item.contains("name")&&item["name"].is_string())std::cerr<<" "<<Json(item["name"].get<std::string>()).dump();std::cerr<<"\n";}
+    }catch(...){std::cerr<<"\nProcess approval preview unavailable; review the recorded operation before deciding.\n";}
+}
 class ChatInput {
     struct State {
         std::mutex mutex;
@@ -489,7 +526,7 @@ std::string queued_input_id(){
 }
 constexpr int run_detached=3;
 int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false,ChatInput* input=nullptr) {
-    using Json=nlohmann::json;const auto path="/v1/runs/"+run;
+    using Json=nlohmann::json;const bool human=human_console_output();const auto path="/v1/runs/"+run;
     auto read=[&](const std::string& route) {
         auto response=client.Get(route,headers);if(!response)throw std::runtime_error("Cannot reach xMind Server during observation");
         if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected run observation (HTTP "+std::to_string(response->status)+")");
@@ -517,8 +554,24 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         const auto owned=owners();
         for(const auto& event:events) {
             if(!event.is_object() || !event.contains("seq") || !event["seq"].is_number_integer() || event["seq"]<=cursor || event["seq"]>std::numeric_limits<std::int64_t>::max() || !event.contains("run_id") || !event["run_id"].is_string() || !owned.contains(event["run_id"].get<std::string>()) || !event.contains("kind") || !event["kind"].is_string() || !event.contains("data"))throw std::runtime_error("Invalid backend event identity or cursor");
-            std::cout<<event.dump()<<'\n'<<std::flush;
-            if(!std::cout)throw std::runtime_error("Run observation output is unavailable");
+            if(!human){std::cout<<event.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Run observation output is unavailable");}
+            else {
+                const auto& kind=event["kind"].get_ref<const std::string&>();const auto& data=event["data"];
+                if(kind=="model.text"||kind=="model.refusal"){
+                    if(data.is_object()&&data.contains("text")&&data["text"].is_string()){std::cout<<terminal_safe_text(data["text"].get_ref<const std::string&>())<<std::flush;if(!std::cout)throw std::runtime_error("Run response output is unavailable");}
+                }else if(kind=="tool.started"){
+                    if(data.is_object()&&data.contains("name")&&data["name"].is_string())std::cerr<<"\nUsing "<<terminal_safe_text(data["name"].get_ref<const std::string&>())<<"…\n";
+                }else if(kind=="tool.completed"||kind=="tool.failed"){
+                    if(data.is_object()&&data.contains("name")&&data["name"].is_string())std::cerr<<(kind=="tool.completed"?"Finished ":"Failed ")<<terminal_safe_text(data["name"].get_ref<const std::string&>())<<".\n";
+                }else if(kind=="model.usage"&&data.is_object()){
+                    bool first=true;const auto counter=[&](const Json& source,const char* field)->std::optional<std::int64_t>{if(source.contains(field)&&source[field].is_number_integer()&&source[field]>=0)return source[field].get<std::int64_t>();return std::nullopt;};
+                    const auto input=counter(data,"input_tokens").has_value()?counter(data,"input_tokens"):counter(data,"prompt_tokens");const auto output=counter(data,"output_tokens").has_value()?counter(data,"output_tokens"):counter(data,"completion_tokens");
+                    const auto show=[&](const char* label,const std::optional<std::int64_t>& value){if(value){std::cerr<<(first?"\n":" · ")<<label<<" "<<*value;first=false;}};show("Input",input);show("Output",output);show("Total",counter(data,"total_tokens"));
+                    auto cached=counter(data,"cached_tokens");if(!cached&&data.contains("prompt_tokens_details")&&data["prompt_tokens_details"].is_object())cached=counter(data["prompt_tokens_details"],"cached_tokens");if(!cached&&data.contains("input_tokens_details")&&data["input_tokens_details"].is_object())cached=counter(data["input_tokens_details"],"cached_tokens");show("Cached",cached);if(!first)std::cerr<<" tokens\n";
+                }else if(kind=="run.failed"){
+                    std::cerr<<"\nRun failed";if(data.is_object()&&data.contains("reason")&&data["reason"].is_string())std::cerr<<": "<<terminal_safe_text(data["reason"].get_ref<const std::string&>());std::cerr<<"\n";
+                }
+            }
             cursor=event["seq"].get<std::int64_t>();
         }
         if(!tree||events.size()<256)break;}
@@ -531,7 +584,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         const auto value=state["state"].get<std::string>();
         if(value=="completed" || value=="failed" || value=="cancelled") {
             // A transition can commit between the event query and status query.
-            emit();return value=="completed"?0:value=="cancelled"?2:1;
+            emit();if(human)std::cerr<<(value=="completed"?"\nRun completed.\n":value=="cancelled"?"\nRun cancelled.\n":"\nRun failed.\n");return value=="completed"?0:value=="cancelled"?2:1;
         }
         if(value!="queued" && value!="running" && value!="paused")throw std::runtime_error("Unknown backend run state");
         if(interactive){
@@ -572,13 +625,12 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 if(operation.value("state",std::string{})!="awaiting_approval")continue;
                 const auto operationId=operation.value("id",std::string{});
                 if(operationId.empty() || operationId.size()>128 || operationId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid approval identity");
-                // JSON escaping keeps file/process content inert on the terminal.
-                // The native backend retains the exact proposal and revalidates
-                // authority, expiry and effect preconditions on the decision.
-                std::cout<<Json{{"type","operation_review"},{"operation",operation}}.dump()<<'\n'<<std::flush;
-                if(!std::cout)throw std::runtime_error("Approval review output is unavailable");
-                print_operation_preview(operation);
-                std::cerr<<"Review the exact operation and any file preview above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
+                // Structured output retains the exact proposal; human output
+                // renders bounded previews. The backend still revalidates the
+                // recorded operation before applying the decision.
+                if(!human){std::cout<<Json{{"type","operation_review"},{"operation",operation}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Approval review output is unavailable");}
+                print_operation_preview(operation);print_process_preview(operation);
+                std::cerr<<(human?"Review the operation above. ":"Review the exact operation and any preview above. ")<<"Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
                 std::string decision;
                 if(!input||!input->read_line(decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
                 if(decision=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
@@ -589,6 +641,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 const auto response=client.Post(route,headers,body.dump(),"application/json");
                 if(!response)throw std::runtime_error("Cannot reach xMind Server for approval");
                 if(response->status<200 || response->status>=300)std::cerr<<"Backend rejected the decision (HTTP "<<response->status<<"). Refreshing recorded state.\n";
+                else if(human)std::cerr<<(decision.starts_with("/allow ")?"Approval recorded.\n":"Operation denied.\n");
                 else std::cout<<Json{{"type",decision=="/cancel"?"run_cancel_result":"operation_decision_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
                 interacted=true;
                 break; // Re-read state before reviewing another operation.
@@ -648,7 +701,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
 // Interactive access client, not a second agent engine. Every request, tool
 // result, approval and response remains owned by the shared native server.
 int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& headers,std::string session,std::string model) {
-    using Json=nlohmann::json;
+    using Json=nlohmann::json;const bool human=human_console_output();
     auto request=[&](const std::string& path,const Json* body=nullptr){
         auto response=body?client.Post(path,headers,body->dump(),"application/json"):client.Get(path,headers);
         if(!response)throw std::runtime_error("Cannot reach xMind Server during chat");
@@ -703,8 +756,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     ChatInput input;
     std::cerr<<"xMind chat: enter a request, /help for commands, /exit to leave. Backend runs survive disconnect.\n";
     if(!session.empty()){
-        std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'
-                 <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
+        if(human)print_human_history(session,history);else std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
     int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0;std::string prompt;
@@ -1094,7 +1146,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             const Json body={{"title",title}};const auto created=request("/v1/sessions",&body);
             if(!created.is_object() || !created.contains("id") || !created["id"].is_string())throw std::runtime_error("Invalid created session");session=created["id"].get<std::string>();
             if(session.empty() || session.size()>128 || session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created session identity");
-            std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
+            if(human)std::cerr<<"Session "<<session<<"\n";else std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
         }
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
         if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
@@ -1112,9 +1164,9 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         const auto run=Json::parse(admitted->body);
         if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=graphSubmission || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
-        std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
+        if(human)std::cerr<<"Run started · "<<id<<"\n";else std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
         const auto watched=watch_run(client,headers,id,0,graphSubmission,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
-        std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
+        if(!human)std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
         if(drain_inbox())return exit_status();
     }
     if(!input.source_closed())throw std::runtime_error("Chat input is unavailable");

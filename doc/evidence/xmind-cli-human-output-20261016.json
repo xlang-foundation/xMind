@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-16",
+  "scope": "Native CLI TTY rendering and approval review",
+  "format_selection": {
+    "attached_terminal": "human-readable output",
+    "piped_output": "newline-delimited JSON",
+    "override": "XMIND_CLI_OUTPUT=human or XMIND_CLI_OUTPUT=json"
+  },
+  "human_terminal_contract": {
+    "streams": "assistant text is written to stdout; tool progress, actual provider token counts, session history, approvals, and run status are written as readable terminal output",
+    "file_approval": "bounded before/after diff is shown before accepting the durable native operation ID",
+    "process_approval": "profile, working directory, executable, literal arguments, timeout, and environment variable names are shown",
+    "terminal_safety": "control characters in model response text are removed before terminal rendering"
+  },
+  "verification": {
+    "build": "Release xmind_cli and unified xmind targets compiled successfully with Visual Studio 18 CMake",
+    "ctest": "native_agent_patch_http_contract passed",
+    "synthetic_cases": [
+      "actual assistant text rendered without NDJSON event envelopes",
+      "provider-supplied prompt/completion/total token counters rendered without estimates",
+      "native create_file proposal diff and exact operation ID displayed before /allow",
+      "approved file content and succeeded native tool result verified",
+      "existing machine-readable JSON approval contract remained passing"
+    ],
+    "live_provider": false
+  },
+  "limitations": [
+    "This checkpoint validates the CLI terminal renderer, not a new webpage or VS Code UI change.",
+    "Full-screen terminal interface and interactive graph/plan views remain separate work."
+  ]
+}
