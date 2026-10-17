@@ -75,6 +75,14 @@ std::string integer(std::string_view raw) {
 }
 std::vector<McpHttpHeader> mcp_http_request_headers(std::string_view request,McpWireEra era,std::string_view legacy_protocol) {
     if(era!=McpWireEra::modern && era!=McpWireEra::legacy)invalid();
+    const auto decoded=mcp_decode_message(request);
+    if(era==McpWireEra::legacy && (decoded.kind==McpMessageKind::result || decoded.kind==McpMessageKind::error)) {
+        // A server-initiated legacy JSON-RPC request is answered with a second
+        // POST in the existing session. Responses carry protocol version but
+        // no method or tool-parameter headers.
+        if(legacy_protocol!="2025-11-25" && legacy_protocol!="2025-06-18")invalid();
+        std::vector<McpHttpHeader> result;add(result,"MCP-Protocol-Version",std::string(legacy_protocol));return result;
+    }
     const auto value=object(request);
     if(!value.contains("jsonrpc") || value["jsonrpc"]!="2.0" || !value.contains("method") || value.contains("result") || value.contains("error"))invalid();
     const auto method=string(value["method"]);if(method.empty() || method.size()>256)invalid();

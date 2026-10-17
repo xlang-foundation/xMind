@@ -37,7 +37,7 @@ struct McpHttpClient::Impl {
     std::size_t rejected=0;
     struct Tool {std::string schema,binding;};
     std::map<std::string,Tool> tools;
-    Impl(std::string url,std::optional<SecretBytes> secret,std::optional<McpBearerValidity> lifetime):endpoint(std::move(url)),bearer(std::move(secret)),validity(lifetime),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false}})"}) {
+    Impl(std::string url,std::optional<SecretBytes> secret,std::optional<McpBearerValidity> lifetime):endpoint(std::move(url)),bearer(std::move(secret)),validity(lifetime),handshake(requests,McpClientIdentity{"xMind","0.1.0",R"({"roots":{"listChanged":false},"elicitation":{"form":{}}})"}) {
         validate_mcp_http_endpoint(endpoint);
         if(validity&&(!bearer||validity->acquired_unix_ms<=0||(validity->expires_unix_ms&&*validity->expires_unix_ms<=validity->acquired_unix_ms)))throw std::invalid_argument("Invalid native MCP bearer lifetime");
     }
@@ -49,14 +49,15 @@ struct McpHttpClient::Impl {
         const std::string& expected,Deadline deadline,std::stop_token cancel,bool& attempted,
         const std::optional<std::string>& schema={},bool initializing=false,std::string* observed_response=nullptr,
         const std::function<void(const McpWireMessage&)>& notification={},bool require_event_stream=false,
-        bool allow_legacy_fallback=false,bool* legacy_fallback=nullptr) {
+        bool allow_legacy_fallback=false,bool* legacy_fallback=nullptr,
+        const McpInputFulfillment* fulfill_peer_request=nullptr) {
         if(validity){const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();if(now<validity->acquired_unix_ms||(validity->expires_unix_ms&&now>=*validity->expires_unix_ms))throw McpOAuthAuthorizationRequired({});}
         const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
         if(remaining.count()<=0)throw McpTransportTimeout("MCP HTTP request deadline exceeded");
         McpHttpPost input;input.url=endpoint;input.body=frame;input.era=era;input.legacy_protocol=legacy_protocol;
         input.input_schema=schema;input.deadline=std::min(remaining,std::chrono::milliseconds(600000));input.idle_timeout=input.deadline;
         if(era==McpWireEra::legacy)input.legacy_session=legacy_session;
-        std::optional<McpCorrelatedReply> result;std::unique_ptr<McpHttpMessageStream> decoder;int response_status=0;bool fallback_status=false;std::exception_ptr decode_failure;
+        std::optional<McpCorrelatedReply> result;std::unique_ptr<McpHttpMessageStream> decoder;int response_status=0;bool fallback_status=false;std::exception_ptr decode_failure;std::size_t peer_requests=0;
         try {
             post_mcp_http(input,bearer?&*bearer:nullptr,[&](const auto& head){
                 response_status=head.status;fallback_status=allow_legacy_fallback&&(head.status==400||head.status==404||head.status==405);
@@ -75,7 +76,28 @@ struct McpHttpClient::Impl {
                 }
                 decoder=std::make_unique<McpHttpMessageStream>(head.media_type,[&](const auto& message){
                     if(message.kind==McpMessageKind::notification){if(notification)notification(message);return;}
-                    if(message.kind==McpMessageKind::request)throw McpProtocolError("MCP HTTP server-request reply owner is not implemented");
+                    if(message.kind==McpMessageKind::request) {
+                        if(era!=McpWireEra::legacy)throw McpProtocolError("Modern MCP peers cannot send client requests");
+                        if(++peer_requests>256)throw McpProtocolError("MCP HTTP unsolicited request limit exceeded");
+                        std::optional<std::string> peer_result;
+                        if(fulfill_peer_request && *fulfill_peer_request &&
+                            (message.method=="elicitation/create" || message.method=="roots/list")) {
+                            const auto raw="{\"method\":"+Json(message.method).dump()+",\"params\":"+message.payload_json+"}";
+                            peer_result=(*fulfill_peer_request)("peer:"+message.id_json,raw);
+                        }
+                        const auto response=peer_result?mcp_peer_reply(message,era,*peer_result):mcp_peer_reply(message,era);
+                        if(!legacy_session && input.legacy_session)legacy_session=input.legacy_session;
+                        McpHttpPost reply;reply.url=endpoint;reply.body=response;reply.era=McpWireEra::legacy;reply.legacy_protocol=legacy_protocol;reply.legacy_session=legacy_session;
+                        const auto left=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
+                        if(left.count()<=0)throw McpTransportTimeout("MCP HTTP request deadline exceeded while answering peer request");
+                        reply.deadline=std::min(left,std::chrono::milliseconds(600000));reply.idle_timeout=reply.deadline;
+                        bool acknowledged=false;
+                        post_mcp_http(reply,bearer?&*bearer:nullptr,[&](const auto& peer_head){
+                            if(peer_head.status!=202)throw McpProtocolError("MCP HTTP peer response did not receive an empty acknowledgement");acknowledged=true;
+                        },[](std::string_view){throw McpProtocolError("MCP HTTP peer response returned a body");},[]{},cancel);
+                        if(!acknowledged)throw McpProtocolError("MCP HTTP peer response was not acknowledged");
+                        return;
+                    }
                     const auto reply=requests.receive(message);
                     if(!reply || reply->request.id!=expected || result)throw McpProtocolError("MCP HTTP response identity changed");
                     if(observed_response)*observed_response=reply->response.raw_json;
@@ -204,7 +226,7 @@ McpToolReply McpHttpClient::call_tool(const std::string& name,std::string_view a
         auto params=mcp_tool_call_params(name,arguments);
         for(std::size_t round=0;round<10;++round) {
             const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
-            const auto reply=state.exchange(request.frame,state.handshake.server().era,request_id,deadline,cancel,attempted,found->second.schema,false,&response);
+            const auto reply=state.exchange(request.frame,state.handshake.server().era,request_id,deadline,cancel,attempted,found->second.schema,false,&response,{},false,false,nullptr,&fulfill_input);
             if(!reply)throw McpProtocolError("MCP HTTP tool call ended without a correlated reply");response=reply->response.raw_json;
             auto result=mcp_decode_tool_reply(request_id,reply->response,state.handshake.server().era);
             if(!result.input_required)return result;

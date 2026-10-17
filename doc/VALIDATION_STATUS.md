@@ -3222,6 +3222,26 @@ third-party provider and arbitrary-peer behavior. The exact commands, source
 revisions, hashes and scope limits are recorded in
 [the evidence record](evidence/native-release-150-20261017.json).
 
+## Legacy MCP HTTP peer requests — 2026-10-17
+
+The native MCP HTTP client now handles legacy server-initiated requests during
+an approved tool call. It routes `elicitation/create` and `roots/list` through
+the existing durable input owner, then posts the response with the negotiated
+protocol version and session identity while the original SSE response remains
+open. Unsupported legacy peer methods receive the normal JSON-RPC
+method-not-found response; modern peers sending independent requests remain a
+protocol error. The legacy client handshake advertises the form elicitation
+capability it now handles.
+
+The synthetic native effect contract verifies fallback negotiation, session
+binding, durable approval, persisted elicitation, the nested response POST,
+completion of the original SSE tool call, and exactly one external effect.
+Focused MCP contracts passed **3/3**, then a full Release rebuild and CTest
+passed **150/150** in 369.70 seconds. The fixture is local and synthetic; this
+does not claim arbitrary third-party peer or live-provider acceptance. Exact
+source hashes and the full test transcript are in
+[the evidence record](evidence/native-release-mcp-http-peer-20261017.json).
+
 ## Browser and VS Code controller gate — 2026-10-17
 
 The isolated view gate passed **390/390 VS Code extension tests** and

@@ -30,12 +30,42 @@ for(const mode of modes){
     });return server;
   },{legacy:'reject',responseMode:mode==='normal-sse'?'sse':'json',keepAliveMs:0}));
 }
+const legacyHttpEffect=join(root,'legacy-peer-elicitation');fs.mkdirSync(legacyHttpEffect);fs.writeFileSync(join(legacyHttpEffect,'effect.txt'),'');
+let legacyReply;
 const host=createServer(async(request,response)=>{
   try{
-    const mode=request.url.slice(1);assert.ok(handlers.has(mode));assert.equal(request.method,'POST');
+    const mode=request.url.slice(1);assert.equal(request.method,'POST');
     assert.equal(request.headers.authorization,'Bearer synthetic-mcp-http-fixture');assert.equal(request.headers.accept,'application/json, text/event-stream');
-    assert.equal(request.headers['mcp-protocol-version'],'2026-07-28');assert.equal(request.headers['mcp-session-id'],undefined);
     const chunks=[];for await(const bytes of request)chunks.push(bytes);const body=Buffer.concat(chunks),raw=body.toString('utf8'),rpc=JSON.parse(raw);
+    if(mode==='legacy-peer-elicitation'){
+      if(rpc.method==='server/discover'){
+        assert.equal(request.headers['mcp-protocol-version'],'2026-07-28');assert.equal(request.headers['mcp-session-id'],undefined);response.writeHead(404);response.end();return;
+      }
+      assert.equal(request.headers['mcp-protocol-version'],'2025-11-25');
+      if(rpc.method==='initialize'){
+        assert.equal(request.headers['mcp-session-id'],undefined);assert.deepEqual(rpc.params.capabilities.elicitation,{form:{}});
+        response.writeHead(200,{'Content-Type':'application/json','Mcp-Session-Id':'legacy-http-session'});
+        response.end(JSON.stringify({jsonrpc:'2.0',id:rpc.id,result:{protocolVersion:'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'legacy-http-peer',version:'fixture'}}}));return;
+      }
+      assert.equal(request.headers['mcp-session-id'],'legacy-http-session');
+      if(rpc.method==='notifications/initialized'){response.writeHead(202);response.end();return;}
+      if(rpc.method==='tools/list'){
+        response.writeHead(200,{'Content-Type':'application/json'});
+        response.end(JSON.stringify({jsonrpc:'2.0',id:rpc.id,result:{tools:[{name:'fixture.write',description:'Legacy HTTP peer effect',inputSchema:{type:'object',properties:{body:{type:'string',minLength:1},decimal:{type:'number'}},required:['body','decimal'],additionalProperties:false},outputSchema:{type:'object',properties:{bytes:{type:'integer',minimum:1}},required:['bytes'],additionalProperties:false}}]}}));return;
+      }
+      if(!Object.hasOwn(rpc,'method')){
+        assert.equal(rpc.id,'peer-elicitation-http-1');assert.deepEqual(rpc.result,{action:'accept',content:{approved:true}});
+        assert.ok(legacyReply);legacyReply();response.writeHead(202);response.end();return;
+      }
+      assert.equal(rpc.method,'tools/call');assert.equal(rpc.params.name,'fixture.write');assert.ok(raw.includes('1.00000000000000000001'));
+      const event=value=>`data: ${JSON.stringify(value)}\r\n\r\n`;
+      response.writeHead(200,{'Content-Type':'text/event-stream'});
+      response.write(event({jsonrpc:'2.0',id:'peer-elicitation-http-1',method:'elicitation/create',params:{mode:'form',message:'Approve the HTTP fixture effect',requestedSchema:{type:'object',properties:{approved:{type:'boolean'}},required:['approved'],additionalProperties:false}}}));
+      await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Legacy HTTP peer reply timed out')),10000);legacyReply=()=>{clearTimeout(timer);legacyReply=undefined;resolve();};response.on('close',()=>{clearTimeout(timer);reject(new Error('Legacy HTTP tool stream closed before the peer reply'));});});
+      fs.appendFileSync(join(legacyHttpEffect,'effect.txt'),rpc.params.arguments.body);
+      response.end(event({jsonrpc:'2.0',id:rpc.id,result:{content:[{type:'text',text:'Legacy HTTP peer acknowledged'}],structuredContent:{bytes:Buffer.byteLength(rpc.params.arguments.body)}}}));return;
+    }
+    assert.ok(handlers.has(mode));assert.equal(request.headers['mcp-protocol-version'],'2026-07-28');assert.equal(request.headers['mcp-session-id'],undefined);
     assert.equal(request.headers['mcp-method'],rpc.method);assert.equal(rpc.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     const count=counts.get(mode);
     if(rpc.method==='server/discover')++count.discover;

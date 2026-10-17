@@ -143,6 +143,11 @@ int main() {
         const auto oldHttp=mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::legacy);
         rejected([&]{mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),static_cast<McpWireEra>(999));});
         require(oldHttp.size()==1 && oldHttp[0].value=="2025-11-25","Older HTTP requests cannot invent modern mirror metadata");
+        const auto peer_request=mcp_decode_message(R"({"jsonrpc":"2.0","id":"peer-request","method":"elicitation/create","params":{"message":"Confirm"}})");
+        const auto peer_response=mcp_peer_reply(peer_request,McpWireEra::legacy,R"({"action":"decline"})");
+        const auto peer_response_headers=mcp_http_request_headers(peer_response,McpWireEra::legacy);
+        require(peer_response_headers.size()==1&&peer_response_headers[0].name=="MCP-Protocol-Version"&&peer_response_headers[0].value=="2025-11-25","Legacy HTTP peer replies must carry only the negotiated protocol header");
+        rejected([&]{mcp_http_request_headers(peer_response,McpWireEra::modern);});
         rejected([&]{mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::modern);});
         rejected([&]{mcp_http_request_headers(mcp_request("http","tools/call","{}",McpWireEra::modern),McpWireEra::modern);});
         rejected([&]{mcp_http_request_headers(mcp_request("http","bad\r\nInjected","{}",McpWireEra::modern),McpWireEra::modern);});

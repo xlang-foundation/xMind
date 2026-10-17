@@ -199,6 +199,7 @@ int main(int argc,char** argv){
             const auto other_workspace=root("other-workspace");start(store,"blocked-other");Task other(store,argv,other_workspace,"blocked-other","blocked-other","normal",R"({"body":"must not run","decimal":1.00000000000000000001})",uncertain_root);proposed(store,"blocked-other");store.decide_operation("blocked-other",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{other.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n" && contents(other_workspace/"effect.txt").empty(),"Stable server quarantine must block actual dispatch from another workspace");store.transition("blocked-other",RunState::running,RunState::failed).get();
             Json http_servers=Json::array();
             for(const std::string mode:{"normal-json","normal-sse","deny","disconnect"})http_servers.push_back({{"id","official-http-"+mode},{"transport","http"},{"endpoint",std::string(argv[6])+"/"+mode},{"credential",{{"scope","server"},{"id","http-key-"+mode}}}});
+            http_servers.push_back({{"id","legacy-http-peer-elicitation"},{"transport","http"},{"endpoint",std::string(argv[6])+"/legacy-peer-elicitation"},{"credential",{{"scope","server"},{"id","http-key-legacy-peer-elicitation"}}}});
             const auto http_settings=McpConfigurationStore(store).apply(Json{{"servers",http_servers}}.dump());
             for(const auto& server:http_settings){const std::string credential="synthetic-mcp-http-fixture";store.put_credential("server",server.bearer->id,mcp_credential_purpose(server,"BEARER"),"labeled HTTP fixture key",SecretBytes({reinterpret_cast<const std::uint8_t*>(credential.data()),credential.size()}),0).get();}
             for(const std::string mode:{"normal-json","normal-sse","deny","disconnect"}) {
@@ -220,6 +221,24 @@ int main(int argc,char** argv){
                 else if(mode=="disconnect"){rejects<McpEffectUncertain>([&]{result.get();});require(store.operation(id).get().state==OperationState::uncertain && contents(remote)=="actual native HTTP MCP effect 雪\n","Lost HTTP reply must record one real uncertain effect");}
                 else {const auto output=Json::parse(result.get());require(output["acknowledged_by_peer"]==true && contents(remote)=="actual native HTTP MCP effect 雪\n" && store.operation(id).get().state==OperationState::succeeded,"Approved HTTP JSON/SSE effect must have actual disk bytes and durable acknowledgement");auto duplicate=invoke();rejects<Conflict>([&]{duplicate.get();});require(contents(remote)=="actual native HTTP MCP effect 雪\n","Duplicate approved HTTP operation must not dispatch again");}
                 store.transition(id,RunState::running,mode=="normal-json" || mode=="normal-sse"?RunState::completed:RunState::failed).get();
+            }
+            {
+                const std::string id="http-peer-elicitation";const auto workspace=root(id);start(store,id);
+                const auto remote=std::filesystem::path(argv[7])/"legacy-peer-elicitation"/"effect.txt";
+                const auto server=*std::find_if(http_settings.begin(),http_settings.end(),[](const auto& value){return value.id=="legacy-http-peer-elicitation";});
+                auto result=std::async(std::launch::async,[&,workspace,id,server]{
+                    auto client=connect_mcp_client(server,store,std::chrono::steady_clock::now()+10s);require(client->server().era==McpWireEra::legacy,"Legacy HTTP peer must negotiate its advertised protocol");
+                    WorkspaceTools tools(workspace.string());McpToolRegistry registry(*client,store,tools,server.id,server.revision,std::chrono::steady_clock::now()+10s);
+                    const auto alias=registry_alias(registry,"tool","fixture.write");
+                    return registry.invoke(id,id,alias,R"({"body":"actual legacy HTTP MCP effect\n","decimal":1.00000000000000000001})",expiry(),std::chrono::steady_clock::now()+10s);
+                });
+                const auto proposal=proposed(store,id);require(proposal.state==OperationState::awaiting_approval&&contents(remote).empty(),"Legacy HTTP peer tool call must remain behind durable approval");
+                store.decide_operation(id,OperationDecision::allow,"fixture-controller").get();
+                std::vector<McpInputRequest> pending;for(int i=0;i<1000&&pending.empty();++i){pending=store.mcp_input_requests(id).get();if(pending.empty())std::this_thread::sleep_for(5ms);}
+                require(pending.size()==1&&pending.front().peer_tool=="fixture.write"&&pending.front().request_key=="peer:\"peer-elicitation-http-1\"","Legacy HTTP server request must be durably tied to its peer ID and approved operation");
+                store.answer_mcp_input_request(id,pending.front().id,R"({"action":"accept","content":{"approved":true}})","fixture-controller").get();
+                const auto outcome=Json::parse(result.get());require(outcome["acknowledged_by_peer"]==true&&contents(remote)=="actual legacy HTTP MCP effect\n"&&store.operation(id).get().state==OperationState::succeeded,"Legacy HTTP nested response POST must resume the original SSE tool call and record the actual effect");
+                store.transition(id,RunState::running,RunState::completed).get();
             }
             {
                 const auto server=*std::find_if(http_settings.begin(),http_settings.end(),[](const auto& value){return value.id=="official-http-normal-json";});

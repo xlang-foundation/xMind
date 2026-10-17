@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-17",
+  "kind": "native-release-mcp-legacy-http-peer-request-contract",
+  "source": {
+    "xmindBaseCommit": "3b48cbecc129aec3f0dc839eab8cc528db12c3f7",
+    "xlang3Revision": "b4a53192fc078a0827d171eeda0ca07792b0d78f",
+    "xlang3Branch": "fix/pytest-pathaware-hook-proxy"
+  },
+  "build": {
+    "configuration": "Release",
+    "generator": "Visual Studio 18 2026",
+    "command": "cmake --build build/native --config Release --parallel 8",
+    "exitCode": 0,
+    "targets": "All configured native targets"
+  },
+  "focusedTests": {
+    "command": "ctest --test-dir build/native --build-config Release -R 'native_mcp_wire_contract|native_mcp_http_readonly_contract|native_mcp_effect_contract' --output-on-failure",
+    "passed": 3,
+    "failed": 0,
+    "tests": [
+      "native_mcp_wire_contract",
+      "native_mcp_http_readonly_contract",
+      "native_mcp_effect_contract"
+    ]
+  },
+  "fullReleaseTests": {
+    "command": "ctest --test-dir build/native --build-config Release --output-on-failure --parallel 4",
+    "passed": 150,
+    "failed": 0,
+    "total": 150,
+    "durationSeconds": 369.70,
+    "transcript": "native-release-mcp-http-peer-20261017.log",
+    "transcriptSha256": "e78f5aeec3b2f476d24f5036b30f36f68b4841cf013f6310a42bc272575e5944"
+  },
+  "contractCoverage": [
+    "Legacy discovery fallback and protocol negotiation",
+    "Session-bound elicitation response in a nested HTTP POST",
+    "Durable user input tied to the approved tool operation and peer request ID",
+    "Completion on the original request-scoped SSE stream",
+    "One actual peer effect with durable acknowledgement"
+  ],
+  "changedSourceHashes": [
+    {
+      "path": "Native/src/mcp_http_client.cpp",
+      "sha256": "0c36e5109d11c8899aaeaf74e1268a017013c0457776f0cc84507e851412756"
+    },
+    {
+      "path": "Native/src/mcp_http_metadata.cpp",
+      "sha256": "ae2870aeaf44336829ae4586b9546c121b39848a8d890668218eba4aeef60993"
+    },
+    {
+      "path": "Native/tests/mcp_effect_contract.cpp",
+      "sha256": "45e7766aad3cd1be993b304e702325b48a8510e2597a3936f899af7cec7951da"
+    },
+    {
+      "path": "Native/tests/mcp_wire_contract.cpp",
+      "sha256": "85e92ceacb888017d999876b36618683defc57efb3728bbb7111e9ca75487242"
+    },
+    {
+      "path": "Native/tests/sdk/http_effect_host.mjs",
+      "sha256": "ed2b82153d65f4730541a8ce01c4f2589529bc5332c7ffb2a7b9a9ba5afd8f2e"
+    }
+  ],
+  "limits": [
+    "The peer fixture is synthetic and local; this is not third-party interoperability certification.",
+    "This native gate does not establish live-provider, installed VS Code, or packaged-release acceptance.",
+    "xlang3 remains on its isolated compatibility branch and was not merged into its main branch."
+  ]
+}
