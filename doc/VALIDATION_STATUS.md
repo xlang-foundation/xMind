@@ -19,11 +19,11 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-main VS Code `80507a4` created and restored a file through the sidebar, executed it with xlang3, and discovered 20 saved OpenAI models. TestProj pytest passed 9/9; webpage Vite build passed. | Broader multi-file/editor workflows, long-task reliability, packaged acceptance, and full-screen CLI validation. |
+| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-main VS Code `80507a4` passed both development-host and fresh-profile VSIX coding runs, with 20 saved OpenAI models; TestProj pytest passed 9/9 and the webpage Vite build passed. | Broader multi-file/editor workflows, long-task reliability, release-accepted packaging, and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
-Primary evidence: [native Release gate](evidence/native-current-source-release-ctest-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [current-main VS Code coding](evidence/vscode-current-main-live-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
+Primary evidence: [native Release gate](evidence/native-current-source-release-ctest-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [current-main VS Code development host](evidence/vscode-current-main-live-coding-20261017.json), [current-main packaged VSIX](evidence/vscode-current-main-packaged-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
 
 ## Current client contract re-run — 2026-10-17
 
@@ -152,6 +152,21 @@ The file was verified absent after cleanup. The extension suite passed
 host; the development bundle is not release accepted and the result does not
 establish broad coding reliability or installed-package acceptance. See the
 [machine-readable acceptance record](evidence/vscode-current-main-live-coding-20261017.json).
+
+## Current-main packaged VSIX first-use acceptance — 2026-10-17
+
+Built extension source `c0cdf2d` as a local VSIX with the verified native
+runtime bundle from xMind `80507a4` and xlang3 `036f450`. The extracted package
+passed the native inventory verifier for all 1,924 files. A fresh VS Code
+profile installed the VSIX, launched its bundled xMind runtime against
+TestProj, reused the saved OpenAI profile and discovered 20 models. An
+approval-gated file creation ran through the packaged xlang3 executable with
+the expected output, then an approved restore removed the test file. The
+extension suite passed 391/391. The package is a development candidate whose
+runtime provenance is explicitly `releaseAccepted=false`; this is not
+production release acceptance or broad coding-reliability evidence. Exact
+archive hash, runtime inventory and run IDs are in the
+[acceptance evidence](evidence/vscode-current-main-packaged-coding-20261017.json).
 
 ## Fresh webpage session coding and restore — 2026-10-17
 

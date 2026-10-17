@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh-install VS Code VSIX acceptance with a live approval-gated coding run",
+  "extension_source_revision": "c0cdf2d1df871a36b72028b38976bfbc6709c317",
+  "extension_version": "0.1.13",
+  "package": {
+    "command": "npm.cmd run package -- --out D:/CantorAI2026/xMind/.agentflow/vscode-package-current-main-20261017/agentflow-0.1.13-current-main.vsix",
+    "prepublish": "Built browser assets and verified the bundled native runtime inventory",
+    "path": "D:/CantorAI2026/xMind/.agentflow/vscode-package-current-main-20261017/agentflow-0.1.13-current-main.vsix",
+    "sha256": "07814a85b2f2cb54f402eee3d9c392c6df2a9889f5e144b60605169576ad0c96",
+    "archive_files": 1970,
+    "compressed_bytes": 31169910,
+    "extracted_runtime_verification": {
+      "passed": true,
+      "files": 1924,
+      "manifest_sha256": "dff14072cc6747f10d06d5cad103735832eb8ae97a96102c269e55450d5a7e73"
+    }
+  },
+  "runtime": {
+    "xmind_revision": "80507a4f3b0c5490f348bbbb70790e8ff59c99fb",
+    "native_executable_sha256": "f3bfb8d6a4b919e0f75140079e2ba652d5f6f3d3e28e783b99af1d698d7a6cd4",
+    "xlang3_revision": "036f450af15426a25758087e8ea6bc70637a9a13",
+    "xlang3_runtime_dll_sha256": "61ad2bb1f38ee5bf7867b2f20955b7b3095542a952f1f2822ec3af13ac864874",
+    "release_accepted": false
+  },
+  "installation": {
+    "vscode_version": "1.142.0",
+    "profile": "D:/CantorAI2026/xMind/.agentflow/vscode-package-current-main-20261017/user-data",
+    "extensions_directory": "D:/CantorAI2026/xMind/.agentflow/vscode-package-current-main-20261017/extensions",
+    "installed_extension": "agentflow-local.agentflow@0.1.13",
+    "runtime_directory_override": false,
+    "workspace": "D:/CantorAI2026/TestProj",
+    "workspace_edits": "approval-gated"
+  },
+  "provider": {
+    "provider": "OpenAI Responses",
+    "model": "gpt-5.6-sol",
+    "credential_source": "Existing repository .config/providers.yaml profile; secret omitted",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "run_id": "ee8b4b976ae491642753f84049374626",
+    "state": "completed",
+    "create_operation": {
+      "tool": "create_file",
+      "operation_id": "cba014dbdcc5bb51a4417f79685e5619",
+      "state": "succeeded",
+      "approval": "Exact one-file creation reviewed and allowed in the packaged VS Code sidebar",
+      "path": "xmind_packaged_vscode_smoke_20261017.py",
+      "content": "def result():\n    return \"xMind packaged current-main\"\n\n\nif __name__ == \"__main__\":\n    print(result())\n"
+    },
+    "process": {
+      "operation_id": "6fcde7efac1726505f62587bfbd0e9b0",
+      "profile": "xlang3",
+      "executable": "C:/Users/shaw9/.xMind/p/packaged-current-main-80507a4/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-c5715fca1b752ffc4aaf60d0fd549dfd47b2b9ded327365862c5db5503b5c916/xlang3.exe",
+      "exit_code": 0,
+      "stdout": "xMind packaged current-main\r\n",
+      "stderr_bytes": 0
+    },
+    "usage": {
+      "final_response_input_tokens": 5729,
+      "final_response_output_tokens": 47,
+      "final_response_total_tokens": 5776,
+      "first_token_seconds": 2.38,
+      "elapsed_seconds": 3.01
+    }
+  },
+  "cleanup": {
+    "restore_run_id": "f58ed0cac2a5281a0d915d44b09af35b",
+    "restore_operation_id": "51cb660620110ad0bd5e04464c5e4912-0",
+    "approval": "Deletion reviewed and allowed in the packaged VS Code sidebar",
+    "file_absent_after_cleanup": true
+  },
+  "extension_tests": {
+    "command": "npm.cmd test",
+    "working_directory": "extensions/vscode",
+    "passed": 391,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "This verifies the local development VSIX in a fresh VS Code profile and one coding/edit/process/restore workflow; it does not certify a release build or broad coding reliability.",
+    "The runtime provenance explicitly remains releaseAccepted=false."
+  ]
+}
