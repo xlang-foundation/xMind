@@ -21,15 +21,15 @@ The VCS checkpoint adds workspace-scoped Git metadata and local branch listing
 alongside status. Backend-owner HTTP coverage exercises a real temporary Git
 repository, the local-view adapter, and xlang3-backed SQLite. CLI metadata and
 status contracts validate authenticated endpoint selection and reject malformed
-responses. This focused run does not establish complete OpenCode VCS parity or
+responses. This focused run does not establish the full xMind VCS workflow or
 a rendered IDE check.
 
 `agents` lists persisted named-agent IDs, revisions and optional model IDs.
 `agent-definition ID` retrieves one persisted definition, including its
 instructions, through the authenticated native API. Definition IDs may contain
 letters, numbers, `_`, `-` and `.`. This inspection is read-only and does not
-start a run. The current implementation is only a partial OpenCode mapping;
-mode, permission, description, visibility and source metadata remain absent.
+start a run. The current persisted definition schema does not yet include mode,
+permission, description, visibility or source metadata.
 
 ## Restore an approved file change
 
@@ -147,8 +147,9 @@ The installed browser preview retains native `19d69dd` and view `6f32d215`
 snapshots. It has not been upgraded to the newer enrollment/profile CLI source.
 Earlier installed CLI/browser checks below retain their historical scope.
 [Current validation](VALIDATION_STATUS.md), [provider setup](provider-setup.md).
-Full interactive/TUI coding parity and live Gemini CLI/IDE acceptance remain
-incomplete; private team-server implementation belongs to Nexus.
+The CLI still needs broader interactive coding and full-screen terminal
+acceptance, including live Gemini CLI coverage. Private team-server
+implementation belongs to Nexus.
 
 ## Conversations, observation and approvals
 
@@ -240,7 +241,7 @@ native endpoint.
 File approvals now render bounded unified diffs; the focused native agent HTTP
 contract also exercises live-process cancellation and detach against an active
 synthetic stream. Interactive diff navigation, attachment/context controls
-during streaming and full TUI/OpenCode CLI parity remain required.
+during streaming and full-screen terminal behavior remain to be validated.
 
 ## Workspace shell attachment
 
@@ -252,9 +253,10 @@ events resize the backend pseudoterminal, and original console input/output
 settings are restored on return. Pipe-based invocation uses UTF-8 lines for the
 native server contract. A nested Windows ConPTY integration contract exercises
 console keystrokes and live resize. Full-screen application behavior and mouse
-input remain unverified; concurrent chat controls, rich diffs and complete
-OpenCode TUI parity also remain open. Use `--console` when a launcher
-redirects standard input while the process still has an attached Windows console.
+input remain unverified; concurrent chat controls, rich diff navigation and
+complete full-screen terminal behavior also remain open. Use `--console` when a
+launcher redirects standard input while the process still has an attached
+Windows console.
 
 The actual-server process contract starts the shell in an isolated fixture,
 sends `echo XMIND_CLI_TERMINAL_ATTACH_OK` and `exit`, checks relayed output and
@@ -347,7 +349,7 @@ native Gemini text execution and signed-history reopen also passed. Regressions
 verify the discovery deadline and failed-turn status through successful settings
 commands. These results establish the native CLI/backend contracts, with hosted
 verification still pending for this checkpoint. They do not establish live
-account discovery, rendered IDE enrollment or end-to-end coding parity.
+account discovery, rendered IDE enrollment or the complete xMind coding flow.
 
 ## Historical checkpoint and live evidence
 
