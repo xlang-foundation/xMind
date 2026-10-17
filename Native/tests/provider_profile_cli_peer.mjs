@@ -167,7 +167,7 @@ async function invoke(args,extra={},status=0){
  return status===0?JSON.parse(result.stdout):result;
 }
 async function chat(session,input,{modelOverride,exit=0}={}){
- const args=[String(proxy.address().port),'chat',session,...(modelOverride===undefined?[]:[modelOverride])];
+ const args=[String(proxy.address().port),'chat',...(session?[session]:[]),...(modelOverride===undefined?[]:[modelOverride])];
  const running=execute(cli,args,{env:environment,windowsHide:true,timeout:16000,maxBuffer:2*1024*1024});running.child.stdin.end(input);
  let result;try{result=await running;result.code=0;}catch(error){if(typeof error.code!=='number')throw error;result={stdout:error.stdout,stderr:error.stderr,code:error.code};}
  privateAbsent(result.stdout+result.stderr);assert.equal(result.code,exit,result.stderr);if(failure)throw failure;
@@ -275,6 +275,7 @@ try{
  const recovered=await chat(session.id,'Synthetic blocked CLI recovery probe\n/provider-models\n/profile gemini 9\nSynthetic CLI recovered turn\n/exit\n');
  assert.deepEqual(recovered.records.filter(value=>value.type==='turn_finished').map(value=>value.exit_status),[1,0],'Only an actual successful later agent turn can recover the prior turn exit status');assert.equal(recovered.records.find(value=>value.type==='provider_profile').expected_provider_revision,10);
  const keyOnly=await control({command:'save_key_only',revision:10},'fixture_profile_saved');assert.equal(keyOnly.revision,11);assert.equal(keyOnly.active,'openai-key-only');
+ const rejectedResetAudit=audit.length,rejectedReset=await chat('','/model\n/exit\n',{exit:1});assert.match(rejectedReset.stderr,/no default model/i,'Reset without a configured default must explain how to proceed: '+rejectedReset.stderr);assert.equal(rejectedReset.records.some(value=>value.type==='session'),false,'A rejected default reset must not create a conversation');assert.equal(audit.slice(rejectedResetAudit).some(value=>value.path==='/v1/sessions'&&value.method==='POST'),false,'Rejected reset must not write a conversation');assert.equal((await invoke(['sessions'])).length,1,'Rejected reset must leave the session catalogue unchanged');
  const keyOnlySession=await invoke(['create-session','Key-only provider model selection']);const keyOnlyAudit=audit.length;
  const explicitModel=await chat(keyOnlySession.id,'/model fixture-openai\n/exit\n');
  const explicitSelection=explicitModel.records.find(value=>value.type==='model');assert.equal(explicitSelection.model_id,'fixture-openai');assert.equal(explicitSelection.saved,true);assert.equal(explicitSelection.revision,1,'CLI must save an explicit session model when the active key-only profile has no default model');

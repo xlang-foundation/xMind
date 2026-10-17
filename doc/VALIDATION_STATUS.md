@@ -3421,10 +3421,14 @@ coding reliability or a new live VS Code run.
 The interactive CLI rejected explicit model selection when a saved provider
 profile contained a key but no default model. It now accepts the selected
 session model and gives a clear, non-mutating explanation if `/model` is used
-to reset without a configured default. The native CLI contract now covers both
-cases and passes. In a temporary workspace, the CLI reused the saved OpenAI
-profile, selected `gpt-5.6-sol`, completed a coding run and applied an approved
-`greeting.py` edit.
+to reset without a configured default. The default check now runs before new
+conversation creation, so a rejected reset leaves no empty session behind.
+The native CLI contract covers explicit selection, in-session reset rejection,
+and the no-session reset case; it passes. A live CLI check against the local
+saved OpenAI profile found 20 models, rejected `/model` without creating a
+conversation, then saved `gpt-5.6-sol` as the model for one new session. In a
+separate temporary workspace, the CLI completed a coding run and applied an
+approved `greeting.py` edit.
 
 The rendered local webpage also reused that saved profile, discovered 20
 models, selected `gpt-5.6-sol`, displayed provider usage and timings, requested

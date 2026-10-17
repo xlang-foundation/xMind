@@ -1049,18 +1049,18 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
                     std::cout<<Json{{"type","model"},{"model_id",model},{"default_model",catalogue["default_model"]}}.dump()<<'\n'<<std::flush;continue;
                 }
                 if(!profile_admission||provider_binding.value("provider_profile_id",std::string{}).empty()){std::cerr<<"Select an active provider profile before choosing a conversation model. Use /profiles and /profile ID REVISION.\n";profile_result=1;continue;}
-                if(session.empty()){
-                    const Json create_body={{"title","New conversation"}};const auto created=request("/v1/sessions",&create_body);
-                    if(!created.is_object()||!created.contains("id")||!created.at("id").is_string())throw std::runtime_error("Invalid created model-selection conversation");session=created.at("id").get<std::string>();
-                    if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created conversation identity");
-                    std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;session_model_state=read_session_model(session);
-                }
                 const bool reset_to_default=prompt=="/model";std::optional<std::string> selected;if(!reset_to_default)selected=prompt.substr(7);
                 const auto metadata=request("/v1/provider/profiles");(void)provider_admission_binding(metadata);
                 std::string route_id,default_model;for(const auto& profile:metadata.at("profiles"))if(profile.is_object()&&profile.value("id",std::string{})==provider_binding.at("provider_profile_id").get<std::string>()){
                     if(!profile.contains("route_id")||!profile.at("route_id").is_string()||!profile.contains("model")||!profile.at("model").is_string())throw std::runtime_error("Invalid active provider model metadata");route_id=provider_profile_identity(profile.at("route_id").get<std::string>());const auto configured_model=profile.at("model").get<std::string>();if(!configured_model.empty())default_model=provider_profile_identity(configured_model);break;
                 }
                 if(route_id.empty()||route_id!=active_provider_route(metadata))throw std::runtime_error("Active provider route is invalid");if(selected&&selected->empty())throw std::invalid_argument("Model ID cannot be empty");if(selected)provider_profile_identity(*selected);else if(default_model.empty()){std::cerr<<"The active provider profile has no default model. Choose a model with /model MODEL_ID or configure its default in Settings.\n";profile_result=1;continue;}
+                if(session.empty()){
+                    const Json create_body={{"title","New conversation"}};const auto created=request("/v1/sessions",&create_body);
+                    if(!created.is_object()||!created.contains("id")||!created.at("id").is_string())throw std::runtime_error("Invalid created model-selection conversation");session=created.at("id").get<std::string>();
+                    if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created conversation identity");
+                    std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;session_model_state=read_session_model(session);
+                }
                 if(!session_model_state.is_object())session_model_state=read_session_model(session);
                 if(!session_model_state.at("editable").get<bool>()){std::cerr<<"Conversation model is locked while a run is active. Wait for it to finish and retry.\n";profile_result=1;continue;}
                 const auto revision=session_model_state.at("revision").get<std::int64_t>();if(revision>=9007199254740991LL)throw std::runtime_error("Conversation model revision is exhausted");

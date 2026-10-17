@@ -34,6 +34,21 @@
     "file": "greeting.py",
     "file_sha256_after": "6dbdc139c43a84b0b2dcd736a41e98c2655da710a16910d7ac565e4667aba209"
   },
+  "no_default_reset_followup": {
+    "xmind_base_commit": "9f18d8f",
+    "native_change": "Validate that the key-only provider has a default before creating a new conversation. A rejected /model reset leaves the session list unchanged.",
+    "release_executable_sha256": "d46a9d68a298dfe384937b1fb44e1fa5b40792126306328fd128c33794897738",
+    "saved_profile": "OpenAI key-only profile from local config; secret omitted",
+    "models_discovered": 20,
+    "commands": ["/model", "/model gpt-5.6-sol"],
+    "reset_result": "Explained that no default is configured; created no session",
+    "explicit_selection": {
+      "model": "gpt-5.6-sol",
+      "saved": true,
+      "session_id": "d2f8b54c74210219f0e1fea124517441"
+    },
+    "session_catalogue_after": 1
+  },
   "live_browser": {
     "url": "http://127.0.0.1:61704/ui/",
     "workspace": "Temporary isolated scratch workspace",
