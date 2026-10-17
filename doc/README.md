@@ -11,7 +11,7 @@ WebRTC and Electron IDE.
 | Server and console | [Native server](native-server.md), [interactive CLI](native-interactive-cli.md) |
 | Browser and editor | [Browser view](browser-view.md), [VS Code setup](../extensions/vscode/README.md), [current browser checkpoint](browser-preview-upgrade.md), [compact layout](compact-sidebar.md), [catalogue recovery](model-catalogue-recovery.md) |
 | Models and credentials | [Provider setup](provider-setup.md), [credential storage](credential-storage.md) |
-| General agents and graphs | [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [graph service](native-graph-service.md) |
+| General agents and graphs | [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [agent process placement](agent-process-placement.md), [graph service](native-graph-service.md) |
 | Long conversations | [Bounded session history pages](native-session-history-pages.md), [JSON POST foundation](native-context-transport.md), [native compaction implementation and remaining acceptance](native-context-compaction-design.md) |
 | Coding tools and approvals | [Workspace tools](native-workspace-tools.md), [multi-folder workspace target](native-multi-folder-workspaces.md), [file creation](native-file-creation.md), [process tools](native-process-tools.md), [permissions](PERMISSIONS.md) |
 | Protocols and profiles | [MCP](native-mcp.md), [A2A](A2A.md), [connection profiles](connection-profiles.md) |

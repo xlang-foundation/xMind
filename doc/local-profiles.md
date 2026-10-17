@@ -53,7 +53,9 @@ publishes readiness. The controller then releases startup-only job termination
 and checks authenticated workspace/owner HTTP metadata before returning the
 connection. The record is a rendezvous channel; model, tool and session commands
 use the backend's existing HTTP protocol. Console pipes are not used for startup
-coordination. Agent-worker shared-memory IPC remains a separate pending feature.
+coordination. Out-of-process C++ AgentRunner placement remains a separate
+pending feature; its target contract is documented in
+[agent execution placement](agent-process-placement.md).
 
 Clients validate PID, creation time, actual executable identity, runtime
 inventory, workspace identity and backend authority. A live but unreachable

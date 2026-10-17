@@ -12,6 +12,13 @@ An earlier selector-only webpage check reconnected with its selected model/histo
 
 `Native/src/agent_runner.cpp` owns the model/tool loop, cancellation/deadline checks, typed tool invocation, exact effect proposals and durable conversation continuation. A provider response can finish or request registered tools; tool results become the next model input. The configured turn limit remains a real bound, rather than an unlimited execution claim. Repository instructions, model selection, credentials and policy are backend-owned.
 
+Today each `AgentRunner` executes in a native service/child-executor thread.
+The `xmind worker` process mode only isolates registered xlang3 callables;
+it does not run this C++ model/tool loop. The requested per-agent in-process or
+out-of-process placement remains open. Its shared-run, private-IPC and crash
+reconciliation requirements are recorded in
+[agent execution placement](agent-process-placement.md).
+
 Agent nodes inside a registered graph invoke this same dynamic engine. The graph determines dependencies between nodes; the model still chooses the tool steps inside an agent node. Human/tool nodes provide explicit decisions or deterministic tool execution. Registered workflows remain useful for repeatable processes, review gates and parallel independent work.
 
 Current native source also accepts model-authored dependency plans with `agent`,
