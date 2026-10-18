@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-17",
+  "source_revision": "60e00af46bf75b134f28c42a6a7658dc50f55395",
+  "scope": "Post-retry VS Code package build and user-profile installation",
+  "package": {
+    "path": "C:/xMindNativeValidation/agentflow-0.1.13-xmind-60e00af.vsix",
+    "bytes": 31164991,
+    "sha256": "df5e519712080d01048b1f4fa8c6bc365c74d3a4413ff0aba6a42eea395bcd36"
+  },
+  "installation": {
+    "vscode_version": "1.142.0",
+    "extension_id": "agentflow-local.agentflow",
+    "extension_version": "0.1.13",
+    "extensions_directory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.13",
+    "install_command_result": "success",
+    "installed_client_sha256": "ea4169b372b583e1e845a02bea970bcdccf7b48beefd3e3f1c25e99fa2b9dc9f"
+  },
+  "verification": {
+    "source_client_sha256": "ea4169b372b583e1e845a02bea970bcdccf7b48beefd3e3f1c25e99fa2b9dc9f",
+    "source_and_installed_client_match": true,
+    "workspace_open_command": "code --reuse-window D:/CantorAI2026/TestProj",
+    "live_coding_with_this_package": false,
+    "reason": "The package installed successfully and TestProj was opened, but this check did not observe an edit/run through the newly installed build."
+  }
+}

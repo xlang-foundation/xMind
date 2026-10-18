@@ -71,6 +71,12 @@ before success; all 392 VS Code contracts pass. The post-fix extension source
 has contract validation, while the live packaged interaction above used the
 preceding source revision.
 
+The post-fix source `60e00af` was then packaged and installed as
+`agentflow-local.agentflow@0.1.13` in the default VS Code profile. The installed
+`client.js` hash matches the source, and TestProj was opened with VS Code's
+reuse-window command. This confirms package installation only: no edit/run was
+observed through that newly installed package. See the [installation record](evidence/vscode-60e00af-installed-20261017.json).
+
 ## Hosted browser and VS Code gate — 2026-10-17
 
 The complete [Browser and VS Code contracts workflow](https://github.com/xlang-foundation/xMind/actions/runs/39059210368)
