@@ -1,0 +1,384 @@
+{
+  "recorded_at": "2026-10-18T10:56:37.230Z",
+  "scope": "Installed Windows x64 development package; production installed WorkspaceBackend/client/browser modules with explicit VS Code workspace/settings/SecretStorage and external-open API fixtures",
+  "extension_version": "0.1.15",
+  "extension_source_revision": "ab0e06e47220b00cb8f0f412636385ad2f3e7e69",
+  "native_source_revision": "316583404a4d4bc6dd806bcf40648008deac2364",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "package": {
+    "version": "0.1.15",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.15-current-win32-x64.vsix",
+    "sha256": "d7e4feb88f4ba220514768f87d4996182960886a820033686b7e834c3e2be2fd",
+    "bytes": 32493801,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "316583404a4d4bc6dd806bcf40648008deac2364",
+    "nativeSha256": "fd2da727ed8c470b805fe997555c3e36d442e0404f1dae0b1653f9eda9b2557c",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false,
+    "browser_assets_verified": 26,
+    "negative_fixtures": [
+      {
+        "expectedReason": "Missing browser/shared renderer package asset: extension/browser-runtime/assets/terminal.js",
+        "fixture": "C:\\xMindNativeValidation\\negative-vsix-0.1.15-missing-terminal.vsix",
+        "rejected": true
+      },
+      {
+        "expectedReason": "Private state must not be packaged",
+        "fixture": "C:\\xMindNativeValidation\\negative-vsix-0.1.15-private-config.vsix",
+        "rejected": true
+      }
+    ]
+  },
+  "installation": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.15",
+    "version": "0.1.15",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "316583404a4d4bc6dd806bcf40648008deac2364",
+    "manifestSha256": "03e6a709b647fd78a04ba8843e7816c4010b3cfc04edd02185542bd4d3604a14",
+    "nativeSha256": "fd2da727ed8c470b805fe997555c3e36d442e0404f1dae0b1653f9eda9b2557c",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "preservation": {
+    "previous_extension": "C:/xMindNativeValidation/preserved-vscode-0.1.14-before-0.1.15",
+    "compared_previous_extension_files": 1972,
+    "settings_backup": "C:/xMindNativeValidation/vscode-settings-before-0.1.15-20261018.json",
+    "settings_unchanged": true,
+    "previous_profile_directories_retained": true,
+    "previous_0_1_14_public_history_unchanged": true,
+    "previous_profile_message_count": 6,
+    "fresh_profile_created_for_new_workspace": true,
+    "profile_format_migration": false
+  },
+  "live": {
+    "workspace": "C:/xMindNativeValidation/vscode-0.1.15-live-workspace-20261018",
+    "effective_workspace": {
+      "authority_id": "324d6e10dc746074f09551e28d690e00",
+      "configured": true,
+      "root": "C:\\xMindNativeValidation\\vscode-0.1.15-live-workspace-20261018",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:e2f41100000005000000000000000000"
+    },
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+    "core_origin": "http://127.0.0.1:49427",
+    "core_pid": 48656,
+    "installed_host_view_origin": "http://127.0.0.1:49430",
+    "current_running_image_matches_installed_package": true,
+    "connect_elapsed_ms": 4647,
+    "connect_timing_scope": "One warm-machine observation, not a cold-start or UI-latency guarantee",
+    "session": "5a3d042ee41e56b8efd53aec164d77ee",
+    "runs": [
+      {
+        "run": {
+          "graph_root": false,
+          "id": "5661be0885df30cd13ae0044f4d27bc9",
+          "node_id": "",
+          "parent_id": "",
+          "provider_context": {
+            "model_id": "gpt-6.1-sol",
+            "profile_id": "openai",
+            "profile_revision": 1,
+            "provider": "openai",
+            "route_id": "openai.responses",
+            "wire": "responses"
+          },
+          "session_id": "5a3d042ee41e56b8efd53aec164d77ee",
+          "state": "completed"
+        },
+        "approval": {
+          "operationId": "a34427b4a4e2425d4d8b3e6729d6cc37",
+          "exactProposalChecked": true,
+          "proposalSha256": "fbbc300ef928c9b9f020d6c875846e2efb6bd8363b11c010d1ca4685985522ed",
+          "actor": "local-owner"
+        },
+        "process": {
+          "operationId": "fe2423615523c86e8b1914e82a634eb3",
+          "profileId": "xlang3",
+          "executable": "C:\\Users\\shaw9\\.xMind\\p-current\\1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf\\runtime-7aa4762c65c7c56173e816f6665b0013260cb2b80bb2e11ec5550b655cbdd42d\\xlang3.exe",
+          "executableSha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+          "arguments": [
+            "-B",
+            "-c",
+            "from slug import slugify; assert slugify(\"Hello World\") == \"hello-world\"; print(\"xMind installed initial assertion passed\")"
+          ],
+          "actor": "trusted-process-profile:xlang3",
+          "exitCode": 0,
+          "stdout": "xMind installed initial assertion passed\r\n",
+          "streamEvents": 180,
+          "reviewed_script": "from slug import slugify; assert slugify(\"Hello World\") == \"hello-world\"; print(\"xMind installed initial assertion passed\")"
+        },
+        "native_sse": {
+          "events": 180,
+          "terminal_cursor": 180,
+          "reason": "terminal",
+          "initial_observation_is_not_a_terminal_snapshot": true
+        },
+        "saved_key_models": 20,
+        "observed_tools": [
+          "create_file",
+          "run_process"
+        ]
+      },
+      {
+        "run": {
+          "graph_root": false,
+          "id": "060fbf9517901a4ce1e1a7dcc706d254",
+          "node_id": "",
+          "parent_id": "",
+          "provider_context": {
+            "model_id": "claude-sonnet-4-6",
+            "profile_id": "claude",
+            "profile_revision": 1,
+            "provider": "anthropic",
+            "route_id": "anthropic.messages",
+            "wire": "anthropic-messages"
+          },
+          "session_id": "5a3d042ee41e56b8efd53aec164d77ee",
+          "state": "completed"
+        },
+        "approval": {
+          "operationId": "4b4845caf2ad4236555dd039306b4f7a",
+          "exactProposalChecked": true,
+          "proposalSha256": "15811758450ceac24cee8c27561bdb325043f9119cc31e7949ec6ee575646c1c",
+          "actor": "local-owner"
+        },
+        "process": {
+          "operationId": "a89e18401bf455b31fee9acaa94b6eaf",
+          "profileId": "xlang3",
+          "executable": "C:\\Users\\shaw9\\.xMind\\p-current\\1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf\\runtime-7aa4762c65c7c56173e816f6665b0013260cb2b80bb2e11ec5550b655cbdd42d\\xlang3.exe",
+          "executableSha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+          "arguments": [
+            "-B",
+            "-c",
+            "from slug import slugify; assert slugify(\"  Hello  World  \") == \"hello-world\"; assert slugify(\"Hello\tWorld\") == \"hello-world\"; assert slugify(\"\") == \"\"; print(\"xMind installed whitespace assertions passed\")"
+          ],
+          "actor": "trusted-process-profile:xlang3",
+          "exitCode": 0,
+          "stdout": "xMind installed whitespace assertions passed\r\n",
+          "streamEvents": 191,
+          "reviewed_script": "from slug import slugify; assert slugify(\"  Hello  World  \") == \"hello-world\"; assert slugify(\"Hello\tWorld\") == \"hello-world\"; assert slugify(\"\") == \"\"; print(\"xMind installed whitespace assertions passed\")"
+        },
+        "native_sse": {
+          "events": 191,
+          "terminal_cursor": 371,
+          "reason": "terminal",
+          "initial_observation_is_not_a_terminal_snapshot": true
+        },
+        "saved_key_models": 13,
+        "observed_tools": [
+          "read_file",
+          "edit_file",
+          "run_process"
+        ]
+      }
+    ],
+    "history_messages": 14,
+    "previous_public_prefix_messages": 6,
+    "previous_public_prefix_preserved": true,
+    "final_file_sha256": "4d0bc17064e8d4f33990753aa1136c33ecaf692c480ba7058912a08800943534",
+    "actual_inference_usage": [
+      {
+        "model": "gpt-6.1-sol",
+        "usage": {
+          "completion_tokens": 45,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 5119,
+          "input_tokens_details": {
+            "cache_write_tokens": 5116,
+            "cached_tokens": 0
+          },
+          "output_tokens": 45,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 5119,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 5116,
+            "cached_tokens": 0
+          },
+          "total_tokens": 5164
+        }
+      },
+      {
+        "model": "gpt-6.1-sol",
+        "usage": {
+          "completion_tokens": 70,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 5289,
+          "input_tokens_details": {
+            "cache_write_tokens": 170,
+            "cached_tokens": 5116
+          },
+          "output_tokens": 70,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 5289,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 170,
+            "cached_tokens": 5116
+          },
+          "total_tokens": 5359
+        }
+      },
+      {
+        "model": "gpt-6.1-sol",
+        "usage": {
+          "completion_tokens": 52,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 5552,
+          "input_tokens_details": {
+            "cache_write_tokens": 263,
+            "cached_tokens": 5286
+          },
+          "output_tokens": 52,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 5552,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 263,
+            "cached_tokens": 5286
+          },
+          "total_tokens": 5604
+        }
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 56,
+          "input_tokens": 8999,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 56,
+          "prompt_tokens": 8999,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 118,
+          "input_tokens": 9182,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 118,
+          "prompt_tokens": 9182,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 197,
+          "input_tokens": 9421,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 197,
+          "prompt_tokens": 9421,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 148,
+          "input_tokens": 9833,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 148,
+          "prompt_tokens": 9833,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    ],
+    "usage_scope": "Seven actual provider inference responses; per-provider counters retain their supplied semantics. Discovery/count calls are separate.",
+    "VSCode_APIs": "Explicit fixture supplies workspaceFolders, machine settings, SecretStorage and external-open sink; installed modules/native/provider execution are real",
+    "rendered_IDE": false
+  },
+  "browser": {
+    "url": "http://127.0.0.1:55665/ui/",
+    "packagedServer": true,
+    "packagedAssets": true,
+    "sameSession": true,
+    "sameHistory": true,
+    "noTypedToken": true,
+    "externalOpenAPIFixture": true,
+    "renderedAcceptance": false,
+    "refresh": {
+      "at": "2026-10-18T10:55:54.408Z",
+      "url": "http://127.0.0.1:55665/ui/",
+      "packagedBrowserHTTPStatus": 200,
+      "noTypedToken": true,
+      "httpOnlySameSiteCookie": true,
+      "selectedModelRestored": true,
+      "selectedModel": {
+        "model_id": "claude-sonnet-4-6",
+        "provider_profile_id": "claude",
+        "provider_route_id": "anthropic.messages"
+      },
+      "providerProfiles": 4,
+      "historyMessages": 14,
+      "renderedAcceptance": false
+    }
+  },
+  "extension_contracts": {
+    "passed": 395,
+    "failed": 0
+  },
+  "native_regression_receipt": "deepseek-checked-context-20261018.json",
+  "prior_live_four_provider_receipt": "four-provider-live-coding-20261018.json",
+  "local_evidence_sha256": {
+    "vscode-0.1.15-package-20261018.log": "72f29960ba8d57bcee89014212c4a26809d2a8aef2f944a0271125e8755c3a97",
+    "vscode-0.1.15-install-20261018.log": "fb94048588c27d17777a1bb5f2bdc283aa784daaa470cf02b67d8053e183e0b7",
+    "vscode-0.1.15-extension-list-20261018.log": "c2d0c58b6eff1719b24b25e2617c03f9422adad1b8d88b4e44997bfdf417acb1",
+    "vscode-0.1.15-archive-hashes-20261018.json": "4660deb9116e880da14578e5152122cdcde9afaf3a22525f5e63f2496c9ccbfa",
+    "vscode-0.1.15-extension-tests-20261018.log": "21e521e8e402d9ad1ffefb96fc2e1022812521463aaf0a6c46dd9c65d6d31e20",
+    "vscode-0.1.15-live-host-state-20261018.json": "95e4aefe6f8f152b972077901af13ce952857030ee2a1122f2cb29e9a05c9696",
+    "vscode-0.1.15-live-events-0-20261018.json": "7c8d325faadf87be8df0c8383ecf522e8491366fb141bf4be7c8ed2636466681",
+    "vscode-0.1.15-live-events-1-20261018.json": "777bbeac3a61c87c99ba9ac6b1827c4912f0a067f53fd449e28c56efaacba451",
+    "vscode-0.1.15-live-history-20261018.json": "95b46d74506527fff17f5ef1814885193dac4a67b3261a41eaf67f0c58592632",
+    "vscode-0.1.15-backend-image-20261018.json": "90f0a10d2ad66b479568214d6931e05aff951f6936725c0c24fd145ccd22e449",
+    "vscode-0.1.15-browser-refresh-20261018.json": "67f08774aa162d4decb46e69f8908bf2015f358b17f86ee5ce5cfe79ddfb5a1a",
+    "installed-vscode-coding-0.1.15-20261018.mjs": "b80c9d25633b747a1b42c8819d78c05676071312e44720f6eb1079fe305530d0",
+    "probe-vscode-0.1.15-browser-20261018.mjs": "8ae970a656ef2e37466f67d9b383e8fa52c4c6a9d23ffeaae8ec028ed8ba66e2",
+    "verify-vsix-payload-0.1.15-20261018.ps1": "88eaabc0ee948c0b22128fa30c95932af096bac64e09f4510e59a961ac5fbd23",
+    "verify-installed-0.1.15-20261018.mjs": "ecb070fa168d5defaa7d585b740d27b11392fa8f31c0d8318db7cea25e985c9c",
+    "preserve-vscode-0.1.14-before-0.1.15-20261018.mjs": "60373b4b25c50ba8ab3413692a3610148de305dc0c7abeebb28e7dc229936bb0",
+    "negative-vsix-0.1.15-20261018.ps1": "bb91877ee4202a7ad14de33988b66a3db4585f02ba5854d77422f2eb4644795e"
+  },
+  "limits": [
+    "No actual VS Code extension activation or rendered webview/browser interaction; editor windows remained closed",
+    "This is an installed local development snapshot, not a release-accepted distribution or Marketplace publication",
+    "Installed-host acceptance covers the selected OpenAI/Claude models; the separate source-native receipt covers four providers",
+    "The previous default VS Code profile had a recorded service-worker failure; rendered behavior has not been rechecked",
+    "The earlier separate failed profile handoff, agent-worker placement, foreign-history idle maintenance, broader long tasks and full current Release acceptance remain unfinished",
+    "No CPython interpreter or native-extension fallback was used"
+  ]
+}

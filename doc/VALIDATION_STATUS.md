@@ -19,9 +19,42 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed VSIX **0.1.14** contains native `b828570`. Its 1,970 installed payloads and full 1,927-file runtime verify. The installed host/client modules completed a real approved file creation and xlang3 execution, with native SSE and actual usage, using explicit VS Code API fixtures. Its packaged browser adapter exposes the same conversation. [Installed package and coding receipt](evidence/vscode-0.1.14-installed-coding-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
+| Coding clients | Installed VSIX **0.1.15** contains native `3165834`. Its 1,970 installed payloads and full 1,927-file runtime verify. Production installed host/client modules completed approved creation and editing across OpenAI → Claude with two actual xlang3 assertion runs and native SSE, preserving 14 messages. VS Code APIs were explicit Node fixtures. The packaged browser exposes the same history and restores the selected model. [Installed package and coding receipt](evidence/vscode-0.1.15-installed-coding-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader models/recovery cases, long-task reliability and full-screen CLI validation. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.15 and production-adapter coding — 2026-10-18
+
+The actual VS Code CLI installed Windows x64 **0.1.15** with native `3165834`
+while editor windows stayed closed. All 1,973 VSIX files were hashed; every
+extension payload matches its staged source. After installation, all **1,970
+non-manifest payloads** match the archive, the package manifest matches apart
+from installer metadata, and the full **1,927-file native inventory** verifies.
+The 26 required browser/renderer/license assets are present. Copies with a
+missing terminal asset or private configuration folder are rejected. The source
+extension suite passes **395/395**.
+
+Production `WorkspaceBackend`, client and browser modules loaded from the actual
+installed extension. **VS Code workspace/settings/SecretStorage and external-open
+APIs were explicit fixtures; no rendered editor ran.** The host bound the opened
+fixture folder, loaded all four saved provider profiles and created a fresh
+native profile under the existing configured root. OpenAI created `slug.py` and
+asserted its initial behavior through xlang3. Claude then read and improved it
+to collapse repeated spaces/tabs, received exact native edit approval and ran
+three actual assertions through xlang3. Both processes exited zero. Seven real
+inference responses retain their supplied usage; native SSE reached terminal
+cursors 180 and 371. The original six-message prefix remains unchanged in the
+final 14-message conversation.
+
+The installed packaged browser adapter serves the same history and restores
+the Claude model after a new cookie session, without typed server/provider keys.
+All 1,972 files of the earlier 0.1.14 installation were preserved separately,
+settings remain byte-identical, prior profile directories remain present, and
+the earlier installed six-message conversation still matches its saved receipt.
+No profile-format migration occurred. Actual editor/webpage rendering, the
+previous service-worker issue, other-host startup and full Release acceptance
+remain unverified. This is a development snapshot, not a release-accepted package.
+[Package hashes, installed bytes, native run/effect records and limits](evidence/vscode-0.1.15-installed-coding-20261018.json).
 
 ## Live coding across four saved providers — 2026-10-18
 
@@ -49,8 +82,9 @@ Gemini, DeepSeek and the final OpenAI run, including 3,494 DeepSeek events.
 The adapter returns the same history as CLI, discovers all four catalogues using
 saved keys, and restores the selected model after a new cookie session. Node
 supplied the cookie jar; **no DOM or rendered browser/editor ran**. VS Code stayed
-closed. The installed 0.1.14 runtime remains `b828570`; this is isolated current
-source acceptance, not an installed-package or full Release result.
+closed. At that source checkpoint the installed 0.1.14 runtime remained
+`b828570`; the subsequent installed 0.1.15 result is recorded above. This receipt
+establishes isolated source acceptance, not a full Release result.
 [Exact runs, effects, handoff, private-hash checks, browser scope and limits](evidence/four-provider-live-coding-20261018.json).
 
 ## DeepSeek checked conversation context — 2026-10-18
@@ -73,7 +107,8 @@ immutable original messages and returning-provider compaction with independent
 synthetic protocol assertions. Browser and extension source bytes are unchanged
 from the prior 395/136 passing suites and their successful hosted view gate.
 At this source checkpoint the live retry was pending; its subsequent result is
-recorded above. Rendered clients and installed deployment remain separate gates.
+recorded above, along with the subsequent installed-module check. Rendered
+clients and full Release acceptance remain separate gates.
 [Source, failed live attempt, exact tests and scope](evidence/deepseek-checked-context-20261018.json).
 
 ## Checked provider changes in an existing conversation — 2026-10-18
@@ -95,10 +130,10 @@ counts, signatures and usage in this contract are explicitly synthetic. Eight
 focused native contracts passed, alongside **395 extension** and **136 browser**
 contracts. [Source hashes, exact gates and limits](evidence/context-provider-switch-20261018.json).
 
-This is a source checkpoint. The installed **0.1.14** runtime remains at
-`b828570`; this change has not been deployed there. Live saved-provider switching,
-rendered editor/browser acceptance, foreign-history idle maintenance and the full
-current release gate remain pending.
+At this source checkpoint the installed **0.1.14** runtime was `b828570`.
+Subsequent live saved-provider switching and installed 0.1.15 checks are recorded
+above. Rendered editor/browser acceptance, foreign-history idle maintenance and
+the full current release gate remain pending.
 
 ## Installed 0.1.14 package and production adapter coding — 2026-10-18
 
