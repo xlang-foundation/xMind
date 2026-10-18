@@ -1,0 +1,163 @@
+{
+  "recordedAt": "2026-10-18T17:01:23.614Z",
+  "baselineRevision": "2c571f29d7a62a32e84ec17b74d9010396095b35",
+  "sourceChanges": {
+    "Native/src/anthropic_stream.cpp": {
+      "before": "748cffbe5bead2033244f275558dbaa1b2fb03154059e7894cc05da3a8cdedf6",
+      "after": "3b2a99e37414c2c1a4e64a0eb9c7357e98f93f089c5d987b9ebbc866d4295085"
+    },
+    "Native/tests/anthropic_stream_contract.cpp": {
+      "before": "b6fe35b0da4319efc1893bd7b676cdc83ea927ef4d10384f79834623522aae57",
+      "after": "3a33e7e90d516433c07b1af8f36bc904d2df7d85144b13a98ba68d04d3b04ddc"
+    },
+    "Native/tests/dynamic_plan_engine_contract.cpp": {
+      "before": "a6d82be00a43a0a743c95951ef904a5d0ac1b8754a3fe1f87c8de83de693337d",
+      "after": "f59898b9fdb01c303f2a4e5c19f5c897816aeedc785ac25544f06a2bedf4e9ef"
+    },
+    "Native/tests/dynamic_plan_engine_peer.mjs": {
+      "before": "9f2a67134f6b095b12d82d7931ea9e781e8d73ecbf86bb07a94aea40d71fb8bd",
+      "after": "9c5eb6e3e89f4a984ddeb8fd5bd6d8e0dc0795298fc2457aaf6874912312a084"
+    },
+    "Native/tests/graph_runner_contract.cpp": {
+      "before": "4453bc023f63fcf07ad5f1e0934139cfc9064bba3dc12c556984faeadcc245bb",
+      "after": "874c8f3e8508c652287ac4d1f509e0ca5d4df74b467a94d9200999e7b8c830a3"
+    },
+    "Native/tests/graph_runner_peer.mjs": {
+      "before": "e803d26c9255bc97e3de888abcfa0fe72a84dba97b4ee40e71accc78ff383b84",
+      "after": "8ca7f237e40cc8741887f7a9b44086d4f6a102df3b0175bc636dd4be544bcd60"
+    }
+  },
+  "versionMetadata": "0.1.24; two version-only metadata inputs also changed",
+  "behavior": "Closed Claude tool blocks retain their already validated initial input object when input_json_delta fragments accumulate zero bytes. Nonempty fragments still require complete strict object JSON. A real AgentService inspection and signed model continuation now complete without creating a plan, child or effect.",
+  "red": {
+    "failed": 2,
+    "total": 2,
+    "seconds": 0.52
+  },
+  "green": {
+    "passed": 2,
+    "total": 2,
+    "seconds": 4.09
+  },
+  "broader": {
+    "passed": 19,
+    "total": 19,
+    "seconds": 75.17,
+    "tests": [
+      "native_anthropic_request_contract",
+      "native_anthropic_stream_contract",
+      "native_anthropic_history_contract",
+      "native_dynamic_plan_contract",
+      "native_dynamic_plan_repository_contract",
+      "native_dynamic_plan_engine_contract",
+      "native_dynamic_plan_mcp_contract",
+      "native_graph_service_http_contract",
+      "native_graph_runner_contract",
+      "native_graph_mcp_contract",
+      "native_graph_mcp_http_contract",
+      "native_graph_mcp_http_subscription_contract",
+      "native_graph_checkpoint_contract",
+      "native_graph_children_contract",
+      "native_graph_contract",
+      "native_agent_runner_contract",
+      "native_anthropic_agent_contract",
+      "native_anthropic_provider_contract",
+      "native_http_stream_transport_contract"
+    ]
+  },
+  "frozenProjectFiles": 2599,
+  "frozenNativeBinaries": 124,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "bd924f0b0bb6ac7ba1063bcc9ca48d7a83d25876d566460e84750cfc24b6387b",
+  "nativeSha256": "d29a7c364db264ceb9bc89f3850f5847fdcd25969998e6c06eb1f8bc5ecea296",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "clientGates": {
+    "recordedAt": "2026-10-18T16:58:26.704Z",
+    "version": "0.1.24",
+    "clientSnapshotSource": "d17bd7132d5739f227d48a771c4aee099bda86d5",
+    "metadataVersionChangedOnly": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 420,
+      "passed": 420,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 99,
+    "browserAssets": 18,
+    "sourceAndAssetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "scope": "Complete Node host/controller and JSDOM/browser-contract fixtures; no actual rendered editor/external browser, native inference or provider request.",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "logs": {
+    "claude-empty-red-test-20261018.log": "a54cee16ef349e90b1d38f311844ddf50810985fdfbd1dbb5d6beb541b7a756f",
+    "claude-empty-green-test-20261018.log": "aae76df09a9a2931f8f1a7644c9e4e159992cb3b52fa73b07ba6bbb9cf50a88d",
+    "claude-empty-broader-test-20261018.log": "43577f5f94900701eb3bb5b5f104aab73d3e3598a8ed8f0c41d6c645a3a38554"
+  },
+  "graphDiagnostics": {
+    "changedBehavior": false,
+    "budgetsChanged": false,
+    "observedExit7ReceiptVerified": true,
+    "failedFixtureDirectoryPreserved": true,
+    "hostedCauseStillUnconfirmed": true,
+    "operationSummaryFields": [
+      "profile_id",
+      "timeout_ms",
+      "reason",
+      "termination",
+      "exit_code",
+      "elapsed_ms",
+      "process_tree_retired",
+      "output_artifact"
+    ],
+    "operationSummaryOmits": [
+      "environment",
+      "stdout body",
+      "stderr body"
+    ],
+    "eventTimeline": "The existing graph/child event timeline remains included; the new operation summary omits environment and output bodies."
+  },
+  "scope": {
+    "syntheticProvider": true,
+    "actualDecoder": true,
+    "actualAgentService": true,
+    "xlang3Sqlite": true,
+    "actualProcessAndGraphRegression": true,
+    "liveProvider": false,
+    "renderedUi": false,
+    "cpythonExecuted": false
+  },
+  "originalLiveCase": {
+    "sourceVersion": "0.1.22",
+    "savedTreeEvents": 561,
+    "child": "09a2f7e97349b7e8331bb309e9c1a300",
+    "rawFailingProviderFrameAvailable": false,
+    "causality": "Saved events match the independently reproduced defect; no assertion that the original unavailable raw frame was captured."
+  },
+  "installed": {
+    "version": "0.1.23",
+    "nativeSha256": "a0d6739478b557f5bee174d06057a6807d07a132bc930c6c3e44c841718ea017",
+    "unchanged": true,
+    "containsThisFix": false
+  },
+  "remaining": [
+    "Current-source complete native and hosted acceptance.",
+    "Stage/install byte-verified 0.1.24 and perform actual saved-key installed coding/failure-plan acceptance.",
+    "Investigate the hosted graph process uncertainty once its actual receipt is available.",
+    "Rendered external-browser/editor acceptance and broader architecture work."
+  ]
+}

@@ -23,6 +23,26 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Claude empty arguments / 0.1.24 source — 2026-10-18
+
+A closed tool block with zero-byte input fragments now keeps the already
+validated initial object. The decoder previously attempted to parse an empty
+string and failed before tools ran. Both new regressions fail before the change
+and pass afterward; all 19 related native contracts pass in 75.17 seconds.
+The agent test executes inspect_plan once, receives the actual absent-plan result
+and commits the matching signed continuation without admitting work or effects.
+Malformed nonempty JSON, duplicates, non-object data and incomplete/truncated
+turns remain rejected. [Source receipt](evidence/claude-empty-tool-fix-20261018.json).
+
+Version 0.1.24 source and an isolated client copy pass 420 extension and 142 browser
+checks with unchanged source/vendor/asset hashes. The default native build
+completed; SDK 58a8aab9 is unchanged. Graph diagnostics now retain actual process
+receipt/budget/artifact metadata while preserving a failed fixture directory.
+This improves investigation of the hosted uncertainty and does not claim its
+cause fixed. Current-source full/hosted acceptance, runtime staging, installation
+and real saved-key installed acceptance are pending. Installed 0.1.23 and its
+existing webpage remain unchanged; rendered GUI acceptance remains pending.
+
 ## Current hosted/native investigation — 2026-10-18
 
 Hosted source 878bd88 passes 149/150 contracts and both SDK smoke checks. The sole
@@ -33,8 +53,9 @@ remains unconfirmed. [Digest-verified evidence](evidence/hosted-native-878-failu
 The older live Claude child selected inspect_plan, emitted a zero-byte argument
 fragment and failed in JSON decoding before any tool effect. The original raw
 provider frame is unavailable. A narrowly staged regression/candidate addresses
-empty deltas while preserving strict nonempty JSON checks; native execution is
-pending the completed graph gate checkpoint. [Research](evidence/claude-empty-tool-research-20261018.json).
+empty deltas while preserving strict nonempty JSON checks. Both regression
+checks fail before/pass after; all 19 related contracts pass. The original raw
+failing frame remains unavailable. [Research](evidence/claude-empty-tool-research-20261018.json).
 
 ## Direct process-child failure — 2026-10-18
 
@@ -111,8 +132,9 @@ Current hosted native and release acceptance remain pending.
 
 The older failed live dynamic plan exposed process-child exit classification.
 The source correction below covers that case; 0.1.23 still needs the update.
-Its separate `anthropic_json_event_invalid` child outcome remains unconfirmed.
-Ordinary coding success does not establish that recovery path.
+Its separate `anthropic_json_event_invalid` child emitted an empty inspect_plan
+fragment. The matching decoder defect is now independently reproduced/fixed
+in source; the original raw failing frame remains unavailable.
 [Complete milestone receipt](evidence/coding-package-0.1.23-20261018.json).
 
 ## Installed coding package 0.1.22 — 2026-10-18

@@ -13,7 +13,23 @@
 #include <cstdlib>
 using namespace agentflow;using Json=nlohmann::json;
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
-std::string graph_diagnostic(PersistenceService& persistence,const std::string& id){const auto run=persistence.run(id).get();const auto graph=persistence.graph_run(id).get();Json events=Json::array(),children=Json::array();for(const auto& event:persistence.events(id).get())events.push_back({{"kind",event.kind},{"json",event.json}});for(const auto& child:persistence.children(id).get()){Json child_events=Json::array();for(const auto& event:persistence.events(child.id).get())child_events.push_back({{"kind",event.kind},{"json",event.json}});children.push_back({{"id",child.id},{"state",to_string(child.state)},{"events",std::move(child_events)}});}return Json{{"state",to_string(run.state)},{"checkpoint",graph.checkpoint_json},{"events",std::move(events)},{"children",std::move(children)}}.dump();}
+std::string graph_diagnostic(PersistenceService& persistence,const std::string& id){
+ const auto run=persistence.run(id).get();const auto graph=persistence.graph_run(id).get();Json events=Json::array(),children=Json::array();
+ for(const auto& event:persistence.events(id).get())events.push_back({{"kind",event.kind},{"json",event.json}});
+ for(const auto& child:persistence.children(id).get()){
+  Json child_events=Json::array(),operations=Json::array();for(const auto& event:persistence.events(child.id).get())child_events.push_back({{"kind",event.kind},{"json",event.json}});
+  for(const auto& operation:persistence.operations(child.id).get()){
+   Json detail={{"id",operation.id},{"tool",operation.spec.tool},{"state",to_string(operation.state)}};
+   if(operation.spec.tool=="run_process"){
+    const auto arguments=Json::parse(operation.spec.arguments_json);for(const auto* key:{"profile_id","timeout_ms"})if(arguments.contains(key))detail[key]=arguments.at(key);
+    if(!operation.result_json.empty()){const auto result=Json::parse(operation.result_json);for(const auto* key:{"reason","termination","exit_code","elapsed_ms","process_tree_retired"})if(result.contains(key))detail[key]=result.at(key);if(result.contains("output_artifact"))detail["output_artifact"]=result.at("output_artifact");}
+   }
+   operations.push_back(std::move(detail));
+  }
+  children.push_back({{"id",child.id},{"state",to_string(child.state)},{"events",std::move(child_events)},{"operations",std::move(operations)}});
+ }
+ return Json{{"state",to_string(run.state)},{"checkpoint",graph.checkpoint_json},{"events",std::move(events)},{"children",std::move(children)}}.dump();
+}
 struct Task{std::stop_source stop;std::future<Run> result;Task(GraphRunner& runner,std::string id):result(std::async(std::launch::async,[this,&runner,id=std::move(id)]{return runner.execute(id,stop.get_token());})){}~Task(){stop.request_stop();if(result.valid())result.wait();}};
 Operation approval(PersistenceService& store,const std::string& root){const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);while(std::chrono::steady_clock::now()<deadline){for(const auto& child:store.children(root).get())for(const auto& op:store.operations(child.id).get())if(op.state==OperationState::awaiting_approval)return op;std::this_thread::sleep_for(std::chrono::milliseconds(5));}throw std::runtime_error("Graph approval did not arrive");}
 int main(int argc,char** argv){if(argc!=5)return 2;try{
@@ -153,6 +169,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
    for(;;){const auto state=persistence.run("nonzero-process-root").get().state;if(state==RunState::failed)break;require(state!=RunState::completed&&state!=RunState::cancelled,"Nonzero process must fail the graph rather than completing");if(std::chrono::steady_clock::now()>=failure_deadline)throw std::runtime_error("Nonzero graph did not retire: "+graph_diagnostic(persistence,"nonzero-process-root"));std::this_thread::sleep_for(std::chrono::milliseconds(5));}
    const auto failed_children=persistence.children("nonzero-process-root").get();require(failed_children.size()==1&&failed_children.front().state==RunState::failed,"A failed process must never admit the success-dependent command");
    const auto failed_operations=persistence.operations(failed_children.front().id).get();require(failed_operations.size()==1&&failed_operations.front().state==OperationState::succeeded,"An observed nonzero exit must retain its completed effect journal");
+   const auto failed_diagnostic=Json::parse(graph_diagnostic(persistence,"nonzero-process-root")).at("children").front().at("operations").front();require(failed_diagnostic.at("exit_code")==7&&failed_diagnostic.at("termination")=="exited"&&failed_diagnostic.at("timeout_ms")==30000&&failed_diagnostic.at("output_artifact").at("state")=="complete"&&!failed_diagnostic.contains("environment")&&!failed_diagnostic.contains("stdout"),"Graph diagnostics must retain actual process outcome/budget/artifact metadata without copying environment or output bodies");
    const auto failed_result=Json::parse(failed_operations.front().result_json);require(failed_result.at("exit_code")==7&&failed_result.at("termination")=="exited"&&failed_result.at("stdout").at("data")=="expected failure output"&&failed_result.at("stderr").at("data")=="expected failure error","Graph failure must retain the exact observed process exit and both output channels");
    std::size_t failure_receipts=0,completed_receipts=0;for(const auto& event:persistence.events(failed_children.front().id).get()){if(event.kind=="tool.failed"){++failure_receipts;require(Json::parse(event.json).at("data")==failed_result,"Graph failure event must preserve the actual operation receipt");}if(event.kind=="tool.completed")++completed_receipts;if(event.kind=="run.failed")require(Json::parse(event.json).at("reason")=="process_exit_nonzero"&&Json::parse(event.json).at("exit_code")==7,"Failed child must retain an actionable exit reason");}
    require(failure_receipts==1&&completed_receipts==0&&!std::filesystem::exists(attached_root/L"graph-should-not-run.txt"),"Failed graph command must emit one failure receipt and no dependent effect");

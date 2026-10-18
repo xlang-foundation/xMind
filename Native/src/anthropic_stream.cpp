@@ -160,7 +160,9 @@ struct AnthropicStream::Impl {
         }
         if(type=="content_block_stop"){
             auto& block=active(value);
-            if(block.type=="tool_use"&&block.input_delta){tool_input(block.value);block.input=std::move(block.value);}
+            // Empty input fragments leave the validated initial object intact.
+            // Nonempty fragments still require one complete valid JSON object.
+            if(block.type=="tool_use"&&block.input_delta&&!block.value.empty()){tool_input(block.value);block.input=std::move(block.value);}
             if(block.type=="thinking")opaque(block.signature,signature_limit);
             block.stopped=true;return;
         }
