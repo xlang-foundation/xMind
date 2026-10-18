@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-18",
+  "sourceRevision": "88164328d2b897bfd10d0a03a38ab8b871139406",
+  "scope": "Browser launcher host reuse and generated UI asset refresh; explicit Node HTTP/cookie fixtures and actual existing native metadata/model discovery. No rendered browser or editor acceptance.",
+  "behavior": [
+    "Reuse the same observed live browser host while rebuilding its matching canonical asset directory.",
+    "Reject conflicting backend/asset identity before asset writes.",
+    "Preserve unobservable hosts on HTTP errors/timeouts; connection refusal can be treated as a gone endpoint without deleting metadata."
+  ],
+  "sourceWorkingTreeSha256": {
+    "Tools/browser-host-lifecycle.mjs": "cfdb33d9a00b460361915b13d6670a6aa9e91ffac6ca00cd9679aa0cbf659f3e",
+    "Tools/start-browser.mjs": "9f8326cb16f0ef1684a57572f907b4db51286ecc03b81069063105c79c56dd28",
+    "Tools/ci-views.mjs": "c5634f6e6dee6f9065d908affc89856d50d1194de36e05e72cb0583b087c00b8",
+    "views/browser/tests/launcher-build.test.cjs": "a6c974ec8851329c97adf94e669e7b7fee0f29d30af8da698583fb92cdead2d5",
+    "views/browser/tests/launcher-lifecycle.test.cjs": "74ebdb7e1196a925e11d80350b39b49c9dafea336f01155b98fffeaeb48ad59b"
+  },
+  "local": {
+    "focusedLauncher": {
+      "passed": 6,
+      "failed": 0
+    },
+    "extension": {
+      "passed": 416,
+      "failed": 0
+    },
+    "browser": {
+      "passed": 141,
+      "failed": 0
+    },
+    "nativeLocalView": {
+      "passed": 1,
+      "failed": 0,
+      "elapsedSeconds": 81,
+      "nativeSourceRevision": "5ed8267fc02ebdb08687f3e902cc36872bc1ad61",
+      "note": "Focused existing compiled native view contract only; not a new complete native gate."
+    },
+    "logs": {
+      "browser-reuse-refresh-focused-20261018.log": {
+        "path": "C:/xMindNativeValidation/browser-reuse-refresh-focused-20261018.log",
+        "sha256": "6f4eae9cd34aceedba1049e54c94df0d14233aecb5f79a385be45efa7d31e85b"
+      },
+      "browser-reuse-extension-tests-20261018.log": {
+        "path": "C:/xMindNativeValidation/browser-reuse-extension-tests-20261018.log",
+        "sha256": "7df2524d90c1111f194d728134ec1e3d3b6eb6046c248d46c2c6c81e06587cd5"
+      },
+      "browser-reuse-browser-tests-20261018.log": {
+        "path": "C:/xMindNativeValidation/browser-reuse-browser-tests-20261018.log",
+        "sha256": "7152497660556459d7b5d778413869f8e45d6eec90d30350558d43e4048451ea"
+      },
+      "browser-reuse-native-view-20261018.log": {
+        "path": "C:/xMindNativeValidation/browser-reuse-native-view-20261018.log",
+        "sha256": "f7b48aacf433ee38b5c2245028012e8545d3715095792ab801a1a773db38e5f6"
+      },
+      "user-browser-52757-refresh-20261018.json": {
+        "path": "C:/xMindNativeValidation/user-browser-52757-refresh-20261018.json",
+        "sha256": "5deaeb5a7732b960c3547de9b63a1da3fbec74c845f247a1aad4e6b950014f97"
+      },
+      "user-browser-52757-catalogues-20261018.json": {
+        "path": "C:/xMindNativeValidation/user-browser-52757-catalogues-20261018.json",
+        "sha256": "0fa2b78cede4657b25af12810e19a6f722659aad009f29e0f12fab1bfb555442"
+      }
+    }
+  },
+  "hosted": {
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39134309670",
+    "artifactId": 12139167549,
+    "archiveSha256": "sha256:17c1c84d03b7b49c28e9499f6ff3620ff73c3bbb8e4f92e048889f6dc0f84284",
+    "digestVerified": true,
+    "beforeAfterHashesEqual": true,
+    "gate": {
+      "sourceRevision": "88164328d2b897bfd10d0a03a38ab8b871139406",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 69,
+      "trackedSourceFiles": 64,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 416,
+        "browser": 141
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 416,
+        "passed": 416,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 141,
+        "passed": 141,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "existingUserPage": {
+    "url": "http://127.0.0.1:52757/ui/",
+    "viewPid": 55896,
+    "nativeViewPid": 24744,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "sessionCount": 1,
+    "historyMessages": 42,
+    "backupFiles": 18,
+    "servedClientBeforeSha256": "fa0b74eb3b4ec21ae9d37b2037170198429e0ec9fdc281a4469517f58cb8fb5b",
+    "servedClientAfterSha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c",
+    "verification": {
+      "served": {
+        "index.html": {
+          "sha256": "8fa07839179137583633c56a15ab72f9616a1ae64a66543c5338c3f1f2254e8a",
+          "builtSha256": "8fa07839179137583633c56a15ab72f9616a1ae64a66543c5338c3f1f2254e8a"
+        },
+        "patch-review.js": {
+          "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+          "builtSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+        },
+        "chat.js": {
+          "sha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+          "builtSha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e"
+        },
+        "chat.css": {
+          "sha256": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a",
+          "builtSha256": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a"
+        },
+        "client.js": {
+          "sha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c",
+          "builtSha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c"
+        },
+        "marked.js": {
+          "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+          "builtSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+        },
+        "purify.js": {
+          "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+          "builtSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+        },
+        "xterm.js": {
+          "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+          "builtSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+        },
+        "xterm.css": {
+          "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+          "builtSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+        },
+        "xterm-fit.js": {
+          "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+          "builtSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+        },
+        "terminal.js": {
+          "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+          "builtSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+        },
+        "browser.js": {
+          "sha256": "772e9748fe0d002b07092fc95329234b3aceb6e3742756c1e954d39ae55b63df",
+          "builtSha256": "772e9748fe0d002b07092fc95329234b3aceb6e3742756c1e954d39ae55b63df"
+        },
+        "browser.css": {
+          "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+          "builtSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+        }
+      },
+      "selectedWorkspaceUnchanged": true,
+      "providerProfilesUnchanged": true,
+      "sessionsAndHistoryUnchanged": true,
+      "viewAndBackendMetadataUnchanged": true,
+      "noTaskOrEffectAdmission": true,
+      "providerInferenceRequests": 0,
+      "executionAvailable": true,
+      "renderedAcceptance": false
+    },
+    "providerDiscovery": [
+      {
+        "id": "openai",
+        "count": 20,
+        "savedKeyDiscoveryPassed": true
+      },
+      {
+        "id": "claude",
+        "count": 13,
+        "savedKeyDiscoveryPassed": true
+      },
+      {
+        "id": "gemini",
+        "count": 11,
+        "savedKeyDiscoveryPassed": true
+      },
+      {
+        "id": "deepseek",
+        "count": 2,
+        "savedKeyDiscoveryPassed": true
+      }
+    ],
+    "discoveryVerification": {
+      "profilesAndSelectionUnchanged": true,
+      "workspaceAndHistoryUnchanged": true,
+      "inferenceRequests": 0,
+      "runOrEffectCommands": 0,
+      "allFourSavedKeysDiscoverModels": true,
+      "renderedAcceptance": false
+    }
+  },
+  "limits": [
+    "No browser/editor window opened; VS Code remains closed.",
+    "No GUI clicks, paint or layout accepted by these HTTP/fixture checks.",
+    "No inference, task/effect admission, provider/model selection or settings write during actual-page checks.",
+    "Existing native backend/view and installed VSIX 0.1.21 were not upgraded or restarted.",
+    "Complete 149-test native source gate remains the separate 5ed8267 receipt; current hosted native acceptance is outstanding."
+  ]
+}

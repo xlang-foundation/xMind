@@ -23,6 +23,27 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Existing browser asset refresh — 2026-10-18
+
+Source `8816432` fixes stale generated assets when the launcher reuses an
+existing browser host. It verifies the same backend and canonical asset root,
+then rebuilds that root. Conflicting identity rejects before writes; HTTP
+errors and observation timeouts preserve the host. Local and hosted suites
+pass all 416 extension and 141 browser contracts. The hosted artifact digest
+and unchanged 69 source/18 generated asset inventories verify. The focused
+native view contract separately passes in 81 seconds; this is not a new full
+native gate.
+
+The actual existing page at `http://127.0.0.1:52757/ui/` now serves the updated
+assets. TestProj, one session with 42 messages, provider settings, active.json
+and both host processes are unchanged; all 18 old assets were backed up.
+Actual saved-key model discovery returns OpenAI 20, Claude 13, Gemini 11 and
+DeepSeek 2 models. These HTTP checks use an explicit Node cookie jar and make
+no inference, task/effect admission, selection or settings write. Installed
+0.1.21 and the existing native runtime were not upgraded. VS Code remains
+closed. Browser clicks/paint/layout and editor activation remain unverified.
+[Browser evidence](evidence/browser-reuse-refresh-20261018.json).
+
 ## Native file-tool owner checkpoint — 2026-10-18
 
 Source `5ed8267` moves model-selected edit/create/patch/restore preparation,
