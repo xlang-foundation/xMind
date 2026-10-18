@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-17",
+  "scope": "In-process owner capability for model-visible workspace tools",
+  "compiled_product_code_revision": "5a24132a48f833c2cd8401b672aeb4071e24b2cc",
+  "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "toolchain": "Visual Studio 18 2026, MSVC 19.51.36256.0",
+  "build_directory": "C:\\xMindNativeValidation\\native-current-source-full",
+  "build_command": "cmake --build C:/xMindNativeValidation/native-current-source-full --config Release --target agentflow_agent_runner_contract agentflow_graph_runner_contract agentflow_workspace_tools_contract --parallel 4",
+  "build_result": "passed",
+  "xmind_executable_sha256": "5a7081ce0e5f3e2631b5dd57dfb5b15276b4ae9985b8fc378dbbbf2a8628a6b7",
+  "ctest_command": "ctest --test-dir C:/xMindNativeValidation/native-current-source-full -C Release --output-on-failure -R native_(agent_runner|graph_runner|workspace_tools|graph_service_http)_contract",
+  "passed": 4,
+  "failed": 0,
+  "tests": [
+    "native_graph_service_http_contract",
+    "native_graph_runner_contract",
+    "native_agent_runner_contract",
+    "native_workspace_tools_contract"
+  ],
+  "duration_seconds": 24.93,
+  "ctest_log": "C:\\xMindNativeValidation\\native-current-source-full\\Testing\\Temporary\\agent-workspace-tool-host-local-20261017.log",
+  "ctest_log_sha256": "d2833af7e6435e1410fff320eb3e5a150a8c39db8498dbdf39cd4f78951c4327",
+  "notes": [
+    "AgentRunner now obtains the workspace tool catalogue and invokes workspace read tools through AgentWorkspaceToolHost; WorkspaceTools and WorkspaceToolSet are the in-process owners.",
+    "This is an in-process capability boundary only. It does not provide an LRPC adapter or move MCP/A2A, process execution, approval state, or edit effects out of the owner process."
+  ]
+}

@@ -92,14 +92,20 @@ the current `AgentRunner`, graph, local-profile, MCP SDK and backend-owner
 contracts ([exact record](evidence/native-current-source-full-20261017.json)).
 That establishes the in-process baseline; it does not change the worker boundary.
 
-Inspection of `AgentRunner::execute` shows the next extraction must be a
-run-scoped `AgentToolHost`, rather than another persistence-only port. The
-runner currently discovers tools and dispatches calls directly through
-`WorkspaceTools` / `WorkspaceToolSet`, `ProcessExecutor`, MCP and A2A registries,
-trusted xlang3 callables, edit/create/patch/restore executors, permission grants
-and repository-instruction contexts. `AgentRunJournal`, `AgentContextJournal`
-and `AgentModelGateway` already isolate durable run/context records and model
-requests, but they do not mediate those effects.
+The first workspace slice now uses `AgentWorkspaceToolHost`: `WorkspaceTools`
+and `WorkspaceToolSet` implement its catalogue and bounded JSON invocation
+methods, and `AgentRunner` consumes them through that interface. The single-root
+and multi-folder paths passed the focused AgentRunner, graph, workspace and
+graph-HTTP contracts ([test record](evidence/agent-workspace-tool-host-local-20261017.json)).
+This capability remains in-process and owns the local workspace handles; it
+does not yet cross LRPC or mediate mutations.
+
+The next extraction must be a run-scoped `AgentToolHost` covering the complete
+model-visible catalogue and dispatch. The runner still invokes `ProcessExecutor`,
+MCP and A2A registries, trusted xlang3 callables, edit/create/patch/restore
+executors, permission grants and repository-instruction contexts directly.
+`AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` isolate durable
+run/context records and model requests, but they do not mediate those effects.
 
 The host's public call should carry a versioned run capability, attempt and
 call IDs, the sealed catalogue revision, tool name, bounded argument JSON,
@@ -113,13 +119,13 @@ backend before forwarding to either the in-process runner or a worker. A lost
 reply after dispatch is recorded as uncertain and is never transparently
 replayed.
 
-Implementation order is therefore: extract the current catalogue and tool-call
-switch behind an in-process `AgentToolHost` without changing its behavior;
-run the same AgentRunner contracts through that host; add the authenticated
-xlang3 LRPC adapter with attempt/call idempotency and bounded streaming; then
-run those contracts in a child process and add crash/recovery acceptance. No
-agent process-placement setting is valid until the remote host implements the
-same effect and approval contract.
+Implementation order is therefore: extend the workspace capability to the
+complete catalogue and tool-call switch behind an in-process `AgentToolHost`
+without changing behavior; run the same AgentRunner contracts through that
+host; add the authenticated xlang3 LRPC adapter with attempt/call idempotency
+and bounded streaming; then run those contracts in a child process and add
+crash/recovery acceptance. No agent process-placement setting is valid until
+the remote host implements the same effect and approval contract.
 
 ## Verified SDK foundation
 
