@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-18T17:27:43.999Z",
+  "baselineRevision": "706f0ca94ed6158afa4d3fce406bcee7cc770ed5",
+  "behavior": "Keep the existing atomic replacement and its exact flushed ciphertext. Permit one bounded retry of unconfirmed ACCESS_DENIED because a blocking reader can close before delete-access probes run. Confirmed sharing conflicts retain their existing deadline. Persistent permission denial still fails promptly; no fallback publication or ownership change is introduced.",
+  "red": {
+    "failed": 1,
+    "total": 1,
+    "seconds": 0.29
+  },
+  "green": {
+    "passed": 1,
+    "total": 1,
+    "seconds": 0.34
+  },
+  "focused": {
+    "passed": 2,
+    "total": 2,
+    "tests": [
+      "native_local_view_provider_config_contract",
+      "native_profile_record_publication_contract"
+    ],
+    "seconds": 54.46
+  },
+  "originalFailure": {
+    "fullGatePassed": 148,
+    "fullGateTotal": 149,
+    "test": "native_local_view_provider_config_contract",
+    "nativeLogSha256": "f744922c18e394edebf67db61a343eb1866baba3dfd54e6482e4889f933a8312",
+    "error": "Cannot publish local profile record (Win32 5); stored database was preserved",
+    "originalBlockingReaderIdentified": false,
+    "causality": "The failed run establishes publication ACCESS_DENIED. The matching lost-probe race is independently reproduced; its specific original reader is unknown."
+  },
+  "regressionScope": {
+    "actualWindowsDenyDeleteReader": true,
+    "actualAtomicReplacement": true,
+    "injectedErrorClass": "After an actual denied move, release the real reader and report ACCESS_DENIED before the probe. This deterministically exercises a disappearing-blocker window.",
+    "productionRuntimeFlagsAdded": false,
+    "exactStagedBytesVerified": true,
+    "persistentSharingAndReadOnlyFailuresPreserveFiles": true,
+    "permissionFailureRemainsUnderOneSecond": true
+  },
+  "frozenProjectFiles": 2599,
+  "frozenNativeBinaries": 124,
+  "nodeDependencyFiles": 18598,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "575c7ab04b88abfc3eb49df1d817b0411de7699e568d394aee5fd1b4a896e05e",
+  "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "logs": {
+    "red": "c11e96de397418c85404539be10b6c8cb7bbb3b684d616a90023be54bb5233b3",
+    "green": "7445c31e6b9b25e44a635dbfc82867d25b7ab2f302cba8f1494271fef1bb1384",
+    "focused": "cc3dffb538d930d5da15c6465cad744b97f4248a9297be59eb8b3fc927021cea"
+  },
+  "installed": {
+    "version": "0.1.23",
+    "unchanged": true,
+    "containsThisFix": false
+  },
+  "remaining": [
+    "Complete current-source native and hosted validation.",
+    "Refresh the unaccepted 0.1.24 candidate from the new native binary; old d29a candidate belongs to failed source 9eb9870.",
+    "Install and validate real saved-key coding/failure-plan behavior.",
+    "Hosted graph PowerShell uncertainty and rendered UI remain unresolved."
+  ],
+  "cpythonExecuted": false
+}

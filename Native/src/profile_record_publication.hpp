@@ -18,21 +18,34 @@ inline bool profile_record_reader_blocks_delete(const std::wstring& file){
 }
 // The caller pins and validates both paths and flushes the staged ciphertext.
 // Retain that exact file while a transient reader prevents atomic replacement.
-inline void publish_profile_record(const std::wstring& staged,const std::wstring& target,
-                                   std::chrono::milliseconds timeout=std::chrono::seconds(5)){
+template<class AtomicReplace>
+inline void publish_profile_record_with(const std::wstring& staged,const std::wstring& target,
+                                       std::chrono::milliseconds timeout,AtomicReplace replace){
     const auto deadline=std::chrono::steady_clock::now()+timeout;
-    while(!MoveFileExW(staged.c_str(),target.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)){
+    bool retried_unconfirmed_denial=false;
+    while(!replace(staged,target)){
         const auto error=GetLastError();
         // MoveFileEx can report ACCESS_DENIED for a deny-delete reader.
         // Retry that case only when a non-mutating access probe confirms sharing.
         const bool sharing=error==ERROR_SHARING_VIOLATION||error==ERROR_LOCK_VIOLATION||
             (error==ERROR_ACCESS_DENIED&&(profile_record_reader_blocks_delete(staged)||
                                         profile_record_reader_blocks_delete(target)));
-        if(!sharing||
+        // The blocking reader may close before the probes observe it. Permit
+        // one retry of that unconfirmed denial, using the same flushed file;
+        // persistent permission errors still fail promptly without a fallback.
+        const bool unconfirmed_denial=error==ERROR_ACCESS_DENIED&&!sharing&&!retried_unconfirmed_denial;
+        if((!sharing&&!unconfirmed_denial)||
            std::chrono::steady_clock::now()>=deadline)
             throw std::runtime_error("Cannot publish local profile record (Win32 "+
                 std::to_string(error)+"); stored database was preserved");
+        if(unconfirmed_denial)retried_unconfirmed_denial=true;
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
+}
+inline void publish_profile_record(const std::wstring& staged,const std::wstring& target,
+                                   std::chrono::milliseconds timeout=std::chrono::seconds(5)){
+    publish_profile_record_with(staged,target,timeout,[](const std::wstring& from,const std::wstring& to){
+        return MoveFileExW(from.c_str(),to.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH);
+    });
 }
 }

@@ -37,6 +37,25 @@ int main(){
             held.close();publishing.get();
         }
         require(read(target)=="new ciphertext"&&!fs::exists(staged),"Atomic publication must use the exact staged bytes");
+        {
+            const auto race_target=base/L"race-profile.state",race_staged=base/L"race-state.tmp";
+            std::ofstream(race_target)<<"race old ciphertext";std::ofstream(race_staged)<<"race new ciphertext";
+            Reader held(race_target);std::size_t attempts=0;
+            agentflow::detail::publish_profile_record_with(race_staged.native(),race_target.native(),2s,
+                [&](const std::wstring& from,const std::wstring& to){
+                    ++attempts;const auto moved=MoveFileExW(from.c_str(),to.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH);
+                    if(attempts==1){
+                        require(!moved&&agentflow::detail::profile_record_reader_blocks_delete(to),"Race fixture must first observe an actual Windows deny-delete reader");
+                        held.close();
+                        // Windows may report ACCESS_DENIED for this conflict.
+                        // Inject that documented error class after releasing
+                        // the real reader, before the publisher's access probe.
+                        SetLastError(ERROR_ACCESS_DENIED);
+                    }
+                    return moved;
+                });
+            require(attempts==2&&read(race_target)=="race new ciphertext"&&!fs::exists(race_staged),"A reader released before the probe must permit one exact atomic replacement retry");
+        }
         std::ofstream(staged)<<"next ciphertext";
         {
             Reader held(target);bool denied=false;

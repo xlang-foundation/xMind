@@ -23,6 +23,29 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Protected profile publication — 2026-10-18
+
+A reader can block atomic profile replacement and then close before the
+follow-up sharing probe. The native publisher now allows one bounded retry of
+unconfirmed ACCESS_DENIED while retaining the exact flushed staged ciphertext
+and existing deadline. Persistent permission errors still fail promptly and
+preserve both files. No fallback write, database reset or competing owner is
+introduced. The deterministic regression performs an actual Windows denied
+move, releases its real reader and injects the ACCESS_DENIED error classification
+before probing. It fails before and passes after; the original failed run
+does not identify its specific reader.
+
+The publication contract and original provider-configuration view test pass
+2/2 in 54.46 seconds with all recorded inputs/binaries unchanged. Native SHA is
+c90df181..., SDK 58a8aab9 is unchanged. This focused result does not turn the
+earlier 148/149 into a full pass. The current complete gate, hosted acceptance,
+0.1.24 runtime/VSIX staging and real installed acceptance are pending.
+[Recovery receipt](evidence/profile-publication-recovery-20261018.json).
+
+Installed 0.1.23 remains unchanged, with all 2,446 actual files backed up and
+settings/six previous profile directories recorded. The unaccepted d29a candidate
+belongs to the failed source and will not be staged. VS Code remains closed.
+
 ## Claude empty arguments / 0.1.24 source — 2026-10-18
 
 A closed tool block with zero-byte input fragments now keeps the already
@@ -43,10 +66,11 @@ cause fixed. Current-source full/hosted acceptance, runtime staging, installatio
 and real saved-key installed acceptance are pending. Installed 0.1.23 and its
 existing webpage remain unchanged; rendered GUI acceptance remains pending.
 
-The complete 149-test local gate is now **running** at source `9eb9870`, native
-SHA `d29a7c36...`. Its manifest freezes all project/library/SDK/binary inputs,
-CMake configuration and 18,598 files from the complete extension and MCP/A2A peer
-dependency trees. File-set and hash verification follows terminal success.
+The complete source 9eb9870 gate finished **148/149 in 903.27 seconds**. All
+project/library/SDK/binary/configuration hashes and 18,598 dependency files/sets
+verify unchanged. The provider-configuration view test failed because Windows
+denied protected profile-record publication before readiness.
+[Failed full gate](evidence/claude-empty-tool-full-failure-20261018.json).
 
 ## Current hosted/native investigation — 2026-10-18
 
