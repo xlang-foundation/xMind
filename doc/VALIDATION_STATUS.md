@@ -20,8 +20,38 @@ used when they were recorded and should not be read as current parity goals.
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed VSIX **0.1.14** contains native `b828570`. Its 1,970 installed payloads and full 1,927-file runtime verify. The installed host/client modules completed a real approved file creation and xlang3 execution, with native SSE and actual usage, using explicit VS Code API fixtures. Its packaged browser adapter exposes the same conversation. [Installed package and coding receipt](evidence/vscode-0.1.14-installed-coding-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
-| Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
+| Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Live coding across four saved providers — 2026-10-18
+
+One conversation completed OpenAI `gpt-6.1-sol` → Claude `claude-sonnet-4-6` →
+Gemini `models/gemini-3.1-pro-preview` → DeepSeek `deepseek-v4-pro` → OpenAI.
+OpenAI read a fixture phrase. Claude recalled it without rereading the source
+and created the exact approved file. Gemini asserted its contents through the
+registered xlang3 process. DeepSeek preserved the phrase and appended the approved
+line; returning to OpenAI asserted the complete final bytes through xlang3. Both
+processes exited zero. Their actual scripts, executable hashes and supplied
+per-response usage are recorded. No CPython interpreter was used.
+
+The first DeepSeek attempt at `55c25d6` failed before any model reservation and
+remains visible. After `3165834` passed ten focused native contracts, a managed
+handoff replaced the isolated test backend on the same profile and address.
+All thirteen existing private message hashes and run budgets remained unchanged.
+The existing browser adapter reconnected and submitted the successful retry.
+Every captured public history prefix stayed unchanged through the final
+23-message conversation; the original private thirteen-message prefix also
+retained its exact hashes.
+
+The production `BrowserSessionClient` submitted the last three runs and both
+file approvals over actual HTTP. Its SSE parser observed terminal cursors for
+Gemini, DeepSeek and the final OpenAI run, including 3,494 DeepSeek events.
+The adapter returns the same history as CLI, discovers all four catalogues using
+saved keys, and restores the selected model after a new cookie session. Node
+supplied the cookie jar; **no DOM or rendered browser/editor ran**. VS Code stayed
+closed. The installed 0.1.14 runtime remains `b828570`; this is isolated current
+source acceptance, not an installed-package or full Release result.
+[Exact runs, effects, handoff, private-hash checks, browser scope and limits](evidence/four-provider-live-coding-20261018.json).
 
 ## DeepSeek checked conversation context — 2026-10-18
 
@@ -42,7 +72,8 @@ Responses → Claude → DeepSeek → Responses, four real file reads, all sixte
 immutable original messages and returning-provider compaction with independent
 synthetic protocol assertions. Browser and extension source bytes are unchanged
 from the prior 395/136 passing suites and their successful hosted view gate.
-Live retry, rendered clients and installed deployment remain separate gates.
+At this source checkpoint the live retry was pending; its subsequent result is
+recorded above. Rendered clients and installed deployment remain separate gates.
 [Source, failed live attempt, exact tests and scope](evidence/deepseek-checked-context-20261018.json).
 
 ## Checked provider changes in an existing conversation — 2026-10-18

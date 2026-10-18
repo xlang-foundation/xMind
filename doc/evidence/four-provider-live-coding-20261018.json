@@ -1,0 +1,500 @@
+{
+  "recorded_at": "2026-10-18T10:43:39.207Z",
+  "scope": "Real saved-provider coding in one native conversation, through CLI and production BrowserSessionClient over HTTP/SSE; no rendered UI",
+  "source_revision": "316583404a4d4bc6dd806bcf40648008deac2364",
+  "runtime": {
+    "initial_native_sha256": "08c53a5ba2c02160ca6e3501d819684a2228776417a51c6a608ea8b7c9792ae0",
+    "final_native_sha256": "fd2da727ed8c470b805fe997555c3e36d442e0404f1dae0b1653f9eda9b2557c",
+    "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "verified_files": 1927,
+    "release_accepted": false
+  },
+  "fixture": {
+    "workspace": "C:/xMindNativeValidation/provider-switch-live-workspace-20261018",
+    "session": "23b2c3b1162f8fee6854974132a63c72",
+    "profile": "C:\\xMindNativeValidation\\profiles\\provider-switch-live-20261018\\fe1ddf1e83af289020682b404ba79a4846475123315e9f561db934cc92a91150",
+    "initial_backend_pid": 63560,
+    "final_backend_pid": 70976,
+    "core_origin": "http://127.0.0.1:63530"
+  },
+  "runs": [
+    {
+      "id": "8b3394c0f0b308c552d131bc17c5a1f4",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "state": "completed",
+      "native_source_revision": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+      "admission_transport": "native-cli",
+      "model_calls_reserved": 2,
+      "observed_tools": [
+        "read_file"
+      ],
+      "reprojection_events": 0
+    },
+    {
+      "id": "bea9783c05c6456cdb472ff91678243f",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 1,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "state": "completed",
+      "native_source_revision": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+      "admission_transport": "native-cli",
+      "model_calls_reserved": 2,
+      "observed_tools": [
+        "create_file"
+      ],
+      "reprojection_events": 2
+    },
+    {
+      "id": "e810ae93158f30c4bef9287fd3cde825",
+      "provider_context": {
+        "model_id": "models/gemini-3.1-pro-preview",
+        "profile_id": "gemini",
+        "profile_revision": 1,
+        "provider": "gemini",
+        "route_id": "gemini.generate-content",
+        "wire": "gemini-generate-content"
+      },
+      "state": "completed",
+      "native_source_revision": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+      "admission_transport": "production-browser-client-http",
+      "model_calls_reserved": 2,
+      "observed_tools": [
+        "run_process"
+      ],
+      "reprojection_events": 2
+    },
+    {
+      "id": "69b474ef8c5a57413578973169b4d2a9",
+      "provider_context": {
+        "model_id": "deepseek-v4-pro",
+        "profile_id": "deepseek",
+        "profile_revision": 1,
+        "provider": "deepseek",
+        "route_id": "deepseek.chat",
+        "wire": "chat-completions"
+      },
+      "state": "completed",
+      "native_source_revision": "316583404a4d4bc6dd806bcf40648008deac2364",
+      "admission_transport": "production-browser-client-http",
+      "model_calls_reserved": 3,
+      "observed_tools": [
+        "read_file",
+        "edit_file"
+      ],
+      "reprojection_events": 3
+    },
+    {
+      "id": "7e21f8568408132245ffeedfd9c4f171",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "state": "completed",
+      "native_source_revision": "316583404a4d4bc6dd806bcf40648008deac2364",
+      "admission_transport": "production-browser-client-http",
+      "model_calls_reserved": 2,
+      "observed_tools": [
+        "run_process"
+      ],
+      "reprojection_events": 2
+    }
+  ],
+  "operations": {
+    "creation": {
+      "ordinal": 1,
+      "operationId": "5ebcc2898ce6089e3d8517971d4f08fe",
+      "proposalSha256": "48b950fd98d451f558958318ed67d81b7ad903ee8a9bdcf58b6e784599e9a04e",
+      "actor": "local-owner",
+      "transport": "production-browser-client-http"
+    },
+    "edit": {
+      "ordinal": 3,
+      "operationId": "2d5f5e0b3a85721c18ffc40655a5e256",
+      "proposalSha256": "5c3ac7968d3a29cd96d467003258968225b9ba0e74212eec3793e0189eb076ba",
+      "actor": "local-owner",
+      "transport": "production-browser-client-http"
+    },
+    "final_file_sha256": "8bf3844d660ef5682d08db81b5b1029f72d0c0f00c5530cdf8e7f2695a41103a",
+    "exact_proposals_checked_before_allow": true,
+    "processes": [
+      {
+        "run": "e810ae93158f30c4bef9287fd3cde825",
+        "operation": "fe3b4f09874845e74cfba54fa353dc2b",
+        "profile_id": "xlang3",
+        "decision_actor": "trusted-process-profile:xlang3",
+        "executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+        "reviewed_script": "with open('remembered.txt', 'r') as f: content = f.read(); assert content == 'xMind provider memory 16b81b86176593859d93879c18ee8c53\\n'; print('xMind Gemini provider memory verified')",
+        "exit_code": 0,
+        "stdout": "xMind Gemini provider memory verified\r\n"
+      },
+      {
+        "run": "7e21f8568408132245ffeedfd9c4f171",
+        "operation": "2565bb65261cdefda81a865e98c0cefb",
+        "profile_id": "xlang3",
+        "decision_actor": "trusted-process-profile:xlang3",
+        "executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+        "reviewed_script": "with open('remembered.txt', 'rb') as f: content = f.read()\nassert content == b'xMind provider memory 16b81b86176593859d93879c18ee8c53\\nDeepSeek continued the same coding conversation\\n'\nprint('xMind four provider coding verified')",
+        "exit_code": 0,
+        "stdout": "xMind four provider coding verified\r\n"
+      }
+    ]
+  },
+  "history": {
+    "public_messages": 23,
+    "preserved_public_prefix_messages": [
+      4,
+      8,
+      13,
+      19
+    ],
+    "original_private_messages_hashed": 13,
+    "all_private_prefix_hashes_preserved": true,
+    "source_files_unchanged_except_requested_edit": true
+  },
+  "retained_failure": {
+    "id": "146c748f2b8e4f45036598d727784f14",
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro",
+    "admissionTransport": "production-browser-client-http",
+    "status": {
+      "graph_root": false,
+      "id": "146c748f2b8e4f45036598d727784f14",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "deepseek-v4-pro",
+        "profile_id": "deepseek",
+        "profile_revision": 1,
+        "provider": "deepseek",
+        "route_id": "deepseek.chat",
+        "wire": "chat-completions"
+      },
+      "session_id": "23b2c3b1162f8fee6854974132a63c72",
+      "state": "failed"
+    },
+    "modelCallsReserved": 0,
+    "operations": 0,
+    "retryAfterNativeFix": true,
+    "source_revision": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+    "reason": "incompatible_provider_history",
+    "original_user_input_still_in_history": true
+  },
+  "handoff": {
+    "same_profile": true,
+    "same_origin": true,
+    "managed_upgrade": true,
+    "original_private_message_hashes_and_run_budgets_unchanged": true,
+    "forced_process_kill": false,
+    "profile_format_migration": false
+  },
+  "browser": {
+    "recordedAt": "2026-10-18T10:42:28.602Z",
+    "url": "http://127.0.0.1:62928/ui/",
+    "nativeView": "http://127.0.0.1:51339",
+    "scope": "Production BrowserSessionClient and real public HTTP adapter; Node supplies a cookie jar, no DOM or rendered browser",
+    "htmlStatus": 200,
+    "sameWorkspace": true,
+    "sameSession": true,
+    "historyMessages": 23,
+    "publicHistoryMatchesCLI": true,
+    "savedKeyModelCounts": {
+      "openai": 20,
+      "claude": 13,
+      "gemini": 11,
+      "deepseek": 2
+    },
+    "noProviderKeyOrServerTokenTyped": true,
+    "sessionModelRestoredAfterNewBrowserSession": true,
+    "selectedModel": {
+      "model_id": "gpt-6.1-sol",
+      "provider_profile_id": "openai",
+      "provider_route_id": "openai.responses"
+    },
+    "streamObservations": [
+      {
+        "ordinal": 2,
+        "run": "e810ae93158f30c4bef9287fd3cde825",
+        "events": 40,
+        "terminalCursor": 166
+      },
+      {
+        "ordinal": 3,
+        "run": "69b474ef8c5a57413578973169b4d2a9",
+        "events": 3494,
+        "terminalCursor": 3669
+      },
+      {
+        "ordinal": 4,
+        "run": "7e21f8568408132245ffeedfd9c4f171",
+        "events": 142,
+        "terminalCursor": 3811
+      }
+    ],
+    "workspaceFiles": [
+      "README.md",
+      "remembered.txt"
+    ],
+    "renderedAcceptance": false
+  },
+  "actual_inference_responses": 11,
+  "actual_inference_usage": [
+    {
+      "model": "gpt-6.1-sol",
+      "usage": {
+        "completion_tokens": 19,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 5039,
+        "input_tokens_details": {
+          "cache_write_tokens": 5036,
+          "cached_tokens": 0
+        },
+        "output_tokens": 19,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 5039,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 5036,
+          "cached_tokens": 0
+        },
+        "total_tokens": 5058
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "usage": {
+        "completion_tokens": 40,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 5166,
+        "input_tokens_details": {
+          "cache_write_tokens": 127,
+          "cached_tokens": 5036
+        },
+        "output_tokens": 40,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 5166,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 127,
+          "cached_tokens": 5036
+        },
+        "total_tokens": 5206
+      }
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 96,
+        "input_tokens": 8353,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 96,
+        "prompt_tokens": 8353,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 33,
+        "input_tokens": 8576,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 33,
+        "prompt_tokens": 8576,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "model": "models/gemini-3.1-pro-preview",
+      "usage": {
+        "candidatesTokenCount": 104,
+        "completion_tokens": 104,
+        "completion_tokens_details": {
+          "reasoning_tokens": 330
+        },
+        "input_tokens": 7404,
+        "output_tokens": 104,
+        "output_tokens_details": {
+          "reasoning_tokens": 330
+        },
+        "promptTokenCount": 7404,
+        "prompt_tokens": 7404,
+        "thoughtsTokenCount": 330,
+        "totalTokenCount": 7838,
+        "total_tokens": 7838
+      }
+    },
+    {
+      "model": "models/gemini-3.1-pro-preview",
+      "usage": {
+        "candidatesTokenCount": 26,
+        "completion_tokens": 26,
+        "input_tokens": 8083,
+        "output_tokens": 26,
+        "promptTokenCount": 8083,
+        "prompt_tokens": 8083,
+        "totalTokenCount": 8109,
+        "total_tokens": 8109
+      }
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "completion_tokens": 2776,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2730
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 8845,
+        "prompt_tokens": 8845,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 11621
+      }
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "completion_tokens": 429,
+        "completion_tokens_details": {
+          "reasoning_tokens": 277
+        },
+        "prompt_cache_hit_tokens": 11520,
+        "prompt_cache_miss_tokens": 213,
+        "prompt_tokens": 11733,
+        "prompt_tokens_details": {
+          "cached_tokens": 11520
+        },
+        "total_tokens": 12162
+      }
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "completion_tokens": 343,
+        "completion_tokens_details": {
+          "reasoning_tokens": 258
+        },
+        "prompt_cache_hit_tokens": 12160,
+        "prompt_cache_miss_tokens": 127,
+        "prompt_tokens": 12287,
+        "prompt_tokens_details": {
+          "cached_tokens": 12160
+        },
+        "total_tokens": 12630
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "usage": {
+        "completion_tokens": 98,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 6467,
+        "input_tokens_details": {
+          "cache_write_tokens": 1301,
+          "cached_tokens": 5163
+        },
+        "output_tokens": 98,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6467,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 1301,
+          "cached_tokens": 5163
+        },
+        "total_tokens": 6565
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "usage": {
+        "completion_tokens": 29,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 6755,
+        "input_tokens_details": {
+          "cache_write_tokens": 288,
+          "cached_tokens": 6464
+        },
+        "output_tokens": 29,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 6755,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 288,
+          "cached_tokens": 6464
+        },
+        "total_tokens": 6784
+      }
+    }
+  ],
+  "usage_scope": "Provider-supplied inference counters are retained per response. Gemini visible-output and thinking counters have different semantics from DeepSeek completion tokens; no cross-provider token-saving, cost or live-compaction claim.",
+  "native_regression_receipt": "deepseek-checked-context-20261018.json",
+  "local_evidence_sha256": {
+    "provider-switch-live-20261018.mjs": "80d354cbf918ad66790c939ff9615ee18f598011be508cd8d97e486f5b42ffeb",
+    "provider-switch-browser-client-20261018.mjs": "a38e53f99336393d2cb42e0aec488bfe398175744635440fc4a65f15311f14dc",
+    "provider-switch-browser-final-20261018.mjs": "b7d8af32b6cbc4b84ddcc4d580651f0553629eda9d4452d7981f97cb51e3ae3b",
+    "provider-switch-browser-observe-20261018.mjs": "4f5866088e853627c57f597cbe93aa07d7e04240e3d4ae1a0b68fdd7d058ce93",
+    "provider-switch-private-history-20261018.py": "b32eeb439f9d5fe563e2433f9e77cf0c387ae0b4ee450b30df54cff5397583b1",
+    "adopt-provider-switch-runtime-20261018.mjs": "2f85bc18c1f3c77eac6765ad6700c18084f4e3d1aade0a801af59cb70e0ad0ad",
+    "provider-switch-live-state-20261018.json": "57f3b86ccee628862d4c872d88f0a2ab7571d02c6aaec18d0c6caaa298923990",
+    "provider-switch-live-history-20261018.json": "8cde3be41896397d77edebfb90f9d6c06922fbb89a45ad82e7989185174ffe8d",
+    "provider-switch-private-history-before-20261018.json": "5435aa81b6baaf6aae7c9fd8d5f34ab6e64ede5b22f3efe059a99fdc4c368e6d",
+    "provider-switch-private-history-after-upgrade-20261018.json": "5435aa81b6baaf6aae7c9fd8d5f34ab6e64ede5b22f3efe059a99fdc4c368e6d",
+    "provider-switch-private-history-final-20261018.json": "9b3cd761c5059d3865f996ed4cb388edf192c4b37d863ffc128060c4d17358b7",
+    "provider-switch-upgrade-20261018.json": "bf3bcfbed19a4901ebc9b4a32d6f1b6cf0482b55c8eb5ad25e81a8ac87b3d5d4",
+    "provider-switch-live-browser-final-20261018.json": "cedb72fe6906fdc74f1fcd67f4c8ecee914a875f593f6c9dc21baf3b0dfc6397",
+    "provider-switch-live-browser-sse-2-20261018.json": "640bdaf82b46360dd567c28ac1d902354c299891dd6585bf2775268dcd9ba285",
+    "provider-switch-live-browser-sse-3-failed-20261018.json": "67d4b53efa0c8e44022ad8876fdc5d3361372826e49deb83cb065947328801dc",
+    "provider-switch-live-browser-sse-3-20261018.json": "f36a934a7ec48948fc3eb86973fd7adf332ee6162f335500aa9108741fc4cc44",
+    "provider-switch-live-browser-sse-4-20261018.json": "ce93f4d97e44a9d64e000b7b877ebb6426817eee58421ac300a1c62448fda32b"
+  },
+  "retained_staging_attempt": {
+    "directory": "C:/xMindNativeValidation/provider-switch-package-55c25d6/.agentflow/provider-switch-runtime",
+    "result": "Initial stage stopped at missing Node yazl dependency; not executed",
+    "resolution": "Installed locked Node dependencies with lifecycle scripts disabled, then verified a fresh complete runtime directory"
+  },
+  "limits": [
+    "Actual BrowserSessionClient and HTTP/SSE adapter execution is not rendered browser/DOM or actual VS Code acceptance",
+    "Only the four selected discovered models were exercised, not every listed model or failure mode",
+    "Installed VSIX 0.1.14 remains on native b828570; new source is not deployed in that installed package",
+    "This successful isolated same-format handoff does not establish recovery of the earlier separate failed profile handoff",
+    "No full current native inventory, hosted Release acceptance, foreign-history idle maintenance or broader long-task reliability claim",
+    "VS Code windows remained closed; no external browser window was opened"
+  ]
+}

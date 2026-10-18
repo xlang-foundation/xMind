@@ -28,6 +28,17 @@ rendered clients and installed-package acceptance have their own remaining gates
 see [current validation status](VALIDATION_STATUS.md). Earlier receipts below
 describe their pinned source checkpoints, not the full current implementation.
 
+A live saved-key conversation subsequently completed OpenAI → Claude → Gemini →
+DeepSeek → OpenAI, including approved creation/edit and two actual xlang3
+assertions. The failed pre-fix DeepSeek attempt remains stored with zero model
+reservations. Managed same-format runtime handoff preserved its profile/address,
+all thirteen original private message hashes and earlier run budgets. The
+successful retry and return to OpenAI preserved the captured public prefixes;
+the final browser HTTP adapter exposes the same 23 messages. This is actual
+backend/production-client execution, with Node supplying the browser cookie jar,
+not rendered UI acceptance or recovery of the earlier separate failed handoff.
+[Live evidence and limits](evidence/four-provider-live-coding-20261018.json).
+
 ## Earlier Responses-only active-run recovery
 
 The initial implementation rebuilt an outgoing Responses-context request when a proved original
