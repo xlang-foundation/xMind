@@ -867,16 +867,16 @@ the same saved provider configuration and conversation. These are scoped live
 tasks, not broad reliability or all-language acceptance: [CLI](evidence/xmind-cli-live-coding-20261016.json),
 [browser and VS Code](evidence/xmind-cross-client-live-coding-20261016.json),
 [current-source browser](evidence/current-source-webpage-coding-20261017.json).
-Current checkout `e8782c4` builds the unified native `xmind` executable; its
-client suites pass **392/392 VS Code** and **136/136 browser** contracts
-([test record](evidence/client-tests-current-main-20261017.json)). A current-
-source worker probe confirms the authenticated xlang3 callable worker, but
-does not run the C++ AgentRunner in a child process
+The client suites pass **392/392 VS Code** and **136/136 browser** contracts
+([test record](evidence/client-tests-current-main-20261017.json)); those client
+results retain their recorded source scope. Current product source `c95f306`
+builds the unified native `xmind` executable and passes the complete
+**147/147** Release CTest gate, including the AgentRunner process-tool host
+seam and both pinned official MCP SDK interoperability contracts
+([native test record](evidence/native-current-source-full-20261017.json)). A
+current-source worker probe confirms the authenticated xlang3 callable worker,
+but does not run the C++ AgentRunner in a child process
 ([worker record](evidence/agent-worker-lrpc-current-source-20261017.json)).
-The last complete native gate passed **147/147** contracts on product source
-`22d923b`; that gate predates the current AgentRunner process-tool host seam.
-The current unified executable has been rebuilt, but its full current-source
-CTest gate remains open.
 
 The remaining work is ordered by the product's in-scope dependencies:
 
