@@ -323,7 +323,22 @@ int run_local_view(int argc, char **argv) {
                 if (import->status == 409)
                     throw std::runtime_error("Native provider settings changed during workspace connection");
             }
-            require(import->status == 200, "Shared provider configuration was rejected");
+            if (import->status != 200) {
+                std::string diagnostic = "Shared provider configuration was rejected (HTTP " +
+                    std::to_string(import->status) + ")";
+                try {
+                    const auto result = Json::parse(import->body);
+                    if (result.is_object() && result.contains("provider_yaml_error_code") &&
+                        result["provider_yaml_error_code"].is_string()) {
+                        const auto code = result["provider_yaml_error_code"].get<std::string>();
+                        static const std::set<std::string> safe_codes{
+                            "file_unavailable", "exceeds_limits", "invalid_utf8", "invalid_yaml",
+                            "unsupported_yaml", "duplicate_field", "invalid_schema", "route_unavailable"};
+                        if (safe_codes.contains(code)) diagnostic += " (" + code + ")";
+                    }
+                } catch (...) { /* Keep diagnostics fixed and secret-free. */ }
+                throw std::runtime_error(std::move(diagnostic));
+            }
         };
         const auto issue = [&] {
             httplib::Client client("127.0.0.1", connection->port);

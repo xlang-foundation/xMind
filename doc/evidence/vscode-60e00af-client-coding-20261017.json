@@ -1,6 +1,6 @@
 {
   "date": "2026-10-17",
-  "scope": "Live coding acceptance through the installed 60e00af VS Code client against an existing managed backend",
+  "scope": "One live VS Code coding workflow in the isolated 90ec355 validation profile; attribution to the separately installed default-profile 60e00af client is unproven",
   "extension_source_revision": "60e00af46bf75b134f28c42a6a7658dc50f55395",
   "package": {
     "path": "C:/xMindNativeValidation/agentflow-0.1.13-xmind-60e00af.vsix",
@@ -17,6 +17,11 @@
     "backend_root": "D:/CantorAI2026/TestProj",
     "provider": "OpenAI Responses",
     "model": "gpt-6.1-sol"
+  },
+  "live_window": {
+    "user_data_dir": "C:/xMindNativeValidation/vscode-userdata-90ec355",
+    "extensions_dir": "C:/xMindNativeValidation/vscode-extensions-90ec355",
+    "attributed_to_default_profile_install": false
   },
   "coding_run": {
     "run_id": "8e2dc4f5f4ef0ec3e7420ccdc3713155",
@@ -47,7 +52,8 @@
     "original_content_restored": true
   },
   "limitations": [
-    "The 60e00af client completed the edit, approval, command, and restore flow against the TestProj backend.",
+    "The observed 90ec355 validation window completed the edit, approval, command, and restore flow against the TestProj backend.",
+    "The process evidence does not prove that the separately installed default-profile 60e00af client served this run.",
     "The registered xlang3 process profile resolves to xlang3.exe under the earlier 90ec355 validation directory. This does not identify the xMind server executable that served the run or prove which bundled xMind server runtime was active.",
     "This proves one single-file coding workflow for the installed client, not broad coding reliability or release acceptance."
   ]

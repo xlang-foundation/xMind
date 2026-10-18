@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-17",
+  "extension_id": "agentflow-local.agentflow",
+  "extension_version": "0.1.13",
+  "default_profile_package_installed": true,
+  "vsix_path": "C:/xMindNativeValidation/xmind-current-4b2e051-b0da71f.vsix",
+  "vsix_sha256": "f50f6a35c7d73e71ea49894893db4cb581d6d249a65545d30f305ab23933bd3d",
+  "xmind_source_revision": "4b2e0512999127a080a8a0021a84ea93fb30b5b9",
+  "xlang3_runtime_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "installed_client_sha256": "ea4169b372b583e1e845a02bea970bcdccf7b48beefd3e3f1c25e99fa2b9dc9f",
+  "installed_native_executable_sha256": "281877c3719cb2cd398cab8c919bdf817c2082cf9a9497db0a79640311bb6049",
+  "provider_configuration_path": "D:/CantorAI2026/xMind/.config/providers.yaml",
+  "provider_key_material_recorded": false,
+  "real_native_view_startup": {
+    "workspace": "D:/CantorAI2026/TestProj",
+    "provider_configuration_imported": true,
+    "ready_state_reached": true,
+    "view_process_stopped_after_test": true
+  },
+  "validation": {
+    "vscode_extension_contracts": "392/392 passed",
+    "browser_client_contracts": "134/134 passed",
+    "native_local_view_provider_config_contract": "passed, including fixed safe YAML error classification"
+  },
+  "default_profile_rendered_view_and_coding_turn": "not yet observed after package refresh"
+}

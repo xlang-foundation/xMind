@@ -5,6 +5,7 @@
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_setup.hpp"
+#include "agentflow/provider_yaml_config.hpp"
 #if defined(_WIN32)
 #include "agentflow/connection_profiles.hpp"
 #endif
@@ -314,6 +315,21 @@ template<class Handler> auto guard_errors(Handler handler) {
 #if defined(_WIN32)
         catch(const A2aRemoteError& error) {reply(response,{{"detail","Remote A2A task request failed"},{"a2a_error_code",error.code}},502);}
 #endif
+        catch(const ProviderYamlError& error) {
+            const char* code="invalid_schema";
+            switch(error.code()) {
+                case ProviderYamlErrorCode::file_unavailable: code="file_unavailable"; break;
+                case ProviderYamlErrorCode::exceeds_limits: code="exceeds_limits"; break;
+                case ProviderYamlErrorCode::invalid_utf8: code="invalid_utf8"; break;
+                case ProviderYamlErrorCode::invalid_yaml: code="invalid_yaml"; break;
+                case ProviderYamlErrorCode::unsupported_yaml: code="unsupported_yaml"; break;
+                case ProviderYamlErrorCode::duplicate_field: code="duplicate_field"; break;
+                case ProviderYamlErrorCode::invalid_schema: code="invalid_schema"; break;
+                case ProviderYamlErrorCode::route_unavailable: code="route_unavailable"; break;
+            }
+            // These fixed labels never include source YAML, paths, or keys.
+            reply(response,{{"detail","Provider YAML configuration rejected"},{"provider_yaml_error_code",code}},400);
+        }
         catch(const ProviderHttpError& error) {
             std::string detail="Model discovery provider returned HTTP "+std::to_string(error.status);
             Json result={{"provider_status",error.status}};

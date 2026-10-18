@@ -71,15 +71,27 @@ before success; all 392 VS Code contracts pass. The post-fix extension source
 has contract validation, while the live packaged interaction above used the
 preceding source revision.
 
-The post-fix source `60e00af` was packaged and installed as
-`agentflow-local.agentflow@0.1.13` in the default VS Code profile. The
-installed `client.js` hash matches the source. A live one-file edit, approval,
-xlang3 command, and approved restore then completed through that installed
-client in TestProj; the original fixture SHA-256 was verified after restore.
-The registered xlang3 process profile resolves to an `xlang3.exe` under the
-earlier `90ec355` validation directory. That path identifies the command
-runtime, not the xMind server executable; the server binary serving this run
-was not separately captured. See the [installation record](evidence/vscode-60e00af-installed-20261017.json) and [live coding record](evidence/vscode-60e00af-client-coding-20261017.json).
+Correction after process-provenance review: source `60e00af` was installed as
+`agentflow-local.agentflow@0.1.13` in the default VS Code profile, but the
+recorded live edit/execute/restore ran in the separate `90ec355` validation
+profile. The default profile still had native runtime `c021ff7` paired with
+xlang3 `036f450`, and its view failed while importing the saved provider YAML.
+The earlier live coding record therefore does not prove default-profile
+acceptance. See the [installation record](evidence/vscode-60e00af-installed-20261017.json)
+and [corrected live coding record](evidence/vscode-60e00af-client-coding-20261017.json).
+
+## Default VS Code runtime refresh — 2026-10-17
+
+Installed a new `agentflow-local.agentflow@0.1.13` VSIX built from xMind
+`4b2e051` and xlang3 `b0da71f` into the default VS Code profile. Installed
+client and native executable hashes match the packaged source and manifest.
+The same saved provider YAML then imported successfully in a real native view
+startup against TestProj using this paired runtime; provider secrets were not
+recorded. The extension suite passes **392/392**, the browser suite passes
+**134/134**, and the native local-view provider-config contract passes with a
+malformed-YAML safe-classification assertion. The default profile's rendered
+xMind view and coding interaction have not yet been observed after this
+package refresh. See the [machine-readable runtime-refresh record](evidence/vscode-default-runtime-refresh-20261017.json).
 
 ## Hosted browser and VS Code gate — 2026-10-17
 
