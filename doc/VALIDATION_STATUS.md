@@ -43,6 +43,11 @@ cause fixed. Current-source full/hosted acceptance, runtime staging, installatio
 and real saved-key installed acceptance are pending. Installed 0.1.23 and its
 existing webpage remain unchanged; rendered GUI acceptance remains pending.
 
+The complete 149-test local gate is now **running** at source `9eb9870`, native
+SHA `d29a7c36...`. Its manifest freezes all project/library/SDK/binary inputs,
+CMake configuration and 18,598 files from the complete extension and MCP/A2A peer
+dependency trees. File-set and hash verification follows terminal success.
+
 ## Current hosted/native investigation — 2026-10-18
 
 Hosted source 878bd88 passes 149/150 contracts and both SDK smoke checks. The sole
