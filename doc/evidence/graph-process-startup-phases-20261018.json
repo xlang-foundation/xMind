@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-18T20:41:05.217Z",
+  "sourceRevision": "d8c4033f98567214d471f9aaa1fdf340c6ca8fe7",
+  "patchSha256": "e4cc75201fab232d752c17e4040a717f356e95b285d912600e906e92a8fdd2d0",
+  "projectFiles": 2607,
+  "pureLibraryFiles": 1870,
+  "sdkFiles": 75,
+  "nativeBinaries": 125,
+  "changedBinaries": [
+    "agentflow_graph_runner_contract.exe"
+  ],
+  "productionExeUnchanged": true,
+  "productionCodeChanged": false,
+  "processDeadlineMs": 30000,
+  "deliberateSleepSeconds": 6,
+  "observedPhases": [
+    "script_entered",
+    "delay_completed",
+    "effect_completed"
+  ],
+  "passed": 1,
+  "failed": 0,
+  "seconds": 11.62,
+  "sourceLibraryRuntimeAndBinaryHashesAndFileSetsUnchanged": true,
+  "build": {
+    "pid": 43960,
+    "launchedAt": "2026-10-18T20:40:30.769Z",
+    "completedAt": "2026-10-18T20:40:51.578Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "7ca646e940003f87da3344ddf9edbd58b7d78e9652e45951846897adff7d2d32"
+  },
+  "test": {
+    "pid": 41612,
+    "launchedAt": "2026-10-18T20:40:52.498Z",
+    "completedAt": "2026-10-18T20:41:04.183Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "34868222844befacb3b6c90863a87584441526f8c574639e9f15aa4977b8571e"
+  },
+  "fullNativeSuiteRun": false,
+  "hostedCauseEstablished": false,
+  "cpythonExecuted": false
+}

@@ -64,6 +64,17 @@ Its cause remains unestablished. Current run 39160294480 at 9e4b118 is still
 in progress at the latest check; it has not been restarted or cancelled.
 [Exact failure evidence](evidence/hosted-native-0c93640-failure-20261018.json).
 
+The graph fixture now records fixed markers at script entry, after its deliberate
+six-second delay and after the attached-folder file effect. Failure diagnostics
+project only those marker names, preserving output privacy. The command,
+profile and observer deadlines are unchanged. Its focused Release contract
+passes in 11.62 seconds, observing all three markers and exit zero; 2,607
+project files, 1,870 pure-library files, 75 SDK runtime files and 125 binaries
+stay unchanged during the test. Only the graph fixture executable changed
+during compilation; the production executable remains byte-identical. This is
+one focused contract, not another full-suite pass or a hosted timeout fix.
+[Focused evidence](evidence/graph-process-startup-phases-20261018.json).
+
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
 | Native backend and local persistence | Installed native 838e2eb / SDK 58a8aab9 passes all 150 local Release contracts in 921.99 seconds; all 2,607 project inputs, pure libraries, SDK/runtime, 125 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3/pip passes three actual commands. [Full gate](evidence/managed-mcp-full-gate-20261018.json). | Current hosted native/release acceptance remains open. Earlier a41877c has a confirmed graph PowerShell timeout; bounded CPU/module samples do not establish its cause. |

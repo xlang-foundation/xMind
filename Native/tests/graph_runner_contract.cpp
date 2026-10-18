@@ -13,6 +13,21 @@
 #include <cstdlib>
 using namespace agentflow;using Json=nlohmann::json;
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+Json process_startup_phases(const Json& result){
+ Json phases=Json::array();
+ if(!result.contains("stdout")||!result.at("stdout").is_object())return phases;
+ const auto& output=result.at("stdout");
+ if(output.value("encoding","")!="utf-8"||!output.contains("data")||!output.at("data").is_string())return phases;
+ const auto text=output.at("data").get<std::string>();
+ // Emit only this fixture's fixed markers; arbitrary process output stays in
+ // its normal bounded artifact rather than being copied into diagnostics.
+ for(const auto* phase:{"script_entered","delay_completed","effect_completed"}){
+  const std::string marker="xmind-graph-phase:"+std::string(phase)+"\n";
+  const std::string windows_marker="xmind-graph-phase:"+std::string(phase)+"\r\n";
+  if(text.find(marker)!=std::string::npos||text.find(windows_marker)!=std::string::npos)phases.push_back(phase);
+ }
+ return phases;
+}
 std::string graph_diagnostic(PersistenceService& persistence,const std::string& id){
  const auto run=persistence.run(id).get();const auto graph=persistence.graph_run(id).get();Json events=Json::array(),children=Json::array();
  for(const auto& event:persistence.events(id).get())events.push_back({{"kind",event.kind},{"json",event.json}});
@@ -22,7 +37,7 @@ std::string graph_diagnostic(PersistenceService& persistence,const std::string& 
    Json detail={{"id",operation.id},{"tool",operation.spec.tool},{"state",to_string(operation.state)}};
    if(operation.spec.tool=="run_process"){
     const auto arguments=Json::parse(operation.spec.arguments_json);for(const auto* key:{"profile_id","timeout_ms"})if(arguments.contains(key))detail[key]=arguments.at(key);
-    if(!operation.result_json.empty()){const auto result=Json::parse(operation.result_json);for(const auto* key:{"reason","termination","exit_code","elapsed_ms","process_tree_retired"})if(result.contains(key))detail[key]=result.at(key);if(result.contains("output_artifact"))detail["output_artifact"]=result.at("output_artifact");}
+    if(!operation.result_json.empty()){const auto result=Json::parse(operation.result_json);for(const auto* key:{"reason","termination","exit_code","elapsed_ms","process_tree_retired"})if(result.contains(key))detail[key]=result.at(key);if(result.contains("output_artifact"))detail["output_artifact"]=result.at("output_artifact");detail["startup_phases"]=process_startup_phases(result);}
    }
    operations.push_back(std::move(detail));
   }
@@ -120,7 +135,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  {PersistenceService persistence(multi_database,imports);Json nodes=Json::array();nodes.push_back({{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments",Json{{"path","secondary.txt"},{"folder_id",attached.identity()}}}});Json child_nodes=Json::array();child_nodes.push_back({{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments",Json{{"path","secondary.txt"},{"folder_id",attached.identity()}}}});child_nodes.push_back({{"id","agent"},{"type","agent"},{"depends_on",Json::array({"read"})},{"prompt","secondary agent child"}});
    // An ordinary command may legitimately exceed the observer's old five-
    // second wait while staying inside its trusted thirty-second budget.
-   const std::string process_path="graph-process-folder.txt";const std::string command="Start-Sleep -Seconds 6; [IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path)";
+   const std::string process_path="graph-process-folder.txt";const std::string command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";
    const Json process_spec={{"nodes",Json::array({{{"id","process"},{"type","tool"},{"tool","run_process"},{"arguments",Json{{"profile","powershell"},{"arguments",Json::array({command})},{"workdir","."},{"folder_id",attached.identity()}}}}})}};
    const Json failed_process_spec={{"nodes",Json::array({
      {{"id","process"},{"type","tool"},{"tool","run_process"},{"arguments",Json{{"profile","powershell"},{"arguments",Json::array({"[IO.File]::AppendAllText('graph-nonzero-effect.txt','once'); [Console]::Out.Write('expected failure output'); [Console]::Error.Write('expected failure error'); exit 7"})},{"workdir","."},{"folder_id",attached.identity()}}}},
@@ -163,6 +178,10 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
    {std::ifstream effect(attached_effect,std::ios::binary);std::string location;std::getline(effect,location);require(std::filesystem::path(location).lexically_normal()==std::filesystem::path(attached.root_path()).lexically_normal(),"Graph process cwd must be the selected attached folder root");}
    const auto process_root=persistence.children("multi-process-root").get();require(process_root.size()==1,"Graph process must be owned by exactly one graph child");
    const auto process_operations=persistence.operations(process_root.front().id).get();require(process_operations.size()==1&&process_operations.front().state==OperationState::succeeded&&process_operations.front().decision_actor=="trusted-process-profile:powershell","Graph process must finish under the explicitly trusted process profile and retain its grant attribution");
+   const auto process_result=Json::parse(process_operations.front().result_json);
+   require(process_startup_phases(process_result)==Json::array({"script_entered","delay_completed","effect_completed"}),"Graph process must retain each observed startup/delay/effect marker");
+   require(process_result.at("exit_code")==0&&process_result.at("termination")=="exited","Graph phase markers cannot replace the actual successful process outcome");
+   std::cout<<"Graph PowerShell phase observations: "<<process_startup_phases(process_result).dump()<<"\n";
    persistence.create_session("nonzero-process","Nonzero process must block graph dependencies").get();
    service.submit_graph("nonzero-process-root","nonzero-process","nonzero-process",graph_revision("nonzero-process"),"Retain a failed command and block its dependent command");
    const auto failure_deadline=std::chrono::steady_clock::now()+multi_settings.process_profiles.front().max_timeout+std::chrono::seconds(5);
