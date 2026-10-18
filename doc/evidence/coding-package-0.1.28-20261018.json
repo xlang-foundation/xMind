@@ -1,0 +1,207 @@
+{
+  "recordedAt": "2026-10-18T20:36:09.945Z",
+  "version": "0.1.28",
+  "clientSource": "526d58e28485cbc9efb64276d9ffeec19eab9bd2",
+  "nativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "nativeRuntimeByteIdenticalToAccepted0_1_27": true,
+  "nativeRuntimeManifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+  "nativeRebuilt": false,
+  "nativeFullGateReference": "managed-mcp-full-gate-20261018.json",
+  "sourceFiles": 97,
+  "stageClientGate": {
+    "recordedAt": "2026-10-18T20:33:22.337Z",
+    "version": "0.1.28",
+    "sourceRevision": "526d58e28485cbc9efb64276d9ffeec19eab9bd2",
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "01342b813675049e7ea909c3ab1ff0f69b8d0c2b602fe15e40d2ead47c7c5900"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "b1e00e0c4935cc22d4824c9e4a1b6c0ecaa8da881225992bf3fafb4df124dcf2"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17438,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClientGate": {
+    "sourceRevision": "526d58e28485cbc9efb64276d9ffeec19eab9bd2",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 70,
+    "trackedSourceFiles": 65,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 422,
+      "browser": 142
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "hostedClientArtifact": {
+    "run": 39163677820,
+    "artifact": 12149424390,
+    "bytes": 307515,
+    "sha256": "5856602ad9605ff5a8c59e664b1995be1e6d0ab5bc9ebdf00b2a9f7948dd2833",
+    "advertisedSizeAndDigestVerified": true
+  },
+  "archive": {
+    "version": "0.1.28",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.28-coding-win32-x64.vsix",
+    "sha256": "720385ed82bc353937d725f4f2394141a3b5c08050239a50547dc861c803abcb",
+    "bytes": 34405134,
+    "archiveFiles": 2448,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.28",
+    "version": "0.1.28",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "preservation": {
+    "recordedAt": "2026-10-18T20:32:18.838Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.27",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.27-before-0.1.28",
+    "checkedFiles": 2446,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "packagedXlang3Pip": {
+    "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pip": "26.2.1",
+    "wheelSha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+    "commands": 3,
+    "allExitZero": true,
+    "offlineInstall": true,
+    "dependenciesSkipped": false,
+    "generatedScripts": 3,
+    "generatedScriptsUseXlang3": true,
+    "cpythonExecuted": false,
+    "scope": "Actual packaged CLI bootstrap and complete offline pure pip installation; no model, backend or rendered client acceptance."
+  },
+  "renderedCodingReference": "rendered-tool-activity-20261018.json",
+  "installedBrowserAssetsEqualLiveTestedAssets": true,
+  "browserAssets": 18,
+  "existingPagePreservedAfterInstallation": {
+    "url": "http://127.0.0.1:62342/ui/",
+    "hostPid": 67948,
+    "nativeViewPid": 17248,
+    "backendPid": 33960,
+    "session": "a2d2abc02773a31a3b4aa76bed134345",
+    "run": "0dbc93cbc6e728579aedf95b79981a7a",
+    "messages": 22,
+    "readOnlyReloadMatchesSavedHistory": true,
+    "effectPostsOnReload": 0
+  },
+  "actualVsCodeActivation": false,
+  "visibleDesktopAcceptance": false,
+  "releaseAccepted": false,
+  "processBoundAgentRunnerImplemented": false,
+  "currentHostedNativeAccepted": false,
+  "cpythonExecuted": false,
+  "installationOrchestrationNote": "The first wrapper stopped after successful archive verification because PowerShell LASTEXITCODE was unset. No install was attempted then. The qualified archive was subsequently installed by one explicit Code CLI invocation, exit zero, and actual CLI listing/payload checks confirm 0.1.28.",
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.28-source-20261018.json",
+      "sha256": "64c754b612d5918b3710b02c423c8cebdbbb6d1a1cfeb53f8254bb87211ebf4b"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.28-client-gate-20261018/gate.json",
+      "sha256": "e5e9e1c78f28a4144fe0812c389c7512aa18008f21f90bba29707fb632405a08"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.28-client-gate-20261018/inputs-before.json",
+      "sha256": "07c730cacb92abdaaaa869fbb8cae3718760343d2289063a3531ece8736339cf"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.28-hosted-views-20261018.json",
+      "sha256": "0df88fce79d9d462a04094a171d90db05f99b01a6267e90f1c2740d259bb5923"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.28-payload-evidence-20261018.json",
+      "sha256": "cca46690c0df9433faebba79397fbeaf884993864e02d33a2d58f1ee49f173fc"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.28-installed-evidence-20261018.json",
+      "sha256": "c5e03d3ca0160146584ed5060987a197b6cdad9ea1ccc0edb023a1ff1d8badef"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.28-preservation-20261018.json",
+      "sha256": "0292374121d9704211234dbcf548f4f553bfd4301bec86e6e93fd7d090ce8031"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.28-install-20261018.log",
+      "sha256": "ea7ea0846dfd01217d43dbbea8833f08f86f6f3c046296fb4296a9fb544a71f3"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.28-extension-list-20261018.log",
+      "sha256": "b29e61a4a64d2f3bb08f4c1b3fb9414209cc1037104bc2963d2501cd6ead061e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.28-pip-20261018/packaged-pip-commands.json",
+      "sha256": "177c5e51347ef2b13493d04fd21c18f86fcf8e897af0cbca2aa31b68b7d5ff45"
+    }
+  ]
+}

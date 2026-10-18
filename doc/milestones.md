@@ -1,6 +1,18 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.27, 2026-10-18
+## Current checkpoint — 0.1.28, 2026-10-18
+
+The final browser/sidebar UI is packaged and installed in 0.1.28. Complete local
+staging and hosted client fixtures pass 422/142. All archive/installed payloads
+verify, and all 18 installed browser assets equal those used by the real
+headless Edge coding acceptance below. Its native runtime is byte-identical
+to the accepted 0.1.27 runtime. Three packaged xlang3/pip commands pass; the
+previous installation is backed up and settings/profile directories preserved.
+The editor remains closed and its actual pane activation remains unverified.
+The existing webpage/backend and 22-message coding session remain available.
+[Installed 0.1.28 evidence](evidence/coding-package-0.1.28-20261018.json).
+
+## Native/MCP and rendered coding checkpoint — 0.1.27, 2026-10-18
 
 Managed profiles now accept trusted MCP server configuration through the
 console, browser launcher and VS Code machine setting. Native startup checks
@@ -26,7 +38,7 @@ edits, regression tests, an observed failure and agent repair, then xlang3 test
 runs passing 21 and 22 tests. The session restores 22 messages without replay.
 Completed tool activity is expandable; approvals and the final answer remain
 reachable. All 422/142 final local client fixtures pass; all 18 served assets
-equal that validated build. The installed extension still has its previous UI.
+equal that validated build. The same UI is now installed in 0.1.28.
 Visible desktop/VS Code activation, current hosted native acceptance, broader
 protocol recovery and process-bound AgentRunner remain open.
 [Rendered coding and final UI](evidence/rendered-tool-activity-20261018.json).
