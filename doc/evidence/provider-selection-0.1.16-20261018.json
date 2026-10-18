@@ -1,0 +1,227 @@
+{
+  "recorded_at": "2026-10-18T11:29:34.651Z",
+  "scope": "Windows development package and installed native/production-client acceptance; VS Code and external-open APIs are explicit fixtures, browser HTTP/SSE uses a Node cookie jar; no rendered UI acceptance.",
+  "fix_source_revision": "d7eb22a9d222d6fd962c40689645628b48015e3e",
+  "extension_source_revision": "fcff1163388f4d88b8f0a78e6c05d31f66e69a5f",
+  "native_source_revision": "3d7dfe16d3eb74826d459f6a3d86c7bb8fa356cf",
+  "correction": {
+    "problem": "Reapplying an unchanged YAML active_profile reset later user selections or rejected attachment while another provider owned execution.",
+    "behavior": "Persist the last file directive atomically with the registry. Repeated directives retain user selection; changed directives retain idle and expected-revision checks. Empty-key templates stay observational.",
+    "initial_red_reproduced": true,
+    "focused_native_checks": 4,
+    "passed": 4,
+    "covers": [
+      "Paused real graph owner with user-selected Claude and unchanged OpenAI file default",
+      "Actual native view/browser HTTP workspace reattachment",
+      "Native SQLite reopen and first file attachment to an existing selection",
+      "Directive removal/reintroduction and deliberate changes",
+      "Real SQLite publication failure rolls back marker and selection together",
+      "Credential references and no-op revisions preserved"
+    ],
+    "first_view_cleanup_warning_not_accepted": true,
+    "final_view_cleanup_verified": true
+  },
+  "package": {
+    "version": "0.1.16",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.16-current-win32-x64.vsix",
+    "sha256": "6d456494a5e25d76d19591e572ecc99b7ddfd18cb501d5cf3ad6045d480aab8f",
+    "bytes": 32495804,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "3d7dfe16d3eb74826d459f6a3d86c7bb8fa356cf",
+    "nativeSha256": "80229485a29aaa4adbe4c3844174b15ed21236b7e01fdb867f8820944ced0f06",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false
+  },
+  "installation": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.16",
+    "version": "0.1.16",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "3d7dfe16d3eb74826d459f6a3d86c7bb8fa356cf",
+    "manifestSha256": "873679971c9867e74d74f18963498b14213aa48423bebe5e49f30bbf80b4d8ff",
+    "nativeSha256": "80229485a29aaa4adbe4c3844174b15ed21236b7e01fdb867f8820944ced0f06",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "negative_package_checks": [
+    {
+      "fixture": "C:\\xMindNativeValidation\\negative-vsix-0.1.16-missing-terminal.vsix",
+      "expectedReason": "Missing browser/shared renderer package asset: extension/browser-runtime/assets/terminal.js",
+      "rejected": true
+    },
+    {
+      "fixture": "C:\\xMindNativeValidation\\negative-vsix-0.1.16-private-config.vsix",
+      "expectedReason": "Private state must not be packaged",
+      "rejected": true
+    }
+  ],
+  "preservation": {
+    "previous_version": "0.1.15",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.15-before-0.1.16",
+    "files": 1972,
+    "settings_unchanged": true,
+    "previous_profiles_retained": true,
+    "prior_conversation_messages": [
+      6,
+      14,
+      6
+    ],
+    "prior_histories_byte_equivalent_after_install": true,
+    "earlier_browser_assets_available": true
+  },
+  "installed_acceptance": {
+    "actual_backend_process": {
+      "ProcessId": 71380,
+      "ExecutablePath": "C:\\Users\\shaw9\\.xMind\\p-current\\81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508\\runtime-515250d58c1cac1933bb4e7eb264cb3b0330c5f584888951d3ef6e5a6f96f1e1\\xmind.exe"
+    },
+    "executable_sha256": "80229485a29aaa4adbe4c3844174b15ed21236b7e01fdb867f8820944ced0f06",
+    "saved_profiles": [
+      "claude",
+      "gemini",
+      "deepseek",
+      "openai"
+    ],
+    "same_backend_after_second_host_attachment": true,
+    "selected_provider": "claude",
+    "actual_saved_key_discovery": {
+      "provider": "claude",
+      "count": 13
+    },
+    "coding": {
+      "session": "1dbf4bab9fb18af6dc4d816353940b58",
+      "run": "41ce0f4d47595cab51e057c2c9ba38aa",
+      "model": "claude-sonnet-4-6",
+      "status": "completed",
+      "approval": {
+        "operationId": "9f854971fa70f6983112b577281eead4",
+        "exactProposalChecked": true,
+        "proposalSha256": "a86bbb996a675e08a96cbeb940c8d1b377623f99f108e256ab4f50aa3e0db2b2",
+        "actor": "local-owner"
+      },
+      "at": "2026-10-18T11:28:09.657Z",
+      "operationId": "6de4348d63c84c49b6d415bbee4911bc",
+      "actor": "trusted-process-profile:xlang3",
+      "executable": "C:\\Users\\shaw9\\.xMind\\p-current\\81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508\\runtime-515250d58c1cac1933bb4e7eb264cb3b0330c5f584888951d3ef6e5a6f96f1e1\\xlang3.exe",
+      "executableSha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+      "arguments": [
+        "-B",
+        "-c",
+        "from square import square; assert square(7) == 49; assert square(-3) == 9; print('xMind 0.1.16 coding assertions passed')"
+      ],
+      "exitCode": 0,
+      "stdout": "xMind 0.1.16 coding assertions passed\r\n",
+      "fileSha256": "5f18e6721c5c11cabeaee4c53bb0514950330c9bad5ee9ae256c59ec82ea3957",
+      "historyMessages": 6,
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 104,
+          "input_tokens": 8173,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 104,
+          "prompt_tokens": 8173,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 143,
+          "input_tokens": 8400,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 143,
+          "prompt_tokens": 8400,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 112,
+          "input_tokens": 8766,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 112,
+          "prompt_tokens": 8766,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "sseEvents": 144,
+      "terminalCursor": 144,
+      "scope": "Production browser protocol/client and actual installed native coding; Node cookie jar, no DOM or editor"
+    },
+    "browser": {
+      "url": "http://127.0.0.1:55888/ui/",
+      "packagedAssets": true,
+      "noTypedToken": true,
+      "noTypedProviderKey": true,
+      "selectedProvider": "claude",
+      "renderedAcceptance": false,
+      "newCookieSessionRestoresModel": true,
+      "savedModel": {
+        "model_id": "claude-sonnet-4-6",
+        "provider_profile_id": "claude",
+        "provider_route_id": "anthropic.messages"
+      },
+      "sameHistoryAfterRefresh": true
+    },
+    "installed_console_replays_three_final_usage_lines": true,
+    "warm_host_connect_ms": 1752,
+    "cold_or_other_host_startup_guarantee": false
+  },
+  "checks": {
+    "extension_tests": 395,
+    "extension_passed": 395,
+    "focused_native_tests": 4,
+    "focused_native_passed": 4,
+    "vscode_windows_opened": false,
+    "rendered_editor": false,
+    "rendered_external_browser": false,
+    "release_accepted": false
+  },
+  "test_scope_corrections": [
+    "The first view run passed feature assertions but had a cleanup warning; only the corrected run with captured process identities and fatal cleanup errors is accepted.",
+    "The first installed-host check incorrectly assumed OpenAI was selected. The actual fresh profile was unselected; its known live backend was reused, Claude explicitly selected, and the corrected check completed. The named file-default case is covered by native fixtures."
+  ],
+  "local_evidence_sha256": {
+    "provider-selection-regression-red-20261018.log": "dbe9cf5382a99e57a65809f3d0d397034c7629dc77eaccc59bd3e27393b47da4",
+    "provider-selection-fix-build-20261018.log": "ff0f9eaa9c6fe10c71d43e8868b52baeb8d47b60ef0edd8e55ef1cc01c24e95f",
+    "provider-selection-core-green-20261018.log": "d8fb0d7ea07c41d4979ec890dc8ca012f85c0e68b6bd73010176218a34d45d87",
+    "provider-selection-view-first-cleanup-warning-20261018.log": "8abea66ff0037b67347c357c0a35a225c08c4bfe779d576e89f69b63fbbe0966",
+    "provider-selection-view-final-20261018.log": "cead9d7ac74b7d367f2198f84b6adbd1993b3fa58d62de41d3740164796f2687",
+    "provider-selection-view-final-details-20261018.log": "5d607b9895bd44d84eb7385372b3ee89fe1efa4e230f75d894173a176a161e5d",
+    "vscode-0.1.16-stage-20261018.log": "058708352d530da6a51eb4a58f2116ab885e1f84884686bcdc8d6956c2ac4ce8",
+    "vscode-0.1.16-package-20261018.log": "748ab3457f68e6eb3bbc90f6b8c00998fbb0a2186eaf0148d13ea6a7f129f114",
+    "vscode-0.1.16-install-20261018.log": "eb70be4a4a745236d2c91e853fe6dff25d7df107b4e0197fdeb26ac5d0f5a28d",
+    "vscode-0.1.16-extension-list-20261018.log": "0dde5f39b24bbb81e2769f4d147c0d1791e6fbabf9c22a9d1d459ecc18e05fab",
+    "vscode-0.1.16-extension-tests-20261018.log": "4b89cfe6ce298ac0872ccf9a6eec23454770e2bc065bf92cf4b692ac348f4c3e",
+    "vscode-0.1.16-live-host-initial-state-20261018.json": "5643d9228012552bb46ddf36058cef826fa5c1b2fce0ca600dcd382a3bc319a8",
+    "vscode-0.1.16-live-host-initial-assumption-20261018.log": "4e4396e1d97e38f55af78fe38c6998677652726b01ca54ef2d1abde5eecf48a1",
+    "vscode-0.1.16-live-host-state-20261018.json": "83bb60df3a0a3aec251eaad6dcd1c737ab9e58c97169ad9c9f7e1e54b5fb9821",
+    "vscode-0.1.16-live-host-resumed-20261018.log": "f753273b9898a2b0aeea22415d9a2ff74b49544234c5fc5b479f4fea99be81ed",
+    "vscode-0.1.16-live-coding-20261018.log": "1923656ee314818178b40cb3be84fa00492b79bc90c06fc9e4d9bb610192348f",
+    "vscode-0.1.16-live-coding-events-20261018.json": "7de66f5011df0baefb5d54299731f2fc1d721ae56a238c78696d8130fcc433b4",
+    "vscode-0.1.16-live-coding-operations-20261018.json": "86d5d4733c8d44568be2447c67430d35ffc51e0ecad0890cd3bcdd46bab89819",
+    "vscode-0.1.16-live-coding-history-20261018.json": "0cfb57ad52027c2929f83f5d7a0f7534c28b497799f9c5d583161527182a8062",
+    "vscode-0.1.16-installed-console-replay-20261018.json": "3955b7ae70ebf6036ee6d87177bad6b3dc8ac7e9bec25c8207840f40382dfcbb",
+    "vscode-0.1.16-preserved-browser-before-20261018.json": "7954008bed759cc6270111a63acc73a8e88e691d948b3e9f40fe1989cbc21c6a",
+    "vscode-0.1.16-preserved-browser-after-20261018.json": "7954008bed759cc6270111a63acc73a8e88e691d948b3e9f40fe1989cbc21c6a",
+    "installed-host-selection-0.1.16-20261018.mjs": "8b2d76f4084373ffa50387886637b302bab6be3a3bf251dc07e71b4368dfe1bc",
+    "installed-browser-coding-0.1.16-20261018.mjs": "98d3bcd52b31b35eed5f5afce6b2d004eb8afabef8c6881a4edbb79d51c8f95a",
+    "check-installed-browser-refresh-0.1.16-20261018.mjs": "30363479cdd931541791321a43e17179f9c840f32ca1246c524ba7517301605c",
+    "probe-browser-preservation-0.1.16-20261018.mjs": "e82621eca187bbad97baf1984f49b95d9d42537627c53620fbbbb775555b36ac",
+    "record-provider-selection-0.1.16-20261018.mjs": "fe74cc47674dd2f01cc8467040f86554f5f939e04d65eac60f06c522e16eb9c4"
+  }
+}

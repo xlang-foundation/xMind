@@ -19,9 +19,46 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed VSIX **0.1.15** contains native `3165834`. Its 1,970 installed payloads and full 1,927-file runtime verify. Production installed host/client modules completed approved creation and editing across OpenAI → Claude with two actual xlang3 assertion runs and native SSE, preserving 14 messages. VS Code APIs were explicit Node fixtures. The packaged browser exposes the same history and restores the selected model. [Installed package and coding receipt](evidence/vscode-0.1.15-installed-coding-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader models/recovery cases, long-task reliability and full-screen CLI validation. |
+| Coding clients | Installed VSIX **0.1.16** contains native `3d7dfe1`; its 1,970 payloads and 1,927-file runtime verify. Installed host/client/browser modules preserve provider selection across reattachment. A real Claude run created an approved file, ran two xlang3 assertions with exit zero, retained six messages and completed native SSE. VS Code APIs were explicit Node fixtures; browser protocol checks used a Node cookie jar. The selected model survives a fresh browser cookie session. Four native configuration checks and 395 extension tests pass. [Current installed receipt](evidence/provider-selection-0.1.16-20261018.json). Earlier 0.1.15 completed OpenAI → Claude creation/editing; `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader models/recovery cases, long-task reliability and broader interactive-console/terminal recovery acceptance. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.16 provider selection and coding — 2026-10-18
+
+Reapplying an unchanged YAML `active_profile` previously reset a later user
+selection or refused another client attachment while a different provider owned
+execution. `d7eb22a` records the last file directive in the same registry CAS.
+Repeated defaults preserve the user's choice; deliberate changes retain idle
+and revision guards. SQLite failure rolls the marker and selection back together.
+The reproduced paused-graph failure now passes. Four focused native checks cover
+this behavior, restart, credential preservation and the actual browser-adapter
+workspace-switch path. The final view check verifies owned-process cleanup too.
+
+Windows x64 **0.1.16**, native `3d7dfe1`, is installed while VS Code stays closed.
+All 1,973 archive files and 1,970 installed non-manifest payloads match source;
+the complete 1,927-file runtime verifies. All 26 required browser assets are
+present; malformed copies with a missing terminal asset or private configuration
+are rejected. The source extension suite passes **395/395**. Earlier extension
+files, settings, profiles, browser assets and conversations of 6/14/6 messages
+remain intact. Existing retained backends were not replaced for this check.
+
+A fresh installed host loaded four saved providers. Selecting Claude survived a
+second actual native view attachment to the same backend. Saved-key discovery
+returned 13 models. Claude `claude-sonnet-4-6` then created the exact approved
+`square.py` and executed `square(7) == 49` and `square(-3) == 9` through the trusted
+xlang3 process. The process exited zero. Three actual model responses retain
+their supplied usage; SSE completed at cursor 144 and six messages remain saved.
+A fresh browser cookie restores the selected model and identical history. The
+installed console also replays the earlier Gemini run with three final usage
+lines. No CPython interpreter was used.
+
+These checks execute production installed host/client/browser modules with
+explicit **VS Code and external-open API fixtures**, and the browser protocol
+client with a **Node cookie jar**. No editor or external browser was rendered.
+Release acceptance, other-host startup and the earlier editor activation issue
+remain pending. The initial host test's incorrect assumed OpenAI selection and
+the first view run's cleanup warning are retained in the receipt; neither is
+counted as accepted evidence. [Package, process, usage and scope receipt](evidence/provider-selection-0.1.16-20261018.json).
 
 ## Native console coding and response usage — 2026-10-18
 
@@ -40,8 +77,8 @@ prints it once at the response boundary, including supplied reasoning/cache
 counts. Seven focused Release contracts pass, including explicitly synthetic
 presentation cases. A separately verified development console replayed the real
 completed run through ConPTY: three final usage lines, with all eight original
-usage events unchanged in NDJSON. The installed VSIX still contains `3165834`;
-this console correction has not replaced its packaged runtime. This is console
+usage events unchanged in NDJSON. That checkpoint used the 0.1.15 VSIX with
+`3165834`; the current 0.1.16 package above now includes the correction. This is console
 acceptance, not actual editor or external-browser rendering acceptance.
 [Run, process, usage and artifact receipt](evidence/native-console-coding-usage-20261018.json).
 
