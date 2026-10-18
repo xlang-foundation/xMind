@@ -1,14 +1,17 @@
 # xMind for VS Code
 
-**0.1.14** is a local Windows x64 development package. Its native runtime
-preserves checked conversation history across tool-authority changes and
-model changes within the same saved Responses provider profile. Reconnecting
-with unchanged provider YAML leaves active backend execution running.
+**0.1.15** is a local Windows x64 development package. Its native runtime
+preserves checked conversation history across authority, model and supported
+provider changes. DeepSeek receives verified foreign tool turns as labelled
+context data while retaining its own native reasoning and tool continuation.
+Reconnecting with unchanged provider YAML leaves active backend execution running.
 
-The extension suite passes **394/394**; the browser suite passes **136/136**.
-Six focused native provider/view/CLI contracts and a live saved-provider browser
-connection during xlang3 execution also pass. These checks do not establish
-rendered IDE or release acceptance. Exact source, package, live and installed
+The extension suite passes **395/395**; the browser suite passes **136/136**.
+Ten focused native contracts pass. A real saved-key coding conversation completed
+OpenAI → Claude → Gemini → DeepSeek → OpenAI, including approved file creation
+and editing, two xlang3 assertions and retained history through a managed runtime
+handoff. These checks cover the selected models and production HTTP clients;
+they do not establish rendered IDE or release acceptance. Exact source, package, live and installed
 scope is recorded in [validation status](https://github.com/xlang-foundation/xMind/blob/main/doc/VALIDATION_STATUS.md).
 
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
