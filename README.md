@@ -13,17 +13,17 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The current local VS Code package is **0.1.25**. Its native source is
-`152fc27154d08e1f0ad51d9ce8c9f04cbb2da039`, paired with xlang3 SDK
+The current local VS Code package is **0.1.26**. Its native source is
+`0c936409a46bb61b4073fa9c1bdc5ebe59906f9c`, paired with xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | All 149 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
+| Native backend | All 150 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
 | Clients | All 420 extension and 142 browser fixture tests pass; installed archive/runtime payloads verify. These are separate from rendered UI checks. |
-| Installed live run | Saved-key Claude completes two A2A instruction-binding checks through the native backend and browser controller with an explicit synthetic peer. |
-| Persistence | The current page restores both completed runs, eight messages and 221 saved events without execution replay. |
+| Installed live run | Saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process through the native backend and browser controller. |
+| Persistence | The 0.1.26 run records 347 saved events. The preserved 0.1.25 page separately restores two completed runs, eight messages and 221 events without execution replay. |
 | Still open | Current rendered webpage input/layout and VS Code activation, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
 Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
@@ -61,21 +61,21 @@ modules and pure standard-library source. Keep that directory intact. With
 `xmind.exe` on PATH, start the managed console for a project:
 
 ```powershell
-xmind --workspace D:ProjectsExample chat
+xmind --workspace D:\Projects\Example chat
 ```
 
-The default profile root is `%USERPROFILE%.xMindp`. If the editor uses a
+The default profile root is `%USERPROFILE%\.xMind\p`. If the editor uses a
 custom `agentflow.profileRoot`, supply that same path with `--profile-root` to
 share its backend and sessions. Reconnecting reuses the profile's saved provider
 settings; omit first-launch configuration options unless you intend to change
 the trusted launch configuration. No key belongs on the command line.
 
 ```powershell
-xmind --workspace D:ProjectsExample sessions
-xmind --workspace D:ProjectsExample profile-info
-xmind --workspace D:ProjectsExample workspace init
-xmind --workspace D:ProjectsExample workspace add-folder D:ProjectsShared
-xmind --workspace D:ProjectsExample workspace info
+xmind --workspace D:\Projects\Example sessions
+xmind --workspace D:\Projects\Example profile-info
+xmind --workspace D:\Projects\Example workspace init
+xmind --workspace D:\Projects\Example workspace add-folder D:\Projects\Shared
+xmind --workspace D:\Projects\Example workspace info
 ```
 
 `workspace init` registers the first folder before group inspection or folder
@@ -96,7 +96,7 @@ For source builds use Windows x64, a C++20 Visual Studio toolchain, CMake,
 Node.js and the supported xlang3 SDK. The guarded build entry point is:
 
 ```powershell
-.Toolsagentflow.ps1 -Action Build
+.\Tools\agentflow.ps1 -Action Build
 ```
 
 [Development](doc/DEVELOPMENT.md) covers explicit SDK/library paths, isolated

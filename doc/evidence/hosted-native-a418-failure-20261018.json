@@ -1,0 +1,161 @@
+{
+  "checkedAt": "2026-10-18T19:17:08.654Z",
+  "runId": 39152463822,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39152463822",
+  "sourceRevision": "a41877c70e2fd7e5c73b072815d61589222ab65e",
+  "artifactId": 12147018726,
+  "artifactBytes": 67104,
+  "artifactSha256": "ee768a4cfe6f0dc4baf15a3178a85118ee99f2163f3e25797bd9a3b3149fcbef",
+  "passed": 149,
+  "total": 150,
+  "seconds": 742.15,
+  "sdkSmokePassed": 2,
+  "failed": [
+    "native_graph_runner_contract"
+  ],
+  "actualGraphProcess": {
+    "elapsed_ms": 30060,
+    "exit_code": 1,
+    "id": "3aaca900ee003947f97fff3aa3603232",
+    "output_artifact": {
+      "operation_id": "3aaca900ee003947f97fff3aa3603232",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "graphRunState": "failed",
+  "childState": "failed",
+  "actualTerminationConfirmed": true,
+  "diagnostics": [
+    {
+      "folder": "agent-runner-4a9d047e-5073-40e4-b2f5-56bbd73dbdb4",
+      "sha256": "3bb3c2ac5e49a95d38e643216b581454fd191b95288fce405056f4a848698809",
+      "samples": [
+        {
+          "pid": 4976,
+          "birth": "2026-10-18T19:05:02.4716170Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 2507,
+          "cpuMs": 468.75,
+          "hotThreads": [],
+          "moduleCount": 64
+        },
+        {
+          "pid": 4976,
+          "birth": "2026-10-18T19:05:02.4716170Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 13210,
+          "cpuMs": 11093.75,
+          "hotThreads": [
+            {
+              "id": 5480,
+              "cpuMs": 10765.625,
+              "waitReason": null,
+              "state": "Running"
+            }
+          ],
+          "moduleCount": 64
+        },
+        {
+          "pid": 4976,
+          "birth": "2026-10-18T19:05:02.4716170Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 23921,
+          "cpuMs": 20656.25,
+          "hotThreads": [
+            {
+              "id": 5480,
+              "cpuMs": 20343.75,
+              "waitReason": "Executive",
+              "state": "Wait"
+            }
+          ],
+          "moduleCount": 64
+        }
+      ],
+      "scope": {
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_agent_runner_contract.exe",
+        "readOnly": true,
+        "kind": "scope",
+        "commandLinesIncluded": false,
+        "ownerPid": 840,
+        "environmentIncluded": false
+      },
+      "end": {
+        "reason": "observer_stopped",
+        "kind": "end",
+        "samples": 3
+      }
+    },
+    {
+      "folder": "graph-runner-f638661b-41a5-4bda-8091-890398ad6efe",
+      "sha256": "f2ae25d8c098c3401204f44e37af731b9e511075d64a4f51a440eaa57fdf824d",
+      "samples": [
+        {
+          "pid": 8104,
+          "birth": "2026-10-18T19:02:11.5661530Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 6803,
+          "cpuMs": 468.75,
+          "hotThreads": [],
+          "moduleCount": 64
+        },
+        {
+          "pid": 8104,
+          "birth": "2026-10-18T19:02:11.5661530Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 17491,
+          "cpuMs": 9312.5,
+          "hotThreads": [
+            {
+              "id": 4116,
+              "cpuMs": 8937.5,
+              "waitReason": null,
+              "state": "Running"
+            }
+          ],
+          "moduleCount": 64
+        },
+        {
+          "pid": 8104,
+          "birth": "2026-10-18T19:02:11.5661530Z",
+          "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "elapsedMs": 28118,
+          "cpuMs": 18984.375,
+          "hotThreads": [
+            {
+              "id": 4116,
+              "cpuMs": 18593.75,
+              "waitReason": null,
+              "state": "Running"
+            }
+          ],
+          "moduleCount": 64
+        }
+      ],
+      "scope": {
+        "environmentIncluded": false,
+        "commandLinesIncluded": false,
+        "kind": "scope",
+        "ownerPid": 8372,
+        "readOnly": true,
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_graph_runner_contract.exe"
+      },
+      "end": {
+        "reason": "observer_stopped",
+        "samples": 3,
+        "kind": "end"
+      }
+    }
+  ],
+  "underlyingCauseConfirmed": false,
+  "accepted": false,
+  "scope": "Exact-source hosted graph process timed out under the unchanged 30-second budget. Read-only child samples show CPU increasing on one PowerShell thread, with a fixed 64-module list. They do not prove the instruction executing, the root cause or a runtime defect. AgentRunner passes in this run. No deadline change, replay, cancellation or current-source acceptance is claimed."
+}

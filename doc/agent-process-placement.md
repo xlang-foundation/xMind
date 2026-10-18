@@ -75,7 +75,7 @@ execution.
    the same process-bound run remains inspectable and controllable after either
    view reconnects.
 
-### Remote-tool owner boundary — source 0.1.26 candidate
+### Remote-tool owner boundary — installed 0.1.26
 
 AgentRunner now invokes native MCP and A2A tools through AgentRemoteToolHost.
 Its request contains owned run/attempt/call identity, workspace revision, tool
@@ -92,9 +92,19 @@ inputs, libraries, SDK/runtime, 125 binaries and 18,598 dependencies unchanged.
 The new contract checks actual native approval/guidance/effect behavior and
 xlang3 SQLite reopen against an explicit synthetic MCP client; existing A2A
 AgentRunner and dynamic MCP/agent/file contracts pass through the new path.
-The initial fixture compilation failure is retained separately. Full current
-source acceptance and process-bound AgentRunner execution remain open. The
-installed 0.1.25 runtime has not changed. [Exact evidence](evidence/remote-tool-owner-20261018.json).
+The initial fixture compilation failure is retained separately.
+[Focused evidence](evidence/remote-tool-owner-20261018.json).
+
+All 150 local Release contracts now pass in 1,001.22 seconds with the complete
+source, SDK, library, dependency and binary file sets/hashes unchanged.
+The installed 0.1.26 build also passes a real saved-key Claude task: one README
+read through the official external MCP filesystem server, one approved native
+file creation and one actual xlang3 verification process with exit code zero.
+The peer's 4,078 input files remain unchanged. This uses the public operator
+serve path and a Node browser-controller fixture; managed-profile MCP setup,
+rendered client acceptance, hosted acceptance and process-bound AgentRunner
+execution remain open. The older user page remains running on 0.1.25.
+[Installed scope and receipts](evidence/coding-package-0.1.26-20261018.json).
 
 ### File-tool owner boundary — current source
 

@@ -1,6 +1,27 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.25, 2026-10-18
+## Current checkpoint — 0.1.26, 2026-10-18
+
+The complete local native gate passes 150/150 in 1,001.22 seconds with source,
+SDK, library, dependency and binary inputs/file sets unchanged. The installed
+0.1.26 payload verifies, and complete client fixtures pass 420/142.
+
+Real saved-key Claude completes a task through that installed backend and the
+production browser controller: one read from the official external filesystem
+MCP server, one approved file creation and one actual xlang3 verification
+process, exit zero. All thirty original/copied project sources and 4,078 peer
+inputs stay unchanged; 347 events and actual provider metrics are recorded.
+The private acceptance backend is retired after completion. Settings, six prior
+profiles and existing user pages remain preserved; page port 62084 still uses
+its existing 0.1.25 backend. [Exact scope and receipts](evidence/coding-package-0.1.26-20261018.json).
+
+Managed-profile MCP configuration, rendered webpage/VS Code acceptance,
+current hosted native acceptance and process-bound AgentRunner remain open.
+The preceding hosted diagnostic run confirms a graph PowerShell timeout;
+bounded CPU/module samples do not establish its cause.
+[Hosted diagnostics](evidence/hosted-native-a418-failure-20261018.json).
+
+## Previous checkpoint — 0.1.25, 2026-10-18
 
 The complete local native gate passes 149/149 with frozen input/file sets
 unchanged. Installed payloads verify, and local client fixtures pass 420/142.

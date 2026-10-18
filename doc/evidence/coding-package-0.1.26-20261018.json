@@ -1,0 +1,317 @@
+{
+  "recordedAt": "2026-10-18T19:19:42.984Z",
+  "version": "0.1.26",
+  "nativeRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "fullNative": {
+    "sourceRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 150,
+    "failed": 0,
+    "seconds": 1001.22,
+    "projectFiles": 2607,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 75,
+    "nativeBinaries": 125,
+    "nodeDependencyRoots": [
+      "Native/tests/sdk/node_modules",
+      "extensions/vscode/node_modules"
+    ],
+    "nodeDependencyFiles": 18598,
+    "repositoryGuidanceFrozen": true,
+    "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "b39861d3502a5e2fd732cec1b7cef9a28234b4cf865e192aa97cc17b97543af5",
+    "ctestLogSha256": "a165a2505702e7aab7d59961fe4d840287f5e8791509851f4fb9883f372deaab",
+    "detailsSha256": "8f5e711614b94b3027112773683e237f111517547cd819600ef65193a94429e3",
+    "nativeSha256": "6b2eb7077a623229d9fbca7c341df90b8d6020ceb4b013049b891e52733c3d9a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+    "hostedOnlyTrustMutationExcluded": true
+  },
+  "clientGate": {
+    "recordedAt": "2026-10-18T19:09:42.419Z",
+    "version": "0.1.26",
+    "clientSnapshotSource": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+    "metadataVersionChangedOnly": false,
+    "packagedClientImplementationUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 420,
+      "passed": 420,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 102,
+    "browserAssets": 18,
+    "sourceAndAssetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "scope": "Complete Node host/controller and JSDOM/browser-contract fixtures; no actual rendered editor/external browser, native inference or provider request.",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "archive": {
+    "version": "0.1.26",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.26-coding-win32-x64.vsix",
+    "sha256": "5a414cebf8a2b47babeaafde9130a7cb48f6469d07565270c3eae65cd4ce3b24",
+    "bytes": 34394671,
+    "archiveFiles": 2447,
+    "nativeFiles": 2402,
+    "nativeRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+    "nativeSha256": "6b2eb7077a623229d9fbca7c341df90b8d6020ceb4b013049b891e52733c3d9a",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.26",
+    "version": "0.1.26",
+    "checkedPayloads": 2444,
+    "nativeFiles": 2402,
+    "nativeRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "6b2eb7077a623229d9fbca7c341df90b8d6020ceb4b013049b891e52733c3d9a",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "23555bfa91bf6f35dd46ca57c5ac35b16f987cfe8d63a9e4c9d2d270750bf9c5",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "packagedPip": {
+    "manifestSha256": "23555bfa91bf6f35dd46ca57c5ac35b16f987cfe8d63a9e4c9d2d270750bf9c5",
+    "nativeRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pip": "26.2.1",
+    "wheelSha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+    "commands": 3,
+    "allExitZero": true,
+    "offlineInstall": true,
+    "dependenciesSkipped": false,
+    "generatedScripts": 3,
+    "generatedScriptsUseXlang3": true,
+    "cpythonExecuted": false,
+    "scope": "Actual packaged CLI bootstrap and complete offline pure pip installation; no model, backend or rendered client acceptance."
+  },
+  "preservation": {
+    "recordedAt": "2026-10-18T19:16:49.544Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.25",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.25-before-0.1.26",
+    "checkedFiles": 2446,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "liveCoding": {
+    "scope": "Actual installed native serve mode, saved-key Claude, official external filesystem MCP implementation, production browser controller/HTTP/SSE and real native file/process operations. Node cookie jar is a fixture. No managed-profile, rendered GUI or genuine external agent-analysis claim.",
+    "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.26-mcp-20261018",
+    "session": "aeaf559fbd30184f7c194c06438c2b18",
+    "run": "ea06dc1046425fc928354a9637cf2f35",
+    "provider": {
+      "id": "claude",
+      "model": "claude-sonnet-4-6",
+      "discoveredModels": 13
+    },
+    "owner": {
+      "pid": 58692,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.26\\native-runtime\\xmind.exe",
+      "birth": "2026-10-18T19:18:36.4828770Z",
+      "origin": "http://127.0.0.1:65438"
+    },
+    "status": "completed",
+    "admissions": 1,
+    "approvedOperations": [
+      {
+        "operationId": "1e879a1b79b6d8e7a6c4ce3c0a37d87a",
+        "tool": "mcp_tool",
+        "decision": "allow"
+      },
+      {
+        "operationId": "491d4b5dc3eba4e6700a6cac7aae8cfd",
+        "tool": "create_file",
+        "decision": "allow"
+      }
+    ],
+    "operations": [
+      {
+        "id": "1e879a1b79b6d8e7a6c4ce3c0a37d87a",
+        "tool": "mcp_tool",
+        "state": "succeeded",
+        "argumentsSha256": "5f3c7faeb6d0af06f633a0b9142164a9b056bc342d036267b03314251dd69d1e",
+        "resultSha256": "a2d80a0656374a1307eb3b677879728e950d0beddcfd30134f4365009c07166a"
+      },
+      {
+        "id": "491d4b5dc3eba4e6700a6cac7aae8cfd",
+        "tool": "create_file",
+        "state": "succeeded",
+        "argumentsSha256": "c6e19bab7c931c57d635047c35c0e7b0c5f6b66c29e9d3c739b1b09681bf6e9b",
+        "resultSha256": "a54b7fc4be2a624e6eedd538ae1bdd2288af09099c004268210ebdb8f629b995"
+      },
+      {
+        "id": "12c2bc9b86f303c9097f809b06c258d8",
+        "tool": "run_process",
+        "state": "succeeded",
+        "argumentsSha256": "238df6d2874b9260d5cd00e34bb37ed411331d30063840ffaa8ecfafbda4043d",
+        "resultSha256": "3bd4a47bdee2e8814a45ad34698c2d765c680917177bc12cc0d0f1ba27dad6d4",
+        "result": {
+          "elapsed_ms": 348,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "12c2bc9b86f303c9097f809b06c258d8",
+          "operation_id": "12c2bc9b86f303c9097f809b06c258d8",
+          "output_artifact": {
+            "operation_id": "12c2bc9b86f303c9097f809b06c258d8",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 28
+          },
+          "pid": 44188,
+          "process_tree_retired": true,
+          "profile_id": "xlang3",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 28,
+            "data": "xmind-native-mcp-coding-ok\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 28
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      }
+    ],
+    "verified": {
+      "at": "2026-10-18T19:19:05.622Z",
+      "parentCompleted": true,
+      "officialFilesystemPeer": true,
+      "peerInputFiles": 4078,
+      "peerInputFileSetUnchanged": true,
+      "mcpReads": 1,
+      "nativeFileCreations": 1,
+      "xlang3ProcessExecutions": 1,
+      "processExit": 0,
+      "processStdout": "xmind-native-mcp-coding-ok",
+      "originalSourceFilesUnchanged": 30,
+      "newFile": "NATIVE_MCP_CHECK.md",
+      "newFileSha256": "ebbc7b79d558950371500d4d42229faf59e02686de8028f7c00e33fc225df2d7",
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 151,
+          "input_tokens": 12565,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 151,
+          "prompt_tokens": 12565,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 151,
+          "input_tokens": 18428,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 151,
+          "prompt_tokens": 18428,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 237,
+          "input_tokens": 18714,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 237,
+          "prompt_tokens": 18714,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 318,
+          "input_tokens": 19176,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 318,
+          "prompt_tokens": 19176,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "savedEvents": 347,
+      "noReplay": true,
+      "renderedAcceptance": false,
+      "cpythonExecuted": false
+    },
+    "actualInputTokens": 68883,
+    "actualOutputTokens": 857,
+    "teardown": {
+      "ownedPid": 58692,
+      "birth": "2026-10-18T19:18:36.4828770Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.26\\native-runtime\\xmind.exe",
+      "reason": "Intentional teardown of this private acceptance backend after completed run and settled effects; no observation timeout",
+      "exited": true
+    }
+  },
+  "preservedUserPage": {
+    "url": "http://127.0.0.1:62084/ui/",
+    "nativeVersion": "0.1.25",
+    "note": "Existing page, backend and session remain on 0.1.25; installing 0.1.26 does not hand off a running user backend."
+  },
+  "rawReceipts": {
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-live-20261018.json": "4e40b08b446b00871c134bc219e84ec04ee63d1c19152350ff7aa7a8ede0a265",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-operations-20261018.json": "12f041ef8215c4822ff499f269fc854f6e0e4b408b7b765f257433f2f5d23e2b",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-children-20261018.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-history-20261018.json": "3b18393320f849d8cde40f036d90cd6520af2a9fd6f38ef0b6d8a2c744b052f7",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-events-20261018.json": "d7d1e4dd8cdadba08b46ec191aa3784b19f700c3fc40d79c2b802f7d24569771",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-saved-tree-events-20261018.json": "3d028d934e307e342f748e24b6b5eb5f8ca3c1fabca59d6e9bc03e1754639f25",
+    "C:/xMindNativeValidation/coding-0.1.26-mcp-posted-20261018.json": "69b54412d335b15352873ff85dabb979f0c0d1f7ea5a3ceb5319236651663ff6",
+    "C:/xMindNativeValidation/run-installed-0.1.26-mcp-coding-20261018.mjs": "a6075efda1edff81ab16aaec00114c187d7d604e3127ed3b4ec12085712542d6",
+    "C:/xMindNativeValidation/external-filesystem-peer-0.1.26-inputs-20261018.json": "bb7ae0242967a1c5007c04835ec8ed219dd4e4959fc44a7bf630f74ebb69aebe",
+    "C:/xMindNativeValidation/coding-0.1.26-native-manifest-20261018.json": "121267debc52ebfa31a2a4d4d4ac0bf5d90a58d6c61582e178abb4d1999dbfff",
+    "C:/xMindNativeValidation/coding-0.1.26-runtime-staged-20261018.json": "5aaff32863887bcd88f0ce4c3540bf3eedad45fd72a17f009debe7d131c7a71e"
+  },
+  "limits": [
+    "Node cookie jar and browser controller are HTTP fixtures, not rendered browser/editor activation.",
+    "The real filesystem peer is an external official Node implementation, not a dependency of the native product core.",
+    "This acceptance uses the public serve --mcp-config operator path. Managed-profile MCP configuration remains a usability gap.",
+    "Current hosted native acceptance is separate; a41877c has one graph process timeout and current 0c93640 is in progress.",
+    "Process-bound AgentRunner, broader protocol recovery and general release acceptance remain open."
+  ],
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}
