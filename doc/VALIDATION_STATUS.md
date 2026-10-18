@@ -83,7 +83,7 @@ and [corrected live coding record](evidence/vscode-60e00af-client-coding-2026101
 ## Default VS Code runtime refresh — 2026-10-17
 
 Installed a new `agentflow-local.agentflow@0.1.13` VSIX built from xMind
-`4b2e051` and xlang3 `b0da71f` into the default VS Code profile. Installed
+`c014dee` and xlang3 `b0da71f` into the default VS Code profile. Installed
 client and native executable hashes match the packaged source and manifest.
 The same saved provider YAML then imported successfully in a real native view
 startup against TestProj using this paired runtime; provider secrets were not
