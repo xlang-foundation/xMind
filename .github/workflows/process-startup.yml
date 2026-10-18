@@ -12,6 +12,10 @@ concurrency:
 jobs:
   diagnostics:
     runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        first_case: [original, minimal-path, module-qualified, cmdlet-phases]
     timeout-minutes: 20
     steps:
       - name: Check out xMind
@@ -24,12 +28,12 @@ jobs:
           node-version: '22'
       - name: Build and exercise the actual native process adapter
         shell: pwsh
-        run: node Tools/ci-process-startup.mjs
+        run: node Tools/ci-process-startup.mjs --first-case=${{ matrix.first_case }}
       - name: Preserve diagnostic results including failed original cases
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: process-startup-diagnostics-${{ github.sha }}
+          name: process-startup-diagnostics-${{ matrix.first_case }}-${{ github.sha }}
           path: |
             build/process-startup-diagnostics/*.json
             build/process-startup-diagnostics/observations/

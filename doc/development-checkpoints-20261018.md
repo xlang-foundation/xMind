@@ -114,3 +114,8 @@ from this archive.
 ## Superseded pre-package client fix checkpoint (23:21 UTC)
 
 - Installed 0.1.32 contains native read owner ce4298d (all 152 local contracts), but its original shared client rejects dotted delegated node IDs and leaves a completed coding run visibly running. Qualified client correction passes 425 extension/147 browser checks, consumes all 1,015 saved events, restores 15 messages/seven usage records, and completes a new real Claude delegated read-only run (173 events, four messages/two usage records, no file changes). Current corrected page http://127.0.0.1:54828/ui/ preserves host 63316/view 72620/backend 17816 and profile p-a32. Installed extension still needs the corrected client package; actual VS Code pane activation and hosted native/release acceptance remain open. See doc/evidence/dotted-node-stream-20261018.json. Original coding observer timeout and model violation of its no-delegation prompt remain failures, not hidden passes.
+
+
+## Startup diagnostic prior matrix
+
+- Startup diagnostic 39172193204 at 411ea4f is terminal failure: 16/17 pass; first cold graph command times out at 30,040ms with only script_entered and no marker. Later canonical paths/directory IDs verify, so the earlier alias-verdict defect is corrected. Warmed module/cache/observer controls do not establish a cold-start fix/cause. Native source/environment/commands/deadlines remain unchanged; no prewarming or retry. See doc/evidence/process-startup-cold-failure-20261018.json. Earlier failures remain separate.

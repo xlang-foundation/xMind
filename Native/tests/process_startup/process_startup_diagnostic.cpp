@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 using namespace agentflow;using Json=nlohmann::json;
 namespace {
 std::string utf8(const std::wstring& value){const auto size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(!size)throw std::runtime_error("Diagnostic path conversion failed");std::string result(size,'\0');WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),result.data(),size,nullptr,nullptr);return result;}
@@ -22,16 +23,23 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
     if(scenario=="graph"){command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";marker="graph-process-folder.txt";}
     else if(scenario=="agent"){command="[IO.File]::WriteAllText('agent-process-folder.txt',(Get-Location).Path)";marker="agent-process-folder.txt";}
     else if(scenario=="dotnet-control"){command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); [Threading.Thread]::Sleep(6000); [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',[IO.Directory]::GetCurrentDirectory()); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";marker="graph-process-folder.txt";}
+    else if(scenario=="cmdlet-phases"){command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); $location=Get-Location; [Console]::Out.WriteLine('xmind-probe:location_resolved'); [IO.File]::WriteAllText('graph-process-folder.txt',$location.Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";marker="graph-process-folder.txt";}
+    else if(scenario=="module-qualified"){command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Microsoft.PowerShell.Utility\\Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Microsoft.PowerShell.Management\\Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";marker="graph-process-folder.txt";}
     else throw std::invalid_argument("Unknown diagnostic scenario");
     if(control=="system-modules")config.environment.emplace_back("PSModulePath",utf8((home/L"Modules").native()));
     else if(control=="private-cache")config.environment.emplace_back("PSModuleAnalysisCachePath",utf8((folder/L"ModuleAnalysisCache").native()));
     else if(control=="cache-off")config.environment.emplace_back("PSModuleAnalysisCachePath","nul");
+    // Only this throwaway probe process changes its inherited PATH. Production
+    // command profiles still retain the full trusted backend environment.
+    else if(control=="minimal-path"){const auto value=system+L";"+home.native();if(!SetEnvironmentVariableW(L"PATH",value.c_str()))throw std::runtime_error("Diagnostic-only parent PATH control failed");}
     else if(control!="default")throw std::invalid_argument("Unknown diagnostic control");
     if(std::filesystem::exists(folder/marker))throw std::invalid_argument("Diagnostic marker must not preexist");
     config.arguments={"-NoLogo","-NoProfile","-NonInteractive","-Command",command};
-    const auto result=ForegroundProcess::run(config);const bool marker_exists=std::filesystem::is_regular_file(folder/marker);
+    Json observed=Json::array();std::mutex observed_mutex;const auto launched=std::chrono::steady_clock::now();
+    const auto result=ForegroundProcess::run(config,{},[&](bool error,std::string_view bytes){std::lock_guard lock(observed_mutex);if(observed.size()<128)observed.push_back({{"elapsed_ms",std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-launched).count()},{"stderr_channel",error},{"data",std::string(bytes.substr(0,8192))},{"truncated",bytes.size()>8192}});});const bool marker_exists=std::filesystem::is_regular_file(folder/marker);
     const auto marker_content=marker_exists?read(folder/marker):std::string{};
     const auto marker_directory_id=marker_exists?ForegroundProcess::directory_identity(marker_content):std::string{};
     Json report={{"scenario",scenario},{"control",control},{"command",command},{"timeout_ms",30000},{"working_directory",config.working_directory},{"working_directory_id",config.working_directory_id},{"pid",result.pid},{"exit_code",result.exit_code},{"elapsed_ms",result.elapsed_ms},{"termination",result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::timed_out?"timed_out":"cancelled"},{"stdout",result.stdout_bytes},{"stderr",result.stderr_bytes},{"stdout_bytes",result.stdout_count},{"stderr_bytes",result.stderr_count},{"truncated",result.truncated},{"marker_exists",marker_exists},{"marker_content",marker_content},{"marker_directory_id",marker_directory_id},{"scope","Native foreground adapter diagnostic only"}};
+    report["output_observations"]=std::move(observed);
     std::cout<<report.dump()<<'\n';return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

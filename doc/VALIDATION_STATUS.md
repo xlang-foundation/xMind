@@ -60,6 +60,14 @@ Directory identities verify for every completed case. This is diagnostic scope,
 not integrated graph/agent or release acceptance; cause remains open.
 [Raw matrix and limits](evidence/process-startup-cold-failure-20261018.json).
 
+The next diagnostic adds bounded native output-receipt times and runs four
+independent fresh hosted first cases: unchanged original, probe-only minimal
+PATH, explicit module qualification, and a location-resolution phase marker.
+All six local cases pass with frozen inputs/binary, including the original
+graph and agent commands. Production environment, commands and 30-second
+budgets remain unchanged. Hosted results and cause attribution are pending.
+[Local controls and exact timing](evidence/process-startup-fresh-controls-local-20261018.json).
+
 ## Current product acceptance matrix — 2026-10-18
 
 The new process-tool owner source passes all 151 local native contracts in
