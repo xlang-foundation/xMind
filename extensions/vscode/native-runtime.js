@@ -13,6 +13,7 @@ const REQUIRED_NATIVE = Object.freeze([
 ]);
 const RETIRED_NATIVE = new Set(['xmind_server.exe', 'xmind_cli.exe', 'xmind_admin.exe', 'xmind_schema_worker.exe']);
 const REQUIRED_STDLIB = Object.freeze(['os.py', 'json/__init__.py', 'encodings/__init__.py', 'importlib/__init__.py']);
+const REQUIRED_BOOTSTRAP = Object.freeze(['pip/__init__.py','pip/__main__.py','pip/_vendor/certifi/cacert.pem']);
 const FORBIDDEN_COMPONENTS = new Set(['.git', '.config', '.agentflow', '__pycache__', 'site-packages']);
 function check(value, message) { if (!value) throw new Error(message); }
 function safeText(value) {
@@ -42,6 +43,11 @@ function runtimeFileKind(name) {
   if (name.startsWith('modules/') && /^modules\/[^/]+\.dist-info\/METADATA$/.test(name)) return 'metadata';
   if (/^wheels\/[a-z0-9_.+-]+-py3-none-win_amd64\.whl$/.test(name)) return 'module';
   if (name.startsWith('stdlib/') && name.endsWith('.py')) return 'stdlib';
+  if (/^stdlib\/pip\/(?:py\.typed|_vendor\/(?:README\.rst|bom\.cdx\.json|vendor\.txt|certifi\/cacert\.pem|.+\/py\.typed|.+\/(?:LICENSE(?:[._-][A-Za-z0-9.-]+)?|COPYING)|urllib3\/contrib\/emscripten\/emscripten_fetch_worker\.js))$/.test(name)) return 'stdlib';
+  // Generic distlib Windows script resources; generated scripts name xlang3.
+  // These are not a CPython executable or ABI extension.
+  if (/^stdlib\/pip\/_vendor\/distlib\/[tw](?:32|64(?:-arm)?)\.exe$/.test(name)) return 'bootstrap';
+  if (/^stdlib\/pip-[0-9]+(?:\.[0-9]+){1,3}\.dist-info\/(?:METADATA|WHEEL|RECORD|entry_points\.txt|top_level\.txt|licenses\/.+)$/.test(name) && !/\.(?:exe|dll|pyd|so|dylib|pyc|pyo|whl|zip)$/i.test(name)) return 'metadata';
   if (name.startsWith('licenses/') && !/\.(?:exe|dll|pyd|pyc|pyo)$/i.test(name)) return 'license';
   if (['README.txt', 'provenance.json'].includes(name)) return 'metadata';
   return undefined;
@@ -72,6 +78,7 @@ function validateManifest(manifest) {
     names.add(name.toLowerCase());
   }
   check(native.every(name => Object.hasOwn(files, name)) && REQUIRED_STDLIB.every(name => Object.hasOwn(files, 'stdlib/' + name)), 'The native runtime or pure standard-library source is incomplete.');
+  check(REQUIRED_BOOTSTRAP.every(name=>Object.hasOwn(files,'stdlib/'+name)), 'The native runtime pip bootstrap is incomplete.');
   validateModuleInventory(files);
   check(Object.keys(files).some(name => name.startsWith('licenses/')), 'The native runtime license notices are missing.');
   return manifest;
@@ -169,4 +176,4 @@ function nativeProgramEntry(runtime, role) {
   check(['serve', 'admin', 'console', 'schema-worker'].includes(role), 'Unsupported native entry role.');
   return {program:path.join(runtime.runtimeRoot,'xmind.exe'),arguments:role==='console'?[]:[role]};
 }
-module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME };

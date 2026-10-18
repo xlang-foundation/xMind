@@ -2,7 +2,7 @@
   "name": "agentflow",
   "displayName": "xMind",
   "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "publisher": "agentflow-local",
   "repository": {
     "type": "git",
@@ -194,7 +194,8 @@
   "devDependencies": {
     "@vscode/vsce": "^3.6.0",
     "jsdom": "^29.1.1",
-    "yazl": "3.3.1"
+    "yazl": "3.3.1",
+    "yauzl": "3.4.0"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",

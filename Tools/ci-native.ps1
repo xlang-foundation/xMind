@@ -46,7 +46,14 @@ $ciRuntimeTargets=@('xlang3','xlang3_ipc_native_host_tests','xlang_json_native_p
 $ciRuntimeBuildArguments=@('--build',$ciRuntimeBuild,'--config','Release','--target')+$ciRuntimeTargets+@('--parallel',$ciParallelism.ToString())
 Invoke-CiCommand 'runtime-build' $ciCmake $ciRuntimeBuildArguments
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
-Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^(xlang3_ipc_native_host_tests|xlang3_cli_unicode_library_path)$','--output-on-failure','--no-tests=error')
+# The Unicode fixture deliberately owns XLANG3_PYTHON_LIB. Supply the allowed
+# library independently for the CLI's linecache/source-registration support;
+# its unique probe still exists only in the Unicode native library root.
+$ciInheritedPythonPath=$env:PYTHONPATH
+try {
+    $env:PYTHONPATH=$ciStdlib
+    Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^(xlang3_ipc_native_host_tests|xlang3_cli_unicode_library_path)$','--output-on-failure','--no-tests=error')
+} finally { $env:PYTHONPATH=$ciInheritedPythonPath }
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
 Invoke-CiCommand 'native-schema-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-jsoncons.mjs'))

@@ -10,6 +10,7 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <regex>
 #include <chrono>
 #include <thread>
 #include <string_view>
@@ -75,6 +76,12 @@ bool allowed(const std::string& name){
     }
     if(name.starts_with("modules/")){const auto relative=name.substr(8);if(relative.ends_with(".x3pkg.dll")||relative.ends_with(".py"))return true;const auto separator=relative.find('/');return separator!=std::string::npos&&relative.find('/',separator+1)==std::string::npos&&relative.substr(0,separator).ends_with(".dist-info")&&relative.substr(separator+1)=="METADATA";}
     if(name.starts_with("stdlib/")&&name.ends_with(".py"))return true;
+    static const std::regex pip_data(R"(^stdlib/pip/(?:py\.typed|_vendor/(?:README\.rst|bom\.cdx\.json|vendor\.txt|certifi/cacert\.pem|.+/py\.typed|.+/(?:LICENSE(?:[._-][A-Za-z0-9.-]+)?|COPYING)|urllib3/contrib/emscripten/emscripten_fetch_worker\.js))$)");
+    static const std::regex pip_launcher(R"(^stdlib/pip/_vendor/distlib/[tw](?:32|64(?:-arm)?)\.exe$)");
+    static const std::regex pip_metadata(R"(^stdlib/pip-[0-9]+(?:\.[0-9]+){1,3}\.dist-info/(?:METADATA|WHEEL|RECORD|entry_points\.txt|top_level\.txt|licenses/.+)$)");
+    if(std::regex_match(name,pip_data))return true;
+    if(std::regex_match(name,pip_launcher))return true;
+    if(std::regex_match(name,pip_metadata)){const auto lower=folded(name);for(const auto* extension:{".exe",".dll",".pyd",".so",".dylib",".pyc",".pyo",".whl",".zip"})if(lower.ends_with(extension))return false;return true;}
     if(name.starts_with("licenses/")){const auto lower=folded(name);for(const auto* extension:{".exe",".dll",".pyd",".pyc",".pyo"})if(lower.ends_with(extension))return false;return true;}
     return name=="README.txt"||name=="provenance.json";
 }

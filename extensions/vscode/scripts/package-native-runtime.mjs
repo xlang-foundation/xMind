@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {resolve,join,dirname,relative,isAbsolute,sep} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import runtime from '../native-runtime.js';
+import {pipBootstrap} from './pip-bootstrap.mjs';
 const {REQUIRED_NATIVE,REQUIRED_STDLIB,MANIFEST_NAME,relativeFile,runtimeFileKind,verifyNativeRuntime,validateModuleInventory}=runtime;
 const EXTENSION=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -77,6 +78,10 @@ export async function stageNativeRuntime(options={}){
   for(const [name,digest]of Object.entries(source.files)){const value=await bytes(join(sourceRoot,...name.split('/')),Math.min(128*1024*1024,256*1024*1024-total));need(sha(value)===digest,'An accepted native bundle file changed.');total+=value.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');inputs.set(name,value);}
   const pureNames=await pureSources(pureRoot);need(REQUIRED_STDLIB.every(name=>pureNames.includes(name)),'The pure standard-library source is incomplete.');
   for(const name of pureNames){const value=await bytes(join(pureRoot,...name.split('/')),8*1024*1024);inputs.set('stdlib/'+name,value);total+=value.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');}
+  const bundled=join(pureRoot,'ensurepip','_bundled');await regular(bundled,true);
+  const pipWheels=(await readdir(bundled)).filter(name=>/^pip-.+\.whl$/.test(name));need(pipWheels.length===1,'Exactly one bundled pip bootstrap wheel is required.');
+  const pipPath=join(bundled,pipWheels[0]),pipBytes=await bytes(pipPath,8*1024*1024),pip=await pipBootstrap(pipBytes,pipWheels[0]);
+  for(const [name,value]of pip.files){need(!inputs.has(name),'Pip bootstrap collides with a source input.');inputs.set(name,value);total+=value.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');}
   const licensePath=resolve(stdlibLicense);need(!licensePath.split(/[\\/]/).some(name=>['.config','.agentflow'].includes(name.toLowerCase())),'Provider/private state is not a standard-library license input.');
   need(![...inputs.keys()].some(name=>name.toLowerCase()==='licenses/python-stdlib-license'),'The standard-library license output collides with the accepted bundle.');
   const license=await bytes(licensePath,1024*1024);inputs.set('licenses/Python-STDLIB-LICENSE',license);total+=license.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');
@@ -84,12 +89,13 @@ export async function stageNativeRuntime(options={}){
   // Verify all source bytes again before publication. Source changes cannot
   // silently combine accepted DLLs with a newer SDK or newer Python source.
   need(raw.equals(await bytes(resolve(bundleManifest),1024*1024)),'The source manifest changed during staging.');
+  need(pipBytes.equals(await bytes(pipPath,8*1024*1024))&&JSON.stringify((await readdir(bundled)).filter(name=>/^pip-.+\.whl$/.test(name)))===JSON.stringify(pipWheels),'The pip bootstrap wheel changed during staging.');
   for(const [name,digest]of Object.entries(source.files))need(sha(await bytes(join(sourceRoot,...name.split('/'))))===digest,'Native source bytes changed during staging.');
   need(JSON.stringify(await pureSources(pureRoot))===JSON.stringify(pureNames),'The pure source file set changed during staging.');
   for(const name of pureNames)need((await bytes(join(pureRoot,...name.split('/')),8*1024*1024)).equals(inputs.get('stdlib/'+name)),'A pure source changed during staging.');need(license.equals(await bytes(licensePath,1024*1024)),'The source license changed during staging.');
   await mkdir(output,{recursive:false});const files={};
   for(const [name,value]of inputs){const target=join(output,...name.split('/'));need(inside(output,target),'Native package output path escaped.');await mkdir(dirname(target),{recursive:true});await writeFile(target,value,{flag:'wx',mode:0o600});files[name]=sha(value);}
-  const manifest={schemaVersion:source.schemaVersion,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled pure Python3.14 source only; no CPython execution, executable, extension or bytecode',files};
+  const manifest={schemaVersion:source.schemaVersion,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled Python3.14 pure source and pip bootstrap, including generic Windows script resources; no CPython runtime, ABI extension, execution or bytecode',pipBootstrap:pip.metadata,files};
   await writeFile(join(output,MANIFEST_NAME),JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});const verified=await verifyNativeRuntime(output);
   return {output,manifestSha256:verified.manifestSha256,nativeFiles:REQUIRED_NATIVE.length,pureSourceFiles:pureNames.length,files:Object.keys(files).length,nativeExecuted:false,configAccessed:false,installed:false};
 }

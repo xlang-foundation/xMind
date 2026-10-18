@@ -7,7 +7,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, nativeProgramEntry, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
+const { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, nativeProgramEntry, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME } = require('../native-runtime');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 async function fixture(t) {
   // Positive inputs must be canonical even when a Windows runner's TEMP uses
@@ -16,13 +16,17 @@ async function fixture(t) {
   t.after(async () => { const resolved = path.resolve(root); assert.equal(path.dirname(resolved).toLowerCase(), temp.toLowerCase()); assert.match(path.basename(resolved), /^xmind-native-runtime-files-/); await fs.rm(resolved, { recursive: true }); });
   const runtime = path.join(root, 'extension/native-runtime'), files = {};
   await fs.mkdir(runtime, { recursive: true });
-  for (const name of [...REQUIRED_NATIVE, ...REQUIRED_STDLIB.map(name => 'stdlib/' + name), 'licenses/SYNTHETIC-LICENSE']) {
+  for (const name of [...REQUIRED_NATIVE, ...REQUIRED_STDLIB.map(name => 'stdlib/' + name), ...REQUIRED_BOOTSTRAP.map(name=>'stdlib/'+name), 'licenses/SYNTHETIC-LICENSE']) {
     const bytes = Buffer.from('Synthetic inventory only: ' + name); await fs.mkdir(path.dirname(path.join(runtime, name)), { recursive: true }); await fs.writeFile(path.join(runtime, name), bytes); files[name] = digest(bytes);
   }
   const manifest = { schemaVersion:1, platform: 'win32', arch: 'x64', bridgeEnabled: false, nativeRevision: 'a'.repeat(40), sdkRevision: 'b'.repeat(40), sourceManifestSha256: 'c'.repeat(64), files };
   const save = () => fs.writeFile(path.join(runtime, MANIFEST_NAME), JSON.stringify(manifest)); await save();
   return { root, runtime, manifest, save, context: { extensionUri: { fsPath: path.join(root, 'extension') }, globalStorageUri: { fsPath: path.join(root, 'private') } }, host: { platform: 'win32', arch: 'x64', remoteName: undefined } };
 }
+test('a coding runtime without pip bootstrap cannot pass package verification',async t=>{
+ const f=await fixture(t);delete f.manifest.files['stdlib/pip/__main__.py'];await f.save();await assert.rejects(verifyNativeRuntime(f.runtime),/pip bootstrap is incomplete/);
+});
+
 test('packaged native discovery binds every listed byte and returns paths without launching', async t => {
   const f = await fixture(t), config = path.join(f.root, 'not-created/.config/providers.yaml'), languageServerConfig=path.join(f.root,'not-created/.config/language-servers.yaml'),processConfig=path.join(f.root,'not-created/.config/processes.yaml');
   const resolved = await resolveNativeRuntime(f.context, f.host, { providerConfigPath: config,languageServerConfigPath:languageServerConfig,processConfigPath:processConfig });

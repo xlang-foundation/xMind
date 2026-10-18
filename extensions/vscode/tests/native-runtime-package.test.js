@@ -11,7 +11,13 @@ const {pathToFileURL}=require('node:url');
 const {REQUIRED_NATIVE,REQUIRED_STDLIB,verifyNativeRuntime,MANIFEST_NAME}=require('../native-runtime');
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const packager=import(pathToFileURL(path.join(__dirname,'../scripts/package-native-runtime.mjs')).href);
-async function fixture(t){
+async function pipWheel(extra={},corruptRecord=false){
+ const members=new Map(Object.entries({'pip/__init__.py':'# Synthetic pip source\n','pip/__main__.py':'# Synthetic entry point\n','pip/_vendor/certifi/cacert.pem':'Synthetic TLS data, not a certificate\n','pip-1.2.3.dist-info/METADATA':'Metadata-Version: 2.1\nName: pip\nVersion: 1.2.3\n','pip-1.2.3.dist-info/WHEEL':'Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n','pip-1.2.3.dist-info/licenses/LICENSE.txt':'Synthetic pip license\n',...extra}).map(([name,value])=>[name,Buffer.from(value)]));
+ members.set('pip-1.2.3.dist-info/RECORD',Buffer.from([...members].map(([name,value])=>`${name},sha256=${crypto.createHash('sha256').update(value).digest('base64url')},${value.length}`).join('\n')+'\npip-1.2.3.dist-info/RECORD,,\n'));
+ if(corruptRecord)members.set('pip/__init__.py',Buffer.from('# Changed source after the recorded checksum\n'));
+ const archive=new(require('yazl').ZipFile)();for(const [name,value]of members)archive.addBuffer(value,name);archive.end();const chunks=[];for await(const chunk of archive.outputStream)chunks.push(chunk);return Buffer.concat(chunks);
+}
+async function fixture(t,extra={}){
   // Windows runners can expose an 8.3 alias in TEMP. Positive fixtures use the
   // canonical parent; intentional alias-rejection cases remain unchanged.
   const temp=await fs.realpath(os.tmpdir()),root=await fs.mkdtemp(path.join(temp,'xmind-native-package-files-'));
@@ -21,6 +27,7 @@ async function fixture(t){
   const files={};
   for(const name of [...REQUIRED_NATIVE,'modules/pydantic_core/_pydantic_core.x3pkg.dll','modules/pydantic_core/__init__.py','modules/pydantic_core/core_schema.py','modules/pydantic_core/_schema_gather.py','modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA','licenses/PYDANTIC_CORE_LICENSE.txt']){const value=Buffer.from(name.endsWith('/METADATA')?'Metadata-Version: 2.1\nName: pydantic-core\nVersion: 2.50.1+xlang3\n':'Synthetic accepted native bytes: '+name);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),value);files[name]=hash(value);}
   for(const name of [...REQUIRED_STDLIB,'synthetic_extra.py']){await fs.mkdir(path.dirname(path.join(stdlibSource,name)),{recursive:true});await fs.writeFile(path.join(stdlibSource,name),Buffer.from('# Synthetic source '+name+'\r\n'));}
+  await fs.mkdir(path.join(stdlibSource,'ensurepip/_bundled'),{recursive:true});await fs.writeFile(path.join(stdlibSource,'ensurepip/_bundled/pip-1.2.3-py3-none-any.whl'),await pipWheel(extra));
   const stdlibLicense=path.join(root,'SYNTHETIC-PYTHON-LICENSE');await fs.writeFile(stdlibLicense,'Synthetic license text');
   const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files};
   const bundleManifest=path.join(root,'accepted-manifest.json');
@@ -33,7 +40,7 @@ test('staging preserves accepted native bytes and pure source while excluding in
   for(const name of ['python.exe','synthetic.pyc','synthetic.pyd'])await fs.writeFile(path.join(f.options.stdlibSource,name),'Synthetic excluded bytes');
   for(const directory of ['__pycache__','site-packages','.config']){await fs.mkdir(path.join(f.options.stdlibSource,directory));await fs.writeFile(path.join(f.options.stdlibSource,directory,'hidden.py'),'Synthetic excluded bytes');}
   const result=await(await packager).stageNativeRuntime(f.options);
-  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,19);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
+  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,26);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
   const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.sourceManifestSha256,f.options.bundleManifestSha256);
   assert.ok(verified.manifest.files['wheels/pydantic_core-2.50.1+xlang3-py3-none-win_amd64.whl']);
   for(const name of REQUIRED_NATIVE)assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
@@ -42,9 +49,16 @@ test('staging preserves accepted native bytes and pure source while excluding in
   for(const name of ['stdlib/python.exe','stdlib/synthetic.pyc','stdlib/synthetic.pyd','stdlib/.config/hidden.py'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
 });
 
+test('pip bootstrap preserves pure code and TLS data but rejects native or mismatched wheel members before publication',async t=>{
+ const f=await fixture(t),stage=(await packager).stageNativeRuntime;await stage(f.options);const manifest=JSON.parse(await fs.readFile(path.join(f.options.out,MANIFEST_NAME),'utf8'));
+ assert.equal(manifest.pipBootstrap.version,'1.2.3');assert.equal(manifest.pipBootstrap.wheelSha256,hash(await fs.readFile(path.join(f.options.stdlibSource,'ensurepip/_bundled/pip-1.2.3-py3-none-any.whl'))));assert.equal(manifest.pipBootstrap.files,7);assert.match(await fs.readFile(path.join(f.options.out,'stdlib/pip/_vendor/certifi/cacert.pem'),'utf8'),/Synthetic TLS data/);
+ for(const extra of [{'pip/native.pyd':'Inert forbidden native payload'},{'pip-1.2.3.dist-info/WHEEL':'Root-Is-Purelib: false\nTag: cp314-cp314-win_amd64\n'},{'pip-1.2.3.dist-info/licenses/payload.DLL':'Inert forbidden native payload'}]){const bad=await fixture(t,extra);await assert.rejects(stage(bad.options),/Unsupported pip|metadata differs/);await assert.rejects(fs.stat(bad.options.out),{code:'ENOENT'});}
+ const corrupt=await fixture(t);await fs.writeFile(path.join(corrupt.options.stdlibSource,'ensurepip/_bundled/pip-1.2.3-py3-none-any.whl'),await pipWheel({},true));await assert.rejects(stage(corrupt.options),/RECORD content differs/);await assert.rejects(fs.stat(corrupt.options.out),{code:'ENOENT'});
+});
+
 test('unified staging binds one product executable and rejects legacy launcher injection',async t=>{
  const f=await fixture(t);const result=await(await packager).stageNativeRuntime(f.options);
- assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,19);
+ assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,26);
  const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.schemaVersion,1);
  assert.equal(verified.manifest.files['xmind.exe'],f.manifest.files['xmind.exe']);
  for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});

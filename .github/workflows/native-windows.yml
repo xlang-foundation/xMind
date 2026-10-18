@@ -66,6 +66,11 @@ jobs:
       - name: Stage the contract-tested native runtime and pinned pure library source
         working-directory: xmind
         run: node Tools/ci-stage-runtime.mjs
+      # Bootstrap executes from the staged package, with an offline installation
+      # from the pinned source wheel rather than a runner's Python installation.
+      - name: Verify packaged xlang3 pip bootstrap and offline installation
+        working-directory: xmind
+        run: node Tools/verify-packaged-pip.mjs extensions/vscode/native-runtime ../stdlib-source/Lib/ensurepip/_bundled build/ci-evidence
       - name: Package and verify shared browser assets
         working-directory: xmind/extensions/vscode
         run: |
