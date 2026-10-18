@@ -9,8 +9,13 @@ restores the original 15 messages/seven usage records and completes a new
 saved-key Claude delegated read-only task, displaying running then completed
 with four messages, two usage records and 173 events. Workspace bytes remain
 unchanged. The original coding UI timeout and no-delegation prompt violation
-remain recorded failures. The installed extension still needs this client fix;
+remain recorded failures. Installed preview 0.1.33 now contains this client fix. All 2,448 archive and
+2,445 installed payloads verify, and its 18 browser assets match the live page.
+All 17,439 staged files remain unchanged after packaging; exact-source hosted
+425/147 client results and artifact digest verify. Existing owners, settings,
+profiles and earlier runtime payloads remain intact. No editor was opened;
 actual VS Code pane and hosted native/release acceptance remain open.
+[Installed 0.1.33 proof and limits](evidence/coding-package-0.1.33-20261018.json).
 [Client fix, real failures and rendered proof](evidence/dotted-node-stream-20261018.json).
 
 ## Product scope
