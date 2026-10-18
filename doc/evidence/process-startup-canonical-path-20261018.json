@@ -1,0 +1,240 @@
+{
+  "recordedAt": "2026-10-18T22:25:52.665Z",
+  "hosted": {
+    "downloadedAt": "2026-10-18T22:23:09.602Z",
+    "runId": 39171491141,
+    "sourceRevision": "571afe03a062b6672b093818f1763048629746ca",
+    "conclusion": "failure",
+    "artifactId": 12152832258,
+    "name": "process-startup-diagnostics-571afe03a062b6672b093818f1763048629746ca",
+    "bytes": 20029,
+    "sha256": "f01a81c3a2b66f74b4258ff17d04baf480a5b03b9bae0986c74d0fb348c15f68",
+    "advertisedSizeAndDigestVerified": true,
+    "output": "C:/xMindNativeValidation/process-startup-hosted-39171491141.zip"
+  },
+  "rawRoot": "C:/xMindNativeValidation/process-startup-hosted-39171491141-verified",
+  "host": {
+    "release": "10.0.26100",
+    "arch": "x64",
+    "imageVersion": "20261007.264.1",
+    "imageOS": "win25-vs2026"
+  },
+  "rawDiagnosticVerdict": false,
+  "executions": [
+    {
+      "label": "01-graph-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 25802,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "02-graph-system-modules",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 18110,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "03-graph-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 17907,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "04-graph-private-cache",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 17782,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "05-graph-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 18315,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "06-graph-cache-off",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 18243,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "07-graph-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 17937,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "08-agent-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11766,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "09-agent-system-modules",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11357,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "10-agent-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11590,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "11-agent-private-cache",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11384,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "12-agent-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11506,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "13-agent-cache-off",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11582,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "14-agent-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11830,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "15-dotnet-control-default",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 6139,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "16-graph-default-observer",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 18027,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "markerEqualsCanonicalWorkingDirectory": true
+    },
+    {
+      "label": "17-agent-default-observer",
+      "rawVerdict": false,
+      "exit": 0,
+      "termination": "exited",
+      "elapsedMs": 11838,
+      "phases": [],
+      "markerEqualsCanonicalWorkingDirectory": true
+    }
+  ],
+  "diagnosticFailure": "Node temporary root uses C:/Users/RUNNER~1; native canonical directory and real marker resolve to C:/Users/runneradmin. Driver compared raw alias spelling instead of canonical identity, so all 17 false verdicts remain retained.",
+  "correction": "Resolve the Node-created folder with fs.realpath and require both canonical path equality and native marker/working-directory identity equality. Process commands, budgets, production adapter and production environment policy unchanged.",
+  "correctedLocal": {
+    "rawRoot": "C:/xMindNativeValidation/process-startup-canonical-path-verified-20261018/diagnostics",
+    "receiptSha256": "2b86118c29144ac624e9fdbc58876fa3449a8f6ef5225e533015afa75850a7e7",
+    "passed": 3,
+    "sourceAndBinaryUnchanged": true,
+    "markerAndWorkingDirectoryIdentityEqual": true
+  },
+  "retainedObserverFailures": [
+    {
+      "path": "C:/xMindNativeValidation/process-startup-hosted-39171491141",
+      "reason": "Extraction stopped on extensionless observer stop marker; second extraction explicitly whitelists known artifact names."
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-canonical-path-20261018/diagnostics",
+      "reason": "Local caller supplied wrong CMake path; no native build or scenarios started."
+    }
+  ],
+  "observations": "Isolated original commands all exited within 30 seconds. Cache/module-path/observer controls do not establish a cause of earlier integrated timeouts. This is not graph/agent or release qualification.",
+  "originalIntegratedPowerShellTimeoutCauseEstablished": false,
+  "correctedHostedVerdict": "pending",
+  "sourceFiles": {
+    "Tools/ci-process-startup.mjs": "07d094276e0d98f276f23f33e057eddd6fa0d725f955b9d7bdf369f5c529b1d7",
+    "Native/tests/process_startup/process_startup_diagnostic.cpp": "5938a8ff01bf169383c3b85040a8544d3d2ee916f9577ecefd126d228a1a592a"
+  }
+}

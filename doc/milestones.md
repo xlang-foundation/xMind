@@ -16,8 +16,12 @@ against their actual source text. A guarded local launcher refuses a labelled
 inert benchmark-marker fixture before any build/scenario. Native process source
 and production environment policy stay unchanged.
 
-An isolated Windows CI workflow will run 17 paired module-path/cache/observer
-experiments with alternating default baselines. This is causal investigation,
+Hosted run 39171491141 executes all 17 paired cases. Each process exits zero
+within budget, but raw verdicts fail because the temporary path uses a Windows
+short-name alias. The corrected driver verifies canonical paths and native
+directory identities; three local cases pass. A corrected hosted verdict remains
+pending. [Retained hosted data and correction](evidence/process-startup-canonical-path-20261018.json).
+The workflow preserves alternating default baselines. This is causal investigation,
 not graph/agent or release acceptance; it cannot turn a failed original into a
 pass by substituting a control. The first filename-concatenation preflight error
 and all local raw receipts are preserved.
