@@ -15,13 +15,68 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Native `c23a6cd` passes all 149 local Release contracts in 811.26 seconds against SDK `58a8aab9`, with 2,506 frozen inputs and binaries unchanged. SDK checks pass 4/4 and the default performance gate 11/11. Installed development 0.1.22 now contains these verified binaries. Hosted inventory is 150; current run `39139479684` is in progress. [Full gate](evidence/child-runtime-library-20261018.json), [installation](evidence/coding-package-0.1.22-20261018.json). | Current hosted acceptance, unconfirmed hosted command failures and production release acceptance. |
-| Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
+| Native backend and local persistence | Installed native `878bd88` / SDK `58a8aab9` passes three focused inventory/profile checks, two SDK smoke checks and real coding below. The complete current 149-test local gate is running with project/library/runtime/binary inputs frozen; the historical c23a6cd 149/149 gate remains separate. Hosted inventory is 150. [Current receipt](evidence/coding-package-0.1.23-20261018.json). | Finish current full local/hosted acceptance; production release acceptance. |
+| Single agents and graphs | Native contracts and prior live planning establish the in-process baseline. The current ordinary coding conversation completes actual commands and approved create/edit effects. | Nonzero direct process children still need failure classification: an older live plan continued success-dependent tasks after exit 1. One older agent child returned an unconfirmed Claude JSON-event failure. Process-bound `AgentRunner` placement is not implemented; existing workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed **0.1.22** contains native `c23a6cd`; 1,969 non-metadata payloads, package metadata and 1,926 runtime files verify. Local and digest-verified hosted extension/browser checks pass 418/142. Provider discovery preserves selected run status and empty profiles show setup guidance. The actual native browser contract passes graph/file/human-input, history transfer and same-origin restarts without replay. Existing webpage assets are refreshed; its saved history/settings and older backend remain intact. Settings, six profile directories and the prior installation are preserved. Earlier captured-stream/Claude/JSDOM checks remain separate historical evidence. [Installed receipt](evidence/coding-package-0.1.22-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
+| Coding clients | Installed **0.1.23** verifies 2,444 non-metadata payloads, package metadata and 2,402 runtime files. Local and digest-verified hosted client checks pass 420/142. Actual installed Claude/browser-controller coding installs 22 dependencies, passes nine xlang3 tests and the Vue build, and creates then exactly edits the report through native approval. The persistent test page at port 51118 restores 16 messages/two completed runs and all 598 saved events without replay. Original/copied source files, settings and six existing profile directories are preserved. [Installed/live receipt](evidence/coding-package-0.1.23-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; full native/hosted/release acceptance and broader failure/recovery coverage remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed coding package 0.1.23 — 2026-10-18
+
+An actual fresh 0.1.22 coding run exposed missing `pip` in the packaged library.
+The configured-library binding correctly removed reliance on this PC's global
+site-packages, but packaging had not supplied pip itself. Version 0.1.23 extracts
+the bundled pure pip wheel without running Python: it checks distribution tags,
+bounded paths/sizes, every RECORD checksum, required certificate data and license
+notices before publication. The native and extension inventory checks admit
+only the required data paths. Generic distlib Windows script resources are
+included unchanged and their imports contain no CPython DLL; generated entry
+points select xlang3. A CPython interpreter/ABI extension remains excluded.
+Both the pinned CI source's pip 25.2 wheel and the local 26.2.1 wheel pass
+extraction. Actual packaged xlang3 identity/version/offline pip installation
+commands all exit zero, with no skipped dependencies.
+
+The installed development VSIX uses native `878bd88`, SDK `58a8aab9`, manifest
+`e659a985...` and archive SHA-256
+`2ffc892b192a104944e0e5ff20360b04aa715adb1b88355ee9fceec51fbf527b`.
+All 2,444 non-metadata installed payloads, package metadata and 2,402 runtime
+files verify. The prior 0.1.22 installation is backed up; settings and six
+existing profile directories remain intact. Build-only scripts and packaging
+dependencies are excluded from the VSIX. VS Code remains closed.
+
+A real Claude single-agent conversation through the installed native backend
+and production browser controller completes four commands: xlang3 pip installs
+22 dependencies, xlang3 pytest passes nine tests, and npm installs/builds the Vue
+frontend. The agent creates `VALIDATION.md` through approval. Its initial report
+miscounts 21 packages; one exact approved edit in the same saved conversation
+corrects that to the receipt's 22, without rerunning any command. All 30 original
+and copied source files remain unchanged. Native metrics record six initial and
+two follow-up model responses; no usage values are invented.
+
+The persistent test page is [localhost:51118](http://127.0.0.1:51118/ui/), using
+`C:\xMindNativeValidation\model-zoo-installed-0.1.23-20261018`. It serves the actual
+installed UI assets and saved provider configuration. Read-only HTTP restoration
+checks two completed runs, 16 messages, all 598 saved events through cursor 598,
+zero duplicates, and Claude discovery using the saved key. This is real native
+execution and production controller/transport evidence with explicit Node
+cookie/workspace host fixtures; physical browser rendering/input and editor
+activation remain unverified. Existing user backends/page data were preserved.
+
+Local and digest-verified hosted client suites pass 420/142. Native inventory
+and profile checks pass 3/3; the two SDK smoke checks pass. The latest older hosted
+run stopped before xMind tests because its Unicode CLI fixture lacked linecache
+support source. CI now provides the pinned pure library through PYTHONPATH only
+for those SDK checks and restores the prior environment afterward. The old native
+baseline still fails its unique Unicode probe, so that test has not been weakened.
+The full current local 149-test gate is running; current hosted native and release
+acceptance remain pending.
+
+The older failed live dynamic plan also exposes unfinished process-child exit
+classification and a separate unconfirmed `anthropic_json_event_invalid` child
+outcome. Ordinary coding success does not establish those recovery paths.
+[Complete milestone receipt](evidence/coding-package-0.1.23-20261018.json).
 
 ## Installed coding package 0.1.22 — 2026-10-18
 

@@ -128,6 +128,17 @@ install the xlang3 binding into the workspace alongside pure-Python packages.
 The wheel contains the SDK's actual plugin, Python files, metadata and license;
 it contains no CPython extension. Missing native dependencies remain errors.
 
+The development package now also supplies pip itself from the standard-library
+source's bundled pure wheel. Packaging checks the wheel metadata and all RECORD
+hashes, retaining the certificates, licenses and generic Windows script-resource
+templates pip needs. The templates import no CPython DLL; generated entry points
+name xlang3. Primary process validation invokes modules through xlang3 directly.
+CI verifies the staged CLI's native identity, pip version and a complete offline
+pip installation from that same source wheel, without skipping dependencies.
+An installed real coding run additionally installs the ModelZoo dependencies
+and passes its nine backend tests and Vue build.
+[Installed bootstrap/coding receipt](evidence/coding-package-0.1.23-20261018.json).
+
 The xlang3 profile rejects direct `pip install` commands without a relative
 `--target`, and rejects `--prefix` and `--user` installs. A prefix installation
 can uninstall shared packages even when its destination is local. An initial
