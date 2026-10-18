@@ -95,8 +95,6 @@ ProviderYamlConfig decode(const Value& root,const std::vector<std::string>& allo
     return result;
 }
 }
-ProviderYamlError::ProviderYamlError(ProviderYamlErrorCode code):std::runtime_error("Provider YAML configuration rejected"),code_(code){}
-ProviderYamlErrorCode ProviderYamlError::code()const noexcept{return code_;}
 ProviderYamlConfig parse_provider_yaml_config(std::string_view source,const std::vector<std::string>& routes){
     if(source.empty()||source.size()>file_limit)fail(ProviderYamlErrorCode::exceeds_limits);
     utf8(source);

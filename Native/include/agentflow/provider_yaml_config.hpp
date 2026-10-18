@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/provider_profiles.hpp"
 #include <filesystem>
+#include <stdexcept>
 #include <string_view>
 
 namespace agentflow {
@@ -9,8 +10,9 @@ enum class ProviderYamlErrorCode {file_unavailable,exceeds_limits,invalid_utf8,i
 // Fixed diagnostics only. No parser exception, path, key, scalar or YAML
 // source is incorporated in what() or the public error-code observation.
 struct ProviderYamlError : std::runtime_error {
-    explicit ProviderYamlError(ProviderYamlErrorCode);
-    ProviderYamlErrorCode code() const noexcept;
+    explicit ProviderYamlError(ProviderYamlErrorCode code)
+        : std::runtime_error("Provider YAML configuration rejected"), code_(code) {}
+    ProviderYamlErrorCode code() const noexcept { return code_; }
 private:
     ProviderYamlErrorCode code_;
 };
