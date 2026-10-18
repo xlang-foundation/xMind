@@ -612,6 +612,24 @@ test('approval notice follows current unexpired backend proposals and retires on
  }finally{r.dom.window.close();}
 });
 
+test('completed tool activity collapses without losing receipts and approvals remain reachable',()=>{
+ const r=renderer(),doc=r.dom.window.document,initialMessages=r.posted.length;
+ try{
+  const operation={id:'activity-file',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:'{"path":"new.cpp","before_content":"","after_content":"reviewed source"}',result_json:'{}'};
+  const activity=doc.getElementById('operation-activity');
+  r.send({type:'status',text:'running'});r.send({type:'operations',operations:[operation]});
+  assert.equal(activity.hidden,false);assert.equal(activity.open,true);assert.match(activity.querySelector('summary').textContent,/review needed/);
+  activity.open=false;let scrolled=false;doc.querySelector('#operations .operation').scrollIntoView=()=>{scrolled=true;};
+  doc.getElementById('approval-review').click();assert.equal(activity.open,true);assert.equal(scrolled,true);
+  r.send(processOutputFixture('6f6b'));assert.equal(doc.getElementById('process-streams').closest('#operation-activity'),activity);assert.match(activity.textContent,/ok/);
+  const completed={...operation,state:'succeeded'};r.send({type:'operations',operations:[completed]});assert.equal(activity.open,true);
+  r.send({type:'status',text:'completed'});assert.equal(activity.open,false);assert.equal(doc.querySelector('#operations .after').textContent,'reviewed source');assert.ok([...doc.querySelectorAll('#operations summary')].some(summary=>summary.textContent==='Outcome'));
+  activity.open=true;r.send({type:'operations',operations:[completed]});r.send({type:'status',text:'completed'});assert.equal(activity.open,true,'unchanged polls preserve explicit inspection');
+  activity.open=false;r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(activity.open,true);assert.match(doc.getElementById('operations').textContent,/Creation is uncertain/);
+  r.send({type:'reset-run'});assert.equal(activity.hidden,true);assert.equal(r.posted.length,initialMessages,'expanding activity never dispatches effects');
+ }finally{r.dom.window.close();}
+});
+
 test('new-file review distinguishes absence, previews exact content and never retries uncertainty',()=>{
   const r=renderer(),doc=r.dom.window.document;const operation={id:'fixture-create',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'new.cpp',parent_id:'fixture-parent',before_exists:false,before_content:'',after_content:'actual proposed source\n'}),result_json:'{}'};
   r.send({type:'operations',operations:[operation]});assert.equal(doc.querySelector('#operations .after').textContent,'actual proposed source\n');assert.match(doc.querySelector('#operations').textContent,/New file/);

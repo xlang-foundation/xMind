@@ -20,9 +20,16 @@ input and 855 output tokens. A fresh HTTP session restores eight messages and
 all 321 saved events without execution replay.
 
 The new page is http://127.0.0.1:62342/ui/; its backend and history stay live.
-Earlier pages, settings and profiles remain preserved. Actual rendered browser
-and VS Code activation, current hosted native acceptance, broader protocol
-recovery and process-bound AgentRunner remain open.
+Earlier pages, settings and profiles remain preserved. Headless Edge now also
+completes two actual coding turns through rendered controls: reviewed catalog
+edits, regression tests, an observed failure and agent repair, then xlang3 test
+runs passing 21 and 22 tests. The session restores 22 messages without replay.
+Completed tool activity is expandable; approvals and the final answer remain
+reachable. All 422/142 final local client fixtures pass; all 18 served assets
+equal that validated build. The installed extension still has its previous UI.
+Visible desktop/VS Code activation, current hosted native acceptance, broader
+protocol recovery and process-bound AgentRunner remain open.
+[Rendered coding and final UI](evidence/rendered-tool-activity-20261018.json).
 [Installed/native/client/live scope](evidence/coding-package-0.1.27-20261018.json).
 
 ## Previous checkpoint — 0.1.26, 2026-10-18

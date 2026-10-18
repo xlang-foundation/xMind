@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-18T20:29:34.5567829Z",
+  "runId": 39156552949,
+  "sourceRevision": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39156552949",
+  "conclusion": "failure",
+  "artifactId": 12148942119,
+  "artifactBytes": 67807,
+  "artifactSha256": "8d6e6f4e118ef2571a9c42a04655fa5c87562a78514f4fe3dd5ab8fab8d134ec",
+  "advertisedDigestAndSizeVerified": true,
+  "passed": 150,
+  "total": 151,
+  "seconds": 846.35,
+  "sdkSmokePassed": 2,
+  "failed": [
+    "native_graph_runner_contract"
+  ],
+  "actualGraphProcess": {
+    "id": "a1422f8af16a34f94e8a426208074500",
+    "profile_id": "powershell",
+    "elapsed_ms": 30093,
+    "timeout_ms": 30000,
+    "exit_code": 1,
+    "state": "uncertain",
+    "termination": "timed_out",
+    "process_tree_retired": true,
+    "outputArtifactState": "complete",
+    "stdoutBytes": 0,
+    "stderrBytes": 0
+  },
+  "graphState": "failed",
+  "childState": "failed",
+  "processSamples": [
+    {
+      "pid": 1900,
+      "createdUtc": "2026-10-18T19:57:16.787182Z",
+      "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "elapsedMs": 9046,
+      "cpuMs": 562.5,
+      "moduleCount": 64
+    },
+    {
+      "pid": 1900,
+      "createdUtc": "2026-10-18T19:57:16.787182Z",
+      "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "elapsedMs": 19619,
+      "cpuMs": 8781.25,
+      "moduleCount": 64
+    },
+    {
+      "pid": 1900,
+      "createdUtc": "2026-10-18T19:57:16.787182Z",
+      "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "elapsedMs": 30223,
+      "cpuMs": 18468.75,
+      "moduleCount": 64
+    }
+  ],
+  "rawEvidenceRoot": "C:\\xMindNativeValidation\\hosted-native-39156552949",
+  "rawCtestSha256": "aa140a3ba7b13d6c781ef9874eaf649c74893f46014eccfc9dd47649635d2de7",
+  "rawDetailsSha256": "bdb6d8d8622941f623b08a7db0c2657f7aa7210323e32cd5153e38281308590a",
+  "rawProcessDiagnosticsSha256": "e5e51157f1e5493c4e45369b4cfa468cff37eaa749997ec3c6a22b672ea60f1e",
+  "causeEstablished": false,
+  "deadlinesChanged": false,
+  "runCancelledOrRestarted": false,
+  "scope": "Terminal hosted native failure at its own exact revision, distinct from local native 150/150 and current UI acceptance. CPU/module samples do not identify a cause."
+}

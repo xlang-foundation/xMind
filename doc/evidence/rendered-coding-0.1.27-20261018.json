@@ -1,0 +1,408 @@
+{
+  "recordedAt": "2026-10-18T20:23:35.857Z",
+  "sourceRevision": "bdf8b45",
+  "nativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "installedVersion": "0.1.27",
+  "url": "http://127.0.0.1:62342/ui/",
+  "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.27-mcp-20261018",
+  "session": "a2d2abc02773a31a3b4aa76bed134345",
+  "run": "f9a32590237442deb7a1c0914160adfb",
+  "provider": "claude",
+  "model": "claude-sonnet-4-6",
+  "browser": {
+    "name": "Microsoft Edge",
+    "mode": "headless Playwright; sandbox enabled; no visible window"
+  },
+  "effectsPerformedThroughRenderedControlsOnly": true,
+  "readOnlyReceiptChecks": "same-origin page fetch plus filesystem hash reads; no observer writes to project",
+  "completed": true,
+  "operations": [
+    {
+      "id": "cabcb11898ae9ff7047f7ffae4e1872f",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "e803b6fe0663e4c1913fbfa2c8fe0bce",
+      "tool": "create_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "3d4839fd2961fb3163c6a0a84a0f6bb9",
+      "tool": "run_process",
+      "state": "succeeded"
+    },
+    {
+      "id": "4b5f96cd6084ae92c3337674285b2211",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "e8804b84f06d750b9e8b2455a203cd7d",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "fileApprovals": [
+    {
+      "operation": "cabcb11898ae9ff7047f7ffae4e1872f",
+      "tool": "replace_file",
+      "path": "backend/app/catalog.py",
+      "observedAt": "2026-10-18T20:20:39.652Z",
+      "allowedAt": "2026-10-18T20:20:39.828Z"
+    },
+    {
+      "operation": "e803b6fe0663e4c1913fbfa2c8fe0bce",
+      "tool": "create_file",
+      "path": "backend/tests/test_sort_tiebreaks.py",
+      "observedAt": "2026-10-18T20:20:51.734Z",
+      "allowedAt": "2026-10-18T20:20:51.782Z"
+    },
+    {
+      "operation": "4b5f96cd6084ae92c3337674285b2211",
+      "tool": "replace_file",
+      "path": "backend/app/catalog.py",
+      "observedAt": "2026-10-18T20:21:52.325Z",
+      "allowedAt": "2026-10-18T20:21:52.501Z"
+    }
+  ],
+  "processes": [
+    {
+      "operation": "3d4839fd2961fb3163c6a0a84a0f6bb9",
+      "binding": {
+        "arguments": [
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_sort_tiebreaks.py"
+        ],
+        "background": false,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:25ef3a00000004000000000000000000",
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:e6f93a00000002000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "backend",
+          "sources": [],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "timeout_ms": 30000,
+        "workdir": "backend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "workspace_revision": 1,
+        "environmentNames": [
+          "XLANG3_PYTHON_LIB",
+          "PIP_FIND_LINKS",
+          "PYTHONPATH"
+        ]
+      },
+      "receipt": {
+        "elapsed_ms": 2389,
+        "exit_code": 1,
+        "independently_verified": false,
+        "job_id": "3d4839fd2961fb3163c6a0a84a0f6bb9",
+        "operation_id": "3d4839fd2961fb3163c6a0a84a0f6bb9",
+        "output_artifact": {
+          "operation_id": "3d4839fd2961fb3163c6a0a84a0f6bb9",
+          "state": "complete",
+          "stderr_bytes": 1607,
+          "stdout_bytes": 0
+        },
+        "pid": 15052,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 1607,
+          "data": "...............FF....\r\n======================================================================\r\nFAIL: test_newest_tie_break_id_always_ascending (test_sort_tiebreaks.TestSortTiebreaks.test_newest_tie_break_id_always_ascending)\r\nEven though newest sorts dates descending, ties must break id ascending.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"C:\\xMindNativeValidation\\model-zoo-installed-0.1.27-mcp-20261018\\backend\\tests\\test_sort_tiebreaks.py\", line 178, in test_newest_tie_break_id_always_ascending\r\n    self.assertEqual(result[0][\"id\"], \"aaa\")\r\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: 'zzz' != 'aaa'\r\n- zzz\r\n+ aaa\r\n\r\n\r\n======================================================================\r\nFAIL: test_newest_tie_breaks_by_id_asc (test_sort_tiebreaks.TestSortTiebreaks.test_newest_tie_breaks_by_id_asc)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"C:\\xMindNativeValidation\\model-zoo-installed-0.1.27-mcp-20261018\\backend\\tests\\test_sort_tiebreaks.py\", line 122, in test_newest_tie_breaks_by_id_asc\r\n    self.assertEqual([r[\"id\"] for r in result], [\"a\", \"m\", \"z\"])\r\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: Lists differ: ['z', 'm', 'a'] != ['a', 'm', 'z']\r\n\r\nFirst differing element 0:\r\n'z'\r\n'a'\r\n\r\n- ['z', 'm', 'a']\r\n?   ^         ^\r\n\r\n+ ['a', 'm', 'z']\r\n?   ^         ^\r\n\r\n\r\n----------------------------------------------------------------------\r\nRan 21 tests in 0.056s\r\n\r\nFAILED (failures=2)\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 1607
+        },
+        "stdout": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    {
+      "operation": "e8804b84f06d750b9e8b2455a203cd7d",
+      "binding": {
+        "arguments": [
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_sort_tiebreaks.py"
+        ],
+        "background": false,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:25ef3a00000004000000000000000000",
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:e6f93a00000002000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "backend",
+          "sources": [],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "timeout_ms": 30000,
+        "workdir": "backend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+        "workspace_revision": 1,
+        "environmentNames": [
+          "XLANG3_PYTHON_LIB",
+          "PIP_FIND_LINKS",
+          "PYTHONPATH"
+        ]
+      },
+      "receipt": {
+        "elapsed_ms": 665,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "e8804b84f06d750b9e8b2455a203cd7d",
+        "operation_id": "e8804b84f06d750b9e8b2455a203cd7d",
+        "output_artifact": {
+          "operation_id": "e8804b84f06d750b9e8b2455a203cd7d",
+          "state": "complete",
+          "stderr_bytes": 125,
+          "stdout_bytes": 0
+        },
+        "pid": 48764,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 125,
+          "data": ".....................\r\n----------------------------------------------------------------------\r\nRan 21 tests in 0.005s\r\n\r\nOK\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 125
+        },
+        "stdout": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    }
+  ],
+  "agentCorrectedOwnFailedTests": true,
+  "additionalUserModelGuidance": 0,
+  "changedExistingFiles": [
+    "backend/app/catalog.py"
+  ],
+  "addedFiles": [
+    "backend/tests/test_sort_tiebreaks.py"
+  ],
+  "workspaceFilesBefore": 31,
+  "workspaceFilesAfter": 32,
+  "originalDSourceFilesUnchanged": 30,
+  "externalMcpPeerFilesUnchanged": 4078,
+  "historyMessages": 14,
+  "savedEvents": 1891,
+  "historyAndOperationsIdenticalAfterPageReload": true,
+  "postRequestsOnReload": 0,
+  "newEventsAfterReload": 0,
+  "usage": [
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 96,
+      "input_tokens": 12705,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 96,
+      "prompt_tokens": 12705,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 2730,
+      "input_tokens": 14679,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 2730,
+      "prompt_tokens": 14679,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 151,
+      "input_tokens": 17740,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 151,
+      "prompt_tokens": 17740,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 498,
+      "input_tokens": 18726,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 498,
+      "prompt_tokens": 18726,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 140,
+      "input_tokens": 19353,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 140,
+      "prompt_tokens": 19353,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 268,
+      "input_tokens": 19743,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 268,
+      "prompt_tokens": 19743,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
+  ],
+  "aggregateReportedInputTokens": 102946,
+  "aggregateReportedOutputTokens": 3883,
+  "finalReportCharacters": 820,
+  "pageErrors": [],
+  "failedPageResponses": [],
+  "observerFailuresPreserved": [
+    "Initial operation waits timed out before file proposal generation; run was left running and observed again.",
+    "A later wait searched for run_process, but the rendered operation is labeled Command; the process had already completed and its native receipt was collected.",
+    "A direct Playwright request GET lacked the browser origin context and returned HTTP 401; same-origin read-only page fetch succeeded. No effect POST was duplicated.",
+    "Node assert deepStrictEqual rejected matching arrays across REPL realms; canonical JSON hash comparisons resolved the observer issue.",
+    "Initial JSON-string manifest comparison was sensitive to object key ordering; canonical recursive key sorting verified the exact peer file set and hashes."
+  ],
+  "visibleDesktopAcceptance": false,
+  "vsCodeActivationAcceptance": false,
+  "broaderCodingCoverageComplete": false,
+  "passed": true,
+  "rawArtifacts": [
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/acceptance.json",
+      "bytes": 13851,
+      "sha256": "0973ffe7d7255d8cdb329b78f7387ffd1522587ca3150a2b02db1b68f32bc0c2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/children.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/completed.png",
+      "bytes": 134462,
+      "sha256": "b0a2212fd9f8dfce5e324b9f35afef194aab8a38c4ea50948023c15b29504882"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/correction-review.png",
+      "bytes": 136358,
+      "sha256": "cc82641f484eb1d3090ec3748eb7949fdc541b7037baaaf3731f9ae1efed6128"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/final-report.png",
+      "bytes": 99063,
+      "sha256": "60e8613aa6995cf3a0a165c1d67c306c8c882f208df85a493b9f7f36299d3bfe"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/history.json",
+      "bytes": 49058,
+      "sha256": "1d1206be224105227af49e0f2af2bc9782f50313d753075b0e73c82beafefc34"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/operations-before-correction.json",
+      "bytes": 41416,
+      "sha256": "b679e10daa4d1d1e381d477aa99ae2d424aaf3c08a29c5d6c66095cfbb96ed55"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/operations.json",
+      "bytes": 44898,
+      "sha256": "375f3e301a574f0dc9229f94db7ab80a34a6de577905c909bb905aa384967a21"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/proposed-changes.png",
+      "bytes": 131594,
+      "sha256": "88672d35c9dcd28e3574c85bf9d97e8975873b3439688f2406a1998197df6117"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/request.json",
+      "bytes": 1277,
+      "sha256": "d9e05234b17fe26c3aec091ef455659a194e3b9953a971558208672219aed2af"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/responses.json",
+      "bytes": 2220570,
+      "sha256": "7ca468820ed167b45546546e72a51b01d72cca1e7ea8b4ac6f3560764a56e623"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/restored.png",
+      "bytes": 90206,
+      "sha256": "865a6e1a5155d42e8540279ffedaa63a628df1fd65c7edfa17e386cb76a62bad"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/reviews.json",
+      "bytes": 30630,
+      "sha256": "1453cacc18a9c0de42089b4aa5444c920e16fb3cad276777b86cd2bbfae76936"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/saved-tree-events.json",
+      "bytes": 475903,
+      "sha256": "38df86ad7b652233f41439f1737e6913368f286387337a834022c1f3831ae045"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/status.json",
+      "bytes": 403,
+      "sha256": "6e41b2400a9bccd2a0dd8705a96d2485cd0e0b36af10984425bf3ac3a5ca42fc"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/workspace-after.json",
+      "bytes": 3166,
+      "sha256": "977f525e01e582e2a8012cd8cc6655b761cb4815481444c4c5e839f548168421"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/workspace-before.json",
+      "bytes": 3056,
+      "sha256": "0a13993428804697d4bfbd3388dc36865979a96849ec8df6bba1c0d43f318200"
+    }
+  ],
+  "xlang3ExecutableSha256": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+  "nativeExecuted": true,
+  "cpythonExecuted": false,
+  "knownUiIssue": "Completed tool cards currently follow the transcript and can push the final assistant report above the initial scroll position; keep this usability issue separate from successful coding execution."
+}

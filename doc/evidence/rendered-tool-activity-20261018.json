@@ -1,0 +1,405 @@
+{
+  "recordedAt": "2026-10-18T20:29:07.599Z",
+  "sourceParent": "bdf8b4561754815baf2aaeaa1eb9df4b91c5fa37",
+  "workingTreePatchSha256": "328901b1cf9ac50d4290b6a223cfee26e55ce5e08ebb22a48cb27b35455f9377",
+  "sourcePatchPath": "C:/xMindNativeValidation/tool-activity-source-20261018.patch",
+  "changes": [
+    "Completed operations and streamed command output share one collapsible Tools and changes section.",
+    "Active execution and pending/uncertain/failed operations remain expanded on phase transitions.",
+    "Review opens the section before scrolling to an approval; unchanged observations preserve manual inspection.",
+    "The full-page fixture now waits bounded real timer turns so deferred streaming paint can occur."
+  ],
+  "clientGate": {
+    "recordedAt": "2026-10-18T20:27:26.054Z",
+    "version": "0.1.27",
+    "sourceParent": "bdf8b4561754815baf2aaeaa1eb9df4b91c5fa37",
+    "workingTreePatchSha256": "328901b1cf9ac50d4290b6a223cfee26e55ce5e08ebb22a48cb27b35455f9377",
+    "sourceFiles": 98,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "a60e5c8dd0afcddd74d93bfa7d5186bcd52111692148c5dca335874de0de31e7"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "46de62d952c6c4faa412aa6d54faa1e1f2286791dd45b975e7d97c4133f52675"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "servedAssetFiles": 18,
+  "servedAssetsEqualValidatedAssets": true,
+  "browserMode": "isolated headless Edge with sandbox enabled; no visible editor/browser window",
+  "url": "http://127.0.0.1:62342/ui/",
+  "session": "a2d2abc02773a31a3b4aa76bed134345",
+  "firstRun": "f9a32590237442deb7a1c0914160adfb",
+  "followupRun": "0dbc93cbc6e728579aedf95b79981a7a",
+  "followupPrompt": "Add one focused regression method to backend/tests/test_sort_tiebreaks.py proving that an unknown sort mode uses downloads descending with ascending id ties, for both normal and reversed input. Keep all existing tests and modify no other file. After ordinary file approval, rerun the same xlang3 unittest discover command from backend. Report the actual test count and exit under 500 characters.",
+  "followupApproval": {
+    "id": "502cd038e420d8a55dacb2c057fe76ea",
+    "allowedAt": "2026-10-18T20:28:11.834Z",
+    "pendingActivityOpenedAutomatically": true,
+    "reviewBannerReopenedCollapsedActivity": true,
+    "comparisonDisplayed": true
+  },
+  "followupOperations": [
+    {
+      "id": "502cd038e420d8a55dacb2c057fe76ea",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "c9ee7e83b5bd101db65417341c73f24b",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "followupProcess": {
+    "binding": {
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_sort_tiebreaks.py"
+      ],
+      "background": false,
+      "directory_id": "windows-local-file-v1:fec0809ac0805ab3:25ef3a00000004000000000000000000",
+      "executable": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xlang3.exe",
+      "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:e6f93a00000002000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+      "folder_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+      "output_limit": 65536,
+      "persistent": false,
+      "profile_id": "xlang3",
+      "profile_revision": 1,
+      "repository_guidance": {
+        "directory": "backend",
+        "sources": [],
+        "version": 1
+      },
+      "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+      "timeout_ms": 30000,
+      "workdir": "backend",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:22ef3a0000000c000000000000000000",
+      "workspace_revision": 1,
+      "environmentNames": [
+        "XLANG3_PYTHON_LIB",
+        "PIP_FIND_LINKS",
+        "PYTHONPATH"
+      ]
+    },
+    "receipt": {
+      "elapsed_ms": 685,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "c9ee7e83b5bd101db65417341c73f24b",
+      "operation_id": "c9ee7e83b5bd101db65417341c73f24b",
+      "output_artifact": {
+        "operation_id": "c9ee7e83b5bd101db65417341c73f24b",
+        "state": "complete",
+        "stderr_bytes": 126,
+        "stdout_bytes": 0
+      },
+      "pid": 24396,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 126,
+        "data": "......................\r\n----------------------------------------------------------------------\r\nRan 22 tests in 0.005s\r\n\r\nOK\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 126
+      },
+      "stdout": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "termination": "exited",
+      "truncated": false
+    }
+  },
+  "followupHistoryMessages": 22,
+  "followupSavedEvents": 428,
+  "priorHistoryPrefixIdentical": true,
+  "followupChangedFiles": [
+    "backend/tests/test_sort_tiebreaks.py"
+  ],
+  "additionalFiles": 0,
+  "historyAndOperationsIdenticalOnReload": true,
+  "newEffectsOrEventsOnReload": 0,
+  "activityCollapsedAfterCompletion": true,
+  "finalAnswer": {
+    "answerFullyVisible": true,
+    "answerPartiallyVisible": true,
+    "answerHeight": 291.484375,
+    "availableHeight": 534.125,
+    "documentWidth": 1440,
+    "viewportWidth": 1440
+  },
+  "providerUsage": [
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 101,
+      "input_tokens": 20061,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 101,
+      "prompt_tokens": 20061,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 608,
+      "input_tokens": 20649,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 608,
+      "prompt_tokens": 20649,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 140,
+      "input_tokens": 21403,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 140,
+      "prompt_tokens": 21403,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 94,
+      "input_tokens": 21798,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 94,
+      "prompt_tokens": 21798,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    }
+  ],
+  "allFivePriorOperationReceiptsAndOutputRetained": true,
+  "priorSavedRestoreButtonsRetained": 3,
+  "pageErrors": [],
+  "failedPageResponses": [],
+  "nativeSourceUnchanged": true,
+  "nativeRebuildPerformed": false,
+  "cpythonExecuted": false,
+  "actualVsCodeActivation": false,
+  "initialFailuresPreserved": [
+    "First regression fixture incorrectly expected a Restore button from an incomplete synthetic receipt. Existing restore-eligibility rules correctly rejected it; the activity test checks retained snapshots/outcomes instead.",
+    "The fixture initially counted the renderer ready message as an effect; it now compares against the initial message count.",
+    "The first activity version left completed streamed output outside the group; the actual screenshot showed the final reply still obscured. Streams were moved into the group before final validation.",
+    "A full-page synthetic streaming assertion exhausted 200 setImmediate turns before the 16ms paint timer. The bounded wait now yields 5ms timer turns with a 2s deadline; the streamed-text assertion is unchanged.",
+    "An unscoped browser locator matched both history and operation command results. Scoping to Operations resolved the observer ambiguity."
+  ],
+  "passed": true,
+  "rawArtifacts": [
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/acceptance.json",
+      "bytes": 13851,
+      "sha256": "0973ffe7d7255d8cdb329b78f7387ffd1522587ca3150a2b02db1b68f32bc0c2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/activity-collapsed.png",
+      "bytes": 100032,
+      "sha256": "673c08ee19fbf65b0bcdf4ee1ecbafac23c5f3dfa80cb45a891ea4d3ddc51143"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/activity-expanded.png",
+      "bytes": 99893,
+      "sha256": "d803136d8ae4e2e12964e0d277359fc2681560f32149cdf5f17a298b23e89a4d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/activity-output-collapsed.png",
+      "bytes": 99336,
+      "sha256": "560cee75ea69f6a4b7dba4a594f7a12d390d00a4a4a4ccfd719faa5dc8ee29a2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/activity-output-expanded.png",
+      "bytes": 99421,
+      "sha256": "db8e824c9c01d7d039f33741c0b0136a3950f84b94c42dc6fd203076eeb9ad88"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/children.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/completed.png",
+      "bytes": 134462,
+      "sha256": "b0a2212fd9f8dfce5e324b9f35afef194aab8a38c4ea50948023c15b29504882"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/correction-review.png",
+      "bytes": 136358,
+      "sha256": "cc82641f484eb1d3090ec3748eb7949fdc541b7037baaaf3731f9ae1efed6128"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/final-report.png",
+      "bytes": 99063,
+      "sha256": "60e8613aa6995cf3a0a165c1d67c306c8c882f208df85a493b9f7f36299d3bfe"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-approval.png",
+      "bytes": 102980,
+      "sha256": "7a6655c4db13075fa05a29e80d4d3d55103c8107506a4f852915831634aeb2e2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-completed.png",
+      "bytes": 113310,
+      "sha256": "bd11c5cc8835354907ff96f1c24e5cecd13308cbd309bba8a77c01299a60dd75"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-events.json",
+      "bytes": 111227,
+      "sha256": "24d77af8d5c848b5eabcae3a1e590d476921d0774fe588c509eab77ca31cb3e3"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-history.json",
+      "bytes": 63578,
+      "sha256": "abe6eacc9c8fdd37dbcbce6b764849846146dca870101a5956869f73421c0807"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-operations.json",
+      "bytes": 24032,
+      "sha256": "e726354b20faf301024c608ab878330c5f586a1e5ea4ceea2a109719300f5613"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-proposal.json",
+      "bytes": 20507,
+      "sha256": "8bdd34939553632bdf30711d25f3c0724a287aa4712245128f8ac31508166242"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-request.json",
+      "bytes": 499,
+      "sha256": "96c5401109903215b3fc7db2699adcb2951f7282f4ba8816f0eb49a7982e61b3"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-responses.json",
+      "bytes": 1475573,
+      "sha256": "8658faf7e875455561d3b70fa2db678d238361a2f5a96052d8a08ec848b9aede"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-restored.png",
+      "bytes": 96111,
+      "sha256": "92e118b271de81a9960cf0eb8b14ac4be9d0679925c89efb764e58213cc3f941"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/followup-workspace-after.json",
+      "bytes": 3166,
+      "sha256": "2591497cd3a3ba34d337ced30d42ba241c8c162b9478063acaac1009701fa71f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/history.json",
+      "bytes": 49058,
+      "sha256": "1d1206be224105227af49e0f2af2bc9782f50313d753075b0e73c82beafefc34"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/operations-before-correction.json",
+      "bytes": 41416,
+      "sha256": "b679e10daa4d1d1e381d477aa99ae2d424aaf3c08a29c5d6c66095cfbb96ed55"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/operations.json",
+      "bytes": 44898,
+      "sha256": "375f3e301a574f0dc9229f94db7ab80a34a6de577905c909bb905aa384967a21"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/proposed-changes.png",
+      "bytes": 131594,
+      "sha256": "88672d35c9dcd28e3574c85bf9d97e8975873b3439688f2406a1998197df6117"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/request.json",
+      "bytes": 1277,
+      "sha256": "d9e05234b17fe26c3aec091ef455659a194e3b9953a971558208672219aed2af"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/responses.json",
+      "bytes": 2220570,
+      "sha256": "7ca468820ed167b45546546e72a51b01d72cca1e7ea8b4ac6f3560764a56e623"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/restored.png",
+      "bytes": 90206,
+      "sha256": "865a6e1a5155d42e8540279ffedaa63a628df1fd65c7edfa17e386cb76a62bad"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/reviews.json",
+      "bytes": 30630,
+      "sha256": "1453cacc18a9c0de42089b4aa5444c920e16fb3cad276777b86cd2bbfae76936"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/saved-tree-events.json",
+      "bytes": 475903,
+      "sha256": "38df86ad7b652233f41439f1737e6913368f286387337a834022c1f3831ae045"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/status.json",
+      "bytes": 403,
+      "sha256": "6e41b2400a9bccd2a0dd8705a96d2485cd0e0b36af10984425bf3ac3a5ca42fc"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/workspace-after.json",
+      "bytes": 3166,
+      "sha256": "977f525e01e582e2a8012cd8cc6655b761cb4815481444c4c5e839f548168421"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.27-20261018/workspace-before.json",
+      "bytes": 3056,
+      "sha256": "0a13993428804697d4bfbd3388dc36865979a96849ec8df6bba1c0d43f318200"
+    }
+  ],
+  "documentationUpdatedAfterFrozenClientGate": true,
+  "focusedFixtureLogs": [
+    {
+      "path": "C:/xMindNativeValidation/tool-activity-focused-20261018.log",
+      "sha256": "f539a166a64dceb7ef64004ba700d15a7659fb4129426650dc3c281a1f028bc0"
+    },
+    {
+      "path": "C:/xMindNativeValidation/tool-activity-focused-final-20261018.log",
+      "sha256": "567e216a829ef53dd3e731ba4a053b6313801c3dd354b3f28552537bbbd1284c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/tool-activity-focused-corrected-20261018.log",
+      "sha256": "a05f101213abd11c4115135bbd36252c3f5ae080aab556ca1efd85a023cd7246"
+    },
+    {
+      "path": "C:/xMindNativeValidation/tool-activity-output-focused-20261018.log",
+      "sha256": "d45b14ddf134812c76f114d23ed7b1ca855358327d6bd6130f8dc4040cc62dd8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/tool-activity-output-focused-corrected-20261018.log",
+      "sha256": "f0db66529a30b0dcdb7216647ba15aa53e5c7673d0a64efb860e444844499a91"
+    }
+  ]
+}

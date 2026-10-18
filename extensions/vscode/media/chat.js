@@ -16,6 +16,17 @@ const RUN_ACTIVITY_STREAM_KINDS=new Set(['model.reasoning','model.text','model.r
 const runActivityLineLengths=[];let runActivityCharCount=0;
 let currentOperations=[];
 let pendingOperations=[];
+let operationActivityPhase;
+function syncOperationActivity(){
+  const activity=byId('operation-activity');
+  const empty=currentOperations.length===0&&processStreams.size===0;
+  activity.hidden=empty;
+  const review=currentOperations.some(item=>['awaiting_approval','uncertain','failed'].includes(item.state));
+  const phase=empty?'empty':review?'review':activeRun?'running':'settled';
+  const summary=byId('operation-activity-summary'),label=(currentOperations.length?'Tools and changes · '+currentOperations.length:'Command output · '+processStreams.size)+(review?' · review needed':'');
+  if(summary.textContent!==label)summary.textContent=label;
+  if(phase!==operationActivityPhase){activity.open=phase==='review'||phase==='running';operationActivityPhase=phase;}
+}
 function pendingApprovals(){return pendingOperations.filter(item=>Date.now()<item.expires_unix_ms&&operationRows.get(item.id)?.section.isConnected);}
 function refreshPendingApprovals(){
   const pending=pendingApprovals(),notice=byId('approval-notice'),label=byId('approval-count');
@@ -24,7 +35,7 @@ function refreshPendingApprovals(){
   if(label.textContent!==text)label.textContent=text;
   return pending.length>0;
 }
-byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item)operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});else refreshPendingApprovals();};
+byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item){byId('operation-activity').open=true;operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});}else refreshPendingApprovals();};
 const processStreams=new Map();
 const processArtifactWidgets=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
@@ -367,6 +378,7 @@ function operations(items){
   }
   for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);
   pendingOperations=items.filter(item=>item.state==='awaiting_approval');
+  syncOperationActivity();
   refreshPendingApprovals();
 }
 function operationExtras(section,item,reviewable=true,fileReviewActions=null){
@@ -796,9 +808,10 @@ window.addEventListener('message',event=>{
   else if(m.type==='a2a-task-follow-up'){
     const item=currentOperations.find(operation=>operation.id===m.id),followUp=m.followUp;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&followUp?.operation_id===item.id&&Number.isSafeInteger(followUp.sequence)&&followUp.follow_up_state==='acknowledged'){byId('status').textContent='Remote agent acknowledged your follow-up · '+followUp.task_id;}
   }
-  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
+  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);syncOperationActivity();skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
   else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-resubscribe,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;for(const row of nestedPlanRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.
+  syncOperationActivity();
   if(follow&&!m.preserveOlder&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;
 });api.postMessage({type:'ready'});

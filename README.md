@@ -24,11 +24,16 @@ no Marketplace publication or general release is implied.
 | Clients | All 421 extension and 142 browser fixture tests pass locally and on hosted CI; installed archive/runtime payloads verify. These are separate from rendered UI checks. |
 | Installed live run | Through the normal managed-profile browser launcher, saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process. |
 | Persistence | The current page restores its completed run, eight messages and all 321 saved events without execution replay. Older pages and histories remain preserved. |
-| Still open | Current rendered webpage input/layout and VS Code activation, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
+| Current webpage | Isolated headless Edge completes two real Claude coding turns: reviewed edits, an actual failing test run, agent correction and successful xlang3 runs of 21 then 22 tests. Final answers remain visible with expandable tool activity. |
+| Still open | Actual VS Code activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
 Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
 changes, an actual Vue production build and Python API tests under xlang3.
-History from earlier packages does not establish current rendered acceptance.
+The current development webpage has newer UI assets than the installed VS Code
+package. Its complete local client fixtures pass 422/142; the installed-package
+hosted client checkpoint above remains 421/142. The current webpage restores
+22 messages and both coding runs without replay. Prior package history does
+not substitute for current rendered checks.
 [Exact current evidence and remaining work](doc/VALIDATION_STATUS.md).
 
 ## Use in VS Code
