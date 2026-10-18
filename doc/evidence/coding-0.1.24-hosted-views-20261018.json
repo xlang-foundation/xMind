@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-18T17:33:40.787Z",
+  "runId": 39147762955,
+  "artifactId": 12143897489,
+  "artifactBytes": 306881,
+  "artifactSha256": "8595101f440e1253092f659b742755b2badadb22598354d0fbf1dd9a78a762f8",
+  "sourceRevision": "9eb98708399c32a65177f6d01ef6cc7416d25f1d",
+  "comparedCurrentRevision": "56fb90a9bf08c4f265d9298cfeeb6ec53638162d",
+  "gate": {
+    "sourceRevision": "9eb98708399c32a65177f6d01ef6cc7416d25f1d",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 70,
+    "trackedSourceFiles": 65,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 420,
+      "browser": 142
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 420,
+      "passed": 420,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "exactSourceFiles": 51,
+  "crlfOnlySourceFiles": 19,
+  "exactAssets": 15,
+  "crlfOnlyAssets": 3,
+  "trackedClientGitBlobsUnchanged": true,
+  "sourceAndAssetBeforeAfterUnchanged": true,
+  "scope": "Hosted synthetic Node/JSDOM suites, normalized Windows text comparison explicitly recorded; no native inference or rendered UI."
+}
