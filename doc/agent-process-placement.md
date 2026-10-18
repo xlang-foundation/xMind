@@ -90,6 +90,21 @@ must stay behind a separately versioned/authenticated contract; LRPC remains a
 candidate transport only. The existing xlang3 callable worker is not evidence
 that the coding agent loop can run in another process.
 
+### Current-source authenticated xlang3 tool worker — 2026-10-17
+
+Built `xmind.exe` from xMind `e8782c4` and started its private `worker` mode as
+a child process with a test-only 32-byte capability delivered through stdin.
+A separately compiled C++ xlang3 client verified that an unauthenticated call
+was denied, the HMAC-authenticated handshake succeeded, the trusted fixture
+function returned `{"result":"worker:xMind","count":5}`, and replaying its
+sequence was denied. The worker was then terminated by the test harness. The
+binary and probe digests, runtime pin, fixture, and exact output are recorded in
+[`agent-worker-lrpc-current-source-20261017.json`](evidence/agent-worker-lrpc-current-source-20261017.json).
+
+This verifies the current-source xlang3 callable worker and its request
+authentication. It remains a tool worker; it does not execute `AgentRunner`
+out of process or establish the process-placement target above.
+
 ### Process-tool host seam — 2026-10-18
 
 `AgentRunner` and `GraphRunner` now consume process-tool discovery, invocation,

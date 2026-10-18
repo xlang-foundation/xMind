@@ -1,7 +1,9 @@
 # xMind for VS Code
 
 The current local VSIX is **0.1.13**. The full extension suite passes
-**390/390** ([current run](../../doc/evidence/vscode-client-tests-current-20261016.log)). In an isolated VS Code test profile, the extension created a native
+**392/392** on Node 22.19.0; the browser suite passes **136/136** from the
+repository root. [Current-source test record](../../doc/evidence/client-tests-current-main-20261017.json).
+In an isolated VS Code test profile, the extension created a native
 TestProj view, started its local backend, and imported four provider profiles
 from the configured YAML file. The matching Native `native_local_view_contract`
 passes **1/1**. This verifies current package startup and provider import; the

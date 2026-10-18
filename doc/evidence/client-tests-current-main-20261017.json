@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "xmind_source_revision": "e8782c444e02079f8b54f52804e77046431f6529",
+  "node_version": "v22.19.0",
+  "extension": {
+    "working_directory": "extensions/vscode",
+    "command": "npm test",
+    "passed": 392,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "working_directory": "repository root",
+    "command": "$files = Get-ChildItem views\\browser\\tests -Filter '*.test.cjs'; node --test $files",
+    "passed": 136,
+    "failed": 0,
+    "skipped": 0
+  },
+  "scope": "Browser and VS Code client contracts; these are not live installed-client acceptance."
+}

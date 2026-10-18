@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current-source native xlang3 callable worker process and authenticated LRPC request",
+  "xmind_source_revision": "e8782c444e02079f8b54f52804e77046431f6529",
+  "xmind_executable": {
+    "path": "C:\\xMindNativeValidation\\xmind-worker-current-source\\Native\\Release\\xmind.exe",
+    "sha256": "4790c752445f89c4f76221f27008c8b56151a39408da7c603bb9334d2254daf6"
+  },
+  "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "xlang3_runtime_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+  "worker_sources": {
+    "Native/src/agent_worker.cpp": "f3d3456263b39ed09a23d7bf4090fc27bad0cc74b4236a2017cb7a371c6661c9",
+    "Native/worker/agent_worker.py": "ef0032c8d5c820174ef2eceab74c1d951724772b225482766e4d85acf6133220",
+    "Native/tests/fixtures/agent_worker_fixture.py": "0820a152cfa3eed38af457af3bad8a8481cd8a63c3e38d28ab2a05cb6e553217"
+  },
+  "probe": {
+    "kind": "temporary C++ client using the xlang3 native runtime API",
+    "source_sha256": "cd961812c01eb84a348f3d5feef824c48643a37d7856f4380502a2dfa6f6fec9a",
+    "executable_sha256": "ece75d8a104264c2f849ad7e627969a03720c3f714c37dbb0d6b4faacf676aa9"
+  },
+  "result": {
+    "unauthenticated_call": "denied",
+    "capability_handshake": "accepted",
+    "authenticated_transform": "{\"result\":\"worker:xMind\",\"count\":5}",
+    "replayed_sequence": "denied",
+    "stdout": "unauthenticated=denied handshake=accepted invoke={\"result\":\"worker:xMind\",\"count\":5} replay=denied",
+    "worker_terminated_after_test": true
+  },
+  "limitations": [
+    "The probe and its test-only capability are outside the xMind repository.",
+    "The fixture is pure Python executed by xlang3; no CPython executable was invoked.",
+    "This validates the xlang3 callable worker only, not out-of-process AgentRunner execution, durable recovery, or UI acceptance."
+  ]
+}
