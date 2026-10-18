@@ -113,9 +113,10 @@ int main(int argc,char** argv){
                 }
                 if(name=="save_key_only"){
                     const auto revision=command.at("revision").get<std::int64_t>();require(runtime.configuration().revision==revision,"Key-only profile fixture must use the observed revision");
+                    const auto previous_active=runtime.configuration().active;
                     const auto path=root/"key-only-provider.yaml";{std::ofstream file(path,std::ios::binary);file<<"version: 1\nactive_profile: openai-key-only\nprofiles:\n  openai-key-only:\n    route: openai.chat\n    api_key: synthetic-profile-cli-openai-key-not-live\n";require(static_cast<bool>(file),"Synthetic key-only profile fixture must be written");}
                     const auto saved=runtime.import_yaml_configuration(path,revision);std::filesystem::remove(path);
-                    require(saved.revision==revision+1&&saved.active=="openai-key-only","Native fixture must save and activate a key-only profile");
+                    require(saved.revision==revision+1&&saved.active==previous_active,"First file attachment must save the key-only profile while preserving the user's existing provider selection");
                     const auto profile=std::find_if(saved.profiles.begin(),saved.profiles.end(),[](const auto& value){return value.id=="openai-key-only";});
                     require(profile!=saved.profiles.end()&&profile->model.empty(),"Key-only fixture must have no default model");
                     std::cout<<Json{{"type","fixture_profile_saved"},{"revision",saved.revision},{"active",saved.active}}.dump()<<'\n'<<std::flush;continue;
