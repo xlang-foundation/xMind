@@ -2,7 +2,7 @@
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 const patchReview=globalThis.XMindPatchReview.patchReview;
 const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
-let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null,promptFiles=[];
+let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null,promptFiles=[],historySignature;
 let renameCapability=false,forkCapability=false,deleteCapability=false,deletePending=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
 let currentWorkspaceRoot;
@@ -79,6 +79,23 @@ function markdown(el,text){
   for(const anchor of el.querySelectorAll('a')){anchor.addEventListener('click',event=>{event.preventDefault();api.postMessage({type:'openLink',url:anchor.getAttribute('href')});});}
   for(const block of el.querySelectorAll('pre')){const button=node('button','Copy code','copy-code');button.onclick=()=>api.postMessage({type:'copy',text:block.querySelector('code')?.textContent||block.textContent});block.after(button);}
 }
+// Accumulate stream text immediately, but parse/sanitize each live body once
+// per frame. Terminal events flush synchronously; retired nodes never repaint.
+const pendingMarkdown=new Map();let markdownFrame;
+const requestPaint=callback=>typeof requestAnimationFrame==='function'?requestAnimationFrame(callback):setTimeout(callback,16);
+const cancelPaint=id=>typeof cancelAnimationFrame==='function'?cancelAnimationFrame(id):clearTimeout(id);
+function cancelEmptyMarkdownFrame(){if(!pendingMarkdown.size&&markdownFrame!==undefined){cancelPaint(markdownFrame);markdownFrame=undefined;}}
+function queueMarkdown(el,text){
+  pendingMarkdown.set(el,text);if(markdownFrame!==undefined)return;
+  markdownFrame=requestPaint(()=>{
+    markdownFrame=undefined;const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
+    const updates=[...pendingMarkdown];pendingMarkdown.clear();let painted=false;
+    for(const [body,value]of updates)if(body.isConnected){markdown(body,value);painted=true;}
+    if(painted&&follow&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;
+  });
+}
+function flushMarkdown(el){if(!pendingMarkdown.has(el))return;const text=pendingMarkdown.get(el);pendingMarkdown.delete(el);if(el.isConnected)markdown(el,text);cancelEmptyMarkdownFrame();}
+function discardMarkdown(container){for(const body of pendingMarkdown.keys())if(container.contains(body))pendingMarkdown.delete(body);cancelEmptyMarkdownFrame();}
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
 const providerWireLabels={'chat-completions':'Chat Completions',responses:'Responses','anthropic-messages':'Messages','gemini-generate-content':'GenerateContent'};
 const providerWireLabel=value=>typeof value==='string'&&Object.hasOwn(providerWireLabels,value)?providerWireLabels[value]:undefined;
@@ -202,7 +219,7 @@ function entry(role,data,parent=byId('history'),messageId){
   parent.append(card);return card;
 }
 const olderHistoryButton=node('button','Load older messages','history-older');olderHistoryButton.id='history-older';olderHistoryButton.type='button';olderHistoryButton.hidden=true;olderHistoryButton.onclick=()=>{olderHistoryButton.disabled=true;api.postMessage({type:'history-older'});};byId('history').parentNode.insertBefore(olderHistoryButton,byId('history'));
-function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
+function resetLive(){if(live)discardMarkdown(live);byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;}
 const protocolDiagnosticCodes=new Set([
   'responses_function_final_mismatch','responses_arguments_mismatch','responses_terminal_mismatch',
@@ -263,9 +280,9 @@ function runFailure(data){
     if(lines.length){const detail=node('details');detail.open=true;detail.append(node('summary','Recorded provider diagnostics'),node('pre',lines.join('\n')));card.append(detail);}
   }
   card.append(node('p','This is a backend execution result. Select another run above to inspect its outcome.','inspection-note'));
-  if(live)live.classList.remove('streaming');
+  if(live){flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}
 }
-function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
+function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;queueMarkdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
   currentOperations=items;
   const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
@@ -428,7 +445,7 @@ function ownedEvent(message){
   if(row.state!=='running'||!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
   if(event.kind==='model.text'||event.kind==='model.refusal')row.text+=event.data.text;if(event.kind==='model.usage')row.usage=event.data;
   if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · child response'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
-  markdown(row.stream.querySelector('.message-body'),row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done')row.stream.firstChild.classList.remove('streaming');
+  const body=row.stream.querySelector('.message-body');if(event.kind==='model.text'||event.kind==='model.refusal')queueMarkdown(body,row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done'){flushMarkdown(body);row.stream.firstChild.classList.remove('streaming');}
 }
 let displayedPlan;const planRows=new Map(),nestedPlanRows=new Map();
 function clearPlan(){displayedPlan=undefined;planRows.clear();nestedPlanRows.clear();byId('plan-view').replaceChildren();byId('plan-view').hidden=true;}
@@ -533,7 +550,7 @@ function graphView(record,children,histories){
   for(const state of record.checkpoint.nodes){
     let row=graphRows.get(state.id);
     if(!row){const card=node('section',undefined,'graph-node'),heading=node('h4'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};graphRows.set(state.id,row);byId('graph-view').append(card);}
-    const definition=definitions.get(state.id),child=children.find(c=>c.node_id===state.id);row.heading.textContent=state.id+' · '+definition.type+' · '+state.state;
+    const definition=definitions.get(state.id),child=children.find(c=>c.node_id===state.id);row.childState=child?.state;row.heading.textContent=state.id+' · '+definition.type+' · '+state.state;
     const waiting=definition.type==='human'&&state.state==='waiting_human'&&['paused','running'].includes(record.run.state);
     if(waiting){
       if(!row.form){row.body.replaceChildren();row.body.append(node('p',definition.prompt||'Provide input'));const form=node('form',undefined,'graph-input'),label=node('label','JSON input'),input=node('textarea'),button=node('button','Submit answer','primary');input.setAttribute('aria-label','JSON input for '+state.id);input.placeholder='{}';input.maxLength=65536;button.type='submit';label.append(input);form.append(label,node('p','Input supplies data; it does not approve tools or commands.','inspection-note'),button);row.body.append(form);row.form=form;row.input=input;row.button=button;
@@ -543,6 +560,7 @@ function graphView(record,children,histories){
       const signature=JSON.stringify(state.output);if(row.form||row.outputSignature!==signature){row.form=undefined;row.body.replaceChildren();if(state.output!==undefined){const detail=node('details');detail.append(node('summary','Observed output'),node('pre',JSON.stringify(state.output,null,2)));row.body.append(detail);}row.outputSignature=signature;}
     }
     if(child && histories[child.id]){const history=histories[child.id],signature=JSON.stringify(history);if(row.historySignature!==signature){row.responses.replaceChildren();for(const item of history)if(item.role!=='user')entry(item.role,item.data,row.responses);row.historySignature=signature;row.stream.replaceChildren();row.text='';row.usage=undefined;}}
+    if(['completed','failed','cancelled'].includes(row.childState)){discardMarkdown(row.stream);row.stream.replaceChildren();row.text='';row.usage=undefined;}
   }
 }
 let displayedContext,contextSubmitting=false;
@@ -560,11 +578,12 @@ function graphEvent(message){
   const event=message.event;appendRunActivity(event);if(event.kind==='process.output'){processOutput(event.data);return;}
   const row=graphRows.get(message.node_id);if(!row)return;
   if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn'){row.stream.replaceChildren();row.text='';row.usage=undefined;return;}
+  if(['completed','failed','cancelled'].includes(row.childState))return;
   if(!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
   if(event.kind==='model.text'||event.kind==='model.refusal')row.text+=event.data.text;
   if(event.kind==='model.usage')row.usage=event.data;
   if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · '+message.node_id),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
-  markdown(row.stream.querySelector('.message-body'),row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done')row.stream.firstChild.classList.remove('streaming');
+  const body=row.stream.querySelector('.message-body');if(event.kind==='model.text'||event.kind==='model.refusal')queueMarkdown(body,row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done'){flushMarkdown(body);row.stream.firstChild.classList.remove('streaming');}
 }
 byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});refreshSendControl();};
 function showPromptFiles(){const list=byId('prompt-files');list.replaceChildren();list.hidden=!promptFiles.length;for(const file of promptFiles){const item=node('span',file.path,'prompt-file');const remove=node('button','×');remove.type='button';remove.title='Remove '+file.path;remove.setAttribute('aria-label','Remove '+file.path);remove.onclick=()=>{promptFiles=promptFiles.filter(value=>value!==file);showPromptFiles();api.postMessage({type:'prompt-files-change',files:promptFiles});};item.append(remove);list.append(item);}}
@@ -666,6 +685,7 @@ window.addEventListener('message',event=>{
   if(globalThis.xMindView&&(event.source!==window||event.origin!==location.origin))return;
   const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80,priorHeight=scroll.scrollHeight,priorTop=scroll.scrollTop;
+  if(m.type==='workspace-clear')historySignature=undefined;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
   else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;promptFiles=[];showPromptFiles();clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
   else if(m.type==='prompt-files'){if(Array.isArray(m.files)&&m.files.length<=32&&m.files.every(file=>file&&typeof file.path==='string'&&typeof file.folder_id==='string')){promptFiles=m.files;showPromptFiles();}}
@@ -705,7 +725,12 @@ window.addEventListener('message',event=>{
     refreshSendControl();
   }
   else if(m.type==='reset-run'){operations([]);clearPlan();clearMcpInputs();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);}
+  else if(m.type==='history'||m.type==='transcript'){
+    const signature=JSON.stringify(m.history),changed=m.type==='history'||signature!==historySignature;
+    if(changed){byId('history').replaceChildren();forkButtons.clear();for(const item of m.history)entry(item.role,item.data,undefined,item.id);historySignature=signature;}
+    if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}
+    olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);
+  }
   else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready; the file change still requires approval.';}}}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
@@ -733,7 +758,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-inputs'){renderMcpInputs(m.requests);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;deleteCapability=m.sessionDeletion===true;refreshRename();refreshForkControls();refreshDeleteControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){const card=entry('user',{content:m.text});if(Array.isArray(m.files)&&m.files.length){const list=node('div',undefined,'message-files');for(const file of m.files)if(typeof file.path==='string')list.append(node('span',file.path,'prompt-file'));card.append(list);}resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
+  else if(m.type==='user'){historySignature=undefined;const card=entry('user',{content:m.text});if(Array.isArray(m.files)&&m.files.length){const list=node('div',undefined,'message-files');for(const file of m.files)if(typeof file.path==='string')list.append(node('span',file.path,'prompt-file'));card.append(list);}resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
     if(!currentWorkspaceRoot||m.root!==currentWorkspaceRoot||typeof m.text!=='string'||!m.text||m.text.length>49152)return;
@@ -741,7 +766,7 @@ window.addEventListener('message',event=>{
     if(combined.length>262144){byId('status').textContent='Context was not added: the draft is too large. Select a smaller range.';return;}
     prompt.value=combined;resizePrompt();prompt.focus();
   }
-  else if(m.type==='event'){const event=m.event;appendRunActivity(event);if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
+  else if(m.type==='event'){const event=m.event;appendRunActivity(event);if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live){flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
     operations(m.operations);
   }

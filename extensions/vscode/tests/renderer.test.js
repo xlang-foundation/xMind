@@ -3,7 +3,7 @@
 // interactive preview, and these tests do not claim live model execution.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('jsdom');const {html}=require('../webview');
-function renderer(){
+function renderer({batchFrames=false}={}){
   const dom=new JSDOM(html('fixture-nonce',{source:'https://fixture',css:'fixture.css',marked:'marked.js',purify:'purify.js',script:'chat.js'}),{runScripts:'outside-only'}),posted=[];
   // JSDOM has no native dialog methods. Model only that browser platform API;
   // the production handlers and messages remain under test.
@@ -13,12 +13,82 @@ function renderer(){
   dom.window.addEventListener('error',event=>{callbackErrors.push(event.error?.message??event.message);event.preventDefault();});
   const closeWindow=dom.window.close.bind(dom.window);
   dom.window.close=()=>{closeWindow();assert.deepEqual(callbackErrors,[],'Renderer event callbacks must not fail silently');};
+  const frames=new Map();let frameId=0;
+  dom.window.requestAnimationFrame=callback=>{frames.set(++frameId,callback);return frameId;};dom.window.cancelAnimationFrame=id=>frames.delete(id);
+  const paint=()=>{const pending=[...frames.values()];frames.clear();for(const callback of pending)callback(0);};
   dom.window.acquireVsCodeApi=()=>({postMessage:message=>posted.push(message)});
   dom.window.TextDecoder=TextDecoder;
   dom.window.TextEncoder=TextEncoder;
   for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
-  return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
+  return {dom,posted,paint,pendingFrames:()=>frames.size,send:data=>{dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}));if(!batchFrames)paint();}};
 }
+test('stream text is accumulated before one sanitized frame and terminal text flushes without another frame',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document;
+ try{
+  for(const text of ['# Fixture\n\n','**safe**\n\n','```js\n','const answer = 42;\n','```\n','<script>fixtureAttack()</script>'])r.send({type:'event',event:{kind:'model.text',data:{text}}});
+  assert.equal(r.pendingFrames(),1);assert.equal(doc.querySelector('#live .message-body').textContent,'');r.paint();
+  assert.equal(r.pendingFrames(),0);assert.equal(doc.querySelector('#live strong').textContent,'safe');assert.equal(doc.querySelector('#live script'),null);doc.querySelector('#live .copy-code').click();assert.equal(r.posted.at(-1).text,'const answer = 42;\n');
+  r.send({type:'event',event:{kind:'model.text',data:{text:'\nFinal fixture text'}}});r.send({type:'event',event:{kind:'model.usage',data:{prompt_tokens:7,completion_tokens:3}}});assert.equal(r.pendingFrames(),1);
+  r.send({type:'event',event:{kind:'model.done',data:{}}});assert.equal(r.pendingFrames(),0);assert.match(doc.querySelector('#live .message-body').textContent,/Final fixture text/);assert.equal(doc.querySelector('#live .streaming'),null);assert.match(doc.querySelector('#live .metrics').textContent,/Input 7Output 3Total —/);
+ }finally{r.dom.window.close();}
+});
+
+test('queued stream work cannot repaint a replacement conversation or an obsolete child',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document;
+ try{
+  r.send({type:'event',event:{kind:'model.text',data:{text:'Retired root fixture'}}});r.send({type:'history',history:[{id:'msg_1',role:'assistant',data:{content:'Replacement fixture'}}]});assert.equal(r.pendingFrames(),0);r.paint();assert.equal(doc.querySelector('#live').textContent,'');assert.ok(!doc.body.textContent.includes('Retired root fixture'));
+  r.send({type:'owned-children',parent:{id:'parent',state:'running'},children:[{run:{id:'child',parent_id:'parent',state:'running'},preset_id:'workspace.inspect',preset_revision:1,task_id:'child'}],histories:{child:[]}});r.send({type:'owned-event',child_id:'child',event:{kind:'model.text',data:{text:'Retired child fixture'}}});r.send({type:'owned-clear'});r.paint();assert.ok(!doc.body.textContent.includes('Retired child fixture'));assert.equal(doc.querySelector('#history .message-body').textContent.trim(),'Replacement fixture');
+ }finally{r.dom.window.close();}
+});
+
+test('graph and delegated response bodies share frames within their views and retain independent terminal metrics',()=>{
+ for(const kind of ['graph','owned']){
+  const r=renderer({batchFrames:true}),doc=r.dom.window.document,selector=kind==='graph'?'#graph-view':'#owned-view';
+  const send=(id,event)=>r.send(kind==='graph'?{type:'graph-event',node_id:id,event}:{type:'owned-event',child_id:id,event});
+  try{
+   if(kind==='graph'){const fixture=graphRenderFixture();fixture.histories={'child-worker':[],'child-other':[]};fixture.children[0].state='running';fixture.record.spec.nodes.push({id:'other',type:'agent'});fixture.record.checkpoint.nodes.push({id:'other',state:'running'});fixture.children.push({id:'child-other',node_id:'other',state:'running'});r.send(fixture);}
+   else r.send({type:'owned-children',parent:{id:'parent',state:'running'},children:['worker','other'].map(id=>({run:{id,parent_id:'parent',state:'running'},preset_id:'workspace.inspect',preset_revision:1,task_id:id})),histories:{worker:[],other:[]}});
+   for(const id of ['worker','other'])for(const text of [id+' ','fixture'])send(id,{kind:'model.text',data:{text}});assert.equal(r.pendingFrames(),1);r.paint();assert.match(doc.querySelector(selector).textContent,/worker fixture/);assert.match(doc.querySelector(selector).textContent,/other fixture/);
+   for(const id of ['worker','other'])send(id,{kind:'model.text',data:{text:' completed'}});send('worker',{kind:'model.usage',data:{prompt_tokens:11,completion_tokens:2}});send('other',{kind:'model.usage',data:{prompt_tokens:3,completion_tokens:5}});for(const id of ['worker','other'])send(id,{kind:'model.done',data:{}});
+   assert.equal(r.pendingFrames(),0);const metrics=doc.querySelectorAll(selector+' .graph-live .metrics');assert.equal(metrics.length,2);assert.match(metrics[0].textContent,/Input 11Output 2Total —/);assert.match(metrics[1].textContent,/Input 3Output 5Total —/);assert.match(doc.querySelector(selector).textContent,/worker fixture completed/);assert.match(doc.querySelector(selector).textContent,/other fixture completed/);
+  }finally{r.dom.window.close();}
+ }
+});
+
+test('a queued Markdown frame honors a user scroll that happens after the stream event',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document,scroll=doc.getElementById('scroll');let position=900,writes=0;
+ try{Object.defineProperties(scroll,{scrollHeight:{get:()=>1000},clientHeight:{get:()=>100},scrollTop:{get:()=>position,set:value=>{position=value;writes++;}}});r.send({type:'event',event:{kind:'model.text',data:{text:'Fixture output'}}});position=100;const before=writes;r.paint();assert.equal(position,100);assert.equal(writes,before);}finally{r.dom.window.close();}
+});
+
+test('terminal graph children display their saved responses without synthesizing a second live answer from replay',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document;
+ try{r.send(graphRenderFixture());r.send({type:'graph-event',node_id:'worker',event:{kind:'model.text',data:{text:'Retired graph replay fixture'}}});r.send({type:'graph-event',node_id:'worker',event:{kind:'model.usage',data:{prompt_tokens:999}}});r.paint();const worker=[...doc.querySelectorAll('#graph-view .graph-node')].find(row=>row.querySelector('h4').textContent.startsWith('worker ·'));assert.ok(!worker.textContent.includes('Retired graph replay fixture'));assert.equal(worker.querySelector('.graph-live .message'),null);assert.match(worker.querySelector('.graph-responses').textContent,/Synthetic child response/);assert.match(worker.querySelector('.graph-responses .metrics').textContent,/Input 12Output 7Total 19/);}finally{r.dom.window.close();}
+});
+
+test('a graph child becoming terminal retires its pending frame even before another history observation',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document,fixture=graphRenderFixture();fixture.children[0].state='running';fixture.histories={'child-worker':[]};
+ try{r.send(fixture);r.send({type:'graph-event',node_id:'worker',event:{kind:'model.text',data:{text:'Unrecorded partial graph fixture'}}});assert.equal(r.pendingFrames(),1);fixture.children[0].state='cancelled';r.send(fixture);assert.equal(r.pendingFrames(),0);r.paint();assert.ok(!doc.querySelector('#graph-view').textContent.includes('Unrecorded partial graph fixture'));assert.equal(doc.querySelector('#graph-view .graph-live .message'),null);}finally{r.dom.window.close();}
+});
+
+test('a queued Markdown frame preserves focused approval controls and does not dispatch a decision',()=>{
+ const r=renderer({batchFrames:true}),doc=r.dom.window.document,scroll=doc.getElementById('scroll');let writes=0;
+ try{Object.defineProperties(scroll,{scrollHeight:{get:()=>500},clientHeight:{get:()=>100},scrollTop:{get:()=>400,set:()=>writes++}});r.send({type:'operations',operations:[{id:'pending-frame',run_id:'run',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'fixture.py',after_content:'pass\n'}),result_json:'{}'}]});const allow=[...doc.querySelectorAll('#operations button')].find(button=>button.textContent==='Allow creation');allow.focus();const before=r.posted.length;
+  r.send({type:'event',event:{kind:'model.text',data:{text:'Fixture output while approval is pending'}}});r.paint();assert.equal(doc.activeElement,allow);assert.equal(writes,0);assert.equal(r.posted.length,before);assert.equal(allow.disabled,false);
+ }finally{r.dom.window.close();}
+});
+
+test('unchanged transcript keeps history nodes and open tool details while pagination controls update',()=>{
+ const r=renderer(),doc=r.dom.window.document,history=[{id:'msg_1',role:'assistant',data:{content:'Fixture response',tool_calls:[{id:'call',name:'read_file',arguments:'{}'}],usage:{prompt_tokens:4,completion_tokens:2}}}];
+ try{r.send({type:'history',history});const card=doc.querySelector('#history .message'),detail=card.querySelector('details');detail.open=true;r.send({type:'transcript',history:structuredClone(history),historyHasMore:true,historyLoading:true});assert.equal(doc.querySelector('#history .message'),card);assert.equal(detail.open,true);assert.equal(doc.getElementById('history-older').hidden,false);assert.equal(doc.getElementById('history-older').disabled,true);
+  const changed=structuredClone(history);changed[0].data.usage.prompt_tokens=5;r.send({type:'transcript',history:changed});assert.notEqual(doc.querySelector('#history .message'),card);assert.match(doc.querySelector('#history .metrics').textContent,/Input 5Output 2/);
+ }finally{r.dom.window.close();}
+});
+
+test('explicit history replacement and optimistic user rows cannot reuse a stale transcript cache',()=>{
+ const r=renderer(),doc=r.dom.window.document,history=[{id:'msg_1',role:'assistant',data:{content:'Same fixture text'}}];
+ try{r.send({type:'history',history});const card=doc.querySelector('#history .message');r.send({type:'history',history:structuredClone(history)});assert.notEqual(doc.querySelector('#history .message'),card);const priorWorkspace=doc.querySelector('#history .message');r.send({type:'workspace-clear'});r.send({type:'transcript',history:structuredClone(history)});assert.notEqual(doc.querySelector('#history .message'),priorWorkspace);r.send({type:'user',text:'Optimistic fixture'});assert.equal(doc.querySelectorAll('#history .message').length,2);r.send({type:'transcript',history:structuredClone(history)});assert.equal(doc.querySelectorAll('#history .message').length,1);assert.ok(!doc.querySelector('#history').textContent.includes('Optimistic fixture'));}finally{r.dom.window.close();}
+});
+
 test('named agent picker shows primary agents and hides subagent and hidden definitions',()=>{
  const r=renderer(),doc=r.dom.window.document;try{r.send({type:'agent-selection',catalogue:{agents:[{id:'reviewer.v1',revision:2,model_id:'claude-sonnet',name:'Repository Reviewer',description:'Reviews changes with source evidence.',mode:'primary',hidden:false,default:true,permissions:[{action:'read_file',resource:'**/.env*',effect:'deny'},{action:'read_file',resource:'.env.example',effect:'allow'}]},{id:'delegate.v1',revision:1,model_id:'claude-sonnet',name:'Delegated Reviewer',description:'Subagent.',mode:'subagent',hidden:false,default:false},{id:'hidden.v1',revision:1,model_id:'claude-sonnet',name:'Hidden Reviewer',description:'Hidden.',mode:'all',hidden:true,default:false}]},selection:{session_id:'session-1',revision:3,editable:true,selected:{id:'reviewer.v1',revision:2,model_id:'claude-sonnet',name:'Repository Reviewer',description:'Reviews changes with source evidence.',mode:'primary',hidden:false,default:true,permissions:[{action:'read_file',resource:'**/.env*',effect:'deny'},{action:'read_file',resource:'.env.example',effect:'allow'}]}}});const option=doc.querySelector('#agent option[value="reviewer.v1"]');assert.equal(option.textContent,'Repository Reviewer · claude-sonnet · default');assert.equal(option.title,'Primary agent · Default for new conversations. Repository Reviewer — Reviews changes with source evidence. Ordered rules: deny read_file **/.env*; allow read_file .env.example');assert.equal(doc.querySelector('#agent option[value="delegate.v1"]'),null);assert.equal(doc.querySelector('#agent option[value="hidden.v1"]'),null);assert.equal(doc.getElementById('agent-status').textContent,'Conversation agent · Repository Reviewer');}finally{r.dom.window.close();}
 });
@@ -779,7 +849,7 @@ test('graph human form preserves a draft across checkpoints and sends raw input 
  fixture.record.run.state='completed';fixture.record.checkpoint.nodes[0]={id:'answer',state:'completed',output:{accepted:true}};r.send(fixture);assert.equal(doc.querySelector('.graph-input'),null);r.send({type:'graph-clear'});assert.equal(doc.getElementById('graph-view').hidden,true);r.dom.window.close();
 });
 test('graph child responses retain actual supplied per-response metrics independently of the root transcript',()=>{
- const r=renderer(),doc=r.dom.window.document;r.send(graphRenderFixture());const worker=[...doc.querySelectorAll('.graph-node')].find(row=>row.querySelector('h4').textContent.startsWith('worker ·')),child=worker.querySelector('.graph-responses');assert.ok(child.textContent.includes('Synthetic child response'));assert.ok(child.textContent.includes('Input 12'));assert.ok(child.textContent.includes('Output 7'));assert.equal(doc.getElementById('history').children.length,0);assert.equal(doc.getElementById('live').children.length,0);
+ const r=renderer(),doc=r.dom.window.document,fixture=graphRenderFixture();fixture.children[0].state='running';fixture.record.checkpoint.nodes.find(node=>node.id==='worker').state='running';r.send(fixture);const worker=[...doc.querySelectorAll('.graph-node')].find(row=>row.querySelector('h4').textContent.startsWith('worker ·')),child=worker.querySelector('.graph-responses');assert.ok(child.textContent.includes('Synthetic child response'));assert.ok(child.textContent.includes('Input 12'));assert.ok(child.textContent.includes('Output 7'));assert.equal(doc.getElementById('history').children.length,0);assert.equal(doc.getElementById('live').children.length,0);
  r.send({type:'graph-event',node_id:'worker',event:{run_id:'child-worker',kind:'model.text',data:{text:'Synthetic next turn'}}});r.send({type:'graph-event',node_id:'worker',event:{run_id:'child-worker',kind:'model.usage',data:{prompt_tokens:9,completion_tokens:3,total_tokens:12}}});assert.ok(worker.querySelector('.graph-live').textContent.includes('Input 9'));assert.equal(doc.getElementById('live').children.length,0);r.dom.window.close();
 });
 test('footer workflow chooser enables a real advertised tool graph on a model-free backend',()=>{

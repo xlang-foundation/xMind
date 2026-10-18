@@ -1,0 +1,246 @@
+{
+  "recordedAt": "2026-10-18T12:53:05.642Z",
+  "sourceBase": "26daafbeae5e7ed9cc14a8ac74626c4147956201",
+  "scope": "Actual saved ModelZoo events/history replayed through the production renderer in JSDOM with explicit frame/DOM/VS Code API fixtures. No inference or actual desktop browser responsiveness claim.",
+  "changes": [
+    "Retain unchanged transcript DOM, open details and selected text instead of rebuilding it; reset the cache on explicit history/workspace replacement or optimistic user insertion.",
+    "Accumulate live Markdown per response and parse/sanitize at most once per frame; final model/failure events flush synchronously.",
+    "Retire pending work on disconnected/reset nodes and completed graph children; completed-child replay cannot synthesize another live response.",
+    "Keep per-response metrics, code copying, safe Markdown, user scrolling and pending approval focus/authorization behavior."
+  ],
+  "before": {
+    "mode": "baseline-verified",
+    "sourcePath": "C:/xMindNativeValidation/renderer-0.1.18-chat-baseline-20261018.js",
+    "sourceSha256": "de0d1c4bbe8f4d3579ba0612b48bc97e515ef0cc93894fcf4a57d02e194ec9b7",
+    "scope": "Unpaced replay of 680 actual native events and actual 12-message history through production renderer in JSDOM. Frame batch sizes are synthetic; elapsed script work is not actual browser latency or live inference.",
+    "rows": [
+      {
+        "syntheticEventsPerFrame": 1,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 204,
+          "parsedCharacters": 107448
+        },
+        "repeatedHistoryMarkdownCalls": 7,
+        "historyNodeRetained": false,
+        "toolDetailRetained": false,
+        "openToolDetailPreserved": false,
+        "errors": [],
+        "domScriptWorkMs": 515,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      },
+      {
+        "syntheticEventsPerFrame": 8,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 204,
+          "parsedCharacters": 107448
+        },
+        "repeatedHistoryMarkdownCalls": 7,
+        "historyNodeRetained": false,
+        "toolDetailRetained": false,
+        "openToolDetailPreserved": false,
+        "errors": [],
+        "domScriptWorkMs": 415,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      },
+      {
+        "syntheticEventsPerFrame": 64,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 204,
+          "parsedCharacters": 107448
+        },
+        "repeatedHistoryMarkdownCalls": 7,
+        "historyNodeRetained": false,
+        "toolDetailRetained": false,
+        "openToolDetailPreserved": false,
+        "errors": [],
+        "domScriptWorkMs": 386,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      }
+    ]
+  },
+  "after": {
+    "mode": "candidate-verified",
+    "sourcePath": "D:/CantorAI2026/xMind/extensions/vscode/media/chat.js",
+    "sourceSha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+    "scope": "Unpaced replay of 680 actual native events and actual 12-message history through production renderer in JSDOM. Frame batch sizes are synthetic; elapsed script work is not actual browser latency or live inference.",
+    "rows": [
+      {
+        "syntheticEventsPerFrame": 1,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 204,
+          "parsedCharacters": 107448
+        },
+        "repeatedHistoryMarkdownCalls": 0,
+        "historyNodeRetained": true,
+        "toolDetailRetained": true,
+        "openToolDetailPreserved": true,
+        "errors": [],
+        "domScriptWorkMs": 494,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      },
+      {
+        "syntheticEventsPerFrame": 8,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 32,
+          "parsedCharacters": 15613
+        },
+        "repeatedHistoryMarkdownCalls": 0,
+        "historyNodeRetained": true,
+        "toolDetailRetained": true,
+        "openToolDetailPreserved": true,
+        "errors": [],
+        "domScriptWorkMs": 144,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      },
+      {
+        "syntheticEventsPerFrame": 64,
+        "events": 680,
+        "stream": {
+          "markdownCalls": 9,
+          "parsedCharacters": 3381
+        },
+        "repeatedHistoryMarkdownCalls": 0,
+        "historyNodeRetained": true,
+        "toolDetailRetained": true,
+        "openToolDetailPreserved": true,
+        "errors": [],
+        "domScriptWorkMs": 102,
+        "savedMessages": 12,
+        "historyContentSha256": "bc3b98a0c033119280ef987b6d48a959c0d8ee8a59e5e09157030343a695edc0",
+        "completedStreamsSha256": "02762f4315d3dfbef7d37055a757d12fe9a4ff28577373753bd1ae092bf2eee6",
+        "metrics": [
+          "Input (uncached) 8,420Output 163Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.20s2.88s",
+          "Profile xlang3PID 6017636.94s",
+          "Input (uncached) 11,776Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.14s3.13s",
+          "Profile xlang3PID 637646.35s",
+          "Input (uncached) 12,546Output 149Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.86s2.64s",
+          "Profile powershellPID 191082.19s",
+          "Input (uncached) 12,923Output 134Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.03s2.11s",
+          "Profile powershellPID 616762.24s",
+          "Input (uncached) 13,961Output 760Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 0.93s13.91s",
+          "Input (uncached) 14,852Output 567Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 2.05s10.38s"
+        ]
+      }
+    ]
+  },
+  "checks": {
+    "extension": 412,
+    "browser": 138,
+    "newRendererRegressions": 9,
+    "native": "Unchanged; prior 148/148 native Release result at 0e35ac3 remains its evidence. No native rebuild/rerun for this renderer-only change."
+  },
+  "comparison": {
+    "completedResponseTextAndMetricsIdentical": true,
+    "normalizedSavedHistoryHtmlIdentical": true,
+    "savedMessages": 12,
+    "synthetic8EventsPerFrame": {
+      "beforeMarkdownCalls": 204,
+      "afterMarkdownCalls": 32
+    },
+    "singleEventPerFrame": "Both perform 204 parses; no batching speedup is claimed when chunks are already separated by frames.",
+    "repeatedUnchangedHistoryMarkdownCalls": {
+      "before": 7,
+      "after": 0
+    }
+  },
+  "fixtureCorrection": "A prior graph-metrics fixture described a completed child while sending its next model turn. That next-turn case now uses a running child; a separate regression verifies completed-child replay rejection.",
+  "installedVersion": "0.1.18",
+  "newRendererInstalled": false,
+  "xlang3Changed": false,
+  "CPythonExecuted": false,
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "logs": {
+    "vscode-0.1.19-extension-tests-20261018.log": {
+      "path": "C:/xMindNativeValidation/vscode-0.1.19-extension-tests-20261018.log",
+      "sha256": "3670bffdea673a0c22d67a946d9254684b1b73080f9b40215180038d6a4bf58b"
+    },
+    "vscode-0.1.19-browser-tests-20261018.log": {
+      "path": "C:/xMindNativeValidation/vscode-0.1.19-browser-tests-20261018.log",
+      "sha256": "1f483f65dd153090dcaeaf0870da551149fdffe64f023718ba17b5f296e84874"
+    },
+    "modelzoo-renderer-baseline-verified-20261018.log": {
+      "path": "C:/xMindNativeValidation/modelzoo-renderer-baseline-verified-20261018.log",
+      "sha256": "81c2e5ef10f07f19838b17a4eb566342e9961ddaa29d05b4c6cf34ced7645f65"
+    },
+    "modelzoo-renderer-candidate-verified-20261018.log": {
+      "path": "C:/xMindNativeValidation/modelzoo-renderer-candidate-verified-20261018.log",
+      "sha256": "2585cee09ecd0e1cb1ba2271dad7609e6d8583cee5c7fb91194f6c3d23e1b7a6"
+    }
+  }
+}

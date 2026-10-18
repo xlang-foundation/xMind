@@ -1,6 +1,6 @@
 # xMind for VS Code
 
-**0.1.18** is a local Windows x64 development package. Its native runtime
+**0.1.19** is a local Windows x64 development package. Its native runtime
 preserves checked conversation history across authority, model and supported
 provider changes. DeepSeek receives verified foreign tool turns as labelled
 context data while retaining its own native reasoning and tool continuation.
@@ -16,8 +16,12 @@ Process directory leases allow child-directory publication while retaining
 leased-path rename/deletion protection. The host observes the same live native
 startup beyond a single observation interval and reports elapsed progress in
 the existing sidebar document.
+Unchanged transcript snapshots preserve open history details. Streamed Markdown
+is parsed once per animation frame during bursts, with a synchronous final
+flush; completed graph children retain their saved responses without replayed
+deltas creating another live answer.
 
-The extension suite passes **403/403**; the browser suite passes **138/138**.
+The extension suite passes **412/412**; the browser suite passes **138/138**.
 All **148** local native Release contracts pass. A real Claude run validated a
 source-verified ModelZoo copy: xlang3 dependency installation, **9 passing**
 FastAPI tests, and a Vue production build. After correcting native directory
