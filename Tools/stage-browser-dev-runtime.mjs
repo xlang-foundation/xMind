@@ -67,15 +67,16 @@ if(sdkRuntime){
   await copyFile(join(sdkRuntime,'xlang3.exe'),join(output,'xlang3.exe'));
   const stagedModules=join(output,'modules');
   await rm(stagedModules,{recursive:true,force:false});await mkdir(stagedModules);
-  const copyRuntimeModules=async(sourceDirectory,destinationDirectory)=>{
+  const copyRuntimeModules=async(sourceDirectory,destinationDirectory,inDistributionMetadata=false)=>{
     for(const entry of await readdir(sourceDirectory,{withFileTypes:true})){
       if(entry.name==='__pycache__')continue;
       const from=join(sourceDirectory,entry.name),to=join(destinationDirectory,entry.name),info=await lstat(from);
       if(info.isSymbolicLink())throw new Error('The xlang3 SDK module tree contains a symbolic link.');
       if(info.isDirectory()){
-        await mkdir(to);await copyRuntimeModules(from,to);
-        if((await readdir(to)).length===0)await rm(to);
-      }else if(info.isFile()&&(entry.name.endsWith('.py')||entry.name.endsWith('.x3pkg.dll'))){
+        await mkdir(to);
+        await copyRuntimeModules(from,to,inDistributionMetadata||entry.name.endsWith('.dist-info'));
+        if((await readdir(to)).length===0)await rm(to,{recursive:true,force:false});
+      }else if(info.isFile()&&(entry.name.endsWith('.py')||entry.name.endsWith('.x3pkg.dll')||inDistributionMetadata)){
         await copyFile(from,to);
       }else if(!info.isFile())throw new Error('The xlang3 SDK module tree contains an unsupported entry.');
     }

@@ -91,8 +91,19 @@ test('manifest forbids unknown executables, native Python extensions, traversal 
   }
   assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core/_pydantic_core.x3pkg.dll'),'module');
   assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core/core_schema.py'),'module');
+  assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA'),'metadata');
+  assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'modules/pydantic_core-2.50.1+xlang3.dist-info/WHEEL': 'f'.repeat(64) } }), /inventory/);
   assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'XMIND.EXE': 'f'.repeat(64) } }), /inventory/);
   assert.throws(() => validateManifest({ ...f.manifest, bridgeEnabled: true }), /incompatible/);
+});
+test('native package distribution metadata is included in the hash-verified inventory', async t => {
+  const f = await fixture(t), name = 'modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA';
+  const bytes = Buffer.from(['Metadata-Version: 2.1', 'Name: pydantic-core', 'Version: 2.50.1+xlang3', ''].join('\n'));
+  await fs.mkdir(path.dirname(path.join(f.runtime, name)), { recursive: true });
+  await fs.writeFile(path.join(f.runtime, name), bytes);
+  f.manifest.files[name] = digest(bytes);
+  await f.save();
+  assert.equal((await verifyNativeRuntime(f.runtime)).manifest.files[name], digest(bytes));
 });
 test('unexpected files are rejected even when every expected hash is unchanged', async t => {
   const f = await fixture(t); await fs.writeFile(path.join(f.runtime, 'python.exe'), 'Synthetic extra file'); await assert.rejects(verifyNativeRuntime(f.runtime), /inventory changed/);
