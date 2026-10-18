@@ -2,7 +2,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
-const {mkdtemp,rm}=require('node:fs/promises');
+const {mkdtemp,readFile,rm}=require('node:fs/promises');
 const {tmpdir}=require('node:os');
 const {join,resolve}=require('node:path');
 
@@ -10,8 +10,9 @@ test('browser launcher serves current workspace actions from freshly built asset
   const root=resolve(__dirname,'../../..');
   const fixture=await mkdtemp(join(tmpdir(),'xmind-browser-launcher-'));
   const assets=join(fixture,'assets');
+  const state=join(fixture,'state');
   const child=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
-    '--backend','http://127.0.0.1:1','--state',join(fixture,'state'),
+    '--backend','http://127.0.0.1:1','--state',state,
     '--assets',assets,'--port','0'],{cwd:root,windowsHide:true});
   t.after(async()=>{
     if(child.exitCode===null&&!child.killed)child.kill();
@@ -40,4 +41,16 @@ test('browser launcher serves current workspace actions from freshly built asset
   assert.match(html,/id="add-workspace"[^>]*>New workspace/);
   assert.match(html,/id="add-workspace-folder"[^>]*>Add folder/);
   assert.match(html,/primary folder of a new local workspace/);
+  if(process.platform==='win32'){
+    // Node's child_process.kill(SIGTERM) maps to unconditional process
+    // termination on Windows; the lifecycle's owned-child behavior is covered
+    // directly by launcher-lifecycle.test.cjs.
+    const closed=new Promise(resolveClose=>child.once('close',resolveClose));
+    child.kill();await closed;
+  }else{
+    const closed=new Promise(resolveClose=>child.once('close',(code,signal)=>resolveClose({code,signal})));
+    child.kill('SIGTERM');
+    assert.deepEqual(await closed,{code:0,signal:null});
+    await assert.rejects(readFile(join(state,'active.json')));
+  }
 });

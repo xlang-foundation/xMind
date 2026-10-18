@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {buildBrowserAssets} from '../views/browser/build.mjs';
 import {createBrowserServer} from '../views/browser/server.mjs';
 import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
+import {createBrowserHostLifecycle} from './browser-host-lifecycle.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
@@ -39,7 +40,12 @@ async function activeCredential(){
   }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
 }
 
-let backend=viewOrigin,nativePid,tokenFile,localAccessToken,languageServerConfig,processConfig;
+let backend=viewOrigin,nativePid,tokenFile,localAccessToken,languageServerConfig,processConfig,nativeChild;
+process.once('exit',()=>{
+  if(nativeChild&&nativeChild.exitCode===null&&nativeChild.signalCode===null){
+    try{nativeChild.kill();}catch{}
+  }
+});
 if(!backend){
   const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
   const verified=await verifyNativeRuntime(runtime);
@@ -75,9 +81,8 @@ if(!backend){
   if(processConfig){processConfig=resolve(processConfig);args.push('--process-config',processConfig);}
   const childEnv={...env,XMIND_VIEW_TOKEN:token};
   for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete childEnv[key];
-  const child=spawn(join(runtimeRoot,'xmind.exe'),args,{cwd:workspace,env:childEnv,windowsHide:true,detached:true,stdio:['ignore','ignore','pipe']});
+  const child=nativeChild=spawn(join(runtimeRoot,'xmind.exe'),args,{cwd:workspace,env:childEnv,windowsHide:true,stdio:['ignore','ignore','pipe']});
   nativePid=child.pid;
-  child.unref();
   let failed,nativeError='';
   child.stderr.on('data',bytes=>{if(nativeError.length<8192)nativeError+=bytes.toString('utf8').slice(0,8192-nativeError.length);});
   child.once('error',error=>{failed=error;});
@@ -117,3 +122,13 @@ const url=await view.listen(port)+'/ui/';
 await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile,graphsConfig:options.get('--graphs-config')?resolve(options.get('--graphs-config')):undefined,languageServerConfig},null,2),{mode:0o600});
 console.log('xMind Browser ready at '+url);
 console.log(tokenFile?'Native profile-aware browser connected to '+backend+'.':'Attached to the existing native view '+backend+'.');
+const lifecycle=createBrowserHostLifecycle({view,nativeChild,state,tokenFile,ownedToken:typeof localAccessToken==='string'?localAccessToken:undefined,url});
+let stopping=false;
+const stop=signal=>{
+  if(stopping)return;
+  stopping=true;
+  void lifecycle.shutdown().then(()=>{process.exit(signal==='SIGINT'?130:0);},()=>{process.exit(1);});
+};
+process.once('SIGINT',()=>stop('SIGINT'));
+process.once('SIGTERM',()=>stop('SIGTERM'));
+if(process.platform==='win32')process.once('SIGBREAK',()=>stop('SIGBREAK'));
