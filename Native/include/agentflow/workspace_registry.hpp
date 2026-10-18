@@ -18,6 +18,8 @@ struct WorkspaceGroupRecord {
 // the execution authority before use; this registry never grants file access.
 // SQLite calls use the embedded xlang3 binding and each method owns its runtime
 // on the calling thread.
+// Private storage must already exist. Its native directory handle supplies the
+// canonical overlap boundary; aliases do not change workspace eligibility.
 class WorkspaceRegistry {
 public:
     WorkspaceRegistry(std::string database,std::vector<std::string> xlang_import_roots,

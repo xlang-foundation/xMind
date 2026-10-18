@@ -36,11 +36,39 @@ void validate_name(const std::string& name){
         throw std::invalid_argument("Workspace name must contain valid UTF-8");
 }
 bool path_prefix(const std::string& parent,const std::string& child){
-    if(parent.empty()||child.size()<parent.size())return false;
     const auto a=std::filesystem::u8path(parent).native(),b=std::filesystem::u8path(child).native();
+    if(a.empty()||b.size()<a.size())return false;
     if(CompareStringOrdinal(a.data(),static_cast<int>(a.size()),b.data(),static_cast<int>(a.size()),TRUE)!=CSTR_EQUAL)return false;
     if(a.size()==b.size())return true;
+    if(a.back()==L'\\'||a.back()==L'/')return true;
     return b[a.size()]==L'\\'||b[a.size()]==L'/';
+}
+std::string private_directory_path(const std::string& input){
+    if(input.empty()||input.size()>32768||input.find('\0')!=std::string::npos)
+        throw std::invalid_argument("Invalid private workspace storage path");
+    // A private directory is intentionally not a WorkspaceTools instance:
+    // .xMind/.config are valid storage locations, never model workspaces.
+    struct Directory {
+        HANDLE handle;
+        ~Directory(){if(handle!=INVALID_HANDLE_VALUE)CloseHandle(handle);}
+    } directory{CreateFileW(fs::u8path(input).c_str(),FILE_READ_ATTRIBUTES,
+        FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,nullptr)};
+    if(directory.handle==INVALID_HANDLE_VALUE)
+        throw std::invalid_argument("Private workspace storage must be an existing directory");
+    BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(directory.handle,&info)||!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
+        throw std::invalid_argument("Private workspace storage must be a directory");
+    const auto size=GetFinalPathNameByHandleW(directory.handle,nullptr,0,FILE_NAME_NORMALIZED|VOLUME_NAME_DOS);
+    if(!size)throw std::runtime_error("Cannot resolve private workspace storage");
+    std::wstring path(size,L'\0');
+    const auto written=GetFinalPathNameByHandleW(directory.handle,path.data(),size,FILE_NAME_NORMALIZED|VOLUME_NAME_DOS);
+    if(!written||written>=size)throw std::runtime_error("Private workspace storage path changed while resolving");
+    path.resize(written);
+    while(!path.empty()&&path.back()==L'\\')path.pop_back();
+    if(path.starts_with(L"\\\\?\\UNC\\"))path=L"\\\\"+path.substr(8);
+    else if(path.starts_with(L"\\\\?\\"))path.erase(0,4);
+    if(path.size()==2&&path[1]==L':')path+=L'\\';
+    return text(fs::path(path));
 }
 void reject_overlap(const std::string& first,const std::string& second){
     if(path_prefix(first,second)||path_prefix(second,first))
@@ -94,6 +122,7 @@ WorkspaceRegistry::WorkspaceRegistry(std::string database,std::vector<std::strin
     if(database_.empty()||database_.find('\0')!=std::string::npos||private_storage_root_.empty()||
        xlang_import_roots_.empty()||std::any_of(xlang_import_roots_.begin(),xlang_import_roots_.end(),[](const auto& root){return root.empty();}))
         throw std::invalid_argument("Invalid local workspace registry configuration");
+    private_storage_root_=private_directory_path(private_storage_root_);
 }
 WorkspaceGroupRecord WorkspaceRegistry::create(const std::string& input,const std::string& requested_name)const{
     WorkspaceTools folder(input);
