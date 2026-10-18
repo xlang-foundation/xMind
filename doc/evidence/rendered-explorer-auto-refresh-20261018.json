@@ -1,0 +1,1124 @@
+{
+  "recordedAt": "2026-10-18T21:28:32.609Z",
+  "sourceParent": "6c6b00c0017297d6df7d89519a1504cc3a5e0708",
+  "qualifiedSourcePatchSha256": "4a21d731dd44e9dd29c47a6fba39e2d29d60f76cdf794d46112ade43a8cec0a7",
+  "nativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "productionNativeSourceUnchanged": true,
+  "nativeRebuilt": false,
+  "implementation": "Thin browser invalidation after newly observed terminal operation states; coalesced read-only workspace queries, bounded 4096-entry observation set, connection/workspace fencing, preservation of expansion, filename query and preview. No effect execution, authorization or persistence moved into the view.",
+  "regressionAgainstPriorImplementation": {
+    "baseline": "6c6b00c0017297d6df7d89519a1504cc3a5e0708",
+    "exitCode": 1,
+    "tests": 5,
+    "passed": 1,
+    "failed": 4,
+    "scope": "New behavior-focused fixtures against unchanged prior browser implementation in isolated C: source; no native runtime or provider requests"
+  },
+  "fullClientGate": {
+    "recordedAt": "2026-10-18T21:26:07.142Z",
+    "version": "0.1.29 plus explorer update",
+    "sourceParent": "6c6b00c0017297d6df7d89519a1504cc3a5e0708",
+    "workingTreePatchSha256": "4a21d731dd44e9dd29c47a6fba39e2d29d60f76cdf794d46112ade43a8cec0a7",
+    "sourceFiles": 98,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "940aade9c204f50109b156776caebda8ff6fa49069db12d16711db39ae6a32f7"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "34270237692ef0f62d1cfd598c820e1b8bd3b9fb6b2c56b180bcfab386398f6a"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "realRenderedAcceptance": {
+    "startedAt": "2026-10-18T21:27:06.1Z",
+    "scope": "Actual sandboxed headless Edge, installed 0.1.28 native runtime and qualified current browser assets; saved-key Claude; no simulated inference",
+    "url": "http://127.0.0.1:52121/ui/",
+    "sourceParent": "6c6b00c0017297d6df7d89519a1504cc3a5e0708",
+    "workingTreePatchSha256": "4a21d731dd44e9dd29c47a6fba39e2d29d60f76cdf794d46112ade43a8cec0a7",
+    "assetsBeforeSha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88",
+    "assetsAfterSha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88",
+    "session": "3bed131c1b0828ed49085e68e6e56505",
+    "fixtureRoot": "C:/xMindNativeValidation/ui-workspaces-0.1.28-20261018",
+    "manualRefreshClicks": 0,
+    "providerKeyPrompted": false,
+    "errors": [],
+    "requests": [
+      {
+        "path": "/ui/",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/chat.css",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/browser.css",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/xterm.css",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/patch-review.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/client.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/xterm-fit.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/terminal.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/purify.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/chat.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/marked.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/browser.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/xterm.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/session",
+        "status": 200,
+        "method": "POST"
+      },
+      {
+        "path": "/v1/health",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/workspaces",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/health",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/agent/planning",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/graphs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/active",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/files",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/workspaces",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/workspaces/select",
+        "status": 200,
+        "method": "POST"
+      },
+      {
+        "path": "/v1/health",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/ui/workspaces",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/health",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/agent/planning",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/models",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/graphs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/active",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/model",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/active",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles/models",
+        "status": 200,
+        "method": "POST"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/agents",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/agent",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles/models",
+        "status": 200,
+        "method": "POST"
+      },
+      {
+        "path": "/ui/workspaces",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/history",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/file",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs",
+        "status": 202,
+        "method": "POST"
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events/stream",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/active",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/operations/9e311a363d7b7e4a8b2256744f22c5b4",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/operations/9e311a363d7b7e4a8b2256744f22c5b4",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/operations/9e311a363d7b7e4a8b2256744f22c5b4/decision",
+        "status": 200,
+        "method": "POST"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/file",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/active",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/mcp-inputs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/history",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/tree-events",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/workspace/folders/file",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/children",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/operations",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/runs/87a5053a1c68382567b7f5ca2ac908cd/plan",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "workspace": {
+      "authority_id": "7fa6646f8d7055dd4d5352318defc6bc",
+      "configured": true,
+      "root": "C:\\xMindNativeValidation\\ui-workspaces-0.1.28-20261018\\project",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000"
+    },
+    "extraFolderId": "windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000",
+    "prompt": "Create auto-refresh-check.txt only in the attached extra folder, with exactly this content including one trailing newline: explorer auto refresh 20261018. Use create_file with the explicit folder_id for extra from workspace context and ordinary file approval. Do not change any other file, run any command, delegate or use MCP. After the creation succeeds, report success in one sentence.",
+    "run": "87a5053a1c68382567b7f5ca2ac908cd",
+    "proposal": {
+      "arguments_json": "{\"after_content\":\"explorer auto refresh 20261018\\n\",\"after_sha256\":\"eaa7c4f3be73fd2ea20f083693404a5bfa6014502f5ded394d198f0dfecc4bc1\",\"before_content\":\"\",\"before_exists\":false,\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"parent_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"path\":\"auto-refresh-check.txt\",\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000\",\"workspace_revision\":2}",
+      "decision_actor": "",
+      "expires_unix_ms": 1792359431532,
+      "id": "9e311a363d7b7e4a8b2256744f22c5b4",
+      "resources": [],
+      "result_json": "{}",
+      "run_id": "87a5053a1c68382567b7f5ca2ac908cd",
+      "state": "awaiting_approval",
+      "tool": "create_file",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000"
+    },
+    "automaticallyAppearedAt": "2026-10-18T21:27:12.859Z",
+    "priorPreviewPreserved": true,
+    "operations": [
+      {
+        "arguments_json": "{\"after_content\":\"explorer auto refresh 20261018\\n\",\"after_sha256\":\"eaa7c4f3be73fd2ea20f083693404a5bfa6014502f5ded394d198f0dfecc4bc1\",\"before_content\":\"\",\"before_exists\":false,\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"parent_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"path\":\"auto-refresh-check.txt\",\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000\",\"workspace_revision\":2}",
+        "decision_actor": "local-owner",
+        "expires_unix_ms": 1792359431532,
+        "id": "9e311a363d7b7e4a8b2256744f22c5b4",
+        "resources": [],
+        "result_json": "{\"after_sha256\":\"eaa7c4f3be73fd2ea20f083693404a5bfa6014502f5ded394d198f0dfecc4bc1\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:c1fe3b00000002000000000000000000\",\"parent_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\",\"path\":\"auto-refresh-check.txt\",\"size\":31,\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000\"}",
+        "run_id": "87a5053a1c68382567b7f5ca2ac908cd",
+        "state": "succeeded",
+        "tool": "create_file",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000"
+      }
+    ],
+    "historyMessages": 17,
+    "savedEvents": 70,
+    "reportedUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 133,
+        "input_tokens": 10055,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 133,
+        "prompt_tokens": 10055,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 40,
+        "input_tokens": 10483,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 40,
+        "prompt_tokens": 10483,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "outputSha256": "eaa7c4f3be73fd2ea20f083693404a5bfa6014502f5ded394d198f0dfecc4bc1",
+    "newFilePreviewCorrect": true,
+    "fixtureInputsUnchanged": true,
+    "completedAt": "2026-10-18T21:27:14.438Z",
+    "browserVersion": "155.0.4283.62",
+    "passed": true
+  },
+  "mainPageDeployment": {
+    "startedAt": "2026-10-18T21:28:03.11Z",
+    "url": "http://127.0.0.1:62342/ui/",
+    "session": "a2d2abc02773a31a3b4aa76bed134345",
+    "run": "0dbc93cbc6e728579aedf95b79981a7a",
+    "hostRestarted": false,
+    "backendRestarted": false,
+    "effectPosts": 0,
+    "pageErrors": [],
+    "eventsBefore": 428,
+    "beforeSha256": "e867d01f7aa44d74ef9f1d32e5af5ac085010438cf183b860d5a4380db7dd0fa",
+    "afterSha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88",
+    "completeAssetSetMatchesQualifiedBuild": true,
+    "messages": 22,
+    "savedEventsReplayed": 0,
+    "completedAt": "2026-10-18T21:28:06.726Z",
+    "passed": true
+  },
+  "installedPackageVersion": "0.1.29",
+  "installedPackageIncludesThisChange": false,
+  "actualVsCodeActivation": false,
+  "visibleDesktopAcceptance": false,
+  "fullNativeGateRerun": false,
+  "currentHostedClientAcceptance": false,
+  "filesystemWatchImplemented": false,
+  "limitations": [
+    "This updates files after observed terminal backend operations. Arbitrary external filesystem changes still require manual Refresh.",
+    "Controller/JSDOM checks cover expansion, search, state deduplication and workspace fencing; the actual Claude browser task covers an attached-folder creation, automatic appearance and retained previous preview.",
+    "The first fresh browser observer assumed the registered project was already selected. It failed before provider submission; the corrected sequence selected the project through the real workspace dialog.",
+    "The first main-page observer assumed one tree-event response contained all 428 events. The endpoint paginates at 256; the corrected read-only observer drained all pages before deployment. Neither attempt submitted a task."
+  ],
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-red-20261018.json",
+      "sha256": "7ce7f9db6ca55af5a5151df2b32290c98dce1f717be976fd576b7605eb91acc2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-red-20261018.log",
+      "sha256": "197079ae0a6fb3d50ec5d98c32b0b5ad74195dd4cb0342321c48a564240ab8c7"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-focused-20261018.log",
+      "sha256": "7e820e4aac9bdf2d189e0037426359ab65e0cf87edf6cd6bc04fededf287c42e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-client-gates-20261018/gate.json",
+      "sha256": "9eca9fe528322b3df85eed14b4ac1e827e819b451b3f863b9cded0458fbdb459"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-client-gates-20261018/inputs-before.json",
+      "sha256": "cd3e1bc4815a50538f1b986ee54d5584d15c5eb516ba795407f7f25c664c7724"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-client-gates-20261018/extension.log",
+      "sha256": "940aade9c204f50109b156776caebda8ff6fa49069db12d16711db39ae6a32f7"
+    },
+    {
+      "path": "C:/xMindNativeValidation/workspace-effect-refresh-client-gates-20261018/browser.log",
+      "sha256": "34270237692ef0f62d1cfd598c820e1b8bd3b9fb6b2c56b180bcfab386398f6a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-20261018/acceptance.json",
+      "sha256": "90a4ea8128a2c681958ec31936619b789cc4d702c8b7d16d6fba2772dc4b5c5d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/main-explorer-refresh-20261018/deployment.json",
+      "sha256": "deb8fe6f68be9b8187287ff2b3af0bd64d7c656f66055e7bdb807b9fd9d4d296"
+    },
+    {
+      "path": "C:/xMindNativeValidation/main-explorer-refresh-paged-20261018/deployment.json",
+      "sha256": "f483f63477b89424416d59df0af4578b127330507fecca2623c5e19643f0d2b0"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/acceptance.json",
+      "sha256": "ecf146c2121be811c0cf451ac20dfe1f0097bd240e7fb2f82bf07fde0b90374f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/admitted-run.json",
+      "sha256": "f73ea48457c875cd87ea9b6fdca300e0d9f69e4a9806a17ce7d8f61534ee6d55"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/automatically-refreshed.png",
+      "sha256": "c8ee785d80df40f6f88e25399e06f23af30d1a123467768decc35e3b93e3bf0c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/browser-before.js",
+      "sha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/events.json",
+      "sha256": "d4ee45b478e9e376d7d42f34ab94e34b41c0bd0271e802d64ad7330c45f55a31"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/history-after.json",
+      "sha256": "707f63398ca684758c9d23f00867bb3ba3182d2e57162ca47994ec10a818f9c9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/history-before.json",
+      "sha256": "44da396e889a8095c92a902f7fa507db4c356a281daf2ef647b964f73e1d0590"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/operations.json",
+      "sha256": "0ccf46772e406d7c6aeed3aca52b950a012da2812e1c5bd7e29df16df859922e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/proposal.json",
+      "sha256": "7cd6677cd4f8f462f91a33b02e46562cfc609faa8e1ae91f80068e6ca08255c8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/request.json",
+      "sha256": "190f2e222645f86171c072d7ec5f349692a6d74324715788e3bdab6be4c88a2d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspace-effect-refresh-selected-20261018/submitted-request.json",
+      "sha256": "01dccd21468ed62f8fb8d1e6053de2e3560b0b17d80631a0478110dffbc33e02"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\main-explorer-refresh-paged-20261018\\owners-preserved.json",
+      "sha256": "0e9cbe7c3ce44f5971f8414738bc3d869c0e7ac16bd516e33526b69c7d094862"
+    }
+  ],
+  "cpythonExecuted": false,
+  "scopePassed": true,
+  "mainPageOwnersIdentityVerifiedAfterDeployment": [
+    {
+      "pid": 67948,
+      "birth": "2026-10-18T20:02:32.046616Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 17248,
+      "birth": "2026-10-18T20:02:33.093718Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe"
+    },
+    {
+      "pid": 33960,
+      "birth": "2026-10-18T20:02:36.467445Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe"
+    }
+  ]
+}

@@ -21,7 +21,7 @@ no Marketplace publication or general release is implied.
 | Check | Verified scope |
 | --- | --- |
 | Native backend | All 150 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
-| Clients | All 422 extension and 142 browser fixture tests pass locally and on hosted CI; all 2,448 archive files and 2,445 installed non-metadata payloads verify. These are separate from actual VS Code activation. |
+| Clients | Packaged 0.1.29 passes 422 extension/142 browser fixtures locally and on hosted CI; all archive/installed payloads verify. New explorer source passes 422/147 locally; its hosted/package acceptance is pending. Actual VS Code activation remains separate. |
 | Installed live run | Through the normal managed-profile browser launcher, saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process. |
 | Persistence | The current coding session restores 22 messages and both completed roots without execution replay. The prior MCP session retains eight messages and 321 events. |
 | Current webpage | Isolated headless Edge completes two real coding turns and separately creates/switches workspaces, attaches a folder, approves a file creation and runs xlang3 in that attached folder. Refresh and file previews work after workspace changes. |
@@ -29,7 +29,11 @@ no Marketplace publication or general release is implied.
 
 Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
 changes, an actual Vue production build and Python API tests under xlang3.
-The installed 0.1.29 browser assets exactly match the live, tested webpage.
+The installed 0.1.29 browser assets match their recorded qualification. The live
+webpage now also refreshes its explorer after observed agent operations while
+preserving open folders, search and the selected preview. A real Claude file
+creation appeared without a Refresh click. That newer browser change has not
+yet been repackaged for the extension.
 Its native runtime is byte-identical to the accepted 0.1.27 runtime; the
 existing browser/backend processes and their history remain running. The
 extension was installed through the Code CLI without opening an editor window.
@@ -39,6 +43,7 @@ Actual VS Code pane activation remains unverified.
 restore 13 messages after explicit backend recovery. This does not establish
 unattended or in-flight recovery; the model's requested bare two-line reply
 format was not satisfied, although its file contents were correct.
+[Automatic explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json).
 [Exact current evidence and remaining work](doc/VALIDATION_STATUS.md).
 
 ## Use in VS Code

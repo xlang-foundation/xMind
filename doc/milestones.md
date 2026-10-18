@@ -1,6 +1,30 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.29, 2026-10-18
+## Current webpage checkpoint — automatic explorer refresh, 2026-10-18
+
+The explorer now refreshes after newly observed terminal backend operations,
+coalesces repeated observations and retains open folders, filename search and
+the selected preview. Refreshes are fenced to the current connection/workspace;
+the completed-operation observation set is bounded to 4,096 entries. All
+execution, approval and persistence remain native.
+
+The previous implementation fails four of five new regression checks; all
+422 extension and 147 browser fixtures pass on the current source, with source,
+dependencies/assets and file sets unchanged. Real headless Edge/Claude creates
+one approved file in the attached folder. It appears without a Refresh click,
+and the previous preview stays open. The correct new file preview and original
+fixture hashes verify. The completed root records 70 events; its session now
+contains 17 messages. Initial observer workspace-selection and pagination
+mistakes are retained; no duplicate provider task was submitted.
+
+The existing page at http://127.0.0.1:62342/ui/ receives the qualified browser
+asset without restarting its host/backend. All 22 messages and 428 paginated
+events remain intact, without effect replay. Installed VS Code 0.1.29 remains
+the previous qualified package; repackaging and current hosted acceptance are
+pending. Arbitrary external filesystem changes still require manual Refresh.
+[Source, regression and live evidence](evidence/rendered-explorer-auto-refresh-20261018.json).
+
+## Installed checkpoint — 0.1.29, 2026-10-18
 
 Workspace creation and switching now restore the Refresh control when the
 asynchronous workspace change settles. The regression failed 2 of 30 focused

@@ -2,6 +2,27 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('browser invalidates workspace views once per observed terminal operation state without invoking a tool',()=>{
+ const changed=[],posted=[],view=new BrowserController({},message=>posted.push(message),{workspaceChanged:items=>changed.push(items)});
+ const operation={id:'effect',run_id:'root',workspace_id:'workspace',tool:'patch_file',state:'awaiting_approval'};
+ try{
+  view.publishOperations([operation]);assert.equal(changed.length,0);
+  view.publishOperations([{...operation,state:'uncertain'}]);view.publishOperations([{...operation,state:'uncertain'}]);assert.equal(changed.length,1);
+  view.publishOperations([{...operation,state:'succeeded'}]);view.publishOperations([{...operation,state:'succeeded'}]);assert.equal(changed.length,2);
+  assert.deepEqual(changed.map(items=>items[0].state),['uncertain','succeeded']);assert.equal(posted.at(-1).type,'operations');
+  view.publishOperations([{...operation,id:'denied',state:'denied'}]);assert.equal(changed.length,2);
+ }finally{view.dispose();}
+ view.publishOperations([{...operation,id:'after-dispose',state:'succeeded'}]);assert.equal(changed.length,2);
+});
+
+test('browser bounds completed-effect observations across long coding histories',()=>{
+ const changed=[],view=new BrowserController({},()=>{},{workspaceChanged:items=>changed.push(items)});
+ try{
+  const items=Array.from({length:4200},(_,index)=>({id:'effect-'+index,run_id:'child',workspace_id:'workspace',tool:'run_process',state:'failed'}));
+  view.publishOperations(items);assert.equal(view.completedWorkspaceEffects.size,4096);assert.equal(changed.length,1);assert.equal(changed[0].length,4200);
+  view.publishOperations(items.slice(-10));assert.equal(changed.length,1,'Repeated snapshots must not continuously reload workspace views');
+ }finally{view.dispose();}
+});
 test('browser leaves persisted prompt admission to a backend advertising queue dispatch',async()=>{
  const calls=[],view=new BrowserController({run:async(...args)=>calls.push(args),sessionInbox:async()=>({items:[{id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'}]})},()=>{});view.session='session';view.health={agent_execution:true,session_inbox_dispatch:true};
  try{await view.drainInbox();assert.deepEqual(calls,[]);}finally{view.dispose();}

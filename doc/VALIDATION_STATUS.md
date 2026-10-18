@@ -23,9 +23,28 @@ commands accepted on 0.1.28 are reused by byte-identical runtime evidence;
 they were not rerun on 0.1.29. The 0.1.28 extension is backed up,
 settings and six existing profile directory names are
 preserved, and no editor window was opened. All 18 installed browser assets
-equal the tested live page. Its existing processes and 22-message coding
+match their 0.1.29 qualification. Its existing processes and 22-message coding
 history remain intact after installation.
 [Installed 0.1.29 evidence](evidence/coding-package-0.1.29-20261018.json).
+
+The live webpage now includes a subsequent explorer update that is not yet in
+the installed package. Newly observed terminal operation states schedule a
+coalesced read-only refresh; repeated snapshots do not continuously reload it.
+Open directories, filename search and the selected file preview are preserved;
+connection/workspace changes fence stale refreshes. The prior implementation
+fails four of five new regression checks; the complete current local suites
+pass 422 extension/147 browser fixtures with all frozen inputs/file sets
+unchanged. Hosted acceptance of this source is pending.
+
+A real saved-key Claude task creates one reviewed file in the attached folder.
+It appears automatically, without Refresh, while the prior preview stays open;
+the new file's preview then matches actual disk contents. The session now has
+17 messages and the new root records 70 events. The existing main page receives
+the qualified asset without host/backend restart and preserves its separate
+22-message session and all 428 paginated follow-up events. This is operation
+observation, not an arbitrary-filesystem watcher. No native code changed or
+full native suite was rerun for this view change.
+[Rendered explorer evidence](evidence/rendered-explorer-auto-refresh-20261018.json).
 
 Actual headless Edge workspace acceptance creates a workspace from a folder,
 attaches a second folder, switches away/back and restores the scoped session.
