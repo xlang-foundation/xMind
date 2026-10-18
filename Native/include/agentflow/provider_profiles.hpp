@@ -44,10 +44,12 @@ public:
     // Native static validation covers each supplied candidate; preparation of
     // the final active execution service happens once, before the single CAS.
     // Identical configuration verifies that CAS without rotating revisions/keys.
+    // before_change runs only for a semantic change, before key publication or
+    // active-service preparation. No-op imports never prepare another service.
     // An empty batch requires an explicit existing active-profile selection.
     ProviderProfileSnapshot save_config(std::vector<ProviderProfileConfigEntry> entries,
         std::optional<std::string> active_profile,std::int64_t expected_revision,
-        Validator validate_each={},Validator prepare_active={});
+        Validator validate_each={},Validator prepare_active={},std::function<void()> before_change={});
     ProviderProfileSnapshot select(std::string id,std::int64_t expected_revision,Validator validate={});
     // Migration only: retain an existing encrypted reference and configuration
     // revision. Backend policy/ownership must match; an existing registry wins.

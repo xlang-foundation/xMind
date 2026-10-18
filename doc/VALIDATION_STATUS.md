@@ -23,6 +23,25 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Browser attachment while execution owns the runtime — 2026-10-18
+
+Native provider configuration import now detects a semantic no-op before
+requiring an idle service. An unchanged document verifies the registry CAS and
+retains its keys, revisions and running execution service. The native mutation
+guard runs only for a real change, before credential publication or service
+preparation. Changed keys, models, selections and inactive-profile additions
+still require an idle healthy runtime; stale revisions still fail.
+
+Six focused Release contracts passed **6/6 in 136.39 seconds**. A full unchanged
+synthetic key document imports over authenticated HTTP while an actual graph
+owns a human pause; changed inputs fail without new credentials or checkpoint
+changes. The production extension host adapter also opens a second actual
+native view using an unchanged empty template, attaching to the same backend
+and preserving graph/history. Existing browser workspace/provider-path and CLI
+contracts still pass. Live saved-provider reconnection during a foreground
+process and rendered clients remain pending at this source checkpoint.
+[Source hashes, exact native gate and scope](evidence/provider-config-observation-20261018.json).
+
 ## Live coding while changing models — 2026-10-18
 
 At `758e38f`, a real saved-OpenAI conversation completed

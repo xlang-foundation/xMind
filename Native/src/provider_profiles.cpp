@@ -69,7 +69,7 @@ ProviderProfileSnapshot ProviderProfiles::save(std::string id,std::string route_
     if(previous==state.snapshot.profiles.end())state.snapshot.profiles.push_back(saved);else *previous=saved;return state.snapshot;
 }
 ProviderProfileSnapshot ProviderProfiles::save_config(std::vector<ProviderProfileConfigEntry> entries,
-    std::optional<std::string> active,std::int64_t expected,Validator validate_each,Validator prepare_active){
+    std::optional<std::string> active,std::int64_t expected,Validator validate_each,Validator prepare_active,std::function<void()> before_change){
     if(entries.size()>32||(entries.empty()&&!active))throw std::invalid_argument("Provider configuration batch requires profiles or an explicit active selection");
     auto state=load();if(expected<0||expected!=state.snapshot.revision||expected>maximum)throw Conflict("Provider profile registry revision changed");
     if(active)identity(*active);
@@ -111,9 +111,10 @@ ProviderProfileSnapshot ProviderProfiles::save_config(std::vector<ProviderProfil
     if(changed&&expected>=maximum)throw Conflict("Provider profile registry revision exhausted");
     if(changed)state.record["revision"]=expected+1;
     const auto encoded=state.record.dump();if(encoded.size()>65536)throw std::invalid_argument("Provider profile registry exceeds limits");
+    if(changed&&before_change)before_change();
     for(auto& candidate:candidates)if(candidate.changed){const auto& r=*candidate.policy;store_.put_credential(r.credential_scope,candidate.profile.credential_id,r.credential_purpose,"Model provider profile",std::move(candidate.secret),0).get();}
     for(const auto& candidate:candidates)if(validate_each)validate_each(candidate.profile,*candidate.policy);
-    if(prepare_active&&selected!=profiles.end()){
+    if(changed&&prepare_active&&selected!=profiles.end()){
         const SavedProviderProfile selected_profile{selected->at("id").get<std::string>(),selected->at("route_id").get<std::string>(),selected->at("model").get<std::string>(),selected->at("credential_id").get<std::string>(),revision(selected->at("revision"))};
         const auto& r=route(selected_profile.route_id);
         auto verified=store_.resolve_credential(r.credential_scope,selected_profile.credential_id,r.credential_purpose).get();

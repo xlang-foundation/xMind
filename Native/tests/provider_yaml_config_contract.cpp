@@ -98,6 +98,19 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         require(credential_count==2&&same(profiles.credential("claude"),claude_key),"Key-only native profile is genuinely encrypted and independently resolvable");
         auto unchanged=apply(profiles,document(),1);
         require(unchanged.revision==1&&profile(unchanged,"claude").revision==1&&profile(unchanged,"claude").credential_id==profile(saved,"claude").credential_id&&store.credentials("server").get().size()==2,"Identical startup config cannot rotate credential/profile/registry revisions");
+        {
+            auto config=parse_provider_yaml_config(document(),allowed);bool guarded=false,prepared_again=false;
+            unchanged=profiles.save_config(std::move(config.profiles),std::move(config.active_profile),1,{},
+                [&](const auto&,const auto&){prepared_again=true;},[&]{guarded=true;throw Conflict("Synthetic busy owner");});
+            require(!guarded&&!prepared_again&&unchanged.revision==1,
+                "Identical config verifies CAS without entering a mutation guard or preparing an execution service");
+            config=parse_provider_yaml_config("version: 1\nprofiles: {claude: {route: anthropic.messages, api_key: synthetic-guarded-new-key}}\n",allowed);
+            rejects<Conflict>([&]{profiles.save_config(std::move(config.profiles),std::move(config.active_profile),1,{},
+                [&](const auto&,const auto&){prepared_again=true;},[&]{guarded=true;throw Conflict("Synthetic busy owner");});});
+            require(guarded&&!prepared_again&&store.credentials("server").get().size()==credential_count&&
+                store.information("native-provider-profiles","registry").get()==source,
+                "A semantic-change guard runs before any credential publication or execution-service preparation");
+        }
         unchanged=apply(profiles,"version: 1\nprofiles: {claude: {route: anthropic.messages}, openai: {route: openai.responses, api_key: \"\"}}\n",1);
         require(unchanged.revision==1&&profile(unchanged,"openai").model=="synthetic-openai-model"&&store.information("native-provider-profiles","registry").get()==source,"Missing model and empty/omitted key reuse exact existing choices/references");
         rejects<std::invalid_argument>([&]{profiles.save("public-key-only","anthropic.messages","",secret(claude_key),1);});

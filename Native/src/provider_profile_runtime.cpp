@@ -297,7 +297,8 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
     // The reader owns/wipes the bounded plaintext input. No view/API handler
     // can supply this local path or obtain the decoded secret-bearing values.
     auto configuration=read_provider_yaml_config(path,allowed_routes);
-    std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
+    std::unique_lock lock(impl_->mutex);
+    if(expected<0||expected!=impl_->state.revision)throw Conflict("Provider profile runtime revision changed");
     if(impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider YAML registry revision changed");
     std::erase_if(configuration.profiles,[&](const auto& entry){
         return entry.key.view().empty()&&std::none_of(impl_->state.profiles.begin(),impl_->state.profiles.end(),
@@ -325,7 +326,8 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
             validate_execution(impl_->route(allowed.id),impl_->base,profile.model,true);
             auto owned=impl_->store.resolve_credential(allowed.credential_scope,profile.credential_id,allowed.credential_purpose).get();
             validate_public_identity(profile.id,profile.model,owned);
-        },[&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
+        },[&](const auto& profile,const auto&){candidate=impl_->prepare(profile);},
+        [&]{impl_->mutable_state(expected);});
     // Publication succeeded. Adopt exactly that prepared generation only when
     // there is an active selection; inactive imports retain the current service.
     impl_->state=std::move(next);std::unique_ptr<ExecutionPlatform> previous;

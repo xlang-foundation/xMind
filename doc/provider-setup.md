@@ -1,5 +1,13 @@
 # Native provider setup
 
+Opening another local view or reconnecting with unchanged provider YAML leaves
+the current execution service running, including an active coding run. Native
+import still validates the expected registry revision and exact encrypted-key
+identity. It neither rotates credentials nor prepares a replacement service for
+an identical configuration. Actual changes to keys, models, selected profiles
+or profile entries require the backend to be idle and healthy. A busy rejection
+does not publish new credentials or alter the active owner.
+
 Default OpenAI profile routes now filter account discovery through the native
 streamed-text model policy. Workspace mode excludes models without tool support
 on the chosen wire. GPT-6 Astra and GPT-6.1 Sol use Responses for tools; Chat

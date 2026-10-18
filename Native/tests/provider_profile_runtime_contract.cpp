@@ -169,6 +169,40 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto graph_admission=Json{{"id","graph-run"},{"session_id","graph-session"},{"graph_id","review"},{"graph_revision",1},{"prompt","Review fixture"},{"provider_profile_id","claude"},{"expected_provider_revision",3}};
         auto stale_graph=graph_admission;stale_graph["expected_provider_revision"]=2;const auto denied_graph=client.Post("/v1/graph-runs",authorized,stale_graph.dump(),"application/json");require(denied_graph&&denied_graph->status==409&&store.runs("graph-session").get().empty(),"Graph profile conflicts must precede root persistence");
         const auto admitted_graph=client.Post("/v1/graph-runs",authorized,graph_admission.dump(),"application/json");const auto graph_error="Current bound graph must use the same native ownership lock: "+(admitted_graph?std::to_string(admitted_graph->status)+" "+admitted_graph->body:std::string("no response"));require(admitted_graph&&admitted_graph->status==202,graph_error.c_str());wait(store,"graph-run",RunState::paused);
+        // The real graph owns a paused human gate, so provider mutation is busy.
+        // Attaching a view with exactly the same YAML must remain observational.
+        const auto config_file=std::filesystem::u8path(argv[1])/"busy-provider-config.yaml";
+        const std::string same_config="version: 1\nactive_profile: claude\nprofiles:\n  openai: {route: openai.chat, model: fixture-openai, api_key: runtime-openai-fixture-key}\n  claude: {route: anthropic.messages, model: fixture-claude, api_key: runtime-claude-fixture-key}\n";
+        const auto registry_before=store.information("native-provider-profiles","registry").get();
+        const auto credentials_before=store.credentials("server").get().size();
+        const auto events_before=store.events("graph-run").get().size();
+        const auto checkpoint_before=store.graph_run("graph-run").get().checkpoint_json;
+        const auto import_config=[&](const std::string& source,std::int64_t revision){
+            {std::ofstream out(config_file,std::ios::binary);out<<source;require(static_cast<bool>(out),"Owned synthetic config write failed");}
+            return client.Post("/v1/provider/configuration/import",authorized,
+                Json{{"path",config_file.string()},{"expected_revision",revision}}.dump(),"application/json");
+        };
+        const auto unchanged_import=import_config(same_config,3);
+        require(unchanged_import&&unchanged_import->status==200&&Json::parse(unchanged_import->body).at("revision")==3,
+            "Unchanged authenticated YAML import must succeed while a graph owns execution");
+        const auto template_import=import_config("version: 1\nprofiles: {unused: {route: openai.chat, api_key: \"\"}}\n",3);
+        require(template_import&&template_import->status==200,"An empty-key template cannot block observation of busy execution");
+        for(const auto& change:std::vector<std::string>{
+            "version: 1\nprofiles: {claude: {route: anthropic.messages, api_key: synthetic-rotated-key}}\n",
+            "version: 1\nactive_profile: openai\nprofiles: {}\n",
+            "version: 1\nprofiles: {openai: {route: openai.chat, model: fixture-openai-updated}}\n",
+            "version: 1\nprofiles: {extra: {route: openai.chat, api_key: synthetic-unpublished-key}}\n"}){
+            const auto denied=import_config(change,3);require(denied&&denied->status==409,
+                "Busy YAML cannot change a key, selected profile, model or inactive profile");
+        }
+        const auto stale_import=import_config(same_config,2);require(stale_import&&stale_import->status==409,
+            "Even identical YAML must retain the caller's expected-revision guard");
+        require(runtime.configuration().revision==3&&runtime.configuration().active=="claude"&&
+            store.information("native-provider-profiles","registry").get()==registry_before&&
+            store.credentials("server").get().size()==credentials_before&&
+            store.run("graph-run").get().state==RunState::paused&&store.events("graph-run").get().size()==events_before&&
+            store.graph_run("graph-run").get().checkpoint_json==checkpoint_before,
+            "Read-only imports and refused mutations retain actual owner, checkpoint, history and encrypted keys");
         rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();require(Json::parse(graph.input_json).at("provider_context").at("profile_id")=="claude"&&Json::parse(graph.input_json).at("provider_context").at("profile_revision")==1,"Graph root must retain its admission profile context independently of registry selection revision");runtime.human_input("graph-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
         require(select(runtime,"openai",3).revision==4,"Completed graph must release profile ownership");
         configured=runtime.save_profile("openai","openai.chat","fixture-openai-updated",key(""),4);

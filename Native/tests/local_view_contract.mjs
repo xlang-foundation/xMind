@@ -75,6 +75,19 @@ try{
  // Instrumentation records transport calls; it does not supply domain replies.
  const streamSession=await native.createSession('Actual native browser subscription'),waitGraph=(await native.graphs()).graphs.find(value=>value.id==='profile.wait.read'),waiting=await native.graphRun(streamSession.id,waitGraph.id,waitGraph.revision,'Wait, then read the real file');
  await waitFor(async()=>{const value=await native.graph(waiting.id);return value.run.state==='paused'&&value;},'native human pause');
+ // Opening another native view with an unchanged template must observe the
+ // existing graph owner without rebuilding it or consuming its human input.
+ const unchangedYaml=path.join(base,'unchanged-provider-template.yaml');
+ await fs.writeFile(unchangedYaml,'version: 1\nprofiles: {}\n');
+ const pausedBefore=await native.graph(waiting.id),historyBeforeAttach=await native.history(streamSession.id);
+ const attachment=manager();settings.providerConfigPath=unchangedYaml;
+ try{
+  const attached=await attachment.connect();
+  assert.equal(attached.backendPid,first.process_id);
+  assert.equal(attached.profileDirectory,first.profile_directory);
+  assert.deepEqual(await client(attached).graph(waiting.id),pausedBefore);
+  assert.deepEqual(await client(attached).history(streamSession.id),historyBeforeAttach);
+ }finally{settings.providerConfigPath='';attachment.dispose();}
  const feeds=[],actualEvents=[],browserClient=new BrowserSessionClient(browserOrigin,{fetchImpl:(url,options)=>fetch(url,{...options,headers:{...options.headers,Cookie:cookie,'Sec-Fetch-Site':'same-origin',Origin:browserOrigin}})}),observedClient=Object.create(browserClient);
  observedClient.eventStream=(id,options)=>{const feed={id,signal:options.signal,after:options.after,observed:false};feeds.push(feed);return browserClient.eventStream(id,{...options,onObservation:async value=>{await options.onObservation?.(value);feed.observed=true;},onEvent:async event=>{actualEvents.push(event);await options.onEvent(event);}});};
  const firstMessages=[],firstView=new BrowserController(observedClient,message=>firstMessages.push(message));

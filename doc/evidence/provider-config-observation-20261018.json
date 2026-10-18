@@ -1,0 +1,50 @@
+{
+  "recorded_at": "2026-10-18T09:37:56.336Z",
+  "scope": "Unchanged native provider YAML imports during owned execution and attachment through the actual native view/extension host adapter",
+  "source_base": "aeb13dadf52f137cdc9bcda4cd8837e84994dd4c",
+  "source_files": {
+    "Native/include/agentflow/provider_profiles.hpp": "ad5feb583d5de39f351a67da7ec0d227dae917f87684541a61dfb3860ac1c20e",
+    "Native/src/provider_profile_runtime.cpp": "6cd7a2109d774d5c11031af4a5a28d97eda3603024c7c1f62bd0619d77ec64ae",
+    "Native/src/provider_profiles.cpp": "d9cd6f19f144760a7bf49d8fc72aa26be8fae973c847c39387024889cb0d92bc",
+    "Native/tests/local_view_contract.mjs": "fdcd650314060a51cc9b12b0a98647ce8227c3345a361c316cb096d1da8b2e97",
+    "Native/tests/provider_profile_runtime_contract.cpp": "f60b506e9477a070acdff22ed6673f83563497dc57dc6735d32c9fdeec4a2153",
+    "Native/tests/provider_yaml_config_contract.cpp": "c4f178525fd89ab6ced7b02ae6bbaa8b55af6092793b9add51243f5d5b01960a"
+  },
+  "native_executable_sha256": "ea9a8766015267d80a482f1f4aca951db390c56fb8edf9ee3e5d5da8a2acbe8d",
+  "runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "native_contracts": {
+    "passed": 6,
+    "failed": 0,
+    "seconds": 136.39,
+    "names": [
+      "native_provider_yaml_config_contract",
+      "native_local_view_contract",
+      "native_local_view_provider_config_contract",
+      "native_provider_profiles_contract",
+      "native_provider_profile_runtime_contract",
+      "native_provider_profile_cli_contract"
+    ],
+    "log_sha256": "6df20834c022c387808abe40732ac8321c7a41df79e8b432063ec0a9c405dfd5",
+    "build_log_sha256": "4f92a1c8b32c8ab8272c076eb206fd24a6fdc1062ccf89580c5dd81c648a746c"
+  },
+  "checks": [
+    "A semantically identical full YAML document verifies registry CAS without rotating encrypted keys or profile/catalogue revisions",
+    "No-op imports never invoke the mutation guard or prepare another execution service",
+    "An actual runtime graph remains paused under its owned human gate while authenticated HTTP import of the identical full secret-bearing fixture document returns 200",
+    "Changed keys, models, active selections and inactive-profile enrollment return 409 while that owner is active, before new credential publication",
+    "Even unchanged import preserves the caller expected-revision check and rejects a stale revision",
+    "The busy graph retains checkpoint, event count, history, provider selection and encrypted credentials",
+    "The production VS Code host adapter opens a second actual native view with an unchanged empty template, attaching to the same backend PID and unchanged graph/history",
+    "Native view provider-path restrictions, scoped browser access, new/existing workspace configuration and shared backend/controller contracts still pass"
+  ],
+  "limits": [
+    "Provider keys and provider replies in these contracts are synthetic; native execution ownership, graph/input/tool lifecycles, encryption, view processes and embedded-xlang3 SQLite are real",
+    "Busy native-view attachment uses an unchanged empty template; full unchanged secret-bearing document coverage is at the authenticated runtime HTTP boundary",
+    "No live saved-provider active-process reconnect acceptance in this source checkpoint",
+    "No current rendered external webpage or installed VS Code acceptance; client JavaScript is unchanged from the prior hosted view gate",
+    "No full current native inventory, hosted Release result or release-accepted installed package",
+    "A genuinely changed configuration still requires an idle healthy runtime; this fix does not apply configuration changes to a running owner",
+    "Existing failed old-profile handoff and profile/provider-switch recovery remain separate open work"
+  ]
+}
