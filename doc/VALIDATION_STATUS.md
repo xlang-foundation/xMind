@@ -19,7 +19,7 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-main VS Code `80507a4` passed both development-host and fresh-profile VSIX coding runs, with 20 saved OpenAI models; TestProj pytest passed 9/9 and the webpage Vite build passed. | Broader multi-file/editor workflows, long-task reliability, release-accepted packaging, and full-screen CLI validation. |
+| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-source `90ec355` VSIX with runtime `22d923b`/xlang3 `b0da71f` installed in a fresh VS Code profile and started its managed TestProj backend. Current extension/browser contracts pass 392/392 and 134/134. TestProj pytest passed 9/9 and the webpage Vite build passed. | Approval-gated coding interaction through this exact current-source VSIX, broader multi-file/editor workflows, long-task reliability, release-accepted packaging, and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
@@ -37,6 +37,19 @@ busy event stream retries with capped exponential backoff, remains able to
 recover when a lease becomes available, and stops its scheduled retry on
 disposal. These are client contract tests; they do not substitute for the
 rendered live coding acceptance recorded below.
+
+## Current-source packaged VS Code launch — 2026-10-17
+
+Built and installed a fresh VSIX from current xMind source `90ec355`, with the
+current native `xmind.exe` from `22d923b` and pinned xlang3 `b0da71f`. The
+packaged runtime inventory passed verification for 1,905 files, and the
+installed executable hash matched the managed backend process started by the
+fresh VS Code profile against `D:/CantorAI2026/TestProj`. The saved trusted
+provider-config path was supplied to the native view. The current VS Code
+contract suite passes **392/392** and the browser suite passes **134/134**.
+This closes fresh installation and managed startup for the current runtime;
+the coding request/approval/edit interaction has not yet been repeated through
+this exact package. See the [launch evidence](evidence/vscode-current-source-22d923b-packaged-launch-20261017.json).
 
 ## Hosted browser and VS Code gate — 2026-10-17
 

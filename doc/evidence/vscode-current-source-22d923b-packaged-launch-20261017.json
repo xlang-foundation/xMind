@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh-profile launch of the current-source VS Code development VSIX",
+  "source_revision": "90ec355d3dad0e4f7bca2fddc6e6ff265123c339",
+  "extension_version": "0.1.13",
+  "package": {
+    "path": "C:/xMindNativeValidation/agentflow-0.1.13-xmind-90ec355-current.vsix",
+    "sha256": "a52313455e9f499c8117941dabfd1c5c48d65e2300f99c9bb4ff2f597a41c261",
+    "bytes": 31122847,
+    "archive_files": 1951,
+    "runtime_inventory_files": 1905,
+    "runtime_manifest_sha256": "7563ff62fa09ac0041067c7860e918bbfc245397ba7c1411a444748f5e1be7eb"
+  },
+  "runtime": {
+    "xmind_revision": "22d923bc34d2eda42673c03854eb8b5e5c8f16fc",
+    "xmind_executable_sha256": "1b273630023fc72dd59b5a65b517fba63c938a3f2ce444f4fdda618a54c6d733",
+    "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "xlang3_runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+    "release_accepted": false,
+    "installed_runtime_matches_backend_process": true
+  },
+  "installation": {
+    "vscode_version": "1.142.0",
+    "fresh_user_data": "C:/xMindNativeValidation/vscode-userdata-90ec355",
+    "extensions_directory": "C:/xMindNativeValidation/vscode-extensions-90ec355",
+    "installed_extension": "agentflow-local.agentflow@0.1.13",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "managed_backend_started": true,
+    "backend_process_running": true,
+    "backend_listener_open": true,
+    "trusted_provider_config_path_supplied": true,
+    "provider_secret_recorded": false
+  },
+  "client_contracts": {
+    "vscode_command": "npm.cmd test",
+    "vscode_passed": 392,
+    "vscode_failed": 0,
+    "browser_command": "node.exe --test views/browser/tests/*.test.cjs",
+    "browser_passed": 134,
+    "browser_failed": 0
+  },
+  "interactive_coding_run_verified": false,
+  "limitations": [
+    "The current-source VSIX installed and started its matching managed backend, but this run did not submit and approve a coding request through the VS Code sidebar.",
+    "A prior packaged coding acceptance at xMind 80507a4 is documented separately; it does not replace this current-runtime interaction check.",
+    "This local development package is not release accepted."
+  ]
+}
