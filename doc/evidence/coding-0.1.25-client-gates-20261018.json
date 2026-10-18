@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-10-18T18:29:10.118Z",
+  "version": "0.1.25",
+  "clientSnapshotSource": "05532346e8e4dbb5f5ed23e2d2a2f4e098be5b79",
+  "metadataVersionChangedOnly": false,
+  "packagedClientImplementationUnchanged": true,
+  "extension": {
+    "exitCode": 0,
+    "tests": 420,
+    "passed": 420,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 142,
+    "passed": 142,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "sourceFiles": 102,
+  "browserAssets": 18,
+  "sourceAndAssetsUnchanged": true,
+  "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+  "scope": "Complete Node host/controller and JSDOM/browser-contract fixtures; no actual rendered editor/external browser, native inference or provider request.",
+  "nativeExecuted": false,
+  "providerRequests": 0,
+  "cpythonExecuted": false,
+  "passed": true
+}

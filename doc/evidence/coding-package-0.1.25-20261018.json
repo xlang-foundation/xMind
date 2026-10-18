@@ -1,0 +1,324 @@
+{
+  "recordedAt": "2026-10-18T18:43:56.999Z",
+  "version": "0.1.25",
+  "nativeRevision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "fullNative": {
+    "sourceRevision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 149,
+    "failed": 0,
+    "seconds": 914.59,
+    "projectFiles": 2604,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 75,
+    "nativeBinaries": 124,
+    "nodeDependencyRoots": [
+      "Native/tests/sdk/node_modules",
+      "extensions/vscode/node_modules"
+    ],
+    "nodeDependencyFiles": 18598,
+    "repositoryGuidanceFrozen": true,
+    "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "5247436256565d4b0491ec1c86e842db4a1e3b12492202464642c81ba0daaabe",
+    "ctestLogSha256": "bc448482fffbf6f7f1429e4b6c413d952951283ce66d912a1a8503191c0f3a9f",
+    "detailsSha256": "ca9ee73854c2d017f9959c7e6410c85d507969cabcda034babccdeb849cb2d59",
+    "nativeSha256": "e2933743feacaabcb891f294e9a1bb232b8f7c88cdeea57698e51ab2d1edfad6",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+    "hostedOnlyTrustMutationExcluded": true
+  },
+  "clientGate": {
+    "recordedAt": "2026-10-18T18:29:10.118Z",
+    "version": "0.1.25",
+    "clientSnapshotSource": "05532346e8e4dbb5f5ed23e2d2a2f4e098be5b79",
+    "metadataVersionChangedOnly": false,
+    "packagedClientImplementationUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 420,
+      "passed": 420,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 102,
+    "browserAssets": 18,
+    "sourceAndAssetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "scope": "Complete Node host/controller and JSDOM/browser-contract fixtures; no actual rendered editor/external browser, native inference or provider request.",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "archive": {
+    "version": "0.1.25",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.25-coding-win32-x64.vsix",
+    "sha256": "98179bb6ae306aeaf6a899de8c4737b16301ad7e4cd55784279bef9a591ea260",
+    "bytes": 34389321,
+    "archiveFiles": 2447,
+    "nativeFiles": 2402,
+    "nativeRevision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+    "nativeSha256": "e2933743feacaabcb891f294e9a1bb232b8f7c88cdeea57698e51ab2d1edfad6",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.25",
+    "version": "0.1.25",
+    "checkedPayloads": 2444,
+    "nativeFiles": 2402,
+    "nativeRevision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "e2933743feacaabcb891f294e9a1bb232b8f7c88cdeea57698e51ab2d1edfad6",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "1dd741d95623b0f162da7f447b933c1cbbbc5b78b5c21c133dd869f3a7183253",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "packagedPip": {
+    "manifestSha256": "1dd741d95623b0f162da7f447b933c1cbbbc5b78b5c21c133dd869f3a7183253",
+    "nativeRevision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pip": "26.2.1",
+    "wheelSha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+    "commands": 3,
+    "allExitZero": true,
+    "offlineInstall": true,
+    "dependenciesSkipped": false,
+    "generatedScripts": 3,
+    "generatedScriptsUseXlang3": true,
+    "cpythonExecuted": false,
+    "scope": "Actual packaged CLI bootstrap and complete offline pure pip installation; no model, backend or rendered client acceptance."
+  },
+  "live": {
+    "scope": "Actual saved-key Claude through installed native backend, production browser controller, HTTP and SSE with an explicit synthetic A2A peer. Workspace host and cookie jar are Node fixtures. No rendered interface or genuine remote agent analysis claim.",
+    "provider": {
+      "id": "claude",
+      "model": "claude-sonnet-4-6",
+      "discoveredModels": 13
+    },
+    "session": "0ceef073223ab8c9f7aef084945e1dd0",
+    "runs": {
+      "blocked": "26ceff51a937e9c9655137b0aa0b40b2",
+      "positive": "72942fc5e95f351ca4b591b3159c0fb5"
+    },
+    "phases": {
+      "blocked": {
+        "state": "completed",
+        "operation": "9df14a5d97245f6da55189c39ffdc3bd",
+        "actualNativeOutcome": true,
+        "instructionBindingVerified": true,
+        "sendsDuringPhase": 0,
+        "operationState": "failed",
+        "changedBeforeDispatch": true,
+        "savedEvents": 120
+      },
+      "positive": {
+        "state": "completed",
+        "operation": "2b166f2bd04425d55c5b452d77eb2fdd",
+        "actualNativeOutcome": true,
+        "instructionBindingVerified": true,
+        "sendsDuringPhase": 1,
+        "operationState": "succeeded",
+        "changedBeforeDispatch": false,
+        "savedEvents": 101
+      }
+    },
+    "verified": {
+      "at": "2026-10-18T18:43:24.065Z",
+      "blockedRemoteSends": 0,
+      "positiveRemoteSends": 1,
+      "processExecutions": 0,
+      "modelToolCalls": 2,
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 102,
+          "input_tokens": 8518,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 102,
+          "prompt_tokens": 8518,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 180,
+          "input_tokens": 8671,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 180,
+          "prompt_tokens": 8671,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 99,
+          "input_tokens": 8986,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 99,
+          "prompt_tokens": 8986,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 261,
+          "input_tokens": 9267,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 261,
+          "prompt_tokens": 9267,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "originalSourceFilesUnchanged": 30,
+      "testPolicyRemoved": true,
+      "testPeerRemoved": true,
+      "parentRunsCompleted": 2,
+      "noReplay": true,
+      "renderedAcceptance": false,
+      "cpythonExecuted": false
+    },
+    "usageTotals": {
+      "input": 35442,
+      "output": 642
+    },
+    "observerRecovery": {
+      "reason": "The harness selected a pending proposal before the controller observed it. The first attempted UI decision sent no decision HTTP request. A separate controller restored the same session/run, observed and compared the exact proposal, then sent one approval. No task or effect replay.",
+      "originalGapReceipt": "coding-0.1.25-a2a-positive-observer-gap-20261018.json",
+      "sameRunRecoveryReceipt": "coding-0.1.25-a2a-positive-controller-recovery-20261018.json",
+      "freshTaskSubmissions": 0
+    }
+  },
+  "page": {
+    "recordedAt": "2026-10-18T18:43:39.747Z",
+    "version": "0.1.25",
+    "url": "http://127.0.0.1:62084/ui/",
+    "viewPid": 49192,
+    "nativeViewPid": 62936,
+    "workspace": "C:\\xMindNativeValidation\\model-zoo-installed-0.1.25-20261018",
+    "rootRuns": 2,
+    "historyMessages": 8,
+    "replay": {
+      "blocked": {
+        "events": 120,
+        "cursor": 120,
+        "duplicates": 0,
+        "operationState": "failed"
+      },
+      "positive": {
+        "events": 101,
+        "cursor": 221,
+        "duplicates": 0,
+        "operationState": "succeeded"
+      }
+    },
+    "served": {
+      "client.js": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f",
+      "browser.js": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a",
+      "chat.js": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+      "chat.css": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a"
+    },
+    "activeProvider": "claude",
+    "testPeerRemoved": true,
+    "testGuidanceRemoved": true,
+    "taskSubmissions": 0,
+    "processReexecutions": 0,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Actual persistent HTTP/native restore and both complete saved event replays, with an explicit Node cookie jar. No rendered GUI, new task or model request."
+  },
+  "preservation": {
+    "settingsUnchanged": true,
+    "priorProfileDirectories": 6,
+    "previousInstalledBackup": "C:/xMindNativeValidation/preserved-vscode-0.1.24-before-0.1.25",
+    "oldPagesPreserved": [
+      54662,
+      51118,
+      52757
+    ],
+    "editorAndBrowserWindowsOpened": 0
+  },
+  "observerFailures": [
+    {
+      "kind": "Initial page readiness observation",
+      "result": "ENOENT reading active.json before host startup completed. The original host was preserved; after its readiness log, read-only verification passed. No host restart or model request."
+    }
+  ],
+  "hosted": {
+    "checkedAt": "2026-10-18T18:41:56Z",
+    "currentNative": {
+      "runId": 39153779094,
+      "revision": "152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+      "status": "pending"
+    },
+    "diagnostics": {
+      "runId": 39152463822,
+      "revision": "a41877c70e2fd7e5c73b072815d61589222ab65e",
+      "status": "in_progress"
+    },
+    "previousNative": {
+      "runId": 39149731654,
+      "revision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+      "passed": 149,
+      "total": 150,
+      "sdkSmokePassed": 2,
+      "graphProcessTimeoutMs": 30033,
+      "underlyingCause": "unknown"
+    },
+    "currentHostedPassClaim": false
+  },
+  "artifactRoot": "C:/xMindNativeValidation",
+  "artifactSha256": {
+    "vscode-0.1.25-payload-evidence-20261018.json": "ed61b10d2c98ad0c3ed03ac2136eb2b6e9d4144be7c791537e81fba2460225a0",
+    "vscode-0.1.25-installed-evidence-20261018.json": "603931d946be7caf5712131f8a61a016f35655fb041d943c35c3a1c4707614d1",
+    "coding-0.1.25-packaged-pip-20261018/packaged-pip.json": "90376020e413f91a2c7f9f8a800fe6ffce456cf28790f909ceeceb21a5bd029a",
+    "coding-0.1.25-a2a-live-20261018.json": "9c3355c832a56d88973b45ef9baa9c683acf0665031c691500c478645b34f847",
+    "coding-0.1.25-a2a-positive-observer-gap-20261018.json": "108806a8da79efa396525a1490ad1498970a5407dd33311c1f0f9358d2c5af30",
+    "coding-0.1.25-a2a-positive-controller-recovery-20261018.json": "aeeffec4695bdbc51b5b16e795f50626e8cbbb80d38c6e4e026a019c19f360f3",
+    "browser-0.1.25-modelzoo-verified-20261018.json": "0f93bec2ea05e0b049dded69df5a07985267a068c5e599d1a68b52694f4ef25f",
+    "browser-0.1.25-modelzoo-requests-20261018.json": "05281ed2d5e48f651000d75c8f5baa047767558686269aae898a3c94915cd73a",
+    "coding-0.1.25-a2a-blocked-operations-20261018.json": "e109457b87c657ae333646efa85c29a187ed36ed380b5e6a38836c06ccaf29e7",
+    "coding-0.1.25-a2a-blocked-children-20261018.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "coding-0.1.25-a2a-blocked-history-20261018.json": "e84bdd14c3523c45f15e63d0223996f063bca9b9c1e96817c228d3dcefc6ce88",
+    "coding-0.1.25-a2a-blocked-saved-tree-events-20261018.json": "710198ff2baf0f84880e30cf3e58f1e7941e784233b518e57bef0457cb6bcb52",
+    "coding-0.1.25-a2a-positive-operations-20261018.json": "4e20c50eaa5a1d1d65fd0a9dab1f7c3c9959bf8bef4adebcf828fa1bc26dbcba",
+    "coding-0.1.25-a2a-positive-children-20261018.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "coding-0.1.25-a2a-positive-history-20261018.json": "aa468c2eef17b7cfbf575967e00c5eb1bcc471a7c4d93c9cd6739c15d956c8af",
+    "coding-0.1.25-a2a-positive-saved-tree-events-20261018.json": "a48c00f59cdf2972595e4e6345ccbd4a2c545e3da03676ae9dc2ffd87ce96f6f"
+  },
+  "remaining": [
+    "Rendered external webpage input/layout/paint and VS Code activation",
+    "Current hosted native/release acceptance and process timeout root cause",
+    "Broader MCP/A2A interoperability and restart/stream recovery",
+    "Process-bound AgentRunner placement and OSS Nexus connection integration"
+  ],
+  "releaseAccepted": false
+}

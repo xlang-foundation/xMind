@@ -15,11 +15,11 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Installed native 44747af / SDK 58a8aab9 passes all 149 local Release contracts in 899.29 seconds; all 2,599 project inputs, pure libraries, SDK/runtime, 124 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and complete offline installation pass three actual commands. [Current full gate](evidence/profile-publication-full-gate-20261018.json). | Hosted source 44747af passes 149/150 and SDK smoke 2/2; the graph process has a confirmed 30,033ms timeout under its unchanged budget, underlying cause unknown. Source 152fc27 acceptance and release acceptance remain open. [Hosted receipt](evidence/hosted-native-447-failure-20261018.json). |
+| Native backend and local persistence | Installed native 152fc27 / SDK 58a8aab9 passes all 149 local Release contracts in 914.59 seconds; all 2,604 project inputs, pure libraries, SDK/runtime, 124 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and full offline installation pass three actual commands. [Current full gate](evidence/a2a-agent-guidance-full-gate-20261018.json). | Current hosted/release acceptance remains open. Hosted source 44747af passes 149/150 and SDK smoke 2/2; its graph process has a confirmed 30,033ms timeout, underlying cause unknown. [Hosted receipt](evidence/hosted-native-447-failure-20261018.json). |
 | Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
-| A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed 0.1.24 verifies 2,444 non-metadata payloads and 2,402 runtime files. Local and digest-verified hosted client checks pass 420/142. Real current installed Claude/controller failure-plan acceptance completes with one exact report creation. Page port 54662 restores ten messages, the completed parent/failed child and all 762 saved events without task replay. The prior 0.1.23 positive ModelZoo test remains separately recorded. [Current milestone](evidence/coding-package-0.1.24-20261018.json). | Current actual browser input/layout/paint and VS Code activation are unverified. VS Code remains closed at the user’s request. Current hosted/release acceptance and broader failure/recovery work remain open. |
+| A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls and selected outbound calls. Installed 0.1.25 with real Claude blocks one stale-instruction proposal before dispatch, then sends one fresh approved request to an explicit synthetic A2A 1.0 peer. Both parent runs complete. [Live receipt](evidence/coding-package-0.1.25-20261018.json). | Broader peer/version interoperability and full restart/stream recovery acceptance. The loopback peer does no actual agent analysis. |
+| Coding clients | Installed 0.1.25 verifies 2,444 non-metadata payloads and 2,402 runtime files, with unchanged settings and six prior profile directories. Complete local client checks pass 420/142. Page port 62084 restores eight messages, two completed parent runs and all 221 saved events without task replay. The 0.1.24 failure-plan and 0.1.23 positive ModelZoo coding checkpoints remain separately preserved. [Current milestone](evidence/coding-package-0.1.25-20261018.json). | Actual browser input/layout/paint and VS Code activation are unverified; no editor/browser windows were opened. Current hosted/release acceptance and broader failure/recovery work remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
@@ -38,26 +38,46 @@ explicit: the unchanged old core sends all three cases, while the corrected
 core sends 0/0/1 and records no operation / failed operation / succeeded
 operation respectively. The focused contract passes in 2.62 seconds. All
 native targets are rebuilt, exe SHA e2933743..., unchanged SDK 58a8aab9.
-The complete 149-test local gate is running from source 152fc27154d08e1f0ad51d9ce8c9f04cbb2da039.
-Its 2,604 tracked project inputs include the current root AGENTS.md; 1,870 pure
-library inputs, 75 SDK runtime files, 124 binaries and 18,598 dependency files
-and sets are frozen. CTest PID 52132, born 2026-10-18T18:22:00.4214602Z,
-must be observed to terminal without restarting it. Logs, manifest and live
-state use C:/xMindNativeValidation/a2a-agent-guidance-full-*; run the full-gate
-helper with after only on terminal success. Do not mutate those inputs,
-including AGENTS.md, before verification. Version 0.1.25 is not staged or installed.
-[Exact red/green evidence](evidence/a2a-agent-guidance-20261018.json).
+The complete local gate passes 149/149 in 914.59 seconds from source
+152fc27154d08e1f0ad51d9ce8c9f04cbb2da039. Its 2,604 tracked project inputs
+include the root AGENTS.md as frozen at validation; 1,870 pure-library inputs,
+75 SDK runtime files, 124 binaries and 18,598 dependency files/sets all verify
+unchanged after terminal completion. Later status documentation is separate
+from that frozen source closure. [Full gate](evidence/a2a-agent-guidance-full-gate-20261018.json).
+
+Version 0.1.25 is staged, packaged and installed through the actual VS Code
+CLI with all payloads verified. Existing user settings and six profile
+directories are preserved; the previous installation is backed up on C:.
+Real saved-key Claude completes two runs against an explicit synthetic A2A
+peer: changed instructions block dispatch with zero sends; a fresh approved
+request sends exactly once. Four actual provider responses report 35,442
+input and 642 output tokens. All thirty original/copied ModelZoo sources
+remain unchanged; the temporary test guidance and peer are removed.
+
+The first positive-case controller decision was attempted before its proposal
+was observed, so no approval HTTP request was sent. A separate controller
+restored the same run, observed and compared the exact proposal, and sent one
+approval. The original observer gap and same-run recovery are retained; no
+task was resubmitted. This validates native/HTTP/controller behavior with a
+synthetic peer, not genuine remote code analysis or rendered UI acceptance.
+
+The persistent page http://127.0.0.1:62084/ui/ restores eight messages and both
+completed runs. All 221 saved events replay exactly, with no duplicate or new
+provider/task/process request. The first read-only readiness check ran before
+active.json existed; after that same host reported ready, verification passed.
+No editor or browser window was opened. [Installed/live/page evidence](evidence/coding-package-0.1.25-20261018.json).
+[Exact native red/green evidence](evidence/a2a-agent-guidance-20261018.json).
 
 The repository checkpoint notes had grown AGENTS.md to 34,298 bytes and the
 actual native guidance reader rejected the xMind workspace at its unchanged
 16 KiB limit. Historical prose is retained verbatim in a fenced
 [archive](development-checkpoints-20261018.md); active product and operation
 rules stay in the smaller root file. A direct native read now verifies its
-exact content and hash. [Readability evidence](evidence/repository-guidance-size-20261018.json).
+exact content and hash. [Readability evidence](evidence/repository-guidance-size-20261018.json). The later 11,561-byte status update also passes an exact native read; [subsequent receipt](evidence/repository-guidance-0.1.25-status-20261018.json).
 
-Installed 0.1.24, its settings/profile data and page port 54662 remain unchanged.
-The source metadata bump and evergreen extension README do not establish
-current client, hosted, rendered or release acceptance.
+The previous 0.1.24 installation backup, its profile/history data and page port
+54662 remain preserved. Current hosted, rendered and release acceptance remain
+open; the new local evidence does not establish those scopes.
 
 ## Installed coding checkpoint 0.1.24 — 2026-10-18
 

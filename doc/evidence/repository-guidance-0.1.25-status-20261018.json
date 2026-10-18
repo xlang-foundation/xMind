@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-10-18T18:44:39.150Z",
+  "source": "AGENTS.md",
+  "bytes": 11561,
+  "sha256": "90ab357e78f50d541475d8c107cba949cb49155eb76b78a07a98b9656020b089",
+  "nativeReadExit": 0,
+  "exactContentReturned": true,
+  "nativeReaderLimit": 16384,
+  "stdoutSha256": "7921960c24dc84eac6fdabb0026111554bd24d1dfce5e44eceb5388c9f5c4a77",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Direct native repository-guidance read after installed 0.1.25 status update. This documentation content is later than the frozen full-native suite input."
+}
