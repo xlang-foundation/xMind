@@ -170,7 +170,13 @@ int main(int argc,char** argv) {
         multi_process.process_profiles.push_back({"powershell",powershell,1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},std::chrono::seconds(30),{},true});
         const std::string process_path="agent-process-folder.txt";const std::string command="[IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path)";
         store.create_session("multi-process","Agent process targets the captured secondary folder").get();AgentRunner process_runner(store,multi_process);process_runner.start("multi-process","multi-process","Run a process in the explicitly attached folder");
-        require(process_runner.execute("multi-process").state==RunState::completed,"AgentRunner must complete the actual process tool round-trip in the attached folder");
+        const auto process_run=process_runner.execute("multi-process");
+        if(process_run.state!=RunState::completed){
+            Json operations=Json::array(),events=Json::array();
+            for(const auto& operation:store.operations("multi-process").get())operations.push_back({{"id",operation.id},{"state",to_string(operation.state)},{"result_json",operation.result_json}});
+            for(const auto& event:store.events("multi-process").get())events.push_back({{"kind",event.kind},{"json",event.json}});
+            throw std::runtime_error("AgentRunner attached process failed: "+Json{{"state",to_string(process_run.state)},{"operations",std::move(operations)},{"events",std::move(events)}}.dump().substr(0,65536));
+        }
         const auto attached_process_effect=std::filesystem::u8path(attached_canonical)/process_path;const auto primary_process_effect=std::filesystem::u8path(primary_root)/process_path;
         require(std::filesystem::is_regular_file(attached_process_effect)&&!std::filesystem::exists(primary_process_effect),"Agent process must create its actual effect only in the explicitly selected attached folder");
         {std::ifstream effect(attached_process_effect,std::ios::binary);std::string location;std::getline(effect,location);require(std::filesystem::path(location).lexically_normal()==std::filesystem::path(attached_canonical).lexically_normal(),"Agent process cwd must be the selected attached folder root");}

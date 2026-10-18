@@ -18,6 +18,10 @@ struct ProcessProfile {
     std::chrono::milliseconds max_timeout{120000};
     std::string executable_id;
     bool auto_approve=false;
+    // Backend-derived pure library binding, never model-selected or persisted
+    // in the administrator's process profile document. Packaged hosts can
+    // derive the adjacent stdlib directory when no explicit root is supplied.
+    std::string xlang3_library;
 };
 // Owned process dispatch value. Workspace paths and handles are resolved by
 // the backend from the durable run membership, never supplied by the caller.

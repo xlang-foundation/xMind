@@ -167,6 +167,13 @@ ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& works
     for(auto& profile:profiles_) {
         if(profile.id.empty() || profile.id.size()>64 || !ids.insert(profile.id).second || profile.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || profile.revision<=0 || !text(profile.executable,32768) || !std::filesystem::u8path(profile.executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::u8path(profile.executable)) || profile.prefix_arguments.size()>32 || profile.max_timeout<std::chrono::milliseconds(1) || profile.max_timeout>std::chrono::minutes(10))throw std::invalid_argument("Invalid trusted process profile");
         for(const auto& arg:profile.prefix_arguments)if(!text(arg))throw std::invalid_argument("Invalid trusted process prefix argument");
+        if(profile.id=="xlang3"&&profile.xlang3_library.empty()){
+            const auto adjacent=std::filesystem::u8path(profile.executable).parent_path()/L"stdlib";
+            if(std::filesystem::is_directory(adjacent))profile.xlang3_library=utf8(adjacent);
+        }
+        if(!profile.xlang3_library.empty()&&(profile.id!="xlang3"||!text(profile.xlang3_library,32768)||
+            !std::filesystem::u8path(profile.xlang3_library).is_absolute()||!std::filesystem::is_directory(std::filesystem::u8path(profile.xlang3_library))))
+            throw std::invalid_argument("Invalid backend xlang3 pure-library binding");
         const auto actual=ForegroundProcess::executable_identity(profile.executable);
         if(profile.executable_id.empty())profile.executable_id=actual;
         else if(profile.executable_id!=actual)throw ProcessBeforeDispatchError("Registered process executable changed; administrator must reimport its profile");
@@ -289,6 +296,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     launch.working_directory=utf8((std::filesystem::u8path(root)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
     if(found->id=="xlang3") {
+        if(!found->xlang3_library.empty())launch.environment.emplace_back("XLANG3_PYTHON_LIB",found->xlang3_library);
         std::vector<std::filesystem::path> import_paths;
         const auto modules=std::filesystem::u8path(found->executable).parent_path()/L"modules";
         if(std::filesystem::is_directory(modules))import_paths.push_back(modules);

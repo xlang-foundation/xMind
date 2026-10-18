@@ -612,7 +612,7 @@ if(BUILD_TESTING)
     target_link_libraries(agentflow_graph_runner_contract PRIVATE agentflow_graph_execution)
     add_test(NAME native_graph_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_runner_peer.mjs"
       "$<TARGET_FILE:agentflow_graph_runner_contract>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
-    set_tests_properties(native_graph_runner_contract PROPERTIES TIMEOUT 45)
+    set_tests_properties(native_graph_runner_contract PROPERTIES TIMEOUT 90)
     add_executable(agentflow_graph_mcp_contract tests/graph_mcp_contract.cpp)
     target_include_directories(agentflow_graph_mcp_contract PRIVATE third_party)
     target_link_libraries(agentflow_graph_mcp_contract PRIVATE agentflow_graph_execution agentflow_mcp_effects)

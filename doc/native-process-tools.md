@@ -1,5 +1,9 @@
 # Native coding process tools — implementation contract
 
+Current validation and installed-package scope are recorded in
+[VALIDATION_STATUS.md](VALIDATION_STATUS.md). The dated acceptance sections below
+are historical checkpoints, not the current installed test inventory.
+
 ## Current integrated local acceptance (2026-10-11)
 
 The previous full native gate at source `7acf21f` built in Release and passed
@@ -94,6 +98,18 @@ the pure Python facades in `modules/pydantic_core`, changing the verified
 runtime inventory. The process-executor contract checks the argument order,
 executes a real xlang3 import and confirms no bytecode directory appears in
 the workspace package target.
+
+The backend binds each active `xlang3` profile to its configured `--stdlib`
+pure-source directory through `XLANG3_PYTHON_LIB`. Relative startup paths resolve
+against the backend's working directory before the profile is admitted. Native
+API callers can supply the backend-only `ProcessProfile::xlang3_library`; an
+adjacent packaged `stdlib` directory is used when that field is empty. This
+binding is derived at startup, is not a model argument or administrator-document
+field, and does not rewrite the saved process configuration. Each actual
+process proposal records the selected library environment alongside its command
+and other bindings. Native modules and workspace `.xlang3-site` imports continue
+through `PYTHONPATH`. A machine-specific fallback library is not proof that the
+configured or packaged pure source has been used.
 
 For workspace dependency installation, use the `xlang3` profile with arguments
 `["-m", "pip", "install", "--only-binary=:all:", "--target", ".xlang3-site", "-r", "requirements.txt"]`.

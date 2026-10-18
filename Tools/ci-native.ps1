@@ -12,12 +12,13 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'b0da71f22e9591b6bd99883b21c50ad85dbe4bed'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne '58a8aab9b40a464e38a741129b4804ac36e27a53'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
 # This pinned runtime includes xMind's tested pytest/async compatibility and
-# native package inventory, including pydantic-core distribution metadata;
+# native package inventory, including pydantic-core distribution metadata and
+# Unicode Windows pure-library environment paths;
 # applying the historical overlay again fails.
 $ciVsWhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $ciVisualStudio=(& $ciVsWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json|ConvertFrom-Json)|Select-Object -First 1
@@ -45,7 +46,7 @@ $ciRuntimeTargets=@('xlang3','xlang3_ipc_native_host_tests','xlang_json_native_p
 $ciRuntimeBuildArguments=@('--build',$ciRuntimeBuild,'--config','Release','--target')+$ciRuntimeTargets+@('--parallel',$ciParallelism.ToString())
 Invoke-CiCommand 'runtime-build' $ciCmake $ciRuntimeBuildArguments
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
-Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^xlang3_ipc_native_host_tests$','--output-on-failure','--no-tests=error')
+Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^(xlang3_ipc_native_host_tests|xlang3_cli_unicode_library_path)$','--output-on-failure','--no-tests=error')
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
 Invoke-CiCommand 'native-schema-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-jsoncons.mjs'))

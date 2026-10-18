@@ -278,6 +278,12 @@ int run_server(int argc,char** argv) {
         // supplies --process-config; an explicitly empty/custom-only list is
         // still an opt-out. Inherit the shell's approval and timeout policy.
         append_paired_xlang3_process_profile(process_profiles,options.at("--modules"));
+        // Bind child xlang3 startup to the same trusted pure source used by
+        // this backend. A developer machine's fallback library must not hide
+        // an unbound runtime in an installed package or clean CI environment.
+        const auto process_library=std::filesystem::absolute(std::filesystem::u8path(options.at("--stdlib"))).lexically_normal().u8string();
+        for(auto& profile:process_profiles)if(profile.id=="xlang3")
+            profile.xlang3_library=std::string(reinterpret_cast<const char*>(process_library.data()),process_library.size());
         agentflow::LanguageServerConfigurationStore language_server_configurations(persistence);
         std::vector<agentflow::LanguageServerProfile> language_servers;
         if(options.contains("--language-server-config")){
