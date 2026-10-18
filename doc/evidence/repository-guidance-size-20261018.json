@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-10-18T18:17:23.790Z",
+  "oldBytes": 34298,
+  "oldSha256": "f01c9dede6b60a6a3b8f84b03a2dbb87a39634e162e2cd70bd0bfcff9c457594",
+  "archive": "doc/development-checkpoints-20261018.md",
+  "archiveSha256": "14a73d70e8aba1475381951b20735aa7d512ba8c690ad871ab8e99a1a5cdaea4",
+  "archivedOriginalBodyOffset": 400,
+  "archivedOriginalBodySha256": "f01c9dede6b60a6a3b8f84b03a2dbb87a39634e162e2cd70bd0bfcff9c457594",
+  "newBytes": 10824,
+  "newSha256": "b8657a1765a47f49e33a9663f98a4f384d633f50f19148705ee38de38f32e893",
+  "nativeReaderLimit": 16384,
+  "oldNativeExit": 1,
+  "oldNativeError": "Guidance file exceeds 16 KiB",
+  "runtimeLimitChanged": false,
+  "newNativeRead": {
+    "exitCode": 0,
+    "sources": 1,
+    "sourceBytes": 10824,
+    "contentSha256": "b8657a1765a47f49e33a9663f98a4f384d633f50f19148705ee38de38f32e893",
+    "exactContentReturned": true
+  },
+  "scope": "Move historical checkpoints out of automatically loaded repository guidance while retaining the original bytes and current product/operation rules.",
+  "archivedOriginalBodyBytes": 34298
+}

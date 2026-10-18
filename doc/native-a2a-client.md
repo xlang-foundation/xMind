@@ -1,5 +1,25 @@
 # Native outbound A2A client and remote delegation
 
+## Repository instructions and approved sends — current source
+
+Ordinary AgentRunner A2A calls bind the delivered root repository guidance
+before publishing an operation. If that guidance changed since the model
+request, the call returns repository_instructions_required without a proposal
+or remote send. The registered tool also verifies the same native precondition
+after approval; a change retires the operation as failed with the recorded
+repository_instructions_changed_before_a2a_dispatch reason. Controller approval
+does not make stale instructions current. A later call must consider the new
+context and obtain its own exact approval.
+
+A native regression exercises both change windows and unchanged approved
+delegation through the real agent/model/tool loop, operation journal, HTTP
+transport and peer-created file. Model/A2A responses are labelled synthetic.
+Both change windows sent a remote task before this correction; afterward
+they send none, while the unchanged case sends exactly once. The next model
+request receives the changed instructions. This is a source-level instruction
+boundary fix; installed, hosted, rendered and broader A2A acceptance retain
+their separately recorded scope. [Red/green evidence](evidence/a2a-agent-guidance-20261018.json).
+
 ## Current boundary
 
 xMind currently exposes an authenticated local A2A server for JSON-RPC A2A

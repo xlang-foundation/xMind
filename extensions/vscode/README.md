@@ -1,50 +1,20 @@
 # xMind for VS Code
 
-**0.1.21** is a local Windows x64 development package. Its native runtime
-preserves checked conversation history across authority, model and supported
-provider changes. DeepSeek receives verified foreign tool turns as labelled
-context data while retaining its own native reasoning and tool continuation.
-Reconnecting with unchanged provider YAML preserves later UI/console provider
-selection, including while a graph owns execution. Deliberate file-default
-changes retain idle and revision checks. Human console output shows final
-supplied usage once per response, including available reasoning/cache counts.
-Foreground Windows processes receive the OS-derived SystemDrive without
-forwarding provider secrets. If another client changes the active provider
-during selection, both clients refresh capabilities and saved-key discovery
-after the conflict without retrying the selection or submitting a task.
-Process directory leases allow child-directory publication while retaining
-leased-path rename/deletion protection. The host observes the same live native
-startup beyond a single observation interval and reports elapsed progress in
-the existing sidebar document.
-Unchanged transcript snapshots preserve open history details. Streamed Markdown
-is parsed once per animation frame during bursts, with a synchronous final
-flush; completed graph children retain their saved responses without replayed
-deltas creating another live answer.
-An event stream cut halfway through a frame now resumes from its last accepted
-cursor, including when the cut splits a UTF-8 character. Only read-only event
-requests retry, under the existing retry limit; prompts and effects are not
-resubmitted. Complete malformed frames and invalid UTF-8 still stop observation.
-Both clients display model/process stream data directly without full metadata
-refreshes for each burst. Saved conversation turns, tool/lifecycle changes and
-unknown event kinds still reconcile persisted state. An idle inbox read failure
-is shown without rejecting the VS Code feed's observation callback, so its
-remaining committed completion frames can arrive on the same subscription.
+xMind connects the opened workspace to the local native C++ agent runtime,
+with embedded xlang3 and SQLite. Sessions, model selection, tool execution,
+approvals and response metrics belong to that shared backend. The extension
+renders and controls the same durable runs available to the webpage and CLI.
 
-The extension suite passes **416/416**; the browser suite passes **138/138**.
-All **148** local native Release contracts pass. A real Claude run validated a
-source-verified ModelZoo copy: xlang3 dependency installation, **9 passing**
-FastAPI tests, and a Vue production build. After correcting native directory
-sharing, a real xlang3 pytest run passed all nine tests and published its cache;
-only the dependency's Starlette/AnyIO deprecation warning remains. A native
-runtime handoff retained the original 12-message conversation and selected
-provider. Event observation resumed through completion without replaying the task.
-The earlier history
-checkpoint passed ten focused native contracts. A real saved-key coding conversation completed
-OpenAI → Claude → Gemini → DeepSeek → OpenAI, including approved file creation
-and editing, two xlang3 assertions and retained history through a managed runtime
-handoff. These checks cover the selected models and production HTTP clients;
-they do not establish rendered IDE or release acceptance. Exact source, package, live and installed
-scope is recorded in [validation status](https://github.com/xlang-foundation/xMind/blob/main/doc/VALIDATION_STATUS.md).
+Saved provider profiles support account model discovery and conversation
+continuation with the implemented OpenAI, Claude, Gemini and DeepSeek routes.
+The coding loop reads and edits workspace files, runs configured commands,
+and supports skills, native MCP tools and owner-registered A2A agents. File
+changes retain scoped review; trusted command profiles can run without a
+per-command prompt. Python-compatible commands use the paired xlang3 runtime.
+
+[Current source, package and installed acceptance](https://github.com/xlang-foundation/xMind/blob/main/doc/VALIDATION_STATUS.md)
+records the exact tested scope. Native contracts, live-provider runs, rendered
+browser checks and actual editor activation are tracked separately.
 
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
 and the composer and model chooser at the bottom. C++ owns execution,

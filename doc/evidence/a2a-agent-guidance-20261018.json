@@ -1,0 +1,122 @@
+{
+  "recordedAt": "2026-10-18T18:12:30.900Z",
+  "baselineNativeRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+  "baselineAgentRunnerSha256": "ca799a2c3d769d247849874ff526b89ae23440341a7d15f16c3654a4136f3e8d",
+  "sourceFiles": {
+    "Native/src/agent_runner.cpp": "fc54c6c7e058eaff9eeefa942ec666a1c54c04f5b656a6203a709d2c193e5713",
+    "Native/tests/a2a_agent_registry_contract.cpp": "fd2437385ca0d5b508ac76e04559e053be8d422623fd59245061349b711f7f0b",
+    "Native/tests/a2a_agent_guidance_contract.hpp": "562904f189773bf90054f6e746077c257fc5c702fcc0457931a5f06fd9b6cf14"
+  },
+  "red": {
+    "failed": 1,
+    "seconds": 2.75,
+    "cases": [
+      {
+        "case": "before",
+        "model_calls": 2,
+        "operations": [
+          {
+            "has_instruction_binding": false,
+            "result_json": "{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-before\",\"independently_verified\":false,\"message_id\":\"xmind-ceee8e7e4679fb0d3800b752eafb0b86\",\"operation_id\":\"ceee8e7e4679fb0d3800b752eafb0b86\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-before\\\",\\\"id\\\":\\\"remote-before\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-before\"}",
+            "state": "succeeded"
+          }
+        ],
+        "peer_effect_exists": true,
+        "remote_sends": 1,
+        "run_state": "completed",
+        "updated_guidance_seen": true
+      },
+      {
+        "case": "approval",
+        "model_calls": 2,
+        "operations": [
+          {
+            "has_instruction_binding": false,
+            "result_json": "{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-approval\",\"independently_verified\":false,\"message_id\":\"xmind-5d484b0cd54a54457830aaedabe2c0df\",\"operation_id\":\"5d484b0cd54a54457830aaedabe2c0df\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-approval\\\",\\\"id\\\":\\\"remote-approval\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-approval\"}",
+            "state": "succeeded"
+          }
+        ],
+        "peer_effect_exists": true,
+        "remote_sends": 1,
+        "run_state": "completed",
+        "updated_guidance_seen": true
+      },
+      {
+        "case": "fresh",
+        "model_calls": 2,
+        "operations": [
+          {
+            "has_instruction_binding": false,
+            "result_json": "{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-b3235f4024406e14d553b4f1c506c28a\",\"operation_id\":\"b3235f4024406e14d553b4f1c506c28a\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}",
+            "state": "succeeded"
+          }
+        ],
+        "peer_effect_exists": true,
+        "remote_sends": 1,
+        "run_state": "completed",
+        "updated_guidance_seen": false
+      }
+    ],
+    "logSha256": "ad2951441344deca829bbef1bcc502ccd3a285f04b0a3392706bfa6424cd1e55"
+  },
+  "green": {
+    "passed": 1,
+    "seconds": 2.62,
+    "cases": [
+      {
+        "case": "before",
+        "model_calls": 2,
+        "operations": [],
+        "peer_effect_exists": false,
+        "remote_sends": 0,
+        "run_state": "completed",
+        "updated_guidance_seen": true
+      },
+      {
+        "case": "approval",
+        "model_calls": 2,
+        "operations": [
+          {
+            "has_instruction_binding": true,
+            "result_json": "{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}",
+            "state": "failed"
+          }
+        ],
+        "peer_effect_exists": false,
+        "remote_sends": 0,
+        "run_state": "completed",
+        "updated_guidance_seen": true
+      },
+      {
+        "case": "fresh",
+        "model_calls": 2,
+        "operations": [
+          {
+            "has_instruction_binding": true,
+            "result_json": "{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-d7c491586fc25eae2c986fe3966fabea\",\"operation_id\":\"d7c491586fc25eae2c986fe3966fabea\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}",
+            "state": "succeeded"
+          }
+        ],
+        "peer_effect_exists": true,
+        "remote_sends": 1,
+        "run_state": "completed",
+        "updated_guidance_seen": false
+      }
+    ],
+    "logSha256": "37b828df14702b76a9e5f294c957144c33b90469188a979617160e6b2e1125f1",
+    "detailsSha256": "57278114da59017e1ffb84ba0a82ae722db6d5c65538090f0d0ae15e62ad35e6"
+  },
+  "scope": "Actual native AgentRunner, owner approval, remote HTTP/file effects, model continuation and xlang3-backed SQLite, using explicit synthetic model/A2A peers. Three cases run against unchanged old core and corrected core; no real provider or rendered acceptance.",
+  "initialFixtureFailure": {
+    "log": "a2a-agent-guidance-red-test-20261018.log",
+    "cause": "Fixture initially searched raw guidance instead of its documented JSON string representation. Corrected before the actual unchanged-core red regression."
+  },
+  "completeCurrentGate": "pending all-target rebuild and full suite",
+  "installedVersion": "0.1.24",
+  "installedChanged": false,
+  "cpythonExecuted": false,
+  "sourceMetadataVersion": "0.1.25",
+  "allNativeTargetsRebuilt": true,
+  "allBuildLogSha256": "211a04be8b9bc1807e5a7466b9fed1be434026fa8a929e1c61ba86bae44233a9",
+  "nativeSha256": "e2933743feacaabcb891f294e9a1bb232b8f7c88cdeea57698e51ab2d1edfad6"
+}

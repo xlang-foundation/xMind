@@ -16,6 +16,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include "a2a_agent_guidance_contract.hpp"
 
 namespace {
 using Json=nlohmann::json;
@@ -139,7 +140,8 @@ int main(int argc,char** argv){
                 auto malformed=client.Post("/v1/a2a/agents/register?next=1",headers,"{}","application/json");require(malformed&&malformed->status==400,"Malformed A2A query must not be accepted");
             }catch(...){server.stop();worker.join();throw;}server.stop();worker.join();persistence.close();
         }
-        std::cout<<"Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck and uncertain-effect quarantine. Task recovery, streaming, cancellation, artifacts and full model-driven cross-client execution remain open.\n";
+        a2a_agent_guidance_test::run(imports,directory.path);
+        std::cout<<"Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.\n";
     }catch(const std::exception& error){std::cerr<<"Native A2A registry contract failed: "<<error.what()<<"\n";return 1;}
     return 0;
 }

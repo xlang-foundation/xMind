@@ -23,6 +23,35 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Current source 0.1.25 — A2A instruction binding
+
+A2A calls in AgentRunner now use the delivered root repository-instruction
+precondition before proposal and across controller approval, as MCP calls do.
+A changed AGENTS.md before proposal publishes no operation or remote send. A
+change while approval is pending retires that exact operation as failed before
+dispatch. The next model request receives the new guidance; no effect replays.
+Unchanged approved delegation still sends once with its instruction binding.
+
+The regression executes the actual native agent loop, approvals, HTTP peers,
+remote file effects and xlang3-backed SQLite. Synthetic model/A2A replies are
+explicit: the unchanged old core sends all three cases, while the corrected
+core sends 0/0/1 and records no operation / failed operation / succeeded
+operation respectively. The focused contract passes in 2.62 seconds. All
+native targets are rebuilt, exe SHA e2933743..., unchanged SDK 58a8aab9.
+Complete source/input/binary validation and 0.1.25 installation remain pending.
+[Exact red/green evidence](evidence/a2a-agent-guidance-20261018.json).
+
+The repository checkpoint notes had grown AGENTS.md to 34,298 bytes and the
+actual native guidance reader rejected the xMind workspace at its unchanged
+16 KiB limit. Historical prose is retained verbatim in a fenced
+[archive](development-checkpoints-20261018.md); active product and operation
+rules stay in the smaller root file. A direct native read now verifies its
+exact content and hash. [Readability evidence](evidence/repository-guidance-size-20261018.json).
+
+Installed 0.1.24, its settings/profile data and page port 54662 remain unchanged.
+The source metadata bump and evergreen extension README do not establish
+current client, hosted, rendered or release acceptance.
+
 ## Installed coding checkpoint 0.1.24 — 2026-10-18
 
 The current installed native package includes the protected profile-publication
