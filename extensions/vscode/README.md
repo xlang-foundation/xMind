@@ -1,6 +1,6 @@
 # xMind for VS Code
 
-**0.1.16** is a local Windows x64 development package. Its native runtime
+**0.1.17** is a local Windows x64 development package. Its native runtime
 preserves checked conversation history across authority, model and supported
 provider changes. DeepSeek receives verified foreign tool turns as labelled
 context data while retaining its own native reasoning and tool continuation.
@@ -8,9 +8,17 @@ Reconnecting with unchanged provider YAML preserves later UI/console provider
 selection, including while a graph owns execution. Deliberate file-default
 changes retain idle and revision checks. Human console output shows final
 supplied usage once per response, including available reasoning/cache counts.
+Foreground Windows processes receive the OS-derived SystemDrive without
+forwarding provider secrets. If another client changes the active provider
+during selection, both clients refresh capabilities and saved-key discovery
+after the conflict without retrying the selection or submitting a task.
 
-The extension suite passes **395/395**; the browser suite passes **136/136**.
-Four focused native provider-configuration contracts pass. The earlier history
+The extension suite passes **399/399**; the browser suite passes **138/138**.
+All **148** local native Release contracts pass. A real Claude run validated a
+source-verified ModelZoo copy: xlang3 dependency installation, **9 passing**
+FastAPI tests (two unresolved pytest cache-write warnings), and a Vue production
+build. Event observation resumed through completion without replaying the task.
+The earlier history
 checkpoint passed ten focused native contracts. A real saved-key coding conversation completed
 OpenAI → Claude → Gemini → DeepSeek → OpenAI, including approved file creation
 and editing, two xlang3 assertions and retained history through a managed runtime

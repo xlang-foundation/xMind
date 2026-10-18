@@ -19,9 +19,44 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed VSIX **0.1.16** contains native `3d7dfe1`; its 1,970 payloads and 1,927-file runtime verify. Installed host/client/browser modules preserve provider selection across reattachment. A real Claude run created an approved file, ran two xlang3 assertions with exit zero, retained six messages and completed native SSE. VS Code APIs were explicit Node fixtures; browser protocol checks used a Node cookie jar. The selected model survives a fresh browser cookie session. Four native configuration checks and 395 extension tests pass. [Current installed receipt](evidence/provider-selection-0.1.16-20261018.json). Earlier 0.1.15 completed OpenAI → Claude creation/editing; `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader models/recovery cases, long-task reliability and broader interactive-console/terminal recovery acceptance. |
+| Coding clients | Installed VSIX **0.1.17**, native `a56c3cd`: 1,970 installed payloads and the 1,927-file runtime verify. Installed host/client imports four saved-key profiles, discovers 13 Claude models and preserves selection across a second attachment. A real Claude run on the identical staged native runtime installed xlang3 dependencies, passed the current ModelZoo copy's nine FastAPI tests, built Vue, and created an approved report. Production event subscription resumed cursor 70 to terminal 680 without task replay. Original/copied source files remain unchanged. VS Code APIs and browser cookie jar were explicit Node fixtures; no rendered acceptance. All 148 native, 399 extension and 138 browser contracts pass. [Current installed receipt](evidence/coding-package-0.1.17-20261018.json). Earlier `d7adf96` passed a different 20-test snapshot and Vue build. | Actual rendered coding acceptance, current-source hosted/release acceptance, two pytest cache-write warnings, prior failed profile handoff, broader models/recovery cases and long-task reliability. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.17 and ModelZoo build acceptance — 2026-10-18
+
+Windows x64 development VSIX **0.1.17** is installed using the actual VS Code CLI
+and listed by it. Its final archive has 1,973 files; all 1,970 installed payloads
+and the 1,927-file runtime verify. It includes native `a56c3cd` and the provider
+conflict recovery from `d3e27e8`. The previous 0.1.16 installation was backed up
+and its 1,972 files checked. Settings remain unchanged and existing profile
+directories are preserved. No VS Code process remained after installation;
+no editor was opened.
+
+The actual installed production host/client connected a fresh workspace/profile,
+imported four saved-key provider profiles, discovered 13 Claude models, explicitly
+selected `claude-sonnet-4-6`, and preserved that selection across a second native
+attachment. This used explicit VS Code API fixtures; it does not prove editor
+activation or rendering. Existing running user backends were not replaced.
+
+A real Claude run on the identical verified staged runtime validated a 30-file
+source-verified copy of the current ModelZoo project. xlang3 pip installed its
+dependencies, xlang3 pytest passed **nine tests** with two cache-write warnings,
+`npm ci` succeeded and Vite built the Vue application. All four native process
+receipts have exit zero. The agent created an approved validation report.
+Original and copied source/configuration files remain unchanged. Six actual
+model responses, 12 history messages and supplied token usage are retained.
+
+The first helper incorrectly required a terminal response from a bounded SSE
+lease, which correctly returned `reconnect` at cursor 70. Its historical
+20-test assumption also did not match the current nine-test source snapshot.
+The original failure record remains. A read-only continuation used the production
+subscription through terminal cursor 680, with no duplicate events or task replay,
+and checked the actual test count against the copied source. The model-authored
+report says 21 packages installed; pip's successful output lists 22. Package,
+test and build claims use the actual process receipts. The two pytest cache-write
+warnings remain unresolved. See the
+[package and live coding receipt](evidence/coding-package-0.1.17-20261018.json).
 
 ## Process environment and provider-selection recovery — 2026-10-18
 
@@ -42,7 +77,7 @@ recovered execution with Claude and its 13 saved-key models, and admitted no run
 This used the production browser controller with a Node cookie jar and explicit
 VS Code workspace/settings APIs; it does not verify rendered desktop behavior.
 
-These changes are not installed in 0.1.16. VS Code stayed closed. External Edge
+These changes are now installed in 0.1.17. VS Code stayed closed. External Edge
 accessibility was readable, but screenshots were black and activation failed
 with `GetCursorPos: Access is denied (0x80070005)` twice, including after a fresh
 window inventory. Rendered acceptance remains open. See the

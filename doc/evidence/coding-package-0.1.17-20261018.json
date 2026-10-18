@@ -1,0 +1,253 @@
+{
+  "recordedAt": "2026-10-18T12:17:19.549Z",
+  "scope": "Windows development package installation plus actual installed host/client/native attachment and a real coding/build task against the identical verified native runtime. Node VS Code API fixtures/cookie jar; rendered UI is not accepted.",
+  "version": "0.1.17",
+  "providerFixSourceRevision": "d3e27e85eabbe9e4ea12fcc00085c174d70bfd83",
+  "nativeRevision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+  "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "sourceFiles": {
+    "client.js": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+    "extension.js": "6e1d75aa9ffc4561f98b4b618cc2a3a784582e22954d6f53fdeb254665219afa",
+    "README.md": "fe1a2930d7e47b1ba2d7a5cd6cf08bf36b33cf6f72b77823bef69f86b0548c0d"
+  },
+  "payload": {
+    "version": "0.1.17",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.17-coding-win32-x64.vsix",
+    "sha256": "d51878aea7b59cc1939b9c7d94d5f45ca4510c51d1787ba8c54f6f8638a7e1bc",
+    "bytes": 32496813,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+    "nativeSha256": "04fe8d7d4c2d5adde8c465f6cfc080337d334006a314da851d37932014c136c3",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.17",
+    "version": "0.1.17",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+    "manifestSha256": "cc821b07091c4afd6b754c0132d67a2b95900a053cd59d8c514e7037916424ce",
+    "nativeSha256": "04fe8d7d4c2d5adde8c465f6cfc080337d334006a314da851d37932014c136c3",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "installedHost": {
+    "version": "0.1.17",
+    "extension": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.17",
+    "workspace": "C:/xMindNativeValidation/installed-0.1.17-workspace-20261018",
+    "scope": "Installed host/client/runtime and real provider discovery; explicit VS Code workspace/settings/SecretStorage fixtures. No actual editor or browser UI.",
+    "inferenceRequests": 0,
+    "startedAt": "2026-10-18T12:16:35.659Z",
+    "runtime": {
+      "nativeRevision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+      "manifestSha256": "cc821b07091c4afd6b754c0132d67a2b95900a053cd59d8c514e7037916424ce",
+      "files": 1927
+    },
+    "connectElapsedMs": 4801,
+    "owner": {
+      "backendPid": 49704,
+      "origin": "http://127.0.0.1:64531",
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233"
+    },
+    "completedAt": "2026-10-18T12:16:43.619Z",
+    "savedKeysImported": 4,
+    "provider": "claude",
+    "catalogueCount": 13,
+    "model": "claude-sonnet-4-6",
+    "secondAttachmentPreservesSelection": true,
+    "executionAvailable": true,
+    "renderedAcceptance": false
+  },
+  "coding": {
+    "recordedAt": "2026-10-18T12:14:00.075Z",
+    "scope": "Actual Claude requests, native tools/processes, browser HTTP/SSE and Node cookie jar. VS Code API fixtures; no rendered browser or editor acceptance.",
+    "sourceRevision": "d3e27e85eabbe9e4ea12fcc00085c174d70bfd83",
+    "nativeRevision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+    "run": "f06d2b8168b1f997ac8db4e5bfa3e5fb",
+    "session": "5fad98b01c0f93a6364b76578441166a",
+    "workspace": "C:/xMindNativeValidation/model-zoo-current-acceptance-20261018",
+    "originalProject": "D:/CantorAI2026/TestProj/model-zoo",
+    "backendPid": 32352,
+    "outcome": "completed",
+    "fourProcessesExitZero": true,
+    "backendTests": {
+      "passed": 9,
+      "warnings": 2,
+      "matchesSourceTestCount": true
+    },
+    "frontendBuild": true,
+    "installedPackages": [
+      "annotated-doc-0.0.5",
+      "annotated-types-0.8.0",
+      "anyio-4.15.1",
+      "certifi-2026.7.22",
+      "click-8.5.0",
+      "colorama-0.4.6",
+      "fastapi-0.120.4",
+      "h11-0.16.0",
+      "httpcore-1.0.9",
+      "httpx-0.28.1",
+      "idna-3.20",
+      "iniconfig-2.3.1",
+      "packaging-26.3",
+      "pluggy-1.7.0",
+      "pydantic-2.14.1",
+      "pydantic-core-2.50.1+xlang3",
+      "pygments-2.21.0",
+      "pytest-8.4.2",
+      "starlette-0.49.3",
+      "typing-extensions-4.16.0",
+      "typing-inspection-0.4.4",
+      "uvicorn-0.39.0"
+    ],
+    "sourceFilesChecked": 30,
+    "copiedSourceUnchanged": true,
+    "originalSourceUnchanged": true,
+    "reportSha256": "3513fb19069bb2907f3f52f94cd6e5f564362314aad0e8e43f2ddaec7c679e54",
+    "actualUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 163,
+        "input_tokens": 8420,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 163,
+        "prompt_tokens": 8420,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 134,
+        "input_tokens": 11776,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 134,
+        "prompt_tokens": 11776,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 149,
+        "input_tokens": 12546,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 149,
+        "prompt_tokens": 12546,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 134,
+        "input_tokens": 12923,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 134,
+        "prompt_tokens": 12923,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 760,
+        "input_tokens": 13961,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 760,
+        "prompt_tokens": 13961,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 567,
+        "input_tokens": 14852,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 567,
+        "prompt_tokens": 14852,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "actualModelResponses": 6,
+    "historyMessages": 12,
+    "eventObservation": {
+      "initialCursor": 70,
+      "initialResult": "reconnect",
+      "continuationEvents": 610,
+      "terminalCursor": 680,
+      "terminal": "terminal",
+      "duplicates": 0,
+      "taskResubmissions": 0,
+      "productionSubscription": true
+    },
+    "harnessCorrection": "Original one-shot helper incorrectly required terminal after a normal bounded stream reconnect and assumed a historical 20-test suite. This read-only continuation uses the production subscription and verifies the current source test count; original failure record/log retained.",
+    "warnings": "pytest cache provider emitted two Windows rename/sharing warnings; all nine tests passed. These warnings remain unresolved.",
+    "reportAccuracy": "Model-authored VALIDATION.md states 21 packages installed; actual successful pip output lists 22. Only process receipts are used for package/test/build claims.",
+    "renderedAcceptance": false,
+    "releaseAccepted": false
+  },
+  "preservation": {
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.16-before-0.1.17",
+    "checkedFiles": 1972,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "previousProfiles": 4,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true
+  },
+  "nativeChecks": {
+    "passed": 148,
+    "total": 148,
+    "receipt": "coding-process-provider-recovery-20261018.json"
+  },
+  "extensionChecks": {
+    "passed": 399,
+    "total": 399
+  },
+  "browserChecks": {
+    "passed": 138,
+    "total": 138
+  },
+  "desktop": {
+    "vscodeWindowsOpened": false,
+    "codeProcessesAfterInstall": 0,
+    "renderedAcceptance": false,
+    "externalBrowserInput": "Previously denied GetCursorPos with black screenshots; no further input attempted."
+  },
+  "packageCorrection": "The first 0.1.17 development archive retained the previous README version. It was replaced by the verified coding archive with the current README, reinstalled with the actual VS Code CLI, and checked again; both initial archive and records remain local.",
+  "limitations": [
+    "Installed host APIs were exercised with explicit VS Code API fixtures; the actual editor was not opened.",
+    "The real ModelZoo task used the staged matching native runtime before installation; the installed host attachment/discovery test admitted no inference.",
+    "Two pytest cache-write warnings remain unresolved. Model-authored report miscounted installed packages (21 versus actual 22); process receipts are authoritative.",
+    "The old one-shot validation helper incorrectly treated the normal SSE reconnect as failure and assumed a historical test count. Its original failure remains recorded; the existing run was verified read-only with the production subscription.",
+    "Existing running user backends were not replaced by installation.",
+    "Hosted current-native and production release acceptance remain outstanding."
+  ],
+  "releaseAccepted": false,
+  "logs": {
+    "vscode-0.1.17-final-package-20261018.log": "b4dfc936287d9814ce0449cdc8952da6118824712239b1af508abf07153b5595",
+    "vscode-0.1.17-final-install-20261018.log": "0b26ba0ea9e546420e9ec86254453562975a258c0a7e30d276706df8e8869df5",
+    "vscode-0.1.17-extension-list-20261018.log": "4b9fba0ef7950a75745e93d47b56551dd6a1233c12e0949900168c0928918834",
+    "vscode-0.1.17-extension-tests-20261018.log": "8f4c3076db385bf0bf324982f608672d277ba4154207beecf6454a244fd872ac",
+    "model-zoo-current-coding-20261018.log": "ebbe45caa45ee64333d0c018f043465e6bf24b304c7ff19a0c7a9b8f17244c48",
+    "model-zoo-current-coding-verification-20261018.log": "ec650ddc4ebfce7857593a2003d4fec75519fca146af7fe3ff5583cd95f98257"
+  }
+}
