@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-17",
+  "scope": "One approval-gated Vue component edit through the xMind webpage, followed by a native workspace build and live page inspection",
+  "xmind_checkout_head": "22d923b",
+  "runtime": {
+    "xmind_revision": "10cbd7785adea12aad9aa9f23079bb9a92807739",
+    "xmind_executable_sha256": "38aa9a7c091acb3e7f801583492199ae4b3999b021710cbaea6ed059733efa51",
+    "sdk_revision": "ad7e74058ebdc941ec656c315a8a47a01c12d74e",
+    "release_accepted": false
+  },
+  "webpage_run": {
+    "run_id": "5c34d10bbbe953f0ee26eb0f97695d02",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "provider": "Claude Messages",
+    "model": "claude-sonnet-4-6",
+    "edit_operation_id": "b2002c1c334a5d5d12bf46618e74c7b6",
+    "edit_approval": "Reviewed and approved in the xMind webpage UI",
+    "file": "model-zoo/frontend/src/components/ModelCard.vue",
+    "file_sha256": "fb7b3ec8ee1c465cbf289fc10df2417f5c4caf51f3f47eda539b1bf78580f1ae",
+    "process_operation_id": "f54254e4356fe88b5b5bb5d60452c4db",
+    "command": "cd model-zoo/frontend; npm run build 2>&1",
+    "exit_code": 0,
+    "build": {
+      "vite_version": "6.4.4",
+      "modules_transformed": 37,
+      "duration_ms": 699,
+      "stderr_bytes": 0
+    },
+    "page_check": {
+      "url": "http://127.0.0.1:4174/",
+      "http_status": 200,
+      "inspection": "Browser accessibility tree showed the updated provider strip, version/date chips, model metrics, demo labels, copy action, and detail link on rendered catalog cards."
+    }
+  },
+  "current_checkout_checks": {
+    "vscode_extension_tests": {
+      "command": "npm test",
+      "passed": 392,
+      "failed": 0,
+      "duration_ms": 3704
+    },
+    "focused_native_ctest": {
+      "registered": 14,
+      "passed": 14,
+      "failed": 0
+    },
+    "full_native_release_build": {
+      "result": "incomplete",
+      "failure": "The final xmind.exe link could not replace build/native/contract-bin/Release/xmind.exe because an active local xMind server process was using that executable.",
+      "source_compilation": "Changed core, agent, worker, process, permission, HTTP, and contract targets compiled; the final executable link was blocked by the file lock."
+    }
+  },
+  "limitations": [
+    "This single-file task used the recorded local development runtime at xMind revision 10cbd778; it does not certify the current checkout's complete packaged runtime.",
+    "Browser inspection was through the accessibility tree and HTTP response, not a pixel-level screenshot review.",
+    "This task did not exercise multi-file edits, workspace switching, or the VS Code live UI."
+  ]
+}

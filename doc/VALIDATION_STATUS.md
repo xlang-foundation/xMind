@@ -3995,3 +3995,26 @@ VSIX and run hashes in the evidence JSON.
 These are bounded local UI checks, not a broad coding-reliability claim. Exact
 revisions, binary hashes, run IDs, token counts and restored file hashes are in
 [machine-readable evidence](evidence/current-main-webpage-coding-20261017.json).
+
+## Webpage TestProj component-edit checkpoint — 2026-10-17
+
+In a fresh xMind webpage conversation bound to `D:\CantorAI2026\TestProj`,
+the coding agent edited only `model-zoo/frontend/src/components/ModelCard.vue`.
+The reviewed card update organized provider identity, version/date, model
+metrics, demo labels, and card actions into a responsive, accessible layout.
+The webpage then ran `npm run build` in the Vue frontend through its trusted
+native process tool. Vite 6.4.4 transformed all 37 modules and exited **0** in
+699 ms with no stderr. The running catalog returned HTTP 200; its accessibility
+tree showed the updated cards and retained the model details, copy, save, and
+demo disclosures.
+
+The run used a local development runtime from xMind revision `10cbd778`, not a
+fresh package of current `main`. On current checkout `22d923b`, the VS Code
+extension suite passes **392/392**, and a focused set of 14 agent, worker,
+process, permissions, HTTP-edit, and backend-owner CTest contracts passes
+**14/14**. The full native Release build compiled the changed sources but could
+not replace `build/native/contract-bin/Release/xmind.exe` because an active
+local server held that file open; the complete current-main native gate and
+fresh packaged UI acceptance remain outstanding. This is one bounded webpage
+coding task, not broad multi-file reliability or visual screenshot acceptance.
+[Run, process output, hashes, current-source checks and limits](evidence/webpage-model-zoo-component-edit-20261017.json).
