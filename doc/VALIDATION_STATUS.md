@@ -4105,3 +4105,16 @@ The VS Code extension suite separately passed **392/392** on the same product
 code. A fresh packaged VSIX/live editor acceptance on this exact current
 runtime remains open.
 [Binary hashes, commands, and CTest log](evidence/native-current-main-release-20261017.json).
+
+## Current-main browser and VS Code client suites — 2026-10-17
+
+At xMind `main` revision `3743dbe`, the VS Code extension suite passed
+**392/392**, and the standalone browser client suite passed **136/136**. The
+browser tests ran from the repository root after rebuilding the production
+browser assets with `node views/browser/build.mjs`. Both suites use the current
+source and require no editor or browser window. They verify client regression
+contracts; a fresh packaged VSIX install and live visual coding acceptance on
+this exact revision remain open. Exact commands, timings and log hashes are in
+[the client-suite evidence](evidence/client-suites-current-20261017.json), with
+[VS Code output](evidence/vscode-client-tests-current-20261018.log) and
+[browser output](evidence/browser-client-tests-current-20261018.log).
