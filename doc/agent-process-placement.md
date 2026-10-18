@@ -74,6 +74,22 @@ execution.
    the same process-bound run remains inspectable and controllable after either
    view reconnects.
 
+### Pinned xlang3 LRPC transport audit — 2026-10-17
+
+The pinned xlang3 revision exposes native C++ wrappers for `lrpc_listen`,
+`register_remote_object`, `import_remote`, and `probe_remote`; its Windows and
+POSIX transports use shared memory. On this Windows host, the pinned checkout's
+Release LRPC smoke, server-exit, backpressure, and backpressure-after-server-
+exit tests all pass. This verifies the transport for the selected xlang3 pin,
+including endpoint retirement and bounded-slot pressure behavior.
+
+LRPC transports calls to xlang objects. It does not by itself implement an
+owned-value AgentRunner protocol, durable run callbacks, provider streaming,
+workspace/effect capabilities, or process-placement policy. The C++ AgentRunner
+must stay behind a separately versioned/authenticated contract; LRPC remains a
+candidate transport only. The existing xlang3 callable worker is not evidence
+that the coding agent loop can run in another process.
+
 ### Process-tool host seam — 2026-10-18
 
 `AgentRunner` and `GraphRunner` now consume process-tool discovery, invocation,
