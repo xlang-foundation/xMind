@@ -123,7 +123,7 @@ remote-host injection, or execute `AgentRunner` out of process. MCP/A2A,
 approval and other workspace-effect dispatch also remain in the concrete
 runner. It is a first capability boundary, not process-placement acceptance.
 
-### Run-scoped workspace invocation boundary — 2026-10-17
+### Run-scoped workspace invocation boundary — 2026-10-18
 
 The model loop now submits read-only workspace tool calls using an owned request
 with run, attempt, call, workspace revision, folder, tool and bounded argument
@@ -137,10 +137,13 @@ adapter must add those checks. The existing `AgentRunner` path remains the
 owner and invokes the same local hosts; this is not yet the complete
 `AgentToolHost` or an IPC contract.
 
-The focused current-source Debug workspace-tool and AgentRunner contracts
-passed 2/2 after the change. Coverage rejects stale membership revisions, mismatched
-folders, hidden tools and malformed run metadata, while proving valid reads
-still reach the selected admitted folder.
+The focused Debug and Release current-source workspace-tool and AgentRunner
+contracts passed 2/2 in each configuration against xMind `91d41f0`. Coverage
+rejects stale membership revisions, mismatched folders, hidden tools,
+duplicate/unknown wire fields, unsupported protocol versions, oversized or
+out-of-range metadata, and malformed run metadata, while proving valid reads
+still reach the selected admitted folder. This validates the backend change;
+the installed VS Code runtime was not rebuilt or activated for this checkpoint.
 
 No process-placement config or C++ AgentRunner worker is implemented, and the
 full process-placement contract remains unaccepted. The run/context journals

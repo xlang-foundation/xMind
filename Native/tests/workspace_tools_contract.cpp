@@ -95,7 +95,10 @@ int main(int argc,char** argv) {
             auto hidden=invocation;hidden.tool_name="run_process";rejects<ToolAccessDenied>([&]{tools.invoke(hidden);});
             rejects<std::invalid_argument>([]{AgentWorkspaceInvocation::parse(R"({"protocol_version":1,"protocol_version":1})");});
             rejects<std::invalid_argument>([]{AgentWorkspaceInvocation::parse(R"({"protocol_version":2,"run_id":"r","attempt_id":"a","call_id":"c","workspace_id":"w","workspace_revision":1,"folder_id":"f","tool_name":"read_file","arguments_json":"{}"})");});
+            rejects<std::invalid_argument>([]{AgentWorkspaceInvocation::parse(R"({"protocol_version":1,"run_id":"r","attempt_id":"a","call_id":"c","workspace_id":"w","workspace_revision":1,"folder_id":"f","tool_name":"read_file","arguments_json":"{}","root":"D:/"})");});
+            rejects<std::invalid_argument>([]{AgentWorkspaceInvocation::parse(std::string(70001,' '));});
             rejects<std::invalid_argument>([]{AgentWorkspaceInvocation::parse(R"({"protocol_version":1,"run_id":"r","attempt_id":"a","call_id":"c","workspace_id":"w","workspace_revision":18446744073709551615,"folder_id":"f","tool_name":"read_file","arguments_json":"{}"})");});
+            auto oversized=invocation;oversized.arguments_json.assign(65537,'x');rejects<std::invalid_argument>([&]{(void)oversized.serialize();});
             rejects<ToolAccessDenied>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"unregistered-folder"})");});
             rejects<std::invalid_argument>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"x","folder_id":"y"})");});
             std::cout<<Json{{"workspace_id",primary.identity()},{"membership_revision",7},{"primary_folder_id",primary.identity()},{"attached_folder_id",attached.identity()},{"same_relative_path_distinct_bytes",true},{"unregistered_folder_rejected",true}}.dump()<<'\n';return 0;
