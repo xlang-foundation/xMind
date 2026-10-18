@@ -19,9 +19,33 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | At `097ee32`, three real saved-provider runs retained one conversation across edit-policy and process-configuration handoffs, created the approved file, and checked its exact bytes through xlang3. The current browser HTTP adapter exposes the same 12 messages and discovers 20 saved-key models. Extension contracts pass 393/393 and browser contracts 136/136. [Live context and coding receipt](evidence/context-authority-replay-live-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; prior failed profile handoff, same-session provider/model changes, broader workflows, long-task reliability and full-screen CLI validation. |
+| Coding clients | At `758e38f`, three saved-provider runs switched models in one conversation, created the approved file, and checked its exact bytes through xlang3. The browser HTTP adapter exposes the same 12 messages and discovers 20 saved-key models. Extension contracts pass 394/394 and browser contracts 136/136; the hosted view gate passed. [Live model-switch coding receipt](evidence/context-model-switch-live-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; active-run browser startup/configuration import, prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Live coding while changing models — 2026-10-18
+
+At `758e38f`, a real saved-OpenAI conversation completed
+`gpt-6.1-sol → gpt-6-sol → gpt-6.1-sol`. The first model read a phrase;
+the second remembered it without rereading and created the exact file after
+controller approval. Returning to the first model ran an inspected assertion
+through the registered xlang3 profile, with exit code zero. All prior public
+history prefixes stayed unchanged. Six actual inference responses report
+32,234 input and 266 output tokens; discovery and count calls are separate.
+
+The current webpage HTTP adapter loads the same 12 messages, reattaches without
+typed server credentials, and discovers 20 models using the saved key. Its
+source passed the [hosted browser and extension gate](https://github.com/xlang-foundation/xMind/actions/runs/39115424911).
+Rendered interaction remains unverified; VS Code stayed closed.
+
+An attempt to start the browser during the third run failed because provider
+configuration import requires an idle service even before checking whether
+the configuration changes anything. Starting the same launcher after that run
+completed succeeds, with the original provider revisions retained. This does
+**not** fix active-run reconnect; that native/view integration issue remains
+open. The current page is a small validation workspace. Broader provider/profile
+switches, old-profile recovery and current installed-editor acceptance remain
+unfinished. [Exact runs, hashes, assertion, HTTP results and retained failure](evidence/context-model-switch-live-20261018.json).
 
 ## Conversation model selection within one Responses profile — 2026-10-18
 

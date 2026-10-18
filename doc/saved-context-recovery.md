@@ -56,6 +56,16 @@ No recovery of the prior failed profile handoff, older-binary migration or
 same-session provider/model change is established by those `097ee32` checks.
 [Live coding and browser HTTP evidence](evidence/context-authority-replay-live-20261018.json).
 
+At `758e38f`, another live conversation completed
+`gpt-6.1-sol → gpt-6-sol → gpt-6.1-sol` on the same saved OpenAI Responses
+profile. It read a phrase, used that conversation to create an approved file,
+then asserted the file bytes through xlang3. All three runs completed and the
+previous public history prefixes remained unchanged. The current browser HTTP
+adapter exposes the same conversation and model catalogue. Starting that view
+while a run was active failed at provider-configuration import; it succeeded
+after the run completed. Active-run reconnect therefore remains unfinished.
+[Live model-switch acceptance and limits](evidence/context-model-switch-live-20261018.json).
+
 ## Earlier observed limitation and installed-client evidence
 
 The 2026-10-18 runtime update reproduced this limitation: run

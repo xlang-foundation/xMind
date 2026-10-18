@@ -1,0 +1,153 @@
+{
+  "recorded_at": "2026-10-18T09:31:24.877Z",
+  "scope": "Real saved-OpenAI coding conversation across model A to B to A; shared native browser HTTP view",
+  "source_revision": "758e38f938460247e1454cc8b67d469366d0bc2c",
+  "runtime": {
+    "native_executable_sha256": "dbea489ef8fc5a4d021b707bd77c55890eed19f1c8e6cdef74fb867b069f966b",
+    "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "xlang3_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "verified_files": 1927,
+    "current_running_image_matches_stage": true,
+    "release_accepted": false
+  },
+  "fixture": {
+    "workspace": "C:/xMindNativeValidation/model-switch-live-workspace-20261018",
+    "profile_directory": "C:\\xMindNativeValidation\\profiles\\model-switch-live-20261018\\48014b886eeb3846402676ac22950704e1848a859dd044ef44218641e928cc6e",
+    "core_origin": "http://127.0.0.1:51708",
+    "session": "10aae52ef97211ba97906a3c83869250",
+    "backend_pid": 55396
+  },
+  "runs": [
+    {
+      "id": "b776af9de2305618d086844ef9994de4",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "reprojection_events": 0
+    },
+    {
+      "id": "f8afd6ffed02687ba7c90a354cdf27eb",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "reprojection_events": 2
+    },
+    {
+      "id": "b7df6b83403f8e83ca3d9a9a51ef4ac9",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "reprojection_events": 2
+    }
+  ],
+  "history": {
+    "public_messages": 12,
+    "preserved_public_prefixes": [
+      4,
+      8
+    ],
+    "second_run_reread_README": false,
+    "private_database_receipts_independently_hashed": false
+  },
+  "creation": {
+    "operation_id": "0f41b93d6705a4aed3c1cb81c70f0d1e",
+    "state": "succeeded",
+    "decision_actor": "local-owner",
+    "exact_proposal_checked_before_allow": true,
+    "independent_file_sha256": "cb0a17a26e6b40c19c5ca294a1b75ce272fe13f60606aa74bcec6d8d776ff0c9"
+  },
+  "process": {
+    "operation_id": "48e4a3d7ab953d6829db99842b054187",
+    "decision_actor": "trusted-process-profile:xlang3",
+    "profile_id": "xlang3",
+    "executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "reviewed_script": "from pathlib import Path; assert Path('remembered.txt').read_bytes() == b'xMind model memory e7fc7ab3abcd5f6e0dedc73760d50f94\\n'; print('xMind model switch verified')",
+    "exit_code": 0,
+    "stdout": "xMind model switch verified\r\n",
+    "CPython_executed": false
+  },
+  "actual_inference_usage": {
+    "responses": 6,
+    "input_tokens": 32234,
+    "output_tokens": 266,
+    "total_tokens": 32500,
+    "scope": "Six completed inference response usage records; discovery/count calls are separate, with no token-saving or cost claim"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:52639/ui/",
+    "native_view": "http://127.0.0.1:57263",
+    "html_status": 200,
+    "same_workspace": true,
+    "same_session": true,
+    "history_messages": 12,
+    "saved_key_reused_without_browser_key_input": true,
+    "discovered_models": 20,
+    "auto_connect_without_typed_server_token": true,
+    "http_only_same_site_cookie": true,
+    "reattachment": true,
+    "rendered_acceptance": false,
+    "external_interaction_attempted_this_checkpoint": false,
+    "prior_external_control_error": "GetCursorPos: Access is denied (0x80070005); awaiting desktop-state clarification"
+  },
+  "hosted_view_gate": {
+    "id": 39115424911,
+    "name": "Browser and VS Code contracts",
+    "source_revision": "758e38f938460247e1454cc8b67d469366d0bc2c",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39115424911",
+    "completed_at": "2026-10-18T09:28:48Z"
+  },
+  "local_evidence_sha256": {
+    "model-switch-live-20261018.mjs": "ec9b85473f131d386b6c1eeec051fa097882936c9b672aded6565737a1d80ac9",
+    "model-switch-live-events-0-20261018.json": "ce48fb64a3de30a17986146c4c343182be03c55b44b131e6ef7f7775154c87b0",
+    "model-switch-live-events-1-20261018.json": "da95e90bce5a4ec09e7e16775b4c96d4af9473d3076f5fe6c68ff1b00a8ce182",
+    "model-switch-live-events-2-20261018.json": "4a2bb080f45a5b1a26baa27e42b9b90291c88f1178f69d769809ecfa49c98201",
+    "model-switch-live-history-20261018.json": "fe3856df297a8c84ae5b9e96905b8ad76bfc3e931274b3e3a2873af02e9ab0c3",
+    "model-switch-live-view-20261018.json": "8d6645eb1db40bf7b93e169052fe49e3652ba7a89e79fed8b6d9d1ce3748b3d5",
+    "model-switch-hosted-view-gate-20261018.json": "10b2fd529dc4b4159e8b27030c71f6eb451942d0ed121b5b4e8c5e725b6bc751"
+  },
+  "retained_attempts": [
+    {
+      "scope": "Browser launcher during the third active native run",
+      "result": "Terminal startup error: Native provider settings changed during workspace connection",
+      "source": "Native/apps/local_view_main.cpp retries import HTTP 409; Native/src/provider_profile_runtime.cpp calls mutable_state before configuration no-op detection",
+      "subsequent_result": "After the existing run completed, the same launcher started and the real public HTTP checks passed",
+      "status": "Unfixed active-run reconnect/configuration-import issue; do not treat idle startup as its repair"
+    },
+    {
+      "scope": "HTTP probe setup",
+      "result": "Path assertion compared forward and back slashes",
+      "resolution": "Normalized both absolute Windows paths with path.resolve; final API/history/model checks passed"
+    }
+  ],
+  "limits": [
+    "Models changed within the same saved OpenAI Responses profile/revision/route; broader provider/profile changes remain unsupported by this context-recovery path",
+    "All model turns in this receipt use 758e38f; no older-binary migration or recovery of the earlier failed profile handoff is established",
+    "Installed VSIX still uses d7adf96; VS Code stayed closed",
+    "Browser validation covers actual HTTP/data/session/model discovery, not rendered interactions or clicking its model chooser",
+    "Active-run browser startup can still fail while importing unchanged provider configuration; this is the next native/view integration gap",
+    "The current webpage workspace is a small validation fixture, not the full Model Zoo project",
+    "Live compaction did not occur; per-model compaction and private receipt immutability are proved separately by native synthetic contracts",
+    "Hosted browser/extension gate passed, but no complete current native Release gate or release-accepted package is claimed"
+  ]
+}
