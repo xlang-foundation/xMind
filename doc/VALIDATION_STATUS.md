@@ -15,11 +15,39 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | xMind main `d919441` built in Release against its pinned xlang3 `b0da71f`; the complete sequential native CTest inventory passed 147/147. The run-scoped workspace invocation changes at `91d41f0` also pass focused AgentRunner/workspace contracts 2/2 in both Debug and Release. | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
+| Native backend and local persistence | xMind main `d919441` passed the complete sequential native CTest inventory, 147/147. Workspace invocation at `91d41f0` passed focused contracts 2/2 in Debug and Release. The 2026-10-18 dependency-packaging correction passes process, AgentRunner, graph and runtime-generation Release contracts 4/4 against the complete pinned xlang3 SDK. | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Webpage, VS Code, and CLI each completed live approval-gated edits and xlang3 execution in prior checkpoints. A current-source local-development VSIX from `ac2ff8e` has a verified 1,921-file native runtime, passed package/private-file checks, and is installed headlessly; the VS Code suite passes 392/392. Package hash, runtime pin, and install evidence are in [the 2026-10-18 VSIX receipt](evidence/vscode-current-native-vsix-20261018.json). | Activate and run a live coding task with the currently installed package; broader multi-file/editor workflows, long-task reliability, and full-screen CLI validation. |
+| Coding clients | Prior webpage, VS Code and CLI checkpoints completed live edits and xlang3 execution. A new CLI task applied seven reviewed FastAPI/Vue changes and built the Vue app, but dependency installation failed and the FastAPI tests did not run. The installed `ac2ff8e` VSIX passed hash checks but has incomplete Pydantic package assets; the source now rejects that inventory. The extension suite passes 392/392. [Current dependency finding](evidence/coding-runtime-package-gap-20261018.json), [prior install receipt](evidence/vscode-current-native-vsix-20261018.json). | Refresh the package from the complete SDK and retest dependency installation and FastAPI tests; installed-client activation, broader coding workflows, long-task reliability and full-screen CLI validation. |
+| Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
+| OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Dependency packaging correction — 2026-10-18
+
+A real CLI coding run against a source copy of TestProj's Model Zoo applied
+seven approved file changes, built all 37 Vue modules, and passed direct
+xlang3 catalogue assertions. Its FastAPI integration tests did not run: pip's
+`--target` installation attempted to build `pydantic-core`, and pytest remained
+uninstalled. The original TestProj sources were hash-verified unchanged.
+
+The development runtime had the native plugin but omitted its Python facades
+and distribution metadata. CI and local staging now retain metadata; both
+JavaScript and native verifiers reject that incomplete plugin inventory.
+The process profile also supports pip prefix installations at
+`.xlang3-site/Lib/site-packages`. This preserves dependency resolution against
+bundled native distributions, which `--target` ignores. A dry run with the
+complete pinned SDK resolves the requirements using its native Pydantic
+binding and pure-Python wheels.
+
+The updated extension suite passes **392/392**. The process, AgentRunner,
+graph and runtime-generation Release contracts pass **4/4 in 38.51 seconds**
+against `xlang3/build-pytest-pathaware/Release`. Both production PowerShell
+module filters were executed against that SDK and retained the plugin, three
+facades and metadata. Fresh packaged dependency installation and full coding
+acceptance remain pending. External browser input was unavailable because the
+Windows automation helper returned access denied; no current rendered-webpage
+acceptance is claimed. [Run, hashes, actual usage and limits](evidence/coding-runtime-package-gap-20261018.json).
 
 ## Browser host lifecycle correction — 2026-10-17
 
@@ -33,8 +61,6 @@ shared backend. Focused launcher/lifecycle contracts passed 3/3;
 the browser controller suite passed 136/136 and the VS Code suite passed
 392/392. This fixes graceful developer-host shutdown; forced process
 termination by the operating system cannot run application cleanup handlers.
-| Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. A fresh packaged VS Code profile fetched 20 OpenAI models from its saved key and completed a coding run without re-entering it. Saved-profile discovery now retries transient startup failures with bounded backoff; 392 extension contracts pass. | Broader live-provider and failure/recovery coverage. |
-| OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
 Primary evidence: [ff80a6f native Release build and CTest against pinned xlang3](evidence/native-ff80a6f-pinned-xlang3-release-20261017.json), [prior current-main native Release build](evidence/native-current-main-pinned-xlang3-release-20261017.json), [pinned xlang3 Release build and CTest](evidence/native-pinned-xlang3-release-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [current-main VS Code development host](evidence/vscode-current-main-live-coding-20261017.json), [current-main packaged VSIX](evidence/vscode-current-main-packaged-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
 

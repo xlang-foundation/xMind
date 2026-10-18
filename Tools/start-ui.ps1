@@ -84,7 +84,12 @@ if(-not $BundleDirectory){
         'psutil._psutil_windows.x3pkg.dll','pydantic_core._pydantic_core.x3pkg.dll','rpds.rpds.x3pkg.dll','xlang__blake2.x3pkg.dll',
         'xlang__hashlib.x3pkg.dll','xlang__ssl.x3pkg.dll','xlang_device.x3pkg.dll','xlang_net.x3pkg.dll','xlang_yaml.x3pkg.dll','zstandard.backend_c.x3pkg.dll',
         'xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')
-    $uiSelectedModules=Get-ChildItem -LiteralPath $uiModules -Recurse -File|Where-Object {($_.Name -like '*.x3pkg.dll' -and $uiRuntimeModuleNames -contains $_.Name) -or ($_.Extension -eq '.py' -and $_.FullName -notmatch '[\\/]__pycache__[\\/]')}
+    $uiSelectedModules=Get-ChildItem -LiteralPath $uiModules -Recurse -File|Where-Object {
+        $uiModuleRelative=[System.IO.Path]::GetRelativePath($uiModules,$_.FullName)
+        ($_.Name -like '*.x3pkg.dll' -and $uiRuntimeModuleNames -contains $_.Name) -or
+        ($_.Extension -eq '.py' -and $uiModuleRelative -notmatch '(^|[\\/])__pycache__([\\/]|$)') -or
+        $uiModuleRelative -match '^[^\\/]+\.dist-info[\\/]METADATA$'
+    }
     foreach($uiModule in $uiSelectedModules){
         $uiRelative=[System.IO.Path]::GetRelativePath($uiModules,$uiModule.FullName)
         $uiTarget=Join-Path (Join-Path $uiSnapshot 'modules') $uiRelative

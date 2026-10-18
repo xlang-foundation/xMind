@@ -45,6 +45,15 @@ function runtimeFileKind(name) {
   if (['README.txt', 'provenance.json'].includes(name)) return 'metadata';
   return undefined;
 }
+function validateModuleInventory(files) {
+  if (['modules/pydantic_core._pydantic_core.x3pkg.dll', 'modules/pydantic_core/_pydantic_core.x3pkg.dll'].some(name => Object.hasOwn(files, name))) {
+    const facades = ['__init__.py', 'core_schema.py', '_schema_gather.py'];
+    const metadata = Object.keys(files).filter(name => /^modules\/pydantic_core-[^/]+\.dist-info\/METADATA$/.test(name));
+    check(facades.every(name => Object.hasOwn(files, 'modules/pydantic_core/' + name)) && metadata.length === 1,
+      'The native pydantic-core package is incomplete; its Python facades and distribution metadata are required.');
+  }
+  return files;
+}
 function validateManifest(manifest) {
   check(manifest && typeof manifest === 'object' && !Array.isArray(manifest) && manifest.schemaVersion === 1 &&
     manifest.platform === 'win32' && manifest.arch === 'x64' && manifest.bridgeEnabled === false &&
@@ -62,6 +71,7 @@ function validateManifest(manifest) {
     names.add(name.toLowerCase());
   }
   check(native.every(name => Object.hasOwn(files, name)) && REQUIRED_STDLIB.every(name => Object.hasOwn(files, 'stdlib/' + name)), 'The native runtime or pure standard-library source is incomplete.');
+  validateModuleInventory(files);
   check(Object.keys(files).some(name => name.startsWith('licenses/')), 'The native runtime license notices are missing.');
   return manifest;
 }
@@ -158,4 +168,4 @@ function nativeProgramEntry(runtime, role) {
   check(['serve', 'admin', 'console', 'schema-worker'].includes(role), 'Unsupported native entry role.');
   return {program:path.join(runtime.runtimeRoot,'xmind.exe'),arguments:role==='console'?[]:[role]};
 }
-module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };

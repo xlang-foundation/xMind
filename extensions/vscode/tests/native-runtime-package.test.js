@@ -19,7 +19,7 @@ async function fixture(t){
   const bundle=path.join(root,'accepted-bundle'),stdlibSource=path.join(root,'pure-source'),out=path.join(root,'packaged-runtime');
   await fs.mkdir(bundle);await fs.mkdir(stdlibSource);
   const files={};
-  for(const name of [...REQUIRED_NATIVE,'modules/pydantic_core/_pydantic_core.x3pkg.dll','modules/pydantic_core/core_schema.py','licenses/SYNTHETIC-XLANG-LICENSE']){const value=Buffer.from('Synthetic accepted native bytes: '+name);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),value);files[name]=hash(value);}
+  for(const name of [...REQUIRED_NATIVE,'modules/pydantic_core/_pydantic_core.x3pkg.dll','modules/pydantic_core/__init__.py','modules/pydantic_core/core_schema.py','modules/pydantic_core/_schema_gather.py','modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA','licenses/SYNTHETIC-XLANG-LICENSE']){const value=Buffer.from('Synthetic accepted native bytes: '+name);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),value);files[name]=hash(value);}
   for(const name of [...REQUIRED_STDLIB,'synthetic_extra.py']){await fs.mkdir(path.dirname(path.join(stdlibSource,name)),{recursive:true});await fs.writeFile(path.join(stdlibSource,name),Buffer.from('# Synthetic source '+name+'\r\n'));}
   const stdlibLicense=path.join(root,'SYNTHETIC-PYTHON-LICENSE');await fs.writeFile(stdlibLicense,'Synthetic license text');
   const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files};
@@ -33,17 +33,17 @@ test('staging preserves accepted native bytes and pure source while excluding in
   for(const name of ['python.exe','synthetic.pyc','synthetic.pyd'])await fs.writeFile(path.join(f.options.stdlibSource,name),'Synthetic excluded bytes');
   for(const directory of ['__pycache__','site-packages','.config']){await fs.mkdir(path.join(f.options.stdlibSource,directory));await fs.writeFile(path.join(f.options.stdlibSource,directory,'hidden.py'),'Synthetic excluded bytes');}
   const result=await(await packager).stageNativeRuntime(f.options);
-  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,15);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
+  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,18);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
   const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.sourceManifestSha256,f.options.bundleManifestSha256);
   for(const name of REQUIRED_NATIVE)assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
-  for(const name of ['modules/pydantic_core/_pydantic_core.x3pkg.dll','modules/pydantic_core/core_schema.py'])assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
+  for(const name of ['modules/pydantic_core/_pydantic_core.x3pkg.dll','modules/pydantic_core/__init__.py','modules/pydantic_core/core_schema.py','modules/pydantic_core/_schema_gather.py','modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA'])assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
   assert.deepEqual(await fs.readFile(path.join(f.options.out,'stdlib/synthetic_extra.py')),Buffer.from('# Synthetic source synthetic_extra.py\r\n'));
   for(const name of ['stdlib/python.exe','stdlib/synthetic.pyc','stdlib/synthetic.pyd','stdlib/.config/hidden.py'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
 });
 
 test('unified staging binds one product executable and rejects legacy launcher injection',async t=>{
  const f=await fixture(t);const result=await(await packager).stageNativeRuntime(f.options);
- assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,15);
+ assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,18);
  const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.schemaVersion,1);
  assert.equal(verified.manifest.files['xmind.exe'],f.manifest.files['xmind.exe']);
  for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
@@ -61,6 +61,8 @@ test('source inventory cannot include a Python executable or missing native file
   const f=await fixture(t),stage=(await packager).stageNativeRuntime;
   f.manifest.files['python.exe']='c'.repeat(64);await f.save();await assert.rejects(stage(f.options),/unsupported file/);
   delete f.manifest.files['python.exe'];delete f.manifest.files['xmind.exe'];await f.save();await assert.rejects(stage(f.options),/incomplete/);
+  const incomplete=await fixture(t);delete incomplete.manifest.files['modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA'];await incomplete.save();
+  await assert.rejects(stage(incomplete.options),/pydantic-core package is incomplete/);await assert.rejects(fs.stat(incomplete.options.out),{code:'ENOENT'});
   await assert.rejects(fs.stat(f.options.out),{code:'ENOENT'});
 });
 test('missing pure source, license output collision and reused output fail before publication',async t=>{

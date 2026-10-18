@@ -198,7 +198,10 @@ $ciRuntimeModules=@('_argon2_cffi_bindings._ffi.x3pkg.dll','_brotli.x3pkg.dll','
     'xlang__hashlib.x3pkg.dll','xlang__ssl.x3pkg.dll','xlang_device.x3pkg.dll','xlang_net.x3pkg.dll',
     'xlang_yaml.x3pkg.dll','zstandard.backend_c.x3pkg.dll')
 Get-ChildItem -LiteralPath (Join-Path $ciRelease 'modules') -Recurse -File | Where-Object {
-    ($_.Name -like '*.x3pkg.dll' -and $ciRuntimeModules -contains $_.Name) -or $_.Extension -eq '.py'
+    $ciModuleRelative=[System.IO.Path]::GetRelativePath((Join-Path $ciRelease 'modules'),$_.FullName)
+    ($_.Name -like '*.x3pkg.dll' -and $ciRuntimeModules -contains $_.Name) -or
+    ($_.Extension -eq '.py' -and $ciModuleRelative -notmatch '(^|[\\/])__pycache__([\\/]|$)') -or
+    $ciModuleRelative -match '^[^\\/]+\.dist-info[\\/]METADATA$'
 } | ForEach-Object {
     $ciRelative=[System.IO.Path]::GetRelativePath((Join-Path $ciRelease 'modules'),$_.FullName)
     $ciTarget=Join-Path (Join-Path $ciBundle 'modules') $ciRelative

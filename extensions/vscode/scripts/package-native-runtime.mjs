@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {resolve,join,dirname,relative,isAbsolute,sep} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import runtime from '../native-runtime.js';
-const {REQUIRED_NATIVE,REQUIRED_STDLIB,MANIFEST_NAME,relativeFile,runtimeFileKind,verifyNativeRuntime}=runtime;
+const {REQUIRED_NATIVE,REQUIRED_STDLIB,MANIFEST_NAME,relativeFile,runtimeFileKind,verifyNativeRuntime,validateModuleInventory}=runtime;
 const EXTENSION=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const need=(condition,message)=>{if(!condition)throw new Error(message);};
@@ -24,7 +24,7 @@ function sourceManifest(value){
   for(const [name,digest]of Object.entries(value.files)){
     need(relativeFile(name)&&['native','module','license','metadata'].includes(runtimeFileKind(name))&&/^[a-f0-9]{64}$/.test(digest)&&!seen.has(name.toLowerCase()),'The native source inventory contains an unsupported file.');seen.add(name.toLowerCase());
   }
-  need(native.every(name=>Object.hasOwn(value.files,name))&&Object.keys(value.files).some(name=>name.startsWith('licenses/')),'The native source files or notices are incomplete.');return value;
+  need(native.every(name=>Object.hasOwn(value.files,name))&&Object.keys(value.files).some(name=>name.startsWith('licenses/')),'The native source files or notices are incomplete.');validateModuleInventory(value.files);return value;
 }
 async function pureSources(root,prefix=''){
   const found=[];

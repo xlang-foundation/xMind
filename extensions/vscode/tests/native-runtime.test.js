@@ -102,6 +102,18 @@ test('native package distribution metadata is included in the hash-verified inve
   await fs.mkdir(path.dirname(path.join(f.runtime, name)), { recursive: true });
   await fs.writeFile(path.join(f.runtime, name), bytes);
   f.manifest.files[name] = digest(bytes);
+  const members = ['modules/pydantic_core._pydantic_core.x3pkg.dll', 'modules/pydantic_core/__init__.py', 'modules/pydantic_core/core_schema.py', 'modules/pydantic_core/_schema_gather.py'];
+  for (const member of members) {
+    const content = Buffer.from('Synthetic native package member: ' + member);
+    await fs.mkdir(path.dirname(path.join(f.runtime, member)), {recursive:true});
+    await fs.writeFile(path.join(f.runtime, member), content);f.manifest.files[member] = digest(content);
+  }
+  for (const missing of [name, ...members.slice(1)]) {
+    const files = {...f.manifest.files};delete files[missing];
+    assert.throws(() => validateManifest({...f.manifest, files}), /pydantic-core package is incomplete/);
+  }
+  const duplicate = {...f.manifest.files, 'modules/pydantic_core-2.50.0+xlang3.dist-info/METADATA':digest(bytes)};
+  assert.throws(() => validateManifest({...f.manifest, files:duplicate}), /pydantic-core package is incomplete/);
   await f.save();
   assert.equal((await verifyNativeRuntime(f.runtime)).manifest.files[name], digest(bytes));
 });

@@ -95,6 +95,21 @@ runtime inventory. The process-executor contract checks the argument order,
 executes a real xlang3 import and confirms no bytecode directory appears in
 the workspace package target.
 
+For workspace dependency installation, use the `xlang3` profile with arguments
+`["-m", "pip", "install", "--only-binary=:all:", "--prefix", ".xlang3-site", "-r", "requirements.txt"]`.
+The native process environment includes `.xlang3-site/Lib/site-packages` as
+well as the paired SDK modules and a direct `.xlang3-site` import directory.
+Pip's prefix install retains dependency resolution against the SDK's native
+distribution metadata. `--target` instead ignores installed distributions and
+can try to rebuild `pydantic-core`; skipping dependencies is not a substitute
+for a supported native binding. Missing native dependencies remain errors.
+
+CI and local development snapshots retain native package `METADATA` files.
+When a Pydantic plugin is present, both the editor verifier and native runtime
+verifier require its three Python facade files and exactly one distribution
+metadata record. An incomplete SDK output must be rebuilt or replaced with a
+complete verified SDK before packaging.
+
 The development `Tools/start-ui.ps1` snapshot now includes the paired
 `xlang3.exe`, checks that the xMind server and SDK runtime DLL hashes match,
 and stages the selected product plugin DLLs and pure facades. A local TestProj
