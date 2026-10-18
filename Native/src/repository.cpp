@@ -1274,6 +1274,20 @@ DynamicNodeRecord Repository::settle_dynamic_child(const std::string& child_id) 
     }else if(child.state==RunState::completed){const auto h=run_history(child_id);if(h.empty()||h.back().role!="assistant")throw DatabaseError("Completed dynamic agent lacks actual output");const auto answer=Json::parse(h.back().json);if(!answer.contains("content")||!answer["content"].is_string())throw DatabaseError("Invalid dynamic agent output");
         for(const auto* key:{"content","model","usage","elapsed_ms","first_token_ms"})if(answer.contains(key))outcome[key]=answer[key];
     }else {Json error=Json::object();const auto failure=db.execute("SELECT payload FROM events WHERE run_id=? AND kind=? ORDER BY seq DESC LIMIT 1",{child_id,"run."+state_name(child.state)}).rows;if(!failure.empty()){const auto source=Json::parse(text(failure[0][0]));for(const auto* key:{"reason","code","protocol_error_code"})if(source.contains(key)&&source[key].is_string()&&source[key].get<std::string>().size()<=256)error[key]=source[key];}outcome["error"]=error;}
+    // A failed deterministic process still has an actual observed result.
+    // Return that receipt to the planning owner, without relabelling its effect.
+    if(child.state==RunState::failed&&n.definition.kind==DynamicNodeKind::tool&&n.definition.tool=="run_process"&&
+       outcome.at("error").value("reason",std::string{})=="process_exit_nonzero"){
+        const auto started=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.started' ORDER BY seq",{child_id}).rows;
+        const auto failed=db.execute("SELECT seq,payload FROM events WHERE run_id=? AND kind='tool.failed' ORDER BY seq",{child_id}).rows;
+        if(started.size()!=1||failed.size()!=1||integer(failed[0][0])<=integer(started[0][0]))throw DatabaseError("Failed process child lacks its ordered actual receipt");
+        const auto before=Json::parse(text(started[0][1])),after=Json::parse(text(failed[0][1]));
+        if(before.value("name",std::string{})!=n.definition.tool||before.value("source",std::string{})!="dynamic_plan"||before.value("plan_node_id",std::string{})!=n.backend_node_id||before.value("arguments_json",std::string{})!=n.definition.arguments_json||
+           after.value("name",std::string{})!=n.definition.tool||after.value("source",std::string{})!="dynamic_plan"||after.value("plan_node_id",std::string{})!=n.backend_node_id||!after.contains("data")||!after["data"].is_object())throw DatabaseError("Failed process receipt differs from its admitted definition");
+        const auto& data=after.at("data");
+        if(data.value("termination",std::string{})!="exited"||!data.contains("exit_code")||!data.at("exit_code").is_number_integer()||data.at("exit_code")==0)throw DatabaseError("Failed process receipt lacks an observed nonzero exit");
+        outcome["tool"]=n.definition.tool;outcome["data"]=data;
+    }
     if(outcome.dump().size()>32768)outcome={{"child_run_id",child_id},{"label",n.definition.label},{"child_state",state_name(child.state)},{"preset_id",n.definition.preset_id},{"preset_revision",n.definition.preset_revision},{"effect_state",effect},{"error",{{"code","result_limit_exceeded"}}},{"history_ref","/v1/runs/"+p.root_run_id+"/children/"+child_id+"/history"}};
     dynamic_safe_sequence(p.state_sequence);const auto event=impl_->event(child_id,"plan.child.settled",outcome.dump());
     changed_one(db.execute("UPDATE dynamic_plan_nodes SET state=?,child_state=?,outcome_json=?,settled_event_seq=?,effect_state=? WHERE plan_id=? AND label=? AND state='claimed' AND outcome_json IS NULL",{effect=="uncertain"?"uncertain":"settled",state_name(child.state),outcome.dump(),event.sequence,effect,p.id,n.definition.label}));

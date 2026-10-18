@@ -159,6 +159,11 @@ Run execute_process_tool(PersistenceService& store,const std::string& child,cons
         ProcessExecutor executor(store,workspace,*settings.workspace,settings.process_profiles);
         const auto expiry=now_ms()+settings.run_timeout.count();
         const auto result=Json::parse(executor.invoke(identity(),child,definition.arguments_json,expiry,cancel,std::move(guidance),false));
+        if(result.at("exit_code")!=0){
+            store.append_event(child,"tool.failed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
+            auto failure=result;failure["reason"]="process_exit_nonzero";
+            return store.transition(child,RunState::running,RunState::failed,failure.dump()).get();
+        }
         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
     }catch(const ProcessOutcomeUnrecorded&){throw;}

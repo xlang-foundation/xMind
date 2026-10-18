@@ -1,0 +1,104 @@
+{
+  "recordedAt": "2026-10-18T16:37:45.952Z",
+  "baselineRevision": "0d8cf037aab0386d72ebc5c0c7ec9f856beae5f3",
+  "sourceChanges": {
+    "Native/src/graph_runner.cpp": {
+      "before": "7aba003fd6086eed0c41d1c20314160d81397cd0ed017b00080432a7f4e62cb3",
+      "after": "294db92c9e4a358c0aef5497f6dffe3b97cf5d580bb36f182a779e0a2c438c3b"
+    },
+    "Native/src/dynamic_plan_executor.cpp": {
+      "before": "88462aeb0614662178416ffe10c4f77e5bc39d8a2805ea96eacfcf49e735a15c",
+      "after": "fc4ed194d43751da6e30d24720bb72ee5f7246bfe1c8caa659d7913336c53c98"
+    },
+    "Native/src/repository.cpp": {
+      "before": "0364b0fc9b564866b5a09a3d30f6cf3ce135b0f86582a0ceffde973f2ad90011",
+      "after": "9e1b44e36f8b2e06096a3c11e83e623f3aa2b087ba2597ad16bccf0e8ec9087d"
+    },
+    "Native/tests/graph_runner_contract.cpp": {
+      "before": "410df16d2c4c4d1ca19f8b29bc00c82981dc33c285aeb05b237a818b43dff27c",
+      "after": "4453bc023f63fcf07ad5f1e0934139cfc9064bba3dc12c556984faeadcc245bb"
+    },
+    "Native/tests/dynamic_plan_mcp_contract.cpp": {
+      "before": "53ea7648d4870bfe6941de197c1f6172dc0ffb4dbc9bf2d3078c7f6c17b59beb",
+      "after": "cda098b4faf754613f3dfbb484c547f6b5b13ed5552c7afafc188dba1cb64b7f"
+    },
+    "Native/tests/dynamic_plan_mcp_peer.mjs": {
+      "before": "1e4570719b384aff2efb3787314e1b759a45c02da536db0aa77d5a58a23452c8",
+      "after": "81a985ee5ad8c3c10f7eb23ce6768f453812d257c2eba5be7bf16603a038912d"
+    }
+  },
+  "behavior": "A synchronous direct graph/dynamic-plan process child fails on an observed nonzero exit. The completed operation receipt and output survive; success-dependent tasks remain unclaimed. The ordinary model-selected process tool continues returning its actual result for agent-directed repair.",
+  "red": {
+    "failed": 2,
+    "total": 2,
+    "seconds": 18.53
+  },
+  "green": {
+    "passed": 2,
+    "total": 2,
+    "seconds": 22.12
+  },
+  "broader": {
+    "passed": 14,
+    "total": 14,
+    "seconds": 78,
+    "tests": [
+      "native_dynamic_plan_contract",
+      "native_dynamic_plan_repository_contract",
+      "native_dynamic_plan_engine_contract",
+      "native_dynamic_plan_mcp_contract",
+      "native_graph_service_http_contract",
+      "native_graph_runner_contract",
+      "native_graph_mcp_contract",
+      "native_graph_mcp_http_contract",
+      "native_graph_mcp_http_subscription_contract",
+      "native_graph_checkpoint_contract",
+      "native_graph_children_contract",
+      "native_graph_contract",
+      "native_process_executor_contract",
+      "native_agent_runner_contract"
+    ]
+  },
+  "frozenProjectFiles": 2599,
+  "frozenNativeBinaries": 124,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "cadfc4150fe68d98d173ff2dcf9a9a15311c33d8be21c14fa055fe293c3c0fa5",
+  "nativeSha256": "0c1573a20d61d95cfbc12366cb2de2a57c13a89fa6a039366b18e3dc2c8e691a",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "installed": {
+    "version": "0.1.23",
+    "nativeSha256": "a0d6739478b557f5bee174d06057a6807d07a132bc930c6c3e44c841718ea017",
+    "unchanged": true,
+    "containsThisFix": false
+  },
+  "logs": {
+    "process-child-red-test-20261018.log": "20b530d8815a3d8e05c920749502a6850f7c1564b743e4ad61167af0d9972e9d",
+    "process-child-green-test-20261018.log": "5f9d5603a8c42a16f5e0db78cfbef86b5defe83289bf08d5af5c044b47678468",
+    "process-child-broader-test-20261018.log": "8294cf9aff2223ac4df0c41b8c1563f78c37b96095a842ee5adbc1771bb1808e"
+  },
+  "scope": {
+    "nativeProcesses": true,
+    "processExit": 7,
+    "powershell": true,
+    "nodeCommand": true,
+    "xlang3Sqlite": true,
+    "syntheticProvider": true,
+    "liveProvider": false,
+    "renderedUi": false,
+    "restartWithoutEffectReplay": true
+  },
+  "priorCompleteGate": {
+    "source": "878bd88d4bc6c8af662ca1048177cb2ede791010",
+    "passed": 149,
+    "seconds": 903.96,
+    "establishesThisFix": false
+  },
+  "remaining": [
+    "Full current-source native/hosted acceptance and installed packaging of this fix.",
+    "Older unconfirmed anthropic_json_event_invalid child outcome.",
+    "Rendered external-browser and editor acceptance.",
+    "Agent process placement and remaining protocol recovery scope."
+  ],
+  "cpythonExecuted": false
+}

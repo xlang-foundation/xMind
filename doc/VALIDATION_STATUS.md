@@ -16,12 +16,32 @@ used when they were recorded and should not be read as current parity goals.
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
 | Native backend and local persistence | Installed native `878bd88` / SDK `58a8aab9` passes three focused inventory/profile checks, two SDK smoke checks and real coding below. The complete current local gate passes **149/149 in 903.96 seconds**, with all frozen project/library/runtime/binary inputs unchanged; the historical c23a6cd gate remains separate. Hosted inventory is 150. [Current receipt](evidence/coding-package-0.1.23-20261018.json). | Current hosted acceptance; production release acceptance. |
-| Single agents and graphs | Native contracts and prior live planning establish the in-process baseline. The current ordinary coding conversation completes actual commands and approved create/edit effects. | Nonzero direct process children still need failure classification: an older live plan continued success-dependent tasks after exit 1. One older agent child returned an unconfirmed Claude JSON-event failure. Process-bound `AgentRunner` placement is not implemented; existing workers isolate trusted callables only. |
+| Single agents and graphs | Native contracts and prior live planning establish the in-process baseline. The current ordinary coding conversation completes actual commands and approved create/edit effects. | The source correction passes both exit-7/restart regressions and all 14 related contracts; installed 0.1.23 still needs this update. An older live plan had continued success-dependent tasks after exit 1. One older agent child returned an unconfirmed Claude JSON-event failure. Process-bound `AgentRunner` placement is not implemented; existing workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed **0.1.23** verifies 2,444 non-metadata payloads, package metadata and 2,402 runtime files. Local and digest-verified hosted client checks pass 420/142. Actual installed Claude/browser-controller coding installs 22 dependencies, passes nine xlang3 tests and the Vue build, and creates then exactly edits the report through native approval. The persistent test page at port 51118 restores 16 messages/two completed runs and all 598 saved events without replay. Original/copied source files, settings and six existing profile directories are preserved. [Installed/live receipt](evidence/coding-package-0.1.23-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; full native/hosted/release acceptance and broader failure/recovery coverage remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Direct process-child failure — 2026-10-18
+
+An observed nonzero command exit now fails its deterministic graph or dynamic-plan
+child. The operation journal remains succeeded because execution and its outcome
+were observed; the actual exit code, stdout/stderr and output artifacts remain
+available. Success-dependent tasks stay unclaimed. A planning owner receives
+the failed command receipt and can revise the plan, while the ordinary coding
+agent tool loop still receives process results for model-directed repair.
+
+Both actual exit-7 regressions fail against the prior code and pass with the fix.
+All 14 related Release contracts pass in 78 seconds. The
+tests use real PowerShell/Node commands, effects, approvals and embedded-xlang3
+SQLite; provider replies are explicit synthetic fixtures. Reopening retains the
+failed child and once-only effect, with no dependent execution. All 2,599 frozen
+project inputs, SDK/library inputs and 124 native binaries remain unchanged.
+[Source receipt](evidence/process-child-exit-20261018.json).
+
+The installed 0.1.23 package/page remain unchanged. Current-source full and hosted
+native gates, packaging this fix, and rendered client acceptance remain pending.
 
 ## Installed coding package 0.1.23 — 2026-10-18
 
@@ -74,9 +94,10 @@ The full current local gate passes **149/149 in 903.96 seconds** with all
 frozen inputs verified unchanged. [Full gate receipt](evidence/pip-bootstrap-full-gate-20261018.json).
 Current hosted native and release acceptance remain pending.
 
-The older failed live dynamic plan also exposes unfinished process-child exit
-classification and a separate unconfirmed `anthropic_json_event_invalid` child
-outcome. Ordinary coding success does not establish those recovery paths.
+The older failed live dynamic plan exposed process-child exit classification.
+The source correction below covers that case; 0.1.23 still needs the update.
+Its separate `anthropic_json_event_invalid` child outcome remains unconfirmed.
+Ordinary coding success does not establish that recovery path.
 [Complete milestone receipt](evidence/coding-package-0.1.23-20261018.json).
 
 ## Installed coding package 0.1.22 — 2026-10-18

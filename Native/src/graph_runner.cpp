@@ -273,6 +273,13 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
                 invocation.workspace_revision=workspace_revision;invocation.folder_id=effect_folder_id;invocation.arguments_json=source;
                 invocation.expires_unix_ms=expiry;invocation.allow_background=false;
                 result=Json::parse(process_->invoke(invocation,cancel,std::move(guard)));
+                // A recorded process exit preserves its effect receipt even
+                // when the command failed. Dependency success follows the exit.
+                if(result.at("exit_code")!=0){
+                    store_.append_event(id,"tool.failed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();
+                    result["reason"]="process_exit_nonzero";result["source"]="graph_tool";
+                    return store_.transition(id,RunState::running,RunState::failed,result.dump()).get();
+                }
             }
         }else if(workspace_tools&&(name=="read_repository_instructions"||name=="read_file"||name=="list_files"||name=="search_files"||name=="find_files"||name=="glob_files"))result=Json::parse(workspace_tools->invoke(name,source,cancel));
         else result=Json::parse(workspace_->invoke(name,source,cancel));
