@@ -1,5 +1,14 @@
 # Saved conversation context after a backend change
 
+The 2026-10-18 runtime update reproduced this limitation: run
+`c74d62c1f86ab26760c1bd34225ca76d` failed `context_unavailable` before any
+model call after the tool/runtime authority changed. A fresh conversation
+completed the coding checks, while the prior history remained stored.
+Automatic continuation across such an authority change is still unfinished.
+A separate profile handoff also remained unresolved; fresh-profile acceptance
+does not establish recovery of that handoff.
+[Current run and package evidence](evidence/native-wheel-live-coding-20261018.json).
+
 A conversation created by an older read-only backend can remain readable after
 upgrading to a backend with file creation/edit proposals enabled. Its original
 provider continuation receipts retain their producing authority binding. The

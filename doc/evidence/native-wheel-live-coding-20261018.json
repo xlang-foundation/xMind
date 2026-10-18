@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-18",
+  "scope": "Live provider-backed CLI dependency installation and full FastAPI/Vue checks on a fresh native profile; installed VSIX verified headlessly",
+  "xmind_source_revision": "d7adf966aed266983c2ec85b47dbe614ec45a3b1",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "live": {
+    "session_id": "f1649a9cd0a1f6efc7c1d7746f9cfb88",
+    "run_id": "ef9bb6af941ccc9c4ff7db94ab5feaea",
+    "state": "completed",
+    "model": "gpt-6.1-sol",
+    "provider": {
+      "model_id": "gpt-6.1-sol",
+      "profile_id": "openai",
+      "profile_revision": 1,
+      "provider": "openai",
+      "route_id": "openai.responses",
+      "wire": "responses"
+    },
+    "workspace": "C:/xMindNativeValidation/coding-workspace-b3827bb",
+    "backend": {
+      "origin": "http://127.0.0.1:59187",
+      "executable": "C:\\xMindNativeValidation\\profiles\\native-wheel-final-d7adf96\\51ea4c701685671d629e570ae83f2643e28d2d21e227b37f9cb218df2a642202\\runtime-e4da59e77d06b0267ac7f9aa5d80daec067b7752830aa72b2133fef41a2a0fe7\\xmind.exe",
+      "profile_directory": "C:\\xMindNativeValidation\\profiles\\native-wheel-final-d7adf96\\51ea4c701685671d629e570ae83f2643e28d2d21e227b37f9cb218df2a642202",
+      "executable_sha256": "1607a6753d5cc309b7ea36bb97d52bb5846184452001e48e36a0beffd350a79c",
+      "process_id": 61836,
+      "workspace": "C:\\xMindNativeValidation\\coding-workspace-b3827bb"
+    },
+    "operations": [
+      {
+        "id": "f53d1aa9bcfacc7f428cc986c5911d87",
+        "profile": "xlang3",
+        "arguments": [
+          "-B",
+          "-m",
+          "pip",
+          "install",
+          "--only-binary=:all:",
+          "--target",
+          ".xlang3-site",
+          "-r",
+          "requirements-dev.txt"
+        ],
+        "state": "succeeded",
+        "exit_code": 0,
+        "elapsed_ms": 24064
+      },
+      {
+        "id": "0920f3b6f634ab8dd708dfad6944efa5",
+        "profile": "xlang3",
+        "arguments": [
+          "-B",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "state": "succeeded",
+        "exit_code": 0,
+        "elapsed_ms": 5117
+      },
+      {
+        "id": "acb5dbbeac969a93a05e232e4340c35c",
+        "profile": "xlang3",
+        "arguments": [
+          "-B",
+          "-c",
+          "import fastapi, starlette, pytest; from importlib.metadata import version; print('fastapi:', fastapi.__file__); print('starlette:', starlette.__file__); print('pytest:', pytest.__file__); print('pydantic-core:', version('pydantic-core'))"
+        ],
+        "state": "succeeded",
+        "exit_code": 0,
+        "elapsed_ms": 2511
+      },
+      {
+        "id": "fb55a63818b1eef865330a5486840286",
+        "profile": "powershell",
+        "arguments": [
+          "-NoLogo",
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          "npm run build"
+        ],
+        "state": "succeeded",
+        "exit_code": 0,
+        "elapsed_ms": 1693
+      }
+    ],
+    "native_wheel_find_links": "file:///C:/xMindNativeValidation/profiles/native-wheel-final-d7adf96/51ea4c701685671d629e570ae83f2643e28d2d21e227b37f9cb218df2a642202/runtime-e4da59e77d06b0267ac7f9aa5d80daec067b7752830aa72b2133fef41a2a0fe7/wheels",
+    "pytest": {
+      "passed": 20,
+      "warnings": 1,
+      "seconds": 3.09,
+      "warning": "Starlette deprecation of anyio.abc.BlockingPortal"
+    },
+    "frontend_build": {
+      "exit_code": 0,
+      "modules": 37
+    },
+    "module_origins": "fastapi: C:\\xMindNativeValidation\\coding-workspace-b3827bb\\model-zoo\\backend\\.xlang3-site\\fastapi\\__init__.py\r\nstarlette: C:\\xMindNativeValidation\\coding-workspace-b3827bb\\model-zoo\\backend\\.xlang3-site\\starlette\\__init__.py\r\npytest: C:\\xMindNativeValidation\\coding-workspace-b3827bb\\model-zoo\\backend\\.xlang3-site\\pytest\\__init__.py\r\npydantic-core: 2.50.1+xlang3\r\n",
+    "actual_usage": {
+      "model_calls": 12,
+      "input_tokens": 109413,
+      "output_tokens": 1041,
+      "total_tokens": 110454
+    },
+    "source_files_unchanged_during_validation": 29,
+    "original_testproj_unchanged": true,
+    "cpython_extensions_in_workspace": 0
+  },
+  "package": {
+    "path": "C:/xMindNativeValidation/xmind-d7adf96-native-wheels.vsix",
+    "sha256": "5f6e0695b231c987a7031f7ad7876a5d228829b70f20822037c2df990943e408",
+    "bytes": 32466388,
+    "archive_entries": 1973,
+    "installed_path": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.13\\native-runtime",
+    "runtime_files": 1927,
+    "manifest_sha256": "34f4edaf97991e9483279ff2a54aa5b2927535b94c9fbc5af3f73cd470c7f217",
+    "native_sha256": "1607a6753d5cc309b7ea36bb97d52bb5846184452001e48e36a0beffd350a79c",
+    "xlang_runtime_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "wheel": "wheels/pydantic_core-2.50.1+xlang3-py3-none-win_amd64.whl",
+    "wheel_sha256": "147fe6eb981146636691a9f00f9014245d0379e2ac4aa01d3aa1651859c708c2",
+    "installed_inventory_verified": true,
+    "rendered_editor_activated": false,
+    "release_accepted": false
+  },
+  "shared_environment": {
+    "prefix_trial": "Pip removed shared FastAPI, Starlette and Uvicorn distributions during an initial prefix trial. Original versions were restored with xlang3.",
+    "restored_versions": {
+      "fastapi": "0.143.3",
+      "starlette": "1.8.0",
+      "uvicorn": "0.53.0"
+    },
+    "final_target_install_uninstalled_shared_packages": false,
+    "byte_for_byte_pretrial_snapshot_available": false
+  },
+  "validation": {
+    "native_release_contracts": "4/4 passed in 39.81 seconds: process executor, AgentRunner, GraphRunner, runtime generation",
+    "extension_contracts": "392/392 passed",
+    "browser_contracts": "136/136 passed",
+    "isolated_direct_xlang3_pytest": "20 passed, 1 warning in 3.11 seconds",
+    "standalone_wheel_binding": "A minimal xlang3.exe/runtime.dll pair imported the target-installed package and native SchemaValidator returned integer 42",
+    "browser_view_api": {
+      "status": 200,
+      "cli_session_visible": true,
+      "url": "http://127.0.0.1:60086/ui/"
+    },
+    "vscode_windows_opened": 0
+  },
+  "limits": [
+    "External browser input remains unavailable: GetCursorPos returned access denied. No rendered webpage or VS Code acceptance is claimed.",
+    "The prior validation profile handoff returned Backend retirement is unresolved. This successful run uses an explicitly fresh profile, not a recovered handoff.",
+    "A prior session failed context_unavailable after its tool authority changed. History was preserved; automatic continuation recovery remains unfinished.",
+    "Shared distribution versions were restored; a byte-for-byte pretrial snapshot of their console launchers was not available.",
+    "This is a local development package and a bounded multi-file coding check, not broad reliability or release acceptance."
+  ]
+}

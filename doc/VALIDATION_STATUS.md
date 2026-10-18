@@ -19,9 +19,34 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Prior webpage, VS Code and CLI checkpoints completed live edits and xlang3 execution. A new CLI task applied seven reviewed FastAPI/Vue changes and built the Vue app, but dependency installation failed and the FastAPI tests did not run. The installed `ac2ff8e` VSIX passed hash checks but has incomplete Pydantic package assets; the source now rejects that inventory. The extension suite passes 392/392. [Current dependency finding](evidence/coding-runtime-package-gap-20261018.json), [prior install receipt](evidence/vscode-current-native-vsix-20261018.json). | Refresh the package from the complete SDK and retest dependency installation and FastAPI tests; installed-client activation, broader coding workflows, long-task reliability and full-screen CLI validation. |
+| Coding clients | A live CLI task applied seven reviewed FastAPI/Vue changes. The final `d7adf96` native runtime then completed an isolated dependency install, all 20 FastAPI tests and the Vue build on a fresh profile. Its bytes match the headlessly installed VSIX; all 1,927 runtime files verify. Extension tests pass 392/392 and browser tests 136/136. [Current native-wheel coding and package receipt](evidence/native-wheel-live-coding-20261018.json). | Rendered external webpage and installed VS Code coding acceptance; existing-profile handoff and changed-authority context recovery; broader workflows, long-task reliability and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Packaged native-wheel coding checkpoint — 2026-10-18
+
+At product source `d7adf96`, a live OpenAI-backed CLI run used the packaged
+xlang3 profile to install dependencies into `.xlang3-site`, run **20 FastAPI
+tests successfully**, build all **37 Vue modules**, and print module paths
+confirming imports from the workspace's direct target directory. Pytest had
+one Starlette deprecation warning. Native Pydantic resolved as
+`2.50.1+xlang3`; the workspace contains no CPython `.pyd` extensions. The
+original TestProj sources and the implemented validation sources were
+hash-verified unchanged during this check.
+
+The same native binary is in the installed development VSIX. Its **1,927-file**
+runtime verifies against the manifest, including the real native dependency
+wheel and license. VS Code remained closed. The authenticated native browser
+view API returned HTTP 200 and listed the CLI conversation on the same backend.
+These are native/client API checks; external browser input was unavailable,
+so rendered webpage and installed-editor acceptance remain pending.
+
+This run used an explicitly fresh profile. A prior profile handoff returned
+`Backend retirement is unresolved`, and a prior changed-authority session
+failed `context_unavailable` before inference. Both remain delivery gaps;
+the fresh-profile success does not establish their recovery. Exact run IDs,
+process results, actual usage, package hashes and the shared-package restoration
+limits are in [the acceptance receipt](evidence/native-wheel-live-coding-20261018.json).
 
 ## Dependency packaging correction — 2026-10-18
 
@@ -53,9 +78,10 @@ The updated extension suite passes **392/392**. The process, AgentRunner,
 graph and runtime-generation Release contracts pass **4/4 in 39.81 seconds**
 against `xlang3/build-pytest-pathaware/Release`. Both production PowerShell
 module filters were executed against that SDK and retained the plugin, three
-facades and metadata. The browser suite also passes **136/136**. The wheel
-install and 20-test run above were direct xlang3 checks; fresh packaged-client
-dependency installation and rendered coding acceptance remain pending.
+facades and metadata. The browser suite also passes **136/136**. The initial
+wheel install and 20-test run were direct xlang3 checks; the subsequent
+packaged-runtime CLI run is recorded above. Rendered coding acceptance
+remains pending.
 External browser input was unavailable because the
 Windows automation helper returned access denied; no current rendered-webpage
 acceptance is claimed. [Run, hashes, actual usage and limits](evidence/coding-runtime-package-gap-20261018.json).
