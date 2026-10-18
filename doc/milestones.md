@@ -1,5 +1,12 @@
 # Reviewable milestones
 
+The first hosted startup-diagnostic job (39171209609) failed before native
+build/scenarios because the fresh checkout had no build parent. Parent creation
+is corrected; a previously absent nested local output passes all three cases,
+and reusing that output still fails before build without changing its receipt.
+The original PowerShell cause and corrected hosted matrix remain pending.
+[Setup correction and retained failure](evidence/process-startup-clean-parent-20261018.json).
+
 ## Process startup diagnostic — 2026-10-18
 
 A separate small native target builds the production Windows foreground

@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-18T22:16:09.142Z",
+  "failedHosted": {
+    "runId": 39171209609,
+    "jobId": 117804465194,
+    "sourceRevision": "65717385f450a8232fdec0dba6f90f559bb44ba1",
+    "status": "completed",
+    "conclusion": "failure",
+    "nativeBuildStarted": false,
+    "scenariosRun": 0,
+    "reason": "Fresh checkout lacks the build parent; nonrecursive fresh-leaf mkdir failed with ENOENT. Artifact upload then failed because no diagnostic files existed.",
+    "retainedLog": "C:/xMindNativeValidation/process-startup-hosted-39171209609.log",
+    "logSha256": "a435fcbf911682d419b91d89db16db4bc958cd1f71028d26431c724e98a50231"
+  },
+  "correction": "Create output parent recursively, then require a fresh leaf with nonrecursive mkdir. No production native source or process command, environment or deadline changes.",
+  "local": {
+    "output": "C:/xMindNativeValidation/process-startup-clean-parent-20261018/nested/diagnostics",
+    "receiptSha256": "ef0ff4d1a16132ce5b475cc53d5bfdce9ceae8bce290b14b5e570147536f85ec",
+    "cases": [
+      {
+        "label": "01-graph-default",
+        "passed": true,
+        "elapsedMs": 6285,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ]
+      },
+      {
+        "label": "02-agent-default",
+        "passed": true,
+        "elapsedMs": 226,
+        "phases": []
+      },
+      {
+        "label": "03-dotnet-control-default",
+        "passed": true,
+        "elapsedMs": 6216,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ]
+      }
+    ],
+    "sourceAndBinaryUnchanged": true,
+    "previousOutputRefusedWithEEXIST": true,
+    "previousReceiptUnchanged": true
+  },
+  "hostedCorrectedMatrix": "pending a new exact-revision job",
+  "causeOfOriginalPowerShellFailuresEstablished": false,
+  "agentOrGraphAcceptance": false,
+  "providerRequests": 0,
+  "cpythonExecuted": false
+}
