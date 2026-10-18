@@ -15,7 +15,7 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Full gate at `5ed8267` passed 149 local Release contracts against xlang3 `b0da71f2`. Current `c23a6cd` includes alias fixes and configured child-library binding, using isolated SDK branch `58a8aab9`; focused rebuilt graph/xlang3/agent checks pass 3/3, native SDK checks 4/4 and its complete default performance gate 11/11. A new full 149-test local gate is running; no result is claimed yet. Hosted inventory is 150. Installed 0.1.21 remains native `0e35ac3`. [Current checkpoint](evidence/child-runtime-library-20261018.json), [earlier full gate](evidence/agent-file-tool-owner-20261018.json). | Finish the same live local gate and verify frozen inputs/binaries; current hosted acceptance, unconfirmed hosted command failures, validated installation and production release acceptance. |
+| Native backend and local persistence | Current native `c23a6cd` passes all 149 local Release contracts in 811.26 seconds against SDK `58a8aab9`. All 2,506 frozen inputs and binary hashes remain unchanged. SDK checks pass 4/4 and its complete default performance gate 11/11. Hosted inventory is 150. Development 0.1.22 packaging is being prepared; installed 0.1.21 still retains native `0e35ac3`. [Current full gate](evidence/child-runtime-library-20261018.json). | Current hosted acceptance, unconfirmed hosted command failures, validated installation and production release acceptance. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
@@ -50,11 +50,12 @@ one successful operation. This changes contract observation, not production
 graph scheduling or command timeouts. Test diagnostics now expose actual child
 stderr and AgentRunner operation/event results on failure.
 
-The complete 149-test local gate is running at this checkpoint with 2,506 frozen
-inputs and the new SDK DLL. Do not infer a complete pass from the focused checks
-or launch another native build/test while that gate is active. The installed
-extension and user backend have not been replaced. Rendered browser/editor
-acceptance remains unverified.
+The same complete 149-test local gate has now finished successfully in 811.26
+seconds. All 2,506 frozen inputs, native executable, SDK CLI and paired runtime
+DLL hashes remain unchanged. Its full log and detailed output are preserved.
+Development package 0.1.22 is being prepared from those tested binaries. The
+installed extension and user backend have not yet been replaced. Rendered
+browser/editor and current hosted acceptance remain unverified.
 [Library checkpoint](evidence/child-runtime-library-20261018.json).
 
 The newer completed hosted run `39131091790`, still at older source `41497dd`,

@@ -58,12 +58,24 @@
       "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
     },
     "fullLocalGate": {
-      "status": "running-at-checkpoint",
-      "expected": 149,
+      "status": "passed",
+      "sourceRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+      "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+      "passed": 149,
+      "failed": 0,
+      "seconds": 811.26,
       "sourceFiles": 2506,
-      "log": "C:/xMindNativeValidation/child-runtime-full-ctest-20261018.log",
-      "verificationHelper": "C:/xMindNativeValidation/check-child-runtime-release-gate-20261018.mjs",
-      "note": "No complete-gate pass claimed; inspect the same live test run and its terminal result before updating this receipt."
+      "sourceAndBinariesUnchanged": true,
+      "binaries": {
+        "xmind.exe": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+        "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+      },
+      "sdkCliSha256": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+      "sourceManifestSha256": "80e9c51b0d33513364675e926552f4702edcd03b2ab79741cc5835cca04104ff",
+      "ctestLogSha256": "ac0a0d8767fba9bcf5905544a92c8ff1f245d833dcdc067e0490918e38ed2e75",
+      "detailsLogSha256": "680844033c2805a541ef5ba28242839194ecbb342e933161453aae63a944ec18",
+      "hostedExpected": 150,
+      "hostedOnlyLocalTrustMutationExcluded": true
     },
     "hostedExpected": 150
   },
@@ -136,6 +148,18 @@
     "child-runtime-source-before-20261018.json": {
       "path": "C:/xMindNativeValidation/child-runtime-source-before-20261018.json",
       "sha256": "80e9c51b0d33513364675e926552f4702edcd03b2ab79741cc5835cca04104ff"
+    },
+    "child-runtime-full-ctest-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-runtime-full-ctest-20261018.log",
+      "sha256": "ac0a0d8767fba9bcf5905544a92c8ff1f245d833dcdc067e0490918e38ed2e75"
+    },
+    "child-runtime-full-details-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-runtime-full-details-20261018.log",
+      "sha256": "680844033c2805a541ef5ba28242839194ecbb342e933161453aae63a944ec18"
+    },
+    "child-runtime-gate-20261018.json": {
+      "path": "C:/xMindNativeValidation/child-runtime-gate-20261018.json",
+      "sha256": "ff2f85753186ca0a678eea9a265ddaa73066c460f7c23e848adb6f7e27576edf"
     }
   },
   "preserved": {
@@ -146,9 +170,9 @@
     "editorOpened": false
   },
   "remaining": [
-    "Complete the same running 149-test native gate and verify frozen source/binary hashes.",
     "Obtain current-source hosted native acceptance and investigate any remaining command failure.",
     "Package/install the validated SDK integration; installed 0.1.21 remains unchanged.",
     "Rendered browser/editor acceptance remains unverified."
-  ]
+  ],
+  "verifiedAt": "2026-10-18T15:04:02.172Z"
 }
