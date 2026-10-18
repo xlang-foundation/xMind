@@ -239,7 +239,14 @@ class BrowserController {
     if(message.type==='agent-select'){try{if(this.health?.agent_selection!==true||this.busy()||!this.agentController)throw new Error('Wait for this conversation to become idle before changing its agent.');await this.agentController.change(message);}catch(error){if(this.current(version))this.post({type:'agent-selection-error',text:error.message});}return;}
     if(message.type==='saveProviderKey'){let key=message.key;delete message.key;try{await this.discover(key||undefined,message.profile,message.route);}finally{key=undefined;}return;}
     if(message.type==='discardProviderKey'){this.selection=undefined;clearTimeout(this.keyTimer);this.profileController?.invalidate();await this.refreshCapabilities();return;}
-    if(message.type==='select-provider'){this.profileController??=new ProfileController(this.client,this.post);if(!await this.profileController.select(message.id)||!this.current(version))return;await this.refreshCapabilities();if(!this.current(version))return;this.model=this.models.default_model;this.remember();this.discover().catch(()=>{});return;}
+    if(message.type==='select-provider'){
+      this.profileController??=new ProfileController(this.client,this.post);
+      await this.profileController.selectAndRefresh(message.id,async()=>{
+        if(!this.current(version))return;
+        await this.refreshCapabilities();if(!this.current(version))return;
+        this.model=this.models.default_model;this.remember();this.discover().catch(()=>{});
+      });return;
+    }
     if(message.type==='refresh'){this.selection=undefined;clearTimeout(this.keyTimer);await this.refreshCapabilities();await this.refreshSessions();if(this.session)await this.select(this.session,this.runId);try{await this.discover();}catch{}return;}
     if(message.type==='delete-session'){
       const session=this.session,target=this.client;

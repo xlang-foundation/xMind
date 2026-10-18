@@ -15,13 +15,38 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | xMind main `d919441` passed the complete sequential native CTest inventory, 147/147. Workspace invocation at `91d41f0` passed focused contracts 2/2 in Debug and Release. The 2026-10-18 dependency-packaging correction passes process, AgentRunner, graph and runtime-generation Release contracts 4/4 against the complete pinned xlang3 SDK. | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
+| Native backend and local persistence | Native `a56c3cd` passed the complete sequential local Release inventory, 148/148, against the pinned xlang3 SDK. Foreground process tests verify OS-derived SystemDrive, reject spoofed parent/profile values, and retain secret isolation. The hosted checklist now explicitly names all 148 local tests plus its one isolated hosted-only OAuth trust test. [Current receipt](evidence/coding-process-provider-recovery-20261018.json). | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed VSIX **0.1.16** contains native `3d7dfe1`; its 1,970 payloads and 1,927-file runtime verify. Installed host/client/browser modules preserve provider selection across reattachment. A real Claude run created an approved file, ran two xlang3 assertions with exit zero, retained six messages and completed native SSE. VS Code APIs were explicit Node fixtures; browser protocol checks used a Node cookie jar. The selected model survives a fresh browser cookie session. Four native configuration checks and 395 extension tests pass. [Current installed receipt](evidence/provider-selection-0.1.16-20261018.json). Earlier 0.1.15 completed OpenAI → Claude creation/editing; `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader models/recovery cases, long-task reliability and broader interactive-console/terminal recovery acceptance. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Process environment and provider-selection recovery — 2026-10-18
+
+Foreground coding processes now receive `SystemDrive` derived from the actual
+OS `SystemRoot`, allowing Windows tools to expand `%SystemDrive%` paths. Tests
+reproduced the missing value before the fix and now reject spoofed inherited
+values and case-insensitive profile overrides while excluding provider secrets.
+All 148 local native Release contracts pass in 800.72 seconds. The hosted-only
+OAuth trust-store contract remains separate; hosted current-source acceptance
+is pending.
+
+Both view adapters now refresh capabilities and saved-key discovery when a
+rejected provider selection reveals a changed active binding. An unchanged busy
+rejection preserves the current model. Neither path retries the selection or
+submits a task. The extension's 399 and browser's 138 Node fixture tests pass.
+An actual two-client native/browser HTTP check received one selection HTTP 409,
+recovered execution with Claude and its 13 saved-key models, and admitted no run.
+This used the production browser controller with a Node cookie jar and explicit
+VS Code workspace/settings APIs; it does not verify rendered desktop behavior.
+
+These changes are not installed in 0.1.16. VS Code stayed closed. External Edge
+accessibility was readable, but screenshots were black and activation failed
+with `GetCursorPos: Access is denied (0x80070005)` twice, including after a fresh
+window inventory. Rendered acceptance remains open. See the
+[checkpoint receipt](evidence/coding-process-provider-recovery-20261018.json).
 
 ## Installed 0.1.16 provider selection and coding — 2026-10-18
 

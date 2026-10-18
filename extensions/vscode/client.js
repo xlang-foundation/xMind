@@ -1083,6 +1083,24 @@ class ProviderProfileController {
     this.savedCatalogue=draft.savedCredential&&!routeChanged?{...saved,route_id:saved.owned_route,ids:[...draft.ids],expires:Infinity,savedCredential:true}:undefined;
     this.present();if(!this.models(model))this.configuredModels();this.post({type:'provider-wire',wire:this.wire(state.active)});return true;
   }
+  activeBinding(){
+    const profile=this.state?.profiles.find(value=>value.id===this.state.active),route=this.state?.routes.find(value=>value.id===profile?.route_id);
+    return JSON.stringify([this.state?.active,profile?.revision,profile?.route_id,profile?.provider,profile?.model,route?.wire,route?.provider,route?.discovery]);
+  }
+  async selectAndRefresh(id,refresh){
+    if(!this.state&&!await this.refresh())throw new Error('Update the backend to use provider profiles');
+    const before=this.activeBinding();
+    try{if(!await this.select(id))return;}
+    catch(error){
+      // Another client may have changed the active binding despite our rejected
+      // selection. Refresh view capabilities, but never replay that mutation.
+      // An unrelated registry revision or a busy rejection keeps its model.
+      if(error.status===409&&this.current(this.epoch)&&before!==this.activeBinding())await refresh();
+      throw error;
+    }
+    if(this.current(this.epoch))await refresh();
+    return true;
+  }
   async select(id){
     if(!this.state&&!await this.refresh())throw new Error('Update the backend to use provider profiles');
     if(this.disposed||!this.state)return;

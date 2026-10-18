@@ -627,10 +627,14 @@ async function activate(context) {
           const version=generation;await profileController?.refresh();if(panel!==view||version!==generation)return;
           const current=await capabilities();if(panel!==view||version!==generation)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});profileController?.models(selectedModel);
         } else if(message.type==='select-provider'){
-          const version=generation;if(!await profileController.select(message.id)||panel!==view||version!==generation)return;
-          const current=await capabilities();if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
-          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
-          await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});await configureModel();
+          const version=generation;await profileController.selectAndRefresh(message.id,async()=>{
+            if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;
+            const current=await capabilities();if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
+            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
+            await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});
+            if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;
+            await configureModel();
+          });
         } else if (message.type === 'refresh') {
           providerSelection=undefined;
           const version=generation;

@@ -35,6 +35,29 @@ test('conflicting provider selection reads fresh metadata once without replaying
  try{await controller.discover();await assert.rejects(controller.select('openai'),error=>error.status===409);assert.equal(calls,1);assert.equal(controller.savedCatalogue,undefined);assert.equal(controller.state.revision,5);assert.equal(posted.findLast(value=>value.type==='provider-profiles').active,'');}finally{controller.dispose();}
 });
 
+test('selection conflict refreshes host capabilities only when the active binding changes',async()=>{
+ for(const change of ['active','profile','route','inactive','busy']){
+  let state=registry(),selections=0,refreshes=0;
+  const conflict=Object.assign(new Error('Selection conflict'),{status:409});
+  const controller=new ProviderProfileController({providerProfiles:async()=>state,selectProviderProfile:async()=>{
+   selections++;
+   if(change==='active')state={...state,revision:5,active:''};
+   if(change==='profile')state={...state,revision:5,profiles:[{...state.profiles[0],revision:5,model:'another-model'}]};
+   if(change==='route')state={...state,revision:5,routes:state.routes.map(route=>route.id==='openai.responses'?{...route,discovery:false}:route)};
+   if(change==='inactive')state={...state,revision:5};
+   throw conflict;
+  }},()=>{});
+  try{await controller.refresh();await assert.rejects(controller.selectAndRefresh('openai',async()=>{refreshes++;}),error=>error===conflict);assert.equal(selections,1);assert.equal(refreshes,['active','profile','route'].includes(change)?1:0,change);}
+  finally{controller.dispose();}
+ }
+});
+
+test('retired provider selection cannot refresh capabilities for a replacement view',async()=>{
+ let release;const pending=new Promise(resolve=>release=resolve),controller=new ProviderProfileController({providerProfiles:async()=>registry(),selectProviderProfile:()=>pending},()=>{});let refreshes=0;
+ try{await controller.refresh();const selection=controller.selectAndRefresh('openai',async()=>{refreshes++;});controller.dispose();release(registry());await selection;assert.equal(refreshes,0);}
+ finally{controller.dispose();release(registry());}
+});
+
 test('saved-credential discovery survives close and conversation discard, with exact native CAS and no retained key',async()=>{
  let state=registry();const posted=[],calls=[],models=Array.from({length:135},(_,n)=>({id:'fixture-model-'+n}));
  const client={baseUrl:'http://127.0.0.1:8765',providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(['discover',...args]);return {models};},saveProviderProfile:async(...args)=>{calls.push(['save',...args]);state={...state,revision:state.revision+1,profiles:[{...state.profiles[0],model:args[2],revision:state.profiles[0].revision+1}]};return state;}};

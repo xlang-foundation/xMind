@@ -457,6 +457,29 @@ test('VS Code footer provider command selects a saved key-only profile via nativ
   view.receive({type:'model',id:'fixture-claude'});await until(()=>writes.length===1);assert.deepEqual(writes[0],{id:'claude-key-only',route_id:'anthropic.messages',model:'fixture-claude',expected_revision:5,activate:true});assert.equal(registry.profiles[0].model,'fixture-current');await until(()=>view.posted.findLast(m=>m.type==='model-list')?.model==='fixture-claude');assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,2);assert.ok(!h.requests.includes('/v1/runs'));
  }finally{view.close();}
 });
+
+test('VS Code provider selection conflict restores execution and saved-key discovery without retrying the command',async()=>{
+ let registry={revision:1,active:'',profiles:[{id:'saved-provider',route_id:'openai.responses',provider:'openai',model:'saved-model',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const selections=[],discoveries=[];
+ const options={health:{agent_execution:false,provider_profile_admission:true},profileRegistry:()=>registry,profileSelect:body=>{selections.push(body);registry={...registry,revision:2,active:'saved-provider'};options.health={agent_execution:true,provider_profile_admission:true};options.catalogue={models:[{id:'saved-model'}],default_model:'saved-model'};throw Object.assign(new Error('Selection conflict'),{status:409});},profileDiscovery:body=>{discoveries.push(body);return [{id:'saved-model'},{id:'another-model'}];}};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];try{
+  view.receive({type:'ready'});await until(()=>view.posted.some(value=>value.type==='settings-state'&&/Choose a saved provider/.test(value.text)));
+  assert.equal(view.posted.findLast(value=>value.type==='capabilities').execution,false);
+  view.receive({type:'select-provider',id:'saved-provider'});
+  await until(()=>view.posted.some(value=>value.type==='error'&&value.text==='Selection conflict'));
+  assert.deepEqual(selections,[{id:'saved-provider',expected_revision:1}]);assert.equal(discoveries.length,1);assert.equal(discoveries[0].id,'saved-provider');assert.equal(discoveries[0].expected_revision,2);assert.ok(!Object.hasOwn(discoveries[0],'api_key'));
+  assert.equal(view.posted.findLast(value=>value.type==='capabilities').execution,true);assert.equal(view.posted.findLast(value=>value.type==='capabilities').model,'saved-model');assert.equal(view.posted.findLast(value=>value.type==='model-list').models.length,2);assert.equal(h.state.get('xmind.model').id,'saved-model');assert.ok(!h.requests.includes('/v1/runs'));assert.equal(h.providerRequests.length,0);assert.equal(h.inputPrompts.length,0);
+ }finally{view.close();}
+});
+
+test('VS Code busy provider rejection keeps the current capabilities and does not rediscover',async()=>{
+ const registry={revision:1,active:'saved-provider',profiles:[{id:'saved-provider',route_id:'openai.responses',provider:'openai',model:'saved-model',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};let selections=0,discoveries=0;
+ const h=harness({health:{agent_execution:true,provider_profile_admission:true},catalogue:{models:[{id:'saved-model'}],default_model:'saved-model'},profileRegistry:()=>registry,profileSelect:()=>{selections++;throw Object.assign(new Error('Busy'),{status:409});},profileDiscovery:()=>{discoveries++;return [{id:'saved-model'}];}});
+ await h.commands.get('agentflow.open')();const view=h.views[0];try{
+  view.receive({type:'ready'});await until(()=>view.posted.some(value=>value.type==='settings-state'&&value.complete));const capabilities=view.posted.filter(value=>value.type==='capabilities').length,before=discoveries;
+  view.receive({type:'select-provider',id:'saved-provider'});await until(()=>view.posted.some(value=>value.type==='error'&&value.text==='Busy'));
+  assert.equal(selections,1);assert.equal(discoveries,before);assert.equal(view.posted.filter(value=>value.type==='capabilities').length,capabilities);assert.ok(!h.requests.includes('/v1/runs'));assert.equal(view.posted.findLast(value=>value.type==='capabilities').model,'saved-model');
+ }finally{view.close();}
+});
 test('VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution',async()=>{
  const options={health:{agent_execution:true,context_controls:true},contextRecord:{session_id:'saved',model_id:'synthetic-host-default',enabled:true,automatic:true,head_revision:4,source_watermark:7,manual:null,checkpoint:{id:'checkpoint',provider_elapsed_ms:12,preparation_elapsed_ms:14,usage:{input_tokens:41,output_tokens:9}}}},h=harness(options);
  await h.commands.get('agentflow.open')();const view=h.views[0];try{view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='context'));

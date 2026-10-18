@@ -1,0 +1,189 @@
+{
+  "recordedAt": "2026-10-18T12:10:03.324Z",
+  "scope": "Coding-process environment and browser/VS Code provider-selection recovery. Development checks; no rendered desktop acceptance or release acceptance.",
+  "native": {
+    "revision": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+    "nativeTree": "6fb79e6583429cdcfe1ab8c3a6befd0b5267fa5a",
+    "executableSha256": "04fe8d7d4c2d5adde8c465f6cfc080337d334006a314da851d37932014c136c3",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "passed": 148,
+    "failed": 0,
+    "elapsedSeconds": 800.72,
+    "scope": "Local Windows Release contracts, including native engine/xlang3 with explicit synthetic provider peers where applicable; not 148 live-provider tasks.",
+    "systemDrive": "Derived from the OS SystemRoot drive; spoofed inherited and explicit profile overrides rejected; provider secrets remain excluded."
+  },
+  "uiAdapters": {
+    "extension": {
+      "passed": 399,
+      "failed": 0
+    },
+    "browser": {
+      "passed": 138,
+      "failed": 0
+    },
+    "scope": "Node controller, API/transport and renderer fixtures; no actual VS Code or browser-window rendering.",
+    "recovery": "A native 409 selection rejection refreshes capabilities/catalogue only if the active provider binding changed. It does not repeat selection or run admission. A busy rejection preserves the current model."
+  },
+  "nativeBrowserConflict": {
+    "scope": "Real native backend and browser HTTP/cookie/controller; explicit VS Code workspace/settings/SecretStorage fixtures. No rendered UI or inference.",
+    "sourceBase": "a56c3cdc3071e93cab631001eb7ba64c475a4cc2",
+    "workingChanges": "Provider-selection capability reconciliation in browser, shared client and VS Code adapter",
+    "workspace": "C:/xMindNativeValidation/model-zoo-current-acceptance-20261018",
+    "startedAt": "2026-10-18T12:09:12.778Z",
+    "inferenceAdmissions": 0,
+    "owner": {
+      "origin": "http://127.0.0.1:57927",
+      "backendPid": 32352,
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f"
+    },
+    "initialExecution": false,
+    "otherClientRevision": 3,
+    "outcome": {
+      "nativeSelectionHTTPStatus": 409,
+      "selectionRequests": 1,
+      "activeProvider": "claude",
+      "execution": true,
+      "model": "claude-sonnet-4-6",
+      "savedKeyCatalogueCount": 13,
+      "noTaskAdmission": true,
+      "noTypedProviderKey": true
+    },
+    "requests": [
+      {
+        "path": "/ui/session",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/agent/planning",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/graphs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/active",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles/select",
+        "method": "POST",
+        "status": 409
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/agent/planning",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/models",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/graphs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles/models",
+        "method": "POST",
+        "status": 200
+      }
+    ],
+    "completedAt": "2026-10-18T12:09:48.206Z"
+  },
+  "ciInventory": {
+    "local": 148,
+    "hostedExpected": 149,
+    "hostedOnly": "native_mcp_oauth_trusted_contract",
+    "exactInventoryVerified": true,
+    "hostedCurrentNativeResult": "Pending; local passing tests are not hosted acceptance."
+  },
+  "installed": {
+    "version": "0.1.16",
+    "nativeRevision": "3d7dfe16d3eb74826d459f6a3d86c7bb8fa356cf",
+    "newFixesInstalled": false
+  },
+  "uiAcceptance": {
+    "vscodeWindowsOpened": false,
+    "renderedVerified": false,
+    "externalBrowserBlocker": "Black screenshots; GetCursorPos Access is denied (0x80070005) on activation, repeated after a fresh window inventory. No further desktop input attempted."
+  },
+  "limitations": [
+    "Development runtime releaseAccepted=false; production release acceptance remains open.",
+    "The installed 0.1.16 and its previously running browser instance do not yet contain these new fixes.",
+    "No new live inference was admitted for this selection-conflict check; saved-key catalogue discovery used the real provider.",
+    "A new larger ModelZoo coding/build acceptance has not yet been run against this native revision."
+  ],
+  "preserved": [
+    "Existing VS Code installations/settings/profiles and browser conversations",
+    "xlang3 branch and SDK; no CPython executed",
+    "Untracked endpoint.obj and probe.obj"
+  ],
+  "logs": {
+    "native": {
+      "path": "C:/xMindNativeValidation/system-drive-full-green-20261018.log",
+      "sha256": "1089231b9f8dafff223ad81ab65cb7190b6e65250f400203709964f5824de1e2"
+    },
+    "nativeDetails": {
+      "path": "C:/xMindNativeValidation/system-drive-full-green-details-20261018.log",
+      "sha256": "25da807cb341c258918e90424eaee6f4eaa20abc5954e5adae953117992b1137"
+    },
+    "extension": {
+      "path": "C:/xMindNativeValidation/provider-conflict-extension-full-20261018.log",
+      "sha256": "878fec6a024314b8dcb49f72e020c7aec55ce5600173983152bb619dbbe03cf9"
+    },
+    "browser": {
+      "path": "C:/xMindNativeValidation/provider-conflict-browser-full-20261018.log",
+      "sha256": "42417e57149d47a76adb577679e0e1bf0e6602684ad9830b4e4dd1ab712fa3f2"
+    }
+  },
+  "sourceFiles": {
+    "extensions/vscode/client.js": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+    "extensions/vscode/extension.js": "6e1d75aa9ffc4561f98b4b618cc2a3a784582e22954d6f53fdeb254665219afa",
+    "views/browser/browser.js": "e74c2e4eb6f02f258ee427f072f66955f82b43ddc3b4a53c1504ed48d42b7312",
+    "extensions/vscode/tests/provider-profile-controller.test.js": "7af30848a6e9419457bcaf87f6e1ae7970e139a60ab6f800ca2105dcb9a75bdf",
+    "extensions/vscode/tests/extension-host.test.js": "0c848da40b451e62fff23803616f2d247b7d621c59b04d5a484e0f822473e8cf",
+    "views/browser/tests/controller.test.cjs": "a7e498f793886126286e0695ec0cb902f993f44f8f7f50d30bdf9c2fd3ef15ba"
+  }
+}
