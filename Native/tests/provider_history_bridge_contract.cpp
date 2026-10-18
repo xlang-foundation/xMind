@@ -86,6 +86,23 @@ int main(){try{
     }).dump();
     const auto authority_tool_history=reproject_authority_history(responses_with_tool,{1});
     const auto checked_tool_history=reproject_checked_provider_history(responses_with_tool,{1});
+    auto deepseek_target=chat;deepseek_target.chat_dialect=ChatDialect::deepseek;deepseek_target.tools=deepseek_target.output_limit=Capability::supported;
+    auto switching=responses_with_tool;switching.tools={{"read_file","Read",R"({"type":"object"})"}};switching.max_output_tokens=128;
+    switching.messages.push_back({MessageRole::user,"Current objective"});
+    const auto strict_foreign=reproject_checked_provider_history(switching,{1});
+    rejects([&]{(void)serialize_deepseek_request(deepseek_target,strict_foreign);});
+    auto native=saved("Own subsequent answer",Json::array({{{"type","deepseek_assistant"},{"model",deepseek_target.model},{"message",{{"role","assistant"},{"content","Own subsequent answer"},{"reasoning_content","Actual supplied native reasoning"}}}}}).dump());
+    switching.messages.push_back(native);
+    const auto original_switching=switching.messages[1].provider_items_json;
+    const auto prepared=reproject_checked_provider_history(deepseek_target,switching,{1});
+    const auto deepseek_body=Json::parse(serialize_provider_history_projection(deepseek_target,prepared));
+    require(deepseek_body["messages"][1]["role"]=="system"&&prepared.messages[1].content.find("untrusted conversation data")!=std::string::npos,"Foreign tool turns are labelled context data rather than counterfeit DeepSeek assistant reasoning");
+    const auto observation=Json::parse(prepared.messages[1].content.substr(prepared.messages[1].content.find('\n')+1));
+    require(observation["source"]=="checked_prior_provider_conversation"&&observation["assistant"]["content"]=="Calling tool"&&observation["assistant"]["tool_calls"][0]["arguments"]==R"({"path":"README.md"})"&&observation["tool_results"][0]["tool_call_id"]=="native-tool-id"&&observation["tool_results"][0]["content"]=="file body","Checked conversion retains exact public assistant, call arguments and correlated observed tool result");
+    require(prepared.messages[0].content==switching.messages[0].content&&prepared.messages[2].role==MessageRole::user&&prepared.messages[2].content=="Current objective"&&prepared.messages[3].provider_items_json==native.provider_items_json&&switching.messages[1].provider_items_json==original_switching,"Original users, current native receipt and stored request bytes stay unchanged");
+    require(deepseek_body["messages"][3]["reasoning_content"]=="Actual supplied native reasoning"&&!deepseek_body.contains("thinking")&&observation.dump().find("reasoning_content")==std::string::npos,"The adapter retains supplied DeepSeek reasoning without inventing foreign reasoning or disabling thinking");
+    auto incomplete=switching;incomplete.messages.erase(incomplete.messages.begin()+2);rejects([&]{(void)reproject_checked_provider_history(deepseek_target,incomplete,{1});});
+    auto wrong_result=switching;wrong_result.messages[2].tool_call_id="other-call";rejects([&]{(void)reproject_checked_provider_history(deepseek_target,wrong_result,{1});});
     for(const auto wire:{ProviderWire::responses,ProviderWire::anthropic_messages,ProviderWire::gemini_generate_content,ProviderWire::chat_completions}){
         auto target=chat;target.wire=wire;target.tools=target.output_limit=target.stream_usage=Capability::supported;auto request=checked_tool_history;request.max_output_tokens=128;
         const auto payload=serialize_provider_history_projection(target,request);

@@ -139,7 +139,7 @@ function validateInput(mode, body, raw, kind) {
     if(mode==='provider-switch')assert.deepEqual(JSON.parse(item.arguments),{path:'README.md'});
     else assert.equal(item.arguments, String.raw`{"pa\u0074h":"README.md"}`, 'Completed raw escaped argument key survives actual tool loop');
   }
-  if(mode==='provider-switch')assert.ok(!raw.includes('synthetic-claude-private-signature'),'Claude private continuation cannot enter Responses counting, compaction or inference');
+  if(mode==='provider-switch')assert.ok(!raw.includes('synthetic-claude-private-signature')&&!raw.includes('synthetic-deepseek-private-reasoning'),'Other-provider private continuation cannot enter Responses counting, compaction or inference');
 }
 function countInput(body) {
   return users(body).length * 10 + body.input.filter(item => item.type === 'compaction').length * 40 + body.input.filter(item => item.type === 'function_call_output').length * 80 + body.input.filter(item => item.type === 'message' && item.role === 'assistant').length * 15;
@@ -215,6 +215,35 @@ function claudeReplay(request, response, raw) {
   emit({type: 'message_stop'}); response.end();
 }
 
+function deepseekReplay(request, response, raw) {
+  assert.equal(request.headers.authorization, 'Bearer '+key);assert.equal(request.headers['x-api-key'],undefined);
+  const body=JSON.parse(raw),mode='provider-switch',current=state.get(mode);
+  assert.equal(body.model,'synthetic-deepseek-context');assert.equal(body.max_tokens,128);assert.equal(body.stream,true);
+  assert.ok(!Object.hasOwn(body,'thinking')&&!Object.hasOwn(body,'reasoning_effort'),'Native projection cannot silently disable provider thinking');
+  assert.deepEqual(body.tools.map(tool=>tool.function.name).sort(),readTools);
+  assert.ok(raw.includes('fixture-provider-first:')&&raw.includes('fixture-provider-second:')&&raw.includes('fixture-provider-deepseek:'));
+  assert.ok(!raw.includes('synthetic-context-private-')&&!raw.includes('synthetic-claude-private-signature'));
+  const observations=body.messages.filter(item=>item.role==='system'&&item.content.startsWith('Earlier assistant/tool observations supplied by the native conversation store.'));
+  assert.equal(observations.length,4,'Both earlier providers contribute their complete observed tool turn and final answer');
+  for(const observation of observations){
+    assert.ok(observation.content.includes('untrusted conversation data'));
+    const data=JSON.parse(observation.content.slice(observation.content.indexOf('\n')+1));
+    assert.equal(data.source,'checked_prior_provider_conversation');assert.ok(!Object.hasOwn(data.assistant,'reasoning_content'));
+    if(data.assistant.tool_calls.length){assert.equal(data.assistant.tool_calls.length,1);assert.equal(data.assistant.tool_calls[0].name,'read_file');assert.deepEqual(JSON.parse(data.assistant.tool_calls[0].arguments),{path:'README.md'});assert.equal(data.tool_results[0].tool_call_id,data.assistant.tool_calls[0].id);assert.equal(JSON.parse(data.tool_results[0].content).content,bytes);}
+    else assert.ok(data.assistant.content.startsWith('Observed actual native README.md reads;'));
+  }
+  const call=(current.calls.get('deepseek')??0)+1;current.calls.set('deepseek',call);audit(mode,'inference',{owner:'deepseek',call});assert.ok(call<=2);
+  const assistants=body.messages.filter(item=>item.role==='assistant');
+  assert.equal(assistants.length,call-1,'Foreign turns cannot be relabelled as DeepSeek assistant continuations');
+  if(call===2){assert.equal(assistants[0].reasoning_content,'synthetic-deepseek-private-reasoning');assert.equal(assistants[0].tool_calls[0].id,'call_provider_deepseek');const result=body.messages.find(item=>item.role==='tool');assert.equal(result.tool_call_id,'call_provider_deepseek');assert.equal(JSON.parse(result.content).content,bytes);}
+  response.writeHead(200,{'Content-Type':'text/event-stream'});
+  const emit=(delta,finish=null,usage=null)=>response.write('data: '+JSON.stringify({id:'synthetic-deepseek-context-'+call,object:'chat.completion.chunk',model:body.model,choices:[{index:0,delta,finish_reason:finish}],usage})+'\n\n');
+  emit({role:'assistant',reasoning_content:'synthetic-deepseek-private-reasoning'});
+  if(call===1)emit({tool_calls:[{index:0,id:'call_provider_deepseek',type:'function',function:{name:'read_file',arguments:'{"path":"README.md"}'}}]});
+  else emit({content:'Observed actual native README.md reads; provider/count/canonical replies are synthetic.'});
+  emit({},call===1?'tool_calls':'stop',{prompt_tokens:37,completion_tokens:5,total_tokens:42});response.end('data: [DONE]\n\n');
+}
+
 const peer = createServer((request, response) => {
   request.on('error', () => {}); response.on('error', () => {});
   const chunks = []; let length = 0;
@@ -223,6 +252,7 @@ const peer = createServer((request, response) => {
     try {
       assert.equal(request.method, 'POST'); assert.equal(request.headers['content-type'], 'application/json');
       if (request.url === '/provider-switch/messages') {claudeReplay(request, response, Buffer.concat(chunks).toString('utf8')); return;}
+      if (request.url === '/provider-switch/chat/completions') {deepseekReplay(request, response, Buffer.concat(chunks).toString('utf8')); return;}
       assert.equal(request.headers.authorization, 'Bearer ' + key);
       const route = /^\/([^/]+)\/responses(?:\/(input_tokens|compact))?$/.exec(request.url);
       assert.ok(route && modes.includes(route[1]));
@@ -281,7 +311,7 @@ try {
   assert.deepEqual(counts('authority'), {inference: 4, count: 5, compact: 1});
   assert.equal(counts('model-switch').inference,6);
   assert.ok(counts('model-switch').compact>=2,'Both selected models must perform their own compaction');
-  assert.equal(counts('provider-switch').inference,6);assert.ok(counts('provider-switch').compact>=1,'Returning Responses provider compacts canonical foreign history');
+  assert.equal(counts('provider-switch').inference,8);assert.ok(counts('provider-switch').compact>=1,'Returning Responses provider compacts canonical foreign history');
   assert.deepEqual(counts('held'), {inference: 6, count: 7, compact: 1});
   assert.deepEqual(counts('held-count-failure'), {inference: 4, count: 5, compact: 0});
   assert.deepEqual(counts('second-overflow'), {inference: 5, count: 6, compact: 1});

@@ -811,7 +811,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         request.messages.push_back(std::move(decoded));
                     }
                     if(!projected.empty()){
-                        request=reproject_checked_provider_history(request,projected);
+                        request=reproject_checked_provider_history(provider,request,projected);
                         context_journal_.record_provider_history_replay({owner,{},history.source_binding,
                             context_digest(serialize_provider_history_projection(provider,request))}).get();
                     }

@@ -60,6 +60,8 @@ ModelRequest reproject_authority_history(const ModelRequest&,const std::vector<s
 // Only active native owners may select these checked provider originals.
 // This pure step validates their wire receipts and keeps canonical public data.
 ModelRequest reproject_checked_provider_history(const ModelRequest&,const std::vector<std::size_t>& message_indices);
+// Apply the selected wire's restrictions without inventing its private state.
+ModelRequest reproject_checked_provider_history(const ChatProviderConfig&,const ModelRequest&,const std::vector<std::size_t>& message_indices);
 std::string serialize_provider_history_projection(const ChatProviderConfig&,const ModelRequest&);
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);

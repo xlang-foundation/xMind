@@ -23,6 +23,28 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## DeepSeek checked conversation context — 2026-10-18
+
+Live OpenAI → Claude → Gemini coding reached DeepSeek, where the strict Chat
+Completions serializer rejected foreign assistant/tool history before reserving
+a model call. That failed run remains stored. A read-only SQL check through
+xlang3 recorded hashes of all thirteen original private messages and confirmed
+zero model reservations for that attempt.
+
+The native selected-provider projection now represents proved foreign
+assistant/tool groups as labelled untrusted context data for DeepSeek. It retains
+their exact public facts and original user messages while keeping DeepSeek's own
+native reasoning and tool continuation. It does not fabricate reasoning or change
+the selected thinking mode. The strict serializer still rejects unchecked history.
+
+Ten focused native Release contracts passed. The engine now exercises
+Responses → Claude → DeepSeek → Responses, four real file reads, all sixteen
+immutable original messages and returning-provider compaction with independent
+synthetic protocol assertions. Browser and extension source bytes are unchanged
+from the prior 395/136 passing suites and their successful hosted view gate.
+Live retry, rendered clients and installed deployment remain separate gates.
+[Source, failed live attempt, exact tests and scope](evidence/deepseek-checked-context-20261018.json).
+
 ## Checked provider changes in an existing conversation — 2026-10-18
 
 Active profiled executions can prepare original conversation history for a

@@ -1,8 +1,36 @@
 # Saved conversation context after a backend change
 
-## Native active-run recovery for Responses context
+## Current profiled execution across providers
 
-The current implementation rebuilds an outgoing Responses-context request when a proved original
+Active profiled runs use a separate native ownership path to prepare original
+conversation groups for a selected provider. It checks the admitted target,
+actual producing model-call receipt, captured profile/model, workspace and exact
+complete-group bytes. The gateway validates each source receipt before changing
+the request copy. The typed publication rechecks the source in a transaction.
+Original messages, private receipts and supplied metrics stay unchanged in SQLite.
+Responses checkpoints remain private to their model and authority; other
+providers receive checked originals rather than a foreign checkpoint.
+
+DeepSeek Chat Completions has an additional restriction: its tool mode needs its
+own prior reasoning, and this wire does not support inserting foreign tool-call
+turns. See the official [thinking-mode](https://api-docs.deepseek.com/guides/thinking_mode/)
+and [tool-call](https://api-docs.deepseek.com/guides/tool_calls/) documentation,
+checked October 18, 2026. Checked foreign assistant/tool groups are therefore
+represented as labelled, untrusted conversation data in system context messages.
+Each record retains the public assistant content/refusal, exact call arguments
+and correlated observed tool-result bytes. Original user objectives remain user
+messages; DeepSeek's own native assistant/tool continuations retain their supplied
+reasoning. The conversion neither invents reasoning nor disables thinking.
+
+Unproved and incomplete source groups still fail closed. The ordinary strict
+continuation API remains separate. Idle maintenance, unprofiled recovery,
+rendered clients and installed-package acceptance have their own remaining gates;
+see [current validation status](VALIDATION_STATUS.md). Earlier receipts below
+describe their pinned source checkpoints, not the full current implementation.
+
+## Earlier Responses-only active-run recovery
+
+The initial implementation rebuilt an outgoing Responses-context request when a proved original
 receipt belongs to a different authority under the same captured provider
 identity, registered context policy and strategy. A selected model may also
 change within the same captured Responses provider profile, profile revision,

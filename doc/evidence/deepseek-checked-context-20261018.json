@@ -1,0 +1,87 @@
+{
+  "recorded_at": "2026-10-18T10:36:55.672Z",
+  "scope": "Native selected-provider conversion of checked foreign history for DeepSeek Chat Completions tool/thinking mode",
+  "source_base": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+  "source_files": {
+    "Native/include/agentflow/model_provider.hpp": "c6cc39979759047d3e2bb7d6962a86db465c50cbde7faa03ad91fd67df06a3a1",
+    "Native/src/agent_runner.cpp": "f5e797475ece74f61a9cc3c6a4e376536e9fa556b2039495b4e982be598ed405",
+    "Native/src/provider_history_bridge.cpp": "f4053a7b3b38ec368b6d0070a37342c11610e92b3473d0d8212090092f40ed06",
+    "Native/tests/context_engine_contract.cpp": "e7ef88d49cd4824a50ef0a3469a5f027f370522888ac555f37097e257e346c19",
+    "Native/tests/context_engine_peer.mjs": "3fabdf21ba16978070820b8abd15c1f4c0895d8102e5a85a7ab086e240d21cfc",
+    "Native/tests/provider_history_bridge_contract.cpp": "28da34be897d93b5bcbcac7798fc56db38233d55d63abbb1b19b442cc282706e"
+  },
+  "native_executable_sha256": "fd2da727ed8c470b805fe997555c3e36d442e0404f1dae0b1653f9eda9b2557c",
+  "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "trigger": {
+    "session": "23b2c3b1162f8fee6854974132a63c72",
+    "failed_run": "146c748f2b8e4f45036598d727784f14",
+    "previous_source": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+    "actual_prior_providers_completed": [
+      "openai",
+      "claude",
+      "gemini"
+    ],
+    "failed_model": "deepseek-v4-pro",
+    "reason": "incompatible_provider_history",
+    "model_calls_reserved": 0,
+    "original_messages_hashed": 13,
+    "retained": true
+  },
+  "provider_contract": {
+    "checked_at": "2026-10-18",
+    "thinking": "https://api-docs.deepseek.com/guides/thinking_mode/",
+    "tool_calls": "https://api-docs.deepseek.com/guides/tool_calls/",
+    "implementation": "Checked foreign assistant/tool groups become labelled untrusted data in system context messages. Public assistant text/refusal, exact arguments and observed tool results remain data; original user messages and current native DeepSeek continuations remain unchanged. No invented reasoning and no silent thinking disable."
+  },
+  "tests": {
+    "native_passed": 10,
+    "gates": {
+      "bridge": {
+        "passed": 1,
+        "seconds": 0.34
+      },
+      "engine": {
+        "passed": 1,
+        "seconds": 6.88
+      },
+      "context": {
+        "passed": 4,
+        "seconds": 10.12
+      },
+      "runtime": {
+        "passed": 4,
+        "seconds": 15.74
+      }
+    },
+    "log_sha256": {
+      "deepseek-context-bridge-tests-20261018.log": "4a8551ac505dfca7f21852e591dcde193630660d343cf4d6667e59a3fddeae7a",
+      "deepseek-context-engine-tests-20261018.log": "b638eaf303fcae086b079d638dc81a883797c585ec5c56849134805b9273cf17",
+      "deepseek-context-context-tests-20261018.log": "8c6b786de123878ff18d1ecf0d711a0c85bbb7a63162046055feff46f2c1e369",
+      "deepseek-context-runtime-tests-20261018.log": "7908eae0da77af1186e41cede876cd03d30435b51a74738cd1ee289ba3b4a90c",
+      "deepseek-context-build-20261018.log": "5e32871aae269bccbfed2f5db945fc8ba28fe6cc4fd2d636ed4297005c261723"
+    },
+    "unchanged_view_source_receipt": "context-provider-switch-20261018.json",
+    "unchanged_extension_tests": 395,
+    "unchanged_browser_tests": 136,
+    "hosted_views": {
+      "id": 39118908489,
+      "source_revision": "55c25d66951bb11388ba3951fcfdb49e77bd2ba3",
+      "conclusion": "success",
+      "url": "https://github.com/xlang-foundation/xMind/actions/runs/39118908489"
+    }
+  },
+  "checks": [
+    "Pure conversion preserves exact foreign call/result facts and original users while retaining current DeepSeek reasoning; incomplete or mismatched tool groups reject",
+    "Ordinary strict DeepSeek serializer still refuses canonical assistant history lacking its required native reasoning",
+    "Actual native engine crosses Responses to Claude to DeepSeek to Responses after database reopens, executes four real file reads and preserves all sixteen original messages/receipts/metrics",
+    "Independent synthetic peer inspects labelled foreign context, exact tool-result file bytes, absent foreign signatures and unchanged default thinking; its second DeepSeek request carries the actual supplied native reasoning",
+    "Returning Responses counting/compaction/inference cannot carry DeepSeek or Claude private continuation data"
+  ],
+  "limits": [
+    "Provider protocol/usage/counts/capacities/signatures in native contracts are explicitly synthetic; live retry after this correction is separate",
+    "No rendered browser/actual VS Code acceptance; external connector inventory still exposes only the in-app browser, which was not used for external-browser acceptance",
+    "Installed 0.1.14 remains at native b828570; no release-accepted package, profile-format migration or full-current native inventory is claimed",
+    "Broader unknown/unprofiled histories, foreign-history idle maintenance and long-task reliability remain separate requirements"
+  ]
+}
