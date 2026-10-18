@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-18T18:25:12.338Z",
+  "runId": 39149731654,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39149731654",
+  "sourceRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+  "artifactId": 12146086396,
+  "artifactBytes": 59112,
+  "artifactSha256": "80165a051a36a2d68e3bad991e622e2cae82ba8b2b0d2963b5bf8cda3ea86966",
+  "passed": 149,
+  "total": 150,
+  "seconds": 780.19,
+  "sdkSmokePassed": 2,
+  "failed": [
+    "native_graph_runner_contract"
+  ],
+  "actualGraphProcess": {
+    "elapsed_ms": 30033,
+    "exit_code": 1,
+    "id": "f6b0f2f4956a454ed66d200c7493c2b0",
+    "output_artifact": {
+      "operation_id": "f6b0f2f4956a454ed66d200c7493c2b0",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "graphRunState": "failed",
+  "childState": "failed",
+  "actualTerminationConfirmed": true,
+  "underlyingCauseConfirmed": false,
+  "accepted": false,
+  "scope": "Exact-source hosted Windows gate failure. New graph diagnostics confirm a 30,033ms timeout under the unchanged 30-second budget with no captured output and a retired process tree. This does not establish the underlying cause or current 152fc27 acceptance."
+}

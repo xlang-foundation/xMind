@@ -320,13 +320,16 @@
     "browser-0.1.24-modelzoo-verified-20261018.json": "85cb013d0f1b6fef9cd473d354382541c733d7148578b9efef3a6f61cf3e9539"
   },
   "hostedNativeCurrent": {
-    "checkedAt": "2026-10-18T17:50:22.680Z",
+    "checkedAt": "2026-10-18T18:25:12.338Z",
     "runId": 39149731654,
     "source": "44747af3a0134c2771b317fb5ec7368c848b9f98",
-    "status": "in_progress",
-    "conclusion": null,
-    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39149731654",
-    "accepted": false
+    "status": "completed",
+    "conclusion": "failure",
+    "passed": 149,
+    "total": 150,
+    "sdkSmokePassed": 2,
+    "accepted": false,
+    "evidence": "hosted-native-447-failure-20261018.json"
   },
   "olderHostedFailure": "hosted-native-449-failure-20261018.json",
   "renderedCurrentEditorAccepted": false,

@@ -15,7 +15,7 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Installed native 44747af / SDK 58a8aab9 passes all 149 local Release contracts in 899.29 seconds; all 2,599 project inputs, pure libraries, SDK/runtime, 124 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and complete offline installation pass three actual commands. [Current full gate](evidence/profile-publication-full-gate-20261018.json). | Current hosted run 39149731654 remains in progress. Older source 449bdce fails 2/150, including an actual AgentRunner 30-second timeout; the graph process cause remains unconfirmed. Release acceptance is open. |
+| Native backend and local persistence | Installed native 44747af / SDK 58a8aab9 passes all 149 local Release contracts in 899.29 seconds; all 2,599 project inputs, pure libraries, SDK/runtime, 124 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and complete offline installation pass three actual commands. [Current full gate](evidence/profile-publication-full-gate-20261018.json). | Hosted source 44747af passes 149/150 and SDK smoke 2/2; the graph process has a confirmed 30,033ms timeout under its unchanged budget, underlying cause unknown. Source 152fc27 acceptance and release acceptance remain open. [Hosted receipt](evidence/hosted-native-447-failure-20261018.json). |
 | Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
@@ -38,7 +38,14 @@ explicit: the unchanged old core sends all three cases, while the corrected
 core sends 0/0/1 and records no operation / failed operation / succeeded
 operation respectively. The focused contract passes in 2.62 seconds. All
 native targets are rebuilt, exe SHA e2933743..., unchanged SDK 58a8aab9.
-Complete source/input/binary validation and 0.1.25 installation remain pending.
+The complete 149-test local gate is running from source 152fc27154d08e1f0ad51d9ce8c9f04cbb2da039.
+Its 2,604 tracked project inputs include the current root AGENTS.md; 1,870 pure
+library inputs, 75 SDK runtime files, 124 binaries and 18,598 dependency files
+and sets are frozen. CTest PID 52132, born 2026-10-18T18:22:00.4214602Z,
+must be observed to terminal without restarting it. Logs, manifest and live
+state use C:/xMindNativeValidation/a2a-agent-guidance-full-*; run the full-gate
+helper with after only on terminal success. Do not mutate those inputs,
+including AGENTS.md, before verification. Version 0.1.25 is not staged or installed.
 [Exact red/green evidence](evidence/a2a-agent-guidance-20261018.json).
 
 The repository checkpoint notes had grown AGENTS.md to 34,298 bytes and the
@@ -77,7 +84,9 @@ rendered browser or VS Code acceptance. No editor/browser window was opened.
 
 [Package, live run, preserved observer failures and page evidence](evidence/coding-package-0.1.24-20261018.json).
 
-Current source hosted validation is still in progress. Older source 449bdce
+Hosted source 44747af is terminal: 149/150, SDK smoke 2/2. Its graph receipt
+now confirms timed_out at 30,033ms, empty output and retired tree; cause unknown.
+[Latest hosted result](evidence/hosted-native-447-failure-20261018.json). Older source 449bdce
 passes 148/150 and both SDK smoke tests. AgentRunner records an actual 30,084ms
 timed_out result with empty output and a retired process tree; its underlying
 cause remains unknown. The graph process failure lacks a termination receipt.
