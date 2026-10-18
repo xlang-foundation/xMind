@@ -64,8 +64,13 @@ The next diagnostic adds bounded native output-receipt times and runs four
 independent fresh hosted first cases: unchanged original, probe-only minimal
 PATH, explicit module qualification, and a location-resolution phase marker.
 All six local cases pass with frozen inputs/binary, including the original
-graph and agent commands. Production environment, commands and 30-second
-budgets remain unchanged. Hosted results and cause attribution are pending.
+graph and agent commands. The fresh hosted matrix finishes with 11/16 passes.
+Original/minimal-PATH/location-marker first cases time out near 30 seconds;
+explicit module qualification completes first in 8.143 seconds, then its
+original comparison still times out. This implicates discovery/autoloading;
+the exact cause remains open. Production environment, commands and 30-second
+budgets remain unchanged. No warm control qualifies a failed original.
+[Fresh hosted results and inference limits](evidence/process-startup-fresh-hosted-20261018.json).
 [Local controls and exact timing](evidence/process-startup-fresh-controls-local-20261018.json).
 
 ## Latest hosted native gate

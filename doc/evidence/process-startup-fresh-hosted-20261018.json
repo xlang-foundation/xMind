@@ -1,0 +1,451 @@
+{
+  "recordedAt": "2026-10-18T23:27:58.593Z",
+  "run": 39176240740,
+  "revision": "1cd75e3a46191843b9cd7d222330305219f0382b",
+  "conclusion": "failure",
+  "scope": "Four distinct fresh hosted jobs exercising the actual native foreground adapter; controls do not qualify original graph or agent product contracts.",
+  "totalCases": 16,
+  "passed": 11,
+  "failed": 5,
+  "sourceClosureIdenticalAcrossJobs": true,
+  "sourceFiles": 11,
+  "binaryHashesMayDifferAcrossIndependentBuilds": true,
+  "experiments": [
+    {
+      "firstCase": "original",
+      "artifact": {
+        "downloadedAt": "2026-10-18T23:25:58.731Z",
+        "runId": 39176240740,
+        "sourceRevision": "1cd75e3a46191843b9cd7d222330305219f0382b",
+        "runConclusion": "failure",
+        "firstCase": "original",
+        "artifactId": 12154373284,
+        "name": "process-startup-diagnostics-original-1cd75e3a46191843b9cd7d222330305219f0382b",
+        "bytes": 7420,
+        "sha256": "f7bbd483e911366ca5487057b9d9fe83a4aff79c611ad035a8441d6ec08c811c",
+        "advertisedSizeAndDigestVerified": true,
+        "output": "C:/xMindNativeValidation/process-startup-fresh-39176240740-original.zip"
+      },
+      "sourceFiles": 11,
+      "binarySha256": "f88981d96e22fa0bbfc504bf6e232af724a624fa86363c745dd05b3790531ef8",
+      "binaryFrozenWithinJob": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1561
+          },
+          "pid": 1544,
+          "elapsedMs": 30038,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 192
+          },
+          "pid": 1968,
+          "elapsedMs": 30047,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "pid": 6632,
+          "elapsedMs": 27066,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 246,
+            "delay_completed": 6284,
+            "effect_completed": 6284
+          },
+          "pid": 4724,
+          "elapsedMs": 6308,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "firstCase": "minimal-path",
+      "artifact": {
+        "downloadedAt": "2026-10-18T23:25:59.085Z",
+        "runId": 39176240740,
+        "sourceRevision": "1cd75e3a46191843b9cd7d222330305219f0382b",
+        "runConclusion": "failure",
+        "firstCase": "minimal-path",
+        "artifactId": 12154691720,
+        "name": "process-startup-diagnostics-minimal-path-1cd75e3a46191843b9cd7d222330305219f0382b",
+        "bytes": 7610,
+        "sha256": "047b7274d76276fd5bea914a0be77bdf67de2d06542b11c54458fdcb8f92c8f8",
+        "advertisedSizeAndDigestVerified": true,
+        "output": "C:/xMindNativeValidation/process-startup-fresh-39176240740-minimal-path.zip"
+      },
+      "sourceFiles": 11,
+      "binarySha256": "14765f75dfea6ac7d2790cc0d374193f89c2ea3dea72fea287ef45c6b85d9f1a",
+      "binaryFrozenWithinJob": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-minimal-path",
+          "scenario": "graph",
+          "control": "minimal-path",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1726
+          },
+          "pid": 7108,
+          "elapsedMs": 30034,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 197,
+            "delay_completed": 28672,
+            "effect_completed": 28877
+          },
+          "pid": 8052,
+          "elapsedMs": 28924,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "pid": 7660,
+          "elapsedMs": 22379,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 198,
+            "delay_completed": 6207,
+            "effect_completed": 6207
+          },
+          "pid": 2500,
+          "elapsedMs": 6219,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "firstCase": "module-qualified",
+      "artifact": {
+        "downloadedAt": "2026-10-18T23:25:59.559Z",
+        "runId": 39176240740,
+        "sourceRevision": "1cd75e3a46191843b9cd7d222330305219f0382b",
+        "runConclusion": "failure",
+        "firstCase": "module-qualified",
+        "artifactId": 12154388056,
+        "name": "process-startup-diagnostics-module-qualified-1cd75e3a46191843b9cd7d222330305219f0382b",
+        "bytes": 7713,
+        "sha256": "c1f8a4bc1ab50dcada8088b4808448af605390b83e1939bbd925c5109c3b0be7",
+        "advertisedSizeAndDigestVerified": true,
+        "output": "C:/xMindNativeValidation/process-startup-fresh-39176240740-module-qualified.zip"
+      },
+      "sourceFiles": 11,
+      "binarySha256": "35c816ff26eaf415c4d319a22b46e7d094c83c3dfc679036ac86d6181a6efc56",
+      "binaryFrozenWithinJob": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-module-qualified-default",
+          "scenario": "module-qualified",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1547,
+            "delay_completed": 7969,
+            "effect_completed": 8111
+          },
+          "pid": 9020,
+          "elapsedMs": 8143,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 168
+          },
+          "pid": 2220,
+          "elapsedMs": 30033,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "pid": 3648,
+          "elapsedMs": 22287,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 163,
+            "delay_completed": 6189,
+            "effect_completed": 6189
+          },
+          "pid": 3840,
+          "elapsedMs": 6201,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "firstCase": "cmdlet-phases",
+      "artifact": {
+        "downloadedAt": "2026-10-18T23:25:59.908Z",
+        "runId": 39176240740,
+        "sourceRevision": "1cd75e3a46191843b9cd7d222330305219f0382b",
+        "runConclusion": "failure",
+        "firstCase": "cmdlet-phases",
+        "artifactId": 12154373306,
+        "name": "process-startup-diagnostics-cmdlet-phases-1cd75e3a46191843b9cd7d222330305219f0382b",
+        "bytes": 7719,
+        "sha256": "478d125397c208d551fd04742e8bf4b987b83f137d847d68ff6eb08133a78e6a",
+        "advertisedSizeAndDigestVerified": true,
+        "output": "C:/xMindNativeValidation/process-startup-fresh-39176240740-cmdlet-phases.zip"
+      },
+      "sourceFiles": 11,
+      "binarySha256": "ff132cfde4471be5e9e51621008f00dac4bf7739fd96ed28ac1a722aba63eafc",
+      "binaryFrozenWithinJob": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-cmdlet-phases-default",
+          "scenario": "cmdlet-phases",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1626
+          },
+          "pid": 8224,
+          "elapsedMs": 30046,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 179,
+            "delay_completed": 28734,
+            "effect_completed": 28923
+          },
+          "pid": 4076,
+          "elapsedMs": 28971,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "pid": 5796,
+          "elapsedMs": 22354,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 188,
+            "delay_completed": 6197,
+            "effect_completed": 6213
+          },
+          "pid": 4704,
+          "elapsedMs": 6213,
+          "exitCode": 0,
+          "termination": "exited",
+          "markerExists": true,
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "originalFirstTimeoutMs": 30038,
+    "minimalPathFirstTimeoutMs": 30034,
+    "moduleQualifiedFirstCompletedMs": 8143,
+    "cmdletPhaseFirstTimeoutMs": 30046,
+    "originalFollowups": "Two complete near 28.9 seconds; two time out near 30 seconds.",
+    "agentFollowups": "All four complete in 22.3–27.1 seconds.",
+    "dotnetControls": "All four complete in 6.2–6.3 seconds.",
+    "inference": "Module-qualified success while original/unqualified commands remain slow implicates command discovery or module autoloading rather than the six-second delay itself. Minimal PATH is not sufficient. The exact underlying cause remains unestablished."
+  },
+  "primaryReference": {
+    "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath?view=powershell-7.6#windows-powershell-startup",
+    "relevance": "Windows PowerShell inserts AllUsers modules when inherited PSModulePath includes PSHOME Modules. The older system-modules control therefore does not prove AllUsers discovery was excluded. This documented behavior is context, not attribution of the measured delay."
+  },
+  "productionProcessAdapterChanged": false,
+  "productionEnvironmentChanged": false,
+  "originalCommandTextAndDeadlinesPreserved": true,
+  "prewarmingOrProductCommandSubstitution": false,
+  "causeEstablished": false,
+  "hostedNativeAccepted": false,
+  "releaseAccepted": false,
+  "rawRoot": "C:/xMindNativeValidation",
+  "rawSha256": {
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-original.json": "a52ac1b6fec0c0a8bafc74b0d640431baea3a6c93b6c32b44999e7decdfd6388",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-original-sources.json": "3b92a39a051902accb6ca1be073d188f49efac04a9903fb242ff384b5c8dd56a",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-minimal-path.json": "d0a458c46240986d266681b05c04ffc74372470061888ba9a2e59864b35d176a",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-minimal-path-sources.json": "3b92a39a051902accb6ca1be073d188f49efac04a9903fb242ff384b5c8dd56a",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-module-qualified.json": "350a4660c661e945f65aa3be35cccf76902fdfd90a0b1ba3ab93ff529acf7f09",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-module-qualified-sources.json": "3b92a39a051902accb6ca1be073d188f49efac04a9903fb242ff384b5c8dd56a",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-cmdlet-phases.json": "b47d9dabec23cf1dfd2b56c69f6991bdc11493160f087b8fe3d46614bde8387e",
+    "C:/xMindNativeValidation/process-startup-fresh-39176240740-cmdlet-phases-sources.json": "3b92a39a051902accb6ca1be073d188f49efac04a9903fb242ff384b5c8dd56a"
+  }
+}
