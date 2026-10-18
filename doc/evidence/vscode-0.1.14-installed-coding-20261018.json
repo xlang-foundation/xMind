@@ -1,0 +1,169 @@
+{
+  "recorded_at": "2026-10-18T09:57:00.296Z",
+  "scope": "Installed Windows x64 VSIX inventory and real coding through its production WorkspaceBackend/client/browser modules; VS Code API and external-open APIs are explicit fixtures",
+  "extension_version": "0.1.14",
+  "extension_source_revision": "f5bfbb241c208a60b90ae3971cc272d94c4d3a15",
+  "native_source_revision": "b828570309baaed574f1395f0c1b857235a35f19",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "package": {
+    "version": "0.1.14",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.14-current-win32-x64.vsix",
+    "sha256": "4732417181d23c3140474d23641fd187827d63d08d09b9a38e4eb3fb092ecef0",
+    "bytes": 32472734,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "b828570309baaed574f1395f0c1b857235a35f19",
+    "nativeSha256": "ea9a8766015267d80a482f1f4aca951db390c56fb8edf9ee3e5d5da8a2acbe8d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false,
+    "browser_assets_verified": 26,
+    "negative_fixtures": [
+      {
+        "expected_reason": "Missing browser/shared renderer package asset: extension/browser-runtime/assets/terminal.js",
+        "rejected": true,
+        "fixture": "negative-vsix-0.1.14-final-missing-terminal.vsix"
+      },
+      {
+        "expected_reason": "Private state must not be packaged",
+        "rejected": true,
+        "fixture": "negative-vsix-0.1.14-final-private-config.vsix"
+      }
+    ]
+  },
+  "installation": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.14",
+    "version": "0.1.14",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "b828570309baaed574f1395f0c1b857235a35f19",
+    "manifestSha256": "fd65cf5908bd861ab1d64df8f4b5fb7836361c2635514e388f9c937d0e0295de",
+    "nativeSha256": "ea9a8766015267d80a482f1f4aca951db390c56fb8edf9ee3e5d5da8a2acbe8d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "releaseAccepted": false,
+    "renderedEditorActivated": false,
+    "listed_by_actual_vscode_cli": true,
+    "vscode_version": "1.142.0",
+    "previous_extension_preserved": "C:/xMindNativeValidation/preserved-vscode-0.1.13-before-0.1.14",
+    "previous_settings_backup": "C:/xMindNativeValidation/vscode-settings-before-0.1.14-20261018.json",
+    "fresh_local_profile_root": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "saved_provider_config_preserved": true,
+    "trusted_process_config": "D:\\CantorAI2026\\xMind\\.config\\processes.yaml",
+    "previous_profile_data_modified": false
+  },
+  "live": {
+    "workspace": "C:/xMindNativeValidation/vscode-0.1.14-live-workspace-20261018",
+    "effective_workspace": {
+      "authority_id": "3f4aa0b56856d3774fcc6a9f368d216a",
+      "configured": true,
+      "root": "C:\\xMindNativeValidation\\vscode-0.1.14-live-workspace-20261018",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:68c93700000014000000000000000000"
+    },
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e",
+    "core_origin": "http://127.0.0.1:55273",
+    "core_pid": 10080,
+    "installed_host_view_origin": "http://127.0.0.1:54370",
+    "current_running_image_matches_installed_package": true,
+    "session": "015aede3f2ffdfd30cc808748933976d",
+    "run": {
+      "graph_root": false,
+      "id": "b17ab673da45a375298b640be8fe4fb9",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "session_id": "015aede3f2ffdfd30cc808748933976d",
+      "state": "completed"
+    },
+    "creation": {
+      "id": "5e58c43b64971ac250269b6c47ea2317",
+      "state": "succeeded",
+      "actor": "local-owner"
+    },
+    "exact_proposal_checked_before_allow": true,
+    "independent_file_sha256": "f87809bfb49d0a63739eac247d1a0113160aae4c4bbc28df42da5d2aeb82ff27",
+    "process": {
+      "id": "6fa8ec467d8264151d52d4bb3b4922ed",
+      "state": "succeeded",
+      "actor": "trusted-process-profile:xlang3",
+      "profileId": "xlang3",
+      "executable": "C:\\Users\\shaw9\\.xMind\\p-current\\b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e\\runtime-675723989edc2785f248c240a6e9e1dc321ad6c3288d2f259860e1e012461751\\xlang3.exe",
+      "arguments": [
+        "-B",
+        "installed_check.py"
+      ],
+      "exitCode": 0,
+      "stdout": "xMind installed coding verified\r\n"
+    },
+    "history_messages": 6,
+    "actual_inference_usage": {
+      "responses": 3,
+      "input_tokens": 15802,
+      "output_tokens": 122,
+      "total_tokens": 15924
+    },
+    "usage_scope": "Three inference responses; provider discovery/count requests are separate",
+    "actual_native_sse": {
+      "events": 135,
+      "reason": "terminal",
+      "terminal_cursor": 135
+    },
+    "saved_key_models_discovered": 20,
+    "VSCode_APIs": "Fixture supplies workspaceFolders, global machine settings and SecretStorage adapter; production installed code and actual native/provider execution",
+    "rendered_IDE": false
+  },
+  "browser": {
+    "url": "http://127.0.0.1:63004/ui/",
+    "packagedServer": true,
+    "packagedAssets": true,
+    "sameSession": true,
+    "sameHistory": true,
+    "noTypedToken": true,
+    "externalOpenAPIFixture": true,
+    "renderedAcceptance": false
+  },
+  "extension_contracts": {
+    "passed": 394,
+    "failed": 0,
+    "source_scope": "Version update and unchanged production JavaScript; README link/version correction followed the suite"
+  },
+  "local_evidence_sha256": {
+    "vscode-0.1.14-final-package-20261018.log": "1522de61b08337592af2d6fbf3a9c838b77ef9f7267791118d90bc03c6c2eda6",
+    "vscode-0.1.14-install-20261018.log": "f41243e5738ed6eafac8ecef16529e7fab5004614c664ad9bba76d027a41249e",
+    "vscode-0.1.14-archive-hashes-20261018.json": "7cfb6a311f649f4041dddc5caa65fcc442fd4f6c1447340bc451afe6513fba9e",
+    "vscode-0.1.14-extension-tests-20261018.log": "6c52d9cb8866cc6e5f626e48a39c112c0b7555b00c0280c49bc3c873dd99ea47",
+    "vscode-0.1.14-live-events-20261018.json": "3ff238878b0b2f18e46ed1dff99fe8f2f6cb693bfc7db547eb6d1dd212183aad",
+    "vscode-0.1.14-live-history-20261018.json": "b1c24c1e46b7cecfae32edb2df58478cc5d02513482e2ab7b7f3338c81b9c464",
+    "installed-vscode-coding-0.1.14-20261018.mjs": "d5a408345c6f86beb33b74ac49f2d9681d901a89ee84a233c76d17d0cc945a6f"
+  },
+  "retained_attempts": [
+    {
+      "scope": "Initial package source-byte verification",
+      "result": "README differed because VSCE rewrote relative links into incorrectly rooted GitHub URLs and source documentation still named 0.1.13",
+      "resolution": "Updated the packaged README version, scope and absolute canonical links; final 1973-file archive matches staged inputs"
+    },
+    {
+      "scope": "Installed-host harness setup",
+      "result": "Empty API key argument was rejected before any session/run admission",
+      "resolution": "Omitted the key exactly as the production saved-profile controller does; reused the same native owner and existing workspace instead of resetting it"
+    }
+  ],
+  "limits": [
+    "This is an installed local development package, not a release-accepted distribution or Marketplace publication",
+    "The installed module test uses labelled VS Code API fixtures in Node; no extension activation or rendered webview inside an actual VS Code window is claimed",
+    "External-open API captures the URL without opening a browser; browser acceptance is actual packaged HTTP/assets/session history, not rendered external interaction",
+    "The previous default VS Code profile had a recorded service-worker failure; its rendered state has not been rechecked while windows remain closed",
+    "A fresh native profile root was configured as requested for new-package acceptance; earlier profile data and the previous extension were preserved, without migration or repair of the earlier failed handoff",
+    "The live workspace is an isolated coding fixture; no new full Model Zoo project acceptance is claimed",
+    "No complete current native/hosted Release gate, broader provider/profile switching or worker-process AgentRunner completion is established",
+    "No CPython interpreter or native-extension fallback was used"
+  ]
+}

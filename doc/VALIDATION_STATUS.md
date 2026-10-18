@@ -19,9 +19,39 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | At `b828570`, browser startup and session reattachment succeeded during a live native xlang3 process; the coding run completed with unchanged history/provider settings and exit code zero. Six current focused native contracts pass. [Live reconnect receipt](evidence/provider-config-live-reconnect-20261018.json). Earlier `758e38f` passed live model switching, 394 extension/136 browser checks and hosted view CI; `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
+| Coding clients | Installed VSIX **0.1.14** contains native `b828570`. Its 1,970 installed payloads and full 1,927-file runtime verify. The installed host/client modules completed a real approved file creation and xlang3 execution, with native SSE and actual usage, using explicit VS Code API fixtures. Its packaged browser adapter exposes the same conversation. [Installed package and coding receipt](evidence/vscode-0.1.14-installed-coding-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build. | Activation and rendered coding acceptance inside actual VS Code and external browser windows; prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.14 package and production adapter coding — 2026-10-18
+
+The actual VS Code CLI installed Windows x64 **0.1.14** without opening windows.
+The final VSIX has 1,973 files; every extension payload matches its staged source.
+After installation, all **1,970 non-manifest payloads** match the archive, the
+package manifest matches apart from installer metadata, and the complete
+**1,927-file native inventory** verifies. The package checker requires 26 browser,
+renderer and license assets. Negative archives missing the terminal script or
+containing a private configuration directory are rejected. The README now names
+the current version and uses canonical absolute documentation links.
+
+Production `WorkspaceBackend`, client and browser modules were loaded from the
+installed extension in Node. **VS Code workspace/settings/SecretStorage and
+external-open APIs were explicit fixtures; no rendered editor ran.** Using the
+actual saved machine settings and the bundled native runtime, the host selected
+the fixture workspace, discovered 20 models without a new API key, proposed and
+approved an exact file, and executed it through xlang3 with exit code zero. Its
+native SSE observer acknowledged the terminal cursor after 135 actual events.
+Three inference responses report 15,802 input and 122 output tokens. The packaged
+browser server/assets expose the same six-message conversation over real HTTP.
+
+The saved provider path was retained; trusted process configuration was set and
+a fresh native profile root selected. Previous user settings, the entire 0.1.13
+extension and earlier profile data were preserved. No profile migration was
+performed. The extension suite passes **394/394**; rendered external browser and
+actual VS Code activation/coding remain unfinished, including rechecking the
+previous default-profile service-worker problem. This development runtime is
+not release accepted. [Archive hashes, installed bytes, native run/effects,
+settings scope, retained attempts and limitations](evidence/vscode-0.1.14-installed-coding-20261018.json).
 
 ## Live browser connection during native coding execution — 2026-10-18
 
