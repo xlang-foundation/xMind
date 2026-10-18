@@ -40,8 +40,10 @@ failed child and once-only effect, with no dependent execution. All 2,599 frozen
 project inputs, SDK/library inputs and 124 native binaries remain unchanged.
 [Source receipt](evidence/process-child-exit-20261018.json).
 
-The installed 0.1.23 package/page remain unchanged. Current-source full and hosted
-native gates, packaging this fix, and rendered client acceptance remain pending.
+The installed 0.1.23 package/page remain unchanged. The complete current-source
+149-test gate is **running** at `449bdce` with its inputs frozen; its outcome is
+separate from the earlier 878bd88 gate. Hosted native acceptance, packaging this
+fix, and rendered client acceptance remain pending.
 
 ## Installed coding package 0.1.23 — 2026-10-18
 
