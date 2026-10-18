@@ -67,12 +67,22 @@ struct WorkspaceFind {
     std::vector<std::string> limits;
     bool truncated=false;
 };
+// Run-scoped owner capability for model-visible workspace tools. Implementors
+// keep workspace roots and file handles private; callers receive only the
+// validated catalogue and bounded JSON results.
+class AgentWorkspaceToolHost {
+public:
+    virtual ~AgentWorkspaceToolHost()=default;
+    virtual std::vector<ModelToolDefinition> tool_catalogue()const=0;
+    virtual std::string invoke(const std::string& name,const std::string& arguments_json,
+        std::stop_token cancel={})const=0;
+};
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
 // Model definitions remain read-only; backend mutations require separate policy contracts.
-class WorkspaceTools {
+class WorkspaceTools : public AgentWorkspaceToolHost {
 public:
     explicit WorkspaceTools(const std::string& root);
-    ~WorkspaceTools();
+    ~WorkspaceTools() override;
     WorkspaceTools(const WorkspaceTools&)=delete;
     WorkspaceTools& operator=(const WorkspaceTools&)=delete;
     // Local volume/file identity from the opened directory handle, never a
@@ -154,6 +164,7 @@ public:
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;
+    std::vector<ModelToolDefinition> tool_catalogue()const override{return definitions();}
 private:
     WorkspaceGlob discover_files(const std::string& pattern,const std::string& path,bool hidden,
         std::size_t limit,std::stop_token cancel,bool respect_ignore,
@@ -171,7 +182,7 @@ struct WorkspaceMembershipSnapshot {std::string workspace_id;std::int64_t revisi
 struct PromptFileAttachment {std::string path,folder_id,name,description,mention;};
 // Immutable membership snapshot for one admitted tool catalogue. Each member
 // is independently opened and identity-checked; folder IDs never become paths.
-class WorkspaceToolSet {
+class WorkspaceToolSet : public AgentWorkspaceToolHost {
 public:
     WorkspaceToolSet(std::string workspace_id,std::int64_t revision,std::vector<WorkspaceToolFolder> folders);
     WorkspaceToolSet(const WorkspaceToolSet&)=delete;
@@ -182,7 +193,8 @@ public:
     std::size_t folder_index(const std::string& folder_id)const;
     WorkspaceTools& folder_tools(std::size_t index)const;
     std::vector<ModelToolDefinition> definitions()const;
-    std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const;
+    std::vector<ModelToolDefinition> tool_catalogue()const override{return definitions();}
+    std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const override;
 private:
     std::string workspace_id_;
     std::int64_t revision_=0;

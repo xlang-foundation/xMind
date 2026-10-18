@@ -428,6 +428,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         run_workspace_tools=std::make_unique<WorkspaceToolSet>(std::move(membership->workspace_id),membership->revision,std::move(membership->folders));
         }
     }
+    AgentWorkspaceToolHost* workspace_tool_host=run_workspace_tools?
+        static_cast<AgentWorkspaceToolHost*>(run_workspace_tools.get()):
+        static_cast<AgentWorkspaceToolHost*>(workspace_.get());
     bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
         const auto admission=journal_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
@@ -610,7 +613,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.context)for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
-        if(workspace_){request.tools=run_workspace_tools?run_workspace_tools->definitions():workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+        if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
@@ -1027,14 +1030,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                                 call.name,normalized_resource,agent_permission_grant_identifier(selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource)});
                             auto approved=PermissionWaiter(journal_).acquire(pending_id,spec,expiry,token,reusable?"agent-permission-grant":std::string{});
                             try{
-                                auto source=run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token);
+                                auto source=workspace_tool_host->invoke(call.name,call.arguments_json,token);
                                 output=Json::parse(source);
                                 journal_.finish_operation(approved.id,OperationState::succeeded,std::move(source)).get();
                             }catch(...){
                                 journal_.finish_operation(approved.id,OperationState::failed,R"({"reason":"permission_asked_read_failed"})").get();
                                 throw;
                             }
-                        }else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
+                        }else output=Json::parse(workspace_tool_host->invoke(call.name,call.arguments_json,token));
                     }
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }
