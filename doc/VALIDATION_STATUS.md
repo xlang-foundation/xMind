@@ -4118,3 +4118,12 @@ this exact revision remain open. Exact commands, timings and log hashes are in
 [the client-suite evidence](evidence/client-suites-current-20261017.json), with
 [VS Code output](evidence/vscode-client-tests-current-20261018.log) and
 [browser output](evidence/browser-client-tests-current-20261018.log).
+
+The current native runtime was also staged into an isolated package workspace
+and built as VSIX `agentflow-local.agentflow@0.1.13`. The archive contains the
+verified xMind `d919441` binary and xlang3 `b0da71f` runtime; the installed
+package's native inventory verifies against its manifest. The CLI installation
+completed with no VS Code process left open. The package is available at
+`C:\xMindNativeValidation\pack-current-main-deb9a7b\agentflow-0.1.13-current-main-clean.vsix`.
+Activation and live coding in this installed build remain open. [Package and
+installation hashes](evidence/vscode-current-native-vsix-20261017.json).

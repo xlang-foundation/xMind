@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-17",
+  "scope": "Current-source VS Code extension package built and installed without launching VS Code",
+  "xmind_checkout_head": "deb9a7b5339b01ab9fd837750432f5a215bf2caa",
+  "compiled_product_code_revision": "d919441757ffb831ece0e607ff4a6bc27fc9a216",
+  "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "package": {
+    "command": "npm run package -- --out C:/xMindNativeValidation/pack-current-main-deb9a7b/agentflow-0.1.13-current-main-clean.vsix",
+    "prepublish": "passed",
+    "native_runtime_verification": "passed",
+    "vsix_path": "C:\\xMindNativeValidation\\pack-current-main-deb9a7b\\agentflow-0.1.13-current-main-clean.vsix",
+    "sha256": "c9a0cb647a86d1c32c30ccd0a6406f47ab80789fd361164cf94695b7d9953f00",
+    "size_bytes": 31146116,
+    "entries": 1967,
+    "extension_id": "agentflow-local.agentflow",
+    "version": "0.1.13"
+  },
+  "embedded_runtime": {
+    "native_revision": "d919441757ffb831ece0e607ff4a6bc27fc9a216",
+    "sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "manifest_sha256": "c4ddf13a65741d9b9e8c6bafcee237ca14ca24b560d70880a0a1c885de551195",
+    "files": 1921,
+    "xmind_executable_sha256": "5a7081ce0e5f3e2631b5dd57dfb5b15276b4ae9985b8fc378dbbbf2a8628a6b7",
+    "package_hash_matches_manifest": true,
+    "forbidden_or_private_entries": 0,
+    "runtime_backup_included": false
+  },
+  "installation": {
+    "command": "code --install-extension <verified VSIX> --force",
+    "result": "passed",
+    "installed_path": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.13",
+    "installed_runtime_verification": "passed",
+    "installed_native_revision": "d919441757ffb831ece0e607ff4a6bc27fc9a216",
+    "vscode_processes_after_install": 0
+  },
+  "limitations": [
+    "The installed extension was not activated in a VS Code window and no live coding task was run against this exact package."
+  ]
+}
