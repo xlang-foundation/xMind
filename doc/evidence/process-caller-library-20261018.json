@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-18T15:20:42.837Z",
+  "basedOnSourceRevision": "be14688e06b97c6341b0adf3246170ea2fbfd146",
+  "productNativeRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "scope": "Native ProcessExecutor caller contract configuration only; product C++ implementation, installed package and running user backends are unchanged.",
+  "behavior": [
+    "Stage allowed pure .py source into a separate fixture directory, excluding site-packages, bytecode and private folders.",
+    "Set the caller-owned ProcessProfile::xlang3_library from that explicit directory.",
+    "Require the durable approval to bind the pure-library and workspace import environments.",
+    "The real child verifies site.__file__ belongs to the configured library and imports its workspace module.",
+    "Retain failed fixture directories for diagnostics; successful fixture cleanup checks the resolved temporary boundary."
+  ],
+  "sourceFilesChanged": [
+    "Native/tests/process_executor_contract.cpp",
+    "Native/tests/process_executor_peer.mjs"
+  ],
+  "otherFrozenInputsVerified": 2504,
+  "productBinariesUnchanged": {
+    "xmind.exe": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+    "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+  },
+  "sdkCliSha256": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+  "testBinarySha256": "c043ca5b68068dabffecea6795c620e0c36b5c071b17da08212dd9f9792e8820",
+  "red": {
+    "failed": 1,
+    "seconds": 3.69,
+    "reason": "Missing caller-supplied library environment in the approval."
+  },
+  "correction": "The first bound-profile attempt retained an order-sensitive environment assertion and failed. That log is preserved; the final assertion compares unique environment names instead of vector order.",
+  "focused": {
+    "passed": 1,
+    "failed": 0,
+    "seconds": 16.16
+  },
+  "logs": {
+    "red": {
+      "sha256": "b1adfadb7ba10784ec67f055aefa4d6e988e9bd06f7e76d9156eb53c3db96180",
+      "bytes": 1925
+    },
+    "initial-order-assertion": {
+      "sha256": "cdf109f50740a6e1ca5ae81e9a4323c4b7b82ea2b4284d413f07587e002032be",
+      "bytes": 1925
+    },
+    "final": {
+      "sha256": "54dc07d50dcf5d32f3fe32e99f8949ea0d27f932426ff9b5175dfb6d04abe0fd",
+      "bytes": 272
+    }
+  },
+  "detailsSha256": "996f9a45ee05f4f77f782a55fd24ffaee424f78f48c0d8d6897e4f0a1e38f67f",
+  "priorFullGate": {
+    "passed": 149,
+    "sourceRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+    "note": "Historical complete gate for unchanged product implementation; only this changed contract was rebuilt and rerun now."
+  },
+  "hostedAcceptancePending": true,
+  "cpythonExecuted": false,
+  "renderedAcceptance": false,
+  "releaseAccepted": false
+}

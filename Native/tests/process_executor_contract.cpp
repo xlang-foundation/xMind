@@ -103,12 +103,15 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         phase("xlang3-workspace-import-path");
         std::filesystem::create_directories(root/".xlang3-site");
         {std::ofstream module(root/".xlang3-site"/"xmind_process_probe.py");module<<"VALUE = 'xlang3-workspace-package-visible'\n";require(bool(module),"xlang3 package-path fixture must be created");}
-        ProcessExecutor xlang_executor(store,workspace,root.string(),{{"xlang3",argv[7],1,{"-c"},10s}});
-        const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import xmind_process_probe; print(xmind_process_probe.VALUE)"})},{"workdir","."}}.dump();
+        ProcessProfile xlang_profile{"xlang3",argv[7],1,{"-c"},10s};xlang_profile.xlang3_library=argv[5];
+        ProcessExecutor xlang_executor(store,workspace,root.string(),{xlang_profile});
+        const auto site_file=(std::filesystem::u8path(argv[5])/L"site.py").generic_string();
+        const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import os, site, xmind_process_probe; assert os.path.normcase(os.path.realpath(site.__file__)) == os.path.normcase(os.path.realpath("+Json(site_file).dump()+")); print(xmind_process_probe.VALUE)"})},{"workdir","."}}.dump();
         Task xlang_task(xlang_executor,"xlang3-import-path",xlang_request);const auto xlang_record=proposed(store,"xlang3-import-path");const auto xlang_payload=Json::parse(xlang_record.spec.arguments_json);
         require(xlang_payload["arguments"][0]=="-B"&&xlang_payload["arguments"][1]=="-c","xlang3 executions must disable writes into the paired runtime package");
-        require(xlang_payload["environment"].size()==1&&xlang_payload["environment"][0]["name"]=="PYTHONPATH","Approved xlang3 process proposal must bind its Python import path");
-        const auto xlang_path=xlang_payload["environment"][0]["value"].get<std::string>();
+        Json xlang_environment=Json::object();for(const auto& entry:xlang_payload.at("environment")){const auto name=entry.at("name").get<std::string>();require(!xlang_environment.contains(name),"Approved child environment cannot contain duplicate names");xlang_environment[name]=entry.at("value");}
+        require(xlang_environment.size()==2&&xlang_environment.contains("PYTHONPATH")&&xlang_environment.value("XLANG3_PYTHON_LIB","")==argv[5],"Approved xlang3 process proposal must bind its workspace import path and configured pure library");
+        const auto xlang_path=xlang_environment.at("PYTHONPATH").get<std::string>();
         require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and workspace package search paths");
         store.decide_operation("xlang3-import-path",OperationDecision::allow,"actual-fixture-controller").get();
         const auto xlang_result=Json::parse(xlang_task.result.get());require(xlang_result["exit_code"]==0&&xlang_result["stdout"]["data"]=="xlang3-workspace-package-visible\r\n"&&store.operation("xlang3-import-path").get().state==OperationState::succeeded, ("Paired xlang3 process must import a pure-Python dependency from the workspace target: "+xlang_result.dump()).c_str());

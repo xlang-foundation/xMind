@@ -111,6 +111,14 @@ and other bindings. Native modules and workspace `.xlang3-site` imports continue
 through `PYTHONPATH`. A machine-specific fallback library is not proof that the
 configured or packaged pure source has been used.
 
+When constructing `ProcessExecutor` directly from an SDK build tree without an
+adjacent `stdlib`, set `ProcessProfile::xlang3_library` from the embedding host's
+library configuration. The direct-caller contract stages separate pure source,
+checks the approval binding by environment name, and has the actual child verify
+its loaded `site.py` path before importing a workspace package. An unbound
+profile fails that contract even on a machine with a fallback library.
+[Caller configuration validation](evidence/process-caller-library-20261018.json).
+
 For workspace dependency installation, use the `xlang3` profile with arguments
 `["-m", "pip", "install", "--only-binary=:all:", "--target", ".xlang3-site", "-r", "requirements.txt"]`.
 The native process environment includes the paired SDK modules and the direct

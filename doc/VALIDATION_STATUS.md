@@ -57,6 +57,15 @@ those six build dependencies are absent from the verified VSIX.
 
 ## Configured child pure libraries — 2026-10-18
 
+The direct `ProcessExecutor` caller contract now supplies the embedding host's
+pure-library binding too. Its fixture stages separate `.py` source and the real
+child verifies `site.__file__`, rather than silently succeeding with this PC's
+fallback library. The unbound caller fails locally; the corrected contract
+passes in 16.16 seconds. Only the two test files changed: the other 2,504 frozen
+inputs, product executable, paired DLL and SDK CLI remain unchanged. This is a
+focused contract correction, not a new complete gate or a new installation.
+[Caller receipt](evidence/process-caller-library-20261018.json).
+
 Source `c23a6cd` binds xlang3 command startup to the backend's actual `--stdlib`
 directory and records that environment in the command approval. Relative
 startup paths resolve before use; the binding is derived locally and does not
