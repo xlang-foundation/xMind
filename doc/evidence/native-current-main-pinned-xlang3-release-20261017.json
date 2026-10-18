@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh Windows x64 Release build of current xMind main and complete sequential native CTest inventory against the xlang3 runtime pinned by this xMind source",
+  "source": {
+    "repository": "https://github.com/xlang-foundation/xMind",
+    "revision": "90ec355d3dad0e4f7bca2fddc6e6ff265123c339",
+    "worktree": "C:/xMind-native-validation-90ec355",
+    "working_tree_clean": true
+  },
+  "runtime": {
+    "repository": "https://github.com/CantorAI/xlang3",
+    "branch": "xmind-fastapi-pydantic-compat",
+    "revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "BEEC7E860B4A1E5088F28768275D2635988F14A494FE8973B66917C1791A4E47"
+  },
+  "build": {
+    "command": "Tools/native-milestone.ps1 -Action Build -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib -BuildDirectory C:/xMind-native-validation-90ec355/build/native",
+    "generator": "Visual Studio 18 2026",
+    "configuration": "Release",
+    "completed": true,
+    "xmind_executable": "C:/xMind-native-validation-90ec355/build/native/Release/xmind.exe",
+    "xmind_executable_sha256": "16C5D3F887B681616A04CBFC5E3D7A696D091F3DC09389CD4ECE7B2CAAE6266D",
+    "cpython_interpreter_executed": false
+  },
+  "contracts": {
+    "command": "ctest --test-dir C:/xMind-native-validation-90ec355/build/native -C Release --output-on-failure",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "full_sequential_run": {
+      "passed": 145,
+      "failed": 2,
+      "elapsed_seconds": 882.43,
+      "failed_tests": [
+        "native_mcp_oauth_service_contract",
+        "native_mcp_oauth_renewal_negative_contract"
+      ],
+      "failure_reason": "The isolated worktree had not yet installed extensions/vscode dependencies; both browser asset builds could not find marked/lib/marked.umd.js."
+    },
+    "environment_correction": "npm ci --prefix extensions/vscode --ignore-scripts --no-audit --no-fund completed in the isolated worktree.",
+    "failed_test_rerun": {
+      "command": "ctest --test-dir C:/xMind-native-validation-90ec355/build/native -C Release --output-on-failure --no-tests=error -R native_mcp_oauth_service_contract|native_mcp_oauth_renewal_negative_contract",
+      "passed": 2,
+      "failed": 0,
+      "elapsed_seconds": 33.60
+    },
+    "interpretation": "Every registered native contract passed: 145 in the full sequential run and the two setup-dependent failures in an isolated rerun after installing the locked client dependencies. The entire 147-test suite was not repeated as a single green run."
+  },
+  "limitations": [
+    "The hosted Release gate for the current xlang3 pin remains outstanding.",
+    "This native contract run does not replace fresh installed-package acceptance or managed startup on other hosts."
+  ]
+}
