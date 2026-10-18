@@ -1,0 +1,237 @@
+{
+  "recordedAt": "2026-10-18T15:15:59.895Z",
+  "version": "0.1.22",
+  "sourceRevision": "bbd21b1da493572b8909547e65dc51e0a3cf54fe",
+  "scope": "Actual CLI-installed byte-verified development VSIX, complete isolated controller suites and actual disposable native graph/HTTP/restart persistence contract. Existing user page assets refreshed through HTTP. No rendered editor/browser acceptance.",
+  "payload": {
+    "version": "0.1.22",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.22-coding-win32-x64.vsix",
+    "sha256": "e3e4fedc7d12d49e550d08ef533b6e0596e3358a0b484984ae5e4c9e39f1179b",
+    "bytes": 32507109,
+    "archiveFiles": 1972,
+    "nativeFiles": 1926,
+    "nativeRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+    "nativeSha256": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.22",
+    "version": "0.1.22",
+    "checkedPayloads": 1969,
+    "nativeFiles": 1926,
+    "nativeRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "9984f68159109ec90b338ecd1d09699b8fa410fc89ef5211a41f123f60548625",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "preservation": {
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.21-before-0.1.22",
+    "checkedFiles": 1972,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileDirectoriesPreserved": 6
+  },
+  "nativeGate": {
+    "sourceRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 149,
+    "failed": 0,
+    "seconds": 811.26,
+    "sourceFiles": 2506,
+    "sourceAndBinariesUnchanged": true,
+    "binaries": {
+      "xmind.exe": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+      "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+    },
+    "sdkCliSha256": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+    "sourceManifestSha256": "80e9c51b0d33513364675e926552f4702edcd03b2ab79741cc5835cca04104ff",
+    "ctestLogSha256": "ac0a0d8767fba9bcf5905544a92c8ff1f245d833dcdc067e0490918e38ed2e75",
+    "detailsLogSha256": "680844033c2805a541ef5ba28242839194ecbb342e933161453aae63a944ec18",
+    "hostedExpected": 150,
+    "hostedOnlyLocalTrustMutationExcluded": true
+  },
+  "clientSourceFiles": 92,
+  "tests": {
+    "extension": {
+      "passed": 418,
+      "failed": 0,
+      "sha256": "d83f903a3b03945b52b939528e6ae88139a1d60efbc1b273ac7493cafd983119"
+    },
+    "browser": {
+      "passed": 142,
+      "failed": 0,
+      "sha256": "139c4f8d19bc6dc6b933cac4b3ae2fc1836c206f0a58d2da889b8667555dfe41"
+    }
+  },
+  "providerStatusRegression": {
+    "red": {
+      "tests": 3,
+      "failed": 3
+    },
+    "green": {
+      "tests": 3,
+      "passed": 3
+    },
+    "scope": "Synthetic host/controller regressions cover empty setup and discovery success/failure while a completed run remains selected; explicit missing-key enrollment still rejects."
+  },
+  "nativeBrowser": {
+    "passed": true,
+    "sha256": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56",
+    "scope": "Actual graph/file read/human pause/input, native SQLite history/export/import, native/browser adapter restarts at unchanged origins without replay. Provider credentials/catalogues and navigation are fixture-only; no live inference."
+  },
+  "hostedViews": {
+    "id": 39139479663,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39139479663",
+    "artifactId": 12140992878,
+    "artifactSha256": "597a73dae1f0d9298230f7d12774b841b77ef13329a398a395627c3d873e9cec",
+    "digestVerified": true,
+    "gate": {
+      "sourceRevision": "bbd21b1da493572b8909547e65dc51e0a3cf54fe",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 69,
+      "trackedSourceFiles": 64,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 418,
+        "browser": 142
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 418,
+        "passed": 418,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 142,
+        "passed": 142,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "existingBrowser": {
+    "url": "http://127.0.0.1:52757",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "sessions": 1,
+    "histories": {
+      "a7377e387b984c72955da7ab768545cd": {
+        "messages": 42,
+        "sha256": "db8922efde94791d41712bf12439c51a9ee2acf49380fd6252bfc0dafa4f513a"
+      }
+    },
+    "verified": {
+      "served": {
+        "index.html": {
+          "sha256": "8fa07839179137583633c56a15ab72f9616a1ae64a66543c5338c3f1f2254e8a",
+          "builtSha256": "8fa07839179137583633c56a15ab72f9616a1ae64a66543c5338c3f1f2254e8a"
+        },
+        "patch-review.js": {
+          "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+          "builtSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+        },
+        "chat.js": {
+          "sha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+          "builtSha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e"
+        },
+        "chat.css": {
+          "sha256": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a",
+          "builtSha256": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a"
+        },
+        "client.js": {
+          "sha256": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f",
+          "builtSha256": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f"
+        },
+        "marked.js": {
+          "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+          "builtSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+        },
+        "purify.js": {
+          "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+          "builtSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+        },
+        "xterm.js": {
+          "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+          "builtSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+        },
+        "xterm.css": {
+          "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+          "builtSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+        },
+        "xterm-fit.js": {
+          "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+          "builtSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+        },
+        "terminal.js": {
+          "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+          "builtSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+        },
+        "browser.js": {
+          "sha256": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a",
+          "builtSha256": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a"
+        },
+        "browser.css": {
+          "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+          "builtSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+        }
+      },
+      "selectedWorkspaceUnchanged": true,
+      "providerProfilesUnchanged": true,
+      "sessionsAndHistoryUnchanged": true,
+      "viewAndBackendMetadataUnchanged": true,
+      "noTaskOrEffectAdmission": true,
+      "providerInferenceRequests": 0,
+      "executionAvailable": true,
+      "renderedAcceptance": false
+    },
+    "backendUpgrade": false
+  },
+  "packagingDependencies": {
+    "productionAuditAdvisories": 0,
+    "devPackagingAdvisories": 6,
+    "affected": "vsce/secretlint/globby/fast-glob/micromatch/braces build-only chain",
+    "excludedFromArchive": true
+  },
+  "hostedNative": {
+    "id": 39139479684,
+    "status": "in_progress_at_observation",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39139479684",
+    "previousCompleted": {
+      "id": 39135479216,
+      "sourceRevision": "091c069461f48b33f88907314b351099d5ea4f76",
+      "passed": 146,
+      "total": 150,
+      "seconds": 644.79,
+      "failures": [
+        "native_graph_runner_contract",
+        "native_process_executor_contract",
+        "native_xlang3_default_process_contract",
+        "native_agent_runner_contract"
+      ],
+      "artifactSha256": "d9fce4ad037b65e5fc239c4d5ec5f1c5e57f0076c06ed67454892d4d7f77d044"
+    }
+  },
+  "renderedEditorActivated": false,
+  "renderedBrowserAccepted": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}

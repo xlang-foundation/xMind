@@ -15,13 +15,45 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Current native `c23a6cd` passes all 149 local Release contracts in 811.26 seconds against SDK `58a8aab9`. All 2,506 frozen inputs and binary hashes remain unchanged. SDK checks pass 4/4 and its complete default performance gate 11/11. Hosted inventory is 150. Development 0.1.22 packaging is being prepared; installed 0.1.21 still retains native `0e35ac3`. [Current full gate](evidence/child-runtime-library-20261018.json). | Current hosted acceptance, unconfirmed hosted command failures, validated installation and production release acceptance. |
+| Native backend and local persistence | Native `c23a6cd` passes all 149 local Release contracts in 811.26 seconds against SDK `58a8aab9`, with 2,506 frozen inputs and binaries unchanged. SDK checks pass 4/4 and the default performance gate 11/11. Installed development 0.1.22 now contains these verified binaries. Hosted inventory is 150; current run `39139479684` is in progress. [Full gate](evidence/child-runtime-library-20261018.json), [installation](evidence/coding-package-0.1.22-20261018.json). | Current hosted acceptance, unconfirmed hosted command failures and production release acceptance. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed **0.1.21** retains native `0e35ac3`; 1,970 payloads and 1,927 runtime files verify. Local and hosted extension/browser checks pass 416/138. Installed host fixture replay retains all 615 captured stream payloads without stream-triggered metadata reads; durable changes still reconcile, and inbox read failure no longer rejects the feed. These are work-count/controller checks, not actual latency. Installed-client/native HTTP cut-response checks recover all 522 saved events without duplicates, with unchanged history/runs/receipts and no inference/effect admission. Settings, profiles and the prior installation are preserved. The prior real Claude/JSDOM review and unchanged native 148-test gate remain separate evidence. [Installed receipt](evidence/coding-package-0.1.21-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
+| Coding clients | Installed **0.1.22** contains native `c23a6cd`; 1,969 non-metadata payloads, package metadata and 1,926 runtime files verify. Local and digest-verified hosted extension/browser checks pass 418/142. Provider discovery preserves selected run status and empty profiles show setup guidance. The actual native browser contract passes graph/file/human-input, history transfer and same-origin restarts without replay. Existing webpage assets are refreshed; its saved history/settings and older backend remain intact. Settings, six profile directories and the prior installation are preserved. Earlier captured-stream/Claude/JSDOM checks remain separate historical evidence. [Installed receipt](evidence/coding-package-0.1.22-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed coding package 0.1.22 — 2026-10-18
+
+The CLI-installed development package contains native `c23a6cd` and SDK
+`58a8aab9`, with client source `bbd21b1`. Archive SHA-256 is
+`e3e4fedc7d12d49e550d08ef533b6e0596e3358a0b484984ae5e4c9e39f1179b`.
+Its 1,969 non-metadata installed payloads, package metadata and 1,926 runtime
+files match the verified package. The prior 0.1.21 installation is backed up;
+settings and six profile directories remain intact. VS Code stays closed.
+
+Three new controller regressions fail before and pass after the discovery
+correction. Empty provider startup gives setup guidance without enrollment;
+success and failure remain visible in Settings while a selected run retains
+its own status. Full local and digest-verified hosted view suites pass 418/142.
+The native browser contract now invokes the unified `serve` mode and keeps its
+second adapter alive through restart assertions. It passes real graph input,
+file output, SQLite history transfer and same-origin restart/reconnect without
+replay. Provider credentials and navigation in this contract are fixtures.
+
+The existing webpage at port 52757 serves refreshed client assets with its
+workspace, provider settings, messages and backend processes preserved. This
+is HTTP evidence; actual page input/paint/layout and editor activation remain
+unverified. The existing page's older backend was not replaced by installation.
+
+Current hosted native run `39139479684` is in progress. The latest completed
+older `091c069` run passes 146/150 in 644.79 seconds, with graph-runner,
+process-executor, xlang3-child and AgentRunner failures. Its downloaded archive
+matches GitHub's digest. That source predates the configured-library fix;
+current hosted acceptance remains open. Six npm audit findings affect the
+development packaging chain; the production audit has zero advisories and
+those six build dependencies are absent from the verified VSIX.
+[Package receipt](evidence/coding-package-0.1.22-20261018.json).
 
 ## Configured child pure libraries — 2026-10-18
 
@@ -53,9 +85,9 @@ stderr and AgentRunner operation/event results on failure.
 The same complete 149-test local gate has now finished successfully in 811.26
 seconds. All 2,506 frozen inputs, native executable, SDK CLI and paired runtime
 DLL hashes remain unchanged. Its full log and detailed output are preserved.
-Development package 0.1.22 is being prepared from those tested binaries. The
-installed extension and user backend have not yet been replaced. Rendered
-browser/editor and current hosted acceptance remain unverified.
+Development package 0.1.22 is now installed from those tested binaries. The
+existing user webpage backend remains unchanged. Rendered browser/editor and
+current hosted acceptance remain unverified.
 [Library checkpoint](evidence/child-runtime-library-20261018.json).
 
 The newer completed hosted run `39131091790`, still at older source `41497dd`,
