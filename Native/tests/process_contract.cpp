@@ -25,6 +25,10 @@ int main(int argc,char** argv) {
     try {
         const auto directory=std::filesystem::u8path(argv[3]);
         _putenv_s("XMIND_AUTH_TOKEN","synthetic private parent access");_putenv_s("XMIND_API_KEY","synthetic private parent model");_putenv_s("XMIND_PARENT_ONLY","synthetic parent sentinel");
+        wchar_t windows_directory[32768]{};const auto windows_length=GetWindowsDirectoryW(windows_directory,static_cast<UINT>(std::size(windows_directory)));
+        require(windows_length&&windows_length<std::size(windows_directory),"Actual Windows directory must be available");
+        const auto expected_drive=utf8(std::filesystem::path(std::wstring(windows_directory,windows_length)).root_name());
+        require(SetEnvironmentVariableW(L"SystemDrive",L"synthetic-untrusted-parent-drive")!=0,"Parent SystemDrive spoof fixture must be set");
         {
             auto c=config(argv,"normal",directory/"normal.txt");c.arguments.insert(c.arguments.end(),{"space argument","\"quoted\"","trailing\\","你好 🌍",""});
             std::string observed_out,observed_err;
@@ -34,9 +38,15 @@ int main(int argc,char** argv) {
             require(j["args"]==nlohmann::json::array({"space argument","\"quoted\"","trailing\\","你好 🌍",""}),"Literal arguments must survive Windows quoting");
             require(std::filesystem::equivalent(std::filesystem::u8path(j["cwd"].get<std::string>()),directory),"Child must run in the identified directory");
             require(j["configured"]=="configured actual fixture" && j["inherited"]==false,"Child environment must be explicit and exclude backend secrets");
+            require(j["systemDrive"]==expected_drive,"Native children must receive the actual OS SystemDrive, independently of an untrusted parent value");
             require(file(directory/"normal.txt")=="actual child effect","Normal child must perform actual file effect");
             require(result.stderr_bytes=="stderr 🌍" && observed_out==result.stdout_bytes && observed_err==result.stderr_bytes,"Both channels and observer bytes must survive exactly");
             require(result.stdout_count==result.stdout_bytes.size() && result.stderr_count==result.stderr_bytes.size() && !result.truncated,"Byte counts cannot be fabricated");
+        }
+        {
+            auto c=config(argv,"normal",directory/"reserved-system-drive.txt");c.environment.emplace_back("systemdrive","synthetic-profile-drive");
+            rejects<std::invalid_argument>([&]{ForegroundProcess::run(c);});
+            require(!std::filesystem::exists(directory/"reserved-system-drive.txt"),"A profile cannot override the reserved SystemDrive before dispatch");
         }
         {
             const auto result=ForegroundProcess::run(config(argv,"bytes",directory/"unused.txt"));

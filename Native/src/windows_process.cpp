@@ -95,6 +95,11 @@ std::vector<wchar_t> environment(const ProcessConfiguration& config) {
     std::map<std::wstring,std::wstring,CaseLess> entries;
     std::array<wchar_t,32768> buffer{};const auto n=GetWindowsDirectoryW(buffer.data(),static_cast<UINT>(buffer.size()));
     if(!n || n>=buffer.size())fail("Cannot obtain process system directory");entries[L"SystemRoot"]=std::wstring(buffer.data(),n);
+    // Windows libraries expand paths such as %SystemDrive%\ProgramData. Derive
+    // this base value from the OS, rather than forwarding a parent override.
+    const auto system_drive=std::filesystem::path(entries[L"SystemRoot"]).root_name().native();
+    if(system_drive.empty())throw ProcessBeforeDispatchError("Cannot obtain process system drive");
+    entries[L"SystemDrive"]=system_drive;
     const auto t=GetTempPathW(static_cast<DWORD>(buffer.size()),buffer.data());if(!t || t>=buffer.size())fail("Cannot obtain process temporary directory");
     entries[L"TEMP"]=std::wstring(buffer.data(),t);entries[L"TMP"]=entries[L"TEMP"];
     // Keep the child environment useful for ordinary workspace builds while

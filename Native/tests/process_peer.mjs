@@ -5,6 +5,7 @@ const [mode,marker,...args]=process.argv.slice(2);
 if(mode==='normal') {
   writeFileSync(marker,'actual child effect');
   process.stdout.write(JSON.stringify({args,cwd:process.cwd(),configured:process.env.XMIND_PROCESS_FIXTURE,
+    systemDrive:process.env.SystemDrive,
     inherited:!!(process.env.XMIND_AUTH_TOKEN||process.env.XMIND_API_KEY||process.env.XMIND_PARENT_ONLY)}));
   process.stderr.write('stderr 🌍');
 } else if(mode==='bytes') {
