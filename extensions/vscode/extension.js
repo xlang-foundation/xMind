@@ -2,7 +2,7 @@
 const vscode = require('vscode');
 const crypto = require('node:crypto');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview,canRestoreFileOperation}=require('./patch-review');
@@ -116,7 +116,7 @@ async function activate(context) {
         if(!streamCurrent(pin))return;
         if(event.seq>cursor){const child=graphChildren.get(event.run_id);if(event.run_id!==runId&&!child)throw new Error('Refresh the owned child before displaying its event');const accepted=await post({type:event.run_id===runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:child?.node_id,child_id:event.run_id});if(!streamCurrent(pin))return;if(accepted===false)throw new Error('Sidebar did not accept the committed event');cursor=event.seq;}
       }
-      if(!snapshotTimer)snapshotTimer=setTimeout(()=>{snapshotTimer=undefined;if(streamCurrent(pin))poll().then(()=>{if(streamCurrent(pin))watch();});},100);
+      if(!snapshotTimer&&eventRequiresSnapshot(event))snapshotTimer=setTimeout(()=>{snapshotTimer=undefined;if(streamCurrent(pin))poll().then(()=>{if(streamCurrent(pin))watch();});},100);
     },onEnd:async(result,pin)=>{if(!streamCurrent(pin))return;await poll();if(streamCurrent(pin))watch();},onError:(error,pin)=>{if(streamCurrent(pin))post({type:'error',text:error.message});}});
     eventSubscription.watch({client,root:run.id,session:sessionId,scope:run.graph_root?'graph':ownedObservation?'tree':'run',generation,view:panel,origin:client.baseUrl,after:run.id===runId?cursor:0});
   }
@@ -292,7 +292,17 @@ async function activate(context) {
 
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { if(version===generation&&panel){if(!busySession()){await readSkills();if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version);else await drainInbox();}await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
+    finally { if(version===generation&&panel){
+      if(!busySession()){
+        await readSkills();
+        // This optional read must not turn a committed-stream observation into
+        // a rejected consumer callback. Leave run/event ownership intact and
+        // expose the failed inbox refresh without dispatching anything again.
+        if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version).catch(error=>{if(version===generation&&panel)post({type:'error',text:error.message});});
+        else await drainInbox();
+      }
+      await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();
+    } }
   }
 
   async function pollOwned(id,version){

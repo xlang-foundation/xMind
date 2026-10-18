@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -46,7 +46,7 @@ function harness(options={}) {
     const inboxRoute=target.pathname.match(/^\/v1\/sessions\/([A-Za-z0-9_-]+)\/inbox(?:\/([A-Za-z0-9_-]+))?$/);
     if(inboxRoute){
       const session=inboxRoute[1],id=inboxRoute[2];
-      if(requestOptions.method==='GET')return {ok:true,json:async()=>({items:inboxItems.filter(item=>item.session_id===session)})};
+      if(requestOptions.method==='GET'){if(options.inboxReadError)throw options.inboxReadError;return {ok:true,json:async()=>({items:inboxItems.filter(item=>item.session_id===session)})};}
       if(requestOptions.method==='POST'){const body=JSON.parse(requestOptions.body),item={id:body.id||'inbox-fixture',session_id:session,content:body.content,state:'queued',created_ms:Date.now(),...(Array.isArray(body.files)&&body.files.length?{files:body.files,workspace_id:body.expected_workspace_id,workspace_revision:body.expected_workspace_revision}:{})};inboxItems.push(item);return {ok:true,status:202,json:async()=>item};}
       if(requestOptions.method==='DELETE'){const index=inboxItems.findIndex(item=>item.id===id&&item.session_id===session&&item.state==='queued');if(index>=0)inboxItems.splice(index,1);return {ok:true,status:204,json:async()=>({})};}
     }
@@ -189,7 +189,7 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':key==='openOnStartup'&&options.openOnStartup===true?true:undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(file,data)=>{const value=JSON.parse(data);if(file==='labeled-fixture-marker')ready.push(value);else previewFailures.push(value);}}:originalRequire(name);
@@ -319,15 +319,44 @@ test('right sidebar Settings manages public connection metadata through its open
 test('sidebar renders committed subscription events and refreshes metadata without a periodic timer',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];assert.equal(feed.id,'finished');assert.equal(feed.options.scope,'run');assert.equal(h.intervals.size,0);
-  const event={seq:2,run_id:'finished',kind:'model.text',data:{text:'Synthetic streamed host chunk'}};await feed.options.onEvent(event);assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===2).length,1);const task=h.scheduledTasks.findLast(t=>t.delay===100);assert.ok(task);const requests=h.requests.length;await new Promise(resolve=>setTimeout(resolve,30));assert.equal(h.requests.length,requests,'Idle subscription issues no metadata poll');task.callback();await until(()=>h.requests.length>requests);await new Promise(resolve=>setImmediate(resolve));assert.equal(h.streams.length,1,'Metadata refresh retains the same subscription');assert.equal(h.intervals.size,0);
+  const event={seq:2,run_id:'finished',kind:'tool.completed',data:{name:'read_file',data:{content:'Synthetic durable result'}}};await feed.options.onEvent(event);assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===2).length,1);const task=h.scheduledTasks.findLast(t=>t.delay===100);assert.ok(task);const requests=h.requests.length;await new Promise(resolve=>setTimeout(resolve,30));assert.equal(h.requests.length,requests,'Idle subscription issues no metadata poll');task.callback();await until(()=>h.requests.length>requests);await new Promise(resolve=>setImmediate(resolve));assert.equal(h.streams.length,1,'Metadata refresh retains the same subscription');assert.equal(h.intervals.size,0);
   h.configureRuns([{id:'finished',state:'completed'}]);feed.resolve({reason:'terminal',cursor:2});await until(()=>view.posted.findLast(m=>m.type==='runs')?.busy===false);assert.ok(view.posted.some(m=>m.type==='transcript'));assert.equal(feed.options.signal.aborted,true);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ }finally{view.close();}
+});
+
+test('sidebar streams model/process deltas without metadata reads and reconciles durable changes once',async()=>{
+ const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(message=>message.type==='inbox'));await new Promise(resolve=>setImmediate(resolve));
+  const feed=h.streams[0],initialReads=h.requests.length,initialTasks=h.scheduledTasks.filter(task=>task.delay===100).length;
+  const kinds=['model.text','model.refusal','model.tool_delta','model.reasoning','model.usage','model.finish','model.done','process.output'];let seq=1;
+  for(let burst=0;burst<3;burst++)for(const kind of kinds)await feed.options.onEvent({seq:++seq,run_id:'finished',kind,data:{text:'Synthetic direct stream payload'}});
+  assert.equal(view.posted.filter(message=>message.type==='event'&&message.event.seq>1).length,24);assert.equal(h.requests.length,initialReads);
+  assert.equal(h.scheduledTasks.filter(task=>task.delay===100).length,initialTasks,'Stream-only deltas must not schedule full metadata snapshots');
+  await feed.options.onEvent({seq:++seq,run_id:'finished',kind:'conversation.assistant',data:{content:'Synthetic persisted assistant turn'}});
+  await feed.options.onEvent({seq:++seq,run_id:'finished',kind:'tool.completed',data:{name:'read_file',data:{content:'Synthetic durable result'}}});
+  const tasks=h.scheduledTasks.filter(task=>task.delay===100);assert.equal(tasks.length,initialTasks+1,'Durable changes share one pending reconciliation');tasks.at(-1).callback();await until(()=>h.requests.length>initialReads);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.streams.length,1);assert.equal(feed.options.signal.aborted,false);assert.ok(!h.requests.includes('/v1/runs'));assert.ok(!h.requests.some(route=>/\/(?:cancel|decision)$/.test(route)));assert.deepEqual(h.errors,[]);
  }finally{view.close();}
 });
 
 test('sidebar terminal snapshot retains queued completion frames until native stream acknowledgement',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
- try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];await feed.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Synthetic pending completion'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);h.configureRuns([{id:'finished',state:'completed'}]);task.callback();await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');assert.equal(feed.options.signal.aborted,false,'A faster snapshot must drain its owned event stream');
-  await feed.options.onEvent({seq:3,run_id:'finished',kind:'run.completed',data:{}});assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===3).length,1);feed.resolve({reason:'terminal',cursor:3});await until(()=>feed.options.signal.aborted);assert.equal(h.streams.length,1);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];await feed.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Synthetic pending completion'}});await feed.options.onEvent({seq:3,run_id:'finished',kind:'tool.completed',data:{name:'read_file',data:{content:'Synthetic durable result'}}});const task=h.scheduledTasks.findLast(t=>t.delay===100);h.configureRuns([{id:'finished',state:'completed'}]);task.callback();await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');assert.equal(feed.options.signal.aborted,false,'A faster snapshot must drain its owned event stream');
+  await feed.options.onEvent({seq:4,run_id:'finished',kind:'run.completed',data:{}});assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===4).length,1);feed.resolve({reason:'terminal',cursor:4});await until(()=>feed.options.signal.aborted);assert.equal(h.streams.length,1);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ }finally{view.close();}
+});
+
+test('a failed idle inbox refresh remains visible without rejecting the owned stream observation',async()=>{
+ const options={running:true,health:{agent_execution:true,session_inbox_dispatch:true}},h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(message=>message.type==='inbox'));await new Promise(resolve=>setImmediate(resolve));
+  const feed=h.streams[0],run={id:'finished',session_id:'saved',state:'completed',parent_id:'',node_id:'',graph_root:false};h.configureRuns([run]);options.inboxReadError=new TypeError('Synthetic inbox connection lost');
+  await assert.doesNotReject(feed.options.onObservation({run,scope:'run',after:0}),'Optional snapshot refresh must not become a stream consumer failure');
+  assert.ok(view.posted.some(message=>message.type==='error'&&message.text==='Synthetic inbox connection lost'));assert.equal(feed.options.signal.aborted,false);assert.equal(h.streams.length,1);
+  await feed.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Committed before the terminal frame'}});assert.equal(view.posted.filter(message=>message.type==='event'&&message.event.seq===2).length,1);
+  options.inboxReadError=undefined;await feed.options.onObservation({run,scope:'run',after:0});await feed.options.onEvent({seq:3,run_id:'finished',kind:'run.completed',data:{}});feed.resolve({reason:'terminal',cursor:3});await until(()=>feed.options.signal.aborted);
+  assert.equal(view.posted.filter(message=>message.type==='event'&&message.event.seq===3).length,1);assert.equal(h.streams.length,1);assert.ok(!h.requests.includes('/v1/runs'));assert.ok(!h.requests.some(route=>/\/(?:cancel|decision)$/.test(route)));
  }finally{view.close();}
 });
 
@@ -341,7 +370,7 @@ test('VS Code slash command resolves the opened workspace catalogue and admits a
 
 test('sidebar selection retires its feed, delayed events and queued metadata refresh',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
- try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const old=h.streams[0];await old.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Before selection'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);
+ try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const old=h.streams[0];await old.options.onEvent({seq:2,run_id:'finished',kind:'tool.completed',data:{name:'read_file',data:{content:'Before selection'}}});const task=h.scheduledTasks.findLast(t=>t.delay===100);
   view.receive({type:'select',id:'saved'});assert.equal(old.options.signal.aborted,true);await until(()=>h.streams.length===2);await new Promise(resolve=>setImmediate(resolve));const requests=h.requests.length,count=view.posted.length;task.callback();await assert.rejects(old.options.onEvent({seq:3,run_id:'finished',kind:'model.text',data:{text:'Retired fixture'}}),/retired/);old.resolve({reason:'terminal',cursor:2});await new Promise(resolve=>setImmediate(resolve));assert.equal(h.requests.length,requests);assert.equal(view.posted.length,count);assert.equal(h.intervals.size,0);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
  }finally{view.close();}
 });

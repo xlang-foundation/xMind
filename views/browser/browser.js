@@ -18,7 +18,7 @@ const BrowserTerminalView=typeof module!=='undefined'&&module.exports?require('.
 const parseWorkspaceCommand=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').parseWorkspaceCommand:globalThis.XMindBackend.parseWorkspaceCommand;
 const McpAuthorizationController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').McpAuthorizationController:globalThis.XMindBackend.McpAuthorizationController;
 const SessionHistoryPager=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').SessionHistoryPager:globalThis.XMindBackend.SessionHistoryPager;
-const snapshotlessEvents=new Set(['model.text','model.refusal','model.tool_delta','model.reasoning','model.usage','model.finish','model.done','process.output','conversation.assistant','conversation.tool_turn']);
+const eventRequiresSnapshot=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').eventRequiresSnapshot:globalThis.XMindBackend.eventRequiresSnapshot;
 function browserRuntime(){return typeof window==='undefined'?globalThis:window;}
 function browserTimeoutSignal(milliseconds){const Controller=browserRuntime().AbortController;if(typeof Controller!=='function')return undefined;try{const controller=new Controller(),timer=setTimeout(()=>controller.abort(),milliseconds);controller.signal.addEventListener('abort',()=>clearTimeout(timer),{once:true});return controller.signal;}catch{return undefined;}}
 function browserAbortedSignal(){const Controller=browserRuntime().AbortController;if(typeof Controller!=='function')return undefined;try{const controller=new Controller();controller.abort();return controller.signal;}catch{return undefined;}}
@@ -103,7 +103,7 @@ class BrowserController {
         if(!this.current(pin.generation))return;
         if(event.seq>this.cursor){const child=this.children.get(event.run_id);if(event.run_id!==this.runId&&!child)throw new Error('Refresh the owned child before displaying its event');this.post({type:event.run_id===this.runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:child?.node_id,child_id:event.run_id});this.cursor=event.seq;}
       }
-      if(!snapshotlessEvents.has(event.kind))this.scheduleSnapshot(pin);
+      if(eventRequiresSnapshot(event))this.scheduleSnapshot(pin);
     },onEnd:async(result,pin)=>{if(!this.current(pin.generation))return;await this.poll();if(this.current(pin.generation))this.watch();},onError:(error,pin)=>{if(this.current(pin.generation))this.post({type:'error',text:error.message});}});
     this.subscription.watch({client:this.client,root:run.id,session:this.session,scope:run.graph_root?'graph':this.health?.owned_child_observation===true?'tree':'run',generation:this.generation,after:run.id===this.runId?this.cursor:0});
   }

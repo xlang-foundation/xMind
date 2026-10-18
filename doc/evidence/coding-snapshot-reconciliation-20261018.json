@@ -1,0 +1,90 @@
+{
+  "recordedAt": "2026-10-18T13:20:10.271Z",
+  "scope": "Production host/controller changes with model-free Node contracts and captured native stream-payload replay. VS Code APIs/HTTP/timers are fixtures; no actual GUI, native rerun, inference, live HTTP work count or latency claim.",
+  "corrections": [
+    "Idle inbox read failure is reported without rejecting the owned committed-stream observation; late completion frames continue on the same subscription. No prompt/tool command is retried.",
+    "Share the UI snapshot policy between browser and VS Code. Model deltas/usage/completion and process output carry their display data; saved conversation turns, tool/lifecycle events and unknown kinds reconcile persisted state."
+  ],
+  "regressions": {
+    "idleInbox": {
+      "before": "Event observer rejected delivery",
+      "after": "Read error visible; same feed delivers later events and terminal acknowledgement without admission/cancel/approval commands"
+    },
+    "streamOnlyDeltas": {
+      "before": "A metadata snapshot is scheduled for streamed model/process deltas",
+      "after": "No metadata reads or snapshot timers for stream-only deltas; durable changes coalesce and still reconcile"
+    }
+  },
+  "tests": {
+    "extension": {
+      "passed": 416,
+      "failed": 0,
+      "logSha256": "5c8e8a4c1a94676b54374559f5289449ff3e9acda0f492cc7ad595a04faaa71c"
+    },
+    "browser": {
+      "passed": 138,
+      "failed": 0,
+      "logSha256": "87f1dbab989a08c45bed1b8c7b3971bfd6f9910aa307bd8f757864856323845f"
+    }
+  },
+  "replay": {
+    "recordedAt": "2026-10-18T13:19:46.702Z",
+    "scope": "Captured real native payload replay through production extension source with explicit VS Code/HTTP/timer fixtures. Work counts only; no actual backend execution, provider request, rendered editor, browser paint or latency claim.",
+    "capturedRun": "f06d2b8168b1f997ac8db4e5bfa3e5fb",
+    "capturedNativeEvents": 680,
+    "rows": [
+      {
+        "version": "installed-0.1.20",
+        "extensionSourceSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+        "syntheticEventsPerSnapshotWindow": 1,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 615,
+        "streamMetadataReads": 3075,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      },
+      {
+        "version": "installed-0.1.20",
+        "extensionSourceSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+        "syntheticEventsPerSnapshotWindow": 8,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 77,
+        "streamMetadataReads": 385,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      },
+      {
+        "version": "current-source",
+        "extensionSourceSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+        "syntheticEventsPerSnapshotWindow": 1,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 0,
+        "streamMetadataReads": 0,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      },
+      {
+        "version": "current-source",
+        "extensionSourceSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+        "syntheticEventsPerSnapshotWindow": 8,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 0,
+        "streamMetadataReads": 0,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      }
+    ]
+  },
+  "limits": {
+    "sourceInstalled": false,
+    "installedVersion": "0.1.20",
+    "nativeSourceChanged": false,
+    "newNativeRerunClaimed": false,
+    "renderedVSCodeAccepted": false,
+    "renderedBrowserAccepted": false
+  }
+}

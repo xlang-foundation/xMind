@@ -23,6 +23,26 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Source correction: stream reconciliation and inbox read failures — 2026-10-18
+
+The VS Code host no longer rejects a committed-stream observation when an
+optional idle inbox read fails. It reports that failure and keeps the owned
+feed alive for remaining completion frames. Browser and VS Code also share
+one UI snapshot policy: model deltas/usage/completion and process output display
+directly, while persisted conversation turns, tool/lifecycle changes and unknown
+kinds reconcile saved state. Tests retain terminal-frame draining and graph
+child transcript refresh. All 416 extension and 138 browser contracts pass.
+
+A replay of 615 stream-only payloads captured from the real 680-event ModelZoo
+run gives identical posted event data in old/current production extension
+source. With synthetic one-event reconciliation windows, fixture metadata reads
+fall from 3,075 to zero; with eight-event windows they fall from 385 to zero.
+A subsequent durable boundary still performs five fixture metadata reads.
+These are adapter work counts with explicit VS Code/HTTP/timer fixtures,
+not live HTTP counts, browser/editor latency or rendered acceptance. Source
+packaging as 0.1.21 remains pending at this checkpoint.
+[Evidence](evidence/coding-snapshot-reconciliation-20261018.json).
+
 ## Installed 0.1.20: truncated event-stream recovery — 2026-10-18
 
 The shared production browser/VS Code reader now treats EOF inside a frame or
