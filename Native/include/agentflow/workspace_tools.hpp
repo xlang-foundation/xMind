@@ -70,11 +70,23 @@ struct WorkspaceFind {
 // Run-scoped owner capability for model-visible workspace tools. Implementors
 // keep workspace roots and file handles private; callers receive only the
 // validated catalogue and bounded JSON results.
+// This invocation crosses the run-loop/host boundary. It carries admitted
+// identity and call metadata, never a path, handle, or caller-selected root.
+struct AgentWorkspaceInvocation {
+    std::string run_id;
+    std::string attempt_id;
+    std::string call_id;
+    std::string workspace_id;
+    std::int64_t workspace_revision=0;
+    std::string folder_id;
+    std::string tool_name;
+    std::string arguments_json;
+};
 class AgentWorkspaceToolHost {
 public:
     virtual ~AgentWorkspaceToolHost()=default;
     virtual std::vector<ModelToolDefinition> tool_catalogue()const=0;
-    virtual std::string invoke(const std::string& name,const std::string& arguments_json,
+    virtual std::string invoke(const AgentWorkspaceInvocation& invocation,
         std::stop_token cancel={})const=0;
 };
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
@@ -164,6 +176,7 @@ public:
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;
+    std::string invoke(const AgentWorkspaceInvocation& invocation,std::stop_token cancel={})const override;
     std::vector<ModelToolDefinition> tool_catalogue()const override{return definitions();}
 private:
     WorkspaceGlob discover_files(const std::string& pattern,const std::string& path,bool hidden,
@@ -194,7 +207,8 @@ public:
     WorkspaceTools& folder_tools(std::size_t index)const;
     std::vector<ModelToolDefinition> definitions()const;
     std::vector<ModelToolDefinition> tool_catalogue()const override{return definitions();}
-    std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const override;
+    std::string invoke(const AgentWorkspaceInvocation& invocation,std::stop_token cancel={})const override;
+    std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const;
 private:
     std::string workspace_id_;
     std::int64_t revision_=0;

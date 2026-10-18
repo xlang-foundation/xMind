@@ -900,6 +900,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;std::vector<PreparedFolderPatch> prepared_folder_patches;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
+                    const auto invoke_workspace_tool=[&](){
+                        AgentWorkspaceInvocation request;
+                        request.run_id=id;request.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);request.call_id=call.id;
+                        request.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id;
+                        request.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
+                        request.folder_id=selected_folder_id;request.tool_name=call.name;request.arguments_json=call.arguments_json;
+                        return workspace_tool_host->invoke(request,token);
+                    };
                     const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch"||call.name=="restore_operation";
                     std::size_t selected_folder_index=0;
                     Json scoped_args;
@@ -1030,14 +1038,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                                 call.name,normalized_resource,agent_permission_grant_identifier(selected_workspace->identity(),permission_policy_binding,call.name,normalized_resource)});
                             auto approved=PermissionWaiter(journal_).acquire(pending_id,spec,expiry,token,reusable?"agent-permission-grant":std::string{});
                             try{
-                                auto source=workspace_tool_host->invoke(call.name,call.arguments_json,token);
+                                auto source=invoke_workspace_tool();
                                 output=Json::parse(source);
                                 journal_.finish_operation(approved.id,OperationState::succeeded,std::move(source)).get();
                             }catch(...){
                                 journal_.finish_operation(approved.id,OperationState::failed,R"({"reason":"permission_asked_read_failed"})").get();
                                 throw;
                             }
-                        }else output=Json::parse(workspace_tool_host->invoke(call.name,call.arguments_json,token));
+                        }else output=Json::parse(invoke_workspace_tool());
                     }
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }

@@ -54,6 +54,17 @@ std::string primary_folder_arguments(const std::string& source,const std::string
         throw ToolAccessDenied("Folder ID is not the primary folder of this workspace tool");
     value.erase("folder_id");return value.dump();
 }
+void validate_workspace_invocation(const AgentWorkspaceInvocation& request){
+    const auto bounded=[](const std::string& value,std::size_t maximum){return !value.empty()&&value.size()<=maximum;};
+    if(!bounded(request.run_id,256)||!bounded(request.attempt_id,256)||!bounded(request.call_id,256)||
+       !bounded(request.workspace_id,256)||!bounded(request.folder_id,256)||!bounded(request.tool_name,128)||
+       request.workspace_revision<=0||request.arguments_json.size()>65536)
+        throw std::invalid_argument("Invalid run-scoped workspace invocation metadata");
+}
+void validate_workspace_tool_name(const std::vector<ModelToolDefinition>& catalogue,const std::string& name){
+    if(std::none_of(catalogue.begin(),catalogue.end(),[&](const auto& item){return item.name==name;}))
+        throw ToolAccessDenied("Tool is not exposed by the admitted workspace catalogue");
+}
 }
 bool WorkspaceTools::backend_private_component(std::string_view name) {
     while(!name.empty()&&(name.back()=='.'||name.back()==' '))name.remove_suffix(1);
@@ -69,6 +80,13 @@ bool WorkspaceTools::backend_private_component(std::string_view name) {
         if(matches)return true;
     }
     return false;
+}
+std::string WorkspaceTools::invoke(const AgentWorkspaceInvocation& request,std::stop_token cancel)const{
+    validate_workspace_invocation(request);
+    if(request.workspace_id!=identity()||request.workspace_revision!=1||request.folder_id!=identity())
+        throw ToolAccessDenied("Workspace invocation does not match the admitted primary folder");
+    validate_workspace_tool_name(definitions(),request.tool_name);
+    return invoke(request.tool_name,request.arguments_json,cancel);
 }
 std::vector<ModelToolDefinition> WorkspaceTools::definitions() {
     auto result=std::vector<ModelToolDefinition>{
@@ -189,5 +207,25 @@ std::string WorkspaceToolSet::invoke(const std::string& name,const std::string& 
     const auto encoded=qualified.dump();
     if(encoded.size()>65536)throw ToolFileError("Folder-qualified tool result exceeds serialized result limit");
     return encoded;
+}
+std::string WorkspaceToolSet::invoke(const AgentWorkspaceInvocation& request,std::stop_token cancel)const{
+    validate_workspace_invocation(request);
+    if(request.workspace_id!=workspace_id_||request.workspace_revision!=revision_)
+        throw ToolAccessDenied("Workspace invocation does not match the admitted membership revision");
+    (void)folder_index(request.folder_id);
+    validate_workspace_tool_name(definitions(),request.tool_name);
+    std::vector<std::set<std::string>> fields;Json args;
+    try{args=Json::parse(request.arguments_json,[&](int depth,Json::parse_event_t event,Json& value){
+        if(depth>64)throw std::invalid_argument("Tool argument nesting exceeds limits");
+        if(event==Json::parse_event_t::object_start)fields.emplace_back();
+        else if(event==Json::parse_event_t::object_end)fields.pop_back();
+        else if(event==Json::parse_event_t::key&&!fields.back().insert(value.get<std::string>()).second)
+            throw std::invalid_argument("Duplicate tool argument");
+        return true;
+    });}catch(const Json::exception&){throw std::invalid_argument("Invalid tool argument JSON");}
+    if(!args.is_object())throw std::invalid_argument("Invalid workspace tool argument object");
+    if(args.contains("folder_id")&&(!args["folder_id"].is_string()||args["folder_id"].get<std::string>()!=request.folder_id))
+        throw ToolAccessDenied("Workspace invocation folder does not match the selected tool arguments");
+    return invoke(request.tool_name,request.arguments_json,cancel);
 }
 }

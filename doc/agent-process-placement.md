@@ -50,8 +50,8 @@ execution.
    receipts. Commands and results carry owned bounded values; credentials,
    SQLite handles and backend runtime objects stay in the owner. The
    `AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` seams now
-   exist, while workspace, MCP/A2A and effect dispatch still use concrete
-   backend services.
+   exist. Workspace model-tool calls also cross a typed, run-scoped invocation
+   envelope; MCP/A2A and effect dispatch still use concrete backend services.
 2. Keep the current in-process implementation as the first host adapter. Run
    the same AgentRunner contract through this host and the existing path,
    covering provider continuations, workspace reads, approved edits, process
@@ -122,6 +122,21 @@ verification callbacks. It does not yet define owned-value IPC messages, allow
 remote-host injection, or execute `AgentRunner` out of process. MCP/A2A,
 approval and other workspace-effect dispatch also remain in the concrete
 runner. It is a first capability boundary, not process-placement acceptance.
+
+### Run-scoped workspace invocation boundary — 2026-10-17
+
+The model loop now submits read-only workspace tool calls using an owned request
+with run, attempt, call, workspace revision, folder, tool and bounded argument
+metadata. The request contains no path, OS handle, credential or database
+object. Both the single-folder host and immutable multi-folder host verify the
+workspace revision, selected folder and exposed tool before dispatch. The
+existing `AgentRunner` path remains the owner and invokes the same local hosts;
+this is not yet the complete `AgentToolHost` or an IPC contract.
+
+The focused current-source Debug workspace-tool and AgentRunner contracts
+passed 2/2 after the change. Coverage rejects stale membership revisions, mismatched
+folders, hidden tools and malformed run metadata, while proving valid reads
+still reach the selected admitted folder.
 
 No process-placement config or C++ AgentRunner worker is implemented, and the
 full process-placement contract remains unaccepted. The run/context journals

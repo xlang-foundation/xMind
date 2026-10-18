@@ -87,6 +87,11 @@ int main(int argc,char** argv) {
             require(first.at("content")=="primary folder bytes\n"&&first.at("folder_id")==primary.identity(),"Omitting folder_id must preserve primary-folder behavior and identify the source");
             require(second.at("content")=="attached folder bytes\n"&&second.at("folder_id")==attached.identity(),"Explicit folder_id must select only its registered folder");
             require(first.at("workspace_id")==primary.identity()&&second.at("workspace_id")==primary.identity()&&second.at("workspace_revision")==7,"Tool outputs must retain workspace membership provenance");
+            AgentWorkspaceInvocation invocation{"run-1","attempt-1","call-1",primary.identity(),7,attached.identity(),"read_file",Json{{"path","same-name.txt"},{"folder_id",attached.identity()}}.dump()};
+            require(Json::parse(tools.invoke(invocation)).at("content")==second.at("content"),"Run-scoped invocation must dispatch only within its admitted folder and revision");
+            auto stale=invocation;stale.workspace_revision=6;rejects<ToolAccessDenied>([&]{tools.invoke(stale);});
+            auto mismatched=invocation;mismatched.folder_id=primary.identity();rejects<ToolAccessDenied>([&]{tools.invoke(mismatched);});
+            auto hidden=invocation;hidden.tool_name="run_process";rejects<ToolAccessDenied>([&]{tools.invoke(hidden);});
             rejects<ToolAccessDenied>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"unregistered-folder"})");});
             rejects<std::invalid_argument>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"x","folder_id":"y"})");});
             std::cout<<Json{{"workspace_id",primary.identity()},{"membership_revision",7},{"primary_folder_id",primary.identity()},{"attached_folder_id",attached.identity()},{"same_relative_path_distinct_bytes",true},{"unregistered_folder_rejected",true}}.dump()<<'\n';return 0;
@@ -177,6 +182,10 @@ int main(int argc,char** argv) {
         require(tools.read_file("README.TXT").content==read.content,"Normal Windows filename lookup must remain usable");
         require(tools.read_file("sub/inside.txt").content=="alpha[.]needle nested\n","Nested file read");
         require(Json::parse(tools.invoke("read_file",R"({"path":"README.txt"})"))["content"]==read.content,"Typed tool invocation must perform actual read");
+        AgentWorkspaceInvocation invocation{"run-1","attempt-1","call-1",tools.identity(),1,tools.identity(),"read_file",R"({"path":"README.txt"})"};
+        require(Json::parse(tools.invoke(invocation))["content"]==read.content,"Single-folder host must validate run-scoped metadata before invoking a workspace tool");
+        auto wrong_revision=invocation;wrong_revision.workspace_revision=2;rejects<ToolAccessDenied>([&]{tools.invoke(wrong_revision);});
+        auto invalid_metadata=invocation;invalid_metadata.call_id.clear();rejects<std::invalid_argument>([&]{tools.invoke(invalid_metadata);});
         const auto page=Json::parse(tools.invoke("read_file",R"({"path":"README.txt","offset":2,"limit":1})"));
         require(page["content"]=="alpha[.]needle \xe4\xb8\xad\r\n"&&page["offset"]==2&&page["lines_read"]==1&&page["next_offset"]==3&&page["has_more"]==true&&page["truncated"]==true&&page["truncated_lines"].empty(),"Pages preserve exact bytes and provide an actual continuation");
         const auto tail=Json::parse(tools.invoke("read_file",R"({"path":"README.txt","offset":3})"));
