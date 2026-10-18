@@ -1,0 +1,237 @@
+{
+  "recordedAt": "2026-10-18T22:36:02.862Z",
+  "artifact": {
+    "downloadedAt": "2026-10-18T22:33:50.969Z",
+    "runId": 39172193204,
+    "sourceRevision": "411ea4f75c47c8f3d9882a98e993703f43636638",
+    "conclusion": "failure",
+    "artifactId": 12152154388,
+    "name": "process-startup-diagnostics-411ea4f75c47c8f3d9882a98e993703f43636638",
+    "bytes": 20400,
+    "sha256": "316735097d74ac0fc9610358de32cc7100488c15a871630627e726c1b29d3a93",
+    "advertisedSizeAndDigestVerified": true,
+    "output": "C:/xMindNativeValidation/process-startup-hosted-39172193204.zip"
+  },
+  "rawRoot": "C:/xMindNativeValidation/process-startup-hosted-39172193204-verified",
+  "host": {
+    "release": "10.0.26100",
+    "arch": "x64",
+    "imageVersion": "20261007.264.1",
+    "imageOS": "win25-vs2026"
+  },
+  "passed": 16,
+  "failed": 1,
+  "sourceAndBinaryUnchanged": true,
+  "cases": [
+    {
+      "label": "01-graph-default",
+      "passed": false,
+      "elapsedMs": 30040,
+      "termination": "timed_out",
+      "exit": 1,
+      "phases": [
+        "script_entered"
+      ],
+      "marker": false,
+      "markerAndWorkingDirectoryIdentityEqual": false
+    },
+    {
+      "label": "02-graph-system-modules",
+      "passed": true,
+      "elapsedMs": 24751,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "03-graph-default",
+      "passed": true,
+      "elapsedMs": 23639,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "04-graph-private-cache",
+      "passed": true,
+      "elapsedMs": 23968,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "05-graph-default",
+      "passed": true,
+      "elapsedMs": 23674,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "06-graph-cache-off",
+      "passed": true,
+      "elapsedMs": 23932,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "07-graph-default",
+      "passed": true,
+      "elapsedMs": 24641,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "08-agent-default",
+      "passed": true,
+      "elapsedMs": 19746,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "09-agent-system-modules",
+      "passed": true,
+      "elapsedMs": 17773,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "10-agent-default",
+      "passed": true,
+      "elapsedMs": 17857,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "11-agent-private-cache",
+      "passed": true,
+      "elapsedMs": 18051,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "12-agent-default",
+      "passed": true,
+      "elapsedMs": 18388,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "13-agent-cache-off",
+      "passed": true,
+      "elapsedMs": 19615,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "14-agent-default",
+      "passed": true,
+      "elapsedMs": 18543,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "15-dotnet-control-default",
+      "passed": true,
+      "elapsedMs": 6178,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "16-graph-default-observer",
+      "passed": true,
+      "elapsedMs": 24170,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    },
+    {
+      "label": "17-agent-default-observer",
+      "passed": true,
+      "elapsedMs": 19081,
+      "termination": "exited",
+      "exit": 0,
+      "phases": [],
+      "marker": true,
+      "markerAndWorkingDirectoryIdentityEqual": true
+    }
+  ],
+  "finding": "The first cold original graph command times out at 30040ms after script_entered and before delay_completed. No marker exists. All later cases exit zero within the unchanged 30000ms budget; canonical paths and native directory identities verify. Isolated native adapter reproduces a genuine cold-command timeout without AgentRunner or SQLite.",
+  "limits": "Later module-path/cache/observer controls run on a warmed host; their success does not establish a cold-start fix or cause. The distinct .NET control completes in 6178ms. No production command, environment policy or deadline change, prewarming, transparent retry or graph/agent acceptance.",
+  "causeEstablished": false,
+  "productionChanged": false,
+  "providerRequests": 0,
+  "cpythonExecuted": false
+}

@@ -1,4 +1,25 @@
-# xlang3 IPC and native agent workers
+### Workspace read owner — 2026-10-18
+
+`AgentReadToolHost` now owns the five model-visible workspace read tools through
+the existing versioned owned workspace envelope. The backend validates active
+run/catalogue/membership, retains inherited denials, generates approval identity
+and expiry, and resolves session/folder/policy-bound grants. It rechecks guidance
+after an approval wait; changed guidance retires the claimed read without
+revealing file contents. Actual primary/attached reads, approvals, grant reuse
+and isolation, directory denial, cancellation and SQLite reopen pass alongside
+the real AgentRunner and graph contracts: eight focused tests in 23.27 seconds.
+The retained fixture compile failure used an incorrect field name; production
+code stayed unchanged across that correction.
+[Focused proof](evidence/read-tool-owner-focused-20261018.json).
+
+This native source is uninstalled and its complete 152-contract gate is pending.
+It is a local owner with a lifetime duplicate guard. Complete tool discovery,
+instructions/skills, language servers, trusted callables, delegation, process
+admission/background joins and authenticated/durable worker transport remain
+backend dependencies. Process placement is not implemented. Installed 0.1.31
+remains the separately accepted coding preview.
+
+ xlang3 IPC and native agent workers
 
 Target integration for the [xMind product architecture](runtime-product-design.md).
 The first registered-tool worker path is implemented; the broader agent-worker

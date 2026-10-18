@@ -1,0 +1,93 @@
+{
+  "recordedAt": "2026-10-18T22:36:02.859Z",
+  "sourceParent": "d941169c73b386476b9271bc0b2c401c5ad31eff",
+  "sourcePatchSha256": "343b8278fc79630aa2399890ea537452b8e35c8b479564b467449e4bb51ac79b",
+  "sourceFiles": {
+    "Native/include/agentflow/agent_read_tool_host.hpp": "b308a4b6e46a76669a8db8260aaa9708649b36180848476c107e517b10af1fbd",
+    "Native/src/agent_read_tool_host.cpp": "70fe6200a6ece8a19d95283f4eac0fb5142ad8b466d78b5ef469c7df3e02a8eb",
+    "Native/src/agent_runner.cpp": "67bfdfac9019901c98b96fd4cc10688ce0cc7060640fe4544e05bb18c3c7f89d",
+    "Native/tests/agent_read_tool_host_contract.cpp": "065a9278feffffe18406d4ef8b37de0aed49a41b5c590b5c317d8a30afa40acd",
+    "Native/CMakeLists.txt": "c360368ef3b90cf655911f099fb2e1453d988a1df6de207b7d97fe82001bcf28"
+  },
+  "scope": "Backend-owned workspace read dispatch; local in-process adapter, not authenticated/durable RPC or out-of-process AgentRunner",
+  "behavior": [
+    "Versioned owned workspace invocation; backend-owned folder resolution, active run, offered catalogue, permission layers and call guard",
+    "Inherited denies and restricted directory enumeration precede approval and data dispatch",
+    "Backend generates read operation IDs/expiry and resolves exact session/folder/policy-bound grants",
+    "Actual selected-folder bytes; attached grant cannot authorize same path in primary",
+    "Repository and skill guidance checks occur before approval and again after approval; changed guidance withholds bytes and retires the read as failed",
+    "Actual approved/denied/automatically granted receipts and grants survive xlang3-backed SQLite reopen without replay"
+  ],
+  "focused": {
+    "recordedAt": "2026-10-18T22:35:26.288Z",
+    "sourceRevision": "d941169c73b386476b9271bc0b2c401c5ad31eff",
+    "patchSha256": "343b8278fc79630aa2399890ea537452b8e35c8b479564b467449e4bb51ac79b",
+    "projectFiles": 2617,
+    "pureLibraryFiles": 1870,
+    "sdkFiles": 75,
+    "nativeBinaries": 127,
+    "changedBinaries": [
+      "agentflow_agent_read_tool_host_contract.exe",
+      "agentflow_agent_process_tool_host_contract.exe",
+      "agentflow_agent_file_tool_host_contract.exe",
+      "agentflow_agent_remote_tool_host_contract.exe",
+      "agentflow_agent_runner_contract.exe",
+      "agentflow_graph_runner_contract.exe",
+      "xmind.exe"
+    ],
+    "productionExeChangedDuringThisBuild": true,
+    "productionCodeChanged": true,
+    "productionSha256": "dd3dcace2e5f3bc5db821aa9129f38dddfab8984afe9b7de1fb4cd4a218fbcd2",
+    "productionDiffersFromInstalled": true,
+    "processDeadlineMsUnchanged": true,
+    "observedGraphPhases": [
+      "script_entered",
+      "delay_completed",
+      "effect_completed"
+    ],
+    "passed": 8,
+    "failed": 0,
+    "seconds": 23.27,
+    "sourceLibraryRuntimeAndBinaryHashesAndFileSetsUnchanged": true,
+    "build": {
+      "pid": 44164,
+      "launchedAt": "2026-10-18T22:34:02.510Z",
+      "completedAt": "2026-10-18T22:34:57.785Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0496c28237cc984028a3a7ae7ac6bc10b098def4a29f7bf08c9eeee06bd205fb"
+    },
+    "test": {
+      "pid": 65572,
+      "launchedAt": "2026-10-18T22:35:00.415Z",
+      "completedAt": "2026-10-18T22:35:23.734Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0099fa73945d36a1904c7503ba571249ec986deb1dc159d05e895e23fda4e9e9"
+    },
+    "fullNativeSuiteRun": false,
+    "hostedCauseEstablished": false,
+    "cpythonExecuted": false
+  },
+  "retainedBuildFailure": {
+    "root": "C:/xMindNativeValidation/read-tool-owner-focused-20261018",
+    "build": {
+      "pid": 27636,
+      "launchedAt": "2026-10-18T22:31:35.684Z",
+      "completedAt": "2026-10-18T22:33:22.363Z",
+      "exitCode": 1,
+      "signal": null,
+      "logSha256": "64d812503b3d1d30a807f60074fffd3af4f022a79a392776ec408ce2846fea89"
+    },
+    "reason": "Fixture assertion used nonexistent OperationSpec.workspace_id; changed to existing workspace with the same folder identity expectation. Production owner and runner sources unchanged across correction.",
+    "testsRun": 0
+  },
+  "rawRoot": "C:/xMindNativeValidation/read-tool-owner-focused-verified-20261018",
+  "fullNativeGate": "not run yet; 152-contract full gate is next",
+  "newNativeSha256": "dd3dcace2e5f3bc5db821aa9129f38dddfab8984afe9b7de1fb4cd4a218fbcd2",
+  "installed": false,
+  "liveProviderRequests": 0,
+  "renderedEditorActivated": false,
+  "processBoundAgentRunnerImplemented": false,
+  "cpythonExecuted": false
+}

@@ -18,6 +18,33 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
+## Workspace read owner — 2026-10-18
+
+`AgentReadToolHost` now owns the five model-visible workspace read tools through
+the existing versioned owned workspace envelope. The backend validates active
+run/catalogue/membership, retains inherited denials, generates approval identity
+and expiry, and resolves session/folder/policy-bound grants. It rechecks guidance
+after an approval wait; changed guidance retires the claimed read without
+revealing file contents. Actual primary/attached reads, approvals, grant reuse
+and isolation, directory denial, cancellation and SQLite reopen pass alongside
+the real AgentRunner and graph contracts: eight focused tests in 23.27 seconds.
+The retained fixture compile failure used an incorrect field name; production
+code stayed unchanged across that correction.
+[Focused proof](evidence/read-tool-owner-focused-20261018.json).
+
+This native source is uninstalled and its complete 152-contract gate is pending.
+It is a local owner with a lifetime duplicate guard. Complete tool discovery,
+instructions/skills, language servers, trusted callables, delegation, process
+admission/background joins and authenticated/durable worker transport remain
+backend dependencies. Process placement is not implemented. Installed 0.1.31
+remains the separately accepted coding preview.
+
+The corrected hosted startup diagnostic reproduces a genuine cold timeout:
+16/17 cases pass; the first original graph command times out after 30,040ms.
+Directory identities verify for every completed case. This is diagnostic scope,
+not integrated graph/agent or release acceptance; cause remains open.
+[Raw matrix and limits](evidence/process-startup-cold-failure-20261018.json).
+
 ## Current product acceptance matrix — 2026-10-18
 
 The new process-tool owner source passes all 151 local native contracts in

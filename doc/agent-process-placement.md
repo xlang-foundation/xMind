@@ -1,5 +1,26 @@
 # Agent execution placement
 
+## Workspace read owner — 2026-10-18
+
+`AgentReadToolHost` now owns the five model-visible workspace read tools through
+the existing versioned owned workspace envelope. The backend validates active
+run/catalogue/membership, retains inherited denials, generates approval identity
+and expiry, and resolves session/folder/policy-bound grants. It rechecks guidance
+after an approval wait; changed guidance retires the claimed read without
+revealing file contents. Actual primary/attached reads, approvals, grant reuse
+and isolation, directory denial, cancellation and SQLite reopen pass alongside
+the real AgentRunner and graph contracts: eight focused tests in 23.27 seconds.
+The retained fixture compile failure used an incorrect field name; production
+code stayed unchanged across that correction.
+[Focused proof](evidence/read-tool-owner-focused-20261018.json).
+
+This native source is uninstalled and its complete 152-contract gate is pending.
+It is a local owner with a lifetime duplicate guard. Complete tool discovery,
+instructions/skills, language servers, trusted callables, delegation, process
+admission/background joins and authenticated/durable worker transport remain
+backend dependencies. Process placement is not implemented. Installed 0.1.31
+remains the separately accepted coding preview.
+
 ## Current behavior
 
 The native `AgentRunner` is the shared C++ model/tool loop. `AgentService`
@@ -45,7 +66,8 @@ This remains an in-process owner adapter with a lifetime call guard. Process
 profile validation, background joins, admission and other backend dependencies
 remain in the runner/service path. Authenticated IPC, durable RPC deduplication,
 worker supervision and actual process-bound AgentRunner execution remain open.
-The installed 0.1.30 runtime has not yet been updated to this native source.
+Installed 0.1.31 includes the process-tool owner and passes a real saved-key
+Claude coding task; the later read-tool owner above remains uninstalled.
 
 ## Target contract
 
