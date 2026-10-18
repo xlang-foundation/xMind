@@ -1,11 +1,17 @@
 # Current native validation
 
-The first hosted startup-diagnostic job (39171209609) failed before native
-build/scenarios because the fresh checkout had no build parent. Parent creation
-is corrected; a previously absent nested local output passes all three cases,
-and reusing that output still fails before build without changing its receipt.
-The original PowerShell cause and corrected hosted matrix remain pending.
-[Setup correction and retained failure](evidence/process-startup-clean-parent-20261018.json).
+The corrected shared client is deployed at http://127.0.0.1:54828/ui/.
+A native delegated child ID containing a period previously stopped live event
+observation and left a completed coding task visibly running. Node metadata
+now follows its native grammar without weakening route or ownership checks.
+All 425 extension and 147 browser checks pass. Actual sandboxed headless Edge
+restores the original 15 messages/seven usage records and completes a new
+saved-key Claude delegated read-only task, displaying running then completed
+with four messages, two usage records and 173 events. Workspace bytes remain
+unchanged. The original coding UI timeout and no-delegation prompt violation
+remain recorded failures. The installed extension still needs this client fix;
+actual VS Code pane and hosted native/release acceptance remain open.
+[Client fix, real failures and rendered proof](evidence/dotted-node-stream-20261018.json).
 
 ## Product scope
 
@@ -32,7 +38,7 @@ The retained fixture compile failure used an incorrect field name; production
 code stayed unchanged across that correction.
 [Focused proof](evidence/read-tool-owner-focused-20261018.json).
 
-This native source is uninstalled. Its complete build and all 152 local Release
+This native source is installed in preview 0.1.32. Its complete build and all 152 local Release
 contracts pass in 903.83 seconds, with 2,617 project inputs, 16 SDK files, 76
 SDK runtime/import-library files, 1,870 pure libraries, 18,598 dependencies and
 127 binaries frozen. [Full qualification](evidence/read-tool-owner-full-20261018.json).
@@ -40,7 +46,8 @@ It is a local owner with a lifetime duplicate guard. Complete tool discovery,
 instructions/skills, language servers, trusted callables, delegation, process
 admission/background joins and authenticated/durable worker transport remain
 backend dependencies. Process placement is not implemented. Installed 0.1.31
-remains the separately accepted coding preview.
+remains the earlier accepted coding preview; the original 0.1.32 client failure
+and qualified live webpage correction are documented above.
 
 The corrected hosted startup diagnostic reproduces a genuine cold timeout:
 16/17 cases pass; the first original graph command times out after 30,040ms.

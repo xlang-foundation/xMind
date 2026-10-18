@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { BackendClient,SessionHistoryPager,parseWorkspaceCommand } = require('../client');
+const { BackendClient,SessionHistoryPager,parseWorkspaceCommand,EventStreamSubscription } = require('../client');
 const { canRestoreFileOperation } = require('../patch-review');
 const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
@@ -216,6 +216,23 @@ test('graph stream validates owned child conversation before delivering its even
  assert.equal((await client.eventStream('root',{scope:'graph',session_id:'session',onEvent:e=>observed.push(e)})).cursor,1);assert.deepEqual(observed,events);assert.deepEqual(sent.map(s=>new URL(s.url).pathname),['/v1/graph-runs/root/events/stream','/v1/graph-runs/root/children']);assert.ok(sent.every(s=>s.options.method==='GET'&&s.options.body===undefined));
  for(const children of [[],[streamRoot({id:'child',parent_id:'foreign',node_id:'worker'})],[streamRoot({id:'child',parent_id:'root',session_id:'foreign',node_id:'worker'})]]){const delivered=[],invalid=new BackendClient('http://localhost:8765',()=>token,async url=>url.endsWith('/children')?new Response(JSON.stringify(children)):streamResponse(streamWire(events,{scope:'graph',run:streamRoot({graph_root:true})})));await assert.rejects(invalid.eventStream('root',{scope:'graph',session_id:'session',onEvent:e=>delivered.push(e)}),error=>/Unowned|identity/.test(error.message)&&error.eventCursor===0);assert.deepEqual(delivered,[]);}
 });
+test('native delegated node IDs keep the tree subscription alive through parent completion',async()=>{
+ const events=[streamEvent(1,'child'),{...streamEvent(2),kind:'run.completed',data:{}}],observed=[],ended=[],errors=[];
+ const client=new BackendClient('http://localhost:8765',()=>token,async url=>url.endsWith('/children')?new Response(JSON.stringify([{run:streamRoot({id:'child',parent_id:'root',node_id:'d.'+'a'.repeat(32)})}])):streamResponse(streamWire(events,{scope:'tree'})));
+ const subscription=new EventStreamSubscription({current:()=>true,onEvent:event=>observed.push(event),onEnd:value=>ended.push(value),onError:error=>errors.push(error)});
+ try{subscription.watch({client,root:'root',session:'session',scope:'tree',generation:0,after:0});await subscriptionTick();assert.deepEqual(errors,[]);assert.deepEqual(observed,events);assert.equal(ended.length,1);assert.equal(ended[0].reason,'terminal');assert.equal(ended[0].cursor,2);}finally{subscription.dispose();}
+});
+
+test('dotted graph node labels retain their declared parent and session ownership',async()=>{
+ const observed=[],events=[streamEvent(1,'child')],client=new BackendClient('http://localhost:8765',()=>token,async url=>url.endsWith('/children')?new Response(JSON.stringify([streamRoot({id:'child',parent_id:'root',node_id:'build.docs'})])):streamResponse(streamWire(events,{scope:'graph',run:streamRoot({graph_root:true})})));
+ const result=await client.eventStream('root',{scope:'graph',session_id:'session',onEvent:event=>observed.push(event)});assert.deepEqual(observed,events);assert.equal(result.reason,'terminal');assert.equal(result.cursor,1);
+});
+
+test('node metadata validation preserves route identity and ownership rejection',async()=>{
+ const node='d.'+'a'.repeat(32),invalid=[...['bad/node','bad\\node','bad node','bad\0node','a'.repeat(129),'d.'+'a'.repeat(63),null,7].map(node_id=>({node_id})),{id:'child.bad'},{session_id:'foreign'},{parent_id:'foreign'},{graph_root:true}];
+ for(const changed of invalid){const observed=[],child=streamRoot({id:'child',parent_id:'root',node_id:node,...changed}),client=new BackendClient('http://localhost:8765',()=>token,async url=>url.endsWith('/children')?new Response(JSON.stringify([{run:child}])):streamResponse(streamWire([streamEvent(1,'child')],{scope:'tree'})));await assert.rejects(client.eventStream('root',{scope:'tree',session_id:'session',onEvent:event=>observed.push(event)}),error=>error.eventCursor===0);assert.deepEqual(observed,[]);}
+});
+
 test('stream rejects changed root/session/scope and events without an initial observation',async()=>{
  for(const source of [streamWire([streamEvent(1)],{run:streamRoot({id:'foreign'})}),streamWire([streamEvent(1)],{run:streamRoot({session_id:'foreign'})}),streamWire([streamEvent(1)],{scope:'tree'}),streamFrame('committed',streamEvent(1),1)]){const events=[],client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(source));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:e=>events.push(e)}),error=>/identity|observation/.test(error.message)&&error.eventCursor===0);assert.deepEqual(events,[]);}
 });

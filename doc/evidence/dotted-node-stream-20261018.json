@@ -1,0 +1,150 @@
+{
+  "recordedAt": "2026-10-18T23:15:52.075Z",
+  "sourceParent": "f10ab36a5fc73bc641ebb175593f65c8f348b561",
+  "qualifiedWorkingTreePatchSha256": "806c592f1727f83f207d36bef03c7455b2feb2f3ae9fdd3564fe958d27c59491",
+  "problem": "Shared browser/VS Code client treated native node metadata as a route ID and rejected legitimate d.<id> delegated nodes and dotted graph labels, stopping tree event observation before root completion.",
+  "change": "Validate node metadata against native graph and dynamic-node grammars while retaining strict route IDs, parent/session ownership and graph-root checks.",
+  "gate": {
+    "recordedAt": "2026-10-18T23:10:49.123Z",
+    "sourceParent": "f10ab36a5fc73bc641ebb175593f65c8f348b561",
+    "workingTreePatchSha256": "806c592f1727f83f207d36bef03c7455b2feb2f3ae9fdd3564fe958d27c59491",
+    "extension": {
+      "exitCode": 0,
+      "tests": 425,
+      "passed": 425,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "d58d475ed587959d9769828711f4eb31c893619390e6465373688c8054689e79"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "8f39bdc7888b2680304015a10000547858e87fc0a36574d6f9fdb92409c7b39d"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nativeSourceUnchangedSinceQualifiedCe4298d": true,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "originalCoding": {
+    "version": "0.1.32",
+    "run": "4b959300a34426ddfc26a89b2f935cc4",
+    "session": "12cb9446b11b67a63679aaec020d8694",
+    "nativeCompleted": true,
+    "renderedAcceptance": false,
+    "error": "page.waitForFunction: Timeout 30000ms exceeded.",
+    "beforeTests": 22,
+    "afterTests": 23,
+    "historyMessages": 15,
+    "usageRecords": 7,
+    "treeEvents": 1015,
+    "promptCompliance": false,
+    "limitation": "The model delegated despite a no-delegation instruction; this is retained as a prompt-compliance failure. Do not resubmit the completed coding task."
+  },
+  "savedStream": {
+    "original": {
+      "passed": false,
+      "cursor": 195,
+      "error": "Invalid execution identity"
+    },
+    "fixed": {
+      "passed": true,
+      "eventCount": 1015,
+      "terminalCursor": 1015
+    },
+    "effectReplay": false
+  },
+  "renderedRestore": {
+    "url": "http://127.0.0.1:54828/ui/",
+    "run": "4b959300a34426ddfc26a89b2f935cc4",
+    "session": "12cb9446b11b67a63679aaec020d8694",
+    "historyMessages": 15,
+    "usageRecords": 7,
+    "status": "completed",
+    "historyExactlyMatchesSavedCodingHistory": true,
+    "effectPosts": 0,
+    "errors": [],
+    "passed": true
+  },
+  "liveDelegated": {
+    "url": "http://127.0.0.1:54828/ui/",
+    "run": "69678a2cd7efe64ee27535e1541547c0",
+    "session": "c69b1f6e2d11e994a77499b5ca744e54",
+    "child": {
+      "batch_id": "c984854709a9ac2c4c8c9141eefad856",
+      "kind": "delegated_leaf",
+      "preset_id": "workspace.inspect",
+      "preset_revision": 1,
+      "run": {
+        "graph_root": false,
+        "id": "58c36cce2b814fa37d77243643ef5ab2",
+        "node_id": "d.84a7c3cfd02fae9d0345d8fc79dcf8e9",
+        "parent_id": "69678a2cd7efe64ee27535e1541547c0",
+        "provider_context": {
+          "model_id": "claude-sonnet-4-6",
+          "profile_id": "claude",
+          "profile_revision": 2,
+          "provider": "anthropic",
+          "route_id": "anthropic.messages",
+          "wire": "anthropic-messages"
+        },
+        "session_id": "c69b1f6e2d11e994a77499b5ca744e54",
+        "state": "completed"
+      },
+      "task_id": "readme-summary"
+    },
+    "taskSubmissions": 1,
+    "delegationCalls": 1,
+    "historyMessages": 4,
+    "usageRecords": 2,
+    "eventCount": 173,
+    "renderedStates": [
+      "Ready",
+      "running",
+      "completed",
+      "completed"
+    ],
+    "operations": [],
+    "workspaceFilesUnchanged": true,
+    "passed": true
+  },
+  "fixtureHistory": "Initial baseline/fixed logs included a missing EventStreamSubscription import. Corrected test-only preload uses exact prior packaged client: two positive regressions fail, negative checks pass; fixed client passes all three. Original logs remain under the raw root.",
+  "rawRoot": "C:/xMindNativeValidation",
+  "rawSha256": {
+    "rendered-coding-0.1.32-selected-20261018/acceptance.json": "161c994282a7b159467772839b486c5327a3130c9624bee2c3e4982900e55eb7",
+    "rendered-coding-0.1.32-selected-20261018/history.json": "209c4c433563232185607145c4a338cda7f7b9c0c7987d0ba155015a0bd7d84d",
+    "rendered-coding-0.1.32-selected-20261018/events.json": "23f447dbd54348b5bed9b0e36047c3cdf3e833282455c9a971c55d8b5482d5da",
+    "coding-0.1.32-completed-stream-diagnostic-20261018.json": "5d8e191165290a89e27920d9ddf62fcccad127f1720820038d8aa65b2cdc189d",
+    "coding-0.1.32-completed-stream-fixed-20261018.json": "2f0f3b8b7fb1a62b9525a7dacdd1b6de6321917734106e101cd37c658430e228",
+    "rendered-fixed-webpage-20261018/acceptance.json": "0963e62c48a807ff004f8d9f4c9cc43619c04d255c96a57782accc7f3b9add97",
+    "rendered-fixed-webpage-20261018/restored.png": "799b4d9ddd671c969228dd5cc4e1ec7bc904e72ecbdc80de3397bc7d6660c404",
+    "rendered-live-delegated-webpage-20261018/acceptance.json": "54d5ec65e39970bce7c910155a5b41df7555e366ed88fd3283f1352406f9830d",
+    "rendered-live-delegated-webpage-20261018/history.json": "192f6e7118f242bcb0897c2f5c330ebf87ed0fd8fb91477baf5fd5c975817501",
+    "rendered-live-delegated-webpage-20261018/child-history.json": "4aa68704aaecbad664c8bc720eac4e805d9e89029841e19d2ee1e4c501c0220e",
+    "rendered-live-delegated-webpage-20261018/events.json": "06d6546a4dfe03dfa0afb4daad4ab177ef4b230602f8b9727fb8b7492b60d089",
+    "rendered-live-delegated-webpage-20261018/completed.png": "edd76f33fd7322e5010baea40de61011443218266d1bd1416b84ef8e8eb59ff5",
+    "dotted-node-stream-before-corrected-fixture-20261018.log": "0430bdab4caf261908cf3126f49ee184f4d62942a9b794fa569d418c9f85b7d8",
+    "dotted-node-stream-after-corrected-fixture-20261018.log": "e146a784831e774067b895f29d54f6e7217a5c57cf2134591c3ac151fdcf3aa4",
+    "dotted-node-stream-client-gate-20261018/source.patch": "806c592f1727f83f207d36bef03c7455b2feb2f3ae9fdd3564fe958d27c59491",
+    "dotted-node-stream-client-gate-20261018/inputs-before.json": "89d50e3708713fcf29135d33d5034683123893964b653f5bf7b6bb3554fa33be"
+  },
+  "scopeLimits": {
+    "nativeProductionSourceChanged": false,
+    "nativeFullSuiteRerun": false,
+    "native152Gate": "read-tool-owner-full-20261018.json",
+    "packagedExtensionFixInstalled": false,
+    "actualExternalBrowserConnected": false,
+    "actualVSCodePaneActivated": false,
+    "hostedNativeAccepted": false,
+    "workerIPCImplemented": false,
+    "releaseAccepted": false
+  },
+  "cpythonExecuted": false
+}

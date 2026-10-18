@@ -682,6 +682,9 @@ class EventStreamSubscription {
   notifyError(error,pin){try{Promise.resolve(this.onError?.(error,pin)).catch(()=>{});}catch{} }
 }
 function executionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(value))throw new Error('Invalid execution identity');return value;}
+// Node metadata is not a route/run identity. Graph labels allow periods up to
+// 64 bytes, delegated nodes use d.<id>, and dynamic execution IDs allow 128.
+function runNodeIdentity(value){if(typeof value!=='string'||!(/^[A-Za-z0-9_-]{1,128}$/.test(value)||/^[A-Za-z0-9_.-]{1,64}$/.test(value)))throw new Error('Invalid native run node identity');return value;}
 function providerCallIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,256}$/.test(value))throw new Error('Invalid provider call identity');return value;}
 function planLabel(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,32}$/.test(value))throw new Error('Invalid planning node label');return value;}
 function planInteger(value,minimum=0){if(!Number.isSafeInteger(value)||value<minimum)throw new Error('Invalid planning revision or counter');return value;}
@@ -756,7 +759,7 @@ function validatePlanInputText(source){
 }
 function validateRunDTO(value){
   planFields(value,['id','session_id','state','parent_id','node_id','graph_root'],['provider_context']);executionIdentity(value.id);executionIdentity(value.session_id);
-  if(value.parent_id!=='')executionIdentity(value.parent_id);if(value.node_id!=='')executionIdentity(value.node_id);if(typeof value.graph_root!=='boolean'||!['queued','running','paused','completed','failed','cancelled'].includes(value.state))throw new Error('Invalid actual run metadata');
+  if(value.parent_id!=='')executionIdentity(value.parent_id);if(value.node_id!=='')runNodeIdentity(value.node_id);if(typeof value.graph_root!=='boolean'||!['queued','running','paused','completed','failed','cancelled'].includes(value.state))throw new Error('Invalid actual run metadata');
   if(value.provider_context!==undefined){planFields(value.provider_context,['profile_id','route_id','provider','wire','model_id','profile_revision']);for(const key of ['profile_id','route_id','provider','model_id'])profileIdentity(value.provider_context[key]);if(!['chat-completions','responses','anthropic-messages','gemini-generate-content'].includes(value.provider_context.wire))throw new Error('Invalid public provider identity');planInteger(value.provider_context.profile_revision,1);}
   return value;
 }
