@@ -1,0 +1,342 @@
+{
+  "recordedAt": "2026-10-18T17:50:11.595Z",
+  "version": "0.1.24",
+  "nativeRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+  "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "manifestSha256": "d4ee1b8425c311ec893a180cb42d85be85e7bc860e9514bc75cfa86ea12bb19e",
+  "fullNative": {
+    "sourceRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 149,
+    "failed": 0,
+    "seconds": 899.29,
+    "projectFiles": 2599,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 75,
+    "nativeBinaries": 124,
+    "nodeDependencyRoots": [
+      "Native/tests/sdk/node_modules",
+      "extensions/vscode/node_modules"
+    ],
+    "nodeDependencyFiles": 18598,
+    "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "586e4a7bf9bcf5fee7b5468bcf2784ef1b35a3b82757dfcf81eef9f707e5a204",
+    "ctestLogSha256": "cb694a9070c0c42e5d430e8bf0ea8ab0eeb5f7316d3320429a52a25cb39df10d",
+    "detailsSha256": "f5a57c74e32a8566f66dc6d06b511e3a0d4da9e65463e227775b11401b0d209c",
+    "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+    "hostedOnlyTrustMutationExcluded": true
+  },
+  "localClientGate": {
+    "recordedAt": "2026-10-18T16:58:26.704Z",
+    "version": "0.1.24",
+    "clientSnapshotSource": "d17bd7132d5739f227d48a771c4aee099bda86d5",
+    "metadataVersionChangedOnly": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 420,
+      "passed": 420,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 99,
+    "browserAssets": 18,
+    "sourceAndAssetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "scope": "Complete Node host/controller and JSDOM/browser-contract fixtures; no actual rendered editor/external browser, native inference or provider request.",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "hostedViews": {
+    "recordedAt": "2026-10-18T17:33:40.787Z",
+    "runId": 39147762955,
+    "artifactId": 12143897489,
+    "artifactBytes": 306881,
+    "artifactSha256": "8595101f440e1253092f659b742755b2badadb22598354d0fbf1dd9a78a762f8",
+    "sourceRevision": "9eb98708399c32a65177f6d01ef6cc7416d25f1d",
+    "comparedCurrentRevision": "56fb90a9bf08c4f265d9298cfeeb6ec53638162d",
+    "gate": {
+      "sourceRevision": "9eb98708399c32a65177f6d01ef6cc7416d25f1d",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 420,
+        "browser": 142
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 420,
+        "passed": 420,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 142,
+        "passed": 142,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "exactSourceFiles": 51,
+    "crlfOnlySourceFiles": 19,
+    "exactAssets": 15,
+    "crlfOnlyAssets": 3,
+    "trackedClientGitBlobsUnchanged": true,
+    "sourceAndAssetBeforeAfterUnchanged": true,
+    "scope": "Hosted synthetic Node/JSDOM suites, normalized Windows text comparison explicitly recorded; no native inference or rendered UI."
+  },
+  "payload": {
+    "version": "0.1.24",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.24-coding-win32-x64.vsix",
+    "sha256": "93d1619ea89648aafbb15ad8bab09c0effa872a8becf3e99c4a637f6ec997b8d",
+    "bytes": 34390235,
+    "archiveFiles": 2447,
+    "nativeFiles": 2402,
+    "nativeRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+    "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.24",
+    "version": "0.1.24",
+    "checkedPayloads": 2444,
+    "nativeFiles": 2402,
+    "nativeRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "d4ee1b8425c311ec893a180cb42d85be85e7bc860e9514bc75cfa86ea12bb19e",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "pip": {
+    "manifestSha256": "d4ee1b8425c311ec893a180cb42d85be85e7bc860e9514bc75cfa86ea12bb19e",
+    "nativeRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pip": "26.2.1",
+    "wheelSha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+    "commands": 3,
+    "allExitZero": true,
+    "offlineInstall": true,
+    "dependenciesSkipped": false,
+    "generatedScripts": 3,
+    "generatedScriptsUseXlang3": true,
+    "cpythonExecuted": false,
+    "scope": "Actual packaged CLI bootstrap and complete offline pure pip installation; no model, backend or rendered client acceptance."
+  },
+  "realSavedKeyAcceptance": {
+    "provider": {
+      "id": "claude",
+      "model": "claude-sonnet-4-6",
+      "discoveredModels": 13
+    },
+    "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.24-20261018",
+    "profileRoot": "C:/Users/shaw9/.xMind/p-a24",
+    "session": "4f3dda5b2581b2d4fd1ae7f7a03f4914",
+    "run": "9c5b5a5f312ab511e385f5bbfc38fec8",
+    "backendPid": 67968,
+    "verified": {
+      "reportCharacters": 2535,
+      "reportCharacterBudgetMet": false,
+      "originalObserverFailurePreserved": true,
+      "sameRunResumed": true,
+      "at": "2026-10-18T17:48:23.462Z",
+      "intentionalExit": 7,
+      "processExecutions": 1,
+      "failedChildren": 1,
+      "dependentUnclaimedAndSkipped": true,
+      "emptyObjectInspectPlanCompleted": true,
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 299,
+          "input_tokens": 8381,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 299,
+          "prompt_tokens": 8381,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 105,
+          "input_tokens": 9376,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 105,
+          "prompt_tokens": 9376,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 121,
+          "input_tokens": 10211,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 121,
+          "prompt_tokens": 10211,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 757,
+          "input_tokens": 11059,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 757,
+          "prompt_tokens": 11059,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 434,
+          "input_tokens": 11945,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 434,
+          "prompt_tokens": 11945,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "controllerTerminalStatus": "completed",
+      "originalSourceFilesUnchanged": 30,
+      "reportSha256": "3060e79d9c1e30701d961eb8e56c1f1433589b0ac78d539d1b5edb7348fee9be",
+      "effectBytes": "once",
+      "renderedAcceptance": false,
+      "cpythonExecuted": false
+    },
+    "providerResponseTotals": {
+      "input": 50972,
+      "output": 1716
+    },
+    "reportReview": {
+      "operationId": "30e2fe66b62e39ba2831a535db70da09",
+      "characters": 2535,
+      "promptLimit": 2000,
+      "promptLimitMet": false,
+      "exactReviewedSha256": "3060e79d9c1e30701d961eb8e56c1f1433589b0ac78d539d1b5edb7348fee9be",
+      "actualReceiptMatched": true,
+      "scope": "Report-length observer failure is retained; accurate exact proposal approved without claiming the prompt length constraint passed."
+    },
+    "originalObserverFailure": {
+      "message": "The expression evaluated to a falsy value:\n\n  assert.ok(args.after_content.length<=2000)\n",
+      "at": "2026-10-18T17:46:40.904Z"
+    },
+    "recoveryObserver": {
+      "originEqualityCheckFailedBeforeApproval": true,
+      "note": "Same backend PID/profile retains the task while its temporary view origin changes between attachments; exact report was approved only by the final same-run recovery."
+    }
+  },
+  "persistentPage": {
+    "recordedAt": "2026-10-18T17:48:39.962Z",
+    "url": "http://127.0.0.1:54662/ui/",
+    "viewPid": 15400,
+    "nativeViewPid": 54240,
+    "workspace": "C:\\xMindNativeValidation\\model-zoo-installed-0.1.24-20261018",
+    "runs": 1,
+    "historyMessages": 10,
+    "failedChildren": 1,
+    "savedEvents": 762,
+    "terminalCursor": 762,
+    "duplicates": 0,
+    "taskSubmissions": 0,
+    "processReexecutions": 0,
+    "providerInferenceRequests": 0,
+    "activeProvider": "claude",
+    "served": {
+      "client.js": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f",
+      "browser.js": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a",
+      "chat.js": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+      "chat.css": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a"
+    },
+    "renderedAcceptance": false,
+    "scope": "Actual persistent HTTP/native restore and complete saved SSE replay, explicit Node cookie jar; no rendered GUI or new task."
+  },
+  "priorPage": {
+    "url": "http://127.0.0.1:51118/ui/",
+    "version": "0.1.23",
+    "scope": "Prior positive ModelZoo dependency/test/build/create/edit acceptance remains a separate checkpoint."
+  },
+  "evidenceRoot": "C:/xMindNativeValidation",
+  "evidenceFiles": {
+    "vscode-0.1.24-payload-evidence-20261018.json": "8c72e518cf60049d8f55fadca9aa96dfc5a98d8221c4d1897f90abe5fe7d52b2",
+    "vscode-0.1.24-installed-evidence-20261018.json": "a056f31b114f84b68d87a9afaa296482e63abb9ab74409a11ef320a36167ca3d",
+    "vscode-0.1.24-preservation-20261018.json": "3159fa06f8078a60b7af36825f0c7bcc85738069e176155e6b8d3b6c1a9c216f",
+    "coding-0.1.24-runtime-staged-20261018.json": "4d848511a7c6a8cf2720ff3f2d9dfd4d47b6c0e7b42c9aac03f7ae42e7ce1149",
+    "coding-0.1.24-packaged-pip-20261018/packaged-pip.json": "f49469127fd7f8e513931444349ed2a2bfd2fa52fb361db45f86deb666628b73",
+    "coding-0.1.24-failure-plan-live-20261018.json": "da2713b418f8f98550abff73c28611c892b374f3c3b98a2dd834403f840d669a",
+    "coding-0.1.24-failure-plan-review-20261018.json": "d4e2f05989555d6910b850280fc147154e2b2e2d75352667b256085ec12660f8",
+    "coding-0.1.24-failure-plan-recovered-20261018.json": "53972404d795ec803bb3beff4fd3f7c0d2f06f1e73f1d4c3c65cc8499c127823",
+    "coding-0.1.24-failure-plan-recovered-v2-20261018.json": "7253e3d7cef99d5b6c2084b0ca742ab32ea117de2a4410b5f09d69f4f620786c",
+    "coding-0.1.24-failure-plan-operations-20261018.json": "b144e350b13c756dad39300daee8a4e470da5fbebc0c88d17c2ecf7e8f3fa4fd",
+    "coding-0.1.24-failure-plan-children-20261018.json": "825a4ccfcc7bd0aa7a34a8512190b3461371c105c5d391e881416431074d116f",
+    "coding-0.1.24-failure-plan-plan-observation-20261018.json": "977f49263d7ee36507ae87a58ba6062bae93c1dcf089b2880cdb707b59624c4a",
+    "coding-0.1.24-failure-plan-history-20261018.json": "0fbd133bc9ab811a44d470ee6ad5201d24119e507bb9e8d19fc693e7de399194",
+    "coding-0.1.24-failure-plan-saved-tree-events-20261018.json": "f28f4befecf09ebb441b52119f21df754677a4fa1147d80c1d23e7d7ceb8576a",
+    "browser-0.1.24-modelzoo-verified-20261018.json": "85cb013d0f1b6fef9cd473d354382541c733d7148578b9efef3a6f61cf3e9539"
+  },
+  "hostedNativeCurrent": {
+    "checkedAt": "2026-10-18T17:50:22.680Z",
+    "runId": 39149731654,
+    "source": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+    "status": "in_progress",
+    "conclusion": null,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39149731654",
+    "accepted": false
+  },
+  "olderHostedFailure": "hosted-native-449-failure-20261018.json",
+  "renderedCurrentEditorAccepted": false,
+  "renderedCurrentBrowserAccepted": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false,
+  "remaining": [
+    "Current-source hosted native acceptance and diagnosis of older hosted PowerShell failures",
+    "Actual rendered browser input/layout and installed VS Code activation",
+    "Broader MCP/A2A recovery, process-bound agent placement and other documented OSS work"
+  ],
+  "scope": "Verified local native/client/package installation, actual saved-key native dynamic-plan failure/revision and persistent HTTP/SSE restore; report prompt length did not pass. No rendered UI or full product/release acceptance."
+}

@@ -1,6 +1,18 @@
 # Reviewable milestones
 
-## First target: usable local coding in the webpage and VS Code — passed 2026-10-16
+## Current checkpoint — 0.1.24, 2026-10-18
+
+The local native gate passes 149/149 with frozen inputs/file sets unchanged.
+The installed package and real Claude failure-plan check pass the bounded
+backend/controller acceptance recorded in [validation status](VALIDATION_STATUS.md).
+The actual command executes once, fails with exit 7 and blocks its dependent;
+inspection and a same-plan skip complete without replay. The report prompt
+length constraint was missed and is explicitly retained in the evidence.
+Current rendered browser and VS Code acceptance remain open; the user closed
+all editor windows. Historical October 16 acceptance below does not accept
+the current package. Private Nexus work remains outside this OSS checkpoint.
+
+## Historical first coding acceptance — 2026-10-16
 
 The first product acceptance gate is a complete local coding task through both
 clients, using the same xMind backend and a real opened project such as

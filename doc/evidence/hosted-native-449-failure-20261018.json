@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-18T17:43:30.673Z",
+  "runId": 39145882998,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39145882998",
+  "sourceRevision": "449bdcee27094d9d2cdd25e23b503681d66ffae9",
+  "artifactId": 12144389355,
+  "artifactBytes": 61965,
+  "artifactSha256": "f33dd47a1b9fc3b5d4e85beb3e30275daeb13d7a49bdde4a7b52984e927029b4",
+  "passed": 148,
+  "total": 150,
+  "seconds": 702.73,
+  "failed": [
+    "native_graph_runner_contract",
+    "native_agent_runner_contract"
+  ],
+  "sdkSmokePassed": 2,
+  "agentProcess": {
+    "runState": "failed",
+    "operations": [
+      {
+        "id": "41dd355d91ff0e7485d9702e807dece7",
+        "state": "uncertain",
+        "result": {
+          "elapsed_ms": 30084,
+          "exit_code": 1,
+          "independently_verified": false,
+          "job_id": "41dd355d91ff0e7485d9702e807dece7",
+          "operation_id": "41dd355d91ff0e7485d9702e807dece7",
+          "output_artifact": {
+            "operation_id": "41dd355d91ff0e7485d9702e807dece7",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 0
+          },
+          "pid": 7192,
+          "process_tree_retired": true,
+          "profile_id": "powershell",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "termination": "timed_out",
+          "truncated": false
+        }
+      }
+    ],
+    "confirmedTermination": "timed_out",
+    "underlyingCauseConfirmed": false
+  },
+  "graph": {
+    "state": "failed",
+    "children": [
+      {
+        "id": "1a0a430924465b3fd837bb15f4067808",
+        "state": "failed",
+        "terminalEvents": [
+          {
+            "json": "{\"reason\":\"graph_process_effect_uncertain\"}",
+            "kind": "run.failed"
+          }
+        ]
+      }
+    ],
+    "processTerminationReceiptAvailable": false,
+    "underlyingCauseConfirmed": false
+  },
+  "scope": "Older source hosted Windows failures; not a current-source result and no inference that both failures share the same cause.",
+  "accepted": false
+}

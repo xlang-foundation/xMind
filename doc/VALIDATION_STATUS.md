@@ -15,13 +15,45 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Installed native `878bd88` / SDK `58a8aab9` passes three focused inventory/profile checks, two SDK smoke checks and real coding below. The complete current local gate passes **149/149 in 903.96 seconds**, with all frozen project/library/runtime/binary inputs unchanged; the historical c23a6cd gate remains separate. Hosted inventory is 150. [Current receipt](evidence/coding-package-0.1.23-20261018.json). | Current hosted acceptance; production release acceptance. |
-| Single agents and graphs | Native contracts and prior live planning establish the in-process baseline. The current ordinary coding conversation completes actual commands and approved create/edit effects. | The source correction passes both exit-7/restart regressions and all 14 related contracts; installed 0.1.23 still needs this update. An older live plan had continued success-dependent tasks after exit 1. One older agent child returned an unconfirmed Claude JSON-event failure. Process-bound `AgentRunner` placement is not implemented; existing workers isolate trusted callables only. |
+| Native backend and local persistence | Installed native 44747af / SDK 58a8aab9 passes all 149 local Release contracts in 899.29 seconds; all 2,599 project inputs, pure libraries, SDK/runtime, 124 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and complete offline installation pass three actual commands. [Current full gate](evidence/profile-publication-full-gate-20261018.json). | Current hosted run 39149731654 remains in progress. Older source 449bdce fails 2/150, including an actual AgentRunner 30-second timeout; the graph process cause remains unconfirmed. Release acceptance is open. |
+| Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed **0.1.23** verifies 2,444 non-metadata payloads, package metadata and 2,402 runtime files. Local and digest-verified hosted client checks pass 420/142. Actual installed Claude/browser-controller coding installs 22 dependencies, passes nine xlang3 tests and the Vue build, and creates then exactly edits the report through native approval. The persistent test page at port 51118 restores 16 messages/two completed runs and all 598 saved events without replay. Original/copied source files, settings and six existing profile directories are preserved. [Installed/live receipt](evidence/coding-package-0.1.23-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; full native/hosted/release acceptance and broader failure/recovery coverage remain open. |
+| Coding clients | Installed 0.1.24 verifies 2,444 non-metadata payloads and 2,402 runtime files. Local and digest-verified hosted client checks pass 420/142. Real current installed Claude/controller failure-plan acceptance completes with one exact report creation. Page port 54662 restores ten messages, the completed parent/failed child and all 762 saved events without task replay. The prior 0.1.23 positive ModelZoo test remains separately recorded. [Current milestone](evidence/coding-package-0.1.24-20261018.json). | Current actual browser input/layout/paint and VS Code activation are unverified. VS Code remains closed at the user’s request. Current hosted/release acceptance and broader failure/recovery work remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed coding checkpoint 0.1.24 — 2026-10-18
+
+The current installed native package includes the protected profile-publication
+retry, strict Claude empty-argument handling and failed process-child semantics.
+The complete local gate passes 149/149 with every frozen input/file set unchanged.
+Its runtime and VSIX payloads, settings and six prior profile directories verify.
+
+A real Claude Sonnet 4.6 conversation validates one actual exit-7 process, exact
+stdout/stderr, an unclaimed blocked dependency, inspect_plan({}) and a same-plan
+skip revision. The observer stopped before file approval because the report
+was 2,535 characters against a 2,000-character prompt limit. That failure is
+retained. After exact receipt/content review, the same run and backend resumed;
+one approved report was created and the parent completed. The length constraint
+did not pass. Five actual provider responses report 50,972 input and 1,716 output
+tokens; these are summed supplied usage fields, not estimates.
+
+The persistent local page is http://127.0.0.1:54662/ui/ in the source-verified
+ModelZoo copy at C:/xMindNativeValidation/model-zoo-installed-0.1.24-20261018.
+HTTP restore verifies ten messages and all 762 saved tree events through cursor
+762, with no process/task replay. The earlier positive 0.1.23 ModelZoo page at
+port 51118 remains a separate checkpoint. Neither result establishes current
+rendered browser or VS Code acceptance. No editor/browser window was opened.
+
+[Package, live run, preserved observer failures and page evidence](evidence/coding-package-0.1.24-20261018.json).
+
+Current source hosted validation is still in progress. Older source 449bdce
+passes 148/150 and both SDK smoke tests. AgentRunner records an actual 30,084ms
+timed_out result with empty output and a retired process tree; its underlying
+cause remains unknown. The graph process failure lacks a termination receipt.
+Do not infer that both failures share a cause or widen budgets to hide them.
+[Older hosted evidence](evidence/hosted-native-449-failure-20261018.json).
 
 ## Protected profile publication — 2026-10-18
 
@@ -38,8 +70,10 @@ does not identify its specific reader.
 The publication contract and original provider-configuration view test pass
 2/2 in 54.46 seconds with all recorded inputs/binaries unchanged. Native SHA is
 c90df181..., SDK 58a8aab9 is unchanged. This focused result does not turn the
-earlier 148/149 into a full pass. The current complete gate, hosted acceptance,
-0.1.24 runtime/VSIX staging and real installed acceptance are pending.
+earlier 148/149 into a full pass. The subsequent complete gate passes 149/149;
+runtime/VSIX staging and
+installed same-run acceptance are recorded above. Current hosted and rendered
+acceptance remain open.
 [Recovery receipt](evidence/profile-publication-recovery-20261018.json).
 
 Installed 0.1.23 remains unchanged, with all 2,446 actual files backed up and

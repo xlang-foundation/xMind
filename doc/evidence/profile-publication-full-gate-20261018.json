@@ -1,0 +1,25 @@
+{
+  "sourceRevision": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "passed": 149,
+  "failed": 0,
+  "seconds": 899.29,
+  "projectFiles": 2599,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 75,
+  "nativeBinaries": 124,
+  "nodeDependencyRoots": [
+    "Native/tests/sdk/node_modules",
+    "extensions/vscode/node_modules"
+  ],
+  "nodeDependencyFiles": 18598,
+  "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "586e4a7bf9bcf5fee7b5468bcf2784ef1b35a3b82757dfcf81eef9f707e5a204",
+  "ctestLogSha256": "cb694a9070c0c42e5d430e8bf0ea8ab0eeb5f7316d3320429a52a25cb39df10d",
+  "detailsSha256": "f5a57c74e32a8566f66dc6d06b511e3a0d4da9e65463e227775b11401b0d209c",
+  "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+  "hostedOnlyTrustMutationExcluded": true
+}
