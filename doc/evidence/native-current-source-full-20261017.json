@@ -1,14 +1,14 @@
 {
   "date": "2026-10-17",
   "scope": "Full current-source native Release build and CTest gate",
-  "xmind_checkout_head": "f22e1885b2de25cc0a3c58bd148be971c687d136",
-  "compiled_product_code_revision": "c95f3062188f8e2b17048483e85f274bb82e44ba",
+  "xmind_checkout_head": "d919441757ffb831ece0e607ff4a6bc27fc9a216",
+  "compiled_product_code_revision": "d919441757ffb831ece0e607ff4a6bc27fc9a216",
   "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
   "toolchain": "Visual Studio 18 2026, MSVC 19.51.36256.0",
   "build_directory": "C:\\xMindNativeValidation\\native-current-source-full",
-  "build_command": "cmake --build C:/xMindNativeValidation/native-current-source-full --config Release --parallel 6",
+  "build_command": "Visual Studio 18 CMake --build C:/xMindNativeValidation/native-current-source-full --config Release --parallel 8",
   "build_result": "passed",
-  "xmind_executable_sha256": "51bff61626f9beca9ff0a5b4990299e7eafc92bbc2f0ca2c618b1aa963ea6115",
+  "xmind_executable_sha256": "5a7081ce0e5f3e2631b5dd57dfb5b15276b4ae9985b8fc378dbbbf2a8628a6b7",
   "xlang3_runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
   "sdk_fixtures": {
     "install": "npm ci --ignore-scripts",
@@ -20,14 +20,15 @@
     },
     "location_note": "Installed from the repository lockfile on C: and exposed at the ignored Native/tests/sdk/node_modules path because D: had no free space."
   },
-  "ctest_command": "ctest --test-dir C:/xMindNativeValidation/native-current-source-full -C Release --output-on-failure",
+  "ctest_command": "Visual Studio 18 CTest --test-dir C:/xMindNativeValidation/native-current-source-full --build-config Release --output-on-failure",
   "ctest_registered": 147,
   "passed": 147,
   "failed": 0,
-  "duration_seconds": 825.87,
-  "ctest_log": "C:\\xMindNativeValidation\\native-current-source-full\\Testing\\Temporary\\LastTest.log",
-  "ctest_log_sha256": "8ad6ca1e510d1fe79971037aac62f896b12dc0f0dAB7e36b29f1dcffe7565eff",
+  "duration_seconds": 815.92,
+  "ctest_log": "C:\\xMindNativeValidation\\native-current-source-full\\Testing\\Temporary\\full-current-20261017.log",
+  "ctest_log_sha256": "a1c021cb3c7532a20cc83b59562972f0d5d203e3d8fdf0d114a8a31e0275f652",
   "notes": [
+    "This rerun compiled the latest xMind checkout at d919441, including the AgentWorkspaceToolHost boundary, and passed all 147 registered Release contracts.",
     "The full gate includes current AgentRunner, graph and process contracts; modern and legacy MCP SDK interoperability; local profile and view acceptance; workspace registry; persistence and owner lifecycle tests.",
     "The client suites are recorded separately and retain their own source scope; this native result does not certify a fresh VS Code package or broad live editor reliability."
   ]
