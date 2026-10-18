@@ -15,13 +15,19 @@ const { LanguageServerEditor } = require('./language-server-editor');
 const { GitChangesTreeProvider } = require('./git-changes-tree');
 
 function startupHtml(message) {
+  const nonce=crypto.randomBytes(16).toString('base64');
   const escaped=String(message).replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none';"></head><body><p role="status">${escaped}</p></body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}';"></head><body><p role="status">${escaped}</p><script nonce="${nonce}">window.addEventListener('message',event=>{const value=event.data;if(value?.type==='startup-progress'&&typeof value.text==='string'&&value.text.length<=1024)document.querySelector('[role="status"]').textContent=value.text;});</script></body></html>`;
 }
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
-  const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime);
+  const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime,{onProgress:({elapsedMs})=>{
+    if(!sidebarView||panel===sidebarView)return;
+    const text=`Waiting for the local xMind backend… ${Math.floor(elapsedMs/1000)} s elapsed.`;
+    Promise.resolve(sidebarView.webview.postMessage({type:'startup-progress',text})).catch(()=>{});
+    Promise.resolve(sidebarView.webview.postMessage({type:'status',text})).catch(()=>{});
+  }});
   const languageServerEditor=new LanguageServerEditor(vscode,workspaceBackend);
   // Interactive preview uses a normal development host. VS Code test hosts
   // deliberately use in-memory storage and cannot verify reconnect persistence.

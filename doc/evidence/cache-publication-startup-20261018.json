@@ -1,0 +1,369 @@
+{
+  "recordedAt": "2026-10-18T12:38:00.178Z",
+  "scope": "Native directory-publication fix, actual same-profile generation handoff, real Claude/xlang3 pytest, and current host startup observation. VS Code APIs/DOM are explicit fixtures; no rendered desktop acceptance.",
+  "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+  "nativeExecutableSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+  "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "xlang3Changed": false,
+  "CPythonExecuted": false,
+  "fullNative": {
+    "passed": 148,
+    "failed": 0,
+    "elapsedSeconds": 778.47
+  },
+  "extension": {
+    "passed": 403,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 138,
+    "scope": "Earlier unchanged browser adapter/controller baseline at d3e27e8; not a new rendered check."
+  },
+  "livePytest": {
+    "scope": "Actual native profile upgrade and real Claude/xlang3 pytest through production browser HTTP/SSE subscription; explicit VS Code API fixtures and Node cookie jar. No rendered UI.",
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "workspace": "C:/xMindNativeValidation/model-zoo-current-acceptance-20261018",
+    "originalRun": "f06d2b8168b1f997ac8db4e5bfa3e5fb",
+    "originalSession": "5fad98b01c0f93a6364b76578441166a",
+    "startedAt": "2026-10-18T12:31:36.954Z",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "before": {
+      "backendPid": 32352,
+      "historyMessages": 12,
+      "profiles": {
+        "active": "claude",
+        "profiles": [
+          {
+            "id": "claude",
+            "model": "claude-sonnet-4-6",
+            "provider": "anthropic",
+            "revision": 2,
+            "route_id": "anthropic.messages"
+          },
+          {
+            "id": "gemini",
+            "model": "",
+            "provider": "gemini",
+            "revision": 1,
+            "route_id": "gemini.generate-content"
+          },
+          {
+            "id": "deepseek",
+            "model": "",
+            "provider": "deepseek",
+            "revision": 1,
+            "route_id": "deepseek.chat"
+          },
+          {
+            "id": "openai",
+            "model": "",
+            "provider": "openai",
+            "revision": 1,
+            "route_id": "openai.responses"
+          }
+        ],
+        "revision": 3,
+        "routes": [
+          {
+            "discovery": true,
+            "id": "openai.chat",
+            "provider": "openai",
+            "wire": "chat-completions"
+          },
+          {
+            "discovery": true,
+            "id": "openai.responses",
+            "provider": "openai",
+            "wire": "responses"
+          },
+          {
+            "discovery": true,
+            "id": "anthropic.messages",
+            "provider": "anthropic",
+            "wire": "anthropic-messages"
+          },
+          {
+            "discovery": true,
+            "id": "gemini.generate-content",
+            "provider": "gemini",
+            "wire": "gemini-generate-content"
+          },
+          {
+            "discovery": true,
+            "id": "deepseek.chat",
+            "provider": "deepseek",
+            "wire": "chat-completions"
+          },
+          {
+            "discovery": true,
+            "id": "xai.responses",
+            "provider": "xai",
+            "wire": "responses"
+          },
+          {
+            "discovery": true,
+            "id": "mistral.chat",
+            "provider": "mistral",
+            "wire": "chat-completions"
+          },
+          {
+            "discovery": true,
+            "id": "openrouter.chat",
+            "provider": "openrouter",
+            "wire": "chat-completions"
+          }
+        ]
+      },
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "backendChangePending": false
+    },
+    "handoffObservation": "Native CLI completed the same-profile upgrade after the host attempt failed before any task admission. This continuation attaches the resulting live owner.",
+    "after": {
+      "backendPid": 37596,
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "historyMessages": 12,
+      "historyPreserved": true,
+      "providerSelectionPreserved": true
+    },
+    "session": "066c31df6ac1a7f0e5cfdd854d482cc9",
+    "earlierFailedRun": "2e9fed85c997d82c1c62eeb72ba8f432",
+    "promptCorrection": "Earlier model command used the wrong workdir; it is preserved as a failed run and is not counted as cache-fix evidence.",
+    "run": "75213dc399bce032abe0baa46562e9fd",
+    "status": {
+      "graph_root": false,
+      "id": "75213dc399bce032abe0baa46562e9fd",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "066c31df6ac1a7f0e5cfdd854d482cc9",
+      "state": "completed"
+    },
+    "events": 141,
+    "operations": [
+      {
+        "id": "cd34b117632ceb966b3c7e4f2ce8b0dc",
+        "tool": "run_process",
+        "state": "succeeded"
+      }
+    ],
+    "stream": {
+      "result": {
+        "reason": "terminal",
+        "cursor": 989,
+        "observation": {
+          "after": 0,
+          "run": {
+            "graph_root": false,
+            "id": "75213dc399bce032abe0baa46562e9fd",
+            "node_id": "",
+            "parent_id": "",
+            "provider_context": {
+              "model_id": "claude-sonnet-4-6",
+              "profile_id": "claude",
+              "profile_revision": 2,
+              "provider": "anthropic",
+              "route_id": "anthropic.messages",
+              "wire": "anthropic-messages"
+            },
+            "session_id": "066c31df6ac1a7f0e5cfdd854d482cc9",
+            "state": "running"
+          },
+          "scope": "run"
+        }
+      }
+    },
+    "verified": {
+      "exitCode": 0,
+      "passed": 9,
+      "warnings": 1,
+      "remainingWarning": "Starlette anyio.abc.BlockingPortal deprecation",
+      "pytestCacheWarning": false,
+      "cachedNodeIds": 9,
+      "stdout": ".........                                                                [100%]\r\n============================== warnings summary ===============================\r\n.xlang3-site\\starlette\\testclient.py:51\r\n  C:\\xMindNativeValidation\\model-zoo-current-acceptance-20261018\\backend\\.xlang3-site\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\r\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\r\n\r\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\r\n9 passed, 1 warning in 2.95s\r\n",
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 136,
+          "input_tokens": 8223,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 136,
+          "prompt_tokens": 8223,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 95,
+          "input_tokens": 8456,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 95,
+          "prompt_tokens": 8456,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 205,
+          "input_tokens": 9036,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 205,
+          "prompt_tokens": 9036,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "actualModelResponses": 3,
+      "terminalCursor": 989,
+      "taskResubmissions": 0
+    },
+    "completedAt": "2026-10-18T12:31:53.608Z"
+  },
+  "failedProbe": {
+    "run": "2e9fed85c997d82c1c62eeb72ba8f432",
+    "status": {
+      "graph_root": false,
+      "id": "2e9fed85c997d82c1c62eeb72ba8f432",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "87e1e6036e1f6e4fbc16bd38d9d9d03c",
+      "state": "completed"
+    },
+    "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+    "explanation": "The model explicitly chose workdir . despite the requested backend directory; this completed process failed with No module named pytest. It was preserved, followed by a distinct explicitly corrected check. It is not counted as cache-fix acceptance."
+  },
+  "initialAdapterFailure": {
+    "error": "The native view did not become ready. Its backend/profile was preserved; reconnect to inspect the same owner.",
+    "inferenceAdmitted": false,
+    "explanation": "The old host killed its own still-running adapter after its 60-second observation deadline; the existing backend and profile were retained."
+  },
+  "startupFix": {
+    "behavior": "Observe the same live native view until ready, exit, invalid metadata or an explicit workspace/disposal change. Report elapsed progress to the existing sidebar document without replacing its HTML. No timeout-triggered respawn or kill.",
+    "actualHost": {
+      "scope": "Current production host adapter and actual native upgrade; explicit VS Code APIs. Real clock/processes; no delayed or synthetic native peer and no inference.",
+      "workspace": "C:/xMindNativeValidation/installed-0.1.17-workspace-20261018",
+      "oldBackendPid": 49704,
+      "startedAt": "2026-10-18T12:34:24.345Z",
+      "launches": [
+        {
+          "pid": 21896,
+          "program": "C:\\xMindNativeValidation\\directory-publication-source-0e35ac3\\.agentflow\\directory-publication-runtime\\xmind.exe"
+        }
+      ],
+      "progress": [
+        {
+          "elapsedMs": 5053,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 10107,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 15147,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 20191,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 25245,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 30298,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 35340,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 40396,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 45436,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        },
+        {
+          "elapsedMs": 50472,
+          "processId": 21896,
+          "root": "C:\\xMindNativeValidation\\installed-0.1.17-workspace-20261018"
+        }
+      ],
+      "completedAt": "2026-10-18T12:35:18.567Z",
+      "elapsedMs": 54221,
+      "newBackendPid": 2876,
+      "selectionPreserved": true,
+      "ready": true,
+      "noRespawn": true,
+      "over60Seconds": false
+    },
+    "scope": "This real handoff took about 54 seconds and did not exceed 60. Synthetic host fixtures separately verify readiness after 75 seconds, native exit after long preparation, invalid metadata and explicit disposal."
+  },
+  "sourceFilesChecked": 30,
+  "sourceAndOriginalUnchanged": true,
+  "installed": {
+    "version": "0.1.17",
+    "newFixesInstalled": false
+  },
+  "warnings": "Only the Starlette/AnyIO deprecation remains in the corrected real pytest run; no warning suppression or cache disabling was used.",
+  "fixtureCorrection": "An initial new disposal fixture changed the pre-construction dependency object rather than the copied manager dependency. Its own Node test child was identified and stopped, the fixture corrected, and the complete 403-test suite passed. No native backend was stopped by this fixture correction.",
+  "diagnosticCleanup": "The exact ready diagnostic view PID 7396 was stopped after matching its process birth and executable; backend 37596 remains preserved.",
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "logs": {
+    "directory-publication-full-ctest-20261018.log": {
+      "path": "C:/xMindNativeValidation/directory-publication-full-ctest-20261018.log",
+      "sha256": "3d6bf431db37790baf6e46a4b1add2868d52fb126540d77b04a1eaaa46c204a4"
+    },
+    "native-startup-extension-final-20261018.log": {
+      "path": "C:/xMindNativeValidation/native-startup-extension-final-20261018.log",
+      "sha256": "4f5def2ef9944ac85be91118830001c9b307b453e59441ee99b808bf74ea72a8"
+    },
+    "native-pytest-cache-corrected-20261018.log": {
+      "path": "C:/xMindNativeValidation/native-pytest-cache-corrected-20261018.log",
+      "sha256": "212c4ec79c324f2b50a4f6bcdb53f45a673966c136a409f2e82e42cac57055de"
+    },
+    "native-pytest-cache-fix-resumed-20261018.log": {
+      "path": "C:/xMindNativeValidation/native-pytest-cache-fix-resumed-20261018.log",
+      "sha256": "761646f0b29383890acfcf14f9094449d6699427342065f548d8bb8b9769ae5c"
+    },
+    "long-native-host-startup-20261018.log": {
+      "path": "C:/xMindNativeValidation/long-native-host-startup-20261018.log",
+      "sha256": "546ef23c789f844ccfb452374ed04011f3553fcad1408d92255893d2aec01919"
+    }
+  }
+}

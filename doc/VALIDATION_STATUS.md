@@ -15,13 +15,53 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Native `a56c3cd` passed the complete sequential local Release inventory, 148/148, against the pinned xlang3 SDK. Foreground process tests verify OS-derived SystemDrive, reject spoofed parent/profile values, and retain secret isolation. The hosted checklist now explicitly names all 148 local tests plus its one isolated hosted-only OAuth trust test. [Current receipt](evidence/coding-process-provider-recovery-20261018.json). | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
+| Native backend and local persistence | Native `0e35ac3` passed all 148 sequential local Release contracts in 778.47 seconds against pinned xlang3 `b0da71f2`. Foreground process contracts cover OS-derived SystemDrive, secret isolation, child-directory publication, and rejection of leased-directory/ancestor renames. The hosted checklist names all 148 local tests plus one isolated hosted-only OAuth trust test. [Current receipt](evidence/cache-publication-startup-20261018.json). | Hosted current-source gate, production release acceptance, and other-host startup. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed VSIX **0.1.17**, native `a56c3cd`: 1,970 installed payloads and the 1,927-file runtime verify. Installed host/client imports four saved-key profiles, discovers 13 Claude models and preserves selection across a second attachment. A real Claude run on the identical staged native runtime installed xlang3 dependencies, passed the current ModelZoo copy's nine FastAPI tests, built Vue, and created an approved report. Production event subscription resumed cursor 70 to terminal 680 without task replay. Original/copied source files remain unchanged. VS Code APIs and browser cookie jar were explicit Node fixtures; no rendered acceptance. All 148 native, 399 extension and 138 browser contracts pass. [Current installed receipt](evidence/coding-package-0.1.17-20261018.json). Earlier `d7adf96` passed a different 20-test snapshot and Vue build. | Actual rendered coding acceptance, current-source hosted/release acceptance, two pytest cache-write warnings, prior failed profile handoff, broader models/recovery cases and long-task reliability. |
+| Coding clients | Installed VSIX **0.1.18**, native `0e35ac3`: 1,970 installed payloads and the 1,927-file runtime verify. Actual installed host/client imports four saved profiles, discovers 13 Claude models and retains selection across reattachment. The identical staged native runtime preserved the original 12-message ModelZoo conversation across upgrade; a real corrected Claude/xlang3 check passed nine tests and wrote its cache, leaving one external dependency deprecation. The prior full task built Vue. A real one-launch host handoff reported progress through readiness at about 54 seconds; fixtures cover readiness after 75 seconds. All 148 native and 403 extension tests pass; unchanged browser baseline 138. [Installed receipt](evidence/coding-package-0.1.18-20261018.json). | Actual rendered editor/browser acceptance; hosted/release acceptance; older unresolved profile handoff; broader models, recovery and long-task reliability. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.18: directory publication and startup observation — 2026-10-18
+
+The actual VS Code CLI installed and lists Windows x64 development **0.1.18**.
+All 1,970 installed payloads and the 1,927-file runtime verify against the final
+1,973-file archive. The previous 0.1.17 installation was backed up and its 1,972
+files checked. Settings are unchanged and all five prior profile directories
+remain present. The actual installed host/client connected a fresh profile,
+imported four saved-key profiles, discovered 13 Claude models and preserved the
+explicit model selection across another attachment. These were explicit Node
+VS Code API fixtures; no editor or browser-window rendering was tested.
+
+The cache warning came from xMind's foreground directory lease, not an xlang3
+API gap. The same directory publication succeeds under standalone paired
+xlang3; an actual launched Node child reproduced Windows EBUSY. Adding write
+sharing to directory leases allows publication of child directories while
+retaining rejection of working-directory and ancestor renames. Executable file
+leases and existing identity, junction, environment and process checks remain.
+All 148 local native Release contracts pass in 778.47 seconds. No xlang3 source
+or SDK change, warning suppression or cache-plugin disabling was used.
+
+A real native profile handoff preserved the original 12-message ModelZoo
+conversation and selected provider. A subsequent Claude probe used the wrong
+workdir and failed before pytest could import; that task is retained as failed.
+A distinct explicitly corrected request ran xlang3 pytest in backend, passed
+all nine tests, wrote all nine cached node IDs, and produced only the external
+Starlette/AnyIO deprecation warning. Original and copied source files remain
+unchanged. The earlier full task's Vue build remains the frontend evidence.
+
+The earlier adapter attempt timed out before admitting any task and killed its
+own still-running native view. The host now continues observing the same live
+child until ready, exit, invalid metadata or explicit workspace/disposal change.
+Elapsed progress updates the existing CSP-protected sidebar document as text,
+without resetting its HTML. A real generation handoff used one child, reported
+10 progress updates and became ready in 54.221 seconds. This actual check did
+not exceed 60 seconds; synthetic host fixtures separately verify readiness
+after 75 seconds, late exit, malformed metadata and cancellation. The complete
+403-test extension suite passes. Rendered UI remains unverified and VS Code
+stayed closed. [Detailed evidence](evidence/cache-publication-startup-20261018.json),
+[installed package receipt](evidence/coding-package-0.1.18-20261018.json).
 
 ## Installed 0.1.17 and ModelZoo build acceptance — 2026-10-18
 

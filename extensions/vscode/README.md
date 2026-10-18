@@ -1,6 +1,6 @@
 # xMind for VS Code
 
-**0.1.17** is a local Windows x64 development package. Its native runtime
+**0.1.18** is a local Windows x64 development package. Its native runtime
 preserves checked conversation history across authority, model and supported
 provider changes. DeepSeek receives verified foreign tool turns as labelled
 context data while retaining its own native reasoning and tool continuation.
@@ -12,12 +12,19 @@ Foreground Windows processes receive the OS-derived SystemDrive without
 forwarding provider secrets. If another client changes the active provider
 during selection, both clients refresh capabilities and saved-key discovery
 after the conflict without retrying the selection or submitting a task.
+Process directory leases allow child-directory publication while retaining
+leased-path rename/deletion protection. The host observes the same live native
+startup beyond a single observation interval and reports elapsed progress in
+the existing sidebar document.
 
-The extension suite passes **399/399**; the browser suite passes **138/138**.
+The extension suite passes **403/403**; the browser suite passes **138/138**.
 All **148** local native Release contracts pass. A real Claude run validated a
 source-verified ModelZoo copy: xlang3 dependency installation, **9 passing**
-FastAPI tests (one pytest cache-write warning and one Starlette deprecation), and a Vue production
-build. Event observation resumed through completion without replaying the task.
+FastAPI tests, and a Vue production build. After correcting native directory
+sharing, a real xlang3 pytest run passed all nine tests and published its cache;
+only the dependency's Starlette/AnyIO deprecation warning remains. A native
+runtime handoff retained the original 12-message conversation and selected
+provider. Event observation resumed through completion without replaying the task.
 The earlier history
 checkpoint passed ten focused native contracts. A real saved-key coding conversation completed
 OpenAI → Claude → Gemini → DeepSeek → OpenAI, including approved file creation

@@ -190,9 +190,13 @@ class WorkspaceBackend {
     let failed=false;child.once('error',()=>{failed=true;});child.once('exit',()=>{failed=true;});child.unref?.();
     let owner;
     try{
-      const deadline=this.deps.now()+60000;let metadata;
-      while(this.deps.now()<deadline&&!failed&&current()){
-        try{const info=await this.deps.fs.lstat(ready);if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1||info.size>16384)throw new Error('Invalid native view metadata file.');metadata=JSON.parse(await this.deps.fs.readFile(ready,'utf8'));break;}catch(error){if(!['ENOENT','EACCES','EPERM','EBUSY'].includes(error.code)&&!(error instanceof SyntaxError))throw error;await this.deps.sleep(100);}
+      const started=this.deps.now();let nextProgress=started+5000,metadata;
+      // A cold verified generation or an idle owner handoff can outlive one
+      // observation interval. Keep this exact live child; only exit, invalid
+      // metadata or an explicit workspace/disposal change ends its startup.
+      while(!failed&&current()){
+        try{const info=await this.deps.fs.lstat(ready);if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1||info.size>16384)throw new Error('Invalid native view metadata file.');metadata=JSON.parse(await this.deps.fs.readFile(ready,'utf8'));break;}catch(error){if(!['ENOENT','EACCES','EPERM','EBUSY'].includes(error.code))throw error;await this.deps.sleep(100);}
+        const now=this.deps.now();if(current()&&!failed&&now>=nextProgress){nextProgress=now+5000;try{this.deps.onProgress?.({elapsedMs:now-started,processId:child.pid,root:canonical});}catch{/* A view notification cannot retire native startup. */}}
       }
       if(!current())throw new Error('Workspace changed while its native view became ready.');
       if(failed||!metadata){

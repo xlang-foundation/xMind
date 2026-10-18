@@ -1,0 +1,118 @@
+{
+  "recordedAt": "2026-10-18T12:40:46.107Z",
+  "version": "0.1.18",
+  "scope": "Installed Windows development package, actual installed host/client/native attachment, real provider discovery, and prior actual coding tests on its identical verified native executable. VS Code API and DOM fixtures are explicit; no rendered desktop acceptance.",
+  "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+  "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "payload": {
+    "version": "0.1.18",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.18-coding-win32-x64.vsix",
+    "sha256": "93593221be424966ccdb8559c66d4959381d93ff064ce6a4a66c853759ec7799",
+    "bytes": 32497408,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.18",
+    "version": "0.1.18",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "manifestSha256": "91b46288c2fea7c8d6071817af0fafab980af611494840a85be5dfede30596b5",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "installedHost": {
+    "version": "0.1.18",
+    "extension": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.18",
+    "workspace": "C:/xMindNativeValidation/installed-0.1.18-workspace-20261018",
+    "scope": "Installed host/client/runtime and real provider discovery; explicit VS Code workspace/settings/SecretStorage fixtures. No actual editor or browser UI.",
+    "inferenceRequests": 0,
+    "startedAt": "2026-10-18T12:39:57.952Z",
+    "runtime": {
+      "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+      "manifestSha256": "91b46288c2fea7c8d6071817af0fafab980af611494840a85be5dfede30596b5",
+      "files": 1927
+    },
+    "connectElapsedMs": 4792,
+    "owner": {
+      "backendPid": 67320,
+      "origin": "http://127.0.0.1:61390",
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04"
+    },
+    "completedAt": "2026-10-18T12:40:06.107Z",
+    "savedKeysImported": 4,
+    "provider": "claude",
+    "catalogueCount": 13,
+    "model": "claude-sonnet-4-6",
+    "secondAttachmentPreservesSelection": true,
+    "executionAvailable": true,
+    "renderedAcceptance": false
+  },
+  "sourceFiles": {
+    "extension.js": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+    "workspace-backend.js": "73f71415027a5624f2c45d9e0d2b98716e4ddfe5cf7917327f48bc8b8982f707",
+    "client.js": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+    "README.md": "6520787e739af10f42378a4fae233bb445a01548e2100ef931f820cd8c08464f"
+  },
+  "checks": {
+    "native": 148,
+    "extension": 403,
+    "browserBaseline": 138
+  },
+  "codingReceipt": "cache-publication-startup-20261018.json",
+  "actualPytest": {
+    "passed": 9,
+    "warnings": 1,
+    "cacheWritten": true,
+    "cacheWarning": false,
+    "remainingWarning": "Starlette/AnyIO deprecation",
+    "originalHistoryMessagesPreserved": 12
+  },
+  "startup": {
+    "realHandoffElapsedMs": 54221,
+    "realLaunches": 1,
+    "realProgressUpdates": 10,
+    "realOver60Seconds": false,
+    "over60Scope": "Synthetic production-host fixture verifies readiness after 75 seconds; the actual measured handoff took about 54 seconds."
+  },
+  "preservation": {
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.17-before-0.1.18",
+    "checkedFiles": 1972,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": 5
+  },
+  "installationCorrection": "The first combined PowerShell command checked an unset LASTEXITCODE after a cmdlet-only verification script and exited before invoking the installer. The premature missing-installation host check is retained. The actual installer then ran successfully, all installed files were verified and the installed host check passed.",
+  "xlang3Changed": false,
+  "CPythonExecuted": false,
+  "vscodeWindowsOpened": false,
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "limitations": [
+    "Actual editor and external-browser rendering remain unverified.",
+    "The cache-fix live inference used the identical staged native executable before installation; the installed-host check admitted no inference.",
+    "The Starlette/AnyIO deprecation remains in the external test project.",
+    "Hosted current-source and production release acceptance remain outstanding.",
+    "Installation does not replace other already-running user backends."
+  ],
+  "logs": {
+    "vscode-0.1.18-package-20261018.log": "7cf0cb1bf02d6691d28fe6f0ff84347652d8f538bb01a0338b02345fd233916d",
+    "vscode-0.1.18-install-20261018.log": "87fced408c49e73ce4c488404cdd4421750abeee6ecefac20e97aec024990154",
+    "vscode-0.1.18-extension-list-20261018.log": "8132eeaa85900b8cf3ced685fb81054ba7e2801e6a237f390449bc927bdb56c3",
+    "vscode-0.1.18-extension-tests-20261018.log": "ebfcd16b947a5d56ffbe0e0e437a69d6dc6490d3fd74344d9a0beccb2948822f",
+    "vscode-0.1.18-installed-host-20261018.log": "592f4d50db4eee90354f00482ee3203780836b7721940c2dbd314bcdfd9d275a"
+  }
+}

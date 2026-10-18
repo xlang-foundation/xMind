@@ -94,8 +94,25 @@ test('admission carries verified workspace authority and rejects late selection 
 test('authority drift rejects admission before a replacement run can be created',async()=>{
  const h=harness(),owner=await h.manager.connect();h.launches[0].info.workspace={...owner.metadata,authority_id:'d'.repeat(32)};await assert.rejects(h.manager.prepare(),/owner changed/);
 });
-test('readiness timeout does not retry spawning or create a JavaScript database',async()=>{
- const h=harness();h.deps.fs.lstat=async()=>{const e=Error('not published');e.code='ENOENT';throw e;};await assert.rejects(h.manager.connect(),/did not become ready/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.ok(!h.directories.some(v=>v.endsWith('.sqlite')));
+test('long native readiness keeps the same live child past one observation interval and reports elapsed progress',async()=>{
+ const h=harness(),inspect=h.deps.fs.lstat,progress=[];h.manager.deps.onProgress=value=>progress.push(value);
+ h.deps.fs.lstat=async file=>{if(file.endsWith('ready.json')&&h.deps.now()<75000){const e=Error('not published yet');e.code='ENOENT';throw e;}return inspect(file);};
+ const owner=await h.manager.connect();assert.equal(owner.backendPid,3000);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.ok(progress.some(value=>value.elapsedMs>=60000));assert.ok(progress.every(value=>value.processId===h.launches[0].child.pid&&value.root===owner.canonical));assert.ok(!h.directories.some(v=>v.endsWith('.sqlite')));
+});
+
+test('explicit disposal retires a still-pending native view without a replacement spawn',async()=>{
+ const h=harness();h.deps.fs.lstat=async()=>{const e=Error('not published');e.code='ENOENT';throw e;};h.manager.deps.onProgress=()=>h.manager.dispose();
+ await assert.rejects(h.manager.connect(),/changed/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
+});
+
+test('a child that exits after long preparation fails without being relaunched or killed again',async()=>{
+ const h=harness(),progress=[];h.manager.deps.onProgress=value=>progress.push(value);
+ h.deps.fs.lstat=async()=>{if(h.deps.now()>=75000){const child=h.launches[0].child;child.exitCode=2;child.emit('exit',2);}const error=Error('not published');error.code='ENOENT';throw error;};
+ await assert.rejects(h.manager.connect(),/did not become ready/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.ok(progress.some(value=>value.elapsedMs>=60000));assert.equal(h.secrets.size,0);
+});
+
+test('readable malformed readiness metadata is a protocol failure rather than an endless pending startup',async()=>{
+ const h=harness();h.deps.fs.readFile=async()=>'{';await assert.rejects(h.manager.connect(),SyntaxError);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
 });
 test('external attachment still verifies the actual opened workspace',async()=>{
  const h=harness({fetch:async()=>({ok:true,json:async()=>({configured:true,root:'D:\\Projects\\Example',workspace_id:'windows-local-file-v1:1:2',authority_id:'b'.repeat(32)})})});await h.manager.attach('http://127.0.0.1:19999','x'.repeat(64));assert.equal(h.launches.length,0);assert.equal(h.manager.stateFields(),undefined);

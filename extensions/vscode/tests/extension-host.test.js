@@ -170,14 +170,14 @@ function harness(options={}) {
   // Native ownership is a separate mock boundary here. Its actual host lifecycle
   // and authenticated HTTP admission races are exercised in workspace-backend.
   class TestWorkspaceBackend{
-    constructor(){this.epoch=0;this.active=undefined;}
+    constructor(_vscode,_context,_resolve,dependencies={}){this.epoch=0;this.active=undefined;this.progress=dependencies.onProgress;}
     invalidate(){this.epoch++;this.active=undefined;}
     dispose(){this.invalidate();}
     async selectedFolder(){return {folder:vscode.workspace.workspaceFolders[0]};}
     signature(){return JSON.stringify(vscode.workspace.workspaceFolders.map(folder=>folder.uri.toString()));}
     requestBackendUpgrade(){backendUpgradeRequests.push(this.epoch);}
     stateFields(){return options.stateScope;}
-    async connect(){connectCalls.push(this.epoch);const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,canonical:root,roots:vscode.workspace.workspaceFolders.map(value=>({name:value.name,fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
+    async connect(){connectCalls.push(this.epoch);const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;if(options.startupProgress)this.progress?.({elapsedMs:options.startupProgress,root,processId:1234});await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,canonical:root,roots:vscode.workspace.workspaceFolders.map(value=>({name:value.name,fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
@@ -234,6 +234,17 @@ test('newly resolved xMind sidebar immediately shows a CSP-protected connecting 
  assert.equal(view.htmlAssignments.filter(value=>value.includes('<p role="status">Connecting to xMind…</p>')).length,1,'the connecting document is assigned only once before the coding UI replaces it');
  view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));
  assert.deepEqual(h.errors,[]);view.close();
+});
+
+test('native startup progress updates the existing CSP-protected connecting document as text',async()=>{
+ let release,entered;const pending=new Promise(resolve=>release=resolve),arrived=new Promise(resolve=>entered=resolve);
+ const h=harness({startupProgress:65000,beforeConnect:async()=>{entered();await pending;}});await h.activation;const opening=h.commands.get('agentflow.open')();await arrived;const view=h.views[0];let dom;
+ try{
+  const progress=view.posted.find(value=>value.type==='startup-progress');assert.match(progress.text,/65 s elapsed/);assert.equal(view.htmlAssignments.length,1);
+  const {JSDOM}=require('jsdom');dom=new JSDOM(view.webview.html,{runScripts:'dangerously'});assert.match(view.webview.html,/script-src 'nonce-/);
+  dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data:progress}));assert.equal(dom.window.document.querySelector('[role="status"]').textContent,progress.text);
+  const text='<img src=x onerror=alert(1)>';dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data:{type:'startup-progress',text}}));assert.equal(dom.window.document.querySelector('[role="status"]').textContent,text);assert.equal(dom.window.document.querySelector('img'),null);
+ }finally{dom?.window.close();release();await opening;view.close();}
 });
 
 test('failed xMind startup replaces the connecting state with safe retry guidance',async()=>{
