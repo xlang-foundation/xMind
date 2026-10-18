@@ -55,7 +55,7 @@ bool invokes_cpython(const std::string& executable,const std::vector<std::string
 }
 std::optional<WorkspaceMembershipSnapshot> process_membership_for_run(PersistenceService& store,const std::string& run_id){
     std::set<std::string> visited;auto owner=run_id;
-    for(std::size_t depth=0;depth<32&&!owner.empty();++depth){
+    for(std::size_t depth=0;depth<32;++depth){
         if(!visited.insert(owner).second)throw ToolAccessDenied("Process run ancestry contains a cycle");
         std::optional<WorkspaceMembershipSnapshot> snapshot;
         for(const auto& event:store.events(owner).get())if(event.kind=="agent.workspace_membership"){
@@ -77,10 +77,9 @@ std::optional<WorkspaceMembershipSnapshot> process_membership_for_run(Persistenc
             snapshot=std::move(parsed);
         }
         if(snapshot)return snapshot;
-        const auto run=store.run(owner).get();if(run.parent_id.empty())break;owner=run.parent_id;
+        const auto run=store.run(owner).get();if(run.parent_id.empty())return std::nullopt;owner=run.parent_id;
     }
-    if(!owner.empty())throw ToolAccessDenied("Process run ancestry exceeds workspace membership lookup limit");
-    return std::nullopt;
+    throw ToolAccessDenied("Process run ancestry exceeds workspace membership lookup limit");
 }
 std::string hex_bytes(std::string_view bytes) {
     constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(bytes.size()*2);

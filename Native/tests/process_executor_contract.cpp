@@ -104,9 +104,11 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         phase("trusted-process-profile");
         ProcessExecutor trusted_executor(store,workspace,root.string(),{{"trusted-fixture",argv[1],1,{argv[2]},10s,{},true}});
         const auto trusted_arguments=Json{{"profile","trusted-fixture"},{"arguments",Json::array({"normal","trusted-approved.txt"})},{"workdir","."}}.dump();
-        const auto trusted_result=Json::parse(trusted_executor.invoke("trusted-approved","run",trusted_arguments,now()+600000));
+        AgentProcessToolHost& trusted_host=trusted_executor;
+        const AgentProcessInvocation trusted_invocation{1,"trusted-approved","run",workspace.identity(),1,workspace.identity(),trusted_arguments,now()+600000,false};
+        const auto trusted_result=Json::parse(trusted_host.invoke(trusted_invocation));
         const auto trusted_operation=store.operation("trusted-approved").get();
-        require(trusted_result["exit_code"]==0&&file(root/"trusted-approved.txt")=="actual child effect"&&trusted_operation.state==OperationState::succeeded&&trusted_operation.decision_actor=="trusted-process-profile:trusted-fixture","Explicitly trusted profile must execute once without a controller prompt and durably record its grant");
+        require(trusted_result["exit_code"]==0&&file(root/"trusted-approved.txt")=="actual child effect"&&trusted_operation.state==OperationState::succeeded&&trusted_operation.decision_actor=="trusted-process-profile:trusted-fixture","A root run without a membership snapshot must execute its explicitly trusted primary-folder process once and durably record the grant");
         ProcessExecutor ordinary_executor(store,workspace,root.string(),profiles);
         Task ordinary_after_trust(ordinary_executor,"ordinary-after-trust",args("normal","ordinary-after-trust.txt"));proposed(store,"ordinary-after-trust");store.decide_operation("ordinary-after-trust",OperationDecision::deny,"actual-fixture-controller").get();rejects<PermissionDenied>([&]{ordinary_after_trust.result.get();});
         phase("attached-workspace-dispatch");

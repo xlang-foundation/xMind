@@ -133,7 +133,11 @@ not process-placement acceptance.
 
 The Release process-executor, AgentRunner and graph-runner contracts pass with
 the typed process request, including attached-folder dispatch, revision and
-folder mismatch rejection, request expiry and both caller paths.
+folder mismatch rejection, request expiry and both caller paths. A follow-up
+regression test reproduced and corrected root-run ancestry termination: a
+single-folder run without a membership event must use the verified primary
+workspace rather than fail the ancestry depth check. The process-executor,
+AgentRunner and graph-runner Release contracts then passed 3/3 in 27.95 seconds.
 
 ### Run-scoped workspace invocation boundary — 2026-10-18
 
