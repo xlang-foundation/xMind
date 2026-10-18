@@ -85,6 +85,42 @@ agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.
 The acceptance section below is required before that option can be advertised.
 
+## Source-driven next boundary — 2026-10-18
+
+The full current-source native gate now passes **147/147** contracts, including
+the current `AgentRunner`, graph, local-profile, MCP SDK and backend-owner
+contracts ([exact record](evidence/native-current-source-full-20261017.json)).
+That establishes the in-process baseline; it does not change the worker boundary.
+
+Inspection of `AgentRunner::execute` shows the next extraction must be a
+run-scoped `AgentToolHost`, rather than another persistence-only port. The
+runner currently discovers tools and dispatches calls directly through
+`WorkspaceTools` / `WorkspaceToolSet`, `ProcessExecutor`, MCP and A2A registries,
+trusted xlang3 callables, edit/create/patch/restore executors, permission grants
+and repository-instruction contexts. `AgentRunJournal`, `AgentContextJournal`
+and `AgentModelGateway` already isolate durable run/context records and model
+requests, but they do not mediate those effects.
+
+The host's public call should carry a versioned run capability, attempt and
+call IDs, the sealed catalogue revision, tool name, bounded argument JSON,
+workspace ID/revision and optional folder ID, plus a deadline. It must not
+carry a workspace root, executable path, credential reference or database
+handle. The backend resolves folder IDs from the admitted membership, rechecks
+the sealed tool binding and agent policy, and invokes the existing native tool
+implementation. Approval waiting, grant lookup, effect claims, MCP/A2A receipts
+and event persistence stay on the backend. Progress events are committed by the
+backend before forwarding to either the in-process runner or a worker. A lost
+reply after dispatch is recorded as uncertain and is never transparently
+replayed.
+
+Implementation order is therefore: extract the current catalogue and tool-call
+switch behind an in-process `AgentToolHost` without changing its behavior;
+run the same AgentRunner contracts through that host; add the authenticated
+xlang3 LRPC adapter with attempt/call idempotency and bounded streaming; then
+run those contracts in a child process and add crash/recovery acceptance. No
+agent process-placement setting is valid until the remote host implements the
+same effect and approval contract.
+
 ## Verified SDK foundation
 
 The existing pinned xlang3 SDK revision
