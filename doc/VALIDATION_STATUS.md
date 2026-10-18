@@ -11,15 +11,15 @@ measured against xMind's own architecture and live coding, CLI, webpage, and
 VS Code acceptance criteria. Older checkpoint notes retain the terminology
 used when they were recorded and should not be read as current parity goals.
 
-## Current product acceptance matrix — 2026-10-17
+## Current product acceptance matrix — 2026-10-18
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | xMind main `ff80a6f` built in Release against its pinned xlang3 `b0da71f`; the complete sequential native CTest inventory passed 147/147. The build also verified that HTTP contract consumers link with the safe provider-YAML error diagnostics. | Hosted Release gate for `ff80a6f`, release-accepted installed package, and managed startup on other hosts. |
+| Native backend and local persistence | xMind main `d919441` built in Release against its pinned xlang3 `b0da71f`; the complete sequential native CTest inventory passed 147/147. The run-scoped workspace invocation changes at `91d41f0` also pass focused AgentRunner/workspace contracts 2/2 in both Debug and Release. | Hosted Release gate for the current source, release-accepted installed package, and managed startup on other hosts. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. The ff80a6f native runtime was staged into a local VSIX; its 1,922-entry runtime manifest verified before packaging and after extraction, no private configuration files were present, and the extracted package passed the native local-view streaming/approval contract. The post-retry VS Code suite passes 392/392; browser suite passes 136/136, including browser-host shutdown ownership and attached-backend preservation. Earlier packaged VS Code coding, TestProj pytest (9/9), and webpage Vite build evidence remains linked below. | Install and rendered coding acceptance for the ff80a6f package, broader multi-file/editor workflows, long-task reliability, and full-screen CLI validation. |
+| Coding clients | Webpage, VS Code, and CLI each completed live approval-gated edits and xlang3 execution in prior checkpoints. A current-source local-development VSIX from `ac2ff8e` has a verified 1,921-file native runtime, passed package/private-file checks, and is installed headlessly; the VS Code suite passes 392/392. Package hash, runtime pin, and install evidence are in [the 2026-10-18 VSIX receipt](evidence/vscode-current-native-vsix-20261018.json). | Activate and run a live coding task with the currently installed package; broader multi-file/editor workflows, long-task reliability, and full-screen CLI validation. |
 
 ## Browser host lifecycle correction — 2026-10-17
 

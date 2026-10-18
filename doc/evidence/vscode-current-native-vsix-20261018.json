@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-18",
+  "scope": "Headless VSIX built from current source, verified, and installed without launching VS Code",
+  "xmind_checkout_head": "ac2ff8e3773eb1a70cc04c511657345730277d09",
+  "native_binary_product_source_revision": "91d41f0f4c2554b07f5dbdfae7c771dbde647052",
+  "native_source_delta_after_binary_build": "ac2ff8e adds tests and documentation only; no product source changed",
+  "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "package": {
+    "command": "npm run package -- --out C:/xMindNativeValidation/agentflow-0.1.13-ac2ff8e-current-native.vsix",
+    "result": "passed",
+    "path": "C:\\xMindNativeValidation\\agentflow-0.1.13-ac2ff8e-current-native.vsix",
+    "sha256": "2d4ca74a73f26eaf9100da4710b7e0af7e48975875e96e42c7828ce09fde2ffe",
+    "size_bytes": 31147901,
+    "entries": 1967,
+    "extension_id": "agentflow-local.agentflow",
+    "version": "0.1.13",
+    "browser_asset_and_private_file_verification": "passed"
+  },
+  "embedded_runtime": {
+    "native_revision": "ac2ff8e3773eb1a70cc04c511657345730277d09",
+    "sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "manifest_sha256": "2516a2a36a12c968e0bb009972422db65ac483ed4b536b31799ba09f2ac2b994",
+    "files": 1921,
+    "xmind_executable_sha256": "610582955df3d96ac5e128f316a5035e217163cd03a44c8403b26c86aa6db0c6",
+    "package_hash_matches_manifest": true,
+    "forbidden_or_private_entries": 0,
+    "release_accepted": false
+  },
+  "tests": {
+    "vscode_extension": "392/392 passed",
+    "native_agent_runner_and_workspace_contracts_debug": "2/2 passed",
+    "native_agent_runner_and_workspace_contracts_release": "2/2 passed"
+  },
+  "installation": {
+    "result": "passed",
+    "installed_path": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.13",
+    "installed_runtime_verification": "passed",
+    "installed_package_entries_hash_checked": 4,
+    "vscode_processes_after_install": 0,
+    "activated_in_window": false
+  },
+  "limitations": [
+    "The installed extension was not activated in a VS Code window and no live coding task was run against this exact package.",
+    "The extension runtime is a current-source local development package, not a release-accepted artifact."
+  ]
+}
