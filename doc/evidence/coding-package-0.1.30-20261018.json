@@ -1,0 +1,291 @@
+{
+  "recordedAt": "2026-10-18T21:32:49.346Z",
+  "version": "0.1.30",
+  "clientSource": "0b23b90969b3c85881e05a6c426dede11e9df15c",
+  "nativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "nativeRuntimeByteIdenticalToAccepted0_1_27": true,
+  "nativeRuntimeManifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+  "nativeRebuilt": false,
+  "nativeFullGateReference": "managed-mcp-full-gate-20261018.json",
+  "sourceFiles": 97,
+  "stageClientGate": {
+    "recordedAt": "2026-10-18T21:30:20.803Z",
+    "version": "0.1.30",
+    "sourceRevision": "0b23b90969b3c85881e05a6c426dede11e9df15c",
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "81eb576da0b2c6143c5d6b721c2fb3c3a54919c035ac3a8d630ed20732cddd5c"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "e0c5fa5e44604657503cf686252dc1e0eee6a2feb936cabfcc893cf809ee25ef"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17438,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClientGate": {
+    "sourceRevision": "0b23b90969b3c85881e05a6c426dede11e9df15c",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 70,
+    "trackedSourceFiles": 65,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 422,
+      "browser": 147
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "hostedClientArtifact": {
+    "run": "39168070472",
+    "revision": "0b23b90969b3c85881e05a6c426dede11e9df15c",
+    "conclusion": "success",
+    "artifact": 12151248753,
+    "name": "view-contracts-evidence-0b23b90969b3c85881e05a6c426dede11e9df15c",
+    "bytes": 308611,
+    "digest": "sha256:448b9dda6f161c566433ddb91187b6b14a1b3660c5c10398c0c26fc71d3c82ba",
+    "digestVerified": true,
+    "path": "C:\\xMindNativeValidation\\coding-0.1.30-source-20261018\\.agentflow\\ci\\artifacts\\view-contracts-evidence-0b23b90969b3c85881e05a6c426dede11e9df15c.zip"
+  },
+  "archive": {
+    "version": "0.1.30",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.30-coding-win32-x64.vsix",
+    "sha256": "ca8e451527394e79bb88e07211d84c68eab1ff46e930f2aab92d606d691cd748",
+    "bytes": 34406029,
+    "archiveFiles": 2448,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.30",
+    "version": "0.1.30",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "preservation": {
+    "recordedAt": "2026-10-18T21:30:10.565Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.29",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.29-before-0.1.30",
+    "checkedFiles": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "packagedXlang3Pip": {
+    "executedOn0_1_30": false,
+    "reusedByteIdenticalRuntimeEvidence": "coding-package-0.1.28-20261018.json",
+    "priorThreeCommandsAllExitZero": true,
+    "cpythonExecuted": false
+  },
+  "renderedCodingReferences": [
+    "rendered-tool-activity-20261018.json",
+    "rendered-workspaces-and-recovery-20261018.json",
+    "rendered-explorer-auto-refresh-20261018.json"
+  ],
+  "postInstallReadOnlyObserver": {
+    "startedAt": "2026-10-18T21:32:08.954Z",
+    "scope": "Read-only installed/served asset and older live runtime verification plus real headless Edge reload/history comparison; no task submissions, no editor opened",
+    "version": "0.1.30",
+    "nativeRebuilt": false,
+    "actualVsCodeActivation": false,
+    "views": [
+      {
+        "name": "main",
+        "url": "http://127.0.0.1:62342/ui/",
+        "errors": [],
+        "failedResponses": [],
+        "effectPosts": 0,
+        "session": "a2d2abc02773a31a3b4aa76bed134345",
+        "run": "0dbc93cbc6e728579aedf95b79981a7a",
+        "all18InstalledAssetsEqualServedAssets": true,
+        "messages": 22,
+        "renderedHistoryCards": 22,
+        "savedEvents": 428,
+        "credentialsPrompted": false,
+        "passed": true
+      },
+      {
+        "name": "workspace",
+        "url": "http://127.0.0.1:52121/ui/",
+        "errors": [],
+        "failedResponses": [],
+        "effectPosts": 0,
+        "session": "3bed131c1b0828ed49085e68e6e56505",
+        "run": "87a5053a1c68382567b7f5ca2ac908cd",
+        "all18InstalledAssetsEqualServedAssets": true,
+        "messages": 17,
+        "renderedHistoryCards": 17,
+        "savedEvents": 70,
+        "credentialsPrompted": false,
+        "passed": true
+      }
+    ],
+    "olderLiveViewRuntimes": [
+      {
+        "version": "0.1.27",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec"
+      },
+      {
+        "version": "0.1.28",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec"
+      }
+    ],
+    "completedAt": "2026-10-18T21:32:17.023Z",
+    "passed": true
+  },
+  "actualVsCodeActivation": false,
+  "visibleDesktopAcceptance": false,
+  "releaseAccepted": false,
+  "processBoundAgentRunnerImplemented": false,
+  "currentHostedNativeAccepted": false,
+  "cpythonExecuted": false,
+  "scope": "Installed package and complete client fixtures qualify this UI/adapter revision; existing browser hosts use older byte-identical native runtime directories. Headless browser acceptance is distinct from actual VS Code pane activation.",
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-source-20261018.json",
+      "sha256": "aeb16956bb226b9081179f05d755e24248f9a59b37725b83ca779af24510fcd9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-client-gate-20261018/gate.json",
+      "sha256": "3e2906ef604aa00f6212419947f95220583b0db22a63519df92d99ad1d15c688"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-client-gate-20261018/inputs-before.json",
+      "sha256": "4ed30c1ab45f6c95f35f20e8804266b7eb166f8d4ca71977950e435cbab5602e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-hosted-views-20261018.json",
+      "sha256": "2131107ae300a968b694680d0955740a9199934d8118aefcedf182fb4eb8a084"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-hosted-artifact-20261018.json",
+      "sha256": "2ddc719eae5124e4fbbae6fa7d98a22783f4a94af7e74fab79f1cad0192282cf"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.30-payload-evidence-20261018.json",
+      "sha256": "fb8b676cceb804cb70fb97354154a1662051786e2adc3ee74a67bd6bd4dda787"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.30-installed-evidence-20261018.json",
+      "sha256": "922c6304b409915b4b811215228b1968d798e8fd2e92d29acb5184cae59f454d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.30-preservation-20261018.json",
+      "sha256": "caf3dbf43b07d0becc0dcb767a8364869b5cedfcecf15cc61fa48f6b39858b20"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.30-install-20261018.log",
+      "sha256": "0380ae7d9b3f8013e490a5da3c03f2652723037e44b9a1c80efa9a8763b29792"
+    },
+    {
+      "path": "C:/xMindNativeValidation/vscode-0.1.30-extension-list-20261018.log",
+      "sha256": "8d1d37d2a8c4ef120baf76cef3522a46795a605bdea47c149f4ebff663fd9b20"
+    },
+    {
+      "path": "C:/xMindNativeValidation/coding-0.1.30-vsce-20261018.log",
+      "sha256": "ee6ba299b8872b11aa0033d13aa5cb12aceedc388e5e63fb9744f70bda719798"
+    },
+    {
+      "path": "C:/xMindNativeValidation/installed-coding-0.1.30-observation-20261018/acceptance.json",
+      "sha256": "3a3e6b81af2ae1ddc9cec0ff63bb6ba58eb6fc3829d147c8d2523e3d95309df8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/installed-coding-0.1.30-observation-20261018/main.json",
+      "sha256": "ee7653f9e4d91c1ed5dc882ff87ec1b792cc688c145c7bef3f91820ea36ff0b1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/installed-coding-0.1.30-observation-20261018/main.png",
+      "sha256": "9b4e045032488164a8e938bb9ef8137a3c8750d7b3c00d0ca3c51b4f705fa576"
+    },
+    {
+      "path": "C:/xMindNativeValidation/installed-coding-0.1.30-observation-20261018/workspace.json",
+      "sha256": "92e75564c2b94cb96d760a6ac37dccc87d6f8b0fb8614611dd0046966cdb0584"
+    },
+    {
+      "path": "C:/xMindNativeValidation/installed-coding-0.1.30-observation-20261018/workspace.png",
+      "sha256": "5c08a404ef9c5561d0cfe65b94f473aafb999aad7f2950a445afceaf90805f92"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\installed-coding-0.1.30-observation-20261018\\main-owners-preserved.json",
+      "sha256": "0e9cbe7c3ce44f5971f8414738bc3d869c0e7ac16bd516e33526b69c7d094862"
+    }
+  ],
+  "mainPageOwnerIdentitiesVerifiedAfterInstallation": [
+    {
+      "pid": 67948,
+      "birth": "2026-10-18T20:02:32.0466160Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 17248,
+      "birth": "2026-10-18T20:02:33.0937180Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe"
+    },
+    {
+      "pid": 33960,
+      "birth": "2026-10-18T20:02:36.4674450Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe"
+    }
+  ]
+}

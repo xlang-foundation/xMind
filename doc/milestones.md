@@ -1,6 +1,24 @@
 # Reviewable milestones
 
-## Current webpage checkpoint — automatic explorer refresh, 2026-10-18
+## Installed checkpoint — 0.1.30, 2026-10-18
+
+The automatic explorer refresh is now packaged and installed. Complete final
+staging and hosted client suites pass 422/147. All 17,438 staged files remain
+unchanged during validation. All 2,448 VSIX files and 2,445 installed payloads
+verify against their inputs; the 2,402-file native runtime remains byte-identical
+to accepted 0.1.27. Prior packaged xlang3/pip acceptance is reused through that
+identity; no new native build or full native-suite pass is claimed.
+
+The 0.1.29 installation is backed up with 2,447 files verified. Settings and
+six prior profile directory names remain preserved. All 18 installed browser
+assets equal both live pages. Read-only headless Edge reloads render all 22
+and 17 saved messages with no key prompts, page errors, failed responses or
+effect POSTs; the respective selected roots retain 428 and 70 events. Both
+older runtime directories still used by native views verify after installation.
+VS Code stays closed; actual pane activation remains unverified.
+[Installed package evidence](evidence/coding-package-0.1.30-20261018.json).
+
+## Source checkpoint — automatic explorer refresh, 2026-10-18
 
 The explorer now refreshes after newly observed terminal backend operations,
 coalesces repeated observations and retains open folders, filename search and
