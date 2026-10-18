@@ -38,9 +38,20 @@ that prior native item IDs are absent from the new request while canonical tool
 results and both user objectives remain. Queued-owner/generic-event forgery,
 foreign identity, stale snapshot and different-workspace cases are rejected.
 The shared client suites passed **393 extension and 136 browser checks**.
-These are native protocol/DOM contracts, not live-provider or rendered installed
-UI acceptance. The installed extension and running browser still use the earlier
-runtime. [Source and validation record](evidence/context-authority-replay-20261018.json).
+These are native protocol/DOM contracts. [Source and validation record](evidence/context-authority-replay-20261018.json).
+
+A subsequent live saved-OpenAI check at `097ee32` completed three runs in the
+same conversation across same-package edit-policy and process-configuration
+handoffs. It read a phrase, remembered it while creating an approved file, and
+used xlang3 to assert the exact file bytes with exit code zero. The command's
+actual assertion was inspected; public history prefixes stayed unchanged at
+4, 8 and 12 messages. No private database mutation or CPython was used. The
+current browser HTTP adapter exposes the same conversation and saved-key model
+discovery. External rendered interaction remains unverified because Windows
+denied browser activation; the installed VS Code runtime remains `d7adf96`.
+No recovery of the prior failed profile handoff, older-binary migration or
+same-session provider/model change is established by these checks.
+[Live coding and browser HTTP evidence](evidence/context-authority-replay-live-20261018.json).
 
 ## Earlier observed limitation and installed-client evidence
 

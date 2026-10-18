@@ -19,9 +19,32 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | A live CLI task applied seven reviewed FastAPI/Vue changes. The final `d7adf96` native runtime then completed an isolated dependency install, all 20 FastAPI tests and the Vue build on a fresh profile. Its bytes match the headlessly installed VSIX; all 1,927 runtime files verify. Extension tests pass 392/392 and browser tests 136/136. [Current native-wheel coding and package receipt](evidence/native-wheel-live-coding-20261018.json). | Rendered external webpage and installed VS Code coding acceptance; existing-profile handoff and changed-authority context recovery; broader workflows, long-task reliability and full-screen CLI validation. |
+| Coding clients | At `097ee32`, three real saved-provider runs retained one conversation across edit-policy and process-configuration handoffs, created the approved file, and checked its exact bytes through xlang3. The current browser HTTP adapter exposes the same 12 messages and discovers 20 saved-key models. Extension contracts pass 393/393 and browser contracts 136/136. [Live context and coding receipt](evidence/context-authority-replay-live-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; prior failed profile handoff, same-session provider/model changes, broader workflows, long-task reliability and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Live coding across backend configuration changes — 2026-10-18
+
+Product source `097ee32` completed three real saved-OpenAI runs in one fresh
+conversation. The first read a fixture phrase. After a same-package upgrade
+from read-only to approved file edits, the second remembered it without reading
+the file again and created the exact requested file after controller approval.
+After enabling the registered process profiles through another same-package
+handoff, the third used xlang3 to assert the exact file bytes and exited zero.
+The actual command was inspected independently of its output and model summary.
+The previous 4-message and 8-message public history prefixes remained unchanged
+in the final 12-message transcript. The running backend image matches the
+verified staged executable; no CPython was used.
+
+The current webpage HTTP adapter serves that same workspace and conversation,
+connects without typed server credentials, reattaches the session, and discovers
+20 models using the saved provider key without receiving a browser API key.
+These are real HTTP/API checks. External browser activation failed with Windows
+`GetCursorPos: Access is denied (0x80070005)`, so rendered interaction is still
+unverified. VS Code stayed closed and its installed runtime remains `d7adf96`.
+This is a small validation workspace, not a new Model Zoo acceptance run. The
+prior failed profile handoff is preserved; no migration or full current Release
+gate is claimed. [Run IDs, hashes, process assertion, actual usage and limits](evidence/context-authority-replay-live-20261018.json).
 
 ## Active conversation context after an authority change — 2026-10-18
 
@@ -36,9 +59,10 @@ The focused Release gate passed **7/7 in 22.48 seconds**, including an independe
 synthetic provider that checks current instructions, preserved user objectives
 and canonical tool results, omission of prior native items, persistence reopen,
 current-authority compaction, and no dispatch for a different workspace. UI
-contracts pass **393 extension and 136 browser checks**. Live-provider recovery,
-rendered clients, foreign provider/model changes, changed-authority idle
-maintenance and over-bound history remain outside this checkpoint. The prior
+contracts pass **393 extension and 136 browser checks**. At this source checkpoint,
+live-provider recovery was still pending; the subsequent live result is recorded
+above. Rendered clients, foreign provider/model changes, changed-authority idle
+maintenance and over-bound history remain outside this recovery path. The prior
 failed profile handoff is not repaired by it. [Exact scope and retained attempts](evidence/context-authority-replay-20261018.json).
 
 ## Managed handoff and profile publication — 2026-10-18

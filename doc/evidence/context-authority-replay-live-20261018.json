@@ -1,0 +1,160 @@
+{
+  "recorded_at": "2026-10-18T09:17:53.354Z",
+  "scope": "Real saved-provider native coding across same-package edit-policy and process-configuration handoffs; public browser HTTP adapter",
+  "source_revision": "097ee32e3c3ecca1888e46a41ef46af9d4bdab09",
+  "runtime": {
+    "native_executable_sha256": "964943994730780289847eff333f76a23a4b93184ecfb9fb9ce5ec4e4dfa7239",
+    "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "manifest_sha256": "06b74d5a49fbf008a887d165548ab200ccf3355c01cf8b58e7ec3848c40ca1df",
+    "release_accepted": false,
+    "current_running_image_matches_stage": true
+  },
+  "fixture": {
+    "workspace": "C:\\xMindNativeValidation\\authority-replay-live-workspace-20261018",
+    "profile_directory": "C:\\xMindNativeValidation\\profiles\\authority-replay-live-20261018\\ab1250f717c94f72951038b4dddd0ca3c98a6450ef46551dc9be5f90e00c8906",
+    "session": "672450b736fb769b659724b9ab9c809e",
+    "core_origin": "http://127.0.0.1:51400",
+    "original_TestProj_modified": false
+  },
+  "handoffs": [
+    {
+      "change": "read_only to approved workspace edits",
+      "before_pid": 13272,
+      "after_pid": 57376
+    },
+    {
+      "change": "enable saved trusted process profiles",
+      "before_pid": 57376,
+      "after_pid": 71224
+    }
+  ],
+  "runs": [
+    {
+      "id": "d3202791792499bb146b808601a89d7d",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "history_reprojected_events": 0
+    },
+    {
+      "id": "dc393202c525f8a76cbd5cac909af332",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "history_reprojected_events": 2
+    },
+    {
+      "id": "d66570c645431f8973831bc3f2c78df9",
+      "state": "completed",
+      "provider_context": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 1,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "history_reprojected_events": 2
+    }
+  ],
+  "history": {
+    "public_message_counts": [
+      4,
+      8,
+      12
+    ],
+    "previous_public_prefixes_deep_equal": true,
+    "private_database_receipts_independently_hashed": false,
+    "second_run_reread_README": false
+  },
+  "file_creation": {
+    "operation_id": "f11f698dc520549890f14dc55c457de7",
+    "state": "succeeded",
+    "decision_actor": "local-owner",
+    "exact_proposal_checked_before_allow": true,
+    "independent_disk_sha256": "450a661a5ea74591a5b1e06eca9a8b27d991233d3d6853061ec00cf442411ec6"
+  },
+  "process": {
+    "operation_id": "dc33d27bd65eaca33192ad3c9d658424",
+    "state": "succeeded",
+    "decision_actor": "trusted-process-profile:xlang3",
+    "profile_id": "xlang3",
+    "executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "arguments_sha256": "a55508b5cbc412dacef228f9c18e437ccb0f1071f9e4917c6faeaa6262472346",
+    "reviewed_script": "from pathlib import Path; assert Path('remembered.txt').read_bytes() == b'xMind authority memory 94785bca297b989ee27a44bfde059246\\n'; print('xMind runtime verified')",
+    "script_checks_exact_prior_phrase_and_newline": true,
+    "exit_code": 0,
+    "stdout": "xMind runtime verified\r\n",
+    "CPython_executed": false
+  },
+  "actual_inference_usage": {
+    "responses": 6,
+    "input_tokens": 30123,
+    "output_tokens": 227,
+    "total_tokens": 30350,
+    "scope": "Six completed inference responses; model discovery and input-count requests are separate; no cost or token-saving claim"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:60951/ui/",
+    "nativeView": "http://127.0.0.1:51849",
+    "scope": "Real public browser HTTP adapter and same CLI conversation; no rendered browser interaction",
+    "htmlStatus": 200,
+    "autoConnectedWithoutInputToken": true,
+    "httpOnlySameSiteCookie": true,
+    "sameWorkspace": true,
+    "sameSession": true,
+    "historyMessages": 12,
+    "savedProviderKeyReusedWithoutBrowserKeyInput": true,
+    "modelCount": 20,
+    "sessionReattachment": true,
+    "externalBrowserControl": {
+      "result": "unavailable",
+      "error": "GetCursorPos failed: Access is denied. (0x80070005)",
+      "recoveryAttempts": 1,
+      "browserConnector": "Only the in-app browser is connected; external preference retained"
+    },
+    "renderedAcceptance": false
+  },
+  "validation": {
+    "native_contracts": 7,
+    "native_seconds": 22.48,
+    "extension_contracts": 393,
+    "browser_contracts": 136,
+    "contract_receipt": "context-authority-replay-20261018.json"
+  },
+  "retained_setup_attempt": {
+    "result": "Console rejected --provider-config before admission",
+    "resolution": "Used unified console --config; no model run was duplicated"
+  },
+  "local_evidence_sha256": {
+    "authority-replay-live-20261018.mjs": "b424ae334604dca32ebcc7ee647107ae10a0189ff08d91986ae90141698c40e1",
+    "authority-replay-live-first-events.json": "b0821a7d853e278b7152023f7af614f80c3ab8245dc83c6475cf3d32a12b9d33",
+    "authority-replay-live-second-events.json": "86fd25f46dca7b2ce3fb2c81da15e6a148ff695840f24893d6576e2ccdd61502",
+    "authority-replay-live-third-events.json": "a8f327145554b5c9b1dbbffbc57903cc221f435e36621df3fcd6f72502cf7ab1",
+    "authority-replay-live-public-history-final-20261018.json": "d8c3eda7cbffa8ec34b3c2b6839391a9d0f601b73a6c9a5da325f08443d420fb",
+    "authority-replay-live-view-20261018.json": "1a77afa78f16ede8b8b93dd8fa82f2d90ab616ac3f777e5411ad18100f20f188",
+    "probe-authority-replay-view-20261018.mjs": "3065ab43b5e23758f33bd3c5160d3cfbf9b8d2a7df631aba46050611bbf95d22"
+  },
+  "limits": [
+    "All live handoffs use the same 097ee32 product package; no older-binary migration or recovery of the prior failed development profile is established",
+    "The installed VSIX remains on d7adf96; no VSIX for this source was installed",
+    "External browser activation returned GetCursorPos access denied (0x80070005); rendered webpage and installed VS Code acceptance remain pending",
+    "The current browser workspace is a small validation fixture, not the full Model Zoo project",
+    "Live public history prefixes were compared; private original receipt immutability and forced compaction were verified by separate native synthetic contracts",
+    "No live compaction occurred; different provider/model identities, changed-authority idle maintenance and over-bound history remain outside this recovery path",
+    "No full current native inventory, hosted Release gate, release-accepted package or all-client coding completion is claimed"
+  ]
+}
