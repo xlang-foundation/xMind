@@ -66,6 +66,11 @@ cause fixed. Current-source full/hosted acceptance, runtime staging, installatio
 and real saved-key installed acceptance are pending. Installed 0.1.23 and its
 existing webpage remain unchanged; rendered GUI acceptance remains pending.
 
+The publication correction's complete local 149-test gate is **running** at
+source `44747af`, native `c90df181...`, with all project/library/SDK/binary/CMake
+inputs and 18,598 dependency files/sets frozen. Its outcome must pass independently
+before 0.1.24 runtime staging, installation and live saved-key acceptance.
+
 The complete source 9eb9870 gate finished **148/149 in 903.27 seconds**. All
 project/library/SDK/binary/configuration hashes and 18,598 dependency files/sets
 verify unchanged. The provider-configuration view test failed because Windows
