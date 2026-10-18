@@ -159,6 +159,10 @@ ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& works
     :store_(store),workspace_(workspace),root_(std::move(root)),profiles_(std::move(profiles)) {
     if(profiles_.empty() || profiles_.size()>16 || !text(root_,32768) || !std::filesystem::u8path(root_).is_absolute())throw std::invalid_argument("Invalid process configuration");
     if(ForegroundProcess::directory_identity(root_)!=workspace_.identity())throw ToolAccessDenied("Process root is not the registered workspace");
+    // Setup accepts equivalent paths only after verifying directory identity.
+    // Keep the native handle's canonical spelling for subsequent binding and
+    // launch checks; TEMP/profile paths may contain DOS aliases or dot segments.
+    root_=workspace_.root_path();
     std::set<std::string> ids;
     for(auto& profile:profiles_) {
         if(profile.id.empty() || profile.id.size()>64 || !ids.insert(profile.id).second || profile.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || profile.revision<=0 || !text(profile.executable,32768) || !std::filesystem::u8path(profile.executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::u8path(profile.executable)) || profile.prefix_arguments.size()>32 || profile.max_timeout<std::chrono::milliseconds(1) || profile.max_timeout>std::chrono::minutes(10))throw std::invalid_argument("Invalid trusted process profile");

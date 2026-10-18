@@ -63,6 +63,18 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         phase("repository-open");
         PersistenceService store(database,imports);owner(store);ProcessExecutor executor(store,workspace,root.string(),profiles);
         phase("request-validation");
+        rejects<ToolAccessDenied>([&]{ProcessExecutor foreign(store,workspace,(root/"sub").string(),profiles);});
+        phase("aliased-root-approval");
+        {
+            ProcessExecutor aliased(store,workspace,root.string()+"\\.",profiles);
+            Task approved_alias(aliased,"approved-alias",args("normal","approved-alias.txt"));
+            proposed(store,"approved-alias");
+            require(!std::filesystem::exists(root/"approved-alias.txt"),"An equivalent root alias cannot bypass process approval");
+            store.decide_operation("approved-alias",OperationDecision::allow,"actual-fixture-controller").get();
+            const auto alias_result=Json::parse(approved_alias.result.get());
+            require(alias_result["exit_code"]==0&&file(root/"approved-alias.txt")=="actual child effect"&&store.operation("approved-alias").get().state==OperationState::succeeded,"An approved equivalent root alias must execute in the bound native workspace");
+        }
+        phase("request-validation");
         const auto definition=Json::parse(executor.definition().input_schema_json);require(definition["properties"]["profile"]["enum"]==Json::array({"fixture"}),"Model schema must expose registered IDs only");
         for(const auto source:{R"({"profile":"unknown","arguments":[]})",R"({"profile":"fixture","arguments":[],"executable":"spoof"})",R"({"profile":"fixture","arguments":[],"environment":{"SECRET":"spoof"}})",R"({"profile":"fixture","profile":"fixture","arguments":[]})",R"({"profile":"fixture","arguments":[],"timeout_ms":10001})"})
             rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",source,now()+600000);});
@@ -116,8 +128,8 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         Task ordinary_after_trust(ordinary_executor,"ordinary-after-trust",args("normal","ordinary-after-trust.txt"));proposed(store,"ordinary-after-trust");store.decide_operation("ordinary-after-trust",OperationDecision::deny,"actual-fixture-controller").get();rejects<PermissionDenied>([&]{ordinary_after_trust.result.get();});
         phase("attached-workspace-dispatch");
         const auto attached_root=root/"attached";std::filesystem::create_directories(attached_root);WorkspaceTools attached_tools(attached_root.string());
-        WorkspaceToolSet membership(workspace.identity(),2,{{workspace.identity(),root.string()},{attached_tools.identity(),attached_root.string()}});
-        store.append_event("run","agent.workspace_membership",Json{{"workspace_id",membership.workspace_id()},{"revision",membership.revision()},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",root.string()}},{{"folder_id",attached_tools.identity()},{"root",attached_root.string()}}})},{"snapshot","run_admission"}}.dump()).get();
+        WorkspaceToolSet membership(workspace.identity(),2,{{workspace.identity(),workspace.root_path()},{attached_tools.identity(),attached_tools.root_path()}});
+        store.append_event("run","agent.workspace_membership",Json{{"workspace_id",membership.workspace_id()},{"revision",membership.revision()},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}},{{"folder_id",attached_tools.identity()},{"root",attached_tools.root_path()}}})},{"snapshot","run_admission"}}.dump()).get();
         auto attached_request=Json::parse(args("normal","attached-effect.txt"));attached_request["folder_id"]=attached_tools.identity();
         const auto attached_invocation=[&](const std::string& operation,const std::string& arguments,const std::string& folder){return AgentProcessInvocation{1,operation,"run",membership.workspace_id(),membership.revision(),folder,arguments,now()+600000,false};};
         auto stale_revision=attached_invocation("attached-stale-revision",args("normal","unauthorized.txt"),attached_tools.identity());--stale_revision.workspace_revision;

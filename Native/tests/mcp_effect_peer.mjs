@@ -74,7 +74,10 @@ for await(const line of input){
     if(mode==='input-required-roots'){
       assert.notEqual(request.id,firstCallId,'Every MCP continuation retry must use a fresh request ID');
       assert.equal(request.params.requestState,'roots-phase-1','Opaque MCP requestState must be echoed on retry');
-      const roots=[path.dirname(file),...additionalRoots].map(root=>({uri:pathToFileURL(root).href,name:path.basename(root)}));
+      // Native roots are normalized from directory handles. Derive the exact
+      // expected URI independently from the actual directory, including when
+      // this peer's command line uses a DOS short alias for TEMP.
+      const roots=[path.dirname(file),...additionalRoots].map(root=>fs.realpathSync.native(root)).map(root=>({uri:pathToFileURL(root).href,name:path.basename(root)}));
       assert.deepEqual(request.params.inputResponses,{workspace:{roots}},'The response must contain every admitted workspace folder and no unregistered roots');
     }
     if(mode==='input-required'){
