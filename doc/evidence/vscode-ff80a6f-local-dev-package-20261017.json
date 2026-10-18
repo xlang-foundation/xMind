@@ -25,6 +25,30 @@
     "installed": false,
     "release_accepted": false
   },
+  "extracted_package_native_view_contract": {
+    "test": "Native/tests/local_view_contract.mjs",
+    "exit_code": 0,
+    "actual_production_extension_controller": true,
+    "actual_native_sidebar_streaming_and_reconnect": true,
+    "actual_approval_gated_creation": true,
+    "actual_shared_console_backend_and_tool_graph": true,
+    "provider_requests": 0,
+    "installed_ide": false,
+    "rendered_ide": false
+  },
+  "provider_configuration_rerun": {
+    "test": "Native/tests/local_view_provider_config_contract.mjs",
+    "behavior_assertions_reported": {
+      "trusted_provider_yaml_import": true,
+      "untrusted_view_import_rejected": true,
+      "keys_returned_to_browser": false,
+      "provider_requests": 0
+    },
+    "process_exit_code": 0,
+    "accepted_as_pass": false,
+    "cleanup_warnings": 3,
+    "cleanup_result": "Owner-stop identity assertions failed and the harness retained its synthetic temporary fixture; no matching owner process remained when checked."
+  },
   "command": "npm.cmd run package -- --out C:/xMindNativeValidation/candidate-ff80a6f/xMind-ff80a6f-dev.vsix",
   "limitations": [
     "No fresh VS Code profile installed this package or completed a rendered coding interaction with it.",
