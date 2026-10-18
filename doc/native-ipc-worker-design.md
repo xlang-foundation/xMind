@@ -125,19 +125,19 @@ does not authenticate an xMind worker or grant a workspace capability.
 ### Native C++ host API extension — 2026-10-17
 
 The xlang3 mainline SDK baseline above is historical: it includes the LRPC
-client and probe but has no supported C++ service-registration/listen API. The
-xMind-specific extension is now on
-[branch `xmind-cpp-lrpc-host`](https://github.com/CantorAI/xlang3/tree/xmind-cpp-lrpc-host)
-at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. It adds
-`X::Runtime::RegisterRemoteObject` and `X::Runtime::LrpcListen`, with a native
-C++ host/second-runtime contract and same-runtime value checks. The branch is
-now pinned by the Windows native CI, which also runs the host contract before
-packaging. The first hosted run against this pin is pending. Its exact build,
-hashes and local smoke results are in
+client and probe but has no supported C++ service-registration/listen API.
+The xMind-specific host extension was introduced at
+`ad7e74058ebdc941ec656c315a8a47a01c12d74e`. The current xMind Windows native
+CI pin is descendant `b0da71f22e9591b6bd99883b21c50ad85dbe4bed` on
+[branch `xmind-fastapi-pydantic-compat`](https://github.com/CantorAI/xlang3/tree/xmind-fastapi-pydantic-compat).
+It retains `X::Runtime::RegisterRemoteObject` and `X::Runtime::LrpcListen` and
+adds pydantic-core distribution metadata for xlang3 pip. The exact hosted gate
+for the current pin is queued at
+[run 39083212989](https://github.com/xlang-foundation/xMind/actions/runs/39083212989).
+The original host contract's local build and smoke evidence remains in
 [xlang3 C++ host evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
-This enables a C++-owned xlang3 LRPC endpoint; it does not solve the backend
-capability RPC, per-run authentication or execution-placement work described
-above.
+This provides a C++-owned xlang3 LRPC endpoint; backend capability RPC,
+per-run authentication and AgentRunner process placement remain unfinished.
 
 An isolated xMind Release build at source `cab94b6` now links against that
 exact xlang3 branch runtime. `native_agent_runner_contract` passed (1/1), and

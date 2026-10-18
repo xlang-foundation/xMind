@@ -82,14 +82,14 @@ boundary; it is not a completion claim.
 
 ### xlang3 native-host prerequisite — 2026-10-17
 
-The pinned xlang3 C++ SDK previously exposed an LRPC client but no supported
-native C++ service-host calls. The xMind-specific prerequisite is now available
-on [xlang3 branch `xmind-cpp-lrpc-host`](https://github.com/CantorAI/xlang3/tree/xmind-cpp-lrpc-host)
-at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`: `X::Runtime` can register a
-runtime-owned service object and start the shared-memory LRPC listener. Its
-native host/second-runtime contract passes, as does the existing xlang3-script
-server to C++ client smoke test. The Windows native CI now pins this commit and
-runs the host contract before packaging; the hosted gate has not yet completed
-against the new pin. This unblocks a supported native IPC boundary, but does
-not implement or validate the AgentRunner supervisor, per-run authentication,
-durable recovery, or client acceptance. [Exact local build and test evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
+The native C++ host API was introduced on xlang3 branch `xmind-cpp-lrpc-host`
+at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. xMind now pins descendant
+`b0da71f22e9591b6bd99883b21c50ad85dbe4bed` from branch
+[`xmind-fastapi-pydantic-compat`](https://github.com/CantorAI/xlang3/tree/xmind-fastapi-pydantic-compat);
+it retains the LRPC host API and adds pydantic-core package metadata required
+by xlang3 pip. The native host/second-runtime contract passed locally at the
+original host revision. The hosted Release gate for the current pin is queued
+at [run 39083212989](https://github.com/xlang-foundation/xMind/actions/runs/39083212989).
+This establishes neither process-bound AgentRunner execution nor its
+per-run authentication, durable recovery or client acceptance. [Original host
+build and test evidence](evidence/xlang3-cpp-lrpc-host-20261017.json).
