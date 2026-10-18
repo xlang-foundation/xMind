@@ -60,7 +60,9 @@ struct DirectoryLease {
         }
     }
     void open(const std::filesystem::path& path) {
-        Handle h(CreateFileW(path.c_str(),FILE_READ_ATTRIBUTES|FILE_TRAVERSE,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));
+        // Deny rename/deletion of each bound directory, while allowing writes
+        // to its children (including atomic directory publication by tools).
+        Handle h(CreateFileW(path.c_str(),FILE_READ_ATTRIBUTES|FILE_TRAVERSE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));
         if(h.value==INVALID_HANDLE_VALUE)fail("Cannot retain process directory");
         BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(h.value,&info))fail("Cannot inspect process directory");
         if(!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) || (info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT))throw ProcessBeforeDispatchError("Process directory reparses are unsupported");

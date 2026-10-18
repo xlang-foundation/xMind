@@ -16,7 +16,7 @@ after the conflict without retrying the selection or submitting a task.
 The extension suite passes **399/399**; the browser suite passes **138/138**.
 All **148** local native Release contracts pass. A real Claude run validated a
 source-verified ModelZoo copy: xlang3 dependency installation, **9 passing**
-FastAPI tests (two unresolved pytest cache-write warnings), and a Vue production
+FastAPI tests (one pytest cache-write warning and one Starlette deprecation), and a Vue production
 build. Event observation resumed through completion without replaying the task.
 The earlier history
 checkpoint passed ten focused native contracts. A real saved-key coding conversation completed

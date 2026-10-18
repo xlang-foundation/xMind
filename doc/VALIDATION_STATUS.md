@@ -41,7 +41,7 @@ activation or rendering. Existing running user backends were not replaced.
 
 A real Claude run on the identical verified staged runtime validated a 30-file
 source-verified copy of the current ModelZoo project. xlang3 pip installed its
-dependencies, xlang3 pytest passed **nine tests** with two cache-write warnings,
+dependencies, xlang3 pytest passed **nine tests** with two warnings,
 `npm ci` succeeded and Vite built the Vue application. All four native process
 receipts have exit zero. The agent created an approved validation report.
 Original and copied source/configuration files remain unchanged. Six actual
@@ -54,8 +54,13 @@ The original failure record remains. A read-only continuation used the productio
 subscription through terminal cursor 680, with no duplicate events or task replay,
 and checked the actual test count against the copied source. The model-authored
 report says 21 packages installed; pip's successful output lists 22. Package,
-test and build claims use the actual process receipts. The two pytest cache-write
-warnings remain unresolved. See the
+test and build claims use the actual process receipts. Detailed inspection
+corrects the earlier summary: there is one pytest cache-write warning and one
+Starlette/AnyIO deprecation warning. The cache publication failure reproduces
+under xMind's foreground process lease and does not reproduce under standalone
+paired xlang3. A narrow native directory-sharing correction passes two focused
+process contracts, including child-directory publication and leased-path rename
+rejection; its full suite and actual pytest rerun remain pending. See the
 [package and live coding receipt](evidence/coding-package-0.1.17-20261018.json).
 
 ## Process environment and provider-selection recovery — 2026-10-18

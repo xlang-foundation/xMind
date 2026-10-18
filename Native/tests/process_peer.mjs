@@ -1,10 +1,14 @@
 // Independent actual child process fixture; never loaded by the product.
-import {writeFileSync,existsSync} from 'node:fs';
+import {writeFileSync,existsSync,mkdirSync,renameSync,readFileSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 const [mode,marker,...args]=process.argv.slice(2);
 if(mode==='normal') {
+  const staging=marker+'-staging',published=marker+'-published';
+  mkdirSync(staging);writeFileSync(staging+'/cache.txt','published child directory');
+  renameSync(staging,published);
   writeFileSync(marker,'actual child effect');
   process.stdout.write(JSON.stringify({args,cwd:process.cwd(),configured:process.env.XMIND_PROCESS_FIXTURE,
+    publishedDirectory:readFileSync(published+'/cache.txt','utf8'),
     systemDrive:process.env.SystemDrive,
     inherited:!!(process.env.XMIND_AUTH_TOKEN||process.env.XMIND_API_KEY||process.env.XMIND_PARENT_ONLY)}));
   process.stderr.write('stderr 🌍');

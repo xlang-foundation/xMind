@@ -33,6 +33,7 @@ int main(int argc,char** argv) {
             auto c=config(argv,"normal",directory/"normal.txt");c.arguments.insert(c.arguments.end(),{"space argument","\"quoted\"","trailing\\","你好 🌍",""});
             std::string observed_out,observed_err;
             const auto result=ForegroundProcess::run(c,{},[&](bool err,std::string_view bytes){(err?observed_err:observed_out).append(bytes);});
+            if(result.exit_code!=0)throw std::runtime_error("Normal child failed: "+result.stderr_bytes);
             const auto j=nlohmann::json::parse(result.stdout_bytes);
             require(result.termination==ProcessTermination::exited && result.exit_code==0 && result.pid!=0,"Observed actual normal exit required");
             require(j["args"]==nlohmann::json::array({"space argument","\"quoted\"","trailing\\","你好 🌍",""}),"Literal arguments must survive Windows quoting");
@@ -40,6 +41,7 @@ int main(int argc,char** argv) {
             require(j["configured"]=="configured actual fixture" && j["inherited"]==false,"Child environment must be explicit and exclude backend secrets");
             require(j["systemDrive"]==expected_drive,"Native children must receive the actual OS SystemDrive, independently of an untrusted parent value");
             require(file(directory/"normal.txt")=="actual child effect","Normal child must perform actual file effect");
+            require(j["publishedDirectory"]=="published child directory","An owned process must be able to publish its own child directory by rename");
             require(result.stderr_bytes=="stderr 🌍" && observed_out==result.stdout_bytes && observed_err==result.stderr_bytes,"Both channels and observer bytes must survive exactly");
             require(result.stdout_count==result.stdout_bytes.size() && result.stderr_count==result.stderr_bytes.size() && !result.truncated,"Byte counts cannot be fabricated");
         }
@@ -47,6 +49,25 @@ int main(int argc,char** argv) {
             auto c=config(argv,"normal",directory/"reserved-system-drive.txt");c.environment.emplace_back("systemdrive","synthetic-profile-drive");
             rejects<std::invalid_argument>([&]{ForegroundProcess::run(c);});
             require(!std::filesystem::exists(directory/"reserved-system-drive.txt"),"A profile cannot override the reserved SystemDrive before dispatch");
+        }
+        {
+            stage="leased-paths";
+            const auto parent=directory/"leased-parent",cwd=parent/"cwd",marker=cwd/"ready.txt";
+            std::filesystem::create_directories(cwd);
+            auto c=config(argv,"stream-wait",marker);c.working_directory=utf8(cwd);c.working_directory_id=ForegroundProcess::directory_identity(c.working_directory);
+            c.workspace_root=utf8(directory);c.workspace_root_id=ForegroundProcess::directory_identity(c.workspace_root);
+            bool checked=false;std::string ready;
+            const auto result=ForegroundProcess::run(c,{},[&](bool err,std::string_view bytes){
+                if(err||checked)return;ready.append(bytes);if(ready.find('\n')==std::string::npos)return;
+                for(const auto& source:{parent,cwd}) {
+                    const auto moved=directory/(source.filename().string()+"-moved");std::error_code error;
+                    std::filesystem::rename(source,moved,error);
+                    if(!error){std::filesystem::rename(moved,source);throw std::runtime_error("A leased process path could be renamed during execution");}
+                    require(std::filesystem::is_directory(source)&&!std::filesystem::exists(moved),"A rejected rename must preserve its bound directory");
+                }
+                std::ofstream ack(marker.string()+".ack");ack<<"verified directory leases";checked=true;
+            });
+            require(checked&&result.exit_code==0,"Working-directory and ancestor leases must remain protected while the child completes");
         }
         {
             const auto result=ForegroundProcess::run(config(argv,"bytes",directory/"unused.txt"));

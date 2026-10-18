@@ -1,0 +1,142 @@
+{
+  "recordedAt": "2026-10-18T12:23:19.287Z",
+  "sourceBase": "4af2bfe2ecb30ca326618cf7c3ea5dfc05add905",
+  "scope": "Actual Windows process/Win32 probes and native Release process contracts; no inference or rendered UI.",
+  "problem": "The foreground launcher denied FILE_SHARE_WRITE on directory ancestors. An actual child could not rename its own staging directory, including pytest cache publication.",
+  "warningCorrection": "The real ModelZoo output contains one PytestCacheWarning and one Starlette/AnyIO DeprecationWarning; earlier summaries grouped both as cache warnings.",
+  "standalone": {
+    "scope": "Standalone paired xlang3 runtime; no xMind process directory lease or provider execution",
+    "executable": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f\\runtime-820206b1556098b5aa6712fa1a2f3746f0098092e77c31ff00fcd5ff158f659c\\xlang3.exe",
+    "cwd": "C:/xMindNativeValidation/standalone-cache-rename-20261018",
+    "exitCode": 0,
+    "stdout": "cache directory publication passed\r\n",
+    "stderr": ""
+  },
+  "sharing": [
+    {
+      "sharing": 1,
+      "exit": 1,
+      "result": {
+        "ok": false,
+        "code": "EBUSY",
+        "syscall": "rename"
+      }
+    },
+    {
+      "sharing": 3,
+      "exit": 0,
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "sharing": 5,
+      "exit": 1,
+      "result": {
+        "ok": false,
+        "code": "EBUSY",
+        "syscall": "rename"
+      }
+    },
+    {
+      "sharing": 7,
+      "exit": 0,
+      "result": {
+        "ok": true
+      }
+    }
+  ],
+  "fix": "Directory leases add FILE_SHARE_WRITE but continue excluding FILE_SHARE_DELETE. Bound-directory rename/deletion remain denied; executable file leases are unchanged.",
+  "focusedChecks": {
+    "passed": 2,
+    "total": 2,
+    "elapsedSeconds": 18.77,
+    "regressions": [
+      "Actual Node child publishes a directory containing a closed file by rename",
+      "Actual parent fails to rename the leased working directory and ancestor while the child is observed running",
+      "Existing directory identity, junction rejection, environment/handle isolation, process approval, output and job lifetime contracts retained"
+    ]
+  },
+  "fullNativeSuite": "Not run for this new fix yet; previous 148/148 result applies to a56c3cd.",
+  "actualPytestRerun": "Pending; standalone cache-publication probe alone does not establish native end-to-end recovery.",
+  "installedVersion": "0.1.17",
+  "fixInstalled": false,
+  "xlang3Changed": false,
+  "CPythonExecuted": false,
+  "reparseScope": {
+    "baselineAndCandidateAttributeOnlyReparseSet": "Both allow an existing same-user handle with FILE_WRITE_ATTRIBUTES to set a junction in an isolated Win32 probe. Do not claim these sharing flags form a filesystem sandbox or prevent in-place metadata changes.",
+    "accessMatrix": [
+      {
+        "sharing": 1,
+        "access": 0,
+        "setReparseWindowsError": 5,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-1-6e010b3e46a4465386a9e48a873cb2ec\\source"
+      },
+      {
+        "sharing": 1,
+        "access": 128,
+        "setReparseWindowsError": 5,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-1-5d28d8ddf4bc41a39ab922da3e230efa\\source"
+      },
+      {
+        "sharing": 1,
+        "access": 256,
+        "setReparseWindowsError": 0,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-1-77309f7dca7a43e7b2c11cefa77d1e63\\source"
+      },
+      {
+        "sharing": 1,
+        "access": 2,
+        "setReparseWindowsError": 32,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-1-2903a94113284410b3e7e37077ee32a0\\source"
+      },
+      {
+        "sharing": 1,
+        "access": 1073741824,
+        "setReparseWindowsError": 32,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-1-0cff3be2485b4a4c9a510c2233354d9a\\source"
+      },
+      {
+        "sharing": 3,
+        "access": 0,
+        "setReparseWindowsError": 5,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-3-a07df82f0db141a8a87b3678fc8478c0\\source"
+      },
+      {
+        "sharing": 3,
+        "access": 128,
+        "setReparseWindowsError": 5,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-3-5998dbd9da5f490fa1fef1863f092217\\source"
+      },
+      {
+        "sharing": 3,
+        "access": 256,
+        "setReparseWindowsError": 0,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-3-38949d841eb649f787419c60e363aaee\\source"
+      },
+      {
+        "sharing": 3,
+        "access": 2,
+        "setReparseWindowsError": 0,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-3-9f241e98aedb46219e95fed19c4d4e5a\\source"
+      },
+      {
+        "sharing": 3,
+        "access": 1073741824,
+        "setReparseWindowsError": 0,
+        "source": "C:\\xMindNativeValidation\\lease-reparse-3-2ef6483920764781b3cd973ebd2856d7\\source"
+      }
+    ],
+    "reference": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/4aeefef8-92c3-4abc-af7a-a610caf8a165"
+  },
+  "logs": {
+    "child-rename-native-red-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-rename-native-red-20261018.log",
+      "sha256": "880c39261da98f3d343f7ba6850b3afd151c4346c166613849b5983b7b2a988b"
+    },
+    "child-rename-focused-green-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-rename-focused-green-20261018.log",
+      "sha256": "c497f3eceea1619bb037df87f9b5df65a2b89ed49a5f86ea0276de09f95dd11d"
+    }
+  }
+}
