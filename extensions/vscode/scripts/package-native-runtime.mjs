@@ -40,6 +40,32 @@ async function pureSources(root,prefix=''){
   }
   return found.sort();
 }
+// Package the SDK's own native binding for isolated pip --target installs.
+// No CPython ABI extension or dependency-bypassing metadata is substituted.
+export async function nativeDependencyWheels(inputs){
+  const plugin=['modules/pydantic_core._pydantic_core.x3pkg.dll','modules/pydantic_core/_pydantic_core.x3pkg.dll'].find(name=>inputs.has(name));
+  if(!plugin)return new Map();
+  const metadataName=[...inputs.keys()].find(name=>/^modules\/pydantic_core-[^/]+\.dist-info\/METADATA$/.test(name));
+  need(metadataName,'Native wheel distribution metadata is missing.');
+  const metadata=inputs.get(metadataName),version=metadata.toString('utf8').match(/^Version: ([0-9]+(?:\.[0-9]+)+\+xlang3)\r?$/m)?.[1];
+  need(version&&metadata.toString('utf8').match(/^Name: pydantic-core\r?$/m)&&metadataName===`modules/pydantic_core-${version}.dist-info/METADATA`,'Native wheel distribution identity is invalid.');
+  const licenseName=[...inputs.keys()].find(name=>name.startsWith('licenses/')&&name.endsWith('/PYDANTIC_CORE_LICENSE.txt'));
+  need(licenseName,'Native Pydantic license notice is required before wheel packaging.');
+  const distribution=`pydantic_core-${version}.dist-info`,members=new Map();
+  for(const name of [plugin,...['__init__.py','core_schema.py','_schema_gather.py'].map(name=>'modules/pydantic_core/'+name)]){
+    need(inputs.has(name),'Native wheel package facade is missing.');members.set(name.slice(8),inputs.get(name));
+  }
+  members.set(distribution+'/METADATA',metadata);
+  members.set(distribution+'/WHEEL',Buffer.from('Wheel-Version: 1.0\nGenerator: xMind xlang3 SDK packager\nRoot-Is-Purelib: false\nTag: py3-none-win_amd64\n'));
+  members.set(distribution+'/licenses/PYDANTIC_CORE_LICENSE.txt',inputs.get(licenseName));
+  const record=[...members].map(([name,value])=>`${name},sha256=${createHash('sha256').update(value).digest('base64url')},${value.length}`).join('\n')+`\n${distribution}/RECORD,,\n`;
+  members.set(distribution+'/RECORD',Buffer.from(record));
+  const {ZipFile}=await import('yazl');const archive=new ZipFile();
+  for(const [name,value]of [...members].sort(([a],[b])=>a.localeCompare(b)))archive.addBuffer(value,name,{mtime:new Date('2020-01-01T00:00:00Z'),mode:0o100644});
+  archive.end();const chunks=[];let length=0;
+  for await(const chunk of archive.outputStream){length+=chunk.length;need(length<=128*1024*1024,'Native dependency wheel exceeds its bound.');chunks.push(chunk);}
+  return new Map([[`wheels/pydantic_core-${version}-py3-none-win_amd64.whl`,Buffer.concat(chunks)]]);
+}
 export async function stageNativeRuntime(options={}){
   need(options.explicitStage===true,'Explicit native runtime staging is required.');
   const {bundle,bundleManifest,bundleManifestSha256,stdlibSource,stdlibLicense,out}=options;
@@ -54,6 +80,7 @@ export async function stageNativeRuntime(options={}){
   const licensePath=resolve(stdlibLicense);need(!licensePath.split(/[\\/]/).some(name=>['.config','.agentflow'].includes(name.toLowerCase())),'Provider/private state is not a standard-library license input.');
   need(![...inputs.keys()].some(name=>name.toLowerCase()==='licenses/python-stdlib-license'),'The standard-library license output collides with the accepted bundle.');
   const license=await bytes(licensePath,1024*1024);inputs.set('licenses/Python-STDLIB-LICENSE',license);total+=license.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');
+  for(const [name,value]of await nativeDependencyWheels(inputs)){need(!inputs.has(name),'Native dependency wheel collides with an accepted input.');inputs.set(name,value);total+=value.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');}
   // Verify all source bytes again before publication. Source changes cannot
   // silently combine accepted DLLs with a newer SDK or newer Python source.
   need(raw.equals(await bytes(resolve(bundleManifest),1024*1024)),'The source manifest changed during staging.');

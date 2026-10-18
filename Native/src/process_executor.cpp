@@ -18,6 +18,12 @@ bool text(const std::string& value,std::size_t limit=4096) {
     return value.size()<=limit && value.find('\0')==std::string::npos && (value.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0)>0);
 }
 std::string utf8(const std::filesystem::path& path){const auto value=path.u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
+std::string file_uri(const std::filesystem::path& path){
+    auto generic=path.generic_u8string();const std::string value(reinterpret_cast<const char*>(generic.data()),generic.size());
+    std::string result=value.starts_with("//")?"file:":"file:///";constexpr char digits[]="0123456789ABCDEF";
+    for(unsigned char c:value){if((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='/'||c==':'||c=='-'||c=='_'||c=='.'||c=='~')result.push_back(static_cast<char>(c));else{result.push_back('%');result.push_back(digits[c>>4]);result.push_back(digits[c&15]);}}
+    return result;
+}
 bool cpython_leaf(std::string token) {
     while(!token.empty() && (token.front()=='\'' || token.front()=='"' || token.front()=='`'))token.erase(token.begin());
     while(!token.empty() && (token.back()=='\'' || token.back()=='"' || token.back()=='`' || token.back()==',' || token.back()=='.'))token.pop_back();
@@ -52,6 +58,25 @@ bool invokes_cpython(const std::string& executable,const std::vector<std::string
         if(inspect())return true;
     }
     return false;
+}
+void require_workspace_pip_install(const std::vector<std::string>& arguments){
+    std::size_t start=0;while(start<arguments.size()&&arguments[start]=="-B")++start;
+    if(arguments.size()<start+3||arguments[start]!="-m"||arguments[start+1]!="pip"||arguments[start+2]!="install")return;
+    std::optional<std::string> target;
+    for(std::size_t index=start+3;index<arguments.size();++index){
+        const auto& argument=arguments[index];
+        if(argument=="--prefix"||argument.starts_with("--prefix=")||argument=="--root"||argument.starts_with("--root=")||argument=="--user")
+            throw ToolAccessDenied("Workspace pip installs must use a relative --target, never a shared prefix or user environment");
+        if(argument=="--target"||argument.starts_with("--target=")){
+            if(target)throw ToolAccessDenied("Workspace pip install has duplicate targets");
+            if(argument=="--target"){if(++index==arguments.size())throw ToolAccessDenied("Workspace pip install target is missing");target=arguments[index];}
+            else target=argument.substr(9);
+        }
+    }
+    if(!target||target->empty()||target->front()=='-')throw ToolAccessDenied("Workspace pip installs require --target .xlang3-site; bundled xlang3 native wheels are resolved automatically");
+    const auto path=std::filesystem::u8path(*target);
+    if(path.is_absolute()||path.has_root_name()||path.has_root_directory())throw ToolAccessDenied("Workspace pip install target must be relative");
+    for(const auto& part:path)if(part==L"..")throw ToolAccessDenied("Workspace pip install target cannot traverse outside its working directory");
 }
 std::optional<WorkspaceMembershipSnapshot> process_membership_for_run(PersistenceService& store,const std::string& run_id){
     std::set<std::string> visited;auto owner=run_id;
@@ -157,7 +182,7 @@ ModelToolDefinition ProcessExecutor::definition() const {
     std::string description="Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Before reviewing changes, use the bounded workspace tools to inspect the relevant files and confirm the target directory is a Git repository before running Git diff commands. Do not chain Git status and diff commands: if the directory is not a repository, skip Git review and inspect the relevant files with workspace tools. Use background=true for bounded jobs that need asynchronous monitoring; then call wait_process with the returned job_id and inspect its terminal result before a final response. For a local development server or watcher that must remain after the response, set both background=true and persistent=true, choose a timeout of at least 30 seconds and within the trusted profile's limit, then call wait_process briefly to inspect startup output. Stop it later with stop_process using its job_id. Persistent jobs are bounded by the trusted profile timeout, stop when the backend shuts down, and do not resume after restart. A short timeout terminates the process tree and can quarantine uncertain effects. Never detach child processes with shell-level Start-Process, start, or output redirection. Nonpersistent background jobs retain the workspace/profile resource lock until completion; persistent services retain exact authorization and timeout but use a per-service resource claim so normal workspace commands can continue. A configured shell profile may interpret its arguments as shell text.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="powershell";}))description+=" For the powershell profile, pass one complete PowerShell script as arguments[0]; it uses a no-profile, noninteractive PowerShell process and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="cmd";}))description+=" For the cmd profile, pass one complete Windows command as arguments[0]; it uses the system command processor and runs without a per-command approval prompt.";
-    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile for Python-compatible workspace scripts, tests and package commands; never invoke python or python.exe. xMind already prepends -B to this profile, so do not pass -B or a python launcher name. Pass module commands directly, for example ['-m','pip','install','--only-binary=:all:','--prefix','.xlang3-site','-r','requirements.txt'], ['-m','pytest','-q'] or ['-c','print(1 + 1)']. Use pip's --prefix .xlang3-site for workspace dependencies: it preserves resolution of the bundled xlang3 native packages. --target ignores installed distribution metadata and can incorrectly try to replace those bindings; do not use --no-deps to bypass dependency checks. Report an unavailable native dependency instead of compiling or loading a CPython extension. Its executable is pinned to the xlang3 runtime paired with this xMind backend, so it does not depend on whichever xlang3.exe happens to appear first on machine PATH. xMind adds the paired runtime modules, .xlang3-site, and .xlang3-site/Lib/site-packages in the selected working directory to PYTHONPATH when those directories exist.";
+    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile for Python-compatible workspace scripts, tests and package commands; never invoke python or python.exe. xMind already prepends -B, so do not pass -B or a python launcher name. Pass module commands directly, for example ['-m','pip','install','--only-binary=:all:','--target','.xlang3-site','-r','requirements.txt'], ['-m','pytest','-q'] or ['-c','print(1 + 1)']. Workspace pip installs require a relative --target; never use --prefix or --user because they can modify shared packages. Bundled wheels provide the xlang3 native bindings through PIP_FIND_LINKS; do not bypass dependency resolution with --no-deps or compile/load CPython extensions. Report an unavailable native dependency. The executable is pinned to the runtime paired with this backend. xMind adds the paired runtime modules and .xlang3-site in the selected working directory to PYTHONPATH when present.";
     description+=" The native executor rejects direct CPython executable profiles and common python/python3.x/pythonw/py launcher names in registered shell commands before dispatch; use the xlang3 profile for Python-compatible work.";
     return {"run_process",std::move(description),
         schema};
@@ -247,6 +272,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(found->id=="xlang3"&&std::find(launch.arguments.begin(),launch.arguments.end(),"-B")==launch.arguments.end())launch.arguments.insert(launch.arguments.begin(),"-B");
     launch.executable_id=found->executable_id;
     for(const auto& arg:args["arguments"]){if(!arg.is_string() || !text(arg.get<std::string>()))throw std::invalid_argument("Invalid literal process argument");launch.arguments.push_back(arg.get<std::string>());}
+    if(found->id=="xlang3")require_workspace_pip_install(launch.arguments);
     if(invokes_cpython(launch.executable,launch.arguments))throw ToolAccessDenied("CPython execution is disabled; use the registered xlang3 profile for Python-compatible commands.");
     if(args.contains("timeout_ms")){if(!args["timeout_ms"].is_number_integer() || args["timeout_ms"]<1 || args["timeout_ms"]>found->max_timeout.count())throw std::invalid_argument("Process timeout exceeds profile budget");launch.timeout=std::chrono::milliseconds(args["timeout_ms"].get<std::int64_t>());}
     std::string relative=".";if(args.contains("workdir")){if(!args["workdir"].is_string() || !text(args["workdir"].get<std::string>()))throw std::invalid_argument("Invalid process workdir");relative=args["workdir"].get<std::string>();}
@@ -264,8 +290,8 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
         if(std::filesystem::is_directory(modules))import_paths.push_back(modules);
         const auto site_packages=std::filesystem::u8path(launch.working_directory)/L".xlang3-site";
         if(std::filesystem::is_directory(site_packages))import_paths.push_back(site_packages);
-        const auto prefix_packages=site_packages/L"Lib"/L"site-packages";
-        if(std::filesystem::is_directory(prefix_packages))import_paths.push_back(prefix_packages);
+        const auto native_wheels=std::filesystem::u8path(found->executable).parent_path()/L"wheels";
+        if(std::filesystem::is_directory(native_wheels))launch.environment.emplace_back("PIP_FIND_LINKS",file_uri(native_wheels));
         if(!import_paths.empty()) {
             std::string python_path;
             for(const auto& import_path:import_paths) {

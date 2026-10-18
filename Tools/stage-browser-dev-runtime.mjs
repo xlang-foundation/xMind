@@ -7,6 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {dirname,join,relative,resolve,isAbsolute,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
+import {nativeDependencyWheels} from '../extensions/vscode/scripts/package-native-runtime.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const values=new Map();
@@ -96,6 +97,14 @@ if(sdkRuntime){
   manifest.files['xlang3.exe']=sha(await readFile(join(output,'xlang3.exe')));
   manifest.sdkRevision=sdkRevision;
 }
+if(sdkRuntime){
+  const sdkSource=execFileSync('git',['-C',sdkRuntime,'rev-parse','--show-toplevel'],{cwd:root,encoding:'utf8'}).trim();
+  const license=join(sdkSource,'modules','pydantic_core','PYDANTIC_CORE_LICENSE.txt');await regular(license);
+  const licenseName='licenses/xlang3-pydantic-core/PYDANTIC_CORE_LICENSE.txt';
+  await mkdir(dirname(join(output,licenseName)),{recursive:true});await copyFile(license,join(output,licenseName));manifest.files[licenseName]=sha(await readFile(license));
+}
+const dependencyInputs=new Map();for(const name of Object.keys(manifest.files))dependencyInputs.set(name,await readFile(join(output,...name.split('/'))));
+for(const [name,value]of await nativeDependencyWheels(dependencyInputs)){await mkdir(dirname(join(output,name)),{recursive:true});await writeFile(join(output,name),value);manifest.files[name]=sha(value);}
 manifest.nativeRevision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 manifest.files['xmind.exe']=sha(await readFile(join(output,'xmind.exe')));
 const provenance=Buffer.from(JSON.stringify({

@@ -34,18 +34,29 @@ uninstalled. The original TestProj sources were hash-verified unchanged.
 The development runtime had the native plugin but omitted its Python facades
 and distribution metadata. CI and local staging now retain metadata; both
 JavaScript and native verifiers reject that incomplete plugin inventory.
-The process profile also supports pip prefix installations at
-`.xlang3-site/Lib/site-packages`. This preserves dependency resolution against
-bundled native distributions, which `--target` ignores. A dry run with the
-complete pinned SDK resolves the requirements using its native Pydantic
-binding and pure-Python wheels.
+The corrected packager builds a wheel from the SDK's actual Pydantic plugin,
+Python files, metadata and license. The process profile exposes those wheels
+to pip through `PIP_FIND_LINKS`, so a normal workspace `--target .xlang3-site`
+installation resolves the native binding without dependency bypasses or a
+CPython extension. Direct pip installs without a relative target, or using
+`--prefix`/`--user`, are rejected before a process proposal is created.
+
+An initial prefix trial was unsafe: pip uninstalled shared FastAPI, Starlette
+and Uvicorn packages. Their original versions (0.143.3, 1.8.0 and 0.53.0)
+were restored through xlang3. The final isolated-target install succeeds,
+contains no `.pyd` files, and leaves those shared versions unchanged. All
+**20 FastAPI tests pass** using those isolated dependencies. A separate
+minimal xlang3 runtime loads the wheel-installed package and performs native
+schema validation successfully.
 
 The updated extension suite passes **392/392**. The process, AgentRunner,
-graph and runtime-generation Release contracts pass **4/4 in 38.51 seconds**
+graph and runtime-generation Release contracts pass **4/4 in 39.81 seconds**
 against `xlang3/build-pytest-pathaware/Release`. Both production PowerShell
 module filters were executed against that SDK and retained the plugin, three
-facades and metadata. Fresh packaged dependency installation and full coding
-acceptance remain pending. External browser input was unavailable because the
+facades and metadata. The browser suite also passes **136/136**. The wheel
+install and 20-test run above were direct xlang3 checks; fresh packaged-client
+dependency installation and rendered coding acceptance remain pending.
+External browser input was unavailable because the
 Windows automation helper returned access denied; no current rendered-webpage
 acceptance is claimed. [Run, hashes, actual usage and limits](evidence/coding-runtime-package-gap-20261018.json).
 

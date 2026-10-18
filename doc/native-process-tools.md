@@ -96,13 +96,20 @@ executes a real xlang3 import and confirms no bytecode directory appears in
 the workspace package target.
 
 For workspace dependency installation, use the `xlang3` profile with arguments
-`["-m", "pip", "install", "--only-binary=:all:", "--prefix", ".xlang3-site", "-r", "requirements.txt"]`.
-The native process environment includes `.xlang3-site/Lib/site-packages` as
-well as the paired SDK modules and a direct `.xlang3-site` import directory.
-Pip's prefix install retains dependency resolution against the SDK's native
-distribution metadata. `--target` instead ignores installed distributions and
-can try to rebuild `pydantic-core`; skipping dependencies is not a substitute
-for a supported native binding. Missing native dependencies remain errors.
+`["-m", "pip", "install", "--only-binary=:all:", "--target", ".xlang3-site", "-r", "requirements.txt"]`.
+The native process environment includes the paired SDK modules and the direct
+`.xlang3-site` import directory. It supplies the runtime's native dependency
+wheels through `PIP_FIND_LINKS`, allowing ordinary pip dependency resolution to
+install the xlang3 binding into the workspace alongside pure-Python packages.
+The wheel contains the SDK's actual plugin, Python files, metadata and license;
+it contains no CPython extension. Missing native dependencies remain errors.
+
+The xlang3 profile rejects direct `pip install` commands without a relative
+`--target`, and rejects `--prefix` and `--user` installs. A prefix installation
+can uninstall shared packages even when its destination is local. An initial
+prefix trial demonstrated that behavior; the three affected shared pure-Python
+distributions were restored to their original versions. Skipping dependencies
+is not an installation strategy.
 
 CI and local development snapshots retain native package `METADATA` files.
 When a Pydantic plugin is present, both the editor verifier and native runtime

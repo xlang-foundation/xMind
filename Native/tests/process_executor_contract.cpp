@@ -91,18 +91,19 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         phase("xlang3-workspace-import-path");
         std::filesystem::create_directories(root/".xlang3-site");
         {std::ofstream module(root/".xlang3-site"/"xmind_process_probe.py");module<<"VALUE = 'xlang3-workspace-package-visible'\n";require(bool(module),"xlang3 package-path fixture must be created");}
-        const auto prefix_packages=root/".xlang3-site"/"Lib"/"site-packages";std::filesystem::create_directories(prefix_packages);
-        {std::ofstream module(prefix_packages/"xmind_prefix_probe.py");module<<"VALUE = 'xlang3-prefix-package-visible'\n";require(bool(module),"xlang3 prefix-package fixture must be created");}
         ProcessExecutor xlang_executor(store,workspace,root.string(),{{"xlang3",argv[7],1,{"-c"},10s}});
-        const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import xmind_process_probe, xmind_prefix_probe; print(xmind_process_probe.VALUE); print(xmind_prefix_probe.VALUE)"})},{"workdir","."}}.dump();
+        const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import xmind_process_probe; print(xmind_process_probe.VALUE)"})},{"workdir","."}}.dump();
         Task xlang_task(xlang_executor,"xlang3-import-path",xlang_request);const auto xlang_record=proposed(store,"xlang3-import-path");const auto xlang_payload=Json::parse(xlang_record.spec.arguments_json);
         require(xlang_payload["arguments"][0]=="-B"&&xlang_payload["arguments"][1]=="-c","xlang3 executions must disable writes into the paired runtime package");
         require(xlang_payload["environment"].size()==1&&xlang_payload["environment"][0]["name"]=="PYTHONPATH","Approved xlang3 process proposal must bind its Python import path");
         const auto xlang_path=xlang_payload["environment"][0]["value"].get<std::string>();
-        require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos&&xlang_path.find("site-packages")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and both workspace package layouts");
+        require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and workspace package search paths");
         store.decide_operation("xlang3-import-path",OperationDecision::allow,"actual-fixture-controller").get();
-        const auto xlang_result=Json::parse(xlang_task.result.get());require(xlang_result["exit_code"]==0&&xlang_result["stdout"]["data"]=="xlang3-workspace-package-visible\r\nxlang3-prefix-package-visible\r\n"&&store.operation("xlang3-import-path").get().state==OperationState::succeeded, ("Paired xlang3 process must import pure-Python dependencies from direct and prefix workspace packages: "+xlang_result.dump()).c_str());
-        require(!std::filesystem::exists(root/".xlang3-site"/"__pycache__")&&!std::filesystem::exists(prefix_packages/"__pycache__"),"xlang3 process runs must not create bytecode in workspace packages");
+        const auto xlang_result=Json::parse(xlang_task.result.get());require(xlang_result["exit_code"]==0&&xlang_result["stdout"]["data"]=="xlang3-workspace-package-visible\r\n"&&store.operation("xlang3-import-path").get().state==OperationState::succeeded, ("Paired xlang3 process must import a pure-Python dependency from the workspace target: "+xlang_result.dump()).c_str());
+        require(!std::filesystem::exists(root/".xlang3-site"/"__pycache__"),"xlang3 process runs must not create bytecode in the workspace package target");
+        ProcessExecutor installer(store,workspace,root.string(),{{"xlang3",argv[7],1,{},10s}});
+        const std::vector<Json> unsafe_installs{Json::array({"-m","pip","install","pytest"}),Json::array({"-m","pip","install","--prefix",".xlang3-site","pytest"}),Json::array({"-m","pip","install","--user","pytest"}),Json::array({"-m","pip","install","--target","../outside","pytest"}),Json::array({"-m","pip","install","--target","C:/outside","pytest"})};
+        for(std::size_t index=0;index<unsafe_installs.size();++index){const auto id="unsafe-pip-install-"+std::to_string(index);const auto request=Json{{"profile","xlang3"},{"arguments",unsafe_installs[index]}}.dump();rejects<ToolAccessDenied>([&]{installer.invoke(id,"run",request,now()+600000);});rejects<NotFound>([&]{store.operation(id).get();});}
         phase("trusted-process-profile");
         ProcessExecutor trusted_executor(store,workspace,root.string(),{{"trusted-fixture",argv[1],1,{argv[2]},10s,{},true}});
         const auto trusted_arguments=Json{{"profile","trusted-fixture"},{"arguments",Json::array({"normal","trusted-approved.txt"})},{"workdir","."}}.dump();

@@ -217,7 +217,7 @@ foreach($ciLicenseRoot in @(@{path=$ciRoot;label='xmind'},@{path=$ciRuntime;labe
     }
 }
 foreach($ciThirdParty in @(@{path=(Join-Path $ciRoot 'Native/third_party');label='xmind-native'},@{path=(Join-Path $ciRuntime 'third_party');label='xlang3-third-party'},@{path=(Join-Path $ciRuntime 'modules');label='xlang3-modules'})){
-    foreach($ciLicense in Get-ChildItem -LiteralPath $ciThirdParty.path -File -Recurse|Where-Object {$_.Name -match '^(LICENSE|NOTICE|COPYING)'}){
+    foreach($ciLicense in Get-ChildItem -LiteralPath $ciThirdParty.path -File -Recurse|Where-Object {$_.Name -match '(^|_)(LICENSE|NOTICE|COPYING)'}){
         $ciLicenseRelative=[System.IO.Path]::GetRelativePath($ciThirdParty.path,$ciLicense.FullName)
         $ciLicenseTarget=Join-Path $ciBundle ('licenses/'+$ciThirdParty.label+'/'+$ciLicenseRelative)
         New-Item -ItemType Directory -Force -Path (Split-Path $ciLicenseTarget -Parent)|Out-Null
