@@ -74,11 +74,28 @@ execution.
    the same process-bound run remains inspectable and controllable after either
    view reconnects.
 
-No process-placement config, C++ AgentRunner worker, or acceptance for this
-contract is implemented yet. The run/context journals and model gateway are
-tested persistence/provider seams; they do not by themselves make AgentRunner
-portable. This document records the requested direction and the testable
-boundary; it is not a completion claim.
+### Process-tool host seam — 2026-10-18
+
+`AgentRunner` now consumes process-tool discovery, invocation, wait, stop and
+run-join through `AgentProcessToolHost`; the existing `ProcessExecutor` is the
+in-process implementation. The Release `agentflow_process_effects` and
+`agentflow_agent` libraries compile, and the updated AgentRunner contract
+passes against the synthetic inference peer and real filesystem/process tools,
+including process execution in an admitted attached workspace folder. The
+contract used the current-source AgentRunner test executable and the matching
+isolated Release xMind worker binary.
+
+This seam still borrows `WorkspaceToolSet`, stop tokens and native instruction
+verification callbacks. It does not yet define owned-value IPC messages, allow
+remote-host injection, or execute `AgentRunner` out of process. MCP/A2A,
+approval and other workspace-effect dispatch also remain in the concrete
+runner. It is a first capability boundary, not process-placement acceptance.
+
+No process-placement config or C++ AgentRunner worker is implemented, and the
+full process-placement contract remains unaccepted. The run/context journals
+and model gateway are tested persistence/provider seams; they do not by
+themselves make AgentRunner portable. This document records the requested
+direction and the testable boundary; it is not a completion claim.
 
 ### xlang3 native-host prerequisite — 2026-10-17
 

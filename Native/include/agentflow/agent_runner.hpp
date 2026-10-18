@@ -112,7 +112,7 @@ private:
     AgentSettings settings_;
     std::shared_ptr<AgentModelGateway> model_gateway_;
     std::unique_ptr<WorkspaceTools> workspace_;
-    std::unique_ptr<ProcessExecutor> process_;
+    std::unique_ptr<AgentProcessToolHost> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<DynamicPlanExecutor> planning_;
