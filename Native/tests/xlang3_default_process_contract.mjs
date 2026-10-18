@@ -27,7 +27,10 @@ const provider=createServer((request,response)=>{let raw='';request.on('data',ch
   const processTool=body.tools.find(tool=>tool.function.name==='run_process').function;
   assert.ok(processTool.description.includes('Use the xlang3 profile'));
   assert.ok(processTool.description.includes('never invoke python or python.exe'));
-  assert.ok(processTool.description.includes("['-m','pip','install','-r','requirements.txt']"));
+  assert.ok(processTool.description.includes('--target')&&processTool.description.includes('.xlang3-site'),
+    'Model guidance must explain workspace-local dependency installation');
+  assert.ok(processTool.description.includes('PIP_FIND_LINKS')&&processTool.description.includes('--only-binary=:all:'),
+    'Model guidance must use the paired native wheels instead of CPython extensions');
   assert.ok(processTool.description.includes("['-m','pytest','-q']"));
   assert.ok(processTool.parameters.properties.profile.enum.includes('xlang3'));
   const result=body.messages.findLast(message=>message.role==='tool');
