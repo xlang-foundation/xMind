@@ -1,130 +1,121 @@
 # xMind
 
-xMind is being built as a general-purpose single-agent and graph platform with a shared coding runtime. The C++ backend owns execution, providers, tools, permissions, sessions and protocols. Embedded xlang3 runs compatible scripts/pure-Python libraries and performs SQLite database I/O. CLI, browser UI and VS Code clients use the same local backend. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded from xMind OSS and reserved for CantorAI’s closed-source Nexus product.
+xMind is a native agent platform and coding assistant for local projects. The
+CLI, webpage and VS Code extension share one C++ backend for agents, tools,
+models, sessions, approvals and execution history. Embedded xlang3 runs
+compatible Python scripts and pure-Python libraries and performs SQLite I/O.
 
-OpenCode 2 and similar coding tools are references for selected workflow ideas; LiteLLM informs provider-ecosystem coverage. xMind implements its own native engine and client contracts. Compatibility, API parity, and reproducing every referenced feature are not goals. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [historical capability reference notes](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
+A coding agent uses the same runtime as a general agent. Start with the normal
+agent/tool loop; add skills, named agents or graphs when the task needs them.
+Agents and graphs can be authored with YAML/Markdown and trusted custom xlang3
+programs through the native authoring API. See the [architecture](doc/architecture.md),
+[diagram](doc/architecture.svg) and [documentation index](doc/README.md).
 
-The latest live coding-acceptance checkpoint passed **98 native, 215 extension
-and 39 browser contracts**. Native discovery and literal content search now share hierarchical
-local ignore rules. Real OpenAI filtered search and an xlang3/SQLite history
-restart passed. Native `glob_files` supports recursive discovery for agents,
-read-only children and graph tools; `read_file` supports bounded line pages
-for files up to 64 MiB. The local VS Code preview has been migrated to an
-approval-enabled backend. A real OpenAI request in a fresh VS Code conversation
-proposed and, after UI approval, created `hello.py` in the opened TestProj workspace.
-The operation and run completed, with actual response token metrics displayed.
-[Installed writing evidence](doc/evidence/vscode-file-creation-live.json).
-Saved model context from a different backend configuration can
-require a fresh conversation; existing history is preserved.
-See [saved-context recovery](doc/saved-context-recovery.md),
-[ignore behavior and limits](doc/native-ignore.md),
-[discovery behavior](doc/native-glob.md),
-[file-page behavior](doc/native-file-pages.md),
-[current validation](doc/VALIDATION_STATUS.md) and the
-[replacement protocol](doc/native-owner-replacement.md) for exact scope.
+## Current preview
 
-The [native regex-search implementation](doc/native-content-search.md) adds scoped
-content search, case folding and charged aggregate read budgets. Exact source
-`5c8c918` passed all 98 hosted native contracts in 274.50 seconds. Both artifact
-digests, complete test identities and all 1,863 packaged runtime file hashes were
-independently verified. Actual provider-driven regex acceptance and installed
-client regex acceptance remain pending. [Hosted evidence](doc/evidence/native-regex-hosted.json).
+The current local VS Code package is **0.1.25**. Its native source is
+`152fc27154d08e1f0ad51d9ce8c9f04cbb2da039`, paired with xlang3 SDK
+`58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
+no Marketplace publication or general release is implied.
 
-## OSS deployment scope
+| Check | Verified scope |
+| --- | --- |
+| Native backend | All 149 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
+| Clients | All 420 extension and 142 browser fixture tests pass; installed archive/runtime payloads verify. These are separate from rendered UI checks. |
+| Installed live run | Saved-key Claude completes two A2A instruction-binding checks through the native backend and browser controller with an explicit synthetic peer. |
+| Persistence | The current page restores both completed runs, eight messages and 221 saved events without execution replay. |
+| Still open | Current rendered webpage input/layout and VS Code activation, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
-Run xMind locally with the VS Code plugin, webpage UI and native CLI. SQLite is the OSS database; C++ owns repository and encryption contracts, and embedded xlang3 performs SQLite I/O. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE belong to the separate closed-source Nexus project. See the [current OSS specification](doc/architecture.md).
+Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
+changes, an actual Vue production build and Python API tests under xlang3.
+History from earlier packages does not establish current rendered acceptance.
+[Exact current evidence and remaining work](doc/VALIDATION_STATUS.md).
 
-xMind's target connection profiles are **Local** for single-user execution and
-**Nexus** for binding the local agent/workspace to a team server over the shared
-versioned protocol. Nexus owns shared PostgreSQL state and distributed
-coordination; xMind does not access its database directly. Generic profile/client
-support belongs in OSS, while the team-server implementation stays private.
-Nexus profile enrollment is not yet implemented. See the
-[profile boundaries](doc/architecture.md#local-and-nexus-connection-profiles).
+## Use in VS Code
 
-## Current native product scope
+1. Install the supplied verified Windows x64 VSIX with **Extensions: Install
+   from VSIX**. VS Code 1.140 or newer is required.
+2. Open and trust the local project folder, then run **xMind: Open Workspace**.
+   xMind uses the opened folder; no `.code-workspace` file or separate server
+   launch is required. For several opened roots, select the active root explicitly.
+3. The agent sidebar is on the right. Choose the saved provider and a discovered
+   model beside the composer. **Settings** can enroll a provider if none is saved.
+   Existing configured keys remain on the backend and do not need re-entry.
+4. Send a coding task. Inspect file-change proposals and approve the exact edits.
+   Configured trusted command profiles can run without a per-command prompt.
 
-Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native contracts in 206.89 seconds**, **119 extension tests in 2.4612639 seconds** and **26 browser tests in 1.3989153 seconds**. All 16 job steps passed, with the exact complete native manifest, zero failures/skips, model-free browser/native integration and 18 verified VSIX assets. Original logs, advertised archive digests and exact source/runtime maps were verified. Provider replies remain synthetic; this establishes the source checkpoint rather than installed or live planning acceptance. The installed preview remains ace/schema v10. [Artifact-bound hosted evidence](doc/evidence/native-dynamic-plan-hosted-provenance.json).
+Use **xMind: Open Browser View** for the webpage attached to the same workspace
+and profile. The local adapter enrolls the browser privately; no server-token
+copy is needed. Closing a view leaves backend execution alive.
 
-The initial native dependency-planning checkpoint (schema v11) passed the complete guarded local **77-contract gate in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen native source hashes** verified. Eligible ordinary Agents now select agent/human dependency plans, revise never-claimed work, pause for authenticated human input and run separately approved coding children followed by verification. The shared views passed **119 extension and 26 browser contracts**. Provider replies, signatures and keys are synthetic; native engines, workspace effects, approvals and embedded-xlang3 SQLite are real. [Initial planning scope](doc/native-dynamic-plan.md), [local source and gate evidence](doc/evidence/native-dynamic-plan-local-provenance.json).
+Machine-level runtime, provider/process YAML and profile-root settings are
+documented in the [extension guide](extensions/vscode/README.md). Paths are
+not imported from the opened project. After changing trusted runtime/process
+configuration, use **xMind: Apply Trusted Runtime Configuration** for a
+profile-preserving handoff.
 
-The current native source supports bounded nested agent/human plans and deterministic tool nodes for admitted workspace reads, approved synchronous processes, registered MCP tools/resources/prompts, and registered A2A calls. Current-source Release contracts passed **4/4** for planning/repository/engine/MCP behavior and **10/10** for context and skill behavior. Workspace skills also have separate live activation and companion-read evidence across the configured providers. These results verify native source behavior; live model-driven planning in the webpage/VS Code and rendered installed planning controls remain open. Responses context compaction has native implementation and contract coverage, while live installed use and Claude, Gemini, and Chat Completions continuation strategies remain open. [Current-source scope and transcripts](doc/evidence/agentflow-current-native-capabilities-20261017.json). The historical e353 checkpoint's model-free integration and 18-asset VSIX results remain separate from current installed-client acceptance.
+## Use the console
 
-Native Responses reasoning continuation passed the exact ace2460 hosted gate: **71 native contracts in 171.52 seconds, 103 extension and 20 browser contracts**, with all 16 job steps, native/browser integration and 18 VSIX assets passing. Verified sources and artifact maps bind the completed-item continuation fix and its real native two-child read/join with synthetic provider replies. The local build was deferred by the benchmark guard. The exact native bundle is installed. One real OpenAI browser prompt completed two read-only native children and a joined parent response, with six owned model attempts, separate per-response metrics and zero effect operations. Immediate refresh retained the connection and selection. Upgrade and rollback checks passed at their separately documented scopes. [Compatibility and scope](doc/native-responses-reasoning.md), [exact hosted evidence](doc/evidence/native-responses-reasoning-hosted-provenance.json).
-
-Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
-
-For the preceding delegation checkpoint, the final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](doc/evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
-
-Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native contracts in 175.51 seconds**, **103 extension tests in 2.9668103 seconds** and **19 browser tests in 1.426115 seconds**, plus native/browser integration and verification of all 18 required VSIX assets. The delegation engine took **4.88 seconds** and its HTTP/CLI contract **1.22 seconds**. All 16 job steps succeeded, with zero failures/skips and the exact complete native manifest. Downloaded artifact digests, exact source and runtime/stdlib pins were verified. [Exact hosted71 provenance](doc/evidence/native-delegation-hosted-provenance.json), [raw hosted CTest](doc/evidence/native-delegation-hosted-ctest.log), [original hosted job](doc/evidence/native-delegation-passing-ci-job.log).
-
-The preceding managed backend upgrade installed the exact hosted e353 bundle with schema v10; the later 7fe upgrade is recorded in the diagnostic scope. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](doc/evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](doc/native-delegation-acceptance.md).
-
-The first e353 live `delegate_tasks` request failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. That historical failure remains recorded; the later ace browser two-child join passed its separate acceptance above. Installed VS Code delegation acceptance remains unverified. The initial v11 planning source checkpoint is distinct from those installed/live results; broader planning, skills, compaction, outbound A2A and provider/coding capabilities remain incomplete. [Implementation and limits](doc/native-delegation.md), [broader native planning design](doc/native-dynamic-plan-design.md).
-
-The preceding direct-MCP checkpoint passed the complete local **69 native contracts in 121.22 seconds**, with the exact expected/registered/passed manifest, zero failures/skips and no post-build exclusions. Direct MCP tool nodes execute real approved file effects in registered model-free graphs, preserving pinned server revisions, exact discovered aliases, literal decimals/large integers/escaped keys inside `arguments_json`, and durable xlang3 SQLite outcomes. The new graph/permission contract passed in **5.59 seconds**; actual administrator/server/CLI/shared-view-adapter integration passed in **2.31 seconds**. Native checks cover human pause/reopen, dependent reads, denied/cancelled/invalid/drift/stale paths, shared-server claim serialization, lost replies, acknowledged output bounds and outcome-journal fail-stop without replay. Metadata/admission do not start peers; stale pauses remain inspectable/cancellable while resume rejects before input commit. `discover-mcp` privately resolves credentials and rejects public catalogue reflection. An initial HTTP startup failure exposed an obsolete model-only guard; its [failed interim log](doc/evidence/native-graph-mcp-initial-ctest.log) is retained separately from the final passing gate and expanded model-configuration negatives. Fresh browser/native integration passed the rebuilt server and source-matched assets; unchanged frontend sources retain the prior **98 extension and 17 browser tests**, without a new frontend rerun. Peer protocol replies are synthetic. Live direct-MCP graph acceptance and rendered IDE acceptance remain incomplete. [Exact local69 evidence](doc/evidence/native-graph-mcp-local-provenance.json), [direct MCP graph scope](doc/native-graph-mcp.md).
-
-Exact source `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937): **69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402 seconds** and **17 browser tests in 1.5543002 seconds**, plus native/browser integration and verification of the 18-asset VSIX. All 16 job steps passed, with an exact native manifest and zero failures/skips. [Exact hosted69 evidence](doc/evidence/native-graph-mcp-hosted-provenance.json). The [delegation design](doc/native-delegation-design.md) distinguishes the initial local implementation above from its broader planning target.
-
-The preceding `fceb50b` Claude receipt checkpoint passed the complete local **67 native contracts in 117.65 seconds**, with the exact native manifest, zero failures/skips and no post-build exclusions. Claude receipts retain ordered text/tool/thinking/redacted blocks and raw tool-input JSON inside `content_json` strings, preserving escaped keys and precise number tokens through persistence and outgoing Messages replay. The new history helper passed in **0.50 seconds**; the expanded actual AgentRunner contract passed in **0.57 seconds**, including interleaved signed blocks around two real file reads, encrypted-credential xlang3 SQLite close/reopen/replay without repeating tools and unsigned-block rejection before effects. Hidden thinking/signatures/redacted data never become ordinary text output; signatures/data remain opaque, without local cryptographic verification. Native request/receipt/count/depth bounds and malformed, foreign or mismatched history rejection passed. Fresh browser/native integration passed the rebuilt server and matching assets. Frontend sources remained exactly unchanged from `ae7c4ba`, retaining its prior **98 extension and 17 browser tests** without a local rerun. Exact revision `fceb50ba0493f645ee5f0a00d5400e0f103df231` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37752689263): **67 native contracts in 120.18 seconds**, **98 extension tests in 2.0700124 seconds** and **17 browser tests in 0.9230928 seconds**, plus native/browser integration and verification of an 18-asset VSIX, with zero failures/skips. The hosted history and agent contracts took **0.31** and **1.03 seconds**. This exact gate excludes the newer direct MCP graph, administrator and server-startup changes. Provider replies, keys and signatures are synthetic. Thinking/reasoning request controls, live Claude acceptance, foreign signed/tool conversion, actual rendered IDE acceptance and preview upgrades remain incomplete. [Local history evidence](doc/evidence/native-anthropic-history-local-provenance.json), [exact hosted67 evidence](doc/evidence/native-anthropic-history-hosted-provenance.json), [receipt scope and bounds](doc/native-claude-history.md).
-
-The preceding `ae7c4ba` checkpoint passed the complete local **66 native contracts in 114.49 seconds**, **98 extension and 17 browser tests**, with the exact native manifest, zero failures/skips and no post-build exclusions. Its original **0.56-second** Claude AgentRunner contract verified two real file reads, correlated Messages IDs/results, encrypted credentials and SQLite reopen/replay, cancellation/recovery and conversation-batch SQL rollback. Native uncached input, separate cache-write/read counters, zeros and actual DOM usage/history rendering passed without invented totals. Exact revision `ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37748603655): **66 native contracts in 131.92 seconds**, **98 extension and 17 browser tests**, native/browser integration and VSIX verification, with zero failures/skips. Its actual Claude agent contract took **1.41 seconds**. Both prior gates exclude the newer ordered signed/redacted receipt work above. [Local Claude agent evidence](doc/evidence/native-anthropic-agent-local-provenance.json), [exact hosted evidence](doc/evidence/native-anthropic-agent-hosted-provenance.json), [Claude agent scope](doc/native-claude-agent.md).
-
-The earlier `ac69c1f` CLI checkpoint separately passed **65 native contracts locally in 113.16 seconds**, including its **4.23-second** provider-profile CLI contract. It exercises OpenAI, Claude and Gemini discovery, private environment-key setup, selection, encrypted credentials and SQLite reopen, signed Gemini text/history/usage, stale ownership without retry and failed-turn status preserved through settings until a later actual successful turn. Public identity reflection is rejected for all three provider families; safe native provider diagnostics reach the CLI. Its local frontend sources were unchanged and retained the earlier **94 extension and 17 browser tests**, without a new frontend rerun. [Local CLI evidence](doc/evidence/native-provider-profile-cli-local-provenance.json). Exact revision `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37746664258): **65 native contracts in 149.37 seconds**, **94 extension and 17 browser tests**, native/browser integration and VSIX verification, with zero failures/skips. This hosted result excludes both newer Claude milestones above. [Hosted CLI evidence](doc/evidence/native-provider-profile-cli-hosted-provenance.json), [CLI scope](doc/native-interactive-cli.md).
-
-The enrollment checkpoint `2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe` passed its exact [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37743203538): **64 native contracts in 158.09 seconds**, **94 extension and 17 browser tests**, native/browser integration and VSIX verification, with zero failures/skips. This verifies native Gemini catalogue pagination, encrypted enrollment, model-specific tool policy and actual enrolled file execution/cancellation/signed SQLite replay with synthetic provider peers. It excludes the newer generic CLI controls and all-provider reflection changes above. [Hosted enrollment evidence](doc/evidence/native-gemini-enrollment-hosted-provenance.json). GenerateContent eligibility alone does not establish tool capability or live model acceptance. [Provider setup](doc/provider-setup.md).
-
-Gemini gateway/history checkpoint `75f45f0a036f1ffbab8c4b157df364f3697b52a0` passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37738970918): **61 native, 91 extension and 17 browser contracts**, plus native/browser integration and VSIX verification, with zero failures or skips. Its native gate took **121.84 seconds**. [Exact scope](doc/evidence/native-gemini-history-hosted-provenance.json). This validates native signed receipts, separate tool identities, supplied usage, callback ordering and escaped large-response handling with synthetic provider fixtures. It excludes the newer agent and enrollment contracts. Earlier cleanup and transport gates remain documented in [validation status](doc/VALIDATION_STATUS.md).
-
-The agent milestone `c9591fe79cad9a4253ac8088933f0c8a2848ded1` passed **62 native contracts locally in 100.44 seconds**, then its exact hosted **62 native, 91 extension and 17 browser contracts**, native/browser integration and VSIX verification, with zero failures/skips and **128.80 seconds** for the native gate. It includes actual Gemini agent/file execution and signed history replay after xlang3 SQLite reopen using synthetic provider replies. [Local scope](doc/evidence/native-gemini-agent-local-provenance.json), [hosted scope](doc/evidence/native-gemini-agent-hosted-provenance.json).
-
-Native checkpoint `46262d6ef7949a9caf778ccb6cf74733ef28b5ac` passed **52 native and 73 extension tests**, plus **14 browser tests**, in its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37709335756). This includes embedded-xlang3 persistence, encrypted credentials, authenticated server/CLI, native model/tool execution, reviewed file/process effects, MCP components, registered graph execution, Chat Completions/Responses adapters saved-key wire enrollment/rebinding and durable native browser access sessions. Native effects are real; provider contracts use labelled synthetic peers. [Exact gate evidence](doc/evidence/native-model-protocol-diagnostics-hosted-provenance.json), [Responses scope](doc/native-responses-provider.md), [graph scope](doc/native-graph-checkpoints.md), [process scope](doc/native-process-tools.md). These checks cover selected native capabilities; broader product completeness remains in progress.
-
-The VS Code adapter uses the right secondary sidebar, with Explorer left and the composer/model selector at the bottom. It renders Markdown/code/history and supplied metrics, compares exact edit/creation snapshots, reviews executable-bound commands, reconstructs retained stdout/stderr, and reconnects without resubmitting work. The HTML browser shares that renderer and backend through a separate access adapter. Earlier browser checks verified authenticated refresh, a registered file-reading graph, visible failures and live Responses tool/edit outcomes. [Failure scope](doc/sidebar-run-failures.md). The preceding c4 preview passed a live read-only OpenAI Agent request, visible token/timing metrics, immediate refresh and read-only installed CLI checks; its original reconnect cause remains unresolved. [Historical acceptance and screenshot](doc/preview-checkpoint-c4ec09fc.md). The earlier managed 7fe diagnostic failed before child admission. The current exact hosted ace backend retains the separate browser repair; a new two-child live join and immediate refresh passed without key entry. [Current acceptance](doc/native-delegation-acceptance.md). [Durable browser sessions](doc/browser-session-persistence.md) separately passed actual refresh and adapter/backend restart checks without login or execution replay. Initial migration enrollment returned HTTP 502 before retries succeeded; its cause remains unresolved. Sidebar renaming and CLI conversation navigation passed the earlier `4203b84` hosted gate (52 native, 72 extension and 13 browser contracts); actual browser rename, refresh, backend reopen and read-only installed CLI navigation also passed at that scope. Actual editor rename acceptance remains pending. [Historical navigation acceptance](doc/evidence/live-browser-cli-navigation-rename.json).
-
-A live OpenAI `chat-latest` browser response was observed earlier. The later `gpt-5.6-sol` HTTP 400 identified a reasoning parameter restriction on the Chat wire. Native Responses enrollment now resolves that tested case: actual minimal text, repository read-tool continuation, one approved edit of a dedicated validation file and a registered Git status command completed using the saved encrypted key. The browser displays real tool/operation outcomes, retained command output and each response's supplied metrics. [Live provider evidence and limits](doc/live-provider-compatibility.md). One official external filesystem MCP read/approval/Responses continuation and one official A2A SDK text task/retry/restart flow also passed live acceptance. [MCP scope](doc/evidence/live-responses-mcp-diagnostic-read.json), [A2A scope](doc/evidence/live-a2a-responses.json). The original MCP protocol failure remains undiagnosed. Broader coding/CLI/editor coverage, provider and MCP/A2A live checks, further planning node kinds/recursion, shell/background/PTY and the remaining in-scope OSS capabilities remain incomplete. The initial locally validated agent/human planning scope is recorded above. Team-server features, PostgreSQL, WebRTC and Electron are outside OSS scope. [Dynamic-agent scope](doc/dynamic-agent-execution.md), [milestones](doc/milestones.md), [MCP setup](doc/native-mcp.md).
-
-## Native build and local use
-
-Interactive native `chat [SESSION [MODEL]]` supports successive requests through the shared server. Native source adds generic provider-profile commands and explicit interactive `/profile ID REVISION` selection; listing/discovery does not silently rebind chat admission. Those controls passed the local/hosted CLI65 and full hosted69/71 gates. Read-only profile/model/history commands and live Responses read/approved-edit checks against the browser backend passed at their recorded earlier installed scopes; broader live interactive profile acceptance remains separate. Conversation navigation and request-based titles passed the `4203b84` hosted native gate and actual read-only console navigation was verified. The preceding e353 install and first live delegation failure have their own [acceptance scope](doc/native-delegation-acceptance.md). [Interactive CLI scope](doc/native-interactive-cli.md).
-
-Chat, approval handling and account discovery passed hosted validation; newer
-conversation navigation passed the later hosted gate, with browser preview installation and actual read-only CLI navigation verified as documented in its scope. Use
-`Tools/agentflow.ps1 -Action Chat -Port PORT` with the server token privately
-configured in `XMIND_AUTH_TOKEN`. Add `-Session ID` to resume, and optionally
-`-Model ID` for that existing session. `-BinaryDirectory DIR` selects an installed
-native distribution instead of the default build output. The public Chat entry
-point passed an empty-chat local check using the exact hosted bundle; no provider
-request was made for that check.
-
-Use Windows x64, a C++20 Visual Studio toolchain, Node.js for editor/tests, and a built sibling xlang3 runtime with its supported SDK/modules. From this checkout:
+A verified native distribution contains `xmind.exe` and its paired runtime,
+modules and pure standard-library source. Keep that directory intact. With
+`xmind.exe` on PATH, start the managed console for a project:
 
 ```powershell
-.\Tools\agentflow.ps1 -Action Build
+xmind --workspace D:ProjectsExample chat
 ```
 
-This builds `Native/CMakeLists.txt` in Release and runs CTest. The root CMake entry point also delegates to `Native/`; the old xlang build and `Core` have been removed. The launcher defers builds while observed xlang3 benchmarks are live; deferral is not a test pass. [Development](doc/DEVELOPMENT.md) describes runtime path overrides and prerequisites; the [documentation index](doc/README.md) maps the maintained guides.
-
-Configure `XMIND_AUTH_TOKEN` privately in the server/client environment (32–256 printable non-space characters). In one console:
+The default profile root is `%USERPROFILE%.xMindp`. If the editor uses a
+custom `agentflow.profileRoot`, supply that same path with `--profile-root` to
+share its backend and sessions. Reconnecting reuses the profile's saved provider
+settings; omit first-launch configuration options unless you intend to change
+the trusted launch configuration. No key belongs on the command line.
 
 ```powershell
-.\Tools\agentflow.ps1 -Action Serve -Port 8765
+xmind --workspace D:ProjectsExample sessions
+xmind --workspace D:ProjectsExample profile-info
+xmind --workspace D:ProjectsExample workspace init
+xmind --workspace D:ProjectsExample workspace add-folder D:ProjectsShared
+xmind --workspace D:ProjectsExample workspace info
 ```
 
-In another console with the same private token:
+`workspace init` registers the first folder before group inspection or folder
+attachment. Adding a folder attaches it to that workspace; it does not copy or
+delete files. Existing runs retain their admitted folder snapshot.
+Explicit `--port` is the separate operator-selected backend mode and requires
+its authentication configuration. [Console commands](doc/native-interactive-cli.md).
+
+## Browser and development
+
+The webpage uses the same renderer and native command/event contracts. Its top
+bar opens Workspace Settings for switching workspaces, creating one from an
+existing folder and attaching additional folders. The left pane browses files;
+the right sidebar contains the current conversation, activity, approvals and
+model selection. [Browser launch and behavior](doc/browser-view.md).
+
+For source builds use Windows x64, a C++20 Visual Studio toolchain, CMake,
+Node.js and the supported xlang3 SDK. The guarded build entry point is:
 
 ```powershell
-.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('health')
-.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('create-session', 'My project')
-.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('sessions')
+.Toolsagentflow.ps1 -Action Build
 ```
 
-Without a model, the server supports session inspection and model-free registered tool graphs but cannot invoke an agent model. To enable the read-tool loop, provide the actual `-Model`, `-ModelEndpoint`, `-ModelTools supported`, and `-Workspace`. Configure `XMIND_API_KEY` privately on the backend or use a stored `-CredentialId`. Chat Completions is the default wire; explicit `-ModelWire responses` uses the native Responses adapter. Interactive Settings uses saved native provider profiles; see [provider setup](doc/provider-setup.md) for supported wires and verification limits. Broader provider coverage remains required. The local token represents a full-access `local-owner`, not team authentication; see [deployment](doc/server-deployment.md).
+[Development](doc/DEVELOPMENT.md) covers explicit SDK/library paths, isolated
+builds and native runtime packaging. Python commands, tests and pip run with
+xlang3; CPython executables and CPython native extensions are not used. Pure
+Python libraries from PyPI are allowed. xMind-required native gaps are fixed
+in an isolated xlang3 branch.
 
-Follow the [VS Code guide](extensions/vscode/README.md). `Tools/start-ui.ps1` starts this machine's isolated development host and persistent native preview without a model or seeded conversations.
+## Scope and history
 
-No CPython executable or native extension is used. `PythonLibSource` selects allowed standard-library source for xlang3. Pure-Python packages must be installed through xlang3's pip; discuss missing native APIs before changing runtime code or adopting a workaround.
+xMind OSS runs locally with SQLite, CLI, webpage and VS Code. Generic Local and
+Nexus connection profiles belong to the public architecture; authenticated
+Nexus enrollment and distributed worker execution remain unfinished. Private
+Nexus owns the team server, PostgreSQL, WebRTC and standalone Electron IDE.
 
-## Project history
+OpenCode and LiteLLM are references for workflow and provider research.
+xMind implements its own C++ runtime and protocols; compatibility and feature
+parity with those projects are not acceptance criteria.
 
-xMind preserves the upstream repository history and license. The old xlang-based implementation and the later Python prototype were removed from the working source tree because the product now uses the native C++/xlang3 architecture. Earlier code remains recoverable through Git history.
+This repository preserves upstream xMind history and its Apache-2.0 license.
+The old xlang implementation and Python prototype are recoverable through Git
+history and are not part of the current product.

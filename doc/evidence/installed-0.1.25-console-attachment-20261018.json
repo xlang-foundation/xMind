@@ -1,0 +1,126 @@
+{
+  "recordedAt": "2026-10-18T18:46:36.985Z",
+  "version": "0.1.25",
+  "binarySha256": "e2933743feacaabcb891f294e9a1bb232b8f7c88cdeea57698e51ab2d1edfad6",
+  "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.25-20261018",
+  "profileRoot": "C:/Users/shaw9/.xMind/p-a25",
+  "backendPid": 18436,
+  "sameExistingBackend": true,
+  "newBackendStarted": false,
+  "session": "0ceef073223ab8c9f7aef084945e1dd0",
+  "rootRuns": 2,
+  "historyMessages": 8,
+  "commands": [
+    {
+      "label": "help",
+      "arguments": [
+        "--help"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "a86beb9141529325afe5ab59602ec183e3e6227963bd1654d018d09b905c48c8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "profile-before",
+      "arguments": [
+        "profile-info"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "df86be3a9984e8678baca6bef87441a14430d33930bb8fd1174a724e0e68d1ed",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "health",
+      "arguments": [
+        "health"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "05e3b420f6f1681b963548a698285e5cfc45e20c88c6c4dc3488eee40bd4dcf2",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "sessions",
+      "arguments": [
+        "sessions"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "03ace6f48747613424f541f71f18652ab6dd064a8ed899088b842884aeb59f3d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "runs",
+      "arguments": [
+        "runs",
+        "0ceef073223ab8c9f7aef084945e1dd0"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "ff2eda491266cfe602a4625b095337a6fe7bd97530c1543c52ebb47104afc72a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "history",
+      "arguments": [
+        "history",
+        "0ceef073223ab8c9f7aef084945e1dd0"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "434ff48216960d98491149a471195e3ed2feb19b6b60fbb8a610471f95258fb3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "profile-after",
+      "arguments": [
+        "profile-info"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "df86be3a9984e8678baca6bef87441a14430d33930bb8fd1174a724e0e68d1ed",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "taskSubmissions": 0,
+  "providerRequests": 0,
+  "workspaceWrites": 0,
+  "scope": "Actual installed native console help and managed read-only attachment to the existing webpage workspace/profile. No interactive terminal input, model request or rendered GUI claim.",
+  "initialSetupProbes": [
+    {
+      "command": "profile-info with explicit --config and --process-config",
+      "exitCode": 2,
+      "stderr": "Profile launch configuration changed; update the existing backend explicitly",
+      "interpretation": "The view imported providers through its authenticated owner API. Passing first-launch provider configuration to that existing managed profile is a different requested launch configuration; the guard rejects it without handoff.",
+      "logs": [
+        "console-0.1.25-profile-before-20261018.stderr.log",
+        "console-0.1.25-profile-before-20261018.stdout.log"
+      ]
+    },
+    {
+      "command": "workspace info before workspace init",
+      "exitCode": 2,
+      "stderr": "Workspace is not registered",
+      "interpretation": "This temporary acceptance profile had not registered a workspace group. Group inspection requires workspace init (or the browser workspace catalogue flow). The final attachment check does not mutate membership to conceal this result.",
+      "logs": [
+        "console-0.1.25-attached-workspace-20261018.stderr.log",
+        "console-0.1.25-attached-workspace-20261018.stdout.log"
+      ]
+    }
+  ],
+  "artifacts": {
+    "console-0.1.25-final-attached-help-20261018.stdout.log": "a86beb9141529325afe5ab59602ec183e3e6227963bd1654d018d09b905c48c8",
+    "console-0.1.25-final-attached-help-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-profile-before-20261018.stdout.log": "df86be3a9984e8678baca6bef87441a14430d33930bb8fd1174a724e0e68d1ed",
+    "console-0.1.25-final-attached-profile-before-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-health-20261018.stdout.log": "05e3b420f6f1681b963548a698285e5cfc45e20c88c6c4dc3488eee40bd4dcf2",
+    "console-0.1.25-final-attached-health-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-sessions-20261018.stdout.log": "03ace6f48747613424f541f71f18652ab6dd064a8ed899088b842884aeb59f3d",
+    "console-0.1.25-final-attached-sessions-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-runs-20261018.stdout.log": "ff2eda491266cfe602a4625b095337a6fe7bd97530c1543c52ebb47104afc72a",
+    "console-0.1.25-final-attached-runs-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-history-20261018.stdout.log": "434ff48216960d98491149a471195e3ed2feb19b6b60fbb8a610471f95258fb3",
+    "console-0.1.25-final-attached-history-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-final-attached-profile-after-20261018.stdout.log": "df86be3a9984e8678baca6bef87441a14430d33930bb8fd1174a724e0e68d1ed",
+    "console-0.1.25-final-attached-profile-after-20261018.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-profile-before-20261018.stderr.log": "c9c808ecd7043632d0102b04888ecb391b39a028bdab0e9812de54d44fcf6286",
+    "console-0.1.25-profile-before-20261018.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "console-0.1.25-attached-workspace-20261018.stderr.log": "965eb61bdc2691290957c3735d7fa0b825a7de42149a8ef3fb37a5b0327560bf",
+    "console-0.1.25-attached-workspace-20261018.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

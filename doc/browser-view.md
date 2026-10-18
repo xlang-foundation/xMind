@@ -69,9 +69,11 @@ folder handle and approval boundary.
 The local browser now implements membership creation and read-only browsing:
 **New workspace** chooses the primary folder, **Add folder** attaches another
 folder to the same workspace, and each member is shown in its own file tree.
-Folder reads use the member folder ID and native handle identity. Agent file
-tools can read from the captured member-folder set; edits and processes, plus
-Git and language-server routing, still use the primary folder. VS Code can add
+Folder reads use the member folder ID and native handle identity. Native agent
+reads, edits, patches and processes use the admitted member-folder snapshot;
+Git and language-server requests can select a member by folder ID. An omitted
+folder ID defaults to the primary folder. See the [multi-folder contract](native-multi-folder-workspaces.md)
+for supported forms, authority checks and remaining rendered acceptance. VS Code can add
 another folder from its opened workspace through **xMind: Add Opened Folder to
 Workspace**; this does not create a `.code-workspace` file or change the primary
 root. The CLI uses one primary `--workspace` root and can initialize its

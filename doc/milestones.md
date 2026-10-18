@@ -1,16 +1,24 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.24, 2026-10-18
+## Current checkpoint — 0.1.25, 2026-10-18
 
-The local native gate passes 149/149 with frozen inputs/file sets unchanged.
-The installed package and real Claude failure-plan check pass the bounded
-backend/controller acceptance recorded in [validation status](VALIDATION_STATUS.md).
-The actual command executes once, fails with exit 7 and blocks its dependent;
-inspection and a same-plan skip complete without replay. The report prompt
-length constraint was missed and is explicitly retained in the evidence.
-Current rendered browser and VS Code acceptance remain open; the user closed
-all editor windows. Historical October 16 acceptance below does not accept
-the current package. Private Nexus work remains outside this OSS checkpoint.
+The complete local native gate passes 149/149 with frozen input/file sets
+unchanged. Installed payloads verify, and local client fixtures pass 420/142.
+Real saved-key Claude completes a stale-instruction A2A block and a fresh
+approved send to an explicit synthetic peer. The persistent page restores both
+completed roots, eight messages and 221 saved events without execution replay.
+[Installed/native/client/live scope](evidence/coding-package-0.1.25-20261018.json).
+
+The installed console also attaches to that same existing backend and reads
+its identical saved history. Seven actual read-only commands pass, without
+starting another backend or submitting a task. First-launch provider options
+and uninitialized workspace-group inspection were rejected in initial setup
+probes; both results are retained. [Console evidence](evidence/installed-0.1.25-console-attachment-20261018.json).
+
+Earlier 0.1.24 failure-plan and 0.1.23 positive ModelZoo coding evidence remain
+separate. Current rendered browser/VS Code and hosted native acceptance remain
+open. No editor/browser window was opened. Private Nexus remains outside this
+OSS checkpoint. [Current acceptance matrix](VALIDATION_STATUS.md).
 
 ## Historical first coding acceptance — 2026-10-16
 

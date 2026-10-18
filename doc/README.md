@@ -11,11 +11,11 @@ WebRTC and Electron IDE.
 | Server and console | [Native server](native-server.md), [interactive CLI](native-interactive-cli.md) |
 | Browser and editor | [Browser view](browser-view.md), [VS Code setup](../extensions/vscode/README.md), [current installed acceptance](VALIDATION_STATUS.md), [compact layout](compact-sidebar.md), [catalogue recovery](model-catalogue-recovery.md) |
 | Models and credentials | [Provider setup](provider-setup.md), [credential storage](credential-storage.md) |
-| General agents and graphs | [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [agent process placement](agent-process-placement.md), [graph service](native-graph-service.md) |
+| General agents and graphs | [Authoring formats and programming API](authoring.md), [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [agent process placement](agent-process-placement.md), [graph service](native-graph-service.md) |
 | Long conversations | [Bounded session history pages](native-session-history-pages.md), [JSON POST foundation](native-context-transport.md), [native compaction implementation and remaining acceptance](native-context-compaction-design.md) |
 | Coding tools and approvals | [Workspace tools](native-workspace-tools.md), [multi-folder workspace target](native-multi-folder-workspaces.md), [file creation](native-file-creation.md), [process tools](native-process-tools.md), [permissions](PERMISSIONS.md) |
 | Protocols and profiles | [MCP](native-mcp.md), [A2A](A2A.md), [connection profiles](connection-profiles.md) |
-| Coverage and verification | [Validation status](VALIDATION_STATUS.md), [parity baseline](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
+| Coverage and verification | [Validation status](VALIDATION_STATUS.md), [reference research](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
 | Source layout | [Cleanup](cleanup.md) |
 | Local owner upgrades | [Native persistence barrier](native-backend-owner.md), [native package verifier](native-runtime-generation.md), [owner commands](native-owner-control.md), [retirement request](native-owner-retirement.md), [qualified replacement startup](native-owner-replacement.md), [legacy preflight](native-legacy-preflight.md), [stopped legacy preparation](native-legacy-owner.md), [legacy stop/adoption](native-legacy-stop.md), [managed upgrade adapter](native-owner-upgrade-client.md), [remaining runtime handoff](native-runtime-handoff.md) |
 

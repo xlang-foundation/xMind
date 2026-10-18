@@ -68,6 +68,15 @@ active.json existed; after that same host reported ready, verification passed.
 No editor or browser window was opened. [Installed/live/page evidence](evidence/coding-package-0.1.25-20261018.json).
 [Exact native red/green evidence](evidence/a2a-agent-guidance-20261018.json).
 
+The installed native console also attaches to this existing page backend:
+seven actual commands verify help, health, profile identity, sessions, runs and
+the exact same eight-message history. The backend PID remains 18436 and neither
+profile inspection reports a new startup. Initial explicit first-launch provider
+options are rejected as a configuration change; workspace group inspection
+before initialization is also rejected. The entry guide now distinguishes saved
+profile attachment from first setup and documents workspace init before info.
+All original outputs remain recorded. [Console attachment evidence](evidence/installed-0.1.25-console-attachment-20261018.json).
+
 The repository checkpoint notes had grown AGENTS.md to 34,298 bytes and the
 actual native guidance reader rejected the xMind workspace at its unchanged
 16 KiB limit. Historical prose is retained verbatim in a fenced
