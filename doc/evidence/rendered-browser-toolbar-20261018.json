@@ -1,0 +1,109 @@
+{
+  "recordedAt": "2026-10-18T20:17:59.767Z",
+  "url": "http://127.0.0.1:62342/ui/",
+  "browser": "Microsoft Edge 155.0.4283.62",
+  "mode": "isolated headless Playwright; sandbox enabled; no visible desktop or VS Code activation",
+  "backendVersion": "0.1.27",
+  "sourceParent": "3a2d194ea537c176a746318d5953064701e47962",
+  "sourceState": "working tree toolbar layout and completed-create copy changes",
+  "checks": {
+    "automaticLocalConnection": true,
+    "existingHistoryRestored": true,
+    "savedProvider": "claude",
+    "savedModel": "claude-sonnet-4-6",
+    "workspaceDialogOpensAndCloses": true,
+    "newWorkspaceEnabled": true,
+    "addFolderEnabled": true,
+    "providerSettingsOpensAndCloses": true,
+    "desktop": {
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "sidebarWidth": 420,
+      "allToolbarControlsFit": true
+    },
+    "resized": {
+      "sidebarWidth": 347,
+      "allToolbarControlsFit": true
+    },
+    "narrowViewport": {
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "sidebarWidth": 390,
+      "allToolbarControlsFit": true
+    },
+    "filePreview": "README.md"
+  },
+  "pageErrors": [],
+  "httpFailures": [],
+  "newProviderRequests": 0,
+  "newFileWrites": 0,
+  "actualCodingThroughRenderedUi": false,
+  "actualVsCodeActivation": false,
+  "passed": true,
+  "filePreviewVerification": {
+    "recordedAt": "2026-10-18T20:18:40.872Z",
+    "title": "README.md",
+    "actualTextLength": 7547,
+    "expectedHeading": "# Model Zoo",
+    "passed": true,
+    "originalObserverFailure": "Initial wait incorrectly searched for ModelZoo without the space; it timed out. Original call output retained. Actual file contents were successfully served, and the corrected heading assertion passes.",
+    "pageErrors": [],
+    "httpFailures": []
+  },
+  "clientGate": {
+    "recordedAt": "2026-10-18T20:18:33.466Z",
+    "version": "0.1.27",
+    "sourceParent": "3a2d194ea537c176a746318d5953064701e47962",
+    "workingTreePatchSha256": "bde0d1d7bc384acce96688b4a5581380d534bba84bc40e09398d78e04b926401",
+    "sourceFiles": 98,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 421,
+      "passed": 421,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "9066984161a88fa1ce8e15402bda634bf6a8f2f63ccdcf50e8d3be46d9ace503"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "7505cfb200f8de0052d3d3a1b89014a09ebaccdf010292be59bc023e504462b8"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "screenshots": [
+    {
+      "path": "C:\\xMindNativeValidation\\rendered-ui-0.1.27-20261018\\desktop-before.png",
+      "sha256": "bdfdf1fedd2d53700d8ee8047f06897467c34b10f4497285da9bb1ff9bb54f8b"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\rendered-ui-0.1.27-20261018\\desktop-after.png",
+      "sha256": "f8c1c67a1ef918d4ef10430b19c3bf7973dbc46e2dab61d62341ea391e8e85f6"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\rendered-ui-0.1.27-20261018\\sidebar-resized.png",
+      "sha256": "664173a28991ca5ab4f9eba052b6a2b3847f273ea60bb4a930fce6776bbb3791"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\rendered-ui-0.1.27-20261018\\mobile.png",
+      "sha256": "9a9dbe17aebcafec04ee777f1c33610f1ae7c7876161e95a10ebe1af0dc1a3e1"
+    },
+    {
+      "path": "C:\\xMindNativeValidation\\rendered-ui-0.1.27-20261018\\file-preview.png",
+      "sha256": "b5a4f2bfde23fcf2783d8316fd9dcfeb0519f4fcd7dc712712539cef126a8c92"
+    }
+  ]
+}

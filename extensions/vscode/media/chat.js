@@ -416,7 +416,7 @@ function operationExtras(section,item,reviewable=true,fileReviewActions=null){
   }
   if(item.tool==='create_file'){
     try{const plan=JSON.parse(item.arguments_json);if(Array.isArray(plan.create_directories)&&plan.create_directories.length){section.append(node('p','This approval also creates these missing parent folders:'));const folders=node('ul');for(const directory of plan.create_directories)if(typeof directory==='string')folders.append(node('li',directory));section.append(folders);}}catch{}
-    section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
+    if(item.state==='awaiting_approval')section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
     if(item.state==='uncertain')section.append(node('p','Creation is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
   }
 }

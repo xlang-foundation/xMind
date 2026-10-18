@@ -65,6 +65,12 @@ html,body{overflow-x:hidden}
   .composer-bar #send{grid-column:2;grid-row:2;justify-self:end}
 }
 /* Long run and operation ids must wrap inside history cards at sidebar width. */
+.conversation-header{flex-direction:column;align-items:stretch;gap:6px;min-width:0;max-width:100%}
+.session-header{display:flex;align-items:center;gap:6px;min-width:0;width:100%}
+.session-header #sessions{flex:1 1 0;min-width:0;width:0;max-width:100%}
+.session-header button,.conversation-tools button{flex:none;width:30px;height:30px;padding:5px}
+.conversation-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-width:0;width:100%}
+.conversation-header button[hidden]{display:none}
 #scroll,.message,.operation,.message-body{min-width:0;max-width:100%}
 #scroll .message h4,#scroll .operation h4,#scroll details>summary{min-width:0;max-width:100%;overflow-wrap:anywhere}
 #mcp-input-view{padding:10px;border:1px solid var(--vscode-panel-border);border-radius:6px;background:var(--vscode-sideBar-background)}#mcp-input-view h3{font-size:13px;margin:0 0 8px}.mcp-input-card{padding:9px 0;border-top:1px solid var(--vscode-panel-border)}.mcp-input-card>strong{display:block;white-space:pre-wrap;overflow-wrap:anywhere}.mcp-input-form label{display:block;margin:8px 0;font-size:12px}.mcp-input-form input,.mcp-input-form select{display:block;box-sizing:border-box;width:100%;margin-top:4px;padding:5px;color:var(--vscode-input-foreground);background:var(--vscode-input-background);border:1px solid var(--vscode-input-border,var(--vscode-panel-border))}.mcp-input-form input[type=checkbox]{width:auto}.mcp-input-form button{margin:6px 6px 0 0}

@@ -617,7 +617,8 @@ test('new-file review distinguishes absence, previews exact content and never re
   r.send({type:'operations',operations:[operation]});assert.equal(doc.querySelector('#operations .after').textContent,'actual proposed source\n');assert.match(doc.querySelector('#operations').textContent,/New file/);
   const controls=[...doc.querySelectorAll('#operations button')];controls.find(button=>button.textContent==='Compare changes').click();assert.equal(r.posted.at(-1).type,'review');assert.equal(r.posted.at(-1).id,operation.id);
   controls.find(button=>button.textContent==='Allow creation').click();assert.equal(r.posted.at(-1).type,'decide');assert.equal(r.posted.at(-1).decision,'allow');
-  r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(doc.querySelectorAll('#operations button').length,0);assert.match(doc.querySelector('#operations').textContent,/Creation is uncertain/);r.dom.window.close();
+  r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(doc.querySelectorAll('#operations button').length,0);assert.match(doc.querySelector('#operations').textContent,/Creation is uncertain/);
+  r.send({type:'operations',operations:[{...operation,state:'succeeded'}]});assert.doesNotMatch(doc.querySelector('#operations').textContent,/backend must still verify/);assert.equal(doc.querySelectorAll('#operations button').length,0);r.dom.window.close();
 });
 
 test('external MCP approval names the server and tool and uncertainty never offers replay',()=>{
