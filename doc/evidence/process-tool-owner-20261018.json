@@ -1,0 +1,328 @@
+{
+  "recordedAt": "2026-10-18T22:02:25.230Z",
+  "sourceParent": "1534685cf4394b4e064034cfae06111f19ad98b1",
+  "sourcePatchSha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a",
+  "sourceFiles": {
+    "Native/CMakeLists.txt": "25427d157505b6a5a1f76b7731095e04f81e907b647063a1c6158fff26f7d189",
+    "Native/include/agentflow/agent_process_tool_host.hpp": "d8a65a47fd3350e4f2c0793800d244acbc389f3f40fe8e3c8256ce260d006fce",
+    "Native/src/agent_process_tool_host.cpp": "e5a4f0a95433ef63966ad8c8a6d36f7fc83495681c20e4377c1572088650d104",
+    "Native/src/agent_runner.cpp": "a02dae64a5dfe799a87b548e7d9aba9e343e102277ea38036d9cb20edd7526cd",
+    "Native/tests/agent_process_tool_host_contract.cpp": "fce2241b873b0cdb5af891404dd489765d3f1e3c7ae10311f25d3cb8380c97d3"
+  },
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "implementation": "Run-scoped backend process owner receives bounded owned run/attempt/call, tool, workspace revision, folder and JSON values. Backend chooses operation identity/expiry, guidance, process profile and background policy; checks active run, offered catalogue, inherited denials and duplicate call admission before dispatch.",
+  "uncertainObservationSuccessOverwritten": false,
+  "stopRequestAcknowledgementTreatedAsCompletedStop": false,
+  "localLifetimeGuardOnly": true,
+  "authenticatedWorkerRpcImplemented": false,
+  "durableWorkerRpcDeduplicationImplemented": false,
+  "processBoundAgentRunnerImplemented": false,
+  "focusedGate": {
+    "recordedAt": "2026-10-18T21:44:15.285Z",
+    "sourceRevision": "1534685cf4394b4e064034cfae06111f19ad98b1",
+    "patchSha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a",
+    "projectFiles": 2610,
+    "pureLibraryFiles": 1870,
+    "sdkFiles": 75,
+    "nativeBinaries": 126,
+    "changedBinaries": [
+      "agentflow_agent_process_tool_host_contract.exe"
+    ],
+    "productionExeChangedDuringThisBuild": false,
+    "productionCodeChanged": true,
+    "productionSha256": "45fb8de43162a6852282d26cf8f31b6447d4d8350f49fc67f128bdb61cbb7cb9",
+    "productionDiffersFromInstalled": true,
+    "processDeadlineMsUnchanged": true,
+    "observedGraphPhases": [
+      "script_entered",
+      "delay_completed",
+      "effect_completed"
+    ],
+    "passed": 5,
+    "failed": 0,
+    "seconds": 20.79,
+    "sourceLibraryRuntimeAndBinaryHashesAndFileSetsUnchanged": true,
+    "build": {
+      "pid": 64664,
+      "launchedAt": "2026-10-18T21:43:08.304Z",
+      "completedAt": "2026-10-18T21:43:49.161Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6e3cde90dd017d713868cf84dc648938e7cea3f1daaf3ec9b44e446a4fa36de7"
+    },
+    "test": {
+      "pid": 22740,
+      "launchedAt": "2026-10-18T21:43:51.853Z",
+      "completedAt": "2026-10-18T21:44:12.685Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "44bd82ba0690358782e907fb150878837d8afc0c5bcab26ef94645861760cf27"
+    },
+    "fullNativeSuiteRun": false,
+    "hostedCauseEstablished": false,
+    "cpythonExecuted": false
+  },
+  "fullNativeGate": {
+    "recordedAt": "2026-10-18T22:01:44.533Z",
+    "sourceParent": "1534685cf4394b4e064034cfae06111f19ad98b1",
+    "sourcePatchSha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 23244,
+      "launchedAt": "2026-10-18T21:45:18.347Z",
+      "completedAt": "2026-10-18T21:46:25.617Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c720913c70c813366db2b155a4c7b421fca3f9d358206628abe75b4631871f08"
+    },
+    "test": {
+      "pid": 49576,
+      "launchedAt": "2026-10-18T21:46:32.145Z",
+      "completedAt": "2026-10-18T22:01:41.687Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8099eace0cb442b31308be7a6d9cf84219c2d7bf1fb23cfec83641e83064b4b5"
+    },
+    "total": 151,
+    "failed": 0,
+    "passed": 151,
+    "seconds": 909.5,
+    "projectFiles": 2610,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 126,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "45fb8de43162a6852282d26cf8f31b6447d4d8350f49fc67f128bdb61cbb7cb9",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "actualXlang3Process": {
+    "elapsed_ms": 140,
+    "exit_code": 0,
+    "independently_verified": false,
+    "job_id": "4f9a65b5b23d56a8ada09b2a9cda6281",
+    "operation_id": "4f9a65b5b23d56a8ada09b2a9cda6281",
+    "output_artifact": {
+      "operation_id": "4f9a65b5b23d56a8ada09b2a9cda6281",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 18
+    },
+    "pid": 69276,
+    "process_tree_retired": true,
+    "profile_id": "xlang3",
+    "stderr": {
+      "byte_count": 0,
+      "data": "",
+      "encoding": "utf-8",
+      "retained_bytes": 0
+    },
+    "stdout": {
+      "byte_count": 18,
+      "data": "owner-process-ok\r\n",
+      "encoding": "utf-8",
+      "retained_bytes": 18
+    },
+    "termination": "exited",
+    "truncated": false
+  },
+  "actualFolders": {
+    "attached_marker_content": "actual attached process\n",
+    "attached_marker_exists": true,
+    "primary_marker_exists": false
+  },
+  "validationScope": "Actual native approvals, selected-folder xlang3 command and xlang3 SQLite reopen; model inference in the complete suite is explicitly synthetic. No installed/client/live-provider acceptance of this new native binary is claimed.",
+  "retainedFailures": [
+    {
+      "scope": "First focused suite",
+      "passed": 4,
+      "total": 5,
+      "reason": "The fixture wrote in text mode and expected LF bytes. The diagnostic proved actual exit zero, correct attached folder and CRLF file bytes."
+    },
+    {
+      "scope": "Diagnostic contract",
+      "passed": 0,
+      "total": 1,
+      "reason": "The same byte assertion remained failing while actual receipt and marker bytes were printed. Production code stayed unchanged."
+    },
+    {
+      "scope": "Full-gate preflight",
+      "nativeBuildStarted": false,
+      "reason": "Unrestricted SDK git inventory exceeded Node default metadata buffer. Corrected inventory covers all sdk/ headers actually consumed by xMind and separately freezes the pinned DLL, CLI, import library and modules."
+    }
+  ],
+  "fixtureCorrection": "Use pathlib.Path.write_bytes with the unchanged LF byte assertion; retain receipt diagnostics and both failed logs. No runtime behavior or deadline was weakened.",
+  "productionOwnerAndRunnerUnchangedAcrossFixtureCorrection": true,
+  "installed": false,
+  "installedPackageVersion": "0.1.30",
+  "installedNativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "currentHostedNativeAccepted": false,
+  "hostedOnlyTrustMutationExcludedFromLocalRun": true,
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/binaries-before-test.json",
+      "sha256": "59528c64522ad3c25c25aa3bbdb4b4d1d72c928c51665b4369062bc81088d3e4"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/build-terminal.json",
+      "sha256": "cdaf59168352b019bc95a7ced9276b370b051512e6d958f676edd9bcd981a30c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/build.log",
+      "sha256": "0cc6633ba8617572d994d944f96d06fc1c03e5b70d0e2ad655ccb923c565072b"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/ctest-terminal.json",
+      "sha256": "fa965a1d25ba3f6d152223fc496edd308edd874f6f098ace11963158e0ffcaf0"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/ctest.log",
+      "sha256": "8dfbc20796e37f5b4c5257933498767d69b0843e43597082bc1169359a9e962c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/failed-suite-frozen-inputs-after.json",
+      "sha256": "beb0340848b315e4d9f60778a957e29c2c43c2a3619b7b041b87558eca23af59"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/inputs-before-build.json",
+      "sha256": "6e85a210995721ea8924b6cda665d7cc7ef5395f5b00a59315f2bb8eb71a7153"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/LastTest.log",
+      "sha256": "44c02922f82336aa934612e842499afb3fd775d7348c6505d582cc443dff2393"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-focused-20261018/source.patch",
+      "sha256": "bce2f508ee6eac2ded34f47032f9af442586a63058c4dc0f3c75cd05221b8b83"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/binaries-before-test.json",
+      "sha256": "20754e2a2c02dafa6985b4e470cd01e1c99b03fd2dd1812abb48530bfe96af40"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/build-terminal.json",
+      "sha256": "2cad6b0ca2d69eb2f95f1e8fce7afb45796fa11830ebe2e8a672685e233d16c9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/build.log",
+      "sha256": "215ae37b27925b699f384569b3a7c9c5b8ca62e0db5d66ca7c9c125a28de032a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/ctest-terminal.json",
+      "sha256": "be595e9937fb595f883258beee45195bb613bbc709b50ab0af90ae1a8aac82f6"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/ctest.log",
+      "sha256": "6acd3e0cad936c62d586537ddcdf9ff8305d193d139b1a57440089db73c725e2"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/failed-suite-frozen-inputs-after.json",
+      "sha256": "85277fc140e6db09174d0d592a27ef780366653bfa81547f955aa18263d057fd"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/inputs-before-build.json",
+      "sha256": "6dae0127f2bc7c73d20485a429b2279b7fe6ae42e1ed8b204dfb8d58066694f8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/LastTest.log",
+      "sha256": "565cc58d781f17d234246a1111658e64b45fd5d9fabb01e715faeba9ec713da1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-diagnostic-20261018/source.patch",
+      "sha256": "9ec523e3ac251409106c3433296394591dff05b868701f8967d4121bcad80b52"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/binaries-before-test.json",
+      "sha256": "db45b712c671efe59d282c05c4538786b5e533a5ca958c91a679f5b90c85527f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/build-terminal.json",
+      "sha256": "9570507895143222f128e74250a66165542d9d1cab84beeeb7c9aef1293929e5"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/build.log",
+      "sha256": "6e3cde90dd017d713868cf84dc648938e7cea3f1daaf3ec9b44e446a4fa36de7"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/ctest-terminal.json",
+      "sha256": "d760e7c91f41c4cf6ad32b1d37cb56ff80bf0d7166b0a4ea55275c8234b1a9b8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/ctest.log",
+      "sha256": "44bd82ba0690358782e907fb150878837d8afc0c5bcab26ef94645861760cf27"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/gate.json",
+      "sha256": "1dcb36ffa28adcbac7bc634e1c7383e8a8b549c5bcd16d232d30bd5fced48585"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/inputs-before-build.json",
+      "sha256": "424331719b91557473017e7c517b2232c8111e6b75b4150a621e25ff42fd81aa"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/LastTest.log",
+      "sha256": "415b356b8898bf983fd315f3be46f254ad8a9f684941e03df1679382d339906a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-final-focused-20261018/source.patch",
+      "sha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-20261018/preflight-failure.json",
+      "sha256": "54dd0584e1b8b40b0df0ec3892f3a05da0662f1ff414898e09a643ef9bed127c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-20261018/source.patch",
+      "sha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/binaries-before-test.json",
+      "sha256": "260b5d740c85ece3683249734d322299b9ee7520181df1c9f0c17c4344af9f62"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/build-terminal.json",
+      "sha256": "032ce382d84382e78053905b9a4f1eb5fc1e204ef606afd092051c1de24699e9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/build.log",
+      "sha256": "c720913c70c813366db2b155a4c7b421fca3f9d358206628abe75b4631871f08"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/contract-inventory.json",
+      "sha256": "325507296d1804ba3ab81332271ae978fd2becae2803dbdbe0b586463f5e3cec"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/ctest-terminal.json",
+      "sha256": "ff54a0dbee6c64c93a6f71f7082f7f30e124723a2dd5295a6dae915af67908ff"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/ctest.log",
+      "sha256": "8099eace0cb442b31308be7a6d9cf84219c2d7bf1fb23cfec83641e83064b4b5"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/gate.json",
+      "sha256": "9ea1ae42a4668cd8bde4e42f83625d902b18f0973b79dae63e8e4fee0b46be59"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/inputs-before-build.json",
+      "sha256": "441549a922f20f30dd9f5ad156c53c22944778bf1744df8e11684f3232699144"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/LastTest.log",
+      "sha256": "cf3f9f44147f656bdbdb48133b547c6c2e844d319096556f8c90c1009b880f60"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-tool-owner-full-sdk-headers-20261018/source.patch",
+      "sha256": "7710e9fa5ed99293d84fb1a70774c9e0534eff936e22b64207d36157061e6e2a"
+    }
+  ],
+  "cpythonExecuted": false
+}

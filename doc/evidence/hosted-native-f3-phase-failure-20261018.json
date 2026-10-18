@@ -1,0 +1,267 @@
+{
+  "checkedAt": "2026-10-18T21:51:00.683Z",
+  "runId": 39164480510,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39164480510",
+  "sourceRevision": "f3e7718f2ef04eb0df2808ed8482e04291068473",
+  "conclusion": "failure",
+  "artifact": {
+    "run": "39164480510",
+    "revision": "f3e7718f2ef04eb0df2808ed8482e04291068473",
+    "conclusion": "failure",
+    "artifact": 12151891158,
+    "name": "native-windows-evidence-f3e7718f2ef04eb0df2808ed8482e04291068473",
+    "bytes": 71374,
+    "digest": "sha256:9838b820a4485b40a8ab67845f65d736a0562b999bfa3917b5282e729b83b921",
+    "digestVerified": true,
+    "path": "C:\\xMindNativeValidation\\coding-0.1.30-source-20261018\\.agentflow\\ci\\artifacts\\native-windows-evidence-f3e7718f2ef04eb0df2808ed8482e04291068473.zip"
+  },
+  "advertisedSizeAndDigestVerified": true,
+  "passed": 149,
+  "total": 151,
+  "seconds": 691.06,
+  "sdkSmokePassed": 2,
+  "failed": [
+    "native_graph_runner_contract",
+    "native_agent_runner_contract"
+  ],
+  "actualGraphProcess": {
+    "elapsed_ms": 30046,
+    "exit_code": 1,
+    "id": "f91f6b267e985e7e3fbc1b46a26c3873",
+    "output_artifact": {
+      "operation_id": "f91f6b267e985e7e3fbc1b46a26c3873",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "actualAgentProcess": {
+    "elapsed_ms": 30035,
+    "exit_code": 1,
+    "independently_verified": false,
+    "job_id": "6423e886c87d646ab2f74d0ef309e252",
+    "operation_id": "6423e886c87d646ab2f74d0ef309e252",
+    "output_artifact": {
+      "operation_id": "6423e886c87d646ab2f74d0ef309e252",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    },
+    "pid": 7392,
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "stderr": {
+      "byte_count": 0,
+      "data": "",
+      "encoding": "utf-8",
+      "retained_bytes": 0
+    },
+    "stdout": {
+      "byte_count": 0,
+      "data": "",
+      "encoding": "utf-8",
+      "retained_bytes": 0
+    },
+    "termination": "timed_out",
+    "truncated": false
+  },
+  "diagnostics": [
+    {
+      "name": "agent-runner-4ef537cd-f45a-434d-b9cb-22061a40b39b",
+      "sha256": "6949f9c64f70f02f748e65d6eb4e60627700508f50394562bf09de920c8c3324",
+      "scope": {
+        "readOnly": true,
+        "commandLinesIncluded": false,
+        "environmentIncluded": false,
+        "kind": "scope",
+        "ownerPid": 8004,
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_agent_runner_contract.exe"
+      },
+      "samples": [
+        {
+          "pid": 7392,
+          "birth": "2026-10-18T21:40:00.0543890Z",
+          "elapsedMs": 2446,
+          "cpuMs": 765.625,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "cpuMs": 375,
+              "id": 1280,
+              "waitReason": null
+            },
+            {
+              "state": "Wait",
+              "cpuMs": 171.875,
+              "id": 7832,
+              "waitReason": "UserRequest"
+            }
+          ]
+        },
+        {
+          "pid": 7392,
+          "birth": "2026-10-18T21:40:00.0543890Z",
+          "elapsedMs": 13140,
+          "cpuMs": 10546.875,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "cpuMs": 10140.625,
+              "id": 1280,
+              "waitReason": null
+            },
+            {
+              "state": "Wait",
+              "cpuMs": 171.875,
+              "id": 7832,
+              "waitReason": "UserRequest"
+            }
+          ]
+        },
+        {
+          "pid": 7392,
+          "birth": "2026-10-18T21:40:00.0543890Z",
+          "elapsedMs": 23764,
+          "cpuMs": 19796.875,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "cpuMs": 19406.25,
+              "id": 1280,
+              "waitReason": null
+            },
+            {
+              "state": "Wait",
+              "cpuMs": 171.875,
+              "id": 7832,
+              "waitReason": "UserRequest"
+            }
+          ]
+        }
+      ],
+      "end": {
+        "samples": 3,
+        "reason": "observer_stopped",
+        "kind": "end"
+      }
+    },
+    {
+      "name": "graph-runner-5efcd64c-f30d-4ea6-817c-3d9cb9b61bcb",
+      "sha256": "153b0854a4b1caa5d822147a10e5657f4ecdd733275224c066a06256c2915eda",
+      "scope": {
+        "environmentIncluded": false,
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_graph_runner_contract.exe",
+        "readOnly": true,
+        "ownerPid": 7812,
+        "commandLinesIncluded": false,
+        "kind": "scope"
+      },
+      "samples": [
+        {
+          "pid": 7636,
+          "birth": "2026-10-18T21:37:15.2494170Z",
+          "elapsedMs": 6892,
+          "cpuMs": 984.375,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Wait",
+              "id": 10056,
+              "cpuMs": 609.375,
+              "waitReason": "Executive"
+            },
+            {
+              "state": "Wait",
+              "id": 3636,
+              "cpuMs": 156.25,
+              "waitReason": "UserRequest"
+            }
+          ]
+        },
+        {
+          "pid": 7636,
+          "birth": "2026-10-18T21:37:15.2494170Z",
+          "elapsedMs": 17469,
+          "cpuMs": 10671.875,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "id": 10056,
+              "cpuMs": 10296.875,
+              "waitReason": null
+            },
+            {
+              "state": "Wait",
+              "id": 3636,
+              "cpuMs": 156.25,
+              "waitReason": "UserRequest"
+            }
+          ]
+        },
+        {
+          "pid": 7636,
+          "birth": "2026-10-18T21:37:15.2494170Z",
+          "elapsedMs": 28063,
+          "cpuMs": 20718.75,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Wait",
+              "id": 10056,
+              "cpuMs": 20343.75,
+              "waitReason": "Executive"
+            },
+            {
+              "state": "Wait",
+              "id": 3636,
+              "cpuMs": 156.25,
+              "waitReason": "UserRequest"
+            }
+          ]
+        }
+      ],
+      "end": {
+        "samples": 3,
+        "kind": "end",
+        "reason": "observer_stopped"
+      }
+    }
+  ],
+  "observations": [
+    "Graph PowerShell entered the script and committed its first stdout marker. No delay_completed or effect_completed marker was committed before timeout.",
+    "The graph timeout is after script entry; these markers do not establish why the next PowerShell command did not finish.",
+    "The separate AgentRunner command also timed out, with no committed output.",
+    "Sampled child CPU rises by roughly 19-20 seconds over the observation window. Thread samples and a 64-module prefix do not establish a managed stack or root cause."
+  ],
+  "causeEstablished": false,
+  "processDeadlineChanged": false,
+  "runCancelledOrRestarted": false,
+  "productionCacheOrEnvironmentWorkaroundApplied": false,
+  "nextInvestigation": "Controlled command/module-resolution diagnostics with unchanged original commands and budgets; do not replace the failing cmdlets or disable the contracts to get a pass.",
+  "reference": {
+    "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_windows_powershell_5.1?view=powershell-5.1",
+    "scope": "Microsoft documents module-cache reads during command search; this supports a hypothesis only, not attribution of this observed failure."
+  },
+  "ctestSha256": "d4a24e0fee55b1c15a527657fd4b9d36bda6f5251cac09d27b886dbb7645b311",
+  "detailsSha256": "d2e46675afdf2874d87e6e7f39273736d905e8e2647f217ab87133fdcefee5dc",
+  "rawEvidenceRoot": "C:/xMindNativeValidation/hosted-native-39164480510"
+}

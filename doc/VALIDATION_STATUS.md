@@ -13,6 +13,16 @@ used when they were recorded and should not be read as current parity goals.
 
 ## Current product acceptance matrix — 2026-10-18
 
+The new process-tool owner source passes all 151 local native contracts in
+909.5 seconds after a complete build. All 2,610 project files, 16 SDK include-tree
+files, 76 SDK runtime/import-library files, 1,870 pure-library files, 18,598
+Node dependency files and 126 binaries verify unchanged through validation.
+This source is newer than the installed runtime described below. It moves
+process preparation behind an owned-value backend capability and preserves
+unsuccessful uncertain-wait/pending-stop results. It does not implement
+process-bound agents or establish installed/live-provider acceptance.
+[Current native source proof](evidence/process-tool-owner-20261018.json).
+
 Installed preview 0.1.30 contains the final UI described below. All 2,448 VSIX
 files and 2,445 installed non-metadata payloads verify; the 2,402-file native
 runtime and its manifest are byte-identical to accepted 0.1.27. All 422/147
@@ -106,9 +116,15 @@ Its cause remains unestablished. Run 39160294480 at 9e4b118 is also terminal
 failure: 150/151 in 657.03 seconds, SDK smoke 2/2. Its graph process reaches
 the same 30-second deadline with no output and a retired process tree.
 The exact artifact size/digest verify. Diagnostic run 39164480510 at f3e7718
-is in progress at the latest check; it has not been restarted or cancelled.
+is now terminal failure: 149/151 in 691.06 seconds, SDK smoke 2/2. The graph
+prints only `script_entered`, then times out after 30,046ms; its delay/effect
+markers are absent. A separate AgentRunner PowerShell command times out after
+30,035ms with no output. Child CPU samples rise by roughly 19–20 seconds;
+the bounded module/thread samples do not establish a root cause. No deadline,
+production cache or environment workaround has been applied.
 [Exact failure evidence](evidence/hosted-native-0c93640-failure-20261018.json).
 [Later failure evidence](evidence/hosted-native-9e4b118-failure-20261018.json).
+[Phase-marker failure evidence](evidence/hosted-native-f3-phase-failure-20261018.json).
 
 The graph fixture now records fixed markers at script entry, after its deliberate
 six-second delay and after the attached-folder file effect. Failure diagnostics

@@ -15,6 +15,38 @@ different kind of agent, tool, graph, or model. Both placements must execute
 the same `AgentRunner` and preserve the same backend-owned workspace, provider,
 permission, MCP/A2A, graph, budget and persistence rules.
 
+## Process-tool owner boundary — 2026-10-18
+
+The run loop now invokes `run_process`, `wait_process` and `stop_process`
+through `AgentProcessOwnerHost`. Its owned request carries run/attempt/call
+identity, workspace revision, folder, tool and bounded JSON arguments. The
+backend chooses operation IDs and expiry, resolves the admitted folder and
+repository/skill guidance, checks the active run and offered catalogue, retains
+inherited denials and rejects duplicate call identity before approval can wait.
+The lower-level executor keeps trusted executable/profile bindings, approval,
+effect claims, output artifacts and process lifecycle ownership.
+
+Uncertain waits and unconfirmed stop requests now retain an unsuccessful tool
+result. Previously a later assignment in the run loop overwrote that state.
+The new contract checks those values with an explicit recording adapter;
+it separately runs an actual approved xlang3 command in an attached folder and
+reopens the xlang3-backed SQLite receipt without replay.
+
+All five focused contracts pass in 20.79 seconds. After building every native
+target, the complete local suite passes 151/151 in 909.5 seconds with frozen
+project inputs, SDK headers/runtime/import library, pure libraries, dependencies
+and 126 binaries unchanged. The initial fixture expected LF bytes after a
+Windows text-mode write; its retained diagnostic proves actual exit zero and
+correct-folder CRLF output. The fixture now writes exact bytes with the original
+byte assertion; production owner/runner code stayed unchanged across that fix.
+[Exact source patch and evidence](evidence/process-tool-owner-20261018.json).
+
+This remains an in-process owner adapter with a lifetime call guard. Process
+profile validation, background joins, admission and other backend dependencies
+remain in the runner/service path. Authenticated IPC, durable RPC deduplication,
+worker supervision and actual process-bound AgentRunner execution remain open.
+The installed 0.1.30 runtime has not yet been updated to this native source.
+
 ## Target contract
 
 Trusted agent and graph configuration may select `in_process` or `process`.

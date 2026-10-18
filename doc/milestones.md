@@ -1,5 +1,37 @@
 # Reviewable milestones
 
+## Native source checkpoint — process-tool owner, 2026-10-18
+
+`AgentProcessOwnerHost` now owns process-call preparation from bounded owned
+run/attempt/call, workspace revision, folder, tool and JSON values. The backend
+chooses operation IDs/expiry, resolves guidance, checks active ownership and
+offered tools, preserves inherited denials and rejects duplicate call identity
+before approval can suspend it. The existing executor retains profile binding,
+approvals, durable effect claims, process lifetime and output artifacts.
+Uncertain waits and pending stop requests remain unsuccessful instead of being
+overwritten by the run loop's general guidance-success assignment.
+
+Five focused contracts pass in 20.79 seconds. A complete native build and all
+151 local contracts pass in 909.5 seconds; 2,610 project inputs, 16 SDK files,
+76 SDK runtime/import-library files, 1,870 pure-library files, 18,598 dependency
+files and 126 binaries remain frozen. The initial fixture failed on text-mode
+CRLF versus expected LF bytes; its diagnostic proves real exit zero and correct
+folder. The final fixture uses an exact byte write with the unchanged assertion.
+Both failures and the SDK-inventory preflight failure remain recorded.
+[Full qualification and retained failures](evidence/process-tool-owner-20261018.json).
+
+The new native executable has SHA-256
+`45fb8de43162a6852282d26cf8f31b6447d4d8350f49fc67f128bdb61cbb7cb9`.
+It is not installed yet. Authentication/IPC, durable worker deduplication,
+supervision and process-bound AgentRunner remain incomplete.
+
+The separate hosted phase-marker job is terminal failure, 149/151 in 691.06
+seconds, SDK smoke 2/2. Its graph enters the script, then reaches the unchanged
+30-second process deadline before the next marker; AgentRunner also times out.
+Bounded CPU/thread/module samples do not establish the cause. No production
+cache/environment workaround or deadline change has been applied.
+[Hosted diagnostic evidence](evidence/hosted-native-f3-phase-failure-20261018.json).
+
 ## Installed checkpoint — 0.1.30, 2026-10-18
 
 The automatic explorer refresh is now packaged and installed. Complete final

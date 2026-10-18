@@ -98,7 +98,25 @@ The acceptance section below is required before that option can be advertised.
 
 ## Source-driven next boundary — 2026-10-18
 
-The full current-source native gate now passes **147/147** contracts, including
+The process-tool slice now follows the same owner pattern as file and remote
+tools: `AgentProcessOwnerHost` accepts owned run/attempt/call identity,
+workspace/folder binding, tool and argument values. The backend owns operation
+identity/expiry, offered-catalogue checks, inherited denials, instruction
+preconditions, approval and effect dispatch. Uncertain wait and pending stop
+results remain unsuccessful instead of being overwritten by the loop's general
+guidance-success assignment. Its actual approved attached-folder xlang3 command
+and SQLite reopen pass; recording-adapter result probes are labelled separately.
+The complete current local native suite passes 151/151 in 909.5 seconds with
+the full frozen input/runtime/binary closure unchanged.
+[Qualification and retained failures](evidence/process-tool-owner-20261018.json).
+
+The lower-level `AgentProcessToolHost` still exposes trusted profile bindings to
+backend admission checks and owns background joins. The new owner adapter is
+not a worker protocol, durable call ledger or placement setting. The remaining
+tool/admission/instruction dependencies described below still need extraction
+before the same AgentRunner can execute in a separate process.
+
+The earlier baseline passed **147/147** contracts, including
 the current `AgentRunner`, graph, local-profile, MCP SDK and backend-owner
 contracts ([exact record](evidence/native-current-source-full-20261017.json)).
 That establishes the in-process baseline; it does not change the worker boundary.
@@ -111,10 +129,12 @@ graph-HTTP contracts ([test record](evidence/agent-workspace-tool-host-local-202
 This capability remains in-process and owns the local workspace handles; it
 does not yet cross LRPC or mediate mutations.
 
-The next extraction must be a run-scoped `AgentToolHost` covering the complete
-model-visible catalogue and dispatch. The runner still invokes `ProcessExecutor`,
-MCP and A2A registries, trusted xlang3 callables, edit/create/patch/restore
-executors, permission grants and repository-instruction contexts directly.
+The next extraction remains a run-scoped `AgentToolHost` covering the complete
+model-visible catalogue and dispatch. File, remote and process dispatch now use
+owner adapters, but the runner still constructs these with concrete backend
+capabilities. Process-profile checks/background joins, MCP/A2A discovery,
+trusted xlang3 callables, permission grants and instruction contexts still
+depend on the backend inside the execution path.
 `AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` isolate durable
 run/context records and model requests, but they do not mediate those effects.
 

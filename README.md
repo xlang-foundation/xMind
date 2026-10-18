@@ -46,6 +46,12 @@ format was not satisfied, although its file contents were correct.
 [Automatic explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json).
 [Exact current evidence and remaining work](doc/VALIDATION_STATUS.md).
 
+Newer native source also passes the complete 151-contract local suite. It moves
+process calls behind a backend-owned capability and retains unsuccessful
+uncertain wait/stop results. That source has not yet replaced the installed
+runtime; hosted native acceptance and process-bound agent execution remain open.
+[Native source evidence](doc/evidence/process-tool-owner-20261018.json).
+
 ## Use in VS Code
 
 1. Install the supplied verified Windows x64 VSIX with **Extensions: Install
