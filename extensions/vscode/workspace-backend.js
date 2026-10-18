@@ -70,6 +70,18 @@ async function processConfigurationPath(context,vscode,io,setting){
     return canonicalPath(candidate);
   }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
+async function mcpConfigurationPath(context,vscode,io,setting){
+  if(setting)return canonicalPath(setting);
+  if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
+  const extensionRoot=context.extensionUri?.fsPath;
+  if(typeof extensionRoot!=='string'||!path.isAbsolute(extensionRoot))return undefined;
+  const candidate=path.resolve(extensionRoot,'..','..','.config','mcp.json');
+  try{
+    const info=await io.lstat(candidate);
+    if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development MCP configuration is aliased or not a regular file.');
+    return canonicalPath(candidate);
+  }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
+}
 
 class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
@@ -126,7 +138,7 @@ class WorkspaceBackend {
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const roots=await Promise.all(selection.roots.map(async root=>canonicalPath(await this.deps.fs.realpath(root.fsPath))));
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
-    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:await providerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'providerConfigPath')),languageServerConfigPath:await languageServerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'languageServerConfigPath')),processConfigPath:await processConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'processConfigPath'))};
+    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:await providerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'providerConfigPath')),languageServerConfigPath:await languageServerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'languageServerConfigPath')),processConfigPath:await processConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'processConfigPath')),mcpConfigPath:await mcpConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'mcpConfigPath'))};
     const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(runtime.qualified!==true)throw new Error('Managed profiles require bundled verified pure-library sources. Clear stdlibSource or use an external development server.');
     if(!current())throw new Error('Workspace changed while preparing its backend.');
@@ -181,6 +193,7 @@ class WorkspaceBackend {
     if(runtime.providerConfig)args.push('--trusted-provider-config',runtime.providerConfig);
     if(runtime.languageServerConfig)args.push('--language-server-config',runtime.languageServerConfig);
     if(runtime.processConfig)args.push('--process-config',runtime.processConfig);
+    if(runtime.mcpConfig)args.push('--mcp-config',runtime.mcpConfig);
     const workspaceEdits=machineSetting(this.vscode,'workspaceEdits')!==false;
     if(workspaceEdits===false)args.push('--read-only');
     else if(upgradeBackend)args.push('--workspace-edits','approved');

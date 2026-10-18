@@ -6,7 +6,7 @@
 #include <vector>
 namespace agentflow {
 struct LocalProfileOptions {
-    std::string workspace, profile_root, provider_config, graphs_config, python_tools_config, language_server_config, process_config;
+    std::string workspace, profile_root, provider_config, graphs_config, python_tools_config, language_server_config, process_config, mcp_config;
     std::optional<bool> approved_edits;
     bool require_existing_profile = false;
     bool upgrade_backend = false;
@@ -31,7 +31,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace,
                                    const std::string &runtime,const std::string &manifest,
                                    const std::string &auth_token,const std::string &owner_receipt={},
-                                   const std::string &language_server_config={});
+                                   const std::string &language_server_config={},
+                                   const std::string &mcp_config={},
+                                   std::string *mcp_document=nullptr);
 // Returns only validated profiles already present under the user-local profile
 // root. This never opens a client-supplied path or creates profile storage.
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});

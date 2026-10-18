@@ -69,6 +69,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.providerConfigPath` | Optional absolute provider YAML path imported by Native. Development Host automatically uses this repository's `.config/providers.yaml`; the extension passes only its path and never searches the opened project. |
 | `agentflow.languageServerConfigPath` | Optional absolute trusted native LSP profile YAML path. Development Host automatically uses this repository's `.config/language-servers.yaml` when present; the extension never searches the opened project. |
 | `agentflow.processConfigPath` | Optional absolute trusted native process profile YAML path. Development Host automatically uses this repository's `.config/processes.yaml` when present; the extension never searches the opened project. |
+| `agentflow.mcpConfigPath` | Optional absolute trusted native MCP server configuration JSON path. Development Host uses this repository's `.config/mcp.json` when present; opened projects are never searched. Native owns validation, persistence and peer launch. |
 | `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles keep their stored policy until the user applies the setting through **xMind: Apply Trusted Runtime Configuration**, which restarts the same profile and preserves sessions/history. |
 | `agentflow.profileRoot` | Optional machine-level profile directory for sharing the same local workspace sessions with the webpage or console. Defaults to `%USERPROFILE%\.xMind\p`; keep custom paths outside every opened workspace. |
 | `agentflow.openOnStartup` | Optional machine-level setting that opens the xMind sidebar and connects the active workspace after VS Code starts. Defaults to `false`. |
@@ -78,10 +79,15 @@ An unset provider path starts Native unconfigured so Settings can enroll a
 provider. With a configured path, every new managed backend imports that same
 file through Native; the host does not copy keys into arguments, conversations
 or workspace state. [Provider setup](https://github.com/xlang-foundation/xMind/blob/main/doc/provider-setup.md).
-After changing a trusted runtime, language-server, or process profile path,
+After changing a trusted runtime, language-server, process, or MCP configuration,
 run **xMind: Apply Trusted Runtime Configuration**. It requests a protected
 native owner handoff after confirmation; sessions and history persist and
 already dispatched work is never replayed.
+
+MCP configuration contents are fingerprinted, so editing the same file also
+requires applying the configuration. Clearing the setting keeps already saved
+MCP settings. To disable a server reversibly, set its `enabled` field to false
+and apply; removing it from the list permanently retires its ID.
 
 External mode requires its actual backend root to match the selected folder.
 Unknown workspace metadata, a different root or a changed generation blocks

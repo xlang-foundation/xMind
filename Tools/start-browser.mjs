@@ -13,10 +13,10 @@ import {createBrowserHostLifecycle,findExistingBrowserHost} from './browser-host
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
 for(let i=2;i<process.argv.length;i+=2){
-  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config','--graphs-config','--language-server-config','--process-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
+  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
   options.set(process.argv[i],process.argv[i+1]);
 }
-if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config','--graphs-config','--language-server-config','--process-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
+if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
 const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
@@ -48,7 +48,7 @@ async function activeCredential(){
   }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
 }
 
-let backend=viewOrigin,nativePid,tokenFile,localAccessToken,languageServerConfig,processConfig,nativeChild;
+let backend=viewOrigin,nativePid,tokenFile,localAccessToken,languageServerConfig,processConfig,mcpConfig,nativeChild;
 process.once('exit',()=>{
   if(nativeChild&&nativeChild.exitCode===null&&nativeChild.signalCode===null){
     try{nativeChild.kill();}catch{}
@@ -87,6 +87,9 @@ if(!backend){
   processConfig=options.get('--process-config');
   if(!processConfig){const candidate=join(root,'.config','processes.yaml');try{if((await stat(candidate)).isFile())processConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(processConfig){processConfig=resolve(processConfig);args.push('--process-config',processConfig);}
+  mcpConfig=options.get('--mcp-config');
+  if(!mcpConfig){const candidate=join(root,'.config','mcp.json');try{if((await stat(candidate)).isFile())mcpConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(mcpConfig){mcpConfig=resolve(mcpConfig);args.push('--mcp-config',mcpConfig);}
   const childEnv={...env,XMIND_VIEW_TOKEN:token};
   for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete childEnv[key];
   const child=nativeChild=spawn(join(runtimeRoot,'xmind.exe'),args,{cwd:workspace,env:childEnv,windowsHide:true,stdio:['ignore','ignore','pipe']});
@@ -127,7 +130,7 @@ if(!backend){
 
 const view=await createBrowserServer({backend,assetRoot:assets,localAccessToken});
 const url=await view.listen(port)+'/ui/';
-await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile,graphsConfig:options.get('--graphs-config')?resolve(options.get('--graphs-config')):undefined,languageServerConfig},null,2),{mode:0o600});
+await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile,graphsConfig:options.get('--graphs-config')?resolve(options.get('--graphs-config')):undefined,languageServerConfig,processConfig,mcpConfig},null,2),{mode:0o600});
 console.log('xMind Browser ready at '+url);
 console.log(tokenFile?'Native profile-aware browser connected to '+backend+'.':'Attached to the existing native view '+backend+'.');
 const lifecycle=createBrowserHostLifecycle({view,nativeChild,state,tokenFile,ownedToken:typeof localAccessToken==='string'?localAccessToken:undefined,url});

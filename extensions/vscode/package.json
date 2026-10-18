@@ -2,7 +2,7 @@
   "name": "agentflow",
   "displayName": "xMind",
   "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "publisher": "agentflow-local",
   "repository": {
     "type": "git",
@@ -170,6 +170,12 @@
           "default": "",
           "scope": "machine",
           "description": "Optional absolute path to trusted native process profiles. Development installs automatically use the repository .config/processes.yaml when present; opened workspaces are never searched. Run xMind: Apply Trusted Runtime Configuration after changing it."
+        },
+        "agentflow.mcpConfigPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Optional absolute path to trusted native MCP server configuration JSON. Development installs use the repository .config/mcp.json when present; opened workspaces are never searched. Run xMind: Apply Trusted Runtime Configuration after changing it. To remove all servers, apply a configuration with an empty servers list."
         },
         "agentflow.workspaceEdits": {
           "type": "boolean",

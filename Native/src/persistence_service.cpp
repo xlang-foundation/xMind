@@ -325,6 +325,14 @@ std::future<void> PersistenceService::put_process_profiles_for_replacement(std::
         repository.put_information("native-process","profiles",json);
     },false);
 }
+std::future<void> PersistenceService::put_mcp_servers_for_replacement(std::string json) {
+    if(!impl_->replacement_bootstrap)throw Conflict("MCP servers may bypass quiescence only during a protected replacement startup");
+    return impl_->submit([this,json=std::move(json)](Repository& repository){
+        const auto owner=repository.backend_owner();
+        if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("MCP replacement import requires the protected quiesced owner");
+        repository.put_information("native-mcp","servers",json);
+    },false);
+}
 std::future<void> PersistenceService::put_language_server_profiles_for_replacement(std::string json) {
     if(!impl_->replacement_bootstrap)throw Conflict("Language-server profiles may bypass quiescence only during a protected replacement startup");
     return impl_->submit([this,json=std::move(json)](Repository& repository){

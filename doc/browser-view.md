@@ -172,6 +172,15 @@ and otherwise uses the repository-local file when present. Both launch paths
 keep the executable and its arguments in owner configuration, never in page or
 model input.
 
+For MCP servers, the profile-aware launcher accepts `--mcp-config FILE` and
+otherwise uses the repository-owned `.config/mcp.json` when present.
+`Tools/start-ui.ps1` accepts `-McpConfig FILE` for its development backend.
+These are trusted host settings, never paths chosen by a page or model.
+Managed profiles keep the imported list when the source file is absent.
+Apply changes through the console's `--mcp-config FILE --upgrade-backend` or
+VS Code's **xMind: Apply Trusted Runtime Configuration**; ordinary reconnection
+does not silently replace the configured server commands.
+
 The profile-aware local launcher keeps its generated access credential in the private launch-state directory and enrolls the page server-side. The VS Code launcher passes its already authenticated local credential directly to the loopback adapter in memory. The page never receives the server credential in JavaScript, a URL, clipboard or browser storage, and users do not enter one. The adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
 
 The standalone page attempts cookie-session restoration when it loads. This

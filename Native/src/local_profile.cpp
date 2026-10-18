@@ -1,4 +1,5 @@
 #include "agentflow/local_profile.hpp"
+#include "agentflow/mcp_configuration.hpp"
 #include "agentflow/context_records.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/runtime_generation.hpp"
@@ -383,7 +384,7 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
             value.at("pid").get<std::uint64_t>() <= MAXDWORD && value.contains("port") &&
             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
-    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config"})
+    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config","mcp_config"})
         if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
     require((!value.contains("process_config")||value.at("process_config").get<std::string>().empty())
                 ?(!value.contains("process_config_digest")||value.at("process_config_digest").get<std::string>().empty())
@@ -392,6 +393,13 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
     if(value.contains("process_config_pending"))require(value.at("process_config_pending").is_boolean()&&
         (!value.at("process_config_pending").get<bool>()||(value.contains("process_config")&&!value.at("process_config").get<std::string>().empty())),
         "Saved process configuration update is invalid");
+    require(value.value("mcp_config",std::string{}).empty()
+                ?value.value("mcp_config_digest",std::string{}).empty()
+                :hex(value.value("mcp_config_digest",std::string{}),64),
+            "Saved MCP configuration fingerprint is invalid");
+    if(value.contains("mcp_config_pending"))require(value.at("mcp_config_pending").is_boolean()&&
+        (!value.at("mcp_config_pending").get<bool>()||!value.value("mcp_config",std::string{}).empty()),
+        "Saved MCP configuration update is invalid");
     if(value.contains("language_server_config_pending"))require(value.at("language_server_config_pending").is_boolean()&&
         (!value.at("language_server_config_pending").get<bool>()||(value.contains("language_server_config")&&!value.at("language_server_config").get<std::string>().empty())),
         "Saved language-server configuration update is invalid");
@@ -555,10 +563,11 @@ Child launch(Store &store, Json &state) {
         args.push_back(L"--workspace-edits");
         args.push_back(L"approved");
     }
-    for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config", "process_config"}) {
-        if(state.contains("owner_receipt")&&std::string(field)!="process_config"&&
+    for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config", "process_config", "mcp_config"}) {
+        if(state.contains("owner_receipt")&&std::string(field)!="process_config"&&std::string(field)!="mcp_config"&&
            !(std::string(field)=="language_server_config"&&state.value("language_server_config_pending",false)))continue;
         if(std::string(field)=="process_config"&&!state.value("process_config_pending",false))continue;
+        if(std::string(field)=="mcp_config"&&!state.value("mcp_config_pending",false))continue;
         if(std::string(field)=="language_server_config"&&state.contains("owner_receipt")&&
            !state.value("language_server_config_pending",false))continue;
         const auto value = state.value(field, std::string{});
@@ -566,7 +575,8 @@ Child launch(Store &store, Json &state) {
             const auto option=std::string(field)=="provider_config"?L"--provider-config":
                 (std::string(field)=="graphs_config"?L"--graphs-config":
                  (std::string(field)=="python_tools_config"?L"--python-tools-config":
-                  (std::string(field)=="process_config"?L"--process-config":L"--language-server-config")));
+                  (std::string(field)=="process_config"?L"--process-config":
+                   (std::string(field)=="mcp_config"?L"--mcp-config":L"--language-server-config"))));
             args.push_back(option);
             args.push_back(wide(value));
         }
@@ -761,6 +771,14 @@ std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::stri
     return result;
 }
 LocalProfileConnection connect_local_profile(const LocalProfileOptions &options) {
+    const auto requested_mcp_path=options.mcp_config.empty()?std::string{}:text(absolute(options.mcp_config));
+    std::string requested_mcp_digest,requested_mcp_document;
+    if(!options.mcp_config.empty()){
+        const auto document=file_bytes(absolute(options.mcp_config),256*1024);
+        validate_mcp_configuration_document(document);
+        requested_mcp_digest=context_digest(document);
+        requested_mcp_document=document;
+    }
     WorkspaceTools workspace(options.workspace.empty() ? text(fs::current_path()) : options.workspace);
     const auto base = absolute(options.profile_root.empty() ? default_root() : options.profile_root),
                selected = absolute(workspace.root_path());
@@ -842,6 +860,29 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if(state.contains("upgrade_intent")&&process_configuration_changed){
             state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;store.write(state);
         }
+        const bool mcp_configuration_changed=!options.mcp_config.empty()&&
+            (state.value("mcp_config",std::string{})!=requested_mcp_path||
+             state.value("mcp_config_digest",std::string{})!=requested_mcp_digest);
+        if(state.contains("owner_receipt")&&mcp_configuration_changed)
+            throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing MCP configuration");
+        if(mcp_configuration_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("MCP configuration changed; update the existing backend explicitly");
+        if(mcp_configuration_changed&&!recovered_stopped_owner&&!state.contains("owner_receipt")){
+            require(state.at("phase")=="ready"&&authenticated(state),"Only an authenticated ready owner can validate an MCP update");
+            const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+            auto request=authority_body(ws);request["document"]=requested_mcp_document;
+            try{
+                const auto validated=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/mcp/validate",&request);
+                require(validated.value("valid",false)&&validated.value("document_sha256",std::string{})==requested_mcp_digest,
+                        "Managed owner did not validate this exact MCP update");
+            }catch(const ProfileRequestError& error){
+                if(error.status==404)throw std::invalid_argument("Upgrade this managed backend without --mcp-config first, then apply the trusted MCP configuration");
+                throw;
+            }
+        }
+        if((recovered_stopped_owner||state.contains("upgrade_intent"))&&mcp_configuration_changed){
+            state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;store.write(state);
+        }
         const bool edit_policy_changed=options.approved_edits&&
             state.at("approved_edits").get<bool>()!=*options.approved_edits;
         if(edit_policy_changed&&!options.upgrade_backend)
@@ -856,7 +897,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state["approved_edits"]=*options.approved_edits;
             store.write(state);
         }
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||language_server_configuration_changed||edit_policy_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
@@ -866,6 +907,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     auto [target,digest]=stage_current_runtime(store,workspace);
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
+                    if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
                     if(options.approved_edits)state["approved_edits"]=*options.approved_edits;
                     state["upgrade_intent"]=true;store.write(state);
@@ -930,6 +972,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         state["process_config"]=options.process_config.empty()?"":text(absolute(options.process_config));
         state["process_config_digest"]=options.process_config.empty()?"":context_digest(file_bytes(absolute(options.process_config),256*1024));
         state["process_config_pending"]=!options.process_config.empty();
+        state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;
+        state["mcp_config_pending"]=!options.mcp_config.empty();
         store.write(state);
     }
     if (state.at("phase") == "preparing") {
@@ -1019,6 +1063,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     state.erase("owner_receipt");state.erase("replacement_port");state.erase("replacement_manifest");state.erase("replacement_runtime");store.write(state);
                 }
                 if(state.value("process_config_pending",false)){state.erase("process_config_pending");store.write(state);}
+                if(state.value("mcp_config_pending",false)){state.erase("mcp_config_pending");store.write(state);}
                 if(state.value("language_server_config_pending",false)){state.erase("language_server_config_pending");store.write(state);}
                 break;
             }
@@ -1044,7 +1089,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,
                                    const std::string &auth_token,const std::string &owner_receipt,
-                                   const std::string &language_server_config) {
+                                   const std::string &language_server_config,const std::string &mcp_config,
+                                   std::string *mcp_document) {
     const auto path=absolute(state_file);
     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
     Store store(path.parent_path());
@@ -1057,6 +1103,18 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                 state.at("runtime")==text(absolute(runtime_root))&&
                 state.at("manifest")==manifest&&state.at("auth")==auth_token,
             "Managed profile runtime does not match its protected startup record");
+    const auto requested_mcp=mcp_config.empty()?std::string{}:text(absolute(mcp_config));
+    require(state.value("mcp_config_pending",false)
+                ?(!requested_mcp.empty()&&state.value("mcp_config",std::string{})==requested_mcp)
+                :requested_mcp.empty(),
+            "Managed profile MCP override differs from its protected startup intent");
+    if(!requested_mcp.empty()){
+        const auto document=file_bytes(absolute(requested_mcp),256*1024);
+        require(context_digest(document)==state.value("mcp_config_digest",std::string{}),
+                "Managed profile MCP configuration changed after startup was prepared");
+        validate_mcp_configuration_document(document);
+        if(mcp_document)*mcp_document=document;
+    }
     if(owner_receipt.empty())require(!state.contains("owner_receipt"),
             "Managed profile replacement receipt was not supplied to the server");
     else{

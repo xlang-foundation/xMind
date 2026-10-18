@@ -25,10 +25,15 @@ class McpConfigurationStore {
 public:
     explicit McpConfigurationStore(PersistenceService& store):store_(store) {}
     std::vector<McpServerSetting> load();
-    std::vector<McpServerSetting> apply(const std::string& desired_json);
+    // Read-only validation against persisted revisions and retired IDs.
+    void validate_update(const std::string& desired_json);
+    std::vector<McpServerSetting> apply(const std::string& desired_json, bool replacement_bootstrap=false);
 private:
     PersistenceService& store_;
 };
+// Validate a trusted startup document before a managed owner is quiesced.
+// This does not import settings, start a peer, or resolve credentials.
+void validate_mcp_configuration_document(const std::string& desired_json);
 // Connector-owned purpose binds an encrypted credential to this exact command,
 // configuration identity and environment name; a command change needs a key
 // provisioned for the new purpose. This is never supplied by a view/model.

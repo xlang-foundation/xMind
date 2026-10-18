@@ -22,7 +22,7 @@ void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
         "  xmind serve --db FILE --modules DIR --stdlib DIR [server options]\n"
-        "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [COMMAND ARGS...]\n"
+        "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
         "  xmind [local profile options] profile-info\n"
         "  xmind [local profile options] workspaces\n"
@@ -47,7 +47,7 @@ void help(){
         "  xmind worker         (private xlang3 agent tool worker)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
         "workspace init uses --workspace (or the current directory) as the first folder. Add folders later with workspace add-folder; workspace info lists IDs accepted by Git commands.\n"
-        "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles.\n"
+        "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles; --mcp-config selects trusted MCP servers.\n"
         "--upgrade-backend safely replaces the managed profile runtime when the current owner supports it.\n"
         "Explicit --port attaches to an operator-selected backend using XMIND_AUTH_TOKEN.\n"
         "No key is accepted on the command line. Worker execution is private to the local runtime.\n"
@@ -112,7 +112,7 @@ int dispatch(int argc,char** argv){
             options.approved_edits=true;continue;
         }
         if(option=="--upgrade-backend"){options.upgrade_backend=true;continue;}
-        if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config"&&option!="--python-tools-config"&&option!="--language-server-config"&&option!="--process-config")throw std::invalid_argument("Unknown console option");
+        if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config"&&option!="--python-tools-config"&&option!="--language-server-config"&&option!="--process-config"&&option!="--mcp-config")throw std::invalid_argument("Unknown console option");
         if(first==argc||!*argv[first])throw std::invalid_argument("Console option requires a value");const std::string value=argv[first++];
         if(option=="--port"){named_port=true;port=std::to_string(port_number(value));}
         else if(option=="--workspace"){workspace=value;options.workspace=value;}
@@ -121,9 +121,10 @@ int dispatch(int argc,char** argv){
         else if(option=="--python-tools-config")options.python_tools_config=value;
         else if(option=="--language-server-config")options.language_server_config=value;
         else if(option=="--process-config")options.process_config=value;
+        else if(option=="--mcp-config")options.mcp_config=value;
         else options.graphs_config=value;
     }
-    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||!options.python_tools_config.empty()||!options.language_server_config.empty()||!options.process_config.empty()||options.approved_edits||options.upgrade_backend))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
+    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||!options.python_tools_config.empty()||!options.language_server_config.empty()||!options.process_config.empty()||!options.mcp_config.empty()||options.approved_edits||options.upgrade_backend))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
     std::function<agentflow::LocalProfileConnection()> profile;
 #if defined(_WIN32)
     if(!named_port)profile=[options]{return agentflow::connect_local_profile(options);};

@@ -1,0 +1,66 @@
+{
+  "recordedAt": "2026-10-18T19:38:09.780Z",
+  "candidateVersion": "0.1.27",
+  "installedVersion": "0.1.26",
+  "nativeValidation": "pending corrected native build and tests; no native acceptance claimed",
+  "scope": "Trusted MCP configuration is forwarded by console/native view/browser launcher and VS Code machine setting. Source includes protected startup fingerprint binding, explicit owner handoff and a read-only backend preflight against persisted revisions and retired IDs. Current installed clients and user page are preserved.",
+  "clientGate": {
+    "recordedAt": "2026-10-18T19:27:13.682Z",
+    "version": "0.1.27",
+    "sourceParent": "0575d72a59180a5ffabb34ad83daffbb785d6e6c",
+    "workingTreePatchSha256": "34f4aaa1e54ae347d814d0337a3462784e3d970aae5b72f1849be011ac05cfde",
+    "sourceFiles": 98,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 421,
+      "passed": 421,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4783ad89a044d055d8477f353d5fcbd098832d6dc1f50229c451e2d5a6dc9c5f"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "362ffac8b785fd4607a3a3417b6d7ce11b80ab22ff00ffafd0b7aa9f28daac24"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "clientClosureStillUnchangedAtCheckpoint": true,
+  "firstFocusedClientResult": {
+    "passed": 45,
+    "total": 46,
+    "reason": "Existing rendezvous-collision mock treated the new optional MCP config path as a directory; corrected the fixture to report this absent optional config."
+  },
+  "correctedFocusedClientResult": {
+    "passed": 46,
+    "total": 46
+  },
+  "initialBuild": {
+    "cancelledIntentionally": true,
+    "reason": "Review found missing stateful MCP-update preflight before quiescence. The exact owned CMake PID/birth/image was checked and only that build tree was stopped; no tests had launched. This was not an observation-timeout restart.",
+    "receipt": "C:/xMindNativeValidation/managed-mcp-initial-build-cancellation-20261018.json"
+  },
+  "currentBuild": {
+    "sessionId": 81113,
+    "pid": 23148,
+    "birth": "2026-10-18T19:34:15.5967010Z",
+    "image": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+    "log": "C:/xMindNativeValidation/managed-mcp-preflight-all-build-20261018.log"
+  },
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}

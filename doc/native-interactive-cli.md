@@ -16,6 +16,14 @@ Managed profile startup on other hosts and first-use acceptance from the
 current installed package remain unverified; agent-worker execution is pending.
 No legacy profile migration is required.
 
+Managed profiles accept `--mcp-config FILE` for a trusted MCP server document.
+The native backend persists its server list; reconnecting without that option
+uses the saved list and does not reread the source file. To apply a changed path
+or file content, supply `--mcp-config FILE --upgrade-backend`. The protected
+handoff retains the same SQLite profile and history. Malformed documents are
+rejected before the existing owner is quiesced. No MCP commands, endpoints or
+credentials come from model or page input. [Server document](native-mcp.md).
+
 The preceding full native Release gate passed **118 local CTest contracts**.
 The VCS checkpoint adds workspace-scoped Git metadata and local branch listing
 alongside status. Backend-owner HTTP coverage exercises a real temporary Git

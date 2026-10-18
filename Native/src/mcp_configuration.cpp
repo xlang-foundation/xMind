@@ -12,6 +12,7 @@
 #include <array>
 #include <sstream>
 #include <iomanip>
+#include <utility>
 
 namespace agentflow {
 namespace {
@@ -105,8 +106,12 @@ std::vector<McpServerSetting> list(const Json& value,bool persisted) {
 }
 }
 std::vector<McpServerSetting> McpConfigurationStore::load(){const auto value=stored(store_);auto values=list(value,true);std::set<std::string> ids,retired;for(const auto& setting:values)ids.insert(setting.id);for(const auto& item:value["retired_ids"]){if(!item.is_string())throw std::invalid_argument("Invalid retired MCP identity");const auto id=item.get<std::string>();identity(id);if(!retired.insert(id).second || ids.contains(id))throw std::invalid_argument("Invalid retired MCP identity");}return values;}
-std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& source) {
-    const auto desired=parse(source);fields(desired,{"servers"});auto values=list(desired,false);const auto previous=stored(store_);
+void validate_mcp_configuration_document(const std::string& source) {
+    const auto desired=parse(source);fields(desired,{"servers"});(void)list(desired,false);
+}
+namespace {
+std::pair<std::vector<McpServerSetting>,std::string> prepare_update(PersistenceService& store,const std::string& source) {
+    const auto desired=parse(source);fields(desired,{"servers"});auto values=list(desired,false);const auto previous=stored(store);
     std::map<std::string,McpServerSetting> old;for(const auto& value:list(previous,true))old.emplace(value.id,value);
     std::set<std::string> retired,active;
     for(const auto& id:previous["retired_ids"]){if(!id.is_string())throw std::invalid_argument("Invalid retired MCP identity");const auto name=id.get<std::string>();identity(name);if(!retired.insert(name).second || old.contains(name))throw std::invalid_argument("Invalid retired MCP identity");}
@@ -116,8 +121,17 @@ std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& so
         saved.push_back(encode(value));}
     for(const auto& [id,value]:old){(void)value;if(!active.contains(id))retired.insert(id);}if(retired.size()>4096)throw Conflict("Retired MCP configuration limit reached");
     const auto encoded=Json{{"version",1},{"servers",saved},{"retired_ids",retired}}.dump();if(encoded.size()>256*1024)throw Conflict("Stored MCP configuration exceeds limits");
-    store_.put_information("native-mcp","servers",encoded).get();return values;
+    return {std::move(values),encoded};
 }
+}
+void McpConfigurationStore::validate_update(const std::string& source){(void)prepare_update(store_,source);}
+std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& source,bool replacement_bootstrap) {
+    auto [values,encoded]=prepare_update(store_,source);
+    if(replacement_bootstrap)store_.put_mcp_servers_for_replacement(std::move(encoded)).get();
+    else store_.put_information("native-mcp","servers",std::move(encoded)).get();
+    return values;
+}
+
 std::string mcp_server_setting_json(const McpServerSetting& value){const auto encoded=encode(value);(void)setting(encoded,true);return encoded.dump();}
 std::string mcp_credential_purpose(const McpServerSetting& setting,const std::string& name) {
     std::string source;

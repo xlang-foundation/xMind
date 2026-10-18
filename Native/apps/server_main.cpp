@@ -152,6 +152,7 @@ int run_server(int argc,char** argv) {
 #if defined(_WIN32)
         std::unique_ptr<agentflow::VerifiedRuntimeGeneration> runtime_generation;
         std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
+        std::string protected_mcp_document;
         if(options.contains("--profile-state")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Managed profile state requires a qualified native package");
         if(options.contains("--owner-receipt")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native and legacy owner preconditions are distinct");
         if(options.contains("--profile-state")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Managed profile startup cannot use a legacy operator ticket");
@@ -162,7 +163,7 @@ int run_server(int argc,char** argv) {
             const auto runtime_root=loaded_runtime_root();
             if(options.contains("--profile-state")){
                 const auto owner_receipt=options.find("--owner-receipt");
-                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{});
+                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{},options.contains("--mcp-config")?options.at("--mcp-config"):std::string{},&protected_mcp_document);
                 runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
                 runtime_generation->require_loaded_server_image();
             }else{
@@ -171,7 +172,8 @@ int run_server(int argc,char** argv) {
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
             if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
-                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                for(const auto* key:{"--model","--model-endpoint","--provider-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                if(options.contains("--mcp-config")&&(!options.contains("--owner-receipt")||!options.contains("--profile-state")))throw std::invalid_argument("Only a protected managed-profile upgrade may apply trusted MCP configuration");
                 if(options.contains("--language-server-config")&&(!options.contains("--owner-receipt")||!options.contains("--profile-state")))throw std::invalid_argument("Only a protected managed-profile upgrade may apply trusted language-server configuration");
                 if(options.contains("--process-config")&&!options.contains("--owner-receipt"))throw std::invalid_argument("Only a managed native owner handoff may apply a trusted process configuration");
                 if(options.contains("--owner-receipt"))bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
@@ -260,9 +262,14 @@ int run_server(int argc,char** argv) {
         agentflow::McpConfigurationStore mcp_configurations(persistence);
         std::vector<agentflow::McpServerSetting> mcp_settings;
         if(options.contains("--mcp-config")) {
-            std::ifstream file(std::filesystem::u8path(options.at("--mcp-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration file");
-            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration file");
-            mcp_settings=mcp_configurations.apply(source);
+            // Managed startup imports the exact bytes authenticated against its
+            // protected fingerprint, without reopening a mutable path.
+            std::string source=protected_mcp_document;
+            if(!options.contains("--profile-state")){
+                std::ifstream file(std::filesystem::u8path(options.at("--mcp-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration file");
+                char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration file");
+            }
+            mcp_settings=mcp_configurations.apply(source,options.contains("--owner-receipt"));
         }else mcp_settings=mcp_configurations.load();
         agentflow::ProcessConfigurationStore process_configurations(persistence);
         std::vector<agentflow::ProcessProfile> process_profiles;

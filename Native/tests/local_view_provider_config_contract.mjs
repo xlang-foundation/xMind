@@ -17,7 +17,7 @@ const base=await fs.mkdtemp(path.join(parent,'xmind-local-view-provider-'));
 const initial=path.join(base,'initial workspace'),existing=path.join(base,'existing workspace');
 const added=path.join(base,'added workspace'),profiles=path.join(base,'profiles');
 const bundle=path.join(base,'bundle'),runtime=path.join(base,'runtime'),assets=path.join(base,'assets');
-const yaml=path.join(base,'providers.yaml');
+const yaml=path.join(base,'providers.yaml'),mcpConfig=path.join(base,'mcp.json');
 const readyRoot=path.join(parent,'xmind-local-view-provider-ready-'+randomBytes(8).toString('hex'));
 const ready=path.join(readyRoot,'ready.json');
 const pids=new Map();let browser,viewProcess,viewError='',passed=false;
@@ -33,7 +33,7 @@ function invoke(exe,args,{cwd=initial,extraEnv={}}={}){
 }
 async function command(exe,args,options){const result=await invoke(exe,args,options);assert.equal(result.code,0,result.stderr||result.stdout);assert.equal(result.signal,null);return JSON.parse(result.stdout);}
 async function rememberOwner(exe,pid){const observed=await command(exe,['admin','inspect-owner-process',String(pid)]);pids.set(pid,observed.process_birth);}
-async function profilePid(exe,root,workspace,languageServers,providerConfig){const args=['--profile-root',root,'--workspace',workspace];if(providerConfig)args.push('--config',providerConfig);if(languageServers)args.push('--language-server-config',languageServers);args.push('profile-info');const value=await command(exe,args,{cwd:workspace});await rememberOwner(exe,value.process_id);return value;}
+async function profilePid(exe,root,workspace,languageServers,providerConfig){const args=['--profile-root',root,'--workspace',workspace];if(providerConfig)args.push('--config',providerConfig);if(languageServers)args.push('--language-server-config',languageServers);args.push('--mcp-config',mcpConfig,'profile-info');const value=await command(exe,args,{cwd:workspace});await rememberOwner(exe,value.process_id);return value;}
 async function waitReady(){const deadline=Date.now()+60000;while(Date.now()<deadline){if(viewProcess.exitCode!==null)throw Error('Native view exited before readiness');try{return JSON.parse(await fs.readFile(ready,'utf8'));}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;await new Promise(resolve=>setTimeout(resolve,50));}}throw Error('Native view readiness timed out');}
 async function stop(pid,birth){
  const observe=()=>command(path.join(runtime,'xmind.exe'),['admin','observe-owner-exit',String(pid),birth,'10000']);
@@ -58,10 +58,10 @@ try{
  const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
  await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:createHash('sha256').update(source).digest('hex'),stdlibSource:stdlib,stdlibLicense:await findPythonStdlibLicense(stdlib),out:runtime});
  cp.execFileSync(process.execPath,[new URL('../../views/browser/build.mjs',import.meta.url).pathname.slice(1),assets],{windowsHide:true,stdio:'ignore'});
- const exe=path.join(runtime,'xmind.exe'),languageServers=path.join(base,'language-servers.json');await fs.writeFile(languageServers,JSON.stringify({profiles:[{id:'fixture-lsp',executable:exe,language_id:'fixture',extensions:['.txt'],request_timeout_ms:1000}]}));const seededProfile=await profilePid(exe,profiles,existing,languageServers,yaml);
+ const exe=path.join(runtime,'xmind.exe'),languageServers=path.join(base,'language-servers.json');await fs.writeFile(mcpConfig,JSON.stringify({servers:[{id:'fixture-mcp',transport:'http',endpoint:'https://fixture.example.test/mcp',enabled:false}]}));await fs.writeFile(languageServers,JSON.stringify({profiles:[{id:'fixture-lsp',executable:exe,language_id:'fixture',extensions:['.txt'],request_timeout_ms:1000}]}));const seededProfile=await profilePid(exe,profiles,existing,languageServers,yaml);
  await fs.writeFile(yaml,'version: 1\nactive_profile: openai\nprofiles:\n  openai:\n    route: openai.responses\n    api_key: synthetic-openai-key-never-sent\n  claude:\n    route: anthropic.messages\n    api_key: synthetic-claude-key-never-sent\n');
  const token=randomBytes(32).toString('hex');
- const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--upgrade-backend','--config',yaml,'--language-server-config',languageServers];
+ const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--upgrade-backend','--config',yaml,'--language-server-config',languageServers,'--mcp-config',mcpConfig];
  viewProcess=cp.spawn(exe,viewArgs,{cwd:initial,env:{...env,XMIND_VIEW_TOKEN:token},windowsHide:true,stdio:['ignore','ignore','pipe']});
  viewProcess.stderr.on('data',bytes=>{if(viewError.length<4096)viewError+=bytes.toString('utf8').slice(0,4096-viewError.length);});
  const readyRecord=await waitReady();assert.equal(readyRecord.workspace.root,await fs.realpath(initial));assert.equal(readyRecord.started_backend,true);await rememberOwner(exe,readyRecord.backend_process_id);
@@ -85,8 +85,8 @@ try{
  assert.deepEqual(await publicProfiles(),chosenState,'Native view reattachment with unchanged OpenAI-default YAML preserves the user-selected Claude registry');
  const add=await fetch(browserOrigin+'/ui/workspaces/create',{method:'POST',headers:{...headers,Cookie:cookie},body:JSON.stringify({root:added})});assert.equal(add.status,200,await add.clone().text());cookie=add.headers.get('set-cookie').split(';')[0];
  discovered=await publicProfiles();assert.deepEqual(discovered.profiles.map(value=>value.id).sort(),['claude','openai']);assert.ok(!JSON.stringify(discovered).includes('synthetic-openai-key-never-sent'));
- assert.ok(seededProfile.process_id);await profilePid(exe,profiles,added,languageServers);passed=true;
- console.log(JSON.stringify({actualNativeView:true,hostImportsOnlyExactTrustedProviderPath:true,untrustedViewCannotImportProviderFiles:true,existingNonemptyProfileImportsNewYamlEntries:true,newWorkspaceImportsSharedYaml:true,userSelectedProviderSurvivesWorkspaceReattachment:true,keysReturnedToBrowser:false,providerRequests:0,actualViewWorkspaceConfig:true,renderedBrowser:false}));
+ assert.ok(seededProfile.process_id);await profilePid(exe,profiles,added,languageServers);for(const workspace of [initial,existing,added]){const configured=await command(exe,['--profile-root',profiles,'--workspace',workspace,'mcp-servers'],{cwd:workspace});assert.deepEqual(configured,{servers:[{id:'fixture-mcp',revision:1,enabled:false,transport:'http'}],runtime_state:'per_run'});}passed=true;
+ console.log(JSON.stringify({actualNativeView:true,trustedMcpAvailableInInitialExistingAndCreatedWorkspaces:true,hostImportsOnlyExactTrustedProviderPath:true,untrustedViewCannotImportProviderFiles:true,existingNonemptyProfileImportsNewYamlEntries:true,newWorkspaceImportsSharedYaml:true,userSelectedProviderSurvivesWorkspaceReattachment:true,keysReturnedToBrowser:false,providerRequests:0,actualViewWorkspaceConfig:true,renderedBrowser:false}));
 }finally{
  await browser?.close().catch(()=>{});
  if(viewProcess&&viewProcess.exitCode===null){viewProcess.kill();await new Promise(resolve=>viewProcess.once('close',resolve));}

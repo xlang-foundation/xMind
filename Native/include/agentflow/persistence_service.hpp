@@ -174,6 +174,7 @@ public:
     // A protected managed-owner replacement may stage only this trusted
     // process-profile record while quiesced, before it is activated.
     std::future<void> put_process_profiles_for_replacement(std::string json);
+    std::future<void> put_mcp_servers_for_replacement(std::string json);
     // Trusted language-server configuration may be staged only by a protected
     // managed-owner replacement before that owner is activated.
     std::future<void> put_language_server_profiles_for_replacement(std::string json);

@@ -28,12 +28,12 @@ test('a coding runtime without pip bootstrap cannot pass package verification',a
 });
 
 test('packaged native discovery binds every listed byte and returns paths without launching', async t => {
-  const f = await fixture(t), config = path.join(f.root, 'not-created/.config/providers.yaml'), languageServerConfig=path.join(f.root,'not-created/.config/language-servers.yaml'),processConfig=path.join(f.root,'not-created/.config/processes.yaml');
-  const resolved = await resolveNativeRuntime(f.context, f.host, { providerConfigPath: config,languageServerConfigPath:languageServerConfig,processConfigPath:processConfig });
+  const f = await fixture(t), config = path.join(f.root, 'not-created/.config/providers.yaml'), languageServerConfig=path.join(f.root,'not-created/.config/language-servers.yaml'),processConfig=path.join(f.root,'not-created/.config/processes.yaml'),mcpConfig=path.join(f.root,'not-created/.config/mcp.json');
+  const resolved = await resolveNativeRuntime(f.context, f.host, { providerConfigPath: config,languageServerConfigPath:languageServerConfig,processConfigPath:processConfig,mcpConfigPath:mcpConfig });
   assert.equal(resolved.nativeProgram, path.join(f.runtime, 'xmind.exe')); assert.equal(resolved.modules, path.join(f.runtime, 'modules'));
-  assert.equal(resolved.stdlib, path.join(f.runtime, 'stdlib')); assert.equal(resolved.providerConfig, config);assert.equal(resolved.languageServerConfig,languageServerConfig);assert.equal(resolved.processConfig,processConfig); assert.equal(resolved.privateStateRoot, f.context.globalStorageUri.fsPath);
+  assert.equal(resolved.stdlib, path.join(f.runtime, 'stdlib')); assert.equal(resolved.providerConfig, config);assert.equal(resolved.languageServerConfig,languageServerConfig);assert.equal(resolved.processConfig,processConfig);assert.equal(resolved.mcpConfig,mcpConfig); assert.equal(resolved.privateStateRoot, f.context.globalStorageUri.fsPath);
   assert.equal(resolved.manifestSha256, digest(await fs.readFile(path.join(f.runtime, MANIFEST_NAME))));
-  await assert.rejects(fs.lstat(config), { code: 'ENOENT' });await assert.rejects(fs.lstat(languageServerConfig),{code:'ENOENT'});await assert.rejects(fs.lstat(processConfig),{code:'ENOENT'});
+  await assert.rejects(fs.lstat(config), { code: 'ENOENT' });await assert.rejects(fs.lstat(languageServerConfig),{code:'ENOENT'});await assert.rejects(fs.lstat(processConfig),{code:'ENOENT'});await assert.rejects(fs.lstat(mcpConfig),{code:'ENOENT'});
 });
 
 test('unified package resolves fixed entry modes and retains the exact primary executable',async t=>{
@@ -134,6 +134,6 @@ test('transient xlang3 bytecode caches do not invalidate the verified runtime in
 });
 test('relative, controlled or malformed configuration paths are rejected without reading keys', async t => {
   const f = await fixture(t);
-  for (const setting of ['providerConfigPath','languageServerConfigPath','processConfigPath'])for (const value of ['.config/config.yaml', path.join(f.root, 'config\nkey'), path.join(f.root, 'bad\ud800')])
+  for (const setting of ['providerConfigPath','languageServerConfigPath','processConfigPath','mcpConfigPath'])for (const value of ['.config/config.yaml', path.join(f.root, 'config\nkey'), path.join(f.root, 'bad\ud800')])
     await assert.rejects(resolveNativeRuntime(f.context, f.host, { [setting]:value }), /absolute local path/);
 });

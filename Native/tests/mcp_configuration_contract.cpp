@@ -26,11 +26,17 @@ int main(int argc,char** argv){
         {
             PersistenceService store(database,imports);McpConfigurationStore configurations(store);require(configurations.load().empty(),"Absent MCP configuration must not invent a server");
             const auto first=configurations.apply(desired());require(first.size()==1 && first[0].revision==1 && first[0].credentials[0].name=="TEST_KEY","Backend must assign revision and normalize environment identity");
+            validate_mcp_configuration_document(desired());
+            rejects<std::invalid_argument>([]{validate_mcp_configuration_document(R"({"servers":[],"servers":[]})");});
+            rejects<Conflict>([&]{configurations.apply(desired(),true);});
+            require(configurations.load()[0].revision==1,"Unprotected replacement import must not change settings");
             bound_purpose=mcp_credential_purpose(first[0],"TEST_KEY");const std::string secret="labeled-private-MCP-credential";
             store.put_credential("server","fixture-key",bound_purpose,"labeled private MCP fixture",SecretBytes({reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size()}),0).get();
             require(store.information("native-mcp","servers").get().find(secret)==std::string::npos,"Configuration must retain only credential references");
             require(configurations.apply(desired())[0].revision==1,"Identical configuration must not rotate revision");
             const auto unchanged=store.information("native-mcp","servers").get();
+            configurations.validate_update(desired());
+            require(store.information("native-mcp","servers").get()==unchanged,"Update preflight must not mutate persisted settings");
             auto invalid=server;invalid["revision"]=7;rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});
             invalid=server;invalid["environment"]={{"TEST_KEY",secret}};rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});
             invalid=server;invalid["credentials"][0]["scope"]="another-team";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});
@@ -48,7 +54,7 @@ int main(int argc,char** argv){
         {
             PersistenceService reopened(database,imports);McpConfigurationStore configurations(reopened);const auto values=configurations.load();require(values.size()==1 && values[0].revision==3 && !values[0].enabled,"Settings and revision must survive backend reopen");
             require(reopened.resolve_credential("server","fixture-key",bound_purpose).get().view().size()>0,"Encrypted referenced credential must survive independently of public metadata");
-            configurations.apply(R"({"servers":[]})");rejects<Conflict>([&]{configurations.apply(desired());});require(configurations.load().empty(),"Removed identities must stay retired");reopened.close();
+            configurations.apply(R"({"servers":[]})");rejects<Conflict>([&]{configurations.validate_update(desired());});rejects<Conflict>([&]{configurations.apply(desired());});require(configurations.load().empty(),"Removed identities must stay retired");reopened.close();
         }
         {
             const auto http_database=(root.path/"http-state.sqlite").string();Json server{{"id","http-fixture"},{"transport","http"},{"endpoint","https://fixture.example.test/mcp"},{"credential",{{"scope","server"},{"id","http-fixture-key"}}}};

@@ -135,9 +135,10 @@ async function resolveNativeRuntime(context, hostEnv, userSettings = {}, depende
   const providerConfig = userSettings.providerConfigPath ? absolute(userSettings.providerConfigPath, 'Provider configuration') : undefined;
   const languageServerConfig = userSettings.languageServerConfigPath ? absolute(userSettings.languageServerConfigPath, 'Language-server configuration') : undefined;
   const processConfig = userSettings.processConfigPath ? absolute(userSettings.processConfigPath, 'Process configuration') : undefined;
+  const mcpConfig = userSettings.mcpConfigPath ? absolute(userSettings.mcpConfigPath, 'MCP configuration') : undefined;
   const program = 'xmind.exe';
   return { nativeProgram: path.join(verified.runtimeRoot, program), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
-    providerConfig, languageServerConfig, processConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
+    providerConfig, languageServerConfig, processConfig, mcpConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
     serverSha256: verified.manifest.files[program],
     qualified: samePath(stdlib,path.join(verified.runtimeRoot,'stdlib')) };
 }

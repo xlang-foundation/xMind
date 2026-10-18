@@ -199,6 +199,8 @@ int run_local_view(int argc, char **argv) {
                 options.language_server_config = value;
             else if (key == "--process-config")
                 options.process_config = value;
+            else if (key == "--mcp-config")
+                options.mcp_config = value;
             else if (key == "--ready-file")
                 ready = value;
             else

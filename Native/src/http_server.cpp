@@ -8,6 +8,8 @@
 #include "agentflow/provider_yaml_config.hpp"
 #if defined(_WIN32)
 #include "agentflow/connection_profiles.hpp"
+#include "agentflow/mcp_configuration.hpp"
+#include "agentflow/context_records.hpp"
 #endif
 #include "agentflow/graph_service.hpp"
 #include "agentflow/dynamic_plan.hpp"
@@ -584,6 +586,14 @@ struct HttpServer::Impl {
         if(owner_control){
             const auto encode_owner=[this](const BackendOwnerState& state){FILETIME birth{},exit{},kernel{},user{};if(!GetProcessTimes(GetCurrentProcess(),&birth,&exit,&kernel,&user))throw std::runtime_error("Cannot observe native owner process");const auto created=(static_cast<std::uint64_t>(birth.dwHighDateTime)<<32)|birth.dwLowDateTime;Json value{{"legacy_ticket_id",state.legacy_ticket_id},{"generation",state.generation},{"revision",state.revision},{"quiesced",state.quiesced},{"receipt_id",state.receipt_id},{"retirement_requested",state.retirement_requested},{"replacement_prepared",state.replacement_prepared},{"retirement_supported",owner_control->replacement_supported()},{"process_id",GetCurrentProcessId()},{"process_birth",std::to_string(created)},{"bootstrap_receipt",nullptr}};if(state.replacement_source)value["bootstrap_receipt"]={{"generation",state.replacement_source->generation},{"revision",state.replacement_source->revision},{"receipt_id",state.replacement_source->receipt_id}};return value;};
             server.Get("/v1/backend/owner",guard_errors([this,encode_owner](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner status does not accept query parameters");reply(response,encode_owner(owner_control->status()));}));
+            server.Post("/v1/backend/owner/mcp/validate",guarded([this](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP preflight does not accept query parameters");
+                const auto input=body(request,{"document","expected_workspace_id","expected_workspace_authority_id"});
+                if(!workspace_admission(input))throw std::invalid_argument("MCP preflight requires workspace authority");
+                const auto document=string_field(input,"document",256*1024);
+                McpConfigurationStore(persistence).validate_update(document);
+                reply(response,{{"valid",true},{"document_sha256",context_digest(document)}});
+            }));
             server.Post("/v1/backend/owner/quiesce",guard_errors([this,encode_owner](const Request& request,Response& response){
                 if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");
                 const auto input=body(request,{"expected_generation","expected_revision","expected_workspace_id","expected_workspace_authority_id","target_runtime_root","target_manifest_sha256"});
