@@ -1,0 +1,74 @@
+param(
+    [Parameter(Mandatory)][ValidateRange(1,2147483647)][int]$OwnerProcessId,
+    [Parameter(Mandatory)][string]$OwnerExecutable,
+    [Parameter(Mandatory)][datetime]$OwnerLaunchedAfterUtc,
+    [Parameter(Mandatory)][string]$OutputFile,
+    [Parameter(Mandatory)][string]$StopFile,
+    [ValidateRange(200,5000)][int]$IntervalMs=2000,
+    [ValidateRange(1,70)][int]$DurationSeconds=65
+)
+$ErrorActionPreference='Stop'
+$encoding=[Text.UTF8Encoding]::new($false)
+$timer=[Diagnostics.Stopwatch]::StartNew()
+$samples=0
+$ownerBirth=$null
+$seen=@{}
+function Record($value){
+    if((Get-Item -LiteralPath $OutputFile).Length -gt 2097152){throw 'Diagnostic output limit reached'}
+    [IO.File]::AppendAllText($OutputFile,($value|ConvertTo-Json -Depth 8 -Compress)+[Environment]::NewLine,$encoding)
+}
+$stream=[IO.File]::Open($OutputFile,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+$stream.Dispose()
+Record @{kind='scope';ownerPid=$OwnerProcessId;ownerImage=$OwnerExecutable;readOnly=$true;commandLinesIncluded=$false;environmentIncluded=$false}
+try {
+    while($timer.Elapsed.TotalSeconds -lt $DurationSeconds -and -not(Test-Path -LiteralPath $StopFile)){
+        # Retrieve only identity/ancestry fields, never command lines or environment.
+        $all=@(Get-CimInstance Win32_Process -Property ProcessId,ParentProcessId,CreationDate,Name,ExecutablePath -OperationTimeoutSec 2)
+        $root=@($all|Where-Object ProcessId -eq $OwnerProcessId)
+        if($root.Count -ne 1){Record @{kind='end';reason='owner_exited';samples=$samples};exit 0}
+        $birth=$root[0].CreationDate.ToUniversalTime()
+        if(-not [String]::Equals($root[0].ExecutablePath,$OwnerExecutable,[StringComparison]::OrdinalIgnoreCase) -or $birth -lt $OwnerLaunchedAfterUtc.ToUniversalTime()){
+            Record @{kind='end';reason='owner_identity_mismatch';samples=$samples};exit 0
+        }
+        if($null -eq $ownerBirth){$ownerBirth=$birth}
+        if($birth -ne $ownerBirth){Record @{kind='end';reason='owner_identity_changed';samples=$samples};exit 0}
+        $family=@{};$family[$OwnerProcessId]=$birth
+        for($depth=0;$depth -lt 8;$depth++){
+            $added=0
+            foreach($candidate in $all){
+                $id=[int]$candidate.ProcessId;$parentId=[int]$candidate.ParentProcessId
+                if(-not $family.ContainsKey($id) -and $family.ContainsKey($parentId) -and $candidate.CreationDate.ToUniversalTime() -ge $family[$parentId]){
+                    if($family.Count -ge 256){throw 'Owned diagnostic family exceeds limit'}
+                    $family[$id]=$candidate.CreationDate.ToUniversalTime();$added++
+                }
+            }
+            if(-not $added){break}
+        }
+        foreach($candidate in $all){
+            $id=[int]$candidate.ProcessId
+            if($id -eq $OwnerProcessId -or -not $family.ContainsKey($id) -or $candidate.Name -notin @('powershell.exe','pwsh.exe')){continue}
+            $key=[string]$id+':'+$candidate.CreationDate.ToUniversalTime().Ticks
+            if($seen.ContainsKey($key) -and ($seen[$key].count -ge 3 -or $timer.ElapsedMilliseconds -lt $seen[$key].nextAt)){continue}
+            if(-not $seen.ContainsKey($key) -and $seen.Count -ge 16){continue}
+            $process=$null
+            try {
+                $process=[Diagnostics.Process]::GetProcessById($id)
+                if([Math]::Abs(($process.StartTime.ToUniversalTime()-$candidate.CreationDate.ToUniversalTime()).TotalMilliseconds) -gt 1 -or -not [String]::Equals($process.MainModule.FileName,$candidate.ExecutablePath,[StringComparison]::OrdinalIgnoreCase)){continue}
+                $threads=@($process.Threads|Select-Object -First 128|ForEach-Object {
+                    $thread=$_
+                    try {$state=[string]$thread.ThreadState;$reason=if($state -eq 'Wait'){[string]$thread.WaitReason}else{$null};@{id=$thread.Id;state=$state;waitReason=$reason;cpuMs=$thread.TotalProcessorTime.TotalMilliseconds}}catch{@{id=$thread.Id;unavailable=$true}}
+                })
+                $modules=@($process.Modules|Select-Object -First 64|ForEach-Object ModuleName)
+                Record @{kind='process';pid=$id;parentPid=[int]$candidate.ParentProcessId;createdUtc=$candidate.CreationDate.ToUniversalTime().ToString('o');image=$candidate.ExecutablePath;elapsedMs=[int64]$timer.ElapsedMilliseconds;cpuMs=$process.TotalProcessorTime.TotalMilliseconds;threads=$threads;modules=$modules}
+                $samples++;$priorCount=if($seen.ContainsKey($key)){$seen[$key].count}else{0}
+                $seen[$key]=@{count=1+$priorCount;nextAt=$timer.ElapsedMilliseconds+10000}
+            }catch{Record @{kind='unavailable';pid=$id;errorType=$_.Exception.GetType().Name}}finally{if($null -ne $process){$process.Dispose()}}
+        }
+        $until=$timer.ElapsedMilliseconds+$IntervalMs
+        while($timer.ElapsedMilliseconds -lt $until -and -not(Test-Path -LiteralPath $StopFile)){Start-Sleep -Milliseconds 100}
+    }
+    Record @{kind='end';reason=$(if(Test-Path -LiteralPath $StopFile){'observer_stopped'}else{'observation_budget'});samples=$samples}
+}catch{
+    Record @{kind='diagnostic_error';errorType=$_.Exception.GetType().Name;samples=$samples}
+    exit 1
+}

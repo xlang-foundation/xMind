@@ -1,14 +1,16 @@
 // Synthetic inference protocol only. The tested native runner executes actual
 // workspace reads. This fixture is not live-model validation or a product path.
 import assert from 'node:assert/strict';
+import {withOwnedProcessDiagnostics} from '../../Tools/owned-process-diagnostics.mjs';
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve,dirname,basename} from 'node:path';
 const [executable,modules,stdlib,...extra]=process.argv.slice(2),rustAnalyzer=extra.length===2?extra[0]:undefined,workerExecutable=extra.at(-1),execute=promisify(execFile);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-')),workspace=join(folder,'workspace');
+let succeeded=false;
 let failure,requests=0,skillRequests=0,skillCapacityRequests=0,skillFollowRequests=0,manualRequests=0,clearRequests=0,pythonRequests=0,pythonWorkerRequests=0,pythonFilteredRequests=0;
 const server=createServer((request,response)=>{
   let source='';request.on('data',data=>{source+=data;});request.on('end',()=>{
@@ -180,6 +182,6 @@ try {
   await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-  let result;try{result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[]),workerExecutable],{windowsHide:true,timeout:60000});}catch(error){if(failure)throw failure;throw error;}
-  if(failure) throw failure;assert.equal(requests,rustAnalyzer?55:50);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
-} finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}
+  let result;try{result=await withOwnedProcessDiagnostics(execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[]),workerExecutable],{windowsHide:true,timeout:60000}),executable,{label:'agent-runner'});}catch(error){if(failure)throw failure;throw error;}
+  if(failure) throw failure;assert.equal(requests,rustAnalyzer?55:50);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);succeeded=true;
+} finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(basename(folder).startsWith('xmind-agent-'));if(succeeded)await rm(folder,{recursive:true,force:true});else process.stderr.write('Agent runner failure evidence retained at '+folder+'\n');}

@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-18T18:02:33.176Z",
+  "baseRevision": "39f86bdc5c9013dba0ef25ddfa0fbf70c359ca0c",
+  "changedExistingInputs": [
+    ".github/workflows/native-windows.yml",
+    "Native/tests/agent_runner_peer.mjs",
+    "Native/tests/graph_runner_peer.mjs"
+  ],
+  "addedInputs": [
+    "Tools/owned-process-diagnostics.mjs",
+    "Tools/owned-process-diagnostics.ps1",
+    "Tools/tests/owned-process-diagnostics.test.mjs"
+  ],
+  "projectFiles": 2602,
+  "projectAndDependencyFileSetsUnchanged": true,
+  "nativeCodeAnd124BinariesUnchanged": true,
+  "nativeSha256": "c90df181f4e26998b59abce551db39f96a124a98d1a02616698240e2da8406fe",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "previousFullGateSource": "44747af3a0134c2771b317fb5ec7368c848b9f98",
+  "diagnosticContracts": 3,
+  "nativeHarnessContracts": 2,
+  "nativeHarnessSeconds": 18.8,
+  "toolLogSha256": "b7a044af5c217d5e9d93b7c35ef61c288f4f560f6ecdc2bfe66f5f0bd18e842f",
+  "nativeLogSha256": "5419907874b1e3f83db2663374f0d3653e927ef1a56cc6f3901964d3ec967cdb",
+  "detailsSha256": "a8b4cf7e57c46379c47f00940d2dab62b22985d35dd02fcbd4ef8dad57931ce1",
+  "sourceManifestSha256": "107dbaaa1f2d302761a4fb4cd50c18b074ebb144aeefd738b4a4e37b8e9159ba",
+  "scope": "Actual Windows diagnostic isolation/identity/fast-failure tests and two native harness regressions, using unchanged native/SDK binaries. Fixture model replies remain synthetic; hosted underlying process cause is not fixed or confirmed.",
+  "sourceFiles": {
+    ".github/workflows/native-windows.yml": "dfc4e3f45f1c70c587290e72d014b3052df5eba3a10459d6c432d8ecf92650da",
+    "Native/tests/agent_runner_peer.mjs": "0591da87db0e09023c8e7bcf72ea9859514b25028357c307dd9bed37171ef6e6",
+    "Native/tests/graph_runner_peer.mjs": "12cbbb115aeeb5d873712841af12f2b355bf0fe8154fde6b84eabd616f46c9ef",
+    "Tools/owned-process-diagnostics.mjs": "93985f70753f5efcf21fdeffaeb848345ac287b25c9f05576962046ebe1358c4",
+    "Tools/owned-process-diagnostics.ps1": "82d6e0c92bed711e9d720b7b42f5d0708cf849b954d4815f259f62e2cb414ce7",
+    "Tools/tests/owned-process-diagnostics.test.mjs": "42bb50d7440280c35f79d8cfc99374f636bd840f4ac867d451011da17d8bb926"
+  },
+  "changes": "Optional read-only hosted native-test process snapshots and failure fixture preservation. No C++/xlang3/product payload changes.",
+  "bounds": {
+    "ancestryEntries": 256,
+    "watchedShellIdentities": 16,
+    "samplesPerIdentity": 3,
+    "threadEntries": 128,
+    "moduleNames": 64,
+    "outputBytes": 2097152,
+    "pollMs": 2000,
+    "sampleSpacingMs": 10000,
+    "observationSeconds": 65,
+    "observerExecutionLimitSeconds": 80,
+    "finalJoinObservationMs": 2000
+  },
+  "primaryProcessDeadlinesUnchanged": true,
+  "noCommandLineOrEnvironmentCapture": true,
+  "defaultLocalWatcherEnabled": false,
+  "ciSelfTestsAfterNativeGate": true,
+  "retainedFailedCheck": {
+    "logSha256": "53eb71f492c8ba7adb895e1047fe7ad922d4ad281dfedbaf6524b087a4b85a3e",
+    "observations": "C:/Users/shaw9/AppData/Local/Temp/xmind-process-observer-CaVyD1/actual-owner-50d6df2f-d0d1-4b1f-a72a-eb875c89e97c/observations.jsonl",
+    "observationsSha256": "12a217d8730bc7170bf284ef2fdccd12c17842e37da6df21fe1e7e7b6fe0ec11",
+    "passed": 2,
+    "failed": 1,
+    "actualOwnedSamples": 1,
+    "guardReason": "owner_identity_mismatch",
+    "explanation": "Original assertion accepted only explicit stop/exit and rejected safe identity-guard retirement after an actual sample. Revised expectation also admits identity-change/mismatch stops while retaining exact descendant, zero-root-exit, privacy and effect assertions. The precise Windows retirement observation that caused the mismatch is not established."
+  },
+  "installedPackageChanged": false,
+  "installedVersion": "0.1.24",
+  "hostedCurrent44747afAccepted": false,
+  "underlyingHostedFailureFixed": false,
+  "renderedAcceptance": false,
+  "cpythonExecuted": false
+}

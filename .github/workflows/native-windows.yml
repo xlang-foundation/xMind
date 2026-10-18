@@ -46,6 +46,15 @@ jobs:
           node-version: '22'
       - name: Build native xlang3 and xMind; run complete contract set
         run: ./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib
+      # Run after native completion (including failure) so these PowerShell
+      # fixtures cannot warm the shell before the native startup contracts.
+      - name: Verify owned process diagnostics isolation
+        if: always()
+        working-directory: xmind
+        run: |
+          New-Item -ItemType Directory -Force -Path build/ci-evidence | Out-Null
+          node --test Tools/tests/owned-process-diagnostics.test.mjs > build/ci-evidence/owned-process-diagnostics-contract.log
+          exit $LASTEXITCODE
       - name: Run extension contracts without package lifecycle scripts
         working-directory: xmind/extensions/vscode
         run: |

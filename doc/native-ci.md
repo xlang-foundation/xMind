@@ -2,7 +2,7 @@
 
 The latest published native gate and installed acceptance are recorded in
 [validation status](VALIDATION_STATUS.md) and
-[Responses continuation](native-responses-reasoning.md). Exact source
+[Responses continuation](native-responses-reasoning.md). Historical source
 `ace246094f6c1fc8cf61c146cfe001c63f1bbc8f` passed 71 native, 103 extension and
 20 browser contracts, native/browser integration and VSIX verification.
 [Exact hosted provenance](evidence/native-responses-reasoning-hosted-provenance.json).
@@ -17,9 +17,10 @@ pinned; workflow permissions are read-only.
 
 The current inputs are:
 
-- xlang3 source `ad8040ffb8aba6eeabeb09053a8e222df09a4e7a`, checked clean.
+- xlang3 source `58a8aab9b40a464e38a741129b4804ac36e27a53`, checked clean.
   It includes the reviewed SQLite transaction/text changes and native Windows
-  long-path support. The historical SQLite patch is not applied again.
+  long-path support, native Unicode pure-library paths and the xMind runtime
+  compatibility fixes. The historical SQLite patch is not applied again.
 - Standard-library source `ebf955df7a89ed0c7968f79faec1de49f61ed7cb`
   (CPython 3.14.0 `Lib/` sources only).
 
@@ -43,6 +44,42 @@ Headless contracts do not establish rendered IDE or live-provider acceptance.
 Diagnostics are retained even after failure. The development bundle is uploaded
 only after its required build/contract steps succeed. Original failed logs and
 later passing results retain their respective source identities.
+
+## Bounded owned-process observations
+
+The graph and agent test peers optionally observe their exact spawned native
+process on the isolated hosted runner. The collector validates the root image
+and creation time, follows bounded descendant identities, and records only
+actual PowerShell CPU time, thread states/wait reasons and loaded module names.
+It does not collect command lines, environment values or process memory, and
+never signals the native test or its descendants. These are diagnostic tools;
+the native C++ process executor, permissions and deadlines are unchanged.
+
+Each shell identity has at most three samples, separated by ten seconds. The
+collector bounds families, shell identities, thread/module entries and output
+size. Normal observation lasts at most 65 seconds; its own process has an
+80-second execution limit. A stop marker retires observation after the native
+process closes. The harness waits at most two seconds for the observer; an
+unfinished observation is labelled incomplete and does not replace the actual
+native execution result. Both peers preserve their failed fixture directory.
+
+The three actual Windows collector checks run after the native gate, including
+after a failure. They must not warm PowerShell before its native startup tests.
+They verify descendant isolation, omission of private arguments/environment,
+identity rejection without terminating the root, and preservation of an actual
+fast exit-7 error. The two affected native harnesses pass in 18.80 seconds, and
+all 2,602 project inputs, dependencies, SDK and 124 native binaries verify
+unchanged during the final checks. The earlier overly strict retirement
+assertion and its failed output remain recorded separately.
+
+This adds evidence for the next hosted run. It does not fix or identify the
+underlying older hosted PowerShell timeout, and does not accept the currently
+running source or any rendered interface. [Exact local scope and retained
+failure](evidence/owned-process-diagnostics-20261018.json).
+
+The collector uses the documented [Node child-process handle](https://nodejs.org/docs/latest-v22.x/api/child_process.html#child_processexecfilefile-args-options-callback)
+and [Windows thread wait reason](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processthread.waitreason)
+observations. A wait reason is a snapshot, not proof of an underlying fault.
 
 ## Local verification and historical evidence
 
