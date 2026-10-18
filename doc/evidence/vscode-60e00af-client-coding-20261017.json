@@ -33,7 +33,7 @@
       "exit_code": 0,
       "stdout": "xMind 60e packaged VS Code coding works\r\n",
       "stderr": "",
-      "runtime_executable_path": "C:/xMindNativeValidation/profile-vscode-90ec355/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-f3c44b8184f58c919338011fc08d4756d31237ef87125965fead212145e008e6/xlang3.exe"
+      "process_executable_path": "C:/xMindNativeValidation/profile-vscode-90ec355/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-f3c44b8184f58c919338011fc08d4756d31237ef87125965fead212145e008e6/xlang3.exe"
     }
   },
   "cleanup": {
@@ -48,7 +48,7 @@
   },
   "limitations": [
     "The 60e00af client completed the edit, approval, command, and restore flow against the TestProj backend.",
-    "The command record points to the managed runtime under the earlier 90ec355 profile. This does not prove that the 60e00af VSIX's bundled native runtime was the backend serving this run.",
+    "The registered xlang3 process profile resolves to xlang3.exe under the earlier 90ec355 validation directory. This does not identify the xMind server executable that served the run or prove which bundled xMind server runtime was active.",
     "This proves one single-file coding workflow for the installed client, not broad coding reliability or release acceptance."
   ]
 }
