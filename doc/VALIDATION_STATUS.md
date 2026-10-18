@@ -19,9 +19,30 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | At `758e38f`, three saved-provider runs switched models in one conversation, created the approved file, and checked its exact bytes through xlang3. The browser HTTP adapter exposes the same 12 messages and discovers 20 saved-key models. Extension contracts pass 394/394 and browser contracts 136/136; the hosted view gate passed. [Live model-switch coding receipt](evidence/context-model-switch-live-20261018.json). Earlier `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; active-run browser startup/configuration import, prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
+| Coding clients | At `b828570`, browser startup and session reattachment succeeded during a live native xlang3 process; the coding run completed with unchanged history/provider settings and exit code zero. Six current focused native contracts pass. [Live reconnect receipt](evidence/provider-config-live-reconnect-20261018.json). Earlier `758e38f` passed live model switching, 394 extension/136 browser checks and hosted view CI; `d7adf96` passed 20 FastAPI tests and the Vue build and remains the installed VSIX runtime. | Rendered external webpage and installed VS Code acceptance on current source; prior failed profile handoff, broader provider/profile changes, long-task reliability and full-screen CLI validation. |
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Live browser connection during native coding execution — 2026-10-18
+
+At `b828570`, a real saved-OpenAI run read the fixture file and invoked its
+registered xlang3 foreground process. The inspected command asserted the exact
+file bytes, printed a start marker, waited 40 seconds as an explicit connection
+test window, then checked the bytes again. While the native operation was
+**executing** and its output artifact remained incomplete, a new browser host
+imported the unchanged saved configuration, connected without typed credentials,
+and reattached its session successfully. The run and operation were still active
+after reattachment. An independent Windows process observation identified the
+actual xlang3 child and its parent backend PID.
+
+The process exited zero and the coding run completed. The same backend PID,
+origin, provider catalogue/profile revisions and previous public history prefix
+were retained. The current webpage HTTP adapter returns all six messages and
+discovers 20 models using the saved key. Three actual inference responses report
+15,986 input and 214 output tokens. The deliberate process wait is not a UI
+latency measurement. No rendered browser/editor result or installed VSIX update
+is claimed; VS Code remained closed. [Exact run/operation, child image hashes,
+active observations, final HTTP checks and limits](evidence/provider-config-live-reconnect-20261018.json).
 
 ## Browser attachment while execution owns the runtime — 2026-10-18
 
@@ -38,8 +59,9 @@ owns a human pause; changed inputs fail without new credentials or checkpoint
 changes. The production extension host adapter also opens a second actual
 native view using an unchanged empty template, attaching to the same backend
 and preserving graph/history. Existing browser workspace/provider-path and CLI
-contracts still pass. Live saved-provider reconnection during a foreground
-process and rendered clients remain pending at this source checkpoint.
+contracts still pass. At this source checkpoint, live saved-provider reconnection
+was pending; the subsequent successful live result is recorded above. Rendered
+clients remain pending.
 [Source hashes, exact native gate and scope](evidence/provider-config-observation-20261018.json).
 
 ## Live coding while changing models — 2026-10-18
@@ -62,7 +84,8 @@ configuration import requires an idle service even before checking whether
 the configuration changes anything. Starting the same launcher after that run
 completed succeeds, with the original provider revisions retained. This does
 **not** fix active-run reconnect; that native/view integration issue remains
-open. The current page is a small validation workspace. Broader provider/profile
+open at `758e38f`; the subsequent `b828570` result above verifies unchanged-config
+attachment during active execution. That earlier page used a small validation workspace. Broader provider/profile
 switches, old-profile recovery and current installed-editor acceptance remain
 unfinished. [Exact runs, hashes, assertion, HTTP results and retained failure](evidence/context-model-switch-live-20261018.json).
 

@@ -8,6 +8,13 @@ an identical configuration. Actual changes to keys, models, selected profiles
 or profile entries require the backend to be idle and healthy. A busy rejection
 does not publish new credentials or alter the active owner.
 
+The six focused native provider/view/CLI contracts pass. A live saved-provider
+run also connected and reattached a browser while its real xlang3 child was
+executing, then completed with exit code zero and unchanged provider revisions,
+history and backend PID. These are native/HTTP checks; rendered external browser
+and installed VS Code acceptance remain separate.
+[Live connection evidence](evidence/provider-config-live-reconnect-20261018.json).
+
 Default OpenAI profile routes now filter account discovery through the native
 streamed-text model policy. Workspace mode excludes models without tool support
 on the chosen wire. GPT-6 Astra and GPT-6.1 Sol use Responses for tools; Chat

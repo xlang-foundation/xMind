@@ -1,0 +1,115 @@
+{
+  "recorded_at": "2026-10-18T09:42:10.948Z",
+  "scope": "Real saved-provider read/process coding loop; actual native browser startup and session reattachment while foreground xlang3 remains active",
+  "source_revision": "b828570309baaed574f1395f0c1b857235a35f19",
+  "runtime": {
+    "native_executable_sha256": "ea9a8766015267d80a482f1f4aca951db390c56fb8edf9ee3e5d5da8a2acbe8d",
+    "runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "verified_files": 1927,
+    "current_core_image_matches_stage": true,
+    "release_accepted": false
+  },
+  "fixture": {
+    "workspace": "C:/xMindNativeValidation/busy-config-live-workspace-20261018",
+    "profile_directory": "C:\\xMindNativeValidation\\profiles\\busy-config-live-20261018\\53365a0ca911c9f2671af1129853d9aa413e77147593a40f248984350c84a400",
+    "core_origin": "http://127.0.0.1:52452",
+    "backend_pid": 48700,
+    "session": "475bb93fcbec8b2814e13e572c38a1e4"
+  },
+  "run": {
+    "graph_root": false,
+    "id": "f469a42cbcbe316d5a71ef95466e829a",
+    "node_id": "",
+    "parent_id": "",
+    "provider_context": {
+      "model_id": "gpt-6.1-sol",
+      "profile_id": "openai",
+      "profile_revision": 1,
+      "provider": "openai",
+      "route_id": "openai.responses",
+      "wire": "responses"
+    },
+    "session_id": "475bb93fcbec8b2814e13e572c38a1e4",
+    "state": "completed"
+  },
+  "operation": {
+    "id": "aa123ca37627d2d493f6462313d4a5f1",
+    "state": "succeeded",
+    "actor": "trusted-process-profile:xlang3",
+    "profile_id": "xlang3",
+    "reviewed_script": "from pathlib import Path\nimport time\nexpected = b'Actual xMind reconnect validation 36f496f1d2f24b0df7e04346\\n'\nassert Path('README.md').read_bytes() == expected\nprint('xMind reconnect process started', flush=True)\ntime.sleep(40)\nassert Path('README.md').read_bytes() == expected\nprint('xMind reconnect process completed')",
+    "exit_code": 0,
+    "stdout": "xMind reconnect process started\r\nxMind reconnect process completed\r\n"
+  },
+  "active_connection": {
+    "at": "2026-10-18T09:40:16.956Z",
+    "url": "http://127.0.0.1:57547/ui/",
+    "nativeView": "http://127.0.0.1:53952",
+    "runState": "running",
+    "operationId": "aa123ca37627d2d493f6462313d4a5f1",
+    "operationState": "executing",
+    "stdout": "xMind reconnect process started\r\n",
+    "outputComplete": false,
+    "unchangedProviders": true,
+    "refreshedWhileActive": true,
+    "noTypedToken": true,
+    "httpOnlySameSiteCookie": true,
+    "renderedAcceptance": false,
+    "existing_history_prefix_messages": 3,
+    "scope": "Public HTTP adapter/session routes and native provider import, without rendered browser interaction"
+  },
+  "independently_observed_child": {
+    "observedAt": "2026-10-18T09:40:32.0063636Z",
+    "pid": 54040,
+    "parentPid": 48700,
+    "executable": "C:\\xMindNativeValidation\\profiles\\busy-config-live-20261018\\53365a0ca911c9f2671af1129853d9aa413e77147593a40f248984350c84a400\\runtime-f4e8be425d28d8a612b647e1374740cab325d53320f680895e8f71aee920d861\\xlang3.exe",
+    "executableSha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4"
+  },
+  "preservation": {
+    "same_backend_pid": true,
+    "same_core_origin": true,
+    "provider_catalogue_revision": 2,
+    "provider_metadata_unchanged": true,
+    "previous_public_history_prefix_unchanged": true,
+    "history_messages": 6,
+    "fixture_file_sha256": "e43c29ddfba3a3773b7eb4cc2b3f52f7d21198e12ac663a51cd3ddb032ef22b3"
+  },
+  "actual_inference_usage": {
+    "responses": 3,
+    "input_tokens": 15986,
+    "output_tokens": 214,
+    "total_tokens": 16200,
+    "scope": "Three completed inference responses; model discovery/count calls are separate; the deliberate 40-second native test wait is not UI latency"
+  },
+  "final_browser": {
+    "url": "http://127.0.0.1:57547/ui/",
+    "html_status": 200,
+    "same_session": true,
+    "same_workspace": true,
+    "history_messages": 6,
+    "saved_key_model_count": 20,
+    "no_browser_provider_key_input": true,
+    "session_reattachment": true,
+    "rendered_acceptance": false
+  },
+  "native_regression_receipt": "provider-config-observation-20261018.json",
+  "local_evidence_sha256": {
+    "busy-config-live-20261018.mjs": "255588420b0e300eb11041075b84e2cdec3b0d788179fd12201ec1bfffa50059",
+    "probe-busy-config-view-20261018.mjs": "f30f1cb31d9623ff012e479dd1311cb3eae96060887b4d3226d8d9ba24dbd3e5",
+    "busy-config-live-events-20261018.json": "e43a4fd379ea51dfd5adfc0d0f2fe8c0ddc5251eb9e7e9198a5fca019098fabe",
+    "busy-config-live-history-20261018.json": "d806eeef2f852bc7dd62a6bbc409ec1a26b62eee6c574a971f510312489d798c",
+    "busy-config-live-child-20261018.json": "dbd577fd3d5818312a8f6b710b81cce1c1759e3ee0d3139f9d59c678b45ed957",
+    "busy-config-live-view-20261018.json": "6b74d1142b6522421685544f3e78635c8225b3e394420d56fdfe10198d9ae5db",
+    "busy-config-live-final-view-20261018.json": "91eb7b16ff645ed739cc427ea051e18d1576ed13803d146e115430f099e0387c"
+  },
+  "limits": [
+    "The 40-second delay is an explicit test window inside a real native xlang3 process, not simulated model/tool execution or a UI response-time measurement",
+    "External browser control was previously denied by Windows; no fresh external input was attempted and rendered UI acceptance remains pending",
+    "VS Code stayed closed; its installed runtime remains d7adf96, and current installed-client acceptance is unfinished",
+    "This is a small validation workspace; no new full Model Zoo project test or file-edit test is claimed here",
+    "A genuinely changed provider configuration still requires an idle healthy runtime; cross-provider/profile changes and the prior failed handoff remain separate work",
+    "No complete current native inventory, hosted native Release result or release-accepted runtime package is claimed",
+    "No CPython interpreter or native-extension fallback was used"
+  ]
+}
