@@ -40,6 +40,24 @@ int main(){try{
     require(bridged_claude.messages.back().provider_items_json=="[]"&&bridged_claude.messages.back().content=="Claude answer",
         "Responses context projection must preserve portable canonical text and remove Claude-only receipts");
     auto foreign_reasoning=conversation(saved("Reasoned answer",response_reasoning));rejects([&]{(void)project_provider_history(chat,foreign_reasoning);});
+    for(const auto& [content,receipt]:std::vector<std::pair<std::string,std::string>>{
+        {"Claude answer",claude},{"Gemini answer",gemini},{"DeepSeek answer",deepseek},{"Responses answer",responses}}){
+        const auto original=conversation(saved(content,receipt));const auto checked=reproject_checked_provider_history(original,{1});
+        require(checked.messages[1].content==content&&checked.messages[1].provider_items_json=="[]"&&original.messages[1].provider_items_json==receipt,
+            "Checked owner projection retains canonical data and never relabels the original native receipt");
+        for(const auto wire:{ProviderWire::responses,ProviderWire::anthropic_messages,ProviderWire::gemini_generate_content,ProviderWire::chat_completions}){
+            auto target=chat;target.wire=wire;target.tools=target.output_limit=target.stream_usage=Capability::supported;
+            auto request=checked;request.max_output_tokens=128;
+            require(serialize_provider_history_projection(target,request).find(content)!=std::string::npos,"Canonical checked history retains its public answer on every registered wire family");
+            if(wire==ProviderWire::chat_completions)for(const auto dialect:{ChatDialect::deepseek,ChatDialect::mistral}){
+                target.chat_dialect=dialect;
+                require(serialize_provider_history_projection(target,request).find(content)!=std::string::npos,"Canonical checked history retains its public answer on each explicit chat dialect");
+            }
+        }
+    }
+    rejects([&]{(void)reproject_checked_provider_history(unknown,{1});});
+    rejects([&]{(void)reproject_checked_provider_history(corrupt,{1});});
+    rejects([&]{(void)reproject_checked_provider_history(foreign_responses,{1,1});});
 
     auto exact_items=Json::parse(responses);exact_items.push_back(Json::parse(response_reasoning).at(0));
     auto changed_authority=conversation(saved("Responses answer",exact_items.dump()));
@@ -67,6 +85,12 @@ int main(){try{
         {{"id","fc_native"},{"type","function_call"},{"call_id","native-tool-id"},{"name","read_file"},{"arguments",R"({"path":"README.md"})"}}
     }).dump();
     const auto authority_tool_history=reproject_authority_history(responses_with_tool,{1});
+    const auto checked_tool_history=reproject_checked_provider_history(responses_with_tool,{1});
+    for(const auto wire:{ProviderWire::responses,ProviderWire::anthropic_messages,ProviderWire::gemini_generate_content,ProviderWire::chat_completions}){
+        auto target=chat;target.wire=wire;target.tools=target.output_limit=target.stream_usage=Capability::supported;auto request=checked_tool_history;request.max_output_tokens=128;
+        const auto payload=serialize_provider_history_projection(target,request);
+        require(payload.find("read_file")!=std::string::npos&&payload.find("file body")!=std::string::npos,"Every target retains the complete checked canonical tool turn without re-executing it");
+    }
     require(authority_tool_history.messages[1].tool_calls[0].id=="native-tool-id"&&
         authority_tool_history.messages[2].tool_call_id=="native-tool-id"&&
         authority_tool_history.messages[2].content=="file body",

@@ -81,7 +81,8 @@ ModelRequest project_provider_history(const ChatProviderConfig& target,const Mod
     for(std::size_t index=0;index<receipts.size();++index)if(receipts[index]&&!native_for(target,*receipts[index]))projected.messages[index].provider_items_json="[]";
     return projected;
 }
-ModelRequest reproject_authority_history(const ModelRequest& request,const std::vector<std::size_t>& indices){
+namespace {
+ModelRequest reproject_checked(const ModelRequest& request,const std::vector<std::size_t>& indices,bool responses_only){
     if(indices.empty())return request;
     std::vector<std::optional<Receipt>> receipts;receipts.reserve(request.messages.size());
     for(const auto& message:request.messages)receipts.push_back(receipt(message));
@@ -90,11 +91,24 @@ ModelRequest reproject_authority_history(const ModelRequest& request,const std::
     for(const auto index:indices){
         if(index>=request.messages.size()||!seen.insert(index).second||
            request.messages[index].role!=MessageRole::assistant||!receipts[index]||
-           receipts[index]->source!=Source::responses)incompatible();
+           (responses_only&&receipts[index]->source!=Source::responses))incompatible();
         const auto& message=request.messages[index];
         if(message.content.empty()&&message.refusal.empty()&&message.tool_calls.empty())incompatible();
         projected.messages[index].provider_items_json="[]";
     }
     return projected;
+}
+}
+ModelRequest reproject_authority_history(const ModelRequest& request,const std::vector<std::size_t>& indices){return reproject_checked(request,indices,true);}
+ModelRequest reproject_checked_provider_history(const ModelRequest& request,const std::vector<std::size_t>& indices){return reproject_checked(request,indices,false);}
+std::string serialize_provider_history_projection(const ChatProviderConfig& config,const ModelRequest& request){
+    switch(config.wire){
+    case ProviderWire::responses:return serialize_responses_request(config,request);
+    case ProviderWire::anthropic_messages:return serialize_anthropic_request(config,request);
+    case ProviderWire::gemini_generate_content:return serialize_gemini_request(gemini_model_request(request,config.tools));
+    case ProviderWire::chat_completions:return config.chat_dialect==ChatDialect::deepseek?serialize_deepseek_request(config,request):
+        config.chat_dialect==ChatDialect::mistral?serialize_mistral_request(config,request):serialize_chat_request(config,request);
+    }
+    throw std::invalid_argument("Unknown provider history projection wire");
 }
 }

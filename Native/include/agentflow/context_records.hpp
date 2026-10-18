@@ -107,6 +107,7 @@ struct ContextHistoryPayload {
     ContextGroupPayload source;
     bool reproject_provider_items=false;
     bool model_changed=false;
+    bool provider_changed=false;
     std::string producing_workspace_identity;
 };
 struct ContextHistoryReplaySpec {
@@ -115,6 +116,29 @@ struct ContextHistoryReplaySpec {
     ContextSnapshot source;
     std::vector<std::int64_t> ordinals;
     std::string projection_binding;
+};
+// Active execution owns any cross-provider projection. Context selection is
+// present only for registered Responses preparation; other wires load originals.
+struct ProviderHistoryOwner {
+    std::string root_run_id,owner_run_id;
+    ModelCallRole role=ModelCallRole::parent;
+    ContextScope scope;
+    std::string provider_identity_json,authority_identity;
+};
+struct ProviderHistorySelection {
+    std::optional<ContextSnapshot> context;
+    std::vector<std::int64_t> ordinals;
+    ContextReadBound bound;
+};
+struct ProviderHistorySnapshot {
+    std::vector<ContextHistoryPayload> groups;
+    std::int64_t source_watermark=0;
+    std::string source_binding;
+};
+struct ProviderHistoryReplaySpec {
+    ProviderHistoryOwner owner;
+    ProviderHistorySelection selection;
+    std::string source_binding,projection_binding;
 };
 enum class ContextProjectionKind {responses_canonical,structured_summary};
 struct ContextProjection {

@@ -23,6 +23,30 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Checked provider changes in an existing conversation — 2026-10-18
+
+Active profiled executions can prepare original conversation history for a
+different provider. The native repository checks the admitted target, producing
+model-call receipt, workspace, complete tool group and exact source digest before
+the gateway validates and converts the request copy. Original provider receipts,
+messages and usage stay unchanged. Responses checkpoints remain bound to their
+own model and authority; another provider receives canonical original messages.
+Unproved, malformed, stale and over-bound history fails before model funding.
+The existing strict continuation APIs retain their previous rejection rules.
+
+The native engine contract runs Responses → Claude → Responses across database
+reopens, performs three actual file reads, preserves all twelve original messages
+and checks the returning provider's own compaction. An independent peer rejects
+foreign private continuation data and checks actual file bytes. Provider replies,
+counts, signatures and usage in this contract are explicitly synthetic. Eight
+focused native contracts passed, alongside **395 extension** and **136 browser**
+contracts. [Source hashes, exact gates and limits](evidence/context-provider-switch-20261018.json).
+
+This is a source checkpoint. The installed **0.1.14** runtime remains at
+`b828570`; this change has not been deployed there. Live saved-provider switching,
+rendered editor/browser acceptance, foreign-history idle maintenance and the full
+current release gate remain pending.
+
 ## Installed 0.1.14 package and production adapter coding — 2026-10-18
 
 The actual VS Code CLI installed Windows x64 **0.1.14** without opening windows.

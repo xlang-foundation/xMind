@@ -615,6 +615,9 @@ test('authority history replay is explained in selected run activity',()=>{
 test('model history projection explains the selected model without inventing response metrics',()=>{
  const r=renderer(),events=r.dom.window.document.getElementById('events');try{r.send({type:'event',event:{seq:8,run_id:'run',kind:'context.history_reprojected',data:{reason:'model_changed',groups:2,messages:2}}});assert.match(events.textContent,/Conversation context refreshed for the selected model\. Recorded history is preserved\./);assert.doesNotMatch(events.textContent,/input_tokens|output_tokens/);}finally{r.dom.window.close();}
 });
+test('provider history projection reports a context update without inventing a model response',()=>{
+ const r=renderer(),events=r.dom.window.document.getElementById('events');try{r.send({type:'event',event:{seq:9,run_id:'run',kind:'context.history_reprojected',data:{reason:'provider_changed',groups:2,messages:2}}});assert.match(events.textContent,/Conversation context refreshed for the selected provider\. Recorded history is preserved\./);assert.doesNotMatch(events.textContent,/input_tokens|output_tokens/);}finally{r.dom.window.close();}
+});
 test('run activity skips streamed token deltas and remains bounded for long tool sessions',()=>{
  const r=renderer(),events=r.dom.window.document.getElementById('events');try{
   r.send({type:'event',event:{seq:1,run_id:'run',kind:'run.running',data:{}}});

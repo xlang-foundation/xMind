@@ -149,58 +149,52 @@ bool same_responses_history_profile(const std::string& source,const std::string&
        a.value("wire",std::string{})!="responses"||b.value("wire",std::string{})!="responses")return false;
     a.erase("model_id");b.erase("model_id");return a==b;
 }
+struct ProvedHistoryReceipt {
+    bool has_items=false;
+    std::string provider_identity,workspace;
+    std::optional<ContextBinding> binding;
+};
+ProvedHistoryReceipt prove_history_receipt(XlangSqlite& db,const ConversationGroup& group,const Message& original){
+    ProvedHistoryReceipt result;if(original.role!="assistant")return result;
+    const auto dto=Json::parse(original.json);
+    if(dto.contains("provider_items")){if(!dto["provider_items"].is_array())throw ContextBindingChanged("Stored provider receipt shape is incompatible");result.has_items=!dto["provider_items"].empty();}
+    if(dto.contains("provider_items_json")&&(!dto["provider_items_json"].is_string()||dto["provider_items_json"].get<std::string>()!="[]"))throw ContextBindingChanged("Legacy opaque receipt has no registered native continuation representation");
+    if(!result.has_items)return result;
+    if(group.legacy_unattributed||!group.execution_owner||!group.committed_event_seq)throw ContextBindingChanged("Opaque original has no proved producing context owner");
+    const auto receipt=db.execute("SELECT r.inference_step_id,m.binding_json,s.spec_json,e.seq,b.workspace_identity FROM agent_model_call_reservations r LEFT JOIN inference_attempt_members m ON m.root_run_id=r.root_run_id AND m.attempt_id=r.attempt_id LEFT JOIN inference_steps s ON s.id=m.step_id JOIN agent_execution_budgets b ON b.root_run_id=r.root_run_id JOIN events e ON e.run_id=r.owner_run_id AND e.kind='budget.model_call.finished' AND json_extract(e.payload,'$.attempt_id')=r.attempt_id AND json_extract(e.payload,'$.was_started')=1 WHERE r.owner_run_id=? AND r.state='finished' AND r.purpose='inference' AND r.actual_assistant_json=? AND e.seq<?",{*group.execution_owner,original.json,*group.committed_event_seq}).rows;
+    if(receipt.size()!=1)throw ContextBindingChanged("Opaque original has no unique completed producing model call");
+    result.workspace=text(receipt[0][4]);
+    if(!std::holds_alternative<std::nullptr_t>(receipt[0][0])){
+        if(std::holds_alternative<std::nullptr_t>(receipt[0][1])||std::holds_alternative<std::nullptr_t>(receipt[0][2]))throw DatabaseError("Opaque original inference membership is incomplete");
+        const auto binding=decode_context_binding(text(receipt[0][1]));const auto spec=Json::parse(text(receipt[0][2]));
+        if(!spec.is_object()||!spec.contains("binding")||decode_context_binding(spec["binding"].dump())!=binding||!spec.contains("scope_kind")||!spec.contains("scope_id")||spec.at("scope_kind")!=context_scope_name(group.scope.kind)||spec.at("scope_id")!=group.scope.id)
+            throw ContextBindingChanged("Opaque original belongs to another execution scope or context binding");
+        result.binding=binding;result.provider_identity=binding.provider_identity_json;
+    }else{
+        const auto context=db.execute("SELECT CASE WHEN json_type(m.payload,'$.provider_context') IS NULL THEN '' ELSE json_quote(json_extract(m.payload,'$.provider_context')) END FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=? AND m.role='user' ORDER BY m.seq LIMIT 1",{*group.execution_owner}).rows;
+        if(context.size()!=1||text(context[0][0]).empty()||!dto.contains("provider_context"))throw ContextBindingChanged("Opaque original lacks a captured provider-profile identity");
+        const auto captured=provider_context(Json::parse(text(context[0][0])));
+        if(provider_context(dto.at("provider_context"))!=captured||!dto.contains("model")||!dto["model"].is_string()||dto["model"]!=Json::parse(captured).at("model_id"))throw ContextBindingChanged("Opaque original differs from its captured provider-profile identity");
+        result.provider_identity=captured;
+    }
+    if(dto.contains("provider_context")&&provider_context(dto.at("provider_context"))!=result.provider_identity)throw ContextBindingChanged("Opaque original provider context differs from its actual model call");
+    const auto event=db.execute("SELECT run_id,kind FROM events WHERE run_id=? AND seq=?",{*group.execution_owner,*group.committed_event_seq}).rows;
+    // The group event is scoped to its actual owner, never an arbitrary equal DTO.
+    if(event.size()!=1||text(event[0][0])!=*group.execution_owner||(text(event[0][1])!="conversation.assistant"&&text(event[0][1])!="conversation.tool_turn"))throw DatabaseError("Opaque source group lacks its actual committed conversation event");
+    return result;
+}
 bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,const std::vector<Message>& originals,const ContextBinding& selected_binding,bool allow_authority_replay=false,std::string* producing_workspace=nullptr,bool* model_changed=nullptr){
     bool reproject=false;
-    for(const auto& original:originals){if(original.role!="assistant")continue;const auto dto=Json::parse(original.json);bool has_items=false;
-        if(dto.contains("provider_items")){if(!dto["provider_items"].is_array())throw ContextBindingChanged("Stored provider receipt shape is incompatible");has_items=!dto["provider_items"].empty();}
-        if(dto.contains("provider_items_json")&&(!dto["provider_items_json"].is_string()||dto["provider_items_json"].get<std::string>()!="[]"))throw ContextBindingChanged("Legacy opaque receipt has no registered native continuation representation");
-        if(!has_items)continue;
-        if(group.legacy_unattributed||!group.execution_owner||!group.committed_event_seq)throw ContextBindingChanged("Opaque original has no proved producing context owner");
-        const auto receipt=db.execute("SELECT r.inference_step_id,m.binding_json,s.spec_json,e.seq,b.workspace_identity FROM agent_model_call_reservations r LEFT JOIN inference_attempt_members m ON m.root_run_id=r.root_run_id AND m.attempt_id=r.attempt_id LEFT JOIN inference_steps s ON s.id=m.step_id JOIN agent_execution_budgets b ON b.root_run_id=r.root_run_id JOIN events e ON e.run_id=r.owner_run_id AND e.kind='budget.model_call.finished' AND json_extract(e.payload,'$.attempt_id')=r.attempt_id AND json_extract(e.payload,'$.was_started')=1 WHERE r.owner_run_id=? AND r.state='finished' AND r.purpose='inference' AND r.actual_assistant_json=? AND e.seq<?",{*group.execution_owner,original.json,*group.committed_event_seq}).rows;
-        if(receipt.size()!=1)throw ContextBindingChanged("Opaque original has no unique completed producing model call");
-        std::string producer_identity;
-        if(!std::holds_alternative<std::nullptr_t>(receipt[0][0])){
-            if(std::holds_alternative<std::nullptr_t>(receipt[0][1])||std::holds_alternative<std::nullptr_t>(receipt[0][2]))throw DatabaseError("Opaque original inference membership is incomplete");
-            const auto source_binding=decode_context_binding(text(receipt[0][1]));const auto spec=Json::parse(text(receipt[0][2]));
-            if(!spec.is_object()||!spec.contains("binding")||decode_context_binding(spec["binding"].dump())!=source_binding||
-               !spec.contains("scope_kind")||!spec.contains("scope_id")||spec.at("scope_kind")!=context_scope_name(group.scope.kind)||spec.at("scope_id")!=group.scope.id)
-                throw ContextBindingChanged("Opaque original belongs to another execution scope or context binding");
-            if(source_binding!=selected_binding){
-                auto compatible=source_binding;compatible.authority_identity=selected_binding.authority_identity;
-                const bool changed_model=Json::parse(source_binding.provider_identity_json)!=Json::parse(selected_binding.provider_identity_json);
-                if(changed_model&&same_responses_history_profile(source_binding.provider_identity_json,selected_binding.provider_identity_json))
-                    compatible.provider_identity_json=selected_binding.provider_identity_json;
-                if(!allow_authority_replay||compatible!=selected_binding)
-                    throw ContextBindingChanged("Opaque original belongs to another selected context authority");
-                reproject=true;
-                if(model_changed)*model_changed|=changed_model;
-                if(producing_workspace){
-                    const auto workspace=text(receipt[0][4]);
-                    if(workspace.empty()||(!producing_workspace->empty()&&*producing_workspace!=workspace))
-                        throw ContextBindingChanged("Opaque originals have incompatible producing workspaces");
-                    *producing_workspace=workspace;
-                }
-            }
-            producer_identity=source_binding.provider_identity_json;
-        }else{
-            // Provider-profile runs without the Responses context manager still
-            // retain native, once-only model-call receipts. Bind those receipts
-            // to the exact provider context captured with that run's user input.
-            const auto context=db.execute("SELECT CASE WHEN json_type(m.payload,'$.provider_context') IS NULL THEN '' ELSE json_quote(json_extract(m.payload,'$.provider_context')) END FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=? AND m.role='user' ORDER BY m.seq LIMIT 1",{*group.execution_owner}).rows;
-            if(context.size()!=1||text(context[0][0]).empty()||!dto.contains("provider_context"))
-                throw ContextBindingChanged("Opaque original lacks a captured provider-profile identity");
-            const auto captured=provider_context(Json::parse(text(context[0][0])));
-            if(provider_context(dto.at("provider_context"))!=captured||!dto.contains("model")||!dto["model"].is_string()||
-               dto["model"]!=Json::parse(captured).at("model_id"))
-                throw ContextBindingChanged("Opaque original differs from its captured provider-profile identity");
-            producer_identity=captured;
+    for(const auto& original:originals){const auto proof=prove_history_receipt(db,group,original);if(!proof.has_items)continue;
+        if(proof.binding&&*proof.binding!=selected_binding){
+            auto compatible=*proof.binding;compatible.authority_identity=selected_binding.authority_identity;
+            const bool changed_model=Json::parse(proof.provider_identity)!=Json::parse(selected_binding.provider_identity_json);
+            if(changed_model&&same_responses_history_profile(proof.provider_identity,selected_binding.provider_identity_json))compatible.provider_identity_json=selected_binding.provider_identity_json;
+            if(!allow_authority_replay||compatible!=selected_binding)throw ContextBindingChanged("Opaque original belongs to another selected context authority");
+            reproject=true;if(model_changed)*model_changed|=changed_model;
+            if(producing_workspace){if(proof.workspace.empty()||(!producing_workspace->empty()&&*producing_workspace!=proof.workspace))throw ContextBindingChanged("Opaque originals have incompatible producing workspaces");*producing_workspace=proof.workspace;}
         }
-        if(Json::parse(producer_identity)!=Json::parse(selected_binding.provider_identity_json)&&
-           !(allow_authority_replay&&reproject&&same_responses_history_profile(producer_identity,selected_binding.provider_identity_json)))
-            throw ContextBindingChanged("Opaque original belongs to another selected provider identity");
-        if(dto.contains("provider_context")&&provider_context(dto.at("provider_context"))!=producer_identity)
-            throw ContextBindingChanged("Opaque original provider context differs from its actual model call");
-        const auto event=db.execute("SELECT run_id,kind FROM events WHERE seq=?",{*group.committed_event_seq}).rows;if(event.size()!=1||text(event[0][0])!=*group.execution_owner||(text(event[0][1])!="conversation.assistant"&&text(event[0][1])!="conversation.tool_turn"))throw DatabaseError("Opaque source group lacks its actual committed conversation event");
+        if(Json::parse(proof.provider_identity)!=Json::parse(selected_binding.provider_identity_json)&&!(allow_authority_replay&&reproject&&same_responses_history_profile(proof.provider_identity,selected_binding.provider_identity_json)))throw ContextBindingChanged("Opaque original belongs to another selected provider identity");
     }
     return reproject;
 }
@@ -1686,14 +1680,16 @@ void graph_context_closed(XlangSqlite& db,const std::string& root,const DynamicB
     const auto rows=db.execute("SELECT paused_segment_id,paused_pins_json FROM graph_context_owners WHERE root_run_id=?",{root}).rows;if(rows.size()!=1||std::holds_alternative<std::nullptr_t>(rows[0][0])||std::holds_alternative<std::nullptr_t>(rows[0][1])||text(rows[0][0])!=segment.id||segment.state!="closed"||segment.remaining_active_ms<1)throw ContextBindingChanged("Registered graph has no verified closed clock");graph_context_drained(db,root,true);if(Json::parse(text(rows[0][1]))!=graph_context_pins(db,root))throw ContextSourceChanged("Registered graph closed context sources changed");
 }
 Json inference_identity(const InferenceStepSpec& s){return {{"root",s.root_run_id},{"owner",s.owner_run_id},{"role",call_role(s.role)},{"scope_kind",context_scope_name(s.scope.kind)},{"scope_id",s.scope.id},{"binding",context_binding_json(s.binding)},{"planning_call",s.planning_call_id?Json(*s.planning_call_id):Json(nullptr)}};}
-void context_owner(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role,const ContextScope& scope,const ContextBinding& binding){
+void history_owner(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role,const ContextScope& scope,const std::string& provider_identity,const std::string& authority_identity){
     const auto r=repo.run(root),o=repo.run(owner);const auto b=repo.root_budget(root);
     if(r.state!=RunState::running||o.state!=RunState::running)throw ContextBindingChanged("Context execution owners changed");
-    if(b.spec.policy_id!="native.graph-context"&&Json::parse(b.spec.provider_identity_json)!=Json::parse(binding.provider_identity_json))throw ContextBindingChanged("Context provider binding changed");
-    if(b.spec.policy_id=="native.dynamic-plan"){const auto caps=repo.dynamic_capabilities(root);if(!caps.catalogue_finalized)throw ContextUnavailable("Context requires its actual sealed execution catalogue");if(role==ModelCallRole::parent&&binding.authority_identity!=caps.backend_identity)throw ContextBindingChanged("Parent context private authority differs from sealed settings");}
+    if(b.spec.policy_id!="native.graph-context"&&Json::parse(b.spec.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Context provider binding changed");
+    if(b.spec.policy_id=="native.dynamic-plan"){const auto caps=repo.dynamic_capabilities(root);if(!caps.catalogue_finalized)throw ContextUnavailable("Context requires its actual sealed execution catalogue");if(role==ModelCallRole::parent&&authority_identity!=caps.backend_identity)throw ContextBindingChanged("Parent context private authority differs from sealed settings");}
     if(role==ModelCallRole::parent){if(root!=owner||r.graph_root||scope.kind!=ContextScopeKind::session||scope.id!=r.session_id)throw Conflict("Parent context does not own this session");}
-    else {const auto a=repo.child_admission(owner);if(a.root_run_id!=root||scope.kind!=ContextScopeKind::execution||scope.id!=owner||(a.kind!=ChildAdmissionKind::dynamic_agent&&a.kind!=ChildAdmissionKind::delegated_leaf&&!(a.kind==ChildAdmissionKind::graph_agent&&b.spec.policy_id=="native.graph-context")))throw Conflict("Child context does not own this execution");if((a.kind==ChildAdmissionKind::dynamic_agent||a.kind==ChildAdmissionKind::graph_agent)&&binding.authority_identity!=a.backend_identity)throw ContextBindingChanged("Context authority differs from its exact captured child settings");if(a.kind==ChildAdmissionKind::graph_agent){const auto capture=repo.graph_context_owner(root);const auto& agent=graph_context_agent(capture.authority,o.node_id);if(Json::parse(agent.provider_identity_json)!=Json::parse(binding.provider_identity_json))throw ContextBindingChanged("Graph context provider differs from its captured node model");}}
+    else {const auto a=repo.child_admission(owner);if(a.root_run_id!=root||scope.kind!=ContextScopeKind::execution||scope.id!=owner||(a.kind!=ChildAdmissionKind::dynamic_agent&&a.kind!=ChildAdmissionKind::delegated_leaf&&!(a.kind==ChildAdmissionKind::graph_agent&&b.spec.policy_id=="native.graph-context")))throw Conflict("Child context does not own this execution");if((a.kind==ChildAdmissionKind::dynamic_agent||a.kind==ChildAdmissionKind::graph_agent)&&authority_identity!=a.backend_identity)throw ContextBindingChanged("Context authority differs from its exact captured child settings");if(a.kind==ChildAdmissionKind::graph_agent){const auto capture=repo.graph_context_owner(root);const auto& agent=graph_context_agent(capture.authority,o.node_id);if(Json::parse(agent.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Graph context provider differs from its captured node model");}}
 }
+void context_owner(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role,const ContextScope& scope,const ContextBinding& binding){history_owner(repo,root,owner,role,scope,binding.provider_identity_json,binding.authority_identity);}
+
 std::int64_t context_logical_limit(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role){
     const auto b=repo.root_budget(root);if(role==ModelCallRole::parent)return b.spec.policy_id=="native.dynamic-plan"?repo.dynamic_capabilities(root).max_parent_turns:32;
     const auto a=repo.child_admission(owner);if(a.kind==ChildAdmissionKind::graph_agent){const auto capture=repo.graph_context_owner(root);return graph_context_agent(capture.authority,repo.run(owner).node_id).turn_limit;}if(a.kind==ChildAdmissionKind::delegated_leaf)return 4;
@@ -1757,6 +1753,91 @@ void Repository::record_context_history_replay(const ContextHistoryReplaySpec& s
         {"authority_identity",spec.source.head.binding.authority_identity},{"projection_binding",spec.projection_binding},
         {"groups",groups},{"messages",messages}}.dump());
     tx.commit();
+}
+namespace {
+ProviderHistorySnapshot read_provider_history(Repository& repo,XlangSqlite& db,const ProviderHistoryOwner& owner,const ProviderHistorySelection& selection){
+    context_hash(owner.authority_identity);const auto target=Json::parse(provider_context(Json::parse(owner.provider_identity_json)));
+    history_owner(repo,owner.root_run_id,owner.owner_run_id,owner.role,owner.scope,owner.provider_identity_json,owner.authority_identity);
+    const auto workspace=repo.root_budget(owner.root_run_id).spec.workspace_identity;
+    const auto& bound=selection.bound;context_read_bound(bound);backfill_context_groups(db,owner.scope,bound);
+    std::vector<ConversationGroup> groups;ProviderHistorySnapshot result;
+    const auto kind=std::string(context_scope_name(owner.scope.kind));Json source=Json::object();
+    if(selection.context){
+        const auto& saved=*selection.context;
+        if(saved.head.scope!=owner.scope||Json::parse(saved.head.binding.provider_identity_json)!=target||saved.head.binding.authority_identity!=owner.authority_identity)
+            throw ContextBindingChanged("Provider history selection differs from its actual owner");
+        const auto current=read_context_snapshot(db,owner.scope,saved.head.binding,bound);
+        if(context_snapshot_json(current)!=context_snapshot_json(saved))throw ContextSourceChanged("Provider history source or head changed");
+        if(selection.ordinals.empty()||selection.ordinals.size()>bound.max_groups)throw std::invalid_argument("Invalid provider history selection");
+        std::set<std::int64_t> seen;
+        for(const auto ordinal:selection.ordinals){
+            if(!seen.insert(ordinal).second)throw std::invalid_argument("Duplicate provider history group");
+            const ConversationGroup* found=nullptr;
+            for(const auto& group:current.groups)if(group.ordinal==ordinal)found=&group;
+            for(const auto& group:current.protected_users)if(group.ordinal==ordinal)found=&group;
+            if(!found)throw NotFound("Provider history group is outside the captured source");groups.push_back(*found);
+        }
+        result.source_watermark=current.source_watermark;source["context"]=context_snapshot_json(current);source["ordinals"]=selection.ordinals;
+    }else{
+        if(!selection.ordinals.empty())throw std::invalid_argument("Original provider history does not accept partial selection");
+        result.source_watermark=integer(db.execute("SELECT next_ordinal-1 FROM context_scopes WHERE kind=? AND id=?",{kind,owner.scope.id}).rows.at(0).at(0));
+        for(const auto& row:db.execute(std::string("SELECT ")+context_group_columns+" FROM conversation_groups WHERE scope_kind=? AND scope_id=? ORDER BY ordinal LIMIT ?",{kind,owner.scope.id,static_cast<std::int64_t>(bound.max_groups+1)}).rows){
+            if(groups.size()>=bound.max_groups)throw ContextCapacityExceeded("Provider history group count exceeds its bound");groups.push_back(decode_context_group(owner.scope,row));
+        }
+    }
+    Json metadata=Json::array();std::size_t bytes=0,metadata_bytes=0,messages=0;
+    for(const auto& group:groups){
+        const auto group_metadata=context_group_json(group);metadata_bytes+=group_metadata.dump().size();
+        if(metadata_bytes>bound.max_metadata_bytes)throw ContextCapacityExceeded("Provider history metadata exceeds its bound");metadata.push_back(group_metadata);
+        ContextHistoryPayload payload;payload.source.group=group;
+        for(const auto& row:db.execute("SELECT m.seq,m.role,m.payload FROM context_group_members g JOIN messages m ON m.seq=g.message_seq WHERE g.scope_kind=? AND g.scope_id=? AND g.ordinal=? ORDER BY g.position",{kind,owner.scope.id,group.ordinal}).rows){
+            const auto size=text(row[2]).size();if(size>bound.max_payload_bytes-bytes||++messages>8192)throw ContextCapacityExceeded("Provider history payload exceeds its bound");bytes+=size;payload.source.originals.push_back({integer(row[0]),text(row[1]),text(row[2])});
+        }
+        if(payload.source.originals.size()!=static_cast<std::size_t>(group.message_count)||context_messages_digest(payload.source.originals)!=group.source_binding||validate_context_group(payload.source.originals)!=group.kind)
+            throw DatabaseError("Provider history differs from its immutable original group");
+        for(const auto& original:payload.source.originals){
+            const auto proof=prove_history_receipt(db,group,original);if(!proof.has_items)continue;
+            if(proof.workspace!=workspace)throw ContextBindingChanged("Provider history belongs to another execution workspace");
+            const auto producing=Json::parse(provider_context(Json::parse(proof.provider_identity)));
+            const auto dto=Json::parse(original.json);
+            const auto captured=db.execute("SELECT payload FROM messages m JOIN task_messages t ON t.message_seq=m.seq WHERE t.run_id=? AND m.role='user' ORDER BY m.seq LIMIT 1",{*group.execution_owner}).rows;
+            if(captured.size()!=1||!dto.contains("provider_context")||Json::parse(prompt_context(text(captured[0][0])))!=producing||!dto.contains("model")||dto.at("model")!=producing.at("model_id"))
+                throw ContextBindingChanged("Provider history lacks its exact captured profile and model");
+            bool changed=producing!=target;
+            if(proof.binding){
+                if(selection.context)changed|=*proof.binding!=selection.context->head.binding;
+                else changed|=proof.binding->authority_identity!=owner.authority_identity;
+            }else if(selection.context)changed=true; // No proof for native Responses continuation reuse.
+            if(changed){
+                payload.reproject_provider_items=true;payload.producing_workspace_identity=proof.workspace;
+                auto from_profile=producing,to_profile=target;from_profile.erase("model_id");to_profile.erase("model_id");
+                payload.provider_changed|=from_profile!=to_profile;payload.model_changed|=producing.at("model_id")!=target.at("model_id");
+            }
+        }
+        result.groups.push_back(std::move(payload));
+    }
+    source["scope_kind"]=kind;source["scope_id"]=owner.scope.id;source["watermark"]=result.source_watermark;source["groups"]=std::move(metadata);
+    source["root"]=owner.root_run_id;source["owner"]=owner.owner_run_id;source["role"]=call_role(owner.role);source["target"]=target;source["authority"]=owner.authority_identity;
+    result.source_binding=context_digest(source.dump());return result;
+}
+}
+ProviderHistorySnapshot Repository::provider_history(const ProviderHistoryOwner& owner,const ProviderHistorySelection& selection){
+    auto& db=impl_->database;Transaction tx(db);auto result=read_provider_history(*this,db,owner,selection);tx.commit();return result;
+}
+void Repository::record_provider_history_replay(const ProviderHistoryReplaySpec& spec){
+    auto& db=impl_->database;Transaction tx(db);context_hash(spec.source_binding);context_hash(spec.projection_binding);
+    const auto current=read_provider_history(*this,db,spec.owner,spec.selection);
+    if(current.source_binding!=spec.source_binding)throw ContextSourceChanged("Provider history changed before projection publication");
+    std::size_t groups=0,messages=0;bool provider_changed=false,model_changed=false;
+    for(const auto& payload:current.groups)if(payload.reproject_provider_items){
+        ++groups;provider_changed|=payload.provider_changed;model_changed|=payload.model_changed;
+        for(const auto& original:payload.source.originals)if(original.role=="assistant"){const auto dto=Json::parse(original.json);if(dto.contains("provider_items")&&!dto.at("provider_items").empty())++messages;}
+    }
+    if(!groups||!messages)throw ContextBindingChanged("Provider history has no changed continuation to project");
+    Json event={{"reason",provider_changed?"provider_changed":model_changed?"model_changed":"authority_changed"},{"scope_kind",context_scope_name(spec.owner.scope.kind)},
+        {"scope_id",spec.owner.scope.id},{"source_watermark",current.source_watermark},{"source_binding",current.source_binding},{"projection_binding",spec.projection_binding},{"groups",groups},{"messages",messages}};
+    if(spec.selection.context)event["head_revision"]=spec.selection.context->head.revision;
+    impl_->event(spec.owner.owner_run_id,"context.history_reprojected",event.dump());tx.commit();
 }
 ContextManualRequest Repository::request_context_compaction(const ContextManualRequestSpec& spec){
     bounded_identity(spec.id);bounded_identity(spec.actor);if(spec.expected_head_revision<0)throw std::invalid_argument("Invalid manual context head");(void)context_binding_json(spec.binding);auto& db=impl_->database;Transaction tx(db);

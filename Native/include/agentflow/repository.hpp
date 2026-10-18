@@ -103,6 +103,8 @@ public:
     std::vector<ContextGroupPayload> context_group_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
     std::vector<ContextHistoryPayload> context_history_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
     void record_context_history_replay(const ContextHistoryReplaySpec& spec);
+    ProviderHistorySnapshot provider_history(const ProviderHistoryOwner& owner,const ProviderHistorySelection& selection={});
+    void record_provider_history_replay(const ProviderHistoryReplaySpec& spec);
     std::optional<ContextProjection> context_projection(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
     ContextStepReservation begin_context_compaction(const ContextCompactionSpec& spec);
     ContextStepReservation start_context_compaction(const std::string& id,const std::string& maintenance_attempt);

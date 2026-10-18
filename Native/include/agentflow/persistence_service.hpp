@@ -91,6 +91,8 @@ public:
     std::future<std::vector<ContextGroupPayload>> context_group_payloads(ContextSnapshot snapshot,std::vector<std::int64_t> ordinals,ContextReadBound bound={});
     std::future<std::vector<ContextHistoryPayload>> context_history_payloads(ContextSnapshot snapshot,std::vector<std::int64_t> ordinals,ContextReadBound bound={});
     std::future<void> record_context_history_replay(ContextHistoryReplaySpec spec);
+    std::future<ProviderHistorySnapshot> provider_history(ProviderHistoryOwner owner,ProviderHistorySelection selection={});
+    std::future<void> record_provider_history_replay(ProviderHistoryReplaySpec spec);
     std::future<std::optional<ContextProjection>> context_projection(ContextScope scope,ContextBinding binding,ContextReadBound bound={});
     std::future<ContextStepReservation> begin_context_compaction(ContextCompactionSpec spec);
     std::future<ContextStepReservation> start_context_compaction(std::string id,std::string maintenance_attempt);

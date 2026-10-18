@@ -1,0 +1,85 @@
+{
+  "recorded_at": "2026-10-18T10:21:01.953Z",
+  "scope": "Active native profiled execution prepares checked original conversation history across providers; synthetic provider protocol with real engine/tools/xlang3 SQLite",
+  "source_base": "2386b5ccc2f9a0d385573fe312518c270d351263",
+  "source_files": {
+    "Native/include/agentflow/agent_context_journal.hpp": "fe8fde1735ed92df3da5fbdcbecdc1ff90765ac9113bea2f7aecbea384b032af",
+    "Native/include/agentflow/context_records.hpp": "4586662f2078fd69d7ea859cebe9f3fdf4404e302e548ed3ec12ff75c126a33a",
+    "Native/include/agentflow/model_provider.hpp": "350399e81e20ee907042d325964ccb68bed756dd8190da20d4817dcb4933610c",
+    "Native/include/agentflow/persistence_service.hpp": "c4fb78318b4210e4e5467a42574ff782ed16e913454656abcbc8d87c0db3cb47",
+    "Native/include/agentflow/repository.hpp": "40b60d92755f2d81aac314af22351f16b30293fb354dc195b4d348cdb58b48d4",
+    "Native/src/agent_runner.cpp": "f9b02c58e43ab015f9ec0af395bcd9e7cd788ffdeba243bb3ce57907b7f04675",
+    "Native/src/context_manager.cpp": "5b0f2bae8e15efd92face59f16789c670cf8ac608a52795a28ed1b4c7294069d",
+    "Native/src/persistence_service.cpp": "58615bfe0dd071942044114e8a3086e86292691c2bf5be205f1463be7eab300f",
+    "Native/src/provider_history_bridge.cpp": "50a11d448396a96743bc382681b4ee58e06b6eeab3ba57998b75c745623d0a93",
+    "Native/src/repository.cpp": "0364b0fc9b564866b5a09a3d30f6cf3ce135b0f86582a0ceffde973f2ad90011",
+    "Native/tests/context_engine_contract.cpp": "6e25dda85d4be8beaf1766979bc44434becbc42c69723636ca4605f03ba21178",
+    "Native/tests/context_engine_peer.mjs": "be8868d72a1595599b6fa01851d6001e075f56836ac338f4728931cadad46c58",
+    "Native/tests/context_repository_contract.cpp": "afe839acf12e25582ccce73af83b8145d460b0d20d2350e5d645568ed654ea77",
+    "Native/tests/provider_history_bridge_contract.cpp": "485fc75aa170e63c21ffc628fbd60e760ffde112f36f01be421db2ca0c6414ab",
+    "Tools/ci-views.mjs": "41962cf6a138bb40e6095ab64eca8afc050be9ed9b0221c6306c247b72c83fe7",
+    "extensions/vscode/media/chat.js": "e39ac498a176c2992887c5f5d1d0afed3a763a62de41bbbdeab2a508a94fc4fd",
+    "extensions/vscode/tests/renderer.test.js": "e66c34bab1feaa5eb05fd34b88f4a56b806fe0f74d127e900eba90664e057dfb"
+  },
+  "native_executable_sha256": "08c53a5ba2c02160ca6e3501d819684a2228776417a51c6a608ea8b7c9792ae0",
+  "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "tests": {
+    "native_passed": 8,
+    "native": {
+      "bridge": {
+        "passed": 1,
+        "seconds": 0.29
+      },
+      "repository": {
+        "passed": 1,
+        "seconds": 3.22
+      },
+      "engine": {
+        "passed": 1,
+        "seconds": 6.45
+      },
+      "context_regressions": {
+        "passed": 3,
+        "seconds": 5.86
+      },
+      "runtime_regressions": {
+        "passed": 2,
+        "seconds": 14.35
+      }
+    },
+    "extension": 395,
+    "browser": 136,
+    "log_sha256": {
+      "provider-switch-bridge-tests-20261018.log": "cfca07763374eec6b13591dd29331901e24cda2c6f19c3e323636b819b746ff9",
+      "provider-switch-repository-tests-20261018.log": "f3b72ad40fadaa1c44ec45838426243d5a26fc713eeb6b6dd468baddcd25a3e7",
+      "provider-switch-engine-tests-20261018.log": "221bcadce6f1bd0edbe9701317b92cd12ffab1dad12d525e03d02549f8930e31",
+      "provider-switch-context-regression-tests-20261018.log": "e8cd3d13199a6f7db0b1ec7240c8977664c68d51f8b65053b188fdfe1954ec20",
+      "provider-switch-runtime-regression-tests-20261018.log": "7d22f1cd239d0a7e86fd18af0a3db99a05168dfde486945f0714fdd7d065e60e",
+      "provider-switch-extension-tests-20261018.log": "5b491d512c12cff83d3bf1190023c57cf238a0ce821df0cefc0f5e49ac89417f",
+      "provider-switch-browser-tests-20261018.log": "3919f179f771da9c128be56c8c41f0765dcd52b1ba038755f843377521410ed9",
+      "provider-switch-build-20261018.log": "04e6c66a8ada5e651a9eb3e087b81c81d4d074416e3e72974cb36f74356e9511"
+    }
+  },
+  "checks": [
+    "Typed active-owner history access verifies admitted provider, root/child scope, sealed dynamic authority, exact source group bytes and complete tool turns",
+    "Native source proof requires one completed producing inference reservation and its scoped finished/conversation events, captured provider profile/model and matching workspace",
+    "Wrong workspace, unadmitted provider, queued owner, stale source digest and over-bound history fail before model funding; generic event append cannot forge context.history_reprojected",
+    "Four source wire families validate against their own original receipt before request-only canonical projection; all four target families and explicit DeepSeek/Mistral chat dialects retain public text",
+    "Canonical Responses tool history serializes with its correlated tool result on all four target wire families; pure conversion does not execute a tool",
+    "Actual native AgentRunner loops cross Responses to Claude to Responses after database reopens, perform three real README.md reads and retain all twelve original messages/receipts/usage as exact prefixes",
+    "Independent synthetic peer rejects Responses private items in Claude and Claude signatures in Responses counting, compaction and inference; same-provider Claude continuation retains its own signature",
+    "Returning Responses execution compacts under its own current binding; foreign canonical checkpoints are not adopted",
+    "Strict existing context/provider continuation APIs retain their previous fail-closed rules; explicit active-owner preparation is separate",
+    "Unbudgeted profiled graph agents retain their execution-local prompt and tool history; provider-profile runtime graph/file-attachment checks pass",
+    "Shared renderer displays provider_changed as a context preparation activity without invented assistant output or usage"
+  ],
+  "limits": [
+    "Native provider replies, model IDs, counts, capacities, signatures, usage and credential in contracts are synthetic; no live saved-provider switching acceptance in this receipt",
+    "No rendered browser or actual VS Code activation/coding acceptance; all VS Code processes remained closed",
+    "Installed extension 0.1.14 and its live packaged browser remain at native b828570; this source change is not deployed there",
+    "Foreign-history idle maintenance, unsupported/unproved history, unprofiled cross-provider recovery and broader long-task reliability remain pending",
+    "Eight focused native contracts are not a full current native inventory or hosted Release acceptance; no release-accepted package or migration is claimed",
+    "Node adapter/controller suites use explicit fixtures and are not evidence of real provider/native execution"
+  ]
+}

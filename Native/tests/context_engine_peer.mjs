@@ -13,7 +13,7 @@ import {tmpdir} from 'node:os';
 const [executable, modules, stdlib] = process.argv.slice(2);
 assert.ok(executable && modules && stdlib, 'Expected native contract and embedded runtime import roots');
 const root = await mkdtemp(join(tmpdir(), 'xmind-context-engine-'));
-const modes = ['rolling', 'authority', 'model-switch', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
+const modes = ['rolling', 'authority', 'model-switch', 'provider-switch', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
 const model = 'synthetic-context-engine-model';
 const key = 'synthetic-context-engine-key-not-live';
 const bytes = 'Actual native context fixture file bytes\n';
@@ -76,6 +76,9 @@ function ownerOf(body) {
   if (prompt.startsWith('fixture-model-first:')) return 'first';
   if (prompt.startsWith('fixture-model-second:')) return 'second';
   if (prompt.startsWith('fixture-model-third:')) return 'third';
+  if (prompt.startsWith('fixture-provider-first:')) return 'first';
+  if (prompt.startsWith('fixture-provider-second:')) return 'second';
+  if (prompt.startsWith('fixture-provider-third:')) return 'third';
   if (prompt.startsWith('fixture-bootstrap:')) return 'bootstrap';
   if (prompt.startsWith('fixture-held-parent:')) return 'parent';
   if (prompt.startsWith('fixture-probe:')) return 'probe';
@@ -132,7 +135,11 @@ function validateInput(mode, body, raw, kind) {
     const value = JSON.parse(item.output);
     if (value.path === 'README.md') assert.equal(value.content, bytes, 'Independent peer must observe actual native file bytes');
   }
-  for (const item of body.input.filter(item => item.type === 'function_call' && item.name === 'read_file')) assert.equal(item.arguments, String.raw`{"pa\u0074h":"README.md"}`, 'Completed raw escaped argument key survives actual tool loop');
+  for (const item of body.input.filter(item => item.type === 'function_call' && item.name === 'read_file')) {
+    if(mode==='provider-switch')assert.deepEqual(JSON.parse(item.arguments),{path:'README.md'});
+    else assert.equal(item.arguments, String.raw`{"pa\u0074h":"README.md"}`, 'Completed raw escaped argument key survives actual tool loop');
+  }
+  if(mode==='provider-switch')assert.ok(!raw.includes('synthetic-claude-private-signature'),'Claude private continuation cannot enter Responses counting, compaction or inference');
 }
 function countInput(body) {
   return users(body).length * 10 + body.input.filter(item => item.type === 'compaction').length * 40 + body.input.filter(item => item.type === 'function_call_output').length * 80 + body.input.filter(item => item.type === 'message' && item.role === 'assistant').length * 15;
@@ -168,13 +175,55 @@ function lateFailure(response) {
   response.end();
 }
 
+function claudeReplay(request, response, raw) {
+  assert.equal(request.headers.authorization, undefined);
+  assert.equal(request.headers['x-api-key'], key);
+  assert.equal(request.headers['anthropic-version'], '2023-06-01');
+  const body = JSON.parse(raw), mode = 'provider-switch', current = state.get(mode);
+  assert.equal(body.model, 'synthetic-claude-context');
+  assert.equal(body.max_tokens, 128); assert.equal(body.stream, true);
+  assert.ok(JSON.stringify(body.system).includes('Current native instructions'));
+  assert.deepEqual(body.tools.map(item => item.name).sort(), readTools);
+  assert.ok(raw.includes('fixture-provider-first:') && raw.includes('fixture-provider-second:'));
+  assert.ok(!raw.includes('synthetic-context-private-') && !raw.includes('rs_provider-switch_'), 'Responses opaque history cannot cross providers');
+  const results = body.messages.flatMap(item => Array.isArray(item.content) ? item.content : []).filter(item => item.type === 'tool_result');
+  assert.ok(results.length >= 1, 'Original tool results remain in canonical history');
+  for (const item of results) {
+    const result = JSON.parse(typeof item.content === 'string' ? item.content : item.content.map(part => part.text).join(''));
+    if (result.path === 'README.md') assert.equal(result.content, bytes);
+  }
+  const call = (current.calls.get('second') ?? 0) + 1;
+  current.calls.set('second', call); audit(mode, 'inference', {owner: 'second', call});
+  assert.ok(call <= 2);
+  if (call === 2) assert.ok(raw.includes('synthetic-claude-private-signature'), 'Same-provider continuation retains its own native receipt');
+  response.writeHead(200, {'Content-Type': 'text/event-stream'});
+  const emit = value => response.write('event: ' + value.type + '\ndata: ' + JSON.stringify(value) + '\n\n');
+  emit({type: 'message_start', message: {id: 'synthetic-claude-context-' + call, type: 'message', role: 'assistant', model: body.model, content: [], stop_reason: null, stop_sequence: null, usage: {input_tokens: 37, output_tokens: 0}}});
+  emit({type: 'content_block_start', index: 0, content_block: {type: 'thinking', thinking: '', signature: ''}});
+  emit({type: 'content_block_delta', index: 0, delta: {type: 'thinking_delta', thinking: 'Explicit synthetic private thought'}});
+  emit({type: 'content_block_delta', index: 0, delta: {type: 'signature_delta', signature: 'synthetic-claude-private-signature'}});
+  emit({type: 'content_block_stop', index: 0});
+  if (call === 1) {
+    emit({type: 'content_block_start', index: 1, content_block: {type: 'tool_use', id: 'call_provider-switch_second_1', name: 'read_file', input: {}}});
+    emit({type: 'content_block_delta', index: 1, delta: {type: 'input_json_delta', partial_json: '{"path":"README.md"}'}});
+  } else {
+    emit({type: 'content_block_start', index: 1, content_block: {type: 'text', text: ''}});
+    emit({type: 'content_block_delta', index: 1, delta: {type: 'text_delta', text: 'Observed actual native README.md reads; provider/count/canonical replies are synthetic.'}});
+  }
+  emit({type: 'content_block_stop', index: 1});
+  emit({type: 'message_delta', delta: {stop_reason: call === 1 ? 'tool_use' : 'end_turn', stop_sequence: null}, usage: {output_tokens: 5}});
+  emit({type: 'message_stop'}); response.end();
+}
+
 const peer = createServer((request, response) => {
   request.on('error', () => {}); response.on('error', () => {});
   const chunks = []; let length = 0;
   request.on('data', chunk => {length += chunk.length; if (length > 8 * 1024 * 1024) request.destroy(); else chunks.push(chunk);});
   request.on('end', () => {
     try {
-      assert.equal(request.method, 'POST'); assert.equal(request.headers.authorization, 'Bearer ' + key); assert.equal(request.headers['content-type'], 'application/json');
+      assert.equal(request.method, 'POST'); assert.equal(request.headers['content-type'], 'application/json');
+      if (request.url === '/provider-switch/messages') {claudeReplay(request, response, Buffer.concat(chunks).toString('utf8')); return;}
+      assert.equal(request.headers.authorization, 'Bearer ' + key);
       const route = /^\/([^/]+)\/responses(?:\/(input_tokens|compact))?$/.exec(request.url);
       assert.ok(route && modes.includes(route[1]));
       const mode = route[1], kind = route[2] === 'input_tokens' ? 'count' : route[2] === 'compact' ? 'compact' : 'inference';
@@ -212,7 +261,7 @@ const peer = createServer((request, response) => {
         send(response, 'resp_held_parent_3', completed(mode, owner, call, message(mode, owner, call, 'Observed the actual answered owned question and once-only corrected continuation.'))); return;
       }
       assert.notEqual(owner, 'maintenance', 'Failed maintenance cannot dispatch its reserved inference');
-      const loops = mode === 'authority'||mode==='model-switch' ? 1 : owner === 'first' ? 5 : 2;
+      const loops = mode === 'authority'||mode==='model-switch'||mode==='provider-switch' ? 1 : owner === 'first' ? 5 : 2;
       if (call <= loops) send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, tool(mode, owner, call)),body.model);
       else {
         assert.equal(call, loops + 1);
@@ -232,6 +281,7 @@ try {
   assert.deepEqual(counts('authority'), {inference: 4, count: 5, compact: 1});
   assert.equal(counts('model-switch').inference,6);
   assert.ok(counts('model-switch').compact>=2,'Both selected models must perform their own compaction');
+  assert.equal(counts('provider-switch').inference,6);assert.ok(counts('provider-switch').compact>=1,'Returning Responses provider compacts canonical foreign history');
   assert.deepEqual(counts('held'), {inference: 6, count: 7, compact: 1});
   assert.deepEqual(counts('held-count-failure'), {inference: 4, count: 5, compact: 0});
   assert.deepEqual(counts('second-overflow'), {inference: 5, count: 6, compact: 1});

@@ -610,7 +610,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         const auto instruction_messages=request.messages.size();
         auto reload_history=[&]{
             request.messages.resize(instruction_messages);request.canonical_window.reset();
-            if(!settings_.context)for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
+            // Profiled budget owners obtain checked originals after sealing
+            // their tool catalogue. Unbudgeted graph agents still need their
+            // execution-local objective and ordinary tool continuation here.
+            if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
@@ -796,6 +799,23 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(dynamic_root)budget->pin_context(prepared_context->snapshot);
                 planning_continuation.clear();
             }else if(budget){
+                if(settings_.provider_identity){
+                    request=trusted_current;for(const auto& note:joined_process_notes)request.messages.push_back({MessageRole::system,note});
+                    ProviderHistoryOwner owner{budget->root_id(),id,leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent,
+                        {admitted.parent_id.empty()?ContextScopeKind::session:ContextScopeKind::execution,admitted.parent_id.empty()?admitted.session_id:id},
+                        execution_identity(settings_,provider.model),context_authority_identity(settings_,provider.model,workspace_?workspace_->identity():"workspace:none",agent_authority_credentials(persistence_,settings_))};
+                    const auto history=context_journal_.provider_history(owner).get();std::vector<std::size_t> projected;
+                    for(const auto& payload:history.groups)for(const auto& original:payload.source.originals){
+                        auto decoded=message(original);
+                        if(payload.reproject_provider_items&&decoded.role==MessageRole::assistant&&decoded.provider_items_json!="[]")projected.push_back(request.messages.size());
+                        request.messages.push_back(std::move(decoded));
+                    }
+                    if(!projected.empty()){
+                        request=reproject_checked_provider_history(request,projected);
+                        context_journal_.record_provider_history_replay({owner,{},history.source_binding,
+                            context_digest(serialize_provider_history_projection(provider,request))}).get();
+                    }
+                }
                 reservation=planning_continuation.empty()?budget->reserve(id,leaf?ModelCallRole::leaf:ModelCallRole::parent,token):budget->reserve_continuation(planning_continuation,token);
                 planning_continuation.clear();
             }

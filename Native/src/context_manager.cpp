@@ -89,7 +89,13 @@ class Preparation {
         if(!ordinals.empty()){
             if(budget){
                 std::vector<std::size_t> reprojected;
-                for(const auto& payload:store.context_history_payloads(snapshot,ordinals,bound).get()){
+                const bool profiled=nlohmann::json::parse(owner.binding.provider_identity_json).size()==6;
+                ProviderHistoryOwner target{owner.root_run_id,owner.owner_run_id,owner.role,owner.scope,owner.binding.provider_identity_json,owner.binding.authority_identity};
+                ProviderHistorySelection selection;selection.context=snapshot;selection.ordinals=ordinals;selection.bound=bound;
+                std::optional<ProviderHistorySnapshot> checked;
+                if(profiled)checked=store.provider_history(target,selection).get();
+                const auto payloads=profiled?std::move(checked->groups):store.context_history_payloads(snapshot,ordinals,bound).get();
+                for(const auto& payload:payloads){
                     if(payload.reproject_provider_items){
                         if(payload.producing_workspace_identity!=budget->snapshot().spec.workspace_identity)
                             throw ContextBindingChanged("History replay belongs to another execution workspace");
@@ -102,9 +108,10 @@ class Preparation {
                     }
                 }
                 if(!reprojected.empty()){
-                    request=reproject_authority_history(request,reprojected);
-                    store.record_context_history_replay({owner.root_run_id,owner.owner_run_id,owner.role,
-                        snapshot,ordinals,context_digest(serialize_responses_request(provider,request))}).get();
+                    request=profiled?reproject_checked_provider_history(request,reprojected):reproject_authority_history(request,reprojected);
+                    const auto digest=context_digest(serialize_responses_request(provider,request));
+                    if(profiled)store.record_provider_history_replay({target,selection,checked->source_binding,digest}).get();
+                    else store.record_context_history_replay({owner.root_run_id,owner.owner_run_id,owner.role,snapshot,ordinals,digest}).get();
                 }
             }else for(const auto& payload:store.context_group_payloads(snapshot,ordinals,bound).get())
                 for(const auto& original:payload.originals)request.messages.push_back(decode(original));
