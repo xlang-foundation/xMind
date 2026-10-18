@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-10-18T23:24:15.915Z",
+  "failedHostedRun": {
+    "id": 39172958425,
+    "job": 117810861503,
+    "revision": "ce4298d1a2e944416c99adda2312b7e2ff03369b",
+    "conclusion": "failure",
+    "cause": "Strict CI inventory omitted native_agent_process_tool_host_contract and native_agent_read_tool_host_contract; 153 were registered but 151 expected.",
+    "nativeBuildCompleted": true,
+    "sdkSmokePassed": 2,
+    "earlyNativeLocalViewPassed": 1,
+    "earlyNativeLocalViewSeconds": 62.56,
+    "complete153ContractSuiteStarted": false,
+    "packageProduced": false,
+    "jobLogSha256": "204c55a422f1e3e6392b277f64c7f282124afec5e11463343b86fcbe1c149a75",
+    "jobLogBytes": 302754,
+    "artifact": {
+      "id": 12154057726,
+      "bytes": 30905,
+      "sha256": "a58e281a3f32f4be5041fbfcb62ab732da338186a1d33e863997f072a25ca290",
+      "advertisedSizeAndDigestVerified": true
+    },
+    "rawContractsSha256": "f7bd11d80b994b24ca6517f0c3d466028af2f15b52f8dddf016c75d54418f807"
+  },
+  "correction": {
+    "file": "Tools/ci-native.ps1",
+    "explicitContractsAdded": [
+      "native_agent_process_tool_host_contract",
+      "native_agent_read_tool_host_contract"
+    ],
+    "expectedCount": 153,
+    "exactHostedInventoryMatches": true,
+    "strictSetAndCountCheckRetained": true,
+    "localCompleteInventory": 152,
+    "hostedOnlyContract": "native_mcp_oauth_trusted_contract",
+    "newNativeTestsExecuted": false,
+    "productionNativeSourceChanged": false
+  },
+  "limits": {
+    "hostedFullSuitePass": false,
+    "previousColdStartTimeoutStillOpen": true,
+    "local152GateUnchanged": true,
+    "releaseAccepted": false
+  },
+  "rawRoot": "C:/xMindNativeValidation"
+}

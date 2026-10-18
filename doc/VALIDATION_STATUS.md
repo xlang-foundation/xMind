@@ -68,6 +68,18 @@ graph and agent commands. Production environment, commands and 30-second
 budgets remain unchanged. Hosted results and cause attribution are pending.
 [Local controls and exact timing](evidence/process-startup-fresh-controls-local-20261018.json).
 
+## Latest hosted native gate
+
+Hosted ce4298d run 39172958425 fails before the complete suite because the
+strict expected inventory omitted the two new process/read owner contracts.
+All 153 contracts register and the native build completes; SDK smoke 2/2 and
+the early local-view check pass. The full suite and package steps do not run.
+The expected list now explicitly includes both contracts and exactly matches
+the hosted 153-name inventory. The local 152-name set differs only by the
+hosted trusted-OAuth contract. The strict set check remains; this correction
+is inventory validation, not hosted native acceptance.
+[Failure, exact inventory and correction](evidence/hosted-native-ce4298d-inventory-failure-20261018.json).
+
 ## Current product acceptance matrix — 2026-10-18
 
 The new process-tool owner source passes all 151 local native contracts in
