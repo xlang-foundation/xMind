@@ -1,6 +1,7 @@
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
+#include "agentflow/agent_remote_tool_host.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
@@ -731,6 +732,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             for(const auto& tool:request.tools)if(is_agent_file_tool(tool.name))owner.allowed_tools.push_back(tool.name);
             file_tool_host=make_agent_file_tool_host(persistence_,std::move(owner));
         }
+        std::unique_ptr<AgentRemoteToolHost> remote_tool_host;
+        if(workspace_&&repository_context){
+            AgentRemoteToolOwnerContext owner;owner.run_id=id;owner.primary_workspace=workspace_.get();owner.workspace_members=run_workspace_tools.get();
+            owner.repository_context=repository_context.get();owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
+            owner.permission_layers=inherited_permission_layers;if(!agent_permission_rules.empty())owner.permission_layers.push_back(agent_permission_rules);
+            owner.offered_tool=[&](const std::string& alias){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==alias;});};
+            owner.mcp_registry=[&](const std::string& alias){const auto found=mcp_tools.find(alias);return found==mcp_tools.end()?nullptr:found->second;};
+            owner.a2a_registry=[&](const std::string& alias)->A2aAgentToolRegistry*{if(!a2a_tools||!alias.starts_with("a2a_delegate_"))return nullptr;const auto definitions=a2a_tools->definitions();return std::any_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==alias;})?a2a_tools.get():nullptr;};
+            remote_tool_host=make_agent_remote_tool_host(persistence_,journal_,std::move(owner));
+        }
         std::string planning_continuation;
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
             if(actual.paused||actual.root.id!=id||actual.call_id.empty()||actual.result_json.empty())throw DynamicOutcomeUnrecorded("Dynamic report does not match its actual running owner");
@@ -934,6 +945,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid file-tool arguments");}
                         if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}
                         auto result=file_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
+                    }else if(mcp_tools.contains(call.name)||(a2a_tools&&call.name.starts_with("a2a_delegate_"))){
+                        if(!remote_tool_host)throw ToolAccessDenied("Remote tool is not admitted for this run");
+                        AgentRemoteToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+                        invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity();invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
+                        invocation.tool_index=static_cast<std::uint32_t>(index-1);invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
+                        auto result=remote_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
                     }else{
                     bool guidance_ready=true;InstructionPrecondition guidance;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
@@ -983,9 +1000,6 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         if(guidance_ready && call.name=="run_process")guidance=selected_repository_context->precondition(scope);
                     }
                     if(repository_context&&call.name=="load_skill")guidance_ready=repository_context->ready(repository_context->skills().activation_directory(call.arguments_json,token),token);
-                    // Remote effects pin the delivered root guidance across approval.
-                    const bool remote_tool=mcp_tools.contains(call.name)||(a2a_tools&&call.name.starts_with("a2a_delegate_"));
-                    if(repository_context&&remote_tool){guidance_ready=guidance_ready&&repository_context->ready(".",token);if(guidance_ready)guidance=repository_context->precondition(".");}
             if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
@@ -1014,15 +1028,6 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(tool.execution==XlangPythonExecution::worker?
                             tool.callable.invoke_json_worker(call.arguments_json,token):
                             tool.callable.invoke_json(call.arguments_json,token));
-                    } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
-                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
-                    } else if(a2a_tools&&call.name.starts_with("a2a_delegate_")) {
-                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        const auto a2a_operation=operation_id();
-                        output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
-                            cancelled(token);const auto observed=Json::parse(event);Json journal={{"operation_id",a2a_operation},{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"agent_id",observed.at("agent_id")},{"data",observed.at("event")}};if(observed.contains("event_id")&&observed["event_id"].is_string())journal["event_id"]=observed["event_id"];journal_.append_a2a_task_event(id,a2a_operation,journal.dump()).get();
-                        }));
                     } else {
                         const bool askable_read=call.name=="read_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files";
                         if(agent_permission_ask&&askable_read){

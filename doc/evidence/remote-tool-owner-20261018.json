@@ -1,0 +1,104 @@
+{
+  "recordedAt": "2026-10-18T18:56:21.562Z",
+  "sourceFiles": {
+    "Native/include/agentflow/agent_remote_tool_host.hpp": "d3a35b37c530f94c2a239a6bc5394a33d0eea0342485682e643c53654815712b",
+    "Native/src/agent_remote_tool_host.cpp": "d7a248e2ab72b3d268f7dbeec8542bba1cdaf8bcf14a4b5f0d243163176022cd",
+    "Native/src/agent_runner.cpp": "a615cfcbf7292f4c5ffbb4382e04c16149c0da8379c9ad0860350ae205605a53",
+    "Native/tests/agent_remote_tool_host_contract.cpp": "bce9200103ac8d8fbb49d8935310f15424541484aedaf852fb75653d0334e216",
+    "Native/CMakeLists.txt": "26b3dc99e56ff94739c70300aa995a5d532ca923eab77c57e1668f7da407a7a1",
+    "Tools/ci-native.ps1": "af45dd293f8f9de05eaf80d275012ee9b23b8010861be75ef6fb8443fb9ee289"
+  },
+  "focused": {
+    "baseRevision": "92fd47bd5de732ef5ce0821c096e2a5c407459ed",
+    "uncommittedWorkingTree": true,
+    "scope": "Focused native owner/agent/A2A/MCP/file checks of an uncommitted working tree, not a complete suite or installed runtime acceptance",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 5,
+    "failed": 0,
+    "seconds": 25.44,
+    "projectFiles": 2607,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 75,
+    "nativeBinaries": 125,
+    "nodeDependencyRoots": [
+      "Native/tests/sdk/node_modules",
+      "extensions/vscode/node_modules"
+    ],
+    "nodeDependencyFiles": 18598,
+    "repositoryGuidanceFrozen": true,
+    "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "20506f477fef4d724a93d664887efe026e71f549bc1451fbc64af7c09eb3f7d7",
+    "ctestLogSha256": "bb71f0e02cc8ccae12bd15a0a27cff3c3f2a317a7f47d104054e2860a4e0275f",
+    "detailsSha256": "70e9801294ff295ff9bb0384f20c05b49aa8dd56a388bb640381b5b3503e65cf",
+    "nativeSha256": "6b2eb7077a623229d9fbca7c341df90b8d6020ceb4b013049b891e52733c3d9a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+    "hostedOnlyTrustMutationExcluded": true
+  },
+  "contracts": [
+    "native_a2a_agent_registry_contract",
+    "native_agent_file_tool_host_contract",
+    "native_agent_remote_tool_host_contract",
+    "native_agent_runner_contract",
+    "native_dynamic_plan_mcp_contract"
+  ],
+  "inventory": {
+    "local": 150,
+    "hosted": 151,
+    "hostedOnly": [
+      "native_mcp_oauth_trusted_contract"
+    ],
+    "newContract": "native_agent_remote_tool_host_contract",
+    "exactPreviousHostedInventoryPlusNewContract": true
+  },
+  "scope": "Actual native AgentRunner routing and in-process remote-tool owner capability checks, with synthetic model/MCP/A2A peers. Actual approvals, local file/process effects and embedded xlang3 SQLite; no live provider, worker IPC or rendered UI acceptance.",
+  "newOwnerCases": [
+    "protocol, envelope and JSON bounds",
+    "foreign run/workspace/membership rejection",
+    "current offered catalogue filtering",
+    "inherited denial cannot be widened by child allow",
+    "cancel and deadline stop before proposal",
+    "pending and completed model-call identity replay rejection",
+    "undelivered guidance blocks proposals",
+    "approved guidance change blocks dispatch",
+    "one approved synthetic MCP client call writes exactly once",
+    "retired owner blocks calls",
+    "both operation outcomes persist across SQLite reopen"
+  ],
+  "build": {
+    "initialExitCode": 1,
+    "initialReason": "New fixture used flattened client operation fields instead of native OperationSpec fields; corrected to proposal.spec. Product sources compiled. Not a product red regression.",
+    "initialLogSha256": "a3f5954922ba2f2e8d98146fb99ad86660b1b9099c028dbaa369417a4ac5d459",
+    "correctedExitCode": 0,
+    "correctedLogSha256": "40006050c49d8b837d0be4121010f6bf5743c55a3bcd164d042b426b0f39b048",
+    "allTargetsExitCode": 0,
+    "allTargetsLogSha256": "ea01a3f1926d86df7f9948c38eb0b6e2e0cf7b54d2a43d42304f4e8aa5609ce6"
+  },
+  "observationSetupFailures": [
+    {
+      "phase": "Focused manifest invocation",
+      "reason": "Abbreviated source revision rejected by the 40-character identity guard; retried with actual full HEAD before any tests."
+    },
+    {
+      "phase": "CTest version probe",
+      "reason": "Misspelled tool path was rejected before test execution. Correct recorded CTest path used for the single focused run."
+    }
+  ],
+  "remaining": [
+    "Full current-source 150-contract gate",
+    "Remote catalogue discovery and remaining AgentRunner backend-service dependencies",
+    "Authenticated private xlang3 IPC supervisor and durable worker admission/fencing/recovery",
+    "Placement configuration and actual in/out-of-process equivalence",
+    "Installed live and rendered client acceptance"
+  ],
+  "installedRuntimeUnchanged": "0.1.25/native 152fc27154d08e1f0ad51d9ce8c9f04cbb2da039",
+  "artifactRoot": "C:/xMindNativeValidation",
+  "postFocusedMetadataChange": {
+    "from": "0.1.25",
+    "to": "0.1.26",
+    "nativeImplementationUnchanged": true,
+    "clientImplementationUnchanged": true,
+    "fullCandidateInputFreezePending": true
+  }
+}

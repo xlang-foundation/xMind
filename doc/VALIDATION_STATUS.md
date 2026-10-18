@@ -23,6 +23,26 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Source 0.1.26 candidate — remote-tool owner boundary
+
+MCP/A2A invocations now cross a native AgentRemoteToolHost value boundary. The
+backend retains registry/destination/credential ownership, catalogue filtering,
+inherited permission ceilings, root guidance and approval preconditions, operation
+receipts and streamed A2A task journaling. Foreign or retired runs, changed
+membership, removed aliases and repeated model-call identities are rejected.
+
+Five focused Release contracts pass in 25.44 seconds with their complete source,
+library, SDK, dependency and binary closure unchanged. The new owner contract
+uses a synthetic MCP client and actual native approvals, one file effect and
+xlang3 SQLite reopen. Existing AgentRunner, dynamic MCP, file and A2A guidance
+contracts also pass. The first test-fixture compile failure and setup probes
+remain recorded. The complete gate now registers 150 local contracts and 151
+hosted contracts including the hosted-only trust check; full source acceptance
+is pending. Installed 0.1.25 and its existing pages remain unchanged. No worker
+IPC/process placement or new live/rendered acceptance is claimed.
+[Owner boundary and exact scope](agent-process-placement.md#remote-tool-owner-boundary--source-0126-candidate),
+[source/fixture evidence](evidence/remote-tool-owner-20261018.json).
+
 ## Current source 0.1.25 — A2A instruction binding
 
 A2A calls in AgentRunner now use the delivered root repository-instruction

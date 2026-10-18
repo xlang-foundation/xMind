@@ -52,7 +52,7 @@ execution.
    `AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` seams now
    exist. Workspace model-tool calls also cross a typed, run-scoped invocation
    envelope. File-tool preparation and effects now cross `AgentFileToolHost`;
-   MCP/A2A and other backend services still need owner capability boundaries.
+   Remote MCP/A2A invocation now crosses AgentRemoteToolHost; discovery and other backend services still need owner capability boundaries.
 2. Keep the current in-process implementation as the first host adapter. Run
    the same AgentRunner contract through this host and the existing path,
    covering provider continuations, workspace reads, approved edits, process
@@ -74,6 +74,27 @@ execution.
 6. Accept through the installed webpage and VS Code clients, and verify that
    the same process-bound run remains inspectable and controllable after either
    view reconnects.
+
+### Remote-tool owner boundary — source 0.1.26 candidate
+
+AgentRunner now invokes native MCP and A2A tools through AgentRemoteToolHost.
+Its request contains owned run/attempt/call identity, workspace revision, tool
+alias, arguments and a bounded activity index. The backend owns the registries,
+filtered offered catalogue, permission layers, root instruction/skill context,
+deadline, operation IDs, approval expiry and A2A event journal. A request cannot
+supply a peer endpoint, credential, approval actor or instruction verifier.
+Catalogue refresh remains owner-controlled between model turns. The host keeps
+a lifetime guard against re-entering the same attempt/call identity, including
+while approval is pending; this is not durable worker RPC admission.
+
+Five focused native contracts pass in 25.44 seconds with all 2,607 project
+inputs, libraries, SDK/runtime, 125 binaries and 18,598 dependencies unchanged.
+The new contract checks actual native approval/guidance/effect behavior and
+xlang3 SQLite reopen against an explicit synthetic MCP client; existing A2A
+AgentRunner and dynamic MCP/agent/file contracts pass through the new path.
+The initial fixture compilation failure is retained separately. Full current
+source acceptance and process-bound AgentRunner execution remain open. The
+installed 0.1.25 runtime has not changed. [Exact evidence](evidence/remote-tool-owner-20261018.json).
 
 ### File-tool owner boundary — current source
 
@@ -194,12 +215,12 @@ direction and the testable boundary; it is not a completion claim.
 ### xlang3 native-host prerequisite — 2026-10-17
 
 The native C++ host API was introduced on xlang3 branch `xmind-cpp-lrpc-host`
-at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. xMind now pins descendant
+at `ad7e74058ebdc941ec656c315a8a47a01c12d74e`. At that checkpoint, xMind pinned descendant
 `b0da71f22e9591b6bd99883b21c50ad85dbe4bed` from branch
 [`xmind-fastapi-pydantic-compat`](https://github.com/CantorAI/xlang3/tree/xmind-fastapi-pydantic-compat);
 it retains the LRPC host API and adds pydantic-core package metadata required
 by xlang3 pip. The native host/second-runtime contract passed locally at the
-original host revision. The hosted Release gate for the current pin is queued
+original host revision. The hosted Release gate for that pin was queued
 at [run 39083212989](https://github.com/xlang-foundation/xMind/actions/runs/39083212989).
 This establishes neither process-bound AgentRunner execution nor its
 per-run authentication, durable recovery or client acceptance. [Original host
