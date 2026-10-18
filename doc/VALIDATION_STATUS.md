@@ -19,9 +19,48 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed VSIX **0.1.18**, native `0e35ac3`: 1,970 installed payloads and the 1,927-file runtime verify. Actual installed host/client imports four saved profiles, discovers 13 Claude models and retains selection across reattachment. The identical staged native runtime preserved the original 12-message ModelZoo conversation across upgrade; a real corrected Claude/xlang3 check passed nine tests and wrote its cache, leaving one external dependency deprecation. The prior full task built Vue. A real one-launch host handoff reported progress through readiness at about 54 seconds; fixtures cover readiness after 75 seconds. All 148 native and 403 extension tests pass; unchanged browser baseline 138. [Installed receipt](evidence/coding-package-0.1.18-20261018.json). | Actual rendered editor/browser acceptance; hosted/release acceptance; older unresolved profile handoff; broader models, recovery and long-task reliability. |
+| Coding clients | Installed **0.1.19** retains native `0e35ac3`; 1,970 installed payloads and its 1,927-file runtime verify. Current extension/browser tests pass 412/138. A real Claude review used installed host/assets, native HTTP/SSE, and the production controller/renderer in JSDOM: two actual file reads, 547 text events, five saved messages, fenced code, exact persisted Markdown/metrics, and an open detail retained across unchanged refresh. Original ModelZoo source and its earlier 12-message conversation are preserved. Unchanged native source/executable retain the prior 148-test Release evidence. [Installed receipt](evidence/coding-package-0.1.19-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Installed 0.1.19: retained history and streamed Markdown — 2026-10-18
+
+Windows x64 development **0.1.19** is installed and listed by the actual VS Code
+CLI. Its 1,973-file archive and all 1,970 installed payloads verify. Native
+0e35ac3, its 1,927-file runtime and pinned xlang3 SDK are unchanged. The previous
+0.1.18 installation was backed up and its 1,972 files checked; settings and six
+prior profile directories are preserved. VS Code remained closed.
+
+Unchanged transcript snapshots now retain the existing DOM and open details.
+Streamed Markdown is batched by animation frame, with synchronous terminal and
+failure flushing. Retired nodes and terminal graph children cannot repaint a
+second live answer. Explicit history/workspace replacement and optimistic user
+messages invalidate the history cache. The 412 extension and 138 browser tests
+pass, including reset, scroll, approval focus, sanitizer, copy and per-response
+metric cases. The unchanged native source/executable retain their prior 148/148
+Release evidence; no new native test run is claimed for this renderer change.
+
+A replay of the real 680-event ModelZoo run preserves final response text and
+metrics and normalized saved-history HTML. In synthetic eight-event frames,
+Markdown calls fall from 204 to 32; with one event per frame both perform 204.
+An unchanged transcript refresh requires zero Markdown parses instead of seven
+and keeps the open tool detail. These are JSDOM/work-count checks, not actual
+browser latency, layout or paint measurements.
+
+Installed host/assets and actual native HTTP/SSE then completed a real Claude
+read-only ModelZoo review through the production controller/renderer in JSDOM.
+Two recorded read_file requests read the backend app and tests; the response
+stream supplied 547 text events and retained five public messages. Fenced code
+and actual token metrics render; final normalized Markdown matches the saved
+response exactly. A subsequent native refresh preserves an opened tool detail.
+No effect-operation rows were created; read-tool evidence is in the saved
+model/tool conversation. Source files and the original 12-message conversation
+remain unchanged. The initial asset check stopped before inference on a CRLF/LF
+checkout difference; strict served/installed/archive byte checks and canonical
+LF source equivalence passed before the real request. VS Code APIs, cookie jar
+and DOM are explicit fixtures; external-browser/editor acceptance remains open.
+[Renderer replay](evidence/renderer-history-frames-20261018.json),
+[installed and live sidebar receipt](evidence/coding-package-0.1.19-20261018.json).
 
 ## Installed 0.1.18: directory publication and startup observation — 2026-10-18
 

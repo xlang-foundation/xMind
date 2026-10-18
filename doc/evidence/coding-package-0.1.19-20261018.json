@@ -1,0 +1,189 @@
+{
+  "recordedAt": "2026-10-18T12:59:51.526Z",
+  "version": "0.1.19",
+  "sourceRevision": "d26c7cbb3d3edcce05b41b7b3064d442f77cd48d",
+  "scope": "Installed package and actual native HTTP/SSE/Claude sidebar review through production controller/renderer in a test DOM. VS Code APIs/cookie jar/JSDOM are explicit fixtures. No real browser paint/layout/input or editor activation acceptance.",
+  "payload": {
+    "version": "0.1.19",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.19-coding-win32-x64.vsix",
+    "sha256": "20a2523a2b8eb1539356bf4e5e7a2c9e868f3a6476ba9b415e4c5f8757508a4d",
+    "bytes": 32498738,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.19",
+    "version": "0.1.19",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "manifestSha256": "91b46288c2fea7c8d6071817af0fafab980af611494840a85be5dfede30596b5",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "sourceFiles": {
+    "extension.js": {
+      "repoSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+      "installedSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+      "canonicalLFEquivalent": true
+    },
+    "workspace-backend.js": {
+      "repoSha256": "73f71415027a5624f2c45d9e0d2b98716e4ddfe5cf7917327f48bc8b8982f707",
+      "installedSha256": "73f71415027a5624f2c45d9e0d2b98716e4ddfe5cf7917327f48bc8b8982f707",
+      "canonicalLFEquivalent": true
+    },
+    "client.js": {
+      "repoSha256": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+      "installedSha256": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+      "canonicalLFEquivalent": true
+    },
+    "media/chat.js": {
+      "repoSha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+      "installedSha256": "e93e4fda8229eed3f6aeb8c398a71b75bffe0961f916a489351ca1948022266d",
+      "canonicalLFEquivalent": true
+    },
+    "README.md": {
+      "repoSha256": "cb1685ca1edaa835a14323dabf4cf2e3a166d3442f9e6725ee09a2667fb4ad59",
+      "installedSha256": "cb1685ca1edaa835a14323dabf4cf2e3a166d3442f9e6725ee09a2667fb4ad59",
+      "canonicalLFEquivalent": true
+    }
+  },
+  "native": {
+    "revision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "tree": "0ca9e25350c8632a8f5b2239cda34b67d49c8dd0",
+    "sourceTreeUnchanged": true,
+    "executableUnchanged": true,
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "priorFullReleaseContracts": 148,
+    "evidence": "cache-publication-startup-20261018.json",
+    "newNativeTestRun": false
+  },
+  "checks": {
+    "extension": 412,
+    "browser": 138,
+    "rendererRegressionsAdded": 9
+  },
+  "replayEvidence": "renderer-history-frames-20261018.json",
+  "liveSidebar": {
+    "scope": "Actual installed host/assets, native HTTP/SSE and real Claude coding review; production controller/renderer with explicit VS Code API, cookie-jar and JSDOM platform fixtures. No rendered-desktop acceptance.",
+    "version": "0.1.19",
+    "workspace": "C:/xMindNativeValidation/model-zoo-current-acceptance-20261018",
+    "startedAt": "2026-10-18T12:57:52.489Z",
+    "inferenceAdmissionCount": 1,
+    "assetCheckCorrection": "The initial attempt stopped before inference on a raw-byte comparison between CRLF checkout and LF worktree source. Served assets are checked byte-for-byte against installed files/archive; source equivalence normalizes CRLF only.",
+    "owner": {
+      "backendPid": 37596,
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f"
+    },
+    "browserOrigin": "http://127.0.0.1:58521",
+    "rendererCanonicalSha256": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+    "assetHashes": {
+      "patch-review.js": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "chat.js": "e93e4fda8229eed3f6aeb8c398a71b75bffe0961f916a489351ca1948022266d"
+    },
+    "session": "15ed760517d0931e7d5b820d20ee7791",
+    "prompt": "Read backend/app/main.py and backend/tests/test_api.py in this workspace. Give a concise coding review in Markdown: explain the actual FastAPI routes and tests, identify two useful test gaps, and include a fenced Python example of one suggested test. Base claims on the files you read. Do not modify files, install packages, run processes or claim you executed tests. This is a read-only coding review.",
+    "run": "bee16a9078125a5c6cf99c00c05b84f2",
+    "verified": {
+      "status": "completed",
+      "historyMessages": 5,
+      "operationTools": [],
+      "nativeTextEvents": 547,
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 104,
+          "input_tokens": 8146,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 104,
+          "prompt_tokens": 8146,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 1397,
+          "input_tokens": 10017,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 1397,
+          "prompt_tokens": 10017,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "renderedMetrics": "Input (uncached) 10,017Output 1,397Total —Cache write 0Cached 0claude-sonnet-4-6Claude · MessagesFirst token 1.04s25.86s",
+      "renderedHistorySha256": "5eaef460505a3329da78cffce1e7d32bd2286de3c94ea098381511a6931c2264",
+      "expectedHistorySha256": "5eaef460505a3329da78cffce1e7d32bd2286de3c94ea098381511a6931c2264",
+      "fencedCodeRendered": true,
+      "openHistoryDetailPreserved": true,
+      "noTypedServerOrProviderKey": true,
+      "originalConversationUnchanged": true,
+      "errors": [],
+      "renderedDesktopAcceptance": false
+    },
+    "completedAt": "2026-10-18T12:58:25.343Z"
+  },
+  "actualReadToolCalls": [
+    {
+      "name": "read_file",
+      "arguments": {
+        "path": "backend/app/main.py"
+      }
+    },
+    {
+      "name": "read_file",
+      "arguments": {
+        "path": "backend/tests/test_api.py"
+      }
+    }
+  ],
+  "noEffectOperationsRecorded": true,
+  "readToolEvidence": "Read-only tools are recorded in model/tool conversation turns, rather than effect-operation rows; the two requests and tool replies were checked in the authoritative saved history.",
+  "sourceFilesChecked": 30,
+  "originalAndCopiedSourceUnchanged": true,
+  "preservation": {
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.18-before-0.1.19",
+    "checkedFiles": 1972,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": 6
+  },
+  "assetCheckCorrection": "The first check stopped before inference because Git checkout used CRLF while the repository worktree used LF. Installed HTTP assets match archive bytes exactly; canonical source comparison normalizes only CRLF line endings. Original failure retained.",
+  "vscodeWindowsOpened": false,
+  "xlang3Changed": false,
+  "CPythonExecuted": false,
+  "renderedDesktopAcceptance": false,
+  "releaseAccepted": false,
+  "limitations": [
+    "JSDOM does not verify actual browser input, rendering, layout, paint or responsiveness.",
+    "Synthetic frame replay quantifies parser work for chosen batch sizes, not actual browser latency.",
+    "Hosted current-source and production release acceptance remain outstanding.",
+    "Other already-running browser adapters continue serving their own package assets until reopened."
+  ],
+  "logs": {
+    "vscode-0.1.19-package-20261018.log": "2ff9315bbd2e280d368cc6df689d7ed29ce667f6ea77a924e2b12d2c199f448d",
+    "vscode-0.1.19-install-20261018.log": "f975d0512a87648ac1d50284cc75c03382b7b951d0ce290382efb4fdc7adcd9c",
+    "vscode-0.1.19-extension-list-20261018.log": "e7ff94c8265b03d4b7fc39fd0a8d3c74231ca7270771d6e1b34c7b977a8b9601",
+    "vscode-0.1.19-extension-tests-20261018.log": "3670bffdea673a0c22d67a946d9254684b1b73080f9b40215180038d6a4bf58b",
+    "vscode-0.1.19-browser-tests-20261018.log": "1f483f65dd153090dcaeaf0870da551149fdffe64f023718ba17b5f296e84874",
+    "live-browser-renderer-0.1.19-resumed-20261018.log": "a2193b317d5ec045421ca81bce67594b415eae3ef378829ae3f6dac28719ef52"
+  }
+}
