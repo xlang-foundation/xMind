@@ -24,10 +24,12 @@ used when they were recorded and should not be read as current parity goals.
 ## Browser host lifecycle correction — 2026-10-17
 
 The local browser launcher now retains ownership of the native view process it
-starts instead of detaching it. Ctrl+C and Windows Ctrl+Break close the HTTP
-adapter, stop that owned native child, and retire the launcher's exact active
-record and access token. An adapter attached with `--backend` closes without
-stopping the shared backend. Focused launcher/lifecycle contracts passed 3/3;
+starts instead of detaching it. Launching again with the same state directory
+reuses its live URL, and a request to attach that state to a different backend
+fails explicitly. Ctrl+C and Windows Ctrl+Break close the HTTP adapter, stop
+that owned native child, and retire the launcher's exact active record and
+access token. An adapter attached with `--backend` closes without stopping the
+shared backend. Focused launcher/lifecycle contracts passed 3/3;
 the browser controller suite passed 136/136 and the VS Code suite passed
 392/392. This fixes graceful developer-host shutdown; forced process
 termination by the operating system cannot run application cleanup handlers.

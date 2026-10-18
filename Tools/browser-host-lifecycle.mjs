@@ -1,7 +1,29 @@
-import {readFile,unlink} from 'node:fs/promises';
+import {lstat,readFile,unlink} from 'node:fs/promises';
 
 async function removeIfPresent(path){
   try{await unlink(path);}catch(error){if(error.code!=='ENOENT')throw error;}
+}
+
+export async function findExistingBrowserHost(state,requestedBackend){
+  const activePath=state+'/active.json';
+  let active;
+  try{
+    const info=await lstat(activePath);
+    if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1||info.size>16384)throw new Error('Invalid existing browser host record.');
+    active=JSON.parse(await readFile(activePath,'utf8'));
+  }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
+  if(!active||typeof active.url!=='string'||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}\/ui\/$/.test(active.url)||typeof active.backend!=='string')throw new Error('Invalid existing browser host record.');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);
+  let live=false;
+  try{
+    const response=await fetch(active.url,{redirect:'error',signal:controller.signal});
+    const contentType=response.headers.get('content-type')||'';
+    live=response.status===200&&contentType.toLowerCase().includes('text/html');
+    await response.body?.cancel();
+  }catch{return undefined;}finally{clearTimeout(timer);}
+  if(!live)return undefined;
+  if(requestedBackend&&new URL(requestedBackend).origin!==active.backend)throw new Error('A browser host already uses this state directory with a different backend; stop it or select another --state.');
+  return active;
 }
 
 function stopChild(child){

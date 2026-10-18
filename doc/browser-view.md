@@ -144,6 +144,11 @@ node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port
 
 The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
 
+Launching again with the same state directory reuses its live browser URL and
+does not start another view. If the existing adapter is attached to a different
+requested backend, startup stops with an explicit message; use a separate state
+directory for a second backend.
+
 The launcher owns the native view it starts. Press Ctrl+C in its console to
 close the browser adapter and retire that native child; Ctrl+Break is also
 handled on Windows. When `--backend` attaches to an existing server, shutdown

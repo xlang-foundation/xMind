@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {buildBrowserAssets} from '../views/browser/build.mjs';
 import {createBrowserServer} from '../views/browser/server.mjs';
 import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
-import {createBrowserHostLifecycle} from './browser-host-lifecycle.mjs';
+import {createBrowserHostLifecycle,findExistingBrowserHost} from './browser-host-lifecycle.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
@@ -21,11 +21,13 @@ const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
 const assets=resolve(options.get('--assets')||join(root,'.agentflow','browser-assets'));
-await buildBrowserAssets(assets);
 const viewOrigin=options.get('--backend');
 const port=Number(options.get('--port')||60405);
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
 await mkdir(state,{recursive:true});
+const existing=await findExistingBrowserHost(state,viewOrigin);
+if(existing){await new Promise(resolve=>process.stdout.write('xMind Browser already running at '+existing.url+'\n',resolve));process.exit(0);}
+await buildBrowserAssets(assets);
 
 async function activeCredential(){
   try{

@@ -41,6 +41,26 @@ test('browser launcher serves current workspace actions from freshly built asset
   assert.match(html,/id="add-workspace"[^>]*>New workspace/);
   assert.match(html,/id="add-workspace-folder"[^>]*>Add folder/);
   assert.match(html,/primary folder of a new local workspace/);
+  const reuse=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
+    '--backend','http://127.0.0.1:1','--state',state,
+    '--assets',assets,'--port','0'],{cwd:root,windowsHide:true});
+  let reusedOutput='';reuse.stdout.setEncoding('utf8');reuse.stdout.on('data',chunk=>reusedOutput+=chunk);
+  const reused=await new Promise((resolveClose,reject)=>{
+    reuse.once('error',reject);
+    reuse.once('close',(code,signal)=>resolveClose({code,signal}));
+  });
+  assert.deepEqual(reused,{code:0,signal:null});
+  assert.match(reusedOutput,new RegExp('already running at '+origin.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/ui/'));
+  const conflict=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
+    '--backend','http://127.0.0.1:2','--state',state,
+    '--assets',assets,'--port','0'],{cwd:root,windowsHide:true});
+  let conflictError='';conflict.stderr.setEncoding('utf8');conflict.stderr.on('data',chunk=>conflictError+=chunk);
+  const conflicted=await new Promise((resolveClose,reject)=>{
+    conflict.once('error',reject);
+    conflict.once('close',(code,signal)=>resolveClose({code,signal}));
+  });
+  assert.equal(conflicted.code,1);
+  assert.match(conflictError,/different backend/);
   if(process.platform==='win32'){
     // Node's child_process.kill(SIGTERM) maps to unconditional process
     // termination on Windows; the lifecycle's owned-child behavior is covered
