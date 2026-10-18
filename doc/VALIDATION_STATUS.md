@@ -32,7 +32,10 @@ The retained fixture compile failure used an incorrect field name; production
 code stayed unchanged across that correction.
 [Focused proof](evidence/read-tool-owner-focused-20261018.json).
 
-This native source is uninstalled and its complete 152-contract gate is pending.
+This native source is uninstalled. Its complete build and all 152 local Release
+contracts pass in 903.83 seconds, with 2,617 project inputs, 16 SDK files, 76
+SDK runtime/import-library files, 1,870 pure libraries, 18,598 dependencies and
+127 binaries frozen. [Full qualification](evidence/read-tool-owner-full-20261018.json).
 It is a local owner with a lifetime duplicate guard. Complete tool discovery,
 instructions/skills, language servers, trusted callables, delegation, process
 admission/background joins and authenticated/durable worker transport remain

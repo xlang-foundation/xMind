@@ -1,0 +1,205 @@
+{
+  "checkedAt": "2026-10-18T22:45:46.878Z",
+  "runId": 39168070397,
+  "sourceRevision": "0b23b90969b3c85881e05a6c426dede11e9df15c",
+  "conclusion": "failure",
+  "artifact": {
+    "id": 12153447024,
+    "path": "C:/xMindNativeValidation/coding-0.1.30-source-20261018/.agentflow/ci/artifacts/native-windows-evidence-0b23b90969b3c85881e05a6c426dede11e9df15c.zip",
+    "bytes": 68354,
+    "sha256": "ea7e30d6b59dffcf6f405a0b2dd2816bf43fa4c618e185c66f1a110e783aadec",
+    "advertisedSizeAndDigestVerified": true
+  },
+  "rawRoot": "C:/xMindNativeValidation/hosted-native-39168070397",
+  "total": 151,
+  "passed": 150,
+  "failed": [
+    "native_graph_runner_contract"
+  ],
+  "seconds": 726.77,
+  "sdkSmokePassed": 2,
+  "actualGraphProcess": {
+    "elapsed_ms": 30089,
+    "exit_code": 1,
+    "id": "6a48165c834cb5bb7bff8dad5ae5b25b",
+    "output_artifact": {
+      "operation_id": "6a48165c834cb5bb7bff8dad5ae5b25b",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "diagnostics": [
+    {
+      "name": "agent-runner-f198f7b0-ff7d-427f-9345-b1b5074a52f5",
+      "rawSha256": "b5015b4986bef87f0bb772a069103236b729af717a74e05a4182a59674cf9f7b",
+      "samples": [
+        {
+          "pid": 7440,
+          "birth": "2026-10-18T22:34:10.2499540Z",
+          "elapsedMs": 2526,
+          "cpuMs": 625,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "waitReason": null,
+              "cpuMs": 265.625,
+              "id": 5984
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 9376
+            }
+          ]
+        },
+        {
+          "pid": 7440,
+          "birth": "2026-10-18T22:34:10.2499540Z",
+          "elapsedMs": 13237,
+          "cpuMs": 11234.375,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "waitReason": null,
+              "cpuMs": 10875,
+              "id": 5984
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 9376
+            }
+          ]
+        },
+        {
+          "pid": 7440,
+          "birth": "2026-10-18T22:34:10.2499540Z",
+          "elapsedMs": 23859,
+          "cpuMs": 21843.75,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "waitReason": null,
+              "cpuMs": 21484.375,
+              "id": 5984
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 9376
+            }
+          ]
+        }
+      ],
+      "last": {
+        "reason": "observer_stopped",
+        "kind": "end",
+        "samples": 3
+      }
+    },
+    {
+      "name": "graph-runner-5b534677-4976-46cb-a49d-ec105f663a46",
+      "rawSha256": "27ada777c63539f7857eb2f8ceefa68da30b6b87d704c827585b6def0af5cf5b",
+      "samples": [
+        {
+          "pid": 7624,
+          "birth": "2026-10-18T22:31:12.6112220Z",
+          "elapsedMs": 6820,
+          "cpuMs": 562.5,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Wait",
+              "waitReason": "PageIn",
+              "cpuMs": 187.5,
+              "id": 8060
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 2284
+            }
+          ]
+        },
+        {
+          "pid": 7624,
+          "birth": "2026-10-18T22:31:12.6112220Z",
+          "elapsedMs": 17339,
+          "cpuMs": 9890.625,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "waitReason": null,
+              "cpuMs": 9500,
+              "id": 8060
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 2284
+            }
+          ]
+        },
+        {
+          "pid": 7624,
+          "birth": "2026-10-18T22:31:12.6112220Z",
+          "elapsedMs": 27959,
+          "cpuMs": 20234.375,
+          "modulePrefixCount": 64,
+          "modulesAreBoundedPrefixNotCompleteInventory": true,
+          "hotThreads": [
+            {
+              "state": "Running",
+              "waitReason": null,
+              "cpuMs": 19828.125,
+              "id": 8060
+            },
+            {
+              "state": "Wait",
+              "waitReason": "UserRequest",
+              "cpuMs": 156.25,
+              "id": 2284
+            }
+          ]
+        }
+      ],
+      "last": {
+        "reason": "observer_stopped",
+        "kind": "end",
+        "samples": 3
+      }
+    }
+  ],
+  "ctestSha256": "f9a436af2e5ed134110dfadb08fd30a08268dd6b9fd6a2e13d3ec96cfa87fda8",
+  "detailsSha256": "35d0f7f48adb64dc148548365db69c90474a6438b5fbf323fca3722b635dfbb0",
+  "scope": "Older native implementation before process/read owner extraction; current 0.1.31/native and ce4298d gates are separate",
+  "causeEstablished": false,
+  "deadlinesChanged": false,
+  "runCancelledOrRestarted": false,
+  "releaseAccepted": false,
+  "productionEnvironmentWorkaroundApplied": false
+}

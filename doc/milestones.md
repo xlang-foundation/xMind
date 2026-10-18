@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## Complete native read-owner checkpoint — 2026-10-18
+
+All 152 local Release contracts pass in 903.83 seconds after a complete build;
+the exact source, SDK/include/runtime, pure-library, dependency and binary
+closure remains unchanged. The source is ce4298d and the native executable
+hash starts dd3dcace. The eight focused tests and earlier fixture compilation
+failure remain separate evidence. This source is not installed yet and has no
+new live-provider or actual editor acceptance.
+[Full source proof](evidence/read-tool-owner-full-20261018.json).
+
+Older hosted source 0b23b90 finishes 150/151 in 726.77 seconds, SDK smoke 2/2;
+its graph PowerShell command times out after script entry. Its artifact digest
+and size verify. This is a separate retained failure, not current source proof.
+[Hosted receipt](evidence/hosted-native-0b23b90-failure-20261018.json).
+
 ## Installed coding checkpoint — 0.1.31, 2026-10-18
 
 The new native process-tool owner is installed. All 151 local native contracts
