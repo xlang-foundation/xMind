@@ -1,0 +1,154 @@
+{
+  "recordedAt": "2026-10-18T14:51:33.390Z",
+  "sourceRevision": "c23a6cdb3ceb0f4069c202e49b5cc7717244b9cc",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "scope": "Configured child pure-library startup and bounded graph observation; actual native filesystem/process/SQLite plus synthetic protocol peers. No live provider or rendered client acceptance.",
+  "behavior": [
+    "Each xlang3 command binds the backend configured pure library in its approval environment; relative startup paths become absolute.",
+    "A packaged adjacent stdlib is available to native API callers; model arguments cannot supply the backend-only library field.",
+    "Windows Unicode library paths use the native wide CRT lookup in an isolated xlang3 branch based on the accepted SDK.",
+    "The graph contract observes a real six-second command within its authorized thirty-second lifetime, retaining one child and one successful operation. Production graph scheduling/timeouts are unchanged.",
+    "Additional test-only failure diagnostics expose actual xlang3 stderr and AgentRunner operation/event outcomes."
+  ],
+  "failuresPreserved": [
+    "Original child uses the machine C:/Python/Python314/Lib fallback instead of the separately configured library.",
+    "ASCII configured library passes after the xMind binding; Unicode still fails with the old native runtime.",
+    "Standalone Unicode pure-module import fails under the preserved baseline, passes with the branch fix.",
+    "A legal six-second graph command fails the original five-second test wait; passes the profile-budget observation."
+  ],
+  "sdk": {
+    "branch": "xmind/unicode-library-path",
+    "url": "https://github.com/CantorAI/xlang3/tree/xmind/unicode-library-path",
+    "basedOn": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "correctness": {
+      "passed": 4,
+      "failed": 0,
+      "seconds": 3.23
+    },
+    "performance": {
+      "passed": 11,
+      "failed": 0,
+      "status": "pass",
+      "repeats": 21,
+      "warmup": 5,
+      "threshold": 0.1
+    },
+    "binaryStage": {
+      "scope": "Freshly compiled candidate core/CLI plus byte-identical native modules and facades from preserved b0da71f2 SDK. Module sources and SDK ABI are unchanged by the bootstrap-only branch.",
+      "core": {
+        "xlang3.exe": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+      },
+      "moduleFiles": 76,
+      "modulesSourceRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+      "cpythonExecuted": false
+    },
+    "originalCheckoutUnchanged": true,
+    "mainNotModified": true
+  },
+  "xmind": {
+    "completeReleaseBuild": true,
+    "focused": {
+      "passed": 3,
+      "failed": 0,
+      "seconds": 21.58
+    },
+    "binaries": {
+      "xmind.exe": "ef6131acb466e10766302324ed60589ecbe04b0252b9dcf246ba250069adf155",
+      "xlang3_runtime.dll": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+    },
+    "fullLocalGate": {
+      "status": "running-at-checkpoint",
+      "expected": 149,
+      "sourceFiles": 2506,
+      "log": "C:/xMindNativeValidation/child-runtime-full-ctest-20261018.log",
+      "verificationHelper": "C:/xMindNativeValidation/check-child-runtime-release-gate-20261018.mjs",
+      "note": "No complete-gate pass claimed; inspect the same live test run and its terminal result before updating this receipt."
+    },
+    "hostedExpected": 150
+  },
+  "latestOlderHosted": {
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39131091790",
+    "sourceRevision": "41497dd9ac61f430cd2913985fe36c2429efe28f",
+    "passed": 142,
+    "failed": 7,
+    "total": 149,
+    "seconds": 683.09,
+    "artifactId": 12139199627,
+    "artifactDigest": "sha256:07c9d6eb144a680ce1eeaeae3db1269347f38f1751d0ebb1953b553a061c77f9",
+    "digestVerified": true,
+    "failedContracts": [
+      "native_dynamic_plan_mcp_contract",
+      "native_graph_runner_contract",
+      "native_process_executor_contract",
+      "native_xlang3_default_process_contract",
+      "native_mcp_effect_contract",
+      "native_agent_runner_contract",
+      "native_workspace_registry_contract"
+    ],
+    "note": "Predates the local alias/library fixes. The added AgentRunner attached-command failure lacks an exact local reproduction; stronger diagnostics are now included. Current hosted acceptance remains open."
+  },
+  "evidence": {
+    "xlang3-configured-library-red-20261018.log": {
+      "path": "C:/xMindNativeValidation/xlang3-configured-library-red-20261018.log",
+      "sha256": "6e4b0fe3fd3538464ca6e50fc042cffe8eca02ebfdcff6dc71b0a4b4ef727c68"
+    },
+    "xlang3-configured-library-green-20261018.log": {
+      "path": "C:/xMindNativeValidation/xlang3-configured-library-green-20261018.log",
+      "sha256": "67d829c91d386e58179c4249be0e14aa056ce1f07e99145196187760535777e6"
+    },
+    "child-runtime-graph-focused-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-runtime-graph-focused-20261018.log",
+      "sha256": "68fd44c09d6f006edf3227a54883520501609fd73ba9699f0facc849cfe2b378"
+    },
+    "graph-command-budget-red-20261018.log": {
+      "path": "C:/xMindNativeValidation/graph-command-budget-red-20261018.log",
+      "sha256": "40340a08828d76f78c1287e68822d0e70e43cd300765504d926972c2128d5ce0"
+    },
+    "xlang3-unicode-library-native-red-20261018.log": {
+      "path": "C:/xMindNativeValidation/xlang3-unicode-library-native-red-20261018.log",
+      "sha256": "17acbd72724832137d1e2c26e7f6376772dabbf640adc2b38291b7bdde473283"
+    },
+    "xlang3-unicode-library-correctness-20261018.log": {
+      "path": "C:/xMindNativeValidation/xlang3-unicode-library-correctness-20261018.log",
+      "sha256": "0301917020eee086867b577930c8c1c22a66774439f84dafacfa7da29501e91e"
+    },
+    "xlang3-unicode-library-performance-20261018.json": {
+      "path": "C:/xMindNativeValidation/xlang3-unicode-library-performance-20261018.json",
+      "sha256": "8155c445da336b8f684712e86c0c88ffed676a7cfe881c11700b30651cb53831"
+    },
+    "xlang3-unicode-library-performance-20261018.log": {
+      "path": "C:/xMindNativeValidation/xlang3-unicode-library-performance-20261018.log",
+      "sha256": "058d449b42cbb728fd5f3d07b6f53002dbe83287e73d25b8f91b33953e5369fd"
+    },
+    "xmind-unicode-library-probe-20261018.json": {
+      "path": "C:/xMindNativeValidation/xmind-unicode-library-probe-20261018.json",
+      "sha256": "6a73d69f2dc16450bf034338f01514b43f9aba6ca41d3aa32976c7effe36323f"
+    },
+    "child-runtime-new-sdk-build-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-runtime-new-sdk-build-20261018.log",
+      "sha256": "edf632e4525603db5643e057f5d78c9689452f44cb753616bbca0ecf33f1fe06"
+    },
+    "child-runtime-new-sdk-focused-20261018.log": {
+      "path": "C:/xMindNativeValidation/child-runtime-new-sdk-focused-20261018.log",
+      "sha256": "a6078f601cb150d4470e1cd64b546b83faf50533b24d069a63d87d06d02e32a3"
+    },
+    "child-runtime-source-before-20261018.json": {
+      "path": "C:/xMindNativeValidation/child-runtime-source-before-20261018.json",
+      "sha256": "80e9c51b0d33513364675e926552f4702edcd03b2ab79741cc5835cca04104ff"
+    }
+  },
+  "preserved": {
+    "cpythonExecuted": false,
+    "userProviderSettingsChanged": false,
+    "userBackendRestartIssued": false,
+    "installedVsixUpdated": false,
+    "editorOpened": false
+  },
+  "remaining": [
+    "Complete the same running 149-test native gate and verify frozen source/binary hashes.",
+    "Obtain current-source hosted native acceptance and investigate any remaining command failure.",
+    "Package/install the validated SDK integration; installed 0.1.21 remains unchanged.",
+    "Rendered browser/editor acceptance remains unverified."
+  ]
+}

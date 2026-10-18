@@ -15,13 +15,54 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Full gate at `5ed8267` passed 149 sequential local Release contracts against xlang3 `b0da71f2`; the hosted checklist adds its isolated OAuth trust test. Current `091c069` includes private-storage and command-root alias fixes: four workspace contracts passed at `5efe11b`, then ten normal-path process/agent contracts and five short-alias repetitions passed at `091c069`. Frozen input/binary hashes verify for each gate. No new complete 149-test gate is claimed. Installed 0.1.21 retains native `0e35ac3` and its separate prior 148-test evidence. [Full source](evidence/agent-file-tool-owner-20261018.json), [private storage](evidence/workspace-private-alias-20261018.json), [process roots](evidence/process-root-alias-20261018.json). | Hosted current-source gate, two older hosted failures still unconfirmed locally, production release acceptance, and other-host startup. |
+| Native backend and local persistence | Full gate at `5ed8267` passed 149 local Release contracts against xlang3 `b0da71f2`. Current `c23a6cd` includes alias fixes and configured child-library binding, using isolated SDK branch `58a8aab9`; focused rebuilt graph/xlang3/agent checks pass 3/3, native SDK checks 4/4 and its complete default performance gate 11/11. A new full 149-test local gate is running; no result is claimed yet. Hosted inventory is 150. Installed 0.1.21 remains native `0e35ac3`. [Current checkpoint](evidence/child-runtime-library-20261018.json), [earlier full gate](evidence/agent-file-tool-owner-20261018.json). | Finish the same live local gate and verify frozen inputs/binaries; current hosted acceptance, unconfirmed hosted command failures, validated installation and production release acceptance. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed **0.1.21** retains native `0e35ac3`; 1,970 payloads and 1,927 runtime files verify. Local and hosted extension/browser checks pass 416/138. Installed host fixture replay retains all 615 captured stream payloads without stream-triggered metadata reads; durable changes still reconcile, and inbox read failure no longer rejects the feed. These are work-count/controller checks, not actual latency. Installed-client/native HTTP cut-response checks recover all 522 saved events without duplicates, with unchanged history/runs/receipts and no inference/effect admission. Settings, profiles and the prior installation are preserved. The prior real Claude/JSDOM review and unchanged native 148-test gate remain separate evidence. [Installed receipt](evidence/coding-package-0.1.21-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Configured child pure libraries — 2026-10-18
+
+Source `c23a6cd` binds xlang3 command startup to the backend's actual `--stdlib`
+directory and records that environment in the command approval. Relative
+startup paths resolve before use; the binding is derived locally and does not
+rewrite process documents or become a model argument. Native API callers can
+also use the adjacent packaged stdlib. The old child instead used this machine's
+fallback library, which hid the missing configured path. A staged-library
+regression reproduces that difference before the fix.
+
+Unicode library paths then expose a separate native gap. The isolated xlang3
+branch `xmind/unicode-library-path` at `58a8aab9` uses the wide Windows environment
+lookup for that path. Its real pure-module regression fails with the preserved
+baseline and passes after the fix. Four native SDK contracts and all 11 default
+Release performance cases pass, with unchanged gate settings and xlang3 as the
+controller. Main and the original SDK checkout are unchanged. Actual normal
+site startup through xMind now passes with a Unicode staged library, relative
+startup argument and SQLite approval binding. The rebuilt focused graph,
+xlang3-child and AgentRunner contracts pass 3/3 in 21.58 seconds.
+
+The graph test additionally retains one actual six-second command inside its
+thirty-second trusted profile budget. The former five-second test wait rejects
+that legitimate command; the corrected observation passes with one child and
+one successful operation. This changes contract observation, not production
+graph scheduling or command timeouts. Test diagnostics now expose actual child
+stderr and AgentRunner operation/event results on failure.
+
+The complete 149-test local gate is running at this checkpoint with 2,506 frozen
+inputs and the new SDK DLL. Do not infer a complete pass from the focused checks
+or launch another native build/test while that gate is active. The installed
+extension and user backend have not been replaced. Rendered browser/editor
+acceptance remains unverified.
+[Library checkpoint](evidence/child-runtime-library-20261018.json).
+
+The newer completed hosted run `39131091790`, still at older source `41497dd`,
+passes 142/149 in 683.09 seconds. Its diagnostic archive digest verifies. The
+same six earlier cases fail, plus AgentRunner's attached-command round-trip.
+That added failure lacks an exact local reproduction; stronger diagnostics are
+included for the next hosted run. Local fixes and a corrected graph observation
+do not establish that current hosted acceptance has passed.
 
 ## Authorized command root aliases — 2026-10-18
 
