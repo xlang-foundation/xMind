@@ -25,8 +25,14 @@ const viewOrigin=options.get('--backend');
 const port=Number(options.get('--port')||60405);
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
 await mkdir(state,{recursive:true});
-const existing=await findExistingBrowserHost(state,viewOrigin);
-if(existing){await new Promise(resolve=>process.stdout.write('xMind Browser already running at '+existing.url+'\n',resolve));process.exit(0);}
+const existing=await findExistingBrowserHost(state,viewOrigin,assets);
+if(existing){
+  // A persistent adapter reloads its complete asset snapshot on a new page
+  // request. Refresh only the caller-requested, verified matching directory;
+  // preserve the adapter, credentials, selected workspace and native backend.
+  await buildBrowserAssets(existing.assets);
+  await new Promise(resolve=>process.stdout.write('xMind Browser already running at '+existing.url+'\nUI assets refreshed. Reload the existing page to use them.\n',resolve));process.exit(0);
+}
 await buildBrowserAssets(assets);
 
 async function activeCredential(){

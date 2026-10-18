@@ -2,7 +2,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
-const {mkdtemp,readFile,rm}=require('node:fs/promises');
+const {mkdtemp,readFile,writeFile,mkdir,rm}=require('node:fs/promises');
 const {tmpdir}=require('node:os');
 const {join,resolve}=require('node:path');
 
@@ -41,6 +41,11 @@ test('browser launcher serves current workspace actions from freshly built asset
   assert.match(html,/id="add-workspace"[^>]*>New workspace/);
   assert.match(html,/id="add-workspace-folder"[^>]*>Add folder/);
   assert.match(html,/primary folder of a new local workspace/);
+  const activeBefore=await readFile(join(state,'active.json'));
+  const stale='/* Explicit stale UI asset fixture; no provider/native execution. */\n';
+  await writeFile(join(assets,'client.js'),stale);
+  await fetch(origin+'/ui/');
+  assert.equal(await (await fetch(origin+'/ui/client.js')).text(),stale);
   const reuse=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
     '--backend','http://127.0.0.1:1','--state',state,
     '--assets',assets,'--port','0'],{cwd:root,windowsHide:true});
@@ -51,6 +56,11 @@ test('browser launcher serves current workspace actions from freshly built asset
   });
   assert.deepEqual(reused,{code:0,signal:null});
   assert.match(reusedOutput,new RegExp('already running at '+origin.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/ui/'));
+  await fetch(origin+'/ui/');
+  assert.equal(await (await fetch(origin+'/ui/client.js')).text(),await readFile(join(root,'extensions/vscode/client.js'),'utf8'),'Reusing the live host must refresh its generated assets');
+  assert.deepEqual(await readFile(join(state,'active.json')),activeBefore,'Refreshing UI assets must keep the same host and backend metadata');
+  assert.equal(child.exitCode,null);
+  await writeFile(join(assets,'client.js'),stale);
   const conflict=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
     '--backend','http://127.0.0.1:2','--state',state,
     '--assets',assets,'--port','0'],{cwd:root,windowsHide:true});
@@ -61,6 +71,16 @@ test('browser launcher serves current workspace actions from freshly built asset
   });
   assert.equal(conflicted.code,1);
   assert.match(conflictError,/different backend/);
+  assert.equal(await readFile(join(assets,'client.js'),'utf8'),stale,'A backend conflict must not write existing assets');
+  const otherAssets=join(fixture,'other-assets');await mkdir(otherAssets);
+  const assetConflict=spawn(process.execPath,[join(root,'Tools/start-browser.mjs'),
+    '--backend','http://127.0.0.1:1','--state',state,
+    '--assets',otherAssets,'--port','0'],{cwd:root,windowsHide:true});
+  let assetConflictError='';assetConflict.stderr.setEncoding('utf8');assetConflict.stderr.on('data',chunk=>assetConflictError+=chunk);
+  const assetConflicted=await new Promise((resolveClose,reject)=>{assetConflict.once('error',reject);assetConflict.once('close',(code,signal)=>resolveClose({code,signal}));});
+  assert.equal(assetConflicted.code,1);assert.match(assetConflictError,/different assets/);
+  assert.equal(await readFile(join(assets,'client.js'),'utf8'),stale);await assert.rejects(readFile(join(otherAssets,'client.js')));
+  assert.deepEqual(await readFile(join(state,'active.json')),activeBefore);
   if(process.platform==='win32'){
     // Node's child_process.kill(SIGTERM) maps to unconditional process
     // termination on Windows; the lifecycle's owned-child behavior is covered

@@ -7,13 +7,10 @@ The earlier `51724ab` backend-only restart contract is retained as
 [historical evidence](evidence/browser-native-restart-contract.log); that older
 adapter still used an in-memory login map. Current live two-child browser
 acceptance has its own [source and scope](native-responses-reasoning.md).
-The combined browser and VS Code contract suite passed **326/326** in its
-[captured run](evidence/browser-web-contract-20261010.log). The latest isolated
-source-integrity workflow passed **264 VS Code and 63 browser contracts**;
-all 49 source/vendor files and 12 generated browser assets remained unchanged.
-See the exact [run and artifact evidence](evidence/view-contracts-c7fbc194.json).
-Live local auto-connection was also verified against the running native backend
-and in the rendered browser view.
+Current acceptance and exact source/package scope are tracked in
+[validation status](VALIDATION_STATUS.md). Earlier 326-test and 264/63-test
+checkpoints and rendered-view evidence are historical; they do not accept
+current browser paint, layout, input or installed editor activation.
 
 xMind has a local HTML view using the same sidebar renderer and native API client as the VS Code extension. The desktop layout places the agent sidebar on the right, Settings at its top, and the discovered-model selector beside the composer at the bottom. Drag the divider to resize it; arrow keys, Shift+arrows, Home and End also resize a focused divider. Its width is remembered as a non-secret appearance preference in localStorage. Narrow windows use the available width.
 
@@ -33,9 +30,10 @@ provider key.
 
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
-Today, the left side is the workspace canvas: its workspace selector switches
-between single-folder local profiles, and **New workspace** registers a chosen
-existing folder as another profile on the same xMind node. Runs start in that
+The top bar identifies the current workspace. Its name or gear opens Workspace
+Settings, where the user switches workspace, creates one from an existing first
+folder, or adds another folder to the current workspace. The left side shows
+the selected workspace's files and previews. Runs start in that
 selected profile and execute in the xMind backend process. The file list and preview are
 read-only native workspace-handle reads; directory links and Git metadata are
 omitted, and backend-private `.config` and `.agentflow` paths remain denied.
@@ -143,6 +141,16 @@ node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port
 ```
 
 The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
+
+Launching again with the same state and matching asset directory rebuilds the
+generated UI files, then reuses the existing browser host and URL. Reload that
+page to load its new validated snapshot. This does not restart the native
+backend, reimport provider settings or resubmit work. A different backend or
+asset directory is rejected before writing those files. A timeout or unavailable
+HTTP observation preserves the existing host and reports that it could not be
+observed; a refused connection permits a new attachment. Do not infer backend
+death from a slow page probe. These UI refresh rules do not apply a new native
+runtime or backend configuration.
 
 Launching again with the same state directory reuses its live browser URL and
 does not start another view. If the existing adapter is attached to a different

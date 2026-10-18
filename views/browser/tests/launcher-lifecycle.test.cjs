@@ -5,6 +5,26 @@ const {EventEmitter}=require('node:events');
 const {mkdtemp,readFile,writeFile,rm}=require('node:fs/promises');
 const {tmpdir}=require('node:os');
 const {join}=require('node:path');
+const {createServer}=require('node:http');
+
+for(const mode of ['unavailable','timeout'])test('browser host '+mode+' observation preserves its record instead of declaring it stopped',async()=>{
+  const {findExistingBrowserHost}=await import('../../../Tools/browser-host-lifecycle.mjs');
+  const state=await mkdtemp(join(tmpdir(),'xmind-browser-observation-'));
+  const server=createServer((request,response)=>{if(mode==='unavailable'){response.writeHead(503,{'Content-Type':'application/json'});response.end('{"detail":"Synthetic observation unavailable"}');}});
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const record=JSON.stringify({url:'http://127.0.0.1:'+server.address().port+'/ui/',backend:'http://127.0.0.1:61234',assets:state,viewPid:process.pid});
+  const active=join(state,'active.json');await writeFile(active,record);
+  try{await assert.rejects(findExistingBrowserHost(state,'http://127.0.0.1:61234',state),/could not be observed.*preserved/i);assert.equal(await readFile(active,'utf8'),record);assert.equal(server.listening,true);}
+  finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(state,{recursive:true,force:true});}
+});
+
+test('a closed browser endpoint permits a new attachment without deleting saved metadata',async()=>{
+  const {findExistingBrowserHost}=await import('../../../Tools/browser-host-lifecycle.mjs');
+  const state=await mkdtemp(join(tmpdir(),'xmind-browser-closed-')),server=createServer();
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;await new Promise(resolve=>server.close(resolve));
+  const active=join(state,'active.json'),record=JSON.stringify({url:'http://127.0.0.1:'+port+'/ui/',backend:'http://127.0.0.1:61234',assets:state,viewPid:process.pid});await writeFile(active,record);
+  try{assert.equal(await findExistingBrowserHost(state,'http://127.0.0.1:61234',state),undefined);assert.equal(await readFile(active,'utf8'),record);}finally{await rm(state,{recursive:true,force:true});}
+});
 
 test('browser launcher shutdown closes its adapter and owned native view and retires its own local credentials',async()=>{
   const {createBrowserHostLifecycle}=await import('../../../Tools/browser-host-lifecycle.mjs');

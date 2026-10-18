@@ -1,10 +1,11 @@
-import {lstat,readFile,unlink} from 'node:fs/promises';
+import {lstat,readFile,realpath,unlink} from 'node:fs/promises';
+import {isAbsolute,resolve} from 'node:path';
 
 async function removeIfPresent(path){
   try{await unlink(path);}catch(error){if(error.code!=='ENOENT')throw error;}
 }
 
-export async function findExistingBrowserHost(state,requestedBackend){
+export async function findExistingBrowserHost(state,requestedBackend,requestedAssets){
   const activePath=state+'/active.json';
   let active;
   try{
@@ -20,9 +21,21 @@ export async function findExistingBrowserHost(state,requestedBackend){
     const contentType=response.headers.get('content-type')||'';
     live=response.status===200&&contentType.toLowerCase().includes('text/html');
     await response.body?.cancel();
-  }catch{return undefined;}finally{clearTimeout(timer);}
-  if(!live)return undefined;
+  }catch(error){
+    // A refused loopback connection means this endpoint is gone. A timeout,
+    // reset or observation error does not justify replacing a live owner.
+    if(error?.cause?.code==='ECONNREFUSED')return undefined;
+    throw new Error('The existing browser host could not be observed; it was preserved. Retry with the same --state.',{cause:error});
+  }finally{clearTimeout(timer);}
+  if(!live)throw new Error('The existing browser host could not be observed; it was preserved. Retry with the same --state.');
   if(requestedBackend&&new URL(requestedBackend).origin!==active.backend)throw new Error('A browser host already uses this state directory with a different backend; stop it or select another --state.');
+  if(requestedAssets!==undefined){
+    if(typeof active.assets!=='string'||!isAbsolute(active.assets))throw new Error('The existing browser host has no verifiable asset directory; it was preserved. Select another --state.');
+    let requested,owned;
+    try{requested=await realpath(resolve(requestedAssets));owned=await realpath(active.assets);}catch(error){throw new Error('The existing browser assets could not be verified; the host was preserved. Check --assets or select another --state.',{cause:error});}
+    if(requested!==owned)throw new Error('A browser host already uses this state directory with different assets; use its --assets directory or select another --state.');
+    active={...active,assets:owned};
+  }
   return active;
 }
 
