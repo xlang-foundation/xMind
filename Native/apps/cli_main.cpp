@@ -54,10 +54,46 @@ std::string terminal_safe_text(std::string_view value){
     for(const unsigned char byte:value)if(byte=='\n'||byte=='\t'||byte>=0x20&&byte!=0x7f)result.push_back(static_cast<char>(byte));
     return result;
 }
+std::string human_usage_line(const nlohmann::json& usage){
+    using Json=nlohmann::json;
+    const auto counter=[](const Json& source,const char* field)->std::optional<std::int64_t>{
+        if(source.is_object()&&source.contains(field)&&source[field].is_number_integer()&&
+           source[field]>=0&&source[field]<=std::numeric_limits<std::int64_t>::max())return source[field].get<std::int64_t>();
+        return std::nullopt;
+    };
+    const auto first=[&](const char* primary,const char* alternate){const auto value=counter(usage,primary);return value?value:counter(usage,alternate);};
+    const auto detailed=[&](const char* field,const char* first_details,const char* second_details){
+        auto value=counter(usage,field);
+        for(const auto* details:{first_details,second_details})if(!value&&usage.contains(details))value=counter(usage[details],field);
+        return value;
+    };
+    std::string line;
+    const auto show=[&](const char* label,const std::optional<std::int64_t>& value){if(value){if(!line.empty())line+=" · ";line+=label;line+=' ';line+=std::to_string(*value);}};
+    const bool uncached=usage.is_object()&&usage.contains("input_tokens_scope")&&usage["input_tokens_scope"]=="uncached";
+    show(uncached?"Input (uncached)":"Input",first("input_tokens","prompt_tokens"));
+    show("Output",first("output_tokens","completion_tokens"));
+    auto reasoning=detailed("reasoning_tokens","output_tokens_details","completion_tokens_details");
+    if(!reasoning)reasoning=counter(usage,"thoughtsTokenCount");
+    show("Reasoning",reasoning);show("Total",counter(usage,"total_tokens"));
+    auto cached=detailed("cached_tokens","input_tokens_details","prompt_tokens_details");
+    if(!cached)cached=counter(usage,"cache_read_input_tokens");
+    show("Cached",cached);show("Cache write",counter(usage,"cache_creation_input_tokens"));
+    if(!line.empty())line+=" tokens";
+    return line;
+}
 void print_human_history(const std::string& session,const nlohmann::json& history){
-    using Json=nlohmann::json;std::cout<<"Session "<<session<<"\n";
+    std::cout<<"Session "<<session<<"\n";
     if(!history.is_array())return;
-    for(const auto& message:history){if(!message.is_object()||!message.contains("role")||!message["role"].is_string()||!message.contains("data")||!message["data"].is_object())continue;const auto role=message["role"].get<std::string>();if(role!="user"&&role!="assistant")continue;const auto& data=message["data"];if(!data.contains("content")||!data["content"].is_string()||data["content"].get_ref<const std::string&>().empty())continue;std::cout<<"\n"<<(role=="user"?"You":"xMind")<<":\n"<<terminal_safe_text(data["content"].get_ref<const std::string&>())<<"\n";if(role=="assistant"&&data.contains("usage")&&data["usage"].is_object()){const auto& usage=data["usage"];const auto input=usage.value("input_tokens",usage.value("prompt_tokens",Json(nullptr))),output=usage.value("output_tokens",usage.value("completion_tokens",Json(nullptr)));if(input.is_number_integer()&&output.is_number_integer())std::cout<<"Input "<<input<<" · Output "<<output;if(usage.contains("total_tokens")&&usage["total_tokens"].is_number_integer())std::cout<<" · Total "<<usage["total_tokens"];if(input.is_number_integer()&&output.is_number_integer())std::cout<<" tokens\n";}}
+    for(const auto& message:history){
+        if(!message.is_object()||!message.contains("role")||!message["role"].is_string()||!message.contains("data")||!message["data"].is_object())continue;
+        const auto role=message["role"].get<std::string>();if(role!="user"&&role!="assistant")continue;
+        const auto& data=message["data"];
+        if(!data.contains("content")||!data["content"].is_string()||data["content"].get_ref<const std::string&>().empty())continue;
+        std::cout<<"\n"<<(role=="user"?"You":"xMind")<<":\n"<<terminal_safe_text(data["content"].get_ref<const std::string&>())<<"\n";
+        if(role=="assistant"&&data.contains("usage")&&data["usage"].is_object()){
+            const auto line=human_usage_line(data["usage"]);if(!line.empty())std::cout<<line<<'\n';
+        }
+    }
     std::cout<<'\n'<<std::flush;
 }
 #if defined(_WIN32)
@@ -536,6 +572,16 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
     const auto initial=read(path);if(!initial.is_object()||initial.value("id",std::string{})!=run||!initial.contains("session_id")||!initial["session_id"].is_string()||initial["session_id"].get<std::string>().empty())throw std::runtime_error("Invalid observed run identity");session=initial["session_id"].get<std::string>();
     if(graph&&initial.value("graph_root",false)!=true)throw std::runtime_error("Select a graph root for graph observation");
     if(!graph&&initial.value("parent_id",std::string{}).empty()&&!initial.value("graph_root",false)){const auto health=read("/v1/health");tree=health.value("owned_child_observation",false);plan_observation=health.contains("agent_planning")&&health["agent_planning"].is_boolean();}
+    // Usage events are cumulative provider snapshots, not separate responses.
+    // Keep each owner's latest supplied snapshot until its response ends;
+    // never deduplicate equal counts across distinct responses or change NDJSON.
+    std::map<std::string,Json> pending_usage;
+    const auto flush_usage=[&](const std::string& owner){
+        const auto found=pending_usage.find(owner);if(found==pending_usage.end())return;
+        const auto line=human_usage_line(found->second);
+        if(!line.empty())std::cerr<<'\n'<<line<<'\n';
+        pending_usage.erase(found);
+    };
     auto owners=[&] {
         std::set<std::string> owned{run};
         if(graph){
@@ -564,11 +610,11 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 }else if(kind=="tool.completed"||kind=="tool.failed"){
                     if(data.is_object()&&data.contains("name")&&data["name"].is_string())std::cerr<<(kind=="tool.completed"?"Finished ":"Failed ")<<terminal_safe_text(data["name"].get_ref<const std::string&>())<<".\n";
                 }else if(kind=="model.usage"&&data.is_object()){
-                    bool first=true;const auto counter=[&](const Json& source,const char* field)->std::optional<std::int64_t>{if(source.contains(field)&&source[field].is_number_integer()&&source[field]>=0)return source[field].get<std::int64_t>();return std::nullopt;};
-                    const auto input=counter(data,"input_tokens").has_value()?counter(data,"input_tokens"):counter(data,"prompt_tokens");const auto output=counter(data,"output_tokens").has_value()?counter(data,"output_tokens"):counter(data,"completion_tokens");
-                    const auto show=[&](const char* label,const std::optional<std::int64_t>& value){if(value){std::cerr<<(first?"\n":" · ")<<label<<" "<<*value;first=false;}};show("Input",input);show("Output",output);show("Total",counter(data,"total_tokens"));
-                    auto cached=counter(data,"cached_tokens");if(!cached&&data.contains("prompt_tokens_details")&&data["prompt_tokens_details"].is_object())cached=counter(data["prompt_tokens_details"],"cached_tokens");if(!cached&&data.contains("input_tokens_details")&&data["input_tokens_details"].is_object())cached=counter(data["input_tokens_details"],"cached_tokens");show("Cached",cached);if(!first)std::cerr<<" tokens\n";
+                    pending_usage[event["run_id"].get<std::string>()]=data;
+                }else if(kind=="model.done"||kind=="budget.model_call.finished"||kind=="run.completed"||kind=="run.cancelled"){
+                    flush_usage(event["run_id"].get<std::string>());
                 }else if(kind=="run.failed"){
+                    flush_usage(event["run_id"].get<std::string>());
                     std::cerr<<"\nRun failed";if(data.is_object()&&data.contains("reason")&&data["reason"].is_string())std::cerr<<": "<<terminal_safe_text(data["reason"].get_ref<const std::string&>());std::cerr<<"\n";
                 }
             }
@@ -584,7 +630,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         const auto value=state["state"].get<std::string>();
         if(value=="completed" || value=="failed" || value=="cancelled") {
             // A transition can commit between the event query and status query.
-            emit();if(human)std::cerr<<(value=="completed"?"\nRun completed.\n":value=="cancelled"?"\nRun cancelled.\n":"\nRun failed.\n");return value=="completed"?0:value=="cancelled"?2:1;
+            emit();if(human){while(!pending_usage.empty())flush_usage(pending_usage.begin()->first);std::cerr<<(value=="completed"?"\nRun completed.\n":value=="cancelled"?"\nRun cancelled.\n":"\nRun failed.\n");}return value=="completed"?0:value=="cancelled"?2:1;
         }
         if(value!="queued" && value!="running" && value!="paused")throw std::runtime_error("Unknown backend run state");
         if(interactive){

@@ -6,6 +6,7 @@ import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {createConnection} from 'node:net';
 import {fileURLToPath} from 'node:url';
+import {verifyCliUsagePresentation} from './cli_usage_presentation.mjs';
 
 const [serverExe, cliExe, modules, stdlib] = process.argv.slice(2);
 assert.ok(serverExe && cliExe && modules && stdlib, 'Pass server, CLI and runtime roots');
@@ -89,6 +90,7 @@ async function idleConnectionFairness() {
   } finally {for(const socket of sockets)socket.destroy();}
 }
 try {
+  await verifyCliUsagePresentation(cliExe);
   await start();
   await idleConnectionFairness();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
