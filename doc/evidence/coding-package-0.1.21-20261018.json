@@ -1,0 +1,339 @@
+{
+  "recordedAt": "2026-10-18T13:23:29.618Z",
+  "version": "0.1.21",
+  "sourceRevision": "41497dd9ac61f430cd2913985fe36c2429efe28f",
+  "scope": "Actual CLI-installed and byte-verified VSIX; installed extension source and client evaluated through explicit VS Code API/HTTP/timer fixtures; actual native saved-run HTTP through a deliberate connection-truncation proxy. No GUI, editor activation, paint/layout/input or latency acceptance.",
+  "payload": {
+    "version": "0.1.21",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.21-coding-win32-x64.vsix",
+    "sha256": "2e2ee62922ff4a29a20af9533fe15b4906c1bf19e32fb4b52444c80c9a775c23",
+    "bytes": 32499808,
+    "archiveFiles": 1973,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.21",
+    "version": "0.1.21",
+    "checkedPayloads": 1970,
+    "nativeFiles": 1927,
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "manifestSha256": "91b46288c2fea7c8d6071817af0fafab980af611494840a85be5dfede30596b5",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "listedByActualVSCodeCLI": true,
+    "settingsUnchanged": true,
+    "previousProfilesPreserved": true,
+    "releaseAccepted": false,
+    "renderedEditorActivated": false
+  },
+  "preservation": {
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.20",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.20-before-0.1.21",
+    "checkedFiles": 1972,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ],
+    "recordedAt": "2026-10-18T13:21:57.401Z",
+    "helperCorrection": "An initial template copied the still-preserved 0.1.19 installation into an extra backup. The corrected 0.1.20 backup was then copied and verified; its settings write refused the identical already-existing settings snapshot. This completion rechecks all 1,972 actual 0.1.20 backup files and that existing settings snapshot before recording success. Initial extra-backup evidence is retained; no installation was changed during these checks."
+  },
+  "sources": {
+    "client.js": {
+      "repoSha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c",
+      "installedSha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c",
+      "canonicalLFEquivalent": true
+    },
+    "extension.js": {
+      "repoSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+      "installedSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+      "canonicalLFEquivalent": true
+    }
+  },
+  "hosted": {
+    "runId": 39131091789,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39131091789",
+    "conclusion": "success",
+    "artifactId": 12137562810,
+    "artifactSha256": "66d53c2e76e3df67c2a9aee3bdf2cd1fd411e35cce364e7c1eca71520ff63edb",
+    "matchesGitHubDigest": true,
+    "sourceAndAssetHashesUnchanged": true,
+    "gate": {
+      "sourceRevision": "41497dd9ac61f430cd2913985fe36c2429efe28f",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 69,
+      "trackedSourceFiles": 64,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 416,
+        "browser": 138
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 416,
+        "passed": 416,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 138,
+        "passed": 138,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "installedHostReplay": {
+    "recordedAt": "2026-10-18T13:23:00.708Z",
+    "scope": "Captured real native payload replay through production extension source with explicit VS Code/HTTP/timer fixtures. Work counts only; no actual backend execution, provider request, rendered editor, browser paint or latency claim.",
+    "capturedRun": "f06d2b8168b1f997ac8db4e5bfa3e5fb",
+    "capturedNativeEvents": 680,
+    "rows": [
+      {
+        "version": "installed-0.1.20",
+        "extensionSourceSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+        "syntheticEventsPerSnapshotWindow": 1,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 615,
+        "streamMetadataReads": 3075,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      },
+      {
+        "version": "installed-0.1.20",
+        "extensionSourceSha256": "3f787245156ac395945a75a436562b4368c03e20cdebb09e7caa6a3b19a8c4c7",
+        "syntheticEventsPerSnapshotWindow": 8,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 77,
+        "streamMetadataReads": 385,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true,
+        "idleInboxFailure": "Observation callback rejected"
+      },
+      {
+        "version": "installed-0.1.21",
+        "extensionSourceSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+        "syntheticEventsPerSnapshotWindow": 1,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 0,
+        "streamMetadataReads": 0,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true
+      },
+      {
+        "version": "installed-0.1.21",
+        "extensionSourceSha256": "a64dc364127b231c69bb459396936601e8e901b42d67ff3a56c7fbf2f6dc4f56",
+        "syntheticEventsPerSnapshotWindow": 8,
+        "capturedStreamEvents": 615,
+        "streamSnapshotCallbacks": 0,
+        "streamMetadataReads": 0,
+        "durableBoundaryMetadataReads": 5,
+        "deliveredEventSha256": "ef89d6af523c2e75c9a85f67d378d1bef4834ec2f9ad2fac455f8260d6c51b67",
+        "oneSubscription": true,
+        "idleInboxFailure": "Read error visible; same feed delivered terminal completion",
+        "noAdmissionOrEffectReplay": true
+      }
+    ]
+  },
+  "nativeReplay": {
+    "startedAt": "2026-10-18T13:23:00.630Z",
+    "scope": "Actual native saved-run SSE over localhost HTTP, with deliberate incomplete-response fault injection; current production reader/subscription versus installed 0.1.19. Explicit Node VS Code API and cookie-jar fixtures. No inference, run admission, tools or GUI acceptance.",
+    "run": "bee16a9078125a5c6cf99c00c05b84f2",
+    "session": "15ed760517d0931e7d5b820d20ee7791",
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/ui/session"
+      },
+      {
+        "method": "GET",
+        "path": "/ui/client.js"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/history"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/runs"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/operations"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/history"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/runs"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/operations"
+      }
+    ],
+    "cuts": [
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1172,
+        "partialFrameBytes": 12
+      },
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1172,
+        "partialFrameBytes": 12
+      },
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1205,
+        "partialFrameBytes": 45
+      }
+    ],
+    "backendPid": 37596,
+    "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+    "installedVersion": "0.1.21",
+    "servedClientMatchesInstalled": true,
+    "installedClientSha256": "3e1b1ab56ebef5c90d012c028bee2eb380e8826b6fa2fe4f6bafe0a9321ec82c",
+    "nativeExecutableSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "baseline": {
+      "events": 522,
+      "cursor": 1511,
+      "sha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79"
+    },
+    "installed019Failure": {
+      "events": 3,
+      "cursor": 992,
+      "eventSha256": "5dc410639d668af4221f028bc3fcf0e64d2ffeb8b655949b4ed16e8e9a4d36b1",
+      "errors": [
+        "Native event stream ended without a complete end frame"
+      ],
+      "retries": [],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        }
+      ],
+      "finished": true
+    },
+    "currentRecovery": {
+      "events": 522,
+      "cursor": 1511,
+      "eventSha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79",
+      "errors": [],
+      "retries": [
+        500
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+        }
+      ],
+      "finished": true
+    },
+    "currentLongerPartialRecovery": {
+      "events": 522,
+      "cursor": 1511,
+      "eventSha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79",
+      "errors": [],
+      "retries": [
+        500
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+        }
+      ],
+      "finished": true
+    },
+    "verified": {
+      "savedHistoryUnchanged": true,
+      "runInventoryUnchanged": true,
+      "operationInventoryUnchanged": true,
+      "noRunOrEffectCommands": true,
+      "providerRequests": 0,
+      "noDuplicateEvents": true,
+      "finalEventContentMatchesBaseline": true,
+      "desktopAcceptance": false
+    },
+    "completedAt": "2026-10-18T13:23:04.068Z"
+  },
+  "nativeGate": {
+    "nativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "nativeSha256": "ad9925bed6fdaf129e943268156ab05978e2795630d24ff8b0e4a78fa7f9dd6d",
+    "unchangedNativeSource": true,
+    "priorLocalReleaseContracts": 148,
+    "newNativeRerunClaimed": false,
+    "hostedNativeGateAccepted": false
+  },
+  "limits": {
+    "renderedBrowserAccepted": false,
+    "renderedVSCodeAccepted": false,
+    "actualLatencyMeasured": false,
+    "releaseAccepted": false,
+    "providerInferenceRequests": 0
+  }
+}

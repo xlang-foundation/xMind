@@ -19,11 +19,11 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed **0.1.20** retains native `0e35ac3`; 1,970 installed payloads and its 1,927-file runtime verify. Local and hosted extension/browser tests pass 414/138. The installed reader recovers 522 actual saved-run events through cursor 1511 after an HTTP response is cut mid-frame, matching uninterrupted replay without duplicates or new inference/effects. Two cut cases pass; prior 0.1.19 stops after three events. History, runs, operation receipts, settings and profiles remain unchanged. The prior real Claude/JSDOM Markdown/metrics review is retained separately. Unchanged native source/executable retain the prior 148-test Release evidence. [Installed receipt](evidence/coding-package-0.1.20-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
+| Coding clients | Installed **0.1.21** retains native `0e35ac3`; 1,970 payloads and 1,927 runtime files verify. Local and hosted extension/browser checks pass 416/138. Installed host fixture replay retains all 615 captured stream payloads without stream-triggered metadata reads; durable changes still reconcile, and inbox read failure no longer rejects the feed. These are work-count/controller checks, not actual latency. Installed-client/native HTTP cut-response checks recover all 522 saved events without duplicates, with unchanged history/runs/receipts and no inference/effect admission. Settings, profiles and the prior installation are preserved. The prior real Claude/JSDOM review and unchanged native 148-test gate remain separate evidence. [Installed receipt](evidence/coding-package-0.1.21-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
-## Source correction: stream reconciliation and inbox read failures — 2026-10-18
+## Installed 0.1.21: stream reconciliation and inbox read failures — 2026-10-18
 
 The VS Code host no longer rejects a committed-stream observation when an
 optional idle inbox read fails. It reports that failure and keeps the owned
@@ -42,6 +42,21 @@ These are adapter work counts with explicit VS Code/HTTP/timer fixtures,
 not live HTTP counts, browser/editor latency or rendered acceptance. Source
 packaging as 0.1.21 remains pending at this checkpoint.
 [Evidence](evidence/coding-snapshot-reconciliation-20261018.json).
+
+The actual CLI installed and lists 0.1.21. All 1,970 installed payloads and
+1,927 runtime files match the verified archive. The prior actual 0.1.20 backup
+was checked across 1,972 files, with settings and all six profile directories
+preserved. An initial packaging template backed up the older 0.1.19 directory;
+that extra evidence is retained. Before installation, the corrected 0.1.20
+backup and existing identical settings snapshot were rechecked and recorded.
+Installed source/client repeat the payload-work and idle-inbox fault checks
+through explicit Node fixtures. Actual native HTTP truncation checks retain
+all 522 events, reuse backend PID 37596 and preserve history/run/operation
+inventories. The current hosted gate at `41497dd` passes all 416/138 tests;
+its downloaded artifact digest and unchanged source/asset hashes verify.
+The native executable and SDK are unchanged. No VS Code window was opened,
+and rendered-client or production-release acceptance remains outstanding.
+[Installed receipt](evidence/coding-package-0.1.21-20261018.json).
 
 ## Installed 0.1.20: truncated event-stream recovery — 2026-10-18
 
