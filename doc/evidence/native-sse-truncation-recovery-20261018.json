@@ -1,0 +1,182 @@
+{
+  "recordedAt": "2026-10-18T13:12:03.979Z",
+  "scope": "Shared production browser/VS Code SSE parser and subscription correction. Real native read-only HTTP replay through an explicit connection-truncation fault proxy, plus model-free Node contracts. No new inference/task/effects or GUI acceptance.",
+  "correction": "Incomplete EOF bytes, including a split UTF-8 character, never form an accepted event. Discard them and resume bounded GET-only observation at the last accepted cursor. Complete malformed frames, invalid UTF-8, identity and consumer failures still stop.",
+  "sourceSha256": "59f651a5dcf56629de7e72a6d9949f503e246f13c0ac2cbf312799962a176ad2",
+  "installed019ClientSha256": "81b7ed0fbd08c7f41b7c1a8cfd4b8673dbcbc16038051f853c89c43d87bc430c",
+  "logs": {
+    "extension": {
+      "tests": 414,
+      "passed": 414,
+      "failed": 0,
+      "logSha256": "f6f76eed0d610b012e02278b42639e938e4535886cb3ca1382031e5dd799a10c"
+    },
+    "browser": {
+      "tests": 138,
+      "passed": 138,
+      "failed": 0,
+      "logSha256": "ce7deddacd3fef743c9e8784b9f184a329f101b768d9e8c698e2b7b9dec1c4dc"
+    }
+  },
+  "native": {
+    "startedAt": "2026-10-18T13:11:03.864Z",
+    "scope": "Actual native saved-run SSE over localhost HTTP, with deliberate incomplete-response fault injection; current production reader/subscription versus installed 0.1.19. Explicit Node VS Code API and cookie-jar fixtures. No inference, run admission, tools or GUI acceptance.",
+    "run": "bee16a9078125a5c6cf99c00c05b84f2",
+    "session": "15ed760517d0931e7d5b820d20ee7791",
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/ui/session"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/history"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/runs"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/operations"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/history"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/15ed760517d0931e7d5b820d20ee7791/runs"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/operations"
+      }
+    ],
+    "cuts": [
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1172,
+        "partialFrameBytes": 12
+      },
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1172,
+        "partialFrameBytes": 12
+      },
+      {
+        "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0",
+        "upstreamBytes": 93093,
+        "forwardedBytes": 1205,
+        "partialFrameBytes": 45
+      }
+    ],
+    "backendPid": 37596,
+    "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+    "baseline": {
+      "events": 522,
+      "cursor": 1511,
+      "sha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79"
+    },
+    "installed019Failure": {
+      "events": 3,
+      "cursor": 992,
+      "eventSha256": "5dc410639d668af4221f028bc3fcf0e64d2ffeb8b655949b4ed16e8e9a4d36b1",
+      "errors": [
+        "Native event stream ended without a complete end frame"
+      ],
+      "retries": [],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        }
+      ],
+      "finished": true
+    },
+    "currentRecovery": {
+      "events": 522,
+      "cursor": 1511,
+      "eventSha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79",
+      "errors": [],
+      "retries": [
+        500
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+        }
+      ],
+      "finished": true
+    },
+    "currentLongerPartialRecovery": {
+      "events": 522,
+      "cursor": 1511,
+      "eventSha256": "fd0db7660f77fbf7d8f1c477088c53dceec9c8ff459b17a1d2130ee1531e2e79",
+      "errors": [],
+      "retries": [
+        500
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=0"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/bee16a9078125a5c6cf99c00c05b84f2/events/stream?after=992"
+        }
+      ],
+      "finished": true
+    },
+    "verified": {
+      "savedHistoryUnchanged": true,
+      "runInventoryUnchanged": true,
+      "operationInventoryUnchanged": true,
+      "noRunOrEffectCommands": true,
+      "providerRequests": 0,
+      "noDuplicateEvents": true,
+      "finalEventContentMatchesBaseline": true,
+      "desktopAcceptance": false
+    },
+    "completedAt": "2026-10-18T13:11:07.285Z"
+  },
+  "limits": {
+    "nativeSourceChanged": false,
+    "nativeRerunClaimed": false,
+    "renderedBrowserAccepted": false,
+    "renderedVSCodeAccepted": false,
+    "sourceFixInstalled": false
+  }
+}

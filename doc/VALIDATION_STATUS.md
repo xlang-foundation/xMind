@@ -23,6 +23,23 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Source correction: truncated event-stream recovery — 2026-10-18
+
+The shared production browser/VS Code reader now treats EOF inside a frame or
+UTF-8 character as a transport interruption. It discards unfinished bytes and
+uses the existing bounded read-only subscription retries at the last accepted
+cursor. Complete malformed frames, invalid UTF-8, identity and consumer errors
+remain terminal. Prompt admission and tool execution are never retried here.
+The complete extension/browser suites pass 414/138. An actual localhost fault
+proxy truncated real native saved-run HTTP responses: installed 0.1.19 stopped
+after three events; the corrected reader recovered all 522 events through cursor
+1511, identical to an uninterrupted baseline, without duplicates. A second cut
+also recovered. Saved history, run inventory and operation receipts are unchanged.
+No new model request or run was admitted. The native executable is unchanged;
+no additional native-suite or rendered-client acceptance is claimed. Packaging
+this source as 0.1.20 remains pending at this checkpoint.
+[Recovery evidence](evidence/native-sse-truncation-recovery-20261018.json).
+
 ## Installed 0.1.19: retained history and streamed Markdown — 2026-10-18
 
 The isolated hosted browser/extension gate now also passes at `01314c7`:
