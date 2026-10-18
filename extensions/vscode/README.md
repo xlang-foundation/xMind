@@ -1,20 +1,15 @@
 # xMind for VS Code
 
-The current local VSIX is **0.1.13**. The full extension suite passes
-**392/392** on Node 22.19.0; the browser suite passes **136/136** from the
-repository root. [Current-source test record](../../doc/evidence/client-tests-current-main-20261017.json).
-In an isolated VS Code test profile, the extension created a native
-TestProj view, started its local backend, and imported four provider profiles
-from the configured YAML file. The matching Native `native_local_view_contract`
-passes **1/1**. This verifies current package startup and provider import; the
-newly started pane has not yet submitted a coding prompt. A separate live
-VS Code coding and build acceptance is recorded in
-[its evidence](../../doc/evidence/testproj-vscode-live-coding-20261015.json).
-The default VS Code profile still has a webview service-worker failure. See the
-[runtime refresh evidence](../../doc/evidence/vscode-runtime-refresh-20261016.json),
-[shared-backend evidence](../../doc/evidence/vscode-shared-backend-20261015.json),
-[webview diagnostic](../../doc/evidence/vscode-webview-clean-profile-20261015.json),
-and [validation status](../../doc/VALIDATION_STATUS.md).
+**0.1.14** is a local Windows x64 development package. Its native runtime
+preserves checked conversation history across tool-authority changes and
+model changes within the same saved Responses provider profile. Reconnecting
+with unchanged provider YAML leaves active backend execution running.
+
+The extension suite passes **394/394**; the browser suite passes **136/136**.
+Six focused native provider/view/CLI contracts and a live saved-provider browser
+connection during xlang3 execution also pass. These checks do not establish
+rendered IDE or release acceptance. Exact source, package, live and installed
+scope is recorded in [validation status](https://github.com/xlang-foundation/xMind/blob/main/doc/VALIDATION_STATUS.md).
 
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
 and the composer and model chooser at the bottom. C++ owns execution,
@@ -53,7 +48,8 @@ does not reset conversation/model choices. Backend ownership remains native.
 confirmation-gated command for a profile-preserving backend upgrade after
 trusted settings change; no legacy profile conversion is required.
 
-These are implementation contracts pending native/installed acceptance.
+Native view and shared host/controller contracts cover these ownership rules;
+rendered installed-client acceptance is tracked separately.
 
 ## Machine configuration and packaging
 
@@ -76,7 +72,7 @@ paths are read from machine/global settings, never selected-project settings.
 An unset provider path starts Native unconfigured so Settings can enroll a
 provider. With a configured path, every new managed backend imports that same
 file through Native; the host does not copy keys into arguments, conversations
-or workspace state. [Provider setup](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/provider-setup.md).
+or workspace state. [Provider setup](https://github.com/xlang-foundation/xMind/blob/main/doc/provider-setup.md).
 After changing a trusted runtime, language-server, or process profile path,
 run **xMind: Apply Trusted Runtime Configuration**. It requests a protected
 native owner handoff after confirmation; sessions and history persist and
@@ -94,7 +90,7 @@ manifest/digest and standard-library/license inputs. `npm run package` builds
 the browser assets and verifies the complete staged Native inventory before
 creating a VSIX. There is no unverified executable/PATH discovery fallback.
 Install it with **Extensions: Install from VSIX**. No Marketplace publication
-is implied. [Build and bundle instructions](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/DEVELOPMENT.md).
+is implied. [Build and bundle instructions](https://github.com/xlang-foundation/xMind/blob/main/doc/DEVELOPMENT.md).
 
 ## Coding controls and validation scope
 
@@ -118,28 +114,22 @@ VS Code display for this toolbar change remain pending.
 The footer displays the backend's actual file policy when Native advertises it:
 **File changes require approval** or **Read only: file changes disabled**.
 Changing the setting does not enable writing in an already-running owner.
-Older backends do not advertise this field, so the view leaves the indicator
-hidden rather than assuming their permissions.
 
-The native patch checkpoint passed all 103 native contracts, and the shared
-client passed 222 extension / 41 browser contracts. A real OpenAI packaged CLI
-run completed an approved add/update/move/delete patch, preserved its first
-creation after a later denial, and retained exact history across restart.
-The installed 0.1.3 TestProj client separately completed approved file creation
-and a fresh workspace read. Installed patch review for this 0.1.4 package remains
-a separate acceptance step. [Patch implementation and scope](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-file-patch.md),
-[runtime handoff](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-runtime-handoff.md).
+Native file creation, edits, patches and restore use approved operations and
+recorded effect receipts. Comparing a proposal leaves the filesystem unchanged.
+See [file effects and validation](https://github.com/xlang-foundation/xMind/blob/main/doc/native-file-patch.md)
+and [runtime handoff](https://github.com/xlang-foundation/xMind/blob/main/doc/native-runtime-handoff.md).
 
 **Open Browser View** opens a local browser adapter connected to the selected
 workspace. The extension enrolls the page's browser session privately; no server
 token needs to be copied into the page. Closing that access view does not stop
-native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/browser-view.md).
+native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/main/doc/browser-view.md).
 
 Client tests use labelled synthetic host, process, HTTP and DOM fixtures. Live
 and installed results are reported separately from xMind's own coding acceptance.
 The persistent window retains VS Code's folder-trust
-requirement. [Opened-folder evidence](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/vscode-opened-workspace.md).
+requirement. [Opened-folder evidence](https://github.com/xlang-foundation/xMind/blob/main/doc/vscode-opened-workspace.md).
 Earlier preview and editor evidence belongs to its recorded runtime.
-[Validation status](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/VALIDATION_STATUS.md),
-[graph/editor history](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/vscode-graph-workflows.md),
-[actual diff-host evidence](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/evidence/vscode-native-diff.json).
+[Validation status](https://github.com/xlang-foundation/xMind/blob/main/doc/VALIDATION_STATUS.md),
+[graph/editor history](https://github.com/xlang-foundation/xMind/blob/main/doc/vscode-graph-workflows.md),
+[actual diff-host evidence](https://github.com/xlang-foundation/xMind/blob/main/doc/evidence/vscode-native-diff.json).
