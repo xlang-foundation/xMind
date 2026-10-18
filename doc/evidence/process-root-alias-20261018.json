@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-18",
+  "sourceRevision": "091c069461f48b33f88907314b351099d5ea4f76",
+  "scope": "Actual native process authorization/dispatch and xlang3 SQLite with isolated filesystem, subprocesses and synthetic model/MCP peers; no live-provider inference or rendered GUI acceptance.",
+  "reproduction": {
+    "sourceBaseRevision": "7e2652542630777c4ee9d65b48e39840e02524e1",
+    "TEMP": "C:/XMINDN~1",
+    "TMP": "C:/XMINDN~1",
+    "canonicalDirectory": "C:/xMindNativeValidation",
+    "baseline": {
+      "passed": 2,
+      "failed": 3,
+      "seconds": 32.7,
+      "failedContracts": [
+        "native_dynamic_plan_mcp_contract",
+        "native_process_executor_contract",
+        "native_mcp_effect_contract"
+      ],
+      "passedContracts": [
+        "native_graph_runner_contract",
+        "native_xlang3_default_process_contract"
+      ]
+    },
+    "deterministicDotAliasRegression": {
+      "failedBeforeFix": true,
+      "beforeSeconds": 5.44
+    }
+  },
+  "change": {
+    "production": "After verifying that the supplied root has the authorized workspace directory identity, ProcessExecutor retains the native handle canonical path for later binding and launch checks. Foreign directory rejection and per-dispatch identity checks remain.",
+    "regressions": "A dot-alias process waits for real approval, writes only after the grant, and records success; a foreign directory constructor is rejected. The short-alias environment exercises existing denial, cancellation, stale directory, attached-folder, shell, xlang3, output and recovery contracts.",
+    "fixtureCorrections": [
+      "Durable membership fixture snapshots use native canonical roots, retaining the strict production snapshot checks.",
+      "The independent MCP peer derives its expected roots URI from the actual directory instead of its raw TEMP alias. Production MCP normalization is unchanged."
+    ]
+  },
+  "validation": {
+    "completeReleaseBuild": true,
+    "focused": {
+      "scope": "Ten focused native Release contracts with normal TEMP and five with a DOS short-alias TEMP; actual filesystem/process/xlang3 SQLite plus synthetic protocol peers. Not a complete native gate.",
+      "gates": {
+        "short": {
+          "passed": 5,
+          "failed": 0,
+          "seconds": 47.15,
+          "logSha256": "2fc884dd33fdce133110eeaf47a4ee41c06f1aa5a424d1dd56a9754d18eb2b38"
+        },
+        "normal": {
+          "passed": 10,
+          "failed": 0,
+          "seconds": 73.94,
+          "logSha256": "5d419174efbe26e661ec85a38f662849d61d5549372a00aeb6c66cc1577908e1"
+        }
+      },
+      "sourceFiles": 2504,
+      "sourceAndBinariesUnchanged": true,
+      "binaries": {
+        "xmind.exe": "1531cfd74df7f076d83ea5c124f7e78ae64610115402cbc35c95e4e0c83046e4",
+        "agentflow_process_executor_contract.exe": "3d2bfcc7dc1ef18a0c90deb7811e9bfd4414eebdb645f099ed1ca77498a0e861",
+        "xlang3_runtime.dll": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47"
+      },
+      "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+      "sourceManifestSha256": "327d5a6325a34620b552ba8c60140e8cedb60c11f4a88714c2edb3e415446e15"
+    },
+    "logs": {
+      "process-alias-five-red-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-five-red-20261018.log",
+        "sha256": "f0275e29e36f864b27c016cfbbad103201b6c74ab719cc087932897e081553bc"
+      },
+      "process-alias-five-red-details-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-five-red-details-20261018.log",
+        "sha256": "67f9bd184152528b4a3330e2059496c6b252e87fc77a85aa001e1552b2255223"
+      },
+      "process-dot-alias-red-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-dot-alias-red-20261018.log",
+        "sha256": "9f858e0bec5aa3feb0a8337feab577490f5f1ab66b9aa92f03ddca7d6716da7e"
+      },
+      "process-alias-full-build-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-full-build-20261018.log",
+        "sha256": "d533ac8df9931fc788fc592084a2c1041f74eba627f812164f3ab38d7d79049c"
+      },
+      "process-alias-short-green-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-short-green-20261018.log",
+        "sha256": "2fc884dd33fdce133110eeaf47a4ee41c06f1aa5a424d1dd56a9754d18eb2b38"
+      },
+      "process-alias-short-green-details-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-short-green-details-20261018.log",
+        "sha256": "7238ea01926e14dfb8c111cbcaa6c76145c9f9b7c417f8063e0d769dfccf5bee"
+      },
+      "process-alias-normal-green-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-normal-green-20261018.log",
+        "sha256": "5d419174efbe26e661ec85a38f662849d61d5549372a00aeb6c66cc1577908e1"
+      },
+      "process-alias-normal-green-details-20261018.log": {
+        "path": "C:/xMindNativeValidation/process-alias-normal-green-details-20261018.log",
+        "sha256": "e370c77fd72dc7b4f30c7d83bcc72db806913215a6704c90843c53aec9bcf49b"
+      }
+    }
+  },
+  "remaining": [
+    "The older hosted graph deadline and paired xlang3 exit-status failures passed locally both before and after this fix; their hosted causes are still unconfirmed.",
+    "Hosted validation for current source is outstanding.",
+    "This is ten normal-path focused contracts and five repeated under a short alias, not a new complete 149-test gate.",
+    "Current source is not installed; rendered browser/editor and production-release acceptance remain outstanding."
+  ],
+  "preserved": {
+    "xlang3SourceAndSdkUnchanged": true,
+    "cpythonExecuted": false,
+    "installedPackageUpdated": false,
+    "userBackendRestartIssued": false,
+    "editorOpened": false
+  }
+}

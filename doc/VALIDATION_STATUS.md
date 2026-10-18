@@ -15,13 +15,42 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Full source gate at `5ed8267` passed all 149 sequential local Release contracts in 819.37 seconds against unchanged xlang3 `b0da71f2`. The file-tool owner contract covers actual approved create/edit/restore, membership/catalogue/policy rejection, call replay rejection, guidance delivery, cross-folder partial effects and SQLite restart. Its 2,504 frozen source/build inputs and tested executable were unchanged during that gate. The hosted checklist contains these 149 plus the isolated hosted-only OAuth trust test. New source `5efe11b` fixes a locally reproduced private-storage alias failure and passes four focused native contracts; it has no new complete local gate. Installed 0.1.21 retains native `0e35ac3` and its prior 148-test evidence. [Full source receipt](evidence/agent-file-tool-owner-20261018.json), [alias fix](evidence/workspace-private-alias-20261018.json). | Hosted current-source gate, five remaining older hosted failures, production release acceptance, and other-host startup. |
+| Native backend and local persistence | Full gate at `5ed8267` passed 149 sequential local Release contracts against xlang3 `b0da71f2`; the hosted checklist adds its isolated OAuth trust test. Current `091c069` includes private-storage and command-root alias fixes: four workspace contracts passed at `5efe11b`, then ten normal-path process/agent contracts and five short-alias repetitions passed at `091c069`. Frozen input/binary hashes verify for each gate. No new complete 149-test gate is claimed. Installed 0.1.21 retains native `0e35ac3` and its separate prior 148-test evidence. [Full source](evidence/agent-file-tool-owner-20261018.json), [private storage](evidence/workspace-private-alias-20261018.json), [process roots](evidence/process-root-alias-20261018.json). | Hosted current-source gate, two older hosted failures still unconfirmed locally, production release acceptance, and other-host startup. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed **0.1.21** retains native `0e35ac3`; 1,970 payloads and 1,927 runtime files verify. Local and hosted extension/browser checks pass 416/138. Installed host fixture replay retains all 615 captured stream payloads without stream-triggered metadata reads; durable changes still reconcile, and inbox read failure no longer rejects the feed. These are work-count/controller checks, not actual latency. Installed-client/native HTTP cut-response checks recover all 522 saved events without duplicates, with unchanged history/runs/receipts and no inference/effect admission. Settings, profiles and the prior installation are preserved. The prior real Claude/JSDOM review and unchanged native 148-test gate remain separate evidence. [Installed receipt](evidence/coding-package-0.1.21-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Authorized command root aliases — 2026-10-18
+
+Source `091c069` fixes a command-execution inconsistency. ProcessExecutor
+verified that its configured root had the authorized native directory identity,
+then kept the original spelling. Later invocation compared that spelling with
+the native canonical path and rejected equivalent DOS aliases/dot segments.
+It now retains the canonical path after identity verification. Foreign-root,
+per-dispatch binding, approval and stale-directory checks remain enforced.
+The new dot-alias regression fails before the fix and then passes by waiting
+for actual approval, executing a real child and recording its file effect.
+
+The short-alias environment reproduces dynamic-process and process-executor
+failures. It also exposes a separate MCP fixture expectation: the peer used its
+raw TEMP alias to construct an expected root URI. That fixture now independently
+resolves the directory. Production MCP root normalization and strict durable
+membership checks are unchanged; membership fixtures now store canonical roots.
+
+All five selected contracts pass with `TEMP/TMP=C:\XMINDN~1` in 47.15 seconds.
+Ten normal-path process/agent/graph/MCP contracts pass in 73.94 seconds. The
+complete Release build passes, and all 2,504 frozen inputs and binaries remain
+unchanged during the checks. These are focused native tests with actual
+filesystem/process/xlang3 SQLite and synthetic protocol peers, not a new full
+149-test gate or live-provider/GUI acceptance. The older hosted graph deadline
+and paired xlang3 exit-status failures pass locally before and after this fix;
+their hosted causes remain unconfirmed. Current hosted validation, installation
+and production release acceptance remain open. xlang3 and the installed package
+are unchanged; no user backend restart or editor open was issued.
+[Process alias evidence](evidence/process-root-alias-20261018.json).
 
 ## Private-storage path aliases — 2026-10-18
 
@@ -100,8 +129,11 @@ Fixture paths include the `RUNNER~1` temporary-directory alias; whether this is
 a common cause still needs local reproduction. This is an older source run,
 not the new file-tool-owner gate. Native hosted/release acceptance remains open;
 no guard relaxation or cross-host fix was claimed at that checkpoint. The
-registry assertion is now reproduced and fixed locally by `5efe11b` above;
-the other five failures and hosted verification remain outstanding.
+registry assertion is now reproduced and fixed locally by `5efe11b` above.
+`091c069` additionally fixes locally reproduced dynamic/process-root failures
+and the independent MCP fixture's alias expectation. The older graph deadline
+and xlang3 exit-status failures remain unconfirmed locally; current hosted
+verification remains outstanding.
 [Failure evidence](evidence/hosted-native-failure-20261018.json).
 
 ## Installed 0.1.21: stream reconciliation and inbox read failures — 2026-10-18
