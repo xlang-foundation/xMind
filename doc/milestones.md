@@ -1,6 +1,31 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.26, 2026-10-18
+## Current checkpoint — 0.1.27, 2026-10-18
+
+Managed profiles now accept trusted MCP server configuration through the
+console, browser launcher and VS Code machine setting. Native startup checks
+its protected fingerprint. Updates use the existing owner handoff, with
+read-only validation against saved revisions and retired IDs before quiescence.
+
+All 150 local native contracts pass in 921.99 seconds with every frozen
+source/dependency/SDK/library/binary input and file set unchanged. Complete
+local and hosted client fixtures pass 421/142. The initial hosted count mismatch
+(expected 420, actual 421) is retained; the corrected hosted gate passes.
+
+Installed 0.1.27 completes one real saved-key Claude task through the normal
+managed-profile browser launcher: official filesystem MCP read, reviewed native
+file creation and successful xlang3 verification process. Thirty original/copied
+sources and all 4,078 peer inputs stay unchanged. Four responses report 69,769
+input and 855 output tokens. A fresh HTTP session restores eight messages and
+all 321 saved events without execution replay.
+
+The new page is http://127.0.0.1:62342/ui/; its backend and history stay live.
+Earlier pages, settings and profiles remain preserved. Actual rendered browser
+and VS Code activation, current hosted native acceptance, broader protocol
+recovery and process-bound AgentRunner remain open.
+[Installed/native/client/live scope](evidence/coding-package-0.1.27-20261018.json).
+
+## Previous checkpoint — 0.1.26, 2026-10-18
 
 The complete local native gate passes 150/150 in 1,001.22 seconds with source,
 SDK, library, dependency and binary inputs/file sets unchanged. The installed

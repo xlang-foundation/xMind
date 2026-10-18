@@ -13,17 +13,17 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The current local VS Code package is **0.1.26**. Its native source is
-`0c936409a46bb61b4073fa9c1bdc5ebe59906f9c`, paired with xlang3 SDK
+The current local VS Code package is **0.1.27**. Its native source is
+`838e2eb370b989b2d568a94c221af2d4247bfe1c`, paired with xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
 | Native backend | All 150 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
-| Clients | All 420 extension and 142 browser fixture tests pass; installed archive/runtime payloads verify. These are separate from rendered UI checks. |
-| Installed live run | Saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process through the native backend and browser controller. |
-| Persistence | The 0.1.26 run records 347 saved events. The preserved 0.1.25 page separately restores two completed runs, eight messages and 221 events without execution replay. |
+| Clients | All 421 extension and 142 browser fixture tests pass locally and on hosted CI; installed archive/runtime payloads verify. These are separate from rendered UI checks. |
+| Installed live run | Through the normal managed-profile browser launcher, saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process. |
+| Persistence | The current page restores its completed run, eight messages and all 321 saved events without execution replay. Older pages and histories remain preserved. |
 | Still open | Current rendered webpage input/layout and VS Code activation, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
 Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
@@ -83,6 +83,12 @@ attachment. Adding a folder attaches it to that workspace; it does not copy or
 delete files. Existing runs retain their admitted folder snapshot.
 Explicit `--port` is the separate operator-selected backend mode and requires
 its authentication configuration. [Console commands](doc/native-interactive-cli.md).
+
+Use `--mcp-config FILE` to import trusted MCP server configuration into a
+managed profile. Applying a changed document requires `--upgrade-backend`;
+the backend validates saved revisions and retired server IDs before handoff.
+VS Code exposes the machine setting `agentflow.mcpConfigPath` and
+**xMind: Apply Trusted Runtime Configuration**. [MCP setup](doc/native-mcp.md).
 
 ## Browser and development
 

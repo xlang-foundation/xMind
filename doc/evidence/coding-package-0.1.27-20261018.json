@@ -1,0 +1,649 @@
+{
+  "recordedAt": "2026-10-18T20:06:02.962Z",
+  "version": "0.1.27",
+  "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "clientRevision": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "fullNative": {
+    "sourceRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 150,
+    "failed": 0,
+    "seconds": 921.99,
+    "projectFiles": 2607,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 75,
+    "nativeBinaries": 125,
+    "nodeDependencyFiles": 18598,
+    "repositoryGuidanceFrozen": true,
+    "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "5c465754249b24adfe1e3439a46f723682816339f50f5e332f332363e0058f97",
+    "ctestLogSha256": "4dfa7532d42c66d23049106fc3e1aba701f299d4fa12b02edd49e82506e7c1ca",
+    "detailsSha256": "c7780d289b536ee15e7d250abd7f2a72d8f88a23be0d727b5dcfad25b41d6e70",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+    "hostedOnlyTrustMutationExcluded": true
+  },
+  "clientGate": {
+    "recordedAt": "2026-10-18T19:27:13.682Z",
+    "version": "0.1.27",
+    "sourceParent": "0575d72a59180a5ffabb34ad83daffbb785d6e6c",
+    "workingTreePatchSha256": "34f4aaa1e54ae347d814d0337a3462784e3d970aae5b72f1849be011ac05cfde",
+    "sourceFiles": 98,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 421,
+      "passed": 421,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4783ad89a044d055d8477f353d5fcbd098832d6dc1f50229c451e2d5a6dc9c5f"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "362ffac8b785fd4607a3a3417b6d7ce11b80ab22ff00ffafd0b7aa9f28daac24"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "hostedViews": {
+    "runId": 39160294562,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39160294562",
+    "artifactId": 12147614433,
+    "artifactBytes": 306923,
+    "artifactSha256": "759458a8e100c831728fc92cb7d15d55ebabca6307497f98a2253bd0efdd4647",
+    "digestVerified": true,
+    "gate": {
+      "sourceRevision": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 421,
+        "browser": 142
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 421,
+        "passed": 421,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 142,
+        "passed": 142,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "archive": {
+    "version": "0.1.27",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.27-coding-win32-x64.vsix",
+    "sha256": "aae262cdc276734fbedde9cd4cb9a00517ecc4f6d61ec706f0854aef433b8a1f",
+    "bytes": 34398632,
+    "archiveFiles": 2447,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.27",
+    "version": "0.1.27",
+    "checkedPayloads": 2444,
+    "nativeFiles": 2402,
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "packagedPip": {
+    "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "nativeRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pip": "26.2.1",
+    "wheelSha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+    "commands": 3,
+    "allExitZero": true,
+    "offlineInstall": true,
+    "dependenciesSkipped": false,
+    "generatedScripts": 3,
+    "generatedScriptsUseXlang3": true,
+    "cpythonExecuted": false,
+    "scope": "Actual packaged CLI bootstrap and complete offline pure pip installation; no model, backend or rendered client acceptance."
+  },
+  "preservation": {
+    "recordedAt": "2026-10-18T20:01:01.155Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.26",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.26-before-0.1.27",
+    "checkedFiles": 2446,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "liveCoding": {
+    "scope": "Actual installed native managed profile, public browser launcher, official external filesystem MCP implementation, saved-key Claude, native file/process effects and production browser controller/HTTP/SSE. Node cookie jar is a fixture; no rendered browser/VS Code activation claim.",
+    "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.27-mcp-20261018",
+    "session": "d6c9a047710ba51ca4bfdd9ff89eb33e",
+    "run": "80af8a0fe10c0c6bac7a1d97a3f4b7ba",
+    "provider": {
+      "id": "claude",
+      "model": "claude-sonnet-4-6",
+      "discoveredModels": 13
+    },
+    "owner": {
+      "pid": 33960,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+      "birth": "2026-10-18T20:02:36.4674450Z",
+      "origin": "http://127.0.0.1:64924",
+      "directory": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867"
+    },
+    "nativeView": {
+      "pid": 17248,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+      "birth": "2026-10-18T20:02:33.0937180Z"
+    },
+    "browserHost": {
+      "pid": 67948,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-18T20:02:32.0466160Z"
+    },
+    "status": "completed",
+    "admissions": 1,
+    "approvedOperations": [
+      {
+        "operationId": "d1b2597b8ccaa33a5a26037f7fa4eaed",
+        "tool": "mcp_tool",
+        "decision": "allow"
+      },
+      {
+        "operationId": "8e624e0b213f1568ad2bf55274c6792a",
+        "tool": "create_file",
+        "decision": "allow"
+      }
+    ],
+    "operations": [
+      {
+        "id": "d1b2597b8ccaa33a5a26037f7fa4eaed",
+        "tool": "mcp_tool",
+        "state": "succeeded",
+        "argumentsSha256": "5e292aeb53ba6eb0ea94bf797dffa650f5ce99e55178d45b4a10a7f88743edbf",
+        "resultSha256": "8a2ba775be72cf947e3300a239b2896c893ed7f66175bb33dd5a101f69ea70e9"
+      },
+      {
+        "id": "8e624e0b213f1568ad2bf55274c6792a",
+        "tool": "create_file",
+        "state": "succeeded",
+        "argumentsSha256": "09d3b80cbc33ee1b5c20284dfba6919744d321386a303063c98750bfd3fa6f8b",
+        "resultSha256": "b21e76a5e4f1b27f5c7e41d08cd36853b3b7029e8e148a938e39ffeea51b6f71"
+      },
+      {
+        "id": "f9779aa5cde5612e5afd11802dd140c3",
+        "tool": "run_process",
+        "state": "succeeded",
+        "argumentsSha256": "b115b3940bb353cb8a26f8fc5df7344bce9917296d07857125f7edca78ddd235",
+        "resultSha256": "96fd1f84fe89567a71f5f7d09ea010c1a9bbf63c9627b6bb40c8dbff03b18237",
+        "result": {
+          "elapsed_ms": 972,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "f9779aa5cde5612e5afd11802dd140c3",
+          "operation_id": "f9779aa5cde5612e5afd11802dd140c3",
+          "output_artifact": {
+            "operation_id": "f9779aa5cde5612e5afd11802dd140c3",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 28
+          },
+          "pid": 15020,
+          "process_tree_retired": true,
+          "profile_id": "xlang3",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 28,
+            "data": "xmind-native-mcp-coding-ok\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 28
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      }
+    ],
+    "verified": {
+      "at": "2026-10-18T20:03:09.554Z",
+      "parentCompleted": true,
+      "officialFilesystemPeer": true,
+      "peerInputFiles": 4078,
+      "peerInputFileSetUnchanged": true,
+      "mcpReads": 1,
+      "nativeFileCreations": 1,
+      "xlang3ProcessExecutions": 1,
+      "processExit": 0,
+      "processStdout": "xmind-native-mcp-coding-ok",
+      "originalSourceFilesUnchanged": 30,
+      "newFile": "NATIVE_MCP_CHECK.md",
+      "newFileSha256": "ebbc7b79d558950371500d4d42229faf59e02686de8028f7c00e33fc225df2d7",
+      "actualUsage": [
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 154,
+          "input_tokens": 12797,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 154,
+          "prompt_tokens": 12797,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 138,
+          "input_tokens": 18657,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 138,
+          "prompt_tokens": 18657,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 239,
+          "input_tokens": 18927,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 239,
+          "prompt_tokens": 18927,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 324,
+          "input_tokens": 19388,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 324,
+          "prompt_tokens": 19388,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      ],
+      "savedEvents": 321,
+      "noReplay": true,
+      "renderedAcceptance": false,
+      "cpythonExecuted": false
+    },
+    "actualInputTokens": 69769,
+    "actualOutputTokens": 855,
+    "persistentPagePreserved": true,
+    "backendPreserved": true,
+    "workspaceFileSet": {
+      "files": 31,
+      "expectedOriginalFiles": 30,
+      "onlyAddition": "NATIVE_MCP_CHECK.md",
+      "unexpectedFiles": 0
+    }
+  },
+  "persistentPage": {
+    "recordedAt": "2026-10-18T20:04:09.270Z",
+    "version": "0.1.27",
+    "url": "http://127.0.0.1:62342/ui/",
+    "host": {
+      "pid": 67948,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-18T20:02:32.0466160Z"
+    },
+    "nativeView": {
+      "pid": 17248,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+      "birth": "2026-10-18T20:02:33.0937180Z"
+    },
+    "backend": {
+      "pid": 33960,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+      "birth": "2026-10-18T20:02:36.4674450Z",
+      "origin": "http://127.0.0.1:64924",
+      "directory": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867"
+    },
+    "workspace": "C:\\xMindNativeValidation\\model-zoo-installed-0.1.27-mcp-20261018",
+    "session": "d6c9a047710ba51ca4bfdd9ff89eb33e",
+    "run": "80af8a0fe10c0c6bac7a1d97a3f4b7ba",
+    "rootRuns": 1,
+    "historyMessages": 8,
+    "savedEventReplay": {
+      "events": 321,
+      "cursor": 321,
+      "duplicates": 0
+    },
+    "operationStates": [
+      {
+        "id": "d1b2597b8ccaa33a5a26037f7fa4eaed",
+        "tool": "mcp_tool",
+        "state": "succeeded"
+      },
+      {
+        "id": "8e624e0b213f1568ad2bf55274c6792a",
+        "tool": "create_file",
+        "state": "succeeded"
+      },
+      {
+        "id": "f9779aa5cde5612e5afd11802dd140c3",
+        "tool": "run_process",
+        "state": "succeeded"
+      }
+    ],
+    "served": {
+      "client.js": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f",
+      "browser.js": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a",
+      "chat.js": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+      "chat.css": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a"
+    },
+    "activeProvider": "claude",
+    "taskSubmissions": 0,
+    "processReexecutions": 0,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Actual persistent installed native/HTTP history and complete saved SSE replay with a fresh Node cookie jar. No new task, model request or rendered GUI claim."
+  },
+  "ciCounterCorrection": {
+    "recordedAt": "2026-10-18T19:46:22.473Z",
+    "parent": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "commit": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+    "changedFile": "Tools/ci-views.mjs",
+    "committedSourceBeforeSha256": "cb4831387cd1fc0c69313b5baf51b33fac3aafe7f05f63fa1b7da40844682f48",
+    "committedSourceAfterSha256": "2ff8b200cce2c82290263ecf187d0214cf31f862793192e0e8eda912f4fc91fa",
+    "frozenWorkingFileSha256": "567d6c092b8e072ac0622fd8d9967091a9c90bfa0ae53511025cedf122059a46",
+    "expectedTestsBefore": {
+      "extension": 420,
+      "browser": 142
+    },
+    "expectedTestsAfter": {
+      "extension": 421,
+      "browser": 142
+    },
+    "workingTreeLeftAt": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "workingFileUnchanged": true,
+    "privateIndex": "C:/xMindNativeValidation/managed-mcp-ci-counter-20261018.index",
+    "setupProbe": "Initial raw CRLF-working-copy/LF-blob comparison failed before any index/blob/commit mutation. Corrected preparation compares canonical Git content and independently preserves the exact frozen working bytes.",
+    "reason": "Exact-source hosted fixtures passed 421/142; update only the CI expected count while preserving the local frozen native source.",
+    "pushed": true,
+    "pushedAt": "2026-10-18T19:46:31.334Z",
+    "fastForwardLocalOnlyAfterNativeAfterChecks": true,
+    "originalFailedRun": 39159679949,
+    "originalArtifactId": 12148765223,
+    "originalArtifactBytes": 307083,
+    "originalArtifactSha256": "932e13a9872a141acf38595a22a5c69a0b880b3d04a52199aac21ddfa3cd1b45",
+    "originalGate": {
+      "sourceRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 420,
+        "browser": 142
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 421,
+        "passed": 421,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 142,
+        "passed": 142,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": false
+    },
+    "note": "The failed hosted gate actually passed all 421/142 fixtures; its expected extension count was 420. Corrected in a separate Git index/commit while local native source stayed exactly frozen. Local fast-forward and stage CI-metadata refresh occurred only after all native after-checks passed. Native implementation/test inventory between 838e2eb and 9e4b118 are unchanged."
+  },
+  "sourceStage": {
+    "recordedAt": "2026-10-18T19:47:44.082Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.27-source-20261018",
+    "sourceRevision": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+    "nativeSourceRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+    "files": {
+      "LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "Tools/agentflow.ps1": "8b0b094b10aacd97e7817e04b9b1e2233ea9a59e472ebdcd7bce0e40fb842636",
+      "Tools/audit-litellm.mjs": "03cf77f1260f0469b0d3a2298f9ed7b0c6b88b76f9db591dbdbf2f9d8ccc4a94",
+      "Tools/audit-opencode.mjs": "9f82d683cd6bc84789f688eea0278a5b60ccd2835eef7407818b26cce5afdb67",
+      "Tools/browser-host-lifecycle.mjs": "cfdb33d9a00b460361915b13d6670a6aa9e91ffac6ca00cd9679aa0cbf659f3e",
+      "Tools/ci-native.ps1": "af45dd293f8f9de05eaf80d275012ee9b23b8010861be75ef6fb8443fb9ee289",
+      "Tools/ci-oauth-certificate.ps1": "6c16f82f7506ad6d9cde41f34b1eb293e113e2d94cf8886e142b86bad2741a4e",
+      "Tools/ci-stage-runtime.mjs": "2ad8253ea4c96f33459770db10e68eef1f490ec82c5564e919629ec7516109b7",
+      "Tools/ci-views.mjs": "e76874b5f0b8bf9452be4a2f8e932da4851ab069aa5303621d3ecb3e6d42eb60",
+      "Tools/github-ci-artifact.mjs": "a6691b446e1a7476532066a8f553a5593f456d1d1030a4d1d45aced48b896698",
+      "Tools/github-ci-log.mjs": "815b7b8e419baf0574ff1fadd2078b7a0894e4a5bc1c4525aadf94b73dd2c45b",
+      "Tools/github-ci.mjs": "0d9b747e2686c31656bd117ca6b6739773db19da377095719205e0ba304363ff",
+      "Tools/inspect-ui.mjs": "8ee1797bd44059d6e6d775d776432547310bdf9aec0f1f0f97fe06b392ac89d8",
+      "Tools/litellm-native-mapping.mjs": "41d20f5fba7c79af36c72bcdbdad3ca3590f84cd29f0c88e4bce589d303b3973",
+      "Tools/native-milestone.ps1": "40c13f920ac2d52bae3fcf0bea7514f9bbfec4e79188a434aec82a8e93100be1",
+      "Tools/open-vscode-ui.cjs": "ff87abfb189880fe05eef5735d8724f8ba175b33871e4e29fdc899474e07a683",
+      "Tools/opencode-mapping.mjs": "763349879657c88357a4ba4ca1a8d832e863db9ffa6932ca21cd69b9280ce79d",
+      "Tools/opencode-native-mapping.mjs": "b7925c8dcac585b8a3697f4c171ea053da7b815d0ec0e8f984b8e13d587086ab",
+      "Tools/owned-process-diagnostics.mjs": "93985f70753f5efcf21fdeffaeb848345ac287b25c9f05576962046ebe1358c4",
+      "Tools/owned-process-diagnostics.ps1": "82d6e0c92bed711e9d720b7b42f5d0708cf849b954d4815f259f62e2cb414ce7",
+      "Tools/reopen-ui.ps1": "cf435f3468b8bb168d951ba6ed66576785bdda6db6bdbe481101ab75ddb243d6",
+      "Tools/stage-browser-dev-runtime.mjs": "1ef9a3b72010854bd8e051ddf0c3038b54ad70a6c8fe82403947189bd5629140",
+      "Tools/start-browser.mjs": "542672ec1cb61894b5ca2207f94bdced5dd82b84c803df68e7a6318dfb52b3fa",
+      "Tools/start-ui.ps1": "f49bf77a8852129f3d0b1013c80846e4ae22d1c048524657727fb08a4cab1bad",
+      "Tools/test-vscode-review.ps1": "1603ac9135912c02c1951df054c9aa6449e6fb6e60e07bddd717229bdb848827",
+      "Tools/tests/owned-process-diagnostics.test.mjs": "42bb50d7440280c35f79d8cfc99374f636bd840f4ac867d451011da17d8bb926",
+      "Tools/tests/xlang3-runtime.test.ps1": "a8af5f27dd5011e73c60fe2e0de5e8a497408c0d367243e51e55c228c5ee7ab7",
+      "Tools/verify-browser-vsix.ps1": "e310c786a9958535454fac1b18388ceaa135b23427d160cc089fb686787725e4",
+      "Tools/verify-jsoncons.mjs": "30cc347b038f7193eff70f3114ba4d0822bf6accbf3d94e092f5d030d1bfd1ea",
+      "Tools/verify-packaged-pip.mjs": "a62e1c897eaf9c60076f76e4d95db9e4d60797872a4e06afa9a2eac400a96a9d",
+      "Tools/verify-regex-dependencies.mjs": "c2e18189844ed3f0d420880b2c778d3bd47c07e7d62d8444529b05afa4f5705c",
+      "Tools/verify-yaml-cpp.mjs": "bb593fbb8760ad82b5638130cf04b0dd92a436022303312d79b77f90698a3759",
+      "Tools/vscode-review-contract.cjs": "61953f9573678843284964a83726ffeba4b112a15175df431e6ed8dde67c4138",
+      "Tools/xlang3-runtime.ps1": "30c3a01ca14e67742085b9be8ac6a02ca00f0af74e9a8372b758f6ce3eb14ece",
+      "extensions/vscode/.vscodeignore": "4d9378c7f2f539eccea14e3caa53ed33c506c4879cfb5f862a15cc65d9801bfb",
+      "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "extensions/vscode/README.md": "d2e36c1d1d89d2258023287417fb3c02fa0c4b1ab2de3acbeb8646c4ce107285",
+      "extensions/vscode/browser-view.js": "786fa84bfa5afb78a62c37f2edd8eb5d26c0d3f3fc975458fe6725702dab4dcf",
+      "extensions/vscode/client.js": "e25aaa41848b5942d38683697cfa999d8806e696befc1c3ba10e98dd2430360f",
+      "extensions/vscode/edit-review.js": "154e338f5e9f0d3c1fafae06608867e90693377ffbd78249d2fc34358bef80fc",
+      "extensions/vscode/editor-selection.js": "ed05c4c19a85c9d727a795e76604bf421e77ede19fba6e6a91b8257a26d2cfa3",
+      "extensions/vscode/extension.js": "7271d611e9bffd3839660c34029ddde377757289a6b613e586f08ec7e9f70f1e",
+      "extensions/vscode/git-changes-tree.js": "639221f7b87431748aa032c38301f534ee73652b27cba5c099d28e8460641bdf",
+      "extensions/vscode/language-server-editor.js": "9a776ba582fb653a4ec974afde904f4e9b10028224528add9c22b85a9d1637a8",
+      "extensions/vscode/media/chat.css": "d8d3bc5d77454682d5f683c327dcc7e1a0bea266e389704b047fea6547e0f56a",
+      "extensions/vscode/media/chat.js": "83f552b0d4d9912b4328e0464dde6177a06d661c449e012a4ec85464be874b6e",
+      "extensions/vscode/media/xmind.svg": "497797d63fb958ccae4236d1736c2422fb5b4659ac4333537fb04ebb308e1a19",
+      "extensions/vscode/native-runtime.js": "542e88b72e154fc2c480117d2177838519446e209967bdf21f1e1e6e7c6859fc",
+      "extensions/vscode/package-lock.json": "672a9e723cb1ded69ae05e7660f1aa52464dc11fb1cf06769058aca2a0bbffca",
+      "extensions/vscode/package.json": "d4485df2f3efaaa64b7a3a25ed08cfa7c74059425c817406e3ba293f5b4b3c8e",
+      "extensions/vscode/patch-review.js": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "extensions/vscode/scripts/package-native-runtime.mjs": "4cd605ade95ec3540d78a3aff898f6cc493f1b953e859116e7845689441ce5f8",
+      "extensions/vscode/scripts/pip-bootstrap.mjs": "f615f33136d7f330dc7eb10e86b2d03c0e0448aa4126a8dfe5fda6c12e688bd2",
+      "extensions/vscode/terminal.js": "c6cddb7862f9d7074b6c675ef33ea2f84ea8e5f6ec9ff7a68f8360ecd351ecd1",
+      "extensions/vscode/tests/agent-selection.test.js": "5311ad66dcc87a38b33b8bd87cb09a571f3bc526fba7704c2ca34208b44c0933",
+      "extensions/vscode/tests/backend-smoke.js": "374f25f5dcde2f43bfbad37b6bfdada8b1241c9203158a2429d19a7929bc3615",
+      "extensions/vscode/tests/browser-view.test.js": "d6439fed05f02a40f7460758df035c4c58eb924bd994527e4fddb1d23a33b125",
+      "extensions/vscode/tests/client-context.test.js": "ac39b0f80b74565f9bd6bb7a666de991ceceae1110358bc09f6f263cc223c61e",
+      "extensions/vscode/tests/client-mcp-authorization.test.js": "d9eccb97f46d749fb6fd0e1f8775f60d277caade8c13d9c6696c586498669d47",
+      "extensions/vscode/tests/client-mcp-resources.test.js": "f5c5c954ff36542971bf427a5c8c604924bf121901c05b859e25453ffe669a8f",
+      "extensions/vscode/tests/client-planning.test.js": "550ca7675ab37035b109c8ca8885b3a07eb13bcc0cc421d491704f8b9f2a96cf",
+      "extensions/vscode/tests/client-timer-binding.test.js": "cc2091ba43af41eb9da6fce5dc19b31845829e7070b43e2e042996c01511ecee",
+      "extensions/vscode/tests/client.test.js": "dadd635aef8816af873e6038fedee24ba564e3647a62a5a3771fc61ae67655bf",
+      "extensions/vscode/tests/editor-selection.test.js": "7f9c9dbd098314189a9e8f28fdff92bd23b212a2da127f1d78f7d29dfded8fa0",
+      "extensions/vscode/tests/extension-host.test.js": "e5cd210da144357ec5a4e74bcde97fe4e74046cbc384018805e5b0de37beddbd",
+      "extensions/vscode/tests/git-changes-tree.test.js": "d4e8df260457598c7c0adfc9943ea53100711af271ce81265edcaa11f1a701c1",
+      "extensions/vscode/tests/language-server-editor.test.js": "3885999229ba66c8bc901d6bcb41fbcc8e01cc459ba76288c14c5a59c3b56f19",
+      "extensions/vscode/tests/mcp-authorization-controller.test.js": "8fbec26fbf802af3c3c14207e1c5a136ff6d3e7a4193a260c6e449af7a3c48f4",
+      "extensions/vscode/tests/native-runtime-package.test.js": "4fb7368bca499783f1f69d5abb950797f0e97654f1e765857ae10964a890c986",
+      "extensions/vscode/tests/native-runtime.test.js": "045de644413f1cd71f40e38dfed398a8bf266764daa71027d6b246050648105c",
+      "extensions/vscode/tests/plan-fixture.js": "33a63804e16896e03dd3750f56b335f1f2870d086ffe2879a29c6bd8ad8b6cf1",
+      "extensions/vscode/tests/provider-profile-controller.test.js": "5dba7aaa8b0ba1cf58a26aaaaa167a1c4b2e7111f473e6a0f821ba679fc581ec",
+      "extensions/vscode/tests/renderer.test.js": "532c7387839f33ef6bf7f5d7705800c6968bc911a230771adfac16a7648c3c46",
+      "extensions/vscode/tests/session-model.test.js": "90642318a8bc58601634c35ac3dca0b41c000517742d0f98191792a8f587e12b",
+      "extensions/vscode/tests/session-permissions.test.js": "14451ece1491dba02250b9358fe6aa16b71591ac8e85beabe5134d7171df9c60",
+      "extensions/vscode/tests/terminal.test.js": "6198e380e727a094735cadfc7e01e4490153491688a853df6fc0133c5ea79d8d",
+      "extensions/vscode/tests/vcs.test.js": "dff616b7b288e91aa02cdc8e0fa0e7abbe636200e1bce9b80dc2afc30dea4ee8",
+      "extensions/vscode/tests/workspace-backend.test.js": "b6bfa4831d9774934e682ca724d12a4f0a02de30d033ad90987cd16cba58e391",
+      "extensions/vscode/webview.js": "1f6230cf3135aabff5677329c66d8f228f8648acf7479030f8212a790dcddd2c",
+      "extensions/vscode/workspace-backend.js": "e9ae95a877097d1e712bba99046890dd344f27c7077f94d0125efb32c82a5aa0",
+      "views/browser/browser.css": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+      "views/browser/browser.js": "557e7ce199af466aeae8354c5f3fc46a1298caa2bd65e9ca60fe7f026918197a",
+      "views/browser/build.mjs": "2605023ae539049e696f7aea1563710d0a30133e83ebad4daa2a3cfc900b9e62",
+      "views/browser/page.cjs": "3727b268d441251a0b83266344cd1a92f3a8fa9e01325d9c71a26fcc9f0176be",
+      "views/browser/server.mjs": "ddfe2bee7796815981a31047282dbafe1b4a9e09ffc37b16977dfb7f3561e265",
+      "views/browser/terminal.js": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+      "views/browser/tests/classic-script.test.cjs": "779c78884a4efda299cd4d335cacb56f782d82d225afd3077a8f4b3cfaea562c",
+      "views/browser/tests/connection.test.cjs": "3368f3c670a3c91c68f1bbb8c028c48685cadb97e7ac8c72be07734a2585c265",
+      "views/browser/tests/controller.test.cjs": "acf3cc485a2adc524f20a64dbec02c9aa3a3983a87f0ce687b943a463b882604",
+      "views/browser/tests/launcher-build.test.cjs": "a6c974ec8851329c97adf94e669e7b7fee0f29d30af8da698583fb92cdead2d5",
+      "views/browser/tests/launcher-lifecycle.test.cjs": "74ebdb7e1196a925e11d80350b39b49c9dafea336f01155b98fffeaeb48ad59b",
+      "views/browser/tests/mcp-authorization-routes.test.cjs": "ac8d325f0a36dcf21dd1ba0e9661e3dff3c7d131e149f4e96f8a092873b27223",
+      "views/browser/tests/native-contract.mjs": "13af98e7f6b3829f109bf2e6094a2d34f7a1aafd6d42f6bd9c88c5ac4b4bc3b4",
+      "views/browser/tests/planning-routes.test.cjs": "ddb82952f79846fa5065e8ee142d1838bd987a63f3c964b442050ffc4b38a0e2",
+      "views/browser/tests/responsive-layout.test.cjs": "1ff728f6dfcb540984d88347dbe70d0bc1a48d260b86655d629f27fd35c390a4",
+      "views/browser/tests/server.test.cjs": "24f52e2539d1f3995d6aa1c1aaf7c7d3085be8e6b526703d66ab5722b958df9e",
+      "views/browser/tests/terminal.test.cjs": "ad94c9fb1097b8135e8579dd97f6675a10fea5db46a5203095f3afd4d0f74001"
+    },
+    "sourceFiles": 97,
+    "currentMetadataVersion": "0.1.27",
+    "targetVersion": "0.1.27",
+    "versionBumpPending": false,
+    "changedFromPriorClient": [
+      "Tools/ci-views.mjs",
+      "Tools/start-browser.mjs",
+      "Tools/start-ui.ps1",
+      "extensions/vscode/README.md",
+      "extensions/vscode/extension.js",
+      "extensions/vscode/native-runtime.js",
+      "extensions/vscode/package-lock.json",
+      "extensions/vscode/package.json",
+      "extensions/vscode/tests/native-runtime.test.js",
+      "extensions/vscode/tests/workspace-backend.test.js",
+      "extensions/vscode/workspace-backend.js"
+    ],
+    "packagedClientImplementationUnchanged": false,
+    "clientGate": "managed-mcp-client-gates-20261018/gate.json",
+    "ciExpectedCountFixPendingLocalFastForward": null,
+    "nativeRuntimeStaged": true,
+    "nativeFullGate": "running separately; actual terminal pass and full after-checks required before runtime staging",
+    "nativeExecuted": false,
+    "configCopied": false,
+    "installed": false,
+    "ciExpectedCountFixApplied": true,
+    "clientMetadataRefreshAfterNativeGate": {
+      "at": "2026-10-18T19:58:32.191Z",
+      "changedFiles": [
+        "Tools/ci-views.mjs"
+      ],
+      "nativeImplementationUnchanged": true,
+      "nativeGateSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c"
+    },
+    "runtimeManifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+    "resolvedNativeSourceRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c"
+  },
+  "rawReceipts": {
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-live-20261018.json": "c2808a1efffda30c36e6e063df511e9f5569e18378ee252dad4225b6f13267d1",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-operations-20261018.json": "caddc974fa3d015ca26cd0b61016487de475279a647b68925e5836a5b07ea596",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-children-20261018.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-history-20261018.json": "f101bd5799339ae7de05282c9cf8ddf8785edf950af28ada3f1d1150f03f3925",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-events-20261018.json": "07eef8ee97a5247b460c686f3fe7a62cab66c9560bc1ff38be878aa867921ae8",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-saved-tree-events-20261018.json": "5d4a691fabae91d00807f612c3406d0bcbf72d33d0033ecd73938cf88c3a24de",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-posted-20261018.json": "488f6cba22d9128b99e3704487438bca13dd454967aab2e4f84e694cda1e507e",
+    "C:/xMindNativeValidation/prepare-installed-0.1.27-mcp-page-20261018.mjs": "a75f9e4bac24f49fb88cd13d13be70a69d64f1c1a94c4f5ebe9516d2c275d80d",
+    "C:/xMindNativeValidation/verify-installed-0.1.27-mcp-coding-20261018.mjs": "59cf8b76050e9a7e8e11a317b5c83cf56cb1936d8b752d4d5d187fdccbcc5c4e",
+    "C:/xMindNativeValidation/verify-page-0.1.27-mcp-20261018.mjs": "1b9d2277b1046acf2118e9dc8abdd0f27905fd60ee508abecb88f19754ee02c7",
+    "C:/xMindNativeValidation/browser-0.1.27-mcp-launch-20261018.json": "fe8c8927a0086a55acf1dadb1812e42ec2712720f233afc08eeec1e26876c766",
+    "C:/xMindNativeValidation/external-filesystem-peer-0.1.27-inputs-20261018.json": "9f3ef22dfd67cfb3eef32474a2dc0e5274960b02e9c9daf59dee7a292cd46ac9",
+    "C:/xMindNativeValidation/managed-mcp-build-inputs-20261018.json": "42a7ee3ebe32db7ab0e384da7a49e0e0dac115db485cd355344c952cbadaa897",
+    "C:/xMindNativeValidation/managed-mcp-initial-build-cancellation-20261018.json": "4ea6e137777e690ae94f51bc16477fbfd4c51e58c4dc1a903d90a9d376fbc9cf",
+    "C:/xMindNativeValidation/coding-0.1.27-mcp-workspace-tree-20261018.json": "5abea15ea1e79ffcca39edef9d9af9b6a8f805d27af38956b9a99433c737b54f"
+  },
+  "limits": [
+    "No rendered browser layout/input or VS Code activation acceptance; no new editor/browser windows were opened.",
+    "External filesystem server is an actual official Node peer used for acceptance, not part of the native C++ product core.",
+    "Older backend builds need a plain runtime upgrade before applying MCP configuration because they lack the protected preflight endpoint.",
+    "Current hosted native/release acceptance remains separate; previous graph PowerShell timeout cause is unproven.",
+    "Broader MCP/A2A recovery, process-bound AgentRunner and authenticated worker IPC remain open."
+  ],
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false,
+  "hostedNativeObservation": [
+    {
+      "id": 39156552949,
+      "status": "in_progress",
+      "conclusion": null,
+      "source": "0c936409a46bb61b4073fa9c1bdc5ebe59906f9c",
+      "url": "https://github.com/xlang-foundation/xMind/actions/runs/39156552949"
+    },
+    {
+      "id": 39160294480,
+      "status": "pending",
+      "conclusion": null,
+      "source": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+      "url": "https://github.com/xlang-foundation/xMind/actions/runs/39160294480"
+    }
+  ]
+}

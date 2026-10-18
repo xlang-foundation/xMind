@@ -1,0 +1,22 @@
+{
+  "sourceRevision": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "passed": 150,
+  "failed": 0,
+  "seconds": 921.99,
+  "projectFiles": 2607,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 75,
+  "nativeBinaries": 125,
+  "nodeDependencyFiles": 18598,
+  "repositoryGuidanceFrozen": true,
+  "dependencySourceRuntimeBinaryFileSetsUnchanged": true,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "5c465754249b24adfe1e3439a46f723682816339f50f5e332f332363e0058f97",
+  "ctestLogSha256": "4dfa7532d42c66d23049106fc3e1aba701f299d4fa12b02edd49e82506e7c1ca",
+  "detailsSha256": "c7780d289b536ee15e7d250abd7f2a72d8f88a23be0d727b5dcfad25b41d6e70",
+  "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "cmakeCacheSha256": "7c73cce7149f0013f3b526de82cbe9dcf908ed4eea9fbecbcdd707634d6cda0b",
+  "hostedOnlyTrustMutationExcluded": true
+}

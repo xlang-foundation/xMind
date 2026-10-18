@@ -15,15 +15,60 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Installed native 0c93640 / SDK 58a8aab9 passes all 150 local Release contracts in 1,001.22 seconds; all 2,607 project inputs, pure libraries, SDK/runtime, 125 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3 identity, pip bootstrap and full offline installation pass three actual commands. [Current full gate](evidence/remote-tool-owner-full-gate-20261018.json). | Current hosted/release acceptance remains open. Hosted source a41877c passes 149/150 and SDK smoke 2/2; its graph process times out at 30,060ms. Read-only PowerShell samples show increasing CPU on one thread; the underlying cause is unproven. [Hosted diagnostics](evidence/hosted-native-a418-failure-20261018.json). |
+| Native backend and local persistence | Installed native 838e2eb / SDK 58a8aab9 passes all 150 local Release contracts in 921.99 seconds; all 2,607 project inputs, pure libraries, SDK/runtime, 125 binaries and 18,598 dependency files/sets verify unchanged. Packaged xlang3/pip passes three actual commands. [Full gate](evidence/managed-mcp-full-gate-20261018.json). | Current hosted native/release acceptance remains open. Earlier a41877c has a confirmed graph PowerShell timeout; bounded CPU/module samples do not establish its cause. |
 | Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
-| MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. Installed 0.1.26 with real Claude reads README through the official external filesystem server, creates one approved file and verifies it with xlang3. The actual peer's 4,078 input files remain unchanged. [Installed receipt](evidence/coding-package-0.1.26-20261018.json). | Managed-profile MCP configuration, broader OAuth renewal, HTTP lifecycle recovery, and rendered-client acceptance. The installed test uses public operator serve mode and a browser-controller fixture. |
+| MCP | Native stdio/Streamable HTTP tools, resources and prompts have Release coverage. Managed profiles now import trusted MCP configuration and validate changed documents against persisted revisions and retired IDs before owner handoff. Installed 0.1.27 with real Claude uses the normal managed browser launcher for an official filesystem MCP read, reviewed file creation and successful xlang3 verification. [Installed receipt](evidence/coding-package-0.1.27-20261018.json). | Broader OAuth renewal, HTTP lifecycle recovery and rendered-client acceptance. Older backend builds require a plain runtime upgrade before the new protected MCP import. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls and selected outbound calls. Installed 0.1.25 with real Claude blocks one stale-instruction proposal before dispatch, then sends one fresh approved request to an explicit synthetic A2A 1.0 peer. Both parent runs complete. [Live receipt](evidence/coding-package-0.1.25-20261018.json). | Broader peer/version interoperability and full restart/stream recovery acceptance. The loopback peer does no actual agent analysis. |
-| Coding clients | Installed 0.1.26 verifies 2,444 non-metadata payloads and 2,402 runtime files, with unchanged settings and six prior profile directories. Complete local client checks pass 420/142. Its real Claude/MCP/file/process task completes with 347 saved events. The preserved 0.1.25 page at port 62084 remains on its existing backend, with its prior eight-message/two-run/221-event restore accepted separately. Earlier failure-plan and positive ModelZoo checkpoints remain preserved. [Current milestone](evidence/coding-package-0.1.26-20261018.json). | Actual browser input/layout/paint and VS Code activation are unverified; no editor/browser windows were opened. Current hosted/release acceptance and broader failure/recovery work remain open. Installing the extension does not hand off an already running user backend. |
+| Coding clients | Installed 0.1.27 verifies 2,444 non-metadata payloads and 2,402 runtime files, with unchanged settings and six prior profile directories. Complete local and hosted client checks pass 421/142. New page port 62342 restores the completed real-Claude MCP/file/process run, eight messages and all 321 saved events without replay. Earlier pages and coding checkpoints remain preserved. [Current milestone](evidence/coding-package-0.1.27-20261018.json). | Actual browser input/layout/paint and VS Code activation are unverified; no editor/browser windows were opened. Current hosted native/release acceptance and broader failure/recovery remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
-## Installed 0.1.26 — remote-tool owner boundary
+## Installed 0.1.27 — managed MCP configuration
+
+The console and native view accept a trusted MCP configuration path; the browser
+launcher and VS Code machine setting forward that path. Native startup binds the
+exact document fingerprint to its protected profile record. Changes require an
+explicit owner handoff. A read-only authenticated backend preflight checks the
+proposed document against saved revisions and retired IDs before quiescence,
+so an invalid retired-ID update leaves the existing backend and history intact.
+Configuration, credentials, peer launch and persistence stay backend-owned.
+
+All 150 local Release contracts pass in 921.99 seconds from native source
+838e2eb with every frozen input/hash/file set unchanged, including root guidance.
+The managed-profile fixture covers initial import, changed-file rejection,
+protected update, retired-ID rejection before retirement and exact history
+preservation. The native view fixture proves MCP configuration is present in
+initial, existing and newly created workspaces. Their endpoints/providers are
+fixtures; the subsequent installed saved-key run supplies separate live proof.
+
+Both complete local and hosted client fixtures pass 421/142. The original
+hosted gate passed every fixture but expected the previous count of 420; its
+failure is retained. The one-line correction was committed and pushed from a
+separate Git index while the local native tree stayed frozen at 838e2eb. Only
+after native after-checks passed was the local checkout fast-forwarded to
+9e4b118 and that CI-metadata change copied into the package stage. Native
+implementation and test inventory are identical between those revisions.
+
+The verified 0.1.27 package is installed. Through the actual public browser
+launcher and managed profile, real saved-key Claude reads README through the
+official external filesystem MCP server, creates one approved file and runs an
+actual xlang3 verification process. It exits zero and prints
+`xmind-native-mcp-coding-ok`. Four responses report 69,769 input and 855 output
+tokens. All thirty original/copied sources and all 4,078 peer input files remain
+unchanged. The new verification file is the only intended source addition.
+
+Page http://127.0.0.1:62342/ui/ remains live. A fresh cookie session restores
+eight messages and all 321 saved events exactly, with no task/provider/process
+replay. The existing settings, profiles and earlier user pages are preserved.
+This is native/HTTP/controller acceptance, not rendered browser or VS Code
+activation. Current hosted native/release, broader recovery and process-bound
+AgentRunner acceptance remain open. The original incomplete collision mock,
+intentional initial-build cancellation for the preflight correction, and CI
+count failure are all retained. No native test deadline was weakened.
+[Full gate](evidence/managed-mcp-full-gate-20261018.json),
+[package, live and historical failure scope](evidence/coding-package-0.1.27-20261018.json).
+
+## Previous installed 0.1.26 — remote-tool owner boundary
 
 MCP/A2A invocations now cross a native AgentRemoteToolHost value boundary. The
 backend retains registry/destination/credential ownership, catalogue filtering,

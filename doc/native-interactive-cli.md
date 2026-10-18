@@ -23,6 +23,10 @@ or file content, supply `--mcp-config FILE --upgrade-backend`. The protected
 handoff retains the same SQLite profile and history. Malformed documents are
 rejected before the existing owner is quiesced. No MCP commands, endpoints or
 credentials come from model or page input. [Server document](native-mcp.md).
+If the existing owner predates the protected MCP preflight endpoint, first
+upgrade it without `--mcp-config`, then apply the MCP document. The older
+owner cannot validate this update; xMind leaves it running rather than retire
+it with an unvalidated server configuration.
 
 The preceding full native Release gate passed **118 local CTest contracts**.
 The VCS checkpoint adds workspace-scoped Git metadata and local branch listing

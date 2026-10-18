@@ -135,6 +135,16 @@ The native agent now loads durable backend-owned stdio configuration, starts an 
 
 Configuration is replaced only by trusted startup or an offline administrator while the backend is stopped. The xlang3 information repository stores it separately from encrypted credential blobs. Revisions are assigned by the backend; unchanged settings retain their revision, changed settings increment it, and removed IDs are permanently retired. This is an immutable service snapshot, not dynamic/team configuration administration. Absolute executable and working-directory paths are required. Arguments are public literal metadata; use credential references for secrets.
 
+Managed profiles also accept this document through `--mcp-config FILE` on
+the console or native view. The browser launcher accepts the same option;
+VS Code exposes `agentflow.mcpConfigPath`. Apply changes through
+`--upgrade-backend` or **xMind: Apply Trusted Runtime Configuration**.
+The native owner validates persisted revisions and retired IDs before its
+protected handoff. An older owner without that preflight endpoint must first
+upgrade without the MCP option. Reconnecting without an explicit file uses the
+saved configuration. Set `enabled:false` for reversible disabling; removing
+a server permanently retires its ID.
+
 Example configuration file (replace paths with the actual trusted server):
 
 ```json
