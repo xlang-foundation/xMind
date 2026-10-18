@@ -1,0 +1,189 @@
+{
+  "checkedAt": "2026-10-18T21:08:13.106Z",
+  "runId": 39160294480,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39160294480",
+  "sourceRevision": "9e4b1189599cfb03488909e5e006e725ebb3bdd5",
+  "conclusion": "failure",
+  "artifactId": 12150840619,
+  "artifactBytes": 67754,
+  "artifactSha256": "eef47385503a9210e32c886df8acf9aa4c50d9c2f385ea1e5774a09618a8b220",
+  "advertisedSizeAndDigestVerified": true,
+  "passed": 150,
+  "total": 151,
+  "seconds": 657.03,
+  "sdkSmokePassed": 2,
+  "failed": [
+    "native_graph_runner_contract"
+  ],
+  "actualGraphProcess": {
+    "elapsed_ms": 30058,
+    "exit_code": 1,
+    "id": "136ce150ed22d970e2dc1240f1e96ace",
+    "output_artifact": {
+      "operation_id": "136ce150ed22d970e2dc1240f1e96ace",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "graphState": "failed",
+  "diagnostics": [
+    {
+      "name": "agent-runner-6c135929-5ae3-41f7-b903-97bccb174f7c",
+      "sha256": "8f3e5209ad263d503548549688087a77f4ff161efe5fe8061b412f8fbf6010d1",
+      "samples": [
+        {
+          "pid": 5312,
+          "birth": "2026-10-18T20:49:15.2796010Z",
+          "elapsedMs": 2450,
+          "cpuMs": 734.375,
+          "sampledModules": 64,
+          "hotThreads": [
+            {
+              "cpuMs": 453.125,
+              "waitReason": null,
+              "id": 9752,
+              "state": "Running"
+            },
+            {
+              "cpuMs": 140.625,
+              "waitReason": "UserRequest",
+              "id": 1676,
+              "state": "Wait"
+            }
+          ]
+        },
+        {
+          "pid": 5312,
+          "birth": "2026-10-18T20:49:15.2796010Z",
+          "elapsedMs": 13064,
+          "cpuMs": 11312.5,
+          "sampledModules": 64,
+          "hotThreads": [
+            {
+              "cpuMs": 11015.625,
+              "waitReason": null,
+              "id": 9752,
+              "state": "Running"
+            },
+            {
+              "cpuMs": 140.625,
+              "waitReason": "UserRequest",
+              "id": 1676,
+              "state": "Wait"
+            }
+          ]
+        }
+      ],
+      "scope": {
+        "environmentIncluded": false,
+        "readOnly": true,
+        "kind": "scope",
+        "ownerPid": 5792,
+        "commandLinesIncluded": false,
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_agent_runner_contract.exe"
+      },
+      "end": {
+        "samples": 2,
+        "kind": "end",
+        "reason": "observer_stopped"
+      }
+    },
+    {
+      "name": "graph-runner-601310cd-a9d4-4120-b8d9-ab116d5bd2f7",
+      "sha256": "87b9aa4a1716907bc442155604b1eb18da8e29cd2ca5134d0e2bdaf8835a2500",
+      "samples": [
+        {
+          "pid": 10112,
+          "birth": "2026-10-18T20:46:30.4391940Z",
+          "elapsedMs": 6767,
+          "cpuMs": 859.375,
+          "sampledModules": 64,
+          "hotThreads": [
+            {
+              "id": 2972,
+              "waitReason": null,
+              "state": "Running",
+              "cpuMs": 515.625
+            },
+            {
+              "id": 4904,
+              "waitReason": "UserRequest",
+              "state": "Wait",
+              "cpuMs": 125
+            }
+          ]
+        },
+        {
+          "pid": 10112,
+          "birth": "2026-10-18T20:46:30.4391940Z",
+          "elapsedMs": 17455,
+          "cpuMs": 10421.875,
+          "sampledModules": 64,
+          "hotThreads": [
+            {
+              "id": 2972,
+              "waitReason": null,
+              "state": "Running",
+              "cpuMs": 10093.75
+            },
+            {
+              "id": 4904,
+              "waitReason": "UserRequest",
+              "state": "Wait",
+              "cpuMs": 125
+            }
+          ]
+        },
+        {
+          "pid": 10112,
+          "birth": "2026-10-18T20:46:30.4391940Z",
+          "elapsedMs": 28069,
+          "cpuMs": 17968.75,
+          "sampledModules": 64,
+          "hotThreads": [
+            {
+              "id": 2972,
+              "waitReason": "Executive",
+              "state": "Wait",
+              "cpuMs": 17656.25
+            },
+            {
+              "id": 4904,
+              "waitReason": "UserRequest",
+              "state": "Wait",
+              "cpuMs": 125
+            }
+          ]
+        }
+      ],
+      "scope": {
+        "readOnly": true,
+        "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_graph_runner_contract.exe",
+        "environmentIncluded": false,
+        "ownerPid": 8608,
+        "commandLinesIncluded": false,
+        "kind": "scope"
+      },
+      "end": {
+        "kind": "end",
+        "samples": 3,
+        "reason": "observer_stopped"
+      }
+    }
+  ],
+  "ctestSha256": "f967f731583b3af7c38b8ef2f55c2df10a65b0577b19908cd7e2ea1a36c396d5",
+  "detailsSha256": "cbf90630008efed53223112447fde2da9a88b08812b6fd96d453a691b79a2292",
+  "rawEvidenceRoot": "C:/xMindNativeValidation/hosted-native-39160294480",
+  "causeEstablished": false,
+  "processBudgetChanged": false,
+  "runCancelledOrRestarted": false,
+  "phaseProbeSource": "f3e7718f2ef04eb0df2808ed8482e04291068473",
+  "phaseProbeHostedAcceptance": "in progress; separate from this terminal old-source result"
+}

@@ -13,18 +13,36 @@ used when they were recorded and should not be read as current parity goals.
 
 ## Current product acceptance matrix — 2026-10-18
 
-Installed preview 0.1.28 contains the final UI described below. All 2,448 VSIX
+Installed preview 0.1.29 contains the final UI described below. All 2,448 VSIX
 files and 2,445 installed non-metadata payloads verify; the 2,402-file native
 runtime and its manifest are byte-identical to accepted 0.1.27. All 422/142
 client fixtures pass both in the final C: staging tree (17,438 source,
-dependency, asset and runtime files unchanged) and on hosted CI at 526d58e.
-The artifact's advertised digest and size verify. Three packaged xlang3/pip
-commands pass, including a complete offline pip installation. The 0.1.27
-extension is backed up, settings and six existing profile directory names are
+dependency, asset and runtime files unchanged) and on hosted CI at 4f5d116.
+The artifact's advertised digest and size verify. The three packaged xlang3/pip
+commands accepted on 0.1.28 are reused by byte-identical runtime evidence;
+they were not rerun on 0.1.29. The 0.1.28 extension is backed up,
+settings and six existing profile directory names are
 preserved, and no editor window was opened. All 18 installed browser assets
 equal the tested live page. Its existing processes and 22-message coding
 history remain intact after installation.
-[Installed 0.1.28 evidence](evidence/coding-package-0.1.28-20261018.json).
+[Installed 0.1.29 evidence](evidence/coding-package-0.1.29-20261018.json).
+
+Actual headless Edge workspace acceptance creates a workspace from a folder,
+attaches a second folder, switches away/back and restores the scoped session.
+Claude reads both markers, creates one reviewed file in the attached folder
+and runs an actual xlang3 assertion there, exit zero. After a deliberate abrupt
+stop of the idle completed owner, explicit CLI recovery and browser refresh
+preserve all nine messages; a real read-only follow-up completes and all 13
+messages restore. Fifteen HTTP 503 responses during the injected outage remain
+recorded. The final observer verifies Refresh, correct file preview and no
+task resubmission or page errors. The model's final file data is correct but
+its extra prose/code fences violate the requested bare two-line format.
+This proves explicit idle recovery, not unattended or in-flight recovery.
+The browser regression found Refresh disabled after creation/switching; the
+0.1.29 fix restores it after the change settles (28/30 before, 30/30 after).
+An earlier final observer left the workspace modal open and could not click
+Refresh; the diagnostic and corrected successful sequence are both retained.
+[Workspace/recovery evidence](evidence/rendered-workspaces-and-recovery-20261018.json).
 
 The current page at http://127.0.0.1:62342/ui/ has now been rendered and exercised
 in isolated headless Microsoft Edge, with sandbox enabled. The sidebar toolbar
@@ -52,7 +70,7 @@ section. Pending approvals open it automatically, Review reopens it after
 collapse, and the final follow-up reply is fully visible after refresh.
 Complete local client fixtures pass 422/142 on the final UI source with all
 source/dependency/asset hashes and file sets unchanged; all 18 served assets
-equal the validated build. These UI changes are now installed in 0.1.28;
+equal the validated build. These UI changes are now installed in 0.1.29;
 visible desktop/VS Code activation remain unverified.
 [First coding turn](evidence/rendered-coding-0.1.27-20261018.json),
 [final UI and follow-up](evidence/rendered-tool-activity-20261018.json).
@@ -60,9 +78,13 @@ visible desktop/VS Code activation remain unverified.
 Hosted native run 39156552949 at 0c93640 is terminal failure: 150/151 pass in
 846.35 seconds, SDK smoke 2/2. The graph PowerShell process reaches its
 unchanged 30-second deadline, with no output and a retired process tree.
-Its cause remains unestablished. Current run 39160294480 at 9e4b118 is still
-in progress at the latest check; it has not been restarted or cancelled.
+Its cause remains unestablished. Run 39160294480 at 9e4b118 is also terminal
+failure: 150/151 in 657.03 seconds, SDK smoke 2/2. Its graph process reaches
+the same 30-second deadline with no output and a retired process tree.
+The exact artifact size/digest verify. Diagnostic run 39164480510 at f3e7718
+is in progress at the latest check; it has not been restarted or cancelled.
 [Exact failure evidence](evidence/hosted-native-0c93640-failure-20261018.json).
+[Later failure evidence](evidence/hosted-native-9e4b118-failure-20261018.json).
 
 The graph fixture now records fixed markers at script entry, after its deliberate
 six-second delay and after the attached-folder file effect. Failure diagnostics
@@ -81,7 +103,7 @@ one focused contract, not another full-suite pass or a hosted timeout fix.
 | Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
 | MCP | Native stdio/Streamable HTTP tools, resources and prompts have Release coverage. Managed profiles now import trusted MCP configuration and validate changed documents against persisted revisions and retired IDs before owner handoff. Installed 0.1.27 with real Claude uses the normal managed browser launcher for an official filesystem MCP read, reviewed file creation and successful xlang3 verification. [Installed receipt](evidence/coding-package-0.1.27-20261018.json). | Broader OAuth renewal, HTTP lifecycle recovery and rendered-client acceptance. Older backend builds require a plain runtime upgrade before the new protected MCP import. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls and selected outbound calls. Installed 0.1.25 with real Claude blocks one stale-instruction proposal before dispatch, then sends one fresh approved request to an explicit synthetic A2A 1.0 peer. Both parent runs complete. [Live receipt](evidence/coding-package-0.1.25-20261018.json). | Broader peer/version interoperability and full restart/stream recovery acceptance. The loopback peer does no actual agent analysis. |
-| Coding clients | Installed 0.1.28 verifies 2,445 non-metadata payloads and the unchanged 2,402-file native runtime, with unchanged settings and six prior profile directories preserved. Complete local and hosted client checks pass 422/142. New page port 62342 restores the completed real-Claude MCP/file/process run, eight messages and all 321 saved events without replay. Earlier pages and coding checkpoints remain preserved. [Current milestone](evidence/coding-package-0.1.27-20261018.json). | Headless Edge layout, dialogs, resizing, history and file preview now pass as recorded above. Two headless rendered coding turns now pass as recorded above. Visible desktop testing and VS Code activation remain unverified. Current hosted native/release acceptance and broader failure/recovery remain open. |
+| Coding clients | Installed 0.1.29 verifies 2,445 non-metadata payloads and the unchanged 2,402-file native runtime, preserving settings and six prior profile directory names. Complete local/hosted client checks pass 422/142. Two rendered coding turns pass; separate real workspace/attached-folder coding and explicit idle-owner recovery restore 13 messages without replay. Earlier pages remain preserved. [Current package](evidence/coding-package-0.1.29-20261018.json). | Visible desktop testing and VS Code activation remain unverified. Current hosted native/release acceptance, unattended and in-flight recovery remain open. The read-only follow-up misses its requested bare reply format. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 

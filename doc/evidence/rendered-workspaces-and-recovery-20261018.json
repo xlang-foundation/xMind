@@ -1,0 +1,882 @@
+{
+  "recordedAt": "2026-10-18T21:21:07.384Z",
+  "scope": "Real headless Edge with sandbox, installed native runtime, saved-key Claude, explicit UI actions; separate from visible desktop or VS Code acceptance",
+  "initialClientSource": "526d58e28485cbc9efb64276d9ffeec19eab9bd2",
+  "finalClientSource": "4f5d116e3f52a8d398532fc8efaf3ebb3bfc4f91",
+  "nativeSource": "838e2eb370b989b2d568a94c221af2d4247bfe1c",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "url": "http://127.0.0.1:52121/ui/",
+  "profileRoot": "C:/Users/shaw9/.xMind/p-u28",
+  "fixturesPreparedByObserver": true,
+  "fixtureRoot": "C:/xMindNativeValidation/ui-workspaces-0.1.28-20261018",
+  "workspaceCreationViaUi": true,
+  "attachedFolderViaUi": true,
+  "workspaceSwitchRoundTrips": 2,
+  "primaryAndAttachedPreviewsMatchedFixtures": true,
+  "configuredProviders": [
+    "claude",
+    "gemini",
+    "deepseek",
+    "openai"
+  ],
+  "providerKeysPrompted": false,
+  "selectedProvider": "claude",
+  "selectedModel": "claude-sonnet-4-6",
+  "discoveredClaudeModels": 13,
+  "firstRun": {
+    "session": "3bed131c1b0828ed49085e68e6e56505",
+    "run": "7070a209a9e80a957186eb79b95f492a",
+    "membershipSnapshot": {
+      "folders": [
+        {
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+          "root": "C:\\xMindNativeValidation\\ui-workspaces-0.1.28-20261018\\project"
+        },
+        {
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000",
+          "root": "C:\\xMindNativeValidation\\ui-workspaces-0.1.28-20261018\\extra"
+        }
+      ],
+      "primary_folder_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+      "revision": 2,
+      "snapshot": "run_admission",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000"
+    },
+    "reads": [
+      {
+        "content": "primary workspace marker 20261018\n",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+        "path": "primary-marker.txt",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+        "workspace_revision": 2
+      },
+      {
+        "content": "attached workspace marker 20261018\n",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000",
+        "path": "attached-marker.txt",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+        "workspace_revision": 2
+      }
+    ],
+    "reviewedCreateOperation": "97e7260b7e1b199a44ba1348b4e51343",
+    "operations": [
+      {
+        "id": "97e7260b7e1b199a44ba1348b4e51343",
+        "tool": "create_file",
+        "state": "succeeded",
+        "decision_actor": "local-owner"
+      },
+      {
+        "id": "727f34edf8d774a7527d1b6bae79ade2",
+        "tool": "run_process",
+        "state": "succeeded",
+        "decision_actor": "trusted-process-profile:xlang3"
+      }
+    ],
+    "processReceipt": {
+      "elapsed_ms": 275,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "727f34edf8d774a7527d1b6bae79ade2",
+      "operation_id": "727f34edf8d774a7527d1b6bae79ade2",
+      "output_artifact": {
+        "operation_id": "727f34edf8d774a7527d1b6bae79ade2",
+        "state": "complete",
+        "stderr_bytes": 0,
+        "stdout_bytes": 22
+      },
+      "pid": 66096,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "stdout": {
+        "byte_count": 22,
+        "data": "workspace-binding-ok\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 22
+      },
+      "termination": "exited",
+      "truncated": false
+    },
+    "processAssertions": "Actual command checks xlang3 identity, two-line count and the second line against the attached value read by the model. The observer separately verifies both source files and the complete concatenated output.",
+    "processTimeoutMs": 600000,
+    "newFiles": [
+      "extra/workspace-binding-check.txt"
+    ],
+    "outputSha256": "e4f7a96cf0fd3a5415a03766787a0b895cd6cfaaac8f16be3814fc2863956990",
+    "historyMessages": 9,
+    "savedEvents": 266,
+    "reportedUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 148,
+        "input_tokens": 8306,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 148,
+        "prompt_tokens": 8306,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 157,
+        "input_tokens": 8874,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 157,
+        "prompt_tokens": 8874,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 246,
+        "input_tokens": 9162,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 246,
+        "prompt_tokens": 9162,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 167,
+        "input_tokens": 9629,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 167,
+        "prompt_tokens": 9629,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "finalReportCharacters": 589
+  },
+  "recovery": {
+    "scope": "Deliberate abrupt stop of an idle completed isolated owner; explicit public CLI --upgrade-backend profile-info, then browser refresh. Not unattended recovery or in-flight effect recovery.",
+    "fault": {
+      "at": "2026-10-18T20:49:01.8959362Z",
+      "pid": 62284,
+      "cimBirth": "2026-10-18T20:43:09.9317980Z",
+      "boundBirth": "2026-10-18T20:43:09.9317983Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-u28\\97a6abd52a4b1dc738921d241ca3e2244023270ab8053b857fdaad54d59f25a2\\runtime-99b6f94a7ad13aed26631ddb23406aad2d0e1be9e125e29b0e71a41e6f8ed612\\xmind.exe",
+      "reason": "Intentional abrupt-stop injection of idle isolated test owner after completed receipts were saved",
+      "originalOwnerExitConfirmed": true,
+      "identityCheckedWithBoundProcessHandle": true,
+      "birthComparedAtCimMicrosecondPrecision": true,
+      "notAnObservationTimeout": true
+    },
+    "replacement": {
+      "at": "2026-10-18T20:49:45.8211725Z",
+      "pid": 22560,
+      "birth": "2026-10-18T20:49:44.4275690Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-u28\\97a6abd52a4b1dc738921d241ca3e2244023270ab8053b857fdaad54d59f25a2\\runtime-3247b8fe462a1c541fe0ac21aefa1b944b153f547c911f0c9e29b4c0fac4e6f4\\xmind.exe",
+      "origin": "http://127.0.0.1:57382",
+      "profileDirectory": "C:\\Users\\shaw9\\.xMind\\p-u28\\97a6abd52a4b1dc738921d241ca3e2244023270ab8053b857fdaad54d59f25a2",
+      "started": true,
+      "previousPid": 62284
+    },
+    "originalNineMessagesPreserved": true,
+    "oldEffectOperationsReplayed": false,
+    "expectedOutageHttpFailures": [
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      },
+      {
+        "path": "/v1/sessions",
+        "status": 503,
+        "method": "GET",
+        "value": {
+          "detail": "Native backend observation unavailable; reconnect this profile"
+        }
+      }
+    ],
+    "providerKeysReentered": false,
+    "internalStartupAttemptsNotEstablished": true
+  },
+  "followup": {
+    "run": "00bb6b24eee9018937cd673d01ceacad",
+    "historyMessages": 13,
+    "savedEvents": 60,
+    "terminal": "completed",
+    "tools": [
+      {
+        "activity_id": "00bb6b24eee9018937cd673d01ceacad:818512554b2e9cca12466ece7115e826:0",
+        "call_id": "toolu_016YBdSdJupPFKdbjhKzquoG",
+        "data": {
+          "content": "primary workspace marker 20261018\nattached workspace marker 20261018\n",
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:d2613b00000002000000000000000000",
+          "path": "workspace-binding-check.txt",
+          "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000",
+          "workspace_revision": 2
+        },
+        "name": "read_file"
+      }
+    ],
+    "journaledEffectOperations": [],
+    "reportedUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 110,
+        "input_tokens": 9694,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 110,
+        "prompt_tokens": 9694,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 42,
+        "input_tokens": 10085,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 42,
+        "prompt_tokens": 10085,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "reportedInputTokens": 19779,
+    "reportedOutputTokens": 152,
+    "actualFinalReply": "The exact two lines from `workspace-binding-check.txt` in the extra folder:\n\n```\nprimary workspace marker 20261018\nattached workspace marker 20261018\n```",
+    "dataCorrect": true,
+    "requestedBareTwoLineFormatSatisfied": false,
+    "contextAuthorityReprojectionEventObserved": false
+  },
+  "refreshFix": {
+    "source": "4f5d116e3f52a8d398532fc8efaf3ebb3bfc4f91",
+    "cause": "Workspace create/switch cleared busy state after the explorer had disabled Refresh; the outer finally did not restore that control.",
+    "automaticExplorerRefreshAfterAgentWriteImplemented": false,
+    "manualRefreshAfterWorkspaceSwitchAndCreationVerified": true,
+    "regressionBefore": {
+      "passed": 28,
+      "failed": 2
+    },
+    "regressionAfter": {
+      "passed": 30,
+      "failed": 0
+    }
+  },
+  "finalReadOnlyObserver": {
+    "startedAt": "2026-10-18T21:20:23.366Z",
+    "scope": "Fresh isolated headless Edge after observer kernel reset and installation; no task resubmission",
+    "url": "http://127.0.0.1:52121/ui/",
+    "session": "3bed131c1b0828ed49085e68e6e56505",
+    "run": "00bb6b24eee9018937cd673d01ceacad",
+    "providerRequests": 0,
+    "errors": [],
+    "requests": [
+      {
+        "path": "/ui/",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/chat.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/browser.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/patch-review.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/terminal.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm-fit.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/purify.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/marked.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/chat.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/browser.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/client.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/session",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/workspaces",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/agent/planning",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/models",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/graphs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/active",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/workspaces",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/model",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/active",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/permissions",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles/models",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/tree-events",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/children",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/operations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/tree-events",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/children",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/operations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/plan",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/mcp-inputs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/messages",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/runs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/agents",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/agent",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/inbox",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles/models",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/3bed131c1b0828ed49085e68e6e56505/history",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/runs/00bb6b24eee9018937cd673d01ceacad/tree-events",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/browser.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/file",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace",
+        "method": "GET",
+        "status": 200
+      }
+    ],
+    "completedAt": "2026-10-18T21:20:25.618Z",
+    "browserVersion": "155.0.4283.62",
+    "workspace": {
+      "authority_id": "7fa6646f8d7055dd4d5352318defc6bc",
+      "configured": true,
+      "root": "C:\\xMindNativeValidation\\ui-workspaces-0.1.28-20261018\\project",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:d0613b00000003000000000000000000"
+    },
+    "workspaces": 3,
+    "historyMessages": 13,
+    "refreshEnabled": true,
+    "filePreviewCorrect": true,
+    "credentialsPrompted": false,
+    "replayedEffects": false,
+    "actualVsCodeActivation": false,
+    "passed": true
+  },
+  "fixtureInputsUnchanged": true,
+  "visibleDesktopAcceptance": false,
+  "actualVsCodeActivation": false,
+  "cpythonExecuted": false,
+  "functionalWorkspaceCodingAndIdleRecoveryVerified": true,
+  "allPromptRequirementsSatisfied": false,
+  "observerLimitations": [
+    "Initial switch assertion observed the workspace label before the asynchronous explorer response. The same switch completed; waiting for the actual marker file confirmed the explorer and no request was repeated.",
+    "Post-recovery observer initially saw the old completed run state before the new run finished; the same admitted run was observed to terminal without resubmission.",
+    "A REPL read-only runtime inventory timed out and reset only its observer kernel. The same inventories completed externally in 1.8 seconds; product owners remained live.",
+    "The first final Refresh observer left the modal workspace dialog open. A retained diagnostic proved pointer interception by that dialog. The corrected sequence waited for settled controls and closed the dialog; no product task was resubmitted."
+  ],
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/after-backend-recovery.png",
+      "sha256": "47955ac8804cda256c470f95fa63657c9facb5182e21fe41ac825984f4737be5"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/after-recovery-events.json",
+      "sha256": "abcc8fd1cfc6d4c6b8c94273df0942c20df2a58911387ef66bc7d7d8ebb279db"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/after-recovery-history.json",
+      "sha256": "44da396e889a8095c92a902f7fa507db4c356a281daf2ef647b964f73e1d0590"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/after-recovery-operations.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/attached-folder.png",
+      "sha256": "3a41f60963f1a78f56319281fa7fb45577e0661aa2b5d41e3cfabba463819c6a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/attached-write-completed.png",
+      "sha256": "37a087f2705702ba83f16d3db3a67b906c69ba18d6abfce2eed126d87032a065"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/attached-write-proposal.png",
+      "sha256": "8caf42f911f1809b5fb8611202de4e07715878a36ae44b20a40f6201d48a52f4"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/baseline-acceptance.json",
+      "sha256": "a7fbd9ef5bcf8aa109c67722937ee1a1cfb6822a74a512dfb0bfd1724952954f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/file-proposal.json",
+      "sha256": "b166c978652a578c1ff799bdf792678a19fe09b9d94761f6af4190adfcbcd86f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/final-installed-29-observer.json",
+      "sha256": "f7e5af759ec8abf94af8292ff99200da73cf16b7fbd111dd9efd52dbe2720cb9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/final-installed-29.png",
+      "sha256": "43d7775d71c4959366aa7b60bb6e85fa85ca038633714144409ab94be70c372e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/final-workspace-page.png",
+      "sha256": "50969fbabae23be8436dafa206b3251d14991838c9a8881f915efabb99086946"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/fixture-files-after.json",
+      "sha256": "9ff73b489a3535bbbad5d3231a5453885b08849bc679b9baa2d3a3cd13bbe0c9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/fixture-inputs-before.json",
+      "sha256": "c5b2507e357dce96be5cb12551a117352f47a94ca6d5bfc9b56ba20a95e8241b"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/history-before-approval.json",
+      "sha256": "d7cadf01f95ef801497ddfb7a2814b9bb1939773358dc15608b03311a581f761"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/history.json",
+      "sha256": "9510c8189b5b61ee2c441a8f016f848b973b3d0997c02ef82f7fbd3d43e6a219"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/operations.json",
+      "sha256": "5bed174295de140839f94321a0b6c4806ae54ced15ec5a55bb382f0059b8e71c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/post-recovery-model-turn.png",
+      "sha256": "50969fbabae23be8436dafa206b3251d14991838c9a8881f915efabb99086946"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/refresh-after-create-fixed.png",
+      "sha256": "4347a3508852afb1bece5bd9fe1e255f9b8229c1f46d36a30f654ebb38fa3385"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/refresh-after-switch-fixed.png",
+      "sha256": "236edae359db9196c9507a7e2d7877ad156858997c98b1f11984a3f428bbfea1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/refresh-before-click-probe-29.json",
+      "sha256": "699f9fd5e062746f433480b6018d8e427c6157c7cf34495bc867bc9f8b2a627d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/refresh-before-click-probe-29.png",
+      "sha256": "feac2e706e72f65c3492611417b059493652b2fc2a105638540cb040de9819bc"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/refresh-click-probe-29.json",
+      "sha256": "f13deb284e699660a076a493cc0ffae600aa2e14e91f24692b9976bb7ac6d974"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/request.json",
+      "sha256": "b861751364d9a4198e0eacf7feb0f54a283276194f77af340a132cb68a4a17e4"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/requests-after-recovery.json",
+      "sha256": "b2a15dc29a3405ef39747f0a8264d2d1fe53390dc719214616425ada8b96bf6a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/responses-after-recovery.json",
+      "sha256": "763a52f7b5c7f9110e3f5aba0d9d55b4a52106feb3493e5afbaa5413d4e1c721"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/responses-before-recovery.json",
+      "sha256": "be4edcd302644b2e1208c70428828f91d32d6cdede351a5a62306db56dcb5c75"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/saved-events.json",
+      "sha256": "e733758b9f8693b3125871ae22bfcfc812b57ddc063c4caed08dfc01c77cdf7d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/status.json",
+      "sha256": "d4b083fb14a1cee4475dc9953aca2c378389efde6332a8acdbaf0de3a1e5ee8f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/workspace-created.png",
+      "sha256": "158166250985e14d168d74e46e575206c003d4fab02cfee40e78420f24bb5d50"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/workspace-membership.json",
+      "sha256": "429cda1c7052e2b845f96981b3f65fe9eab5366a6684ec0f0fe8c115678b00a3"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/workspace-session-restored.png",
+      "sha256": "47955ac8804cda256c470f95fa63657c9facb5182e21fe41ac825984f4737be5"
+    },
+    {
+      "path": "C:/xMindNativeValidation/rendered-workspaces-0.1.28-20261018/workspace-switch-restored.png",
+      "sha256": "baf69e64476785f487c73eccfbe03494e5ce9303416a74e63e9626a23950028f"
+    }
+  ]
+}

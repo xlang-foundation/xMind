@@ -1,6 +1,38 @@
 # Reviewable milestones
 
-## Current checkpoint — 0.1.28, 2026-10-18
+## Current checkpoint — 0.1.29, 2026-10-18
+
+Workspace creation and switching now restore the Refresh control when the
+asynchronous workspace change settles. The regression failed 2 of 30 focused
+browser checks before the fix; all 30 pass afterward. Complete staging and
+hosted client fixtures pass 422/142. All 2,448 VSIX files and 2,445 installed
+non-metadata payloads verify. The native runtime remains byte-identical to
+accepted 0.1.27; no native rebuild or new full native-suite pass is claimed.
+The 0.1.28 installation is backed up; settings and six prior profile directory
+names are preserved. VS Code remains closed; actual pane activation is open.
+[Package evidence](evidence/coding-package-0.1.29-20261018.json).
+
+Actual headless Edge controls create a workspace, attach a second folder,
+switch away and back, approve a Claude file proposal in the attached folder
+and run an actual xlang3 check there. An intentional idle-owner abrupt stop,
+explicit public CLI recovery and browser refresh preserve the nine original
+messages. A real read-only Claude follow-up completes; all 13 messages restore
+without effect replay. Fifteen expected HTTP 503 responses during the outage
+remain recorded. This is explicit idle recovery, not unattended or in-flight
+recovery. The model returns correct file data with extra introductory text and
+code fences, missing the requested bare two-line format. A final observer
+passes Refresh and file preview with no page errors; its earlier modal-dialog
+click obstruction is retained as an observer failure.
+[Workspace and recovery scope](evidence/rendered-workspaces-and-recovery-20261018.json).
+
+The existing page at http://127.0.0.1:62342/ui/ receives the one changed browser
+asset without restarting its host/backend or changing its 22-message session.
+Hosted native run 39160294480 is terminal failure, 150/151 in 657.03 seconds,
+SDK smoke 2/2. Its graph PowerShell process times out with no output; cause is
+unestablished. The phase-marker diagnostic job remains separate and in progress.
+[Failure receipt](evidence/hosted-native-9e4b118-failure-20261018.json).
+
+## Previous checkpoint — 0.1.28, 2026-10-18
 
 The final browser/sidebar UI is packaged and installed in 0.1.28. Complete local
 staging and hosted client fixtures pass 422/142. All archive/installed payloads
