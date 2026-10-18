@@ -51,7 +51,8 @@ execution.
    SQLite handles and backend runtime objects stay in the owner. The
    `AgentRunJournal`, `AgentContextJournal` and `AgentModelGateway` seams now
    exist. Workspace model-tool calls also cross a typed, run-scoped invocation
-   envelope; MCP/A2A and effect dispatch still use concrete backend services.
+   envelope. File-tool preparation and effects now cross `AgentFileToolHost`;
+   MCP/A2A and other backend services still need owner capability boundaries.
 2. Keep the current in-process implementation as the first host adapter. Run
    the same AgentRunner contract through this host and the existing path,
    covering provider continuations, workspace reads, approved edits, process
@@ -73,6 +74,29 @@ execution.
 6. Accept through the installed webpage and VS Code clients, and verify that
    the same process-bound run remains inspectable and controllable after either
    view reconnects.
+
+### File-tool owner boundary — current source
+
+The shared AgentRunner sends owned run/attempt/call identity, workspace revision,
+folder ID, tool name and JSON arguments to `AgentFileToolHost`. Its local owner
+keeps workspace handles, instruction contexts, prepared patches, permissions,
+approval expiry, operation IDs and the xlang3-backed persistence service. It
+prepares and executes edit, create, single/multi-folder patch and restore calls.
+The invocation cannot supply a root path, native object, prepared plan or grant.
+The owner rejects foreign or retired runs, changed membership bindings, tools
+outside its frozen catalogue, inherited denials and a repeated call identity
+within its lifetime. Undelivered guidance returns the existing model-visible
+request for a fresh model turn without an approval proposal. Actual partial
+patch outcomes and uncertain-effect failures retain the existing executors.
+
+This is an in-process owner boundary. Its policy and folder/instruction
+capabilities are constructed by trusted backend code and must outlive it.
+AgentRunner still requires concrete backend services for admission, instruction
+delivery and MCP/A2A. The local call guard is not durable RPC deduplication,
+worker authentication or crash recovery. Process placement must remain
+unavailable until a complete owner host, authenticated transport, supervisor and
+restart/reconciliation contracts execute the same agent loop. Current-source
+build and native validation are tracked separately from installed 0.1.21.
 
 ### Pinned xlang3 LRPC transport audit — 2026-10-17
 

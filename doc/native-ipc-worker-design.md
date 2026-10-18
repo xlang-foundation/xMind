@@ -80,6 +80,17 @@ Permission grant lookup still uses the local persistence adapter, and effect
 executors still receive backend persistence directly; approvals and effect
 dispatch have not yet become a worker RPC.
 
+The file-effect slice now uses `AgentFileToolHost`: the run loop sends owned
+identity, membership and argument values. The local owner performs folder
+resolution, guidance checks, inherited-denial checks, preparation, controller
+approval and edit/create/patch/restore execution. Prepared filesystem plans,
+instruction verifiers, expiry and operation IDs stay in the backend. The owner
+checks its frozen catalogue and active run and rejects duplicate call identity
+within its lifetime. This is not an authenticated or durable worker RPC; the
+current owner is constructed inside the in-process execution path. Remaining
+admission, instruction, MCP/A2A and other concrete dependencies still prevent a
+separate AgentRunner process. See [placement status](agent-process-placement.md).
+
 The remaining product work is a placement-aware execution path for the same
 agent/model/tool loop while preserving the parent backend's run identity,
 SQLite persistence, permissions, approvals, event stream and effect journal.
