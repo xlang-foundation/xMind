@@ -12,12 +12,13 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'ad7e74058ebdc941ec656c315a8a47a01c12d74e'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'b0da71f22e9591b6bd99883b21c50ad85dbe4bed'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
 # This pinned runtime includes xMind's tested pytest/async compatibility and
-# native package inventory; applying the historical overlay again fails.
+# native package inventory, including pydantic-core distribution metadata;
+# applying the historical overlay again fails.
 $ciVsWhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $ciVisualStudio=(& $ciVsWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json|ConvertFrom-Json)|Select-Object -First 1
 if($LASTEXITCODE -ne 0 -or -not $ciVisualStudio){throw 'No supported MSVC x64 toolchain is installed.'}
