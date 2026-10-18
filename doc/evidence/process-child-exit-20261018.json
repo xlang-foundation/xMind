@@ -95,10 +95,27 @@
     "establishesThisFix": false
   },
   "remaining": [
-    "Full current-source native/hosted acceptance and installed packaging of this fix.",
+    "Hosted native acceptance and installed packaging of this fix; complete local source 449bdce gate passes 149/149.",
     "Older unconfirmed anthropic_json_event_invalid child outcome.",
     "Rendered external-browser and editor acceptance.",
     "Agent process placement and remaining protocol recovery scope."
   ],
-  "cpythonExecuted": false
+  "cpythonExecuted": false,
+  "completeNative": {
+    "sourceRevision": "449bdcee27094d9d2cdd25e23b503681d66ffae9",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "passed": 149,
+    "failed": 0,
+    "seconds": 904.36,
+    "projectFiles": 2599,
+    "pureLibraryFiles": 1870,
+    "nativeBinaries": 124,
+    "allFrozenInputsUnchanged": true,
+    "sourceManifestSha256": "7a8c63172850c5c1b7ffa5b4926358e5c52c330a6dc08dd2bd3a883514b9027c",
+    "ctestLogSha256": "cf3b887831ad8d3232ff736992189a55cc2dab3081d101e3cfd7d154cb727916",
+    "detailsSha256": "42a459112aeaadfe64e37570d25e49bff1790d22a26246f3e22c9a8ada7dc9fa",
+    "nativeSha256": "0c1573a20d61d95cfbc12366cb2de2a57c13a89fa6a039366b18e3dc2c8e691a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "hostedOnlyTrustMutationExcluded": true
+  }
 }

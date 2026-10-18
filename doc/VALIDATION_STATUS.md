@@ -23,6 +23,19 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Current hosted/native investigation — 2026-10-18
+
+Hosted source 878bd88 passes 149/150 contracts and both SDK smoke checks. The sole
+failure is the attached-folder graph PowerShell process, whose operation becomes
+uncertain. The retained log lacks its actual termination/exit result; the cause
+remains unconfirmed. [Digest-verified evidence](evidence/hosted-native-878-failure-20261018.json).
+
+The older live Claude child selected inspect_plan, emitted a zero-byte argument
+fragment and failed in JSON decoding before any tool effect. The original raw
+provider frame is unavailable. A narrowly staged regression/candidate addresses
+empty deltas while preserving strict nonempty JSON checks; native execution is
+pending the completed graph gate checkpoint. [Research](evidence/claude-empty-tool-research-20261018.json).
+
 ## Direct process-child failure — 2026-10-18
 
 An observed nonzero command exit now fails its deterministic graph or dynamic-plan
@@ -40,10 +53,10 @@ failed child and once-only effect, with no dependent execution. All 2,599 frozen
 project inputs, SDK/library inputs and 124 native binaries remain unchanged.
 [Source receipt](evidence/process-child-exit-20261018.json).
 
-The installed 0.1.23 package/page remain unchanged. The complete current-source
-149-test gate is **running** at `449bdce` with its inputs frozen; its outcome is
-separate from the earlier 878bd88 gate. Hosted native acceptance, packaging this
-fix, and rendered client acceptance remain pending.
+The installed 0.1.23 package/page remain unchanged. The complete source `449bdce` gate passes **149/149 in 904.36 seconds**, with
+all frozen inputs unchanged. [Full gate receipt](evidence/process-child-full-gate-20261018.json).
+This is separate from the earlier 878bd88 gate. Hosted native acceptance,
+packaging this fix, and rendered client acceptance remain pending.
 
 ## Installed coding package 0.1.23 — 2026-10-18
 

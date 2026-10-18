@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-18T16:51:55.388Z",
+  "run": 39142318957,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39142318957",
+  "sourceRevision": "878bd88d4bc6c8af662ca1048177cb2ede791010",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "status": "completed",
+  "conclusion": "failure",
+  "contracts": {
+    "passed": 149,
+    "total": 150,
+    "failed": [
+      "native_graph_runner_contract"
+    ],
+    "seconds": 715.19
+  },
+  "sdkSmoke": {
+    "passed": 2,
+    "total": 2,
+    "seconds": 3.74
+  },
+  "artifact": {
+    "id": 12143353103,
+    "bytes": 58887,
+    "sha256": "808e86b6f4896fce488485df5b1f2c9c355b40eddc6f64f80bebb3648eae91f5",
+    "digestVerified": true
+  },
+  "ctestLogSha256": "138393b5445082b219a057d79a34a08948706d4585de4ed059c768baecb83a80",
+  "lastTestSha256": "d6573cd9ec65c5dbe4fdfdfc3866fd70dbc46484eb3cd34eec9055f94f7fb93f",
+  "failure": {
+    "scenario": "Graph direct process in captured attached folder",
+    "fixtureCommand": "Start-Sleep -Seconds 6; [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path)",
+    "trustedProcessBudgetMs": 30000,
+    "testElapsedSeconds": 35.71,
+    "childState": "failed",
+    "operationState": "uncertain",
+    "graphCheckpointState": "uncertain",
+    "reason": "graph_process_effect_uncertain",
+    "actualProcessTermination": "not present in retained diagnostics",
+    "actualProcessExit": "not present in retained diagnostics",
+    "causeConfirmed": false,
+    "localReproduction": "Existing full/focused/current live local gates pass the same positive command. No new native test was started during the running full gate."
+  },
+  "nextEvidence": "Candidate test diagnostics retain the durable process termination/exit/elapsed/budget/output-artifact metadata and preserve a failed fixture directory. They do not change process budgets or claim the hosted failure fixed.",
+  "provenance": {
+    "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "processors": 4,
+    "build_parallelism": 4,
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain": "Visual Studio 18 2026",
+    "xmind": "878bd88d4bc6c8af662ca1048177cb2ede791010",
+    "windows_default_owner_matches_user": false,
+    "toolchain_version": "18.10.12224.181",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb"
+  },
+  "cpythonExecuted": false
+}

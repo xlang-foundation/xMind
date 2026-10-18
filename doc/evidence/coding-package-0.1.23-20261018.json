@@ -467,12 +467,29 @@
   },
   "hostedNative": {
     "run": 39142318957,
-    "status": "in_progress_at_observation",
+    "status": "completed",
     "url": "https://github.com/xlang-foundation/xMind/actions/runs/39142318957",
     "previousFailedRun": 39139479684,
     "previousFailure": "SDK Unicode CLI fixture had no linecache source before any xMind contract ran.",
     "previousArtifactSha256": "a058b95545de210a3833a63854bcf4c83d31c4ef30b325b48ef2de4f266ea2f5",
-    "correction": "Supply pinned allowed standard-library source through PYTHONPATH only for the SDK smoke, restoring the prior environment afterward. The preserved native baseline still fails its unique Unicode probe; current SDK smoke passes."
+    "correction": "Supply pinned allowed standard-library source through PYTHONPATH only for the SDK smoke, restoring the prior environment afterward. The preserved native baseline still fails its unique Unicode probe; current SDK smoke passes.",
+    "conclusion": "failure",
+    "contracts": {
+      "passed": 149,
+      "total": 150,
+      "failed": [
+        "native_graph_runner_contract"
+      ],
+      "seconds": 715.19
+    },
+    "artifact": {
+      "id": 12143353103,
+      "bytes": 58887,
+      "sha256": "808e86b6f4896fce488485df5b1f2c9c355b40eddc6f64f80bebb3648eae91f5",
+      "digestVerified": true
+    },
+    "details": "hosted-native-878-failure-20261018.json",
+    "note": "SDK smoke is fixed and passes 2/2. One graph process outcome is uncertain; its actual termination/exit is absent, so the cause remains unconfirmed. Current local gates are separate."
   },
   "logs": {
     "pip-bootstrap-extension-full-20261018.log": "94b312aa57919482e4ced35c2544a8dd56b8bfd99bc6c586058a86d61f907abd",

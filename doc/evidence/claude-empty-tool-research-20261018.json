@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-10-18T16:44:05.288Z",
+  "root": "b55b3bfb323c12a432b244ca9cc93747",
+  "child": "09a2f7e97349b7e8331bb309e9c1a300",
+  "readOnlyExistingBackend": {
+    "pid": 33392,
+    "birthAndImageVerified": true,
+    "requests": "GET saved tree-events only; DPAPI token retained in memory, no startup, write, inference or task admission.",
+    "savedTreeEvents": 561,
+    "lastCursor": 561
+  },
+  "savedEventsSha256": "77fe61629cff58b63c81a00eca1b7f16fe46b54476184d3d4bb4560ea94bc7eb",
+  "childEvents": [
+    {
+      "seq": 292,
+      "kind": "run.queued"
+    },
+    {
+      "seq": 293,
+      "kind": "plan.child.admitted"
+    },
+    {
+      "seq": 294,
+      "kind": "run.running"
+    },
+    {
+      "seq": 295,
+      "kind": "agent.workspace_membership"
+    },
+    {
+      "seq": 296,
+      "kind": "agent.plan.preset"
+    },
+    {
+      "seq": 297,
+      "kind": "agent.repository_instructions"
+    },
+    {
+      "seq": 298,
+      "kind": "agent.repository_scope"
+    },
+    {
+      "seq": 299,
+      "kind": "budget.model_call.reserved"
+    },
+    {
+      "seq": 300,
+      "kind": "budget.model_call.started"
+    },
+    {
+      "seq": 301,
+      "kind": "model.usage"
+    },
+    {
+      "seq": 302,
+      "kind": "model.tool_delta",
+      "name": "inspect_plan",
+      "argumentBytes": 0
+    },
+    {
+      "seq": 303,
+      "kind": "model.tool_delta",
+      "name": "inspect_plan",
+      "argumentBytes": 0
+    },
+    {
+      "seq": 304,
+      "kind": "budget.model_call.finished"
+    },
+    {
+      "seq": 305,
+      "kind": "run.failed",
+      "reason": "model_protocol_error",
+      "protocol_error_code": "anthropic_json_event_invalid"
+    },
+    {
+      "seq": 306,
+      "kind": "plan.child.settled"
+    }
+  ],
+  "childMessages": 1,
+  "childAssistantMessages": 0,
+  "childOperations": 0,
+  "hypothesis": "The empty inspect_plan fragment reaches content_block_stop with an empty accumulator; the decoder parses that empty string instead of retaining its already validated initial object.",
+  "originalRawProviderWireAvailable": false,
+  "causality": "Saved semantic events and source support this hypothesis; the original raw failing frame is unavailable. Independent component/integration regressions are staged but have not yet executed because another full native gate is live.",
+  "reference": {
+    "repository": "anthropics/anthropic-sdk-python",
+    "commit": "02c93c199b78c3f9bbe59cf424162f8a3868d5ed",
+    "url": "https://github.com/anthropics/anthropic-sdk-python/blob/02c93c199b78c3f9bbe59cf424162f8a3868d5ed/src/anthropic/lib/streaming/_messages.py#L464",
+    "sha256": "1a9901c6674af6cdbd1faa043986238d5112c6263834e501027e0fffd3fc9217",
+    "observation": "The accumulator only parses when accumulated bytes are nonempty; initial tool input remains otherwise.",
+    "executed": false,
+    "copiedImplementation": false
+  },
+  "proposedNativeChange": "At closed tool blocks, parse accumulated arguments only when nonempty. Initial input was already strictly validated. Nonempty malformed, duplicate and non-object inputs remain rejected.",
+  "mainSourceUnchanged": true,
+  "cpythonExecuted": false
+}
