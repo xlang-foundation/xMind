@@ -19,8 +19,8 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-source `90ec355` VSIX with runtime `22d923b`/xlang3 `b0da71f` installed in a fresh VS Code profile and started its managed TestProj backend. Current extension/browser contracts pass 392/392 and 134/134. TestProj pytest passed 9/9 and the webpage Vite build passed. | Approval-gated coding interaction through this exact current-source VSIX, broader multi-file/editor workflows, long-task reliability, release-accepted packaging, and full-screen CLI validation. |
-| Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. | Broader live-provider and failure/recovery coverage. |
+| Coding clients | Webpage, VS Code, and CLI each completed a live approval-gated edit and xlang3 execution. Current-source `90ec355` VSIX with runtime `22d923b`/xlang3 `b0da71f` was installed in a fresh VS Code profile and completed an approved edit, xlang3 run and approved restore on TestProj. The post-retry VS Code suite passes 392/392; browser suite passes 134/134. TestProj pytest passed 9/9 and the webpage Vite build passed. | Broader multi-file/editor workflows, long-task reliability, release-accepted packaging, and full-screen CLI validation. |
+| Provider gateway | Saved Claude, Gemini, DeepSeek, and OpenAI profiles are discoverable; live provider-backed runs report actual usage and timings. A fresh packaged VS Code profile fetched 20 OpenAI models from its saved key and completed a coding run without re-entering it. Saved-profile discovery now retries transient startup failures with bounded backoff; 392 extension contracts pass. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
 Primary evidence: [current-main native Release build and CTest against pinned xlang3](evidence/native-current-main-pinned-xlang3-release-20261017.json), [pinned xlang3 Release build and CTest](evidence/native-pinned-xlang3-release-20261017.json), [prior native Release gate](evidence/native-current-source-release-ctest-20261017.json), [webpage coding](evidence/webpage-fresh-session-coding-20261017.json), [current-main VS Code development host](evidence/vscode-current-main-live-coding-20261017.json), [current-main packaged VSIX](evidence/vscode-current-main-packaged-coding-20261017.json), [CLI coding](evidence/xmind-cli-approval-gated-coding-20261017.json), [TestProj xlang3 pytest](evidence/testproj-fastapi-pytest-xlang3-20261017.json). This matrix states the current verified scope; historical checkpoint notes below retain their own dates and limits.
@@ -48,8 +48,28 @@ fresh VS Code profile against `D:/CantorAI2026/TestProj`. The saved trusted
 provider-config path was supplied to the native view. The current VS Code
 contract suite passes **392/392** and the browser suite passes **134/134**.
 This closes fresh installation and managed startup for the current runtime;
-the coding request/approval/edit interaction has not yet been repeated through
-this exact package. See the [launch evidence](evidence/vscode-current-source-22d923b-packaged-launch-20261017.json).
+the packaged coding interaction is recorded below. See the
+[launch evidence](evidence/vscode-current-source-22d923b-packaged-launch-20261017.json).
+
+## Current-source packaged VS Code coding — 2026-10-17
+
+The same `90ec355` VSIX completed a fresh TestProj coding turn after applying
+trusted runtime configuration. The user-supplied OpenAI profile fetched 20
+models without re-entering the key; `gpt-6.1-sol` was selected. The agent
+proposed one exact change to `xmind_vscode_coding_smoke.py`, which was reviewed
+and approved in the packaged sidebar. Its registered xlang3 process exited 0
+in 0.14 seconds and printed the expected string. A second reviewed patch
+restored the original file, and its SHA-256 matched the pre-run value. The
+package is still a development candidate and its backend needed one explicit
+trusted-configuration restart after opening quiesced. See the [machine-readable
+acceptance record](evidence/vscode-current-source-packaged-coding-20261017.json).
+
+After this live observation exposed provider startup racing the single 250 ms
+saved-key discovery retry, the retry was changed to bounded 250/500/1000 ms
+backoff. The regression test now covers two consecutive transient failures
+before success; all 392 VS Code contracts pass. The post-fix extension source
+has contract validation, while the live packaged interaction above used the
+preceding source revision.
 
 ## Hosted browser and VS Code gate — 2026-10-17
 

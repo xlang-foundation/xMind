@@ -1045,12 +1045,17 @@ class ProviderProfileController {
           catalogue=await this.client.discoverProfileModels(id,latest.route_id,undefined,this.state.revision);
         }else if(savedCredential&&(!Number.isInteger(error.status)||[502,503,504].includes(error.status))){
           // A just-selected saved profile can race native/provider readiness on
-          // first use. Retry only transient discovery failures, once, and only
-          // while the same saved profile remains selected.
-          await new Promise(resolve=>setTimeout(resolve,250));
-          if(!this.current(epoch))return true;
-          if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
-          catalogue=await this.client.discoverProfileModels(id,saved.route_id,undefined,this.state.revision);
+          // first use. Retry transient discovery failures with bounded backoff,
+          // and only while the same backend and profile remain selected.
+          let retryError=error;
+          for(const delay of [250,500,1000]){
+            await new Promise(resolve=>setTimeout(resolve,delay));
+            if(!this.current(epoch))return true;
+            if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
+            try{catalogue=await this.client.discoverProfileModels(id,saved.route_id,undefined,this.state.revision);break;}
+            catch(retry){retryError=retry;if(Number.isInteger(retry.status)&&![502,503,504].includes(retry.status))throw retry;}
+          }
+          if(!catalogue)throw retryError;
         }else throw error;
       }
       if(!this.current(epoch))return true;

@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-17",
+  "scope": "Fresh-profile coding acceptance through the current-source packaged VS Code extension",
+  "extension_source_revision": "90ec355d3dad0e4f7bca2fddc6e6ff265123c339",
+  "extension_version": "0.1.13",
+  "package": {
+    "path": "C:/xMindNativeValidation/agentflow-0.1.13-xmind-90ec355-current.vsix",
+    "sha256": "a52313455e9f499c8117941dabfd1c5c48d65e2300f99c9bb4ff2f597a41c261",
+    "bytes": 31122847,
+    "archive_files": 1951,
+    "runtime_inventory_files": 1905
+  },
+  "runtime": {
+    "xmind_revision": "22d923bc34d2eda42673c03854eb8b5e5c8f16fc",
+    "xmind_executable_sha256": "1b273630023fc72dd59b5a65b517fba63c938a3f2ce444f4fdda618a54c6d733",
+    "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "xlang3_runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+    "xlang3_executable_sha256": "d3fbc91e94ea065639407437b799c01f8772c92d3ea82eb64789ce33cc64daeb",
+    "release_accepted": false
+  },
+  "installation": {
+    "vscode_version": "1.142.0",
+    "fresh_user_data": "C:/xMindNativeValidation/vscode-userdata-90ec355",
+    "extensions_directory": "C:/xMindNativeValidation/vscode-extensions-90ec355",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "managed_backend_connected": true,
+    "trusted_provider_config_path": "D:/CantorAI2026/xMind/.config/providers.yaml",
+    "provider_secret_recorded": false,
+    "provider": "OpenAI Responses",
+    "model": "gpt-6.1-sol",
+    "discovered_model_count": 20
+  },
+  "coding_run": {
+    "run_id": "390ef41c0e62cc2752c9c43dd910cd36",
+    "state": "completed",
+    "edit": {
+      "operation_id": "880073c80d13df9c609560dea5f990c4",
+      "approval": "Exact one-file edit reviewed and allowed in the packaged VS Code sidebar",
+      "path": "xmind_vscode_coding_smoke.py",
+      "before_sha256": "e45e9c9306cad8d53289ab357745a27b9c73fde7eb2ed1875a22774dcc6d17e2",
+      "after_sha256": "8d7cdedc02c62430cf20834c6ccd17f929aeef12eaff80255b675bf3f653c8f9"
+    },
+    "process": {
+      "operation_id": "82352cf7c8adb87dde42599f458ca4eb",
+      "profile": "xlang3",
+      "arguments": ["-B", "xmind_vscode_coding_smoke.py"],
+      "exit_code": 0,
+      "duration_seconds": 0.14,
+      "stdout": "xMind packaged VS Code coding works\\r\\n",
+      "stderr": ""
+    }
+  },
+  "cleanup": {
+    "restore_run_id": "e50250d3a9216b66ba02dd6c8f443908",
+    "approval": "Inverse patch reviewed and allowed in the packaged VS Code sidebar",
+    "final_sha256": "e45e9c9306cad8d53289ab357745a27b9c73fde7eb2ed1875a22774dcc6d17e2",
+    "original_content_restored": true
+  },
+  "client_contracts": {
+    "command": "npm.cmd test",
+    "passed": 392,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "The package was built from source revision 90ec355 before the later bounded provider-discovery retry change; that change is covered by the 392-test suite but is not in this installed package.",
+    "This proves one single-file coding workflow and restore in a local development package; it does not establish broad coding reliability or release acceptance.",
+    "The fresh managed backend required Apply Trusted Runtime Configuration after its first quiesced state before saved-provider discovery and coding could proceed."
+  ]
+}
