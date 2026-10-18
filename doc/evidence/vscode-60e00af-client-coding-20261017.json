@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-17",
+  "scope": "Live coding acceptance through the installed 60e00af VS Code client against an existing managed backend",
+  "extension_source_revision": "60e00af46bf75b134f28c42a6a7658dc50f55395",
+  "package": {
+    "path": "C:/xMindNativeValidation/agentflow-0.1.13-xmind-60e00af.vsix",
+    "sha256": "df5e519712080d01048b1f4fa8c6bc365c74d3a4413ff0aba6a42eea395bcd36",
+    "bytes": 31164991
+  },
+  "installation": {
+    "vscode_version": "1.142.0",
+    "extension_id": "agentflow-local.agentflow",
+    "extension_version": "0.1.13",
+    "extensions_directory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.13",
+    "client_sha256": "ea4169b372b583e1e845a02bea970bcdccf7b48beefd3e3f1c25e99fa2b9dc9f",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "backend_root": "D:/CantorAI2026/TestProj",
+    "provider": "OpenAI Responses",
+    "model": "gpt-6.1-sol"
+  },
+  "coding_run": {
+    "run_id": "8e2dc4f5f4ef0ec3e7420ccdc3713155",
+    "state": "completed",
+    "edit": {
+      "operation_id": "20ca437691d0da29a96a36096d90bd98",
+      "approval": "One-file patch reviewed and allowed in the installed VS Code sidebar",
+      "path": "xmind_vscode_coding_smoke.py",
+      "before_sha256": "e45e9c9306cad8d53289ab357745a27b9c73fde7eb2ed1875a22774dcc6d17e2"
+    },
+    "process": {
+      "operation_id": "1608d9c6bedc1d17c54938ed8c5823bf",
+      "profile": "xlang3",
+      "exit_code": 0,
+      "stdout": "xMind 60e packaged VS Code coding works\r\n",
+      "stderr": "",
+      "runtime_executable_path": "C:/xMindNativeValidation/profile-vscode-90ec355/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-f3c44b8184f58c919338011fc08d4756d31237ef87125965fead212145e008e6/xlang3.exe"
+    }
+  },
+  "cleanup": {
+    "restore_operation_id": "26111138b914e09e2ebbe7fd435a0956-0",
+    "restore_approval": "Inverse one-file patch reviewed and allowed in the installed VS Code sidebar",
+    "verification_process_operation_id": "00cf954ba599a4427e773ed818a2b9e1",
+    "verification_profile": "xlang3",
+    "verification_exit_code": 0,
+    "verification_stdout": "xMind VS Code coding works\r\n",
+    "final_sha256": "e45e9c9306cad8d53289ab357745a27b9c73fde7eb2ed1875a22774dcc6d17e2",
+    "original_content_restored": true
+  },
+  "limitations": [
+    "The 60e00af client completed the edit, approval, command, and restore flow against the TestProj backend.",
+    "The command record points to the managed runtime under the earlier 90ec355 profile. This does not prove that the 60e00af VSIX's bundled native runtime was the backend serving this run.",
+    "This proves one single-file coding workflow for the installed client, not broad coding reliability or release acceptance."
+  ]
+}

@@ -71,11 +71,15 @@ before success; all 392 VS Code contracts pass. The post-fix extension source
 has contract validation, while the live packaged interaction above used the
 preceding source revision.
 
-The post-fix source `60e00af` was then packaged and installed as
-`agentflow-local.agentflow@0.1.13` in the default VS Code profile. The installed
-`client.js` hash matches the source, and TestProj was opened with VS Code's
-reuse-window command. This confirms package installation only: no edit/run was
-observed through that newly installed package. See the [installation record](evidence/vscode-60e00af-installed-20261017.json).
+The post-fix source `60e00af` was packaged and installed as
+`agentflow-local.agentflow@0.1.13` in the default VS Code profile. The
+installed `client.js` hash matches the source. A live one-file edit, approval,
+xlang3 command, and approved restore then completed through that installed
+client in TestProj; the original fixture SHA-256 was verified after restore.
+The command record points to the managed backend runtime under the earlier
+`90ec355` profile, so this verifies the installed client against that existing
+backend but does not establish the `60e00af` VSIX's bundled runtime as the
+backend serving the run. See the [installation record](evidence/vscode-60e00af-installed-20261017.json) and [live coding record](evidence/vscode-60e00af-client-coding-20261017.json).
 
 ## Hosted browser and VS Code gate — 2026-10-17
 
