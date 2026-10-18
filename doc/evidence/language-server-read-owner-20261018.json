@@ -1,0 +1,108 @@
+{
+  "recordedAt": "2026-10-18T23:56:35.152Z",
+  "sourceParent": "091e7aff692e9a71c050f69142c87e0082571ce1",
+  "sourcePatchSha256": "ae05a39d9596d2239111cfe372d12dc868872a54e1cabbda88d60bfaea3a4b3f",
+  "change": "Route configured model language_server queries through AgentReadToolHost using the existing owned workspace envelope. Registry, executable binding, admitted roots and dispatch remain backend-owned.",
+  "behavior": [
+    "Validate live run, offered catalogue, immutable workspace revision and matching explicit folder before query dispatch.",
+    "Apply selected and inherited permission rules to the requested document, and require its repository/skill guidance before query or approval.",
+    "Bind saved ask grants to actual session, folder, policy, tool and requested path; preserve independent operation receipts and recheck guidance after approval.",
+    "Keep native LSP methods read-only and preserve custom xlang3 aliases named language_server when no native registry is configured."
+  ],
+  "qualification": {
+    "recordedAt": "2026-10-18T23:55:16.946Z",
+    "sourceParent": "091e7aff692e9a71c050f69142c87e0082571ce1",
+    "sourcePatchSha256": "ae05a39d9596d2239111cfe372d12dc868872a54e1cabbda88d60bfaea3a4b3f",
+    "projectFiles": 2617,
+    "sdkSourceFiles": 16,
+    "pureLibraries": 1870,
+    "sdkRuntimeFiles": 76,
+    "rustToolchainBinLibLibexecFiles": 3722,
+    "rustShimFiles": 4,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 127,
+    "nativeSha256": "51bd453f26cac43442d097bfb17cfb827d1c3d593d8f1818297f999b036f735c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "rustAnalyzerSha256": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27",
+    "ownerContractsPassed": 8,
+    "actualRustAnalyzerContractsPassed": 2,
+    "cargoSemanticFixturePassed": true,
+    "allSourceSdkLibrariesToolchainDependenciesBinariesAndSetsUnchanged": true,
+    "modelScope": "Explicit synthetic gateway for AgentRunner language dispatch and alias regression; actual Rust Analyzer and xlang3 callable; no live provider key",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "fullNativeSuiteRun": false,
+    "installed": false,
+    "workerIPCImplemented": false,
+    "cpythonExecuted": false,
+    "build": {
+      "pid": 21404,
+      "launchedAt": "2026-10-18T23:52:08.369Z",
+      "completedAt": "2026-10-18T23:54:37.235Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dc087814a8e7454840be0e1ea7422014477ef1de572883a534ab84edaf4bedf6"
+    },
+    "owner": {
+      "pid": 65120,
+      "launchedAt": "2026-10-18T23:54:40.987Z",
+      "completedAt": "2026-10-18T23:55:04.415Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "32cbb54fc95f0611ab5dc47ee473196d82fac9b909adeb24a17ce06bda0e7d04"
+    },
+    "realLanguage": {
+      "pid": 22940,
+      "launchedAt": "2026-10-18T23:55:04.420Z",
+      "completedAt": "2026-10-18T23:55:13.432Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2a611c12b5cc05c50a8a9c18a41e1b399af84442579ae2a08ab63cd3d27cbddd"
+    },
+    "passed": true
+  },
+  "actualSemantics": "Actual Rust Analyzer verifies symbols, definition, references, hover, diagnostics, editor formatting and multi-folder selection. An explicit C++ model-gateway fixture invokes actual AgentRunner LSP queries and path denial. A trusted custom alias invokes actual xlang3 code. No live model inference was used.",
+  "failuresRetained": [
+    {
+      "scope": "First compile",
+      "reason": "New fixture compared std::string with JSON directly; corrected to typed string extraction without changing production code."
+    },
+    {
+      "scope": "First owner suite",
+      "passed": 7,
+      "total": 8,
+      "reason": "Nested ask fixture used * (one path component); corrected to ** with an explicit native-policy precondition. Approval assertions remain."
+    },
+    {
+      "scope": "First semantic suite",
+      "cargoFixturePassed": true,
+      "multifolderPassed": true,
+      "semanticPassed": false,
+      "reason": "Definition lookup returned null for the existing bounded loop, before the new AgentRunner case. Cause remains unexplained. Later logged diagnostics and final normal fresh-fixture qualification pass; this is not claimed as a fix for the earlier initialization failure."
+    }
+  ],
+  "limits": {
+    "fullNativeSuiteRun": false,
+    "installed": false,
+    "hostedAccepted": false,
+    "initialSemanticFailureUnexplained": true,
+    "actualVSCodePaneActivated": false,
+    "workerIPCImplemented": false,
+    "releaseAccepted": false,
+    "permissionsScope": "Requested-document rules and guidance; registered language-server executables remain trusted and may index the workspace. This is not filesystem/network isolation."
+  },
+  "rawRoot": "C:/xMindNativeValidation",
+  "rawSha256": {
+    "language-read-owner-complete-focused-20261018/gate.json": "6aa6474874fd7e81ac051d05aa1ea870c65ef9f746531c5dd4961e30b1458e2b",
+    "language-read-owner-complete-focused-20261018/source.patch": "ae05a39d9596d2239111cfe372d12dc868872a54e1cabbda88d60bfaea3a4b3f",
+    "language-read-owner-complete-focused-20261018/inputs-before-build.json": "02d648b6681ec0ca3420fcf8332c7a972627843d6207a9eb28320ce979fd2eaa",
+    "language-read-owner-complete-focused-20261018/owner-LastTest.log": "c159ee125e8377e59309dcf4e0a5ebbe5c8e869d5c21ada4169fca31acf64ac5",
+    "language-read-owner-complete-focused-20261018/real-language-LastTest.log": "411ad2bb18ba0675614a04dc35265853876079cbf6c4c6854fa97f6cb6f179a6",
+    "language-read-owner-focused-20261018/build.log": "e931d1865c8fd946cfc8f2f877af49a3e3eb554d50b55fccd0d053d77d954979",
+    "language-read-owner-focused-verified-20261018/owner-ctest.log": "365c3b65f636a294da72f4e2df3f95ee0bea1f4328a76d52bba51fa25767656e",
+    "language-read-owner-final-focused-20261018/real-language-ctest.log": "658121cef467656a0924a4bc621dec111020129671c5b532669a87e1c3dd0862",
+    "language-semantic-diagnostic-20261018/diagnostic.json": "76e96b849cb559fd829478368f32f3f7c537575d31149b36e430cbf95633435b",
+    "language-semantic-fresh-diagnostic-20261018/diagnostic.json": "c475a1c68c31c541322deed65b1f44dbdae3e7ca21d666e4f6a9b00b97dff6c6"
+  },
+  "cpythonExecuted": false
+}

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <algorithm>
+#include <fstream>
 #include "nlohmann/json.hpp"
 using namespace agentflow;
 namespace {
@@ -30,7 +32,46 @@ LanguageServerProfile rust_profile(const std::string& executable){
     const auto path=env("PATH");if(!path.empty())profile.environment.emplace_back("PATH",std::filesystem::u8path(executable).parent_path().string()+";"+path);
     const auto rustup=env("RUSTUP_HOME");if(!rustup.empty())profile.environment.emplace_back("RUSTUP_HOME",rustup);
     const auto user=env("USERPROFILE");if(!user.empty()){profile.environment.emplace_back("USERPROFILE",user);profile.environment.emplace_back("HOME",user);profile.environment.emplace_back("CARGO_HOME",user+"/.cargo");}
+    const auto diagnostic=env("XMIND_LSP_TEST_LOG_DIRECTORY");if(!diagnostic.empty()){
+        const auto directory=std::filesystem::u8path(diagnostic);require(directory.is_absolute()&&std::filesystem::is_directory(directory),"Language fixture diagnostic directory must already exist");
+        profile.environment.emplace_back("RA_LOG","project_model=debug,rust_analyzer=info");
+        profile.environment.emplace_back("RA_LOG_FILE",utf8(directory/("rust-"+std::to_string(std::random_device{}())+".log")));
+    }
     return profile;
+}
+// Explicit model-call fixture; language queries still use the real registered
+// Rust Analyzer process and the real AgentRunner/read-owner/SQLite path.
+class LanguageModelFixture final:public AgentModelGateway {
+public:
+    LanguageModelFixture(std::string path,bool denied,bool custom=false):path_(std::move(path)),denied_(denied),custom_(custom){}
+    ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
+        ++calls;ModelCompletion reply;
+        if(calls==1){require(std::any_of(request.tools.begin(),request.tools.end(),[](const auto& t){return t.name=="language_server";}),"Run must offer its registered language tool");reply.finish_reason="tool_calls";const auto args=custom_?Json{{"text","xMind"}}:Json{{"server_id","rust-analyzer"},{"method","documentSymbol"},{"path",path_}};reply.tool_calls.push_back({custom_?"custom-language-extension":denied_?"denied-language-query":"allowed-language-query","language_server",args.dump()});return reply;}
+        require(calls==2&&!request.messages.empty()&&request.messages.back().role==MessageRole::tool,"Runner must deliver one actual owned language result");
+        const auto value=Json::parse(request.messages.back().content);
+        if(custom_)require(value.value("count",0)==5&&value.value("text",std::string{})=="XMIND","An admitted custom language_server alias must retain its actual xlang3 callable when no LSP is configured");
+        else if(denied_)require(value.contains("error")&&value["error"]["code"]=="agent_permission_denied","Path-specific language denial must reach the model result");
+        else require(value.contains("result")&&value["result"].is_array()&&!value["result"].empty(),"Actual Rust Analyzer symbols must cross the owned run boundary");
+        reply.content="Fixture inspected the actual owned query outcome.";reply.finish_reason="stop";return reply;
+    }
+    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected fixture context count");}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected fixture compaction");}
+    unsigned calls=0;
+private:
+    std::string path_;bool denied_,custom_;
+};
+void agent_owner_contract(const std::string& executable,const std::string& workspace_path,const std::string& path,const std::string& modules,const std::string& pure){
+    TempDirectory temp;PersistenceService persistence(utf8(temp.path/"agent-language.sqlite"),{modules,pure});persistence.create_session("language-session","Actual owned AgentRunner language query").get();
+    for(const bool denied:{false,true}){
+        AgentSettings settings;settings.workspace=workspace_path;settings.language_servers.push_back(rust_profile(executable));settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"language_server"};settings.provider.endpoint="http://127.0.0.1:1/v1/chat/completions";settings.provider.model="explicit-fixture";settings.provider.tools=Capability::supported;
+        if(denied)settings.permission_rules={{"language_server",path,"deny"}};
+        const auto gateway=std::make_shared<LanguageModelFixture>(path,denied);AgentRunner runner(persistence,std::move(settings),{},{},false,gateway);const std::string id=denied?"denied-language-run":"allowed-language-run";
+        runner.start(id,"language-session","Query the registered language server through its admitted owner.");const auto done=runner.execute(id);require(done.state==RunState::completed&&gateway->calls==2,"Real AgentRunner must complete its owned language query and denial turns");
+    }
+    const auto code=temp.path/"custom_language.py";std::ofstream module(code,std::ios::binary);module<<"def transform(arguments):\n    return {\"text\": arguments[\"text\"].upper(), \"count\": len(arguments[\"text\"])}\n";module.close();require(bool(module),"Trusted extension fixture must be written");
+    AgentSettings custom;custom.workspace=workspace_path;custom.a2a_enabled=false;custom.tool_allowlist=std::vector<std::string>{"language_server"};custom.provider.endpoint="http://127.0.0.1:1/v1/chat/completions";custom.provider.model="explicit-fixture";custom.provider.tools=Capability::supported;
+    custom.xlang_python_tools.push_back({ModelToolDefinition{"language_server","Explicit trusted alias regression",R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false})"},XlangPythonCallable(modules,pure,utf8(temp.path),"custom_language","transform")});
+    const auto gateway=std::make_shared<LanguageModelFixture>(path,false,true);AgentRunner runner(persistence,std::move(custom),{},{},false,gateway);runner.start("custom-language-run","language-session","Invoke the registered trusted custom extension.");require(runner.execute("custom-language-run").state==RunState::completed&&gateway->calls==2,"Custom alias dispatch must remain admitted without an LSP registry");
 }
 void http_contract(const std::string& executable,const std::string& workspace_path,const std::string& path,const std::string& modules,const std::string& pure_python){
     TempDirectory temp;PersistenceService persistence(utf8(temp.path/"lsp.sqlite"),{modules,pure_python});AgentSettings settings;settings.workspace=workspace_path;settings.language_servers.push_back(rust_profile(executable));
@@ -115,7 +156,7 @@ int main(int argc,char** argv){
         const auto diagnostics=request("diagnostics");
         require(diagnostics["result"].is_object()&&diagnostics["result"]["items"].is_array()&&diagnostics["result"]["items"].empty(),"Real rust-analyzer must report the valid fixture without diagnostics");
         const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});require(Json::parse(editor)["result"]==symbols["result"],"Editor and AgentRunner queries must share the same trusted server-selection behavior");
-        http_contract(argv[1],argv[2],path,argv[4],argv[5]);provider_profile_contract(argv[1],argv[2],path,argv[4],argv[5]);
-        std::cout<<"Actual rust-analyzer verified persistent native stdio, AgentRunner read-only tool queries, direct and authenticated provider-profile formatting, symbols, definition, references, hover and clean diagnostics. xlang3 SQLite initialized the real backends; no model or synthetic LSP peer used\n";return 0;
+        http_contract(argv[1],argv[2],path,argv[4],argv[5]);provider_profile_contract(argv[1],argv[2],path,argv[4],argv[5]);agent_owner_contract(argv[1],argv[2],path,argv[4],argv[5]);
+        std::cout<<"Actual rust-analyzer verified persistent native stdio, symbols, definition, references, hover, clean diagnostics and authenticated formatting. Real AgentRunner used an explicit model fixture to verify owned language queries and path-specific denial through xlang3 SQLite; no live model or synthetic LSP peer used\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

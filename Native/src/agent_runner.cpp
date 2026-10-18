@@ -744,6 +744,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.repository_context=repository_context_for_folder;owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
             owner.inherited_permission_layers=inherited_permission_layers;owner.permission_rules=agent_permission_rules;
             owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==name;});};
+            if(language_servers_)owner.language_server_query=[&](const AgentWorkspaceInvocation& call,std::stop_token stop){
+                const auto* folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
+                return language_servers_->invoke(call.arguments_json,stop,folders,settings_.language_server_dispatch);
+            };
             read_tool_host=make_agent_read_tool_host(journal_,persistence_,std::move(owner));
         }
         std::string planning_continuation;
@@ -962,7 +966,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         invocation.folder_id=invocation.workspace_id;invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
                         if(call.name=="run_process"){Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process-tool arguments");}if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}}
                         auto result=process_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
-                    }else if(is_agent_read_tool(call.name)){
+                    }else if(is_agent_read_tool(call.name)&&(call.name!="language_server"||language_servers_)){
                         if(!read_tool_host)throw ToolAccessDenied("Workspace read is not admitted for this run");
                         AgentWorkspaceInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
                         invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity();invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
@@ -987,10 +991,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
-                    else if(call.name=="language_server"&&language_servers_) {
-                        const auto* admitted_folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
-                        output=Json::parse(language_servers_->invoke(call.arguments_json,token,admitted_folders,settings_.language_server_dispatch));
-                    } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
+                    else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
                         auto frozen=execution_settings;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.selectable_models=models();
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {

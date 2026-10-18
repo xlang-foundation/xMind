@@ -1,3 +1,29 @@
+## Owned language-server queries — 2026-10-18
+
+Configured model language-server calls now cross the existing owned read-tool
+interface. The backend checks active run, offered catalogue, admitted revision
+and folder, requested-document guidance, and selected/inherited permissions.
+Ask grants retain session/folder/policy/tool/path binding and durable receipts;
+changed guidance after approval withholds dispatch. A custom xlang3 tool named
+`language_server` still runs when no native registry is configured.
+
+Eight focused owner contracts pass. Two actual Rust Analyzer contracts and
+the Cargo fixture pass, including AgentRunner queries/denial and the actual
+xlang3 alias through an explicit model-gateway fixture. All source, SDK, pure
+library, dependency and binary sets remain frozen, including Rust bin/lib,
+libexec and four tool shims. This is not live model inference or worker IPC.
+The first semantic definition lookup failed before the new AgentRunner case;
+its cause is unexplained despite later diagnostic and final fresh-fixture
+passes. Fixture compile and wildcard-input failures remain separately recorded.
+This source is uninstalled; complete native and hosted gates remain open.
+[Exact source, outcomes and limits](evidence/language-server-read-owner-20261018.json).
+
+Permissions and guidance apply to the requested document. Language-server
+executables remain trusted and can index the workspace; read-only LSP methods
+do not establish filesystem or network isolation. Registry admission/discovery,
+instructions/skills, custom-callable ownership and worker transport remain
+backend dependencies.
+
 ### Workspace read owner — 2026-10-18
 
 `AgentReadToolHost` now owns the five model-visible workspace read tools through

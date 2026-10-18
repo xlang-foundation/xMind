@@ -129,3 +129,8 @@ from this archive.
 ## Superseded fresh startup diagnostics pending checkpoint
 
 - Startup diagnostic 39172193204 at 411ea4f fails its first original cold graph command (30,040ms, script_entered only), with 16 later passes. Cause remains open; see doc/evidence/process-startup-cold-failure-20261018.json. New bounded output timing and separately labelled minimal-PATH/module-qualified/location-marker controls pass all six local native-adapter cases with exact original commands/deadlines preserved. Four independent fresh hosted first-case jobs are configured; hosted results are pending. This changes only diagnostics, not production environment/commands or native runtime acceptance. See doc/evidence/process-startup-fresh-controls-local-20261018.json.
+
+
+## Preserved installed 0.1.31 page details
+
+- New separate installed page http://127.0.0.1:63383/ui/, profile C:/Users/shaw9/.xMind/p-a31, workspace C:/xMindNativeValidation/model-zoo-installed-0.1.31-20261018. Host 64940 born 2026-10-18T22:22:18.9164270Z, view 40236 born 22:22:19.9382670Z, backend 67432 born 22:22:23.1982620Z. Saved-key real Claude root 0e69174be66928e5db07781602bf33ce / authoritative session 7c81bdf15bd2418ffb52409ea42d40d0 passes 22 tests, adds one reviewed case-insensitive-name regression, then passes 23 under xlang3. Original 32 source files/other copied files stay unchanged. Independent read-only observer renders/restores all 13 messages and six usage records, zero effect POSTs/replay. Earlier observer placeholder/session races and model-discovery POST classification errors remain documented; do not resubmit this completed run. Main 62342/old private 52121 owners stay unchanged; their 0.1.27/0.1.28 runtime inventories still verify all 2,402 files.

@@ -15,7 +15,7 @@ constexpr std::int64_t max_revision=9007199254740991LL;
 void text(const std::string& value,std::size_t maximum,const char* message,bool empty=false){
     if((!empty&&value.empty())||value.size()>maximum||value.find('\0')!=std::string::npos)throw std::invalid_argument(message);
 }
-bool askable_read_action(const std::string& action){return action=="read_file"||action=="list_files"||action=="search_files"||action=="find_files"||action=="glob_files";}
+bool askable_read_action(const std::string& action){return action=="read_file"||action=="list_files"||action=="search_files"||action=="find_files"||action=="glob_files"||action=="language_server";}
 Json grant_json(const AgentPermissionGrant& grant){
     return {{"id",grant.id},{"workspace_id",grant.workspace_id},{"policy_binding",grant.policy_binding},{"action",grant.action},
         {"resource",grant.resource},{"created_unix_ms",grant.created_unix_ms}};

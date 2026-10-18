@@ -38,6 +38,7 @@ public:
         if(cancel.stop_requested()||std::chrono::steady_clock::now()>=owner_.deadline)throw ToolCancelled("Workspace read owner cancelled or expired");
         if(call.run_id!=owner_.run_id||call.workspace_id!=workspace_id_||call.workspace_revision!=revision_)throw ToolAccessDenied("Workspace read differs from its admitted owner");
         if(!is_agent_read_tool(call.tool_name)||!owner_.offered_tool(call.tool_name))throw ToolAccessDenied("Workspace read is outside the admitted catalogue");
+        if(call.tool_name=="language_server"&&!owner_.language_server_query)throw ToolAccessDenied("Language-server owner is not admitted for this run");
         const auto run=journal_.run(owner_.run_id).get();
         if(run.state!=RunState::running)throw ToolAccessDenied("Workspace read owner is no longer running");
         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid workspace read arguments");}
@@ -57,7 +58,7 @@ public:
             if(resource.empty())resource=".";
         }
         if(resource=="*"&&(call.tool_name=="search_files"||call.tool_name=="find_files"||call.tool_name=="glob_files"))resource=".";
-        const bool enumerates=call.tool_name!="read_file";
+        const bool enumerates=call.tool_name!="read_file"&&call.tool_name!="language_server";
         bool asks=false;
         const auto check_policy=[&](const std::vector<AgentPermissionRule>& rules){
             if(agent_permission_denies(rules,call.tool_name,resource)||(enumerates&&agent_permission_denies_directory_enumeration(rules,call.tool_name,resource)))throw AgentPermissionDenied("Selected agent denied workspace read resources");
@@ -69,13 +70,16 @@ public:
         const auto ready=[&](){
             if(!context)return true;
             if(!context->skills().ready(cancel))return false;
-            if(call.tool_name!="read_file"&&call.tool_name!="list_files")return true;
+            if(call.tool_name!="read_file"&&call.tool_name!="list_files"&&call.tool_name!="language_server")return true;
             if(!args.contains("path")||!args["path"].is_string())throw std::invalid_argument("Scoped workspace read requires a path");
-            auto scope=args["path"].get<std::string>();if(call.tool_name=="read_file")scope=RepositoryInstructionContext::file_directory(scope);
+            auto scope=args["path"].get<std::string>();if(call.tool_name!="list_files")scope=RepositoryInstructionContext::file_directory(scope);
             return context->ready(scope,cancel);
         };
         if(!ready())return {false,guidance_required()};
-        const auto read=[&](){return owner_.workspace_members?owner_.workspace_members->invoke(call,cancel):owner_.primary_workspace->invoke(call,cancel);};
+        const auto read=[&](){
+            if(call.tool_name=="language_server")return owner_.language_server_query(call,cancel);
+            return owner_.workspace_members?owner_.workspace_members->invoke(call,cancel):owner_.primary_workspace->invoke(call,cancel);
+        };
         if(!asks)return {true,read()};
         auto* workspace=owner_.workspace_members?&owner_.workspace_members->folder_tools(index):owner_.primary_workspace;
         const auto pending_id=operation_id(),normalized=detail::agent_permission_normalize_resource(resource);
@@ -97,6 +101,6 @@ private:
     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
 };
 }
-bool is_agent_read_tool(const std::string& name){return name=="read_file"||name=="list_files"||name=="search_files"||name=="find_files"||name=="glob_files";}
+bool is_agent_read_tool(const std::string& name){return name=="read_file"||name=="list_files"||name=="search_files"||name=="find_files"||name=="glob_files"||name=="language_server";}
 std::unique_ptr<AgentReadToolHost> make_agent_read_tool_host(AgentRunJournal& journal,PersistenceService& store,AgentReadToolOwnerContext owner){return std::make_unique<LocalReadToolHost>(journal,store,std::move(owner));}
 }
