@@ -31,6 +31,8 @@ const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undef
 function appendRunActivity(event){
   if(!event||RUN_ACTIVITY_STREAM_KINDS.has(event.kind))return;
   let summary='';
+  if(event.kind==='context.history_reprojected'&&event.data?.reason==='model_changed')
+    summary='Conversation context refreshed for the selected model. Recorded history is preserved.\n';
   if(event.kind==='context.history_reprojected'&&event.data?.reason==='authority_changed')
     summary='Conversation context refreshed for the current backend. Recorded history is preserved.\n';
   if(event?.kind==='a2a.task_event'&&event.data&&typeof event.data==='object'){

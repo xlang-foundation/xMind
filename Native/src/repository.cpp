@@ -141,7 +141,15 @@ void backfill_context_groups(XlangSqlite& db,const ContextScope& s,const Context
 }
 ConversationGroup decode_context_group(const ContextScope& scope,const std::vector<SqlValue>& r){ConversationGroup g;g.scope=scope;g.ordinal=integer(r[0]);g.first_message_seq=integer(r[1]);g.last_message_seq=integer(r[2]);if(!std::holds_alternative<std::nullptr_t>(r[3]))g.execution_owner=text(r[3]);if(!std::holds_alternative<std::nullptr_t>(r[4]))g.committed_event_seq=integer(r[4]);const auto k=text(r[5]);g.kind=k=="user"?ConversationGroupKind::user:k=="assistant"?ConversationGroupKind::assistant:ConversationGroupKind::tool_turn;g.message_count=integer(r[6]);g.payload_bytes=integer(r[7]);g.source_binding=text(r[8]);g.legacy_unattributed=integer(r[9])!=0;return g;}
 const char* context_group_columns="ordinal,first_message_seq,last_message_seq,execution_owner,committed_event_seq,kind,message_count,payload_bytes,source_binding,legacy_unattributed";
-bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,const std::vector<Message>& originals,const ContextBinding& selected_binding,bool allow_authority_replay=false,std::string* producing_workspace=nullptr){
+bool same_responses_history_profile(const std::string& source,const std::string& target){
+    auto a=Json::parse(source),b=Json::parse(target);
+    // An unprofiled legacy identity is insufficient proof of the provider route.
+    // Each full identity was validated at its own context admission boundary.
+    if(!a.is_object()||!b.is_object()||!a.contains("profile_id")||!b.contains("profile_id")||
+       a.value("wire",std::string{})!="responses"||b.value("wire",std::string{})!="responses")return false;
+    a.erase("model_id");b.erase("model_id");return a==b;
+}
+bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,const std::vector<Message>& originals,const ContextBinding& selected_binding,bool allow_authority_replay=false,std::string* producing_workspace=nullptr,bool* model_changed=nullptr){
     bool reproject=false;
     for(const auto& original:originals){if(original.role!="assistant")continue;const auto dto=Json::parse(original.json);bool has_items=false;
         if(dto.contains("provider_items")){if(!dto["provider_items"].is_array())throw ContextBindingChanged("Stored provider receipt shape is incompatible");has_items=!dto["provider_items"].empty();}
@@ -159,9 +167,13 @@ bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,co
                 throw ContextBindingChanged("Opaque original belongs to another execution scope or context binding");
             if(source_binding!=selected_binding){
                 auto compatible=source_binding;compatible.authority_identity=selected_binding.authority_identity;
+                const bool changed_model=Json::parse(source_binding.provider_identity_json)!=Json::parse(selected_binding.provider_identity_json);
+                if(changed_model&&same_responses_history_profile(source_binding.provider_identity_json,selected_binding.provider_identity_json))
+                    compatible.provider_identity_json=selected_binding.provider_identity_json;
                 if(!allow_authority_replay||compatible!=selected_binding)
                     throw ContextBindingChanged("Opaque original belongs to another selected context authority");
                 reproject=true;
+                if(model_changed)*model_changed|=changed_model;
                 if(producing_workspace){
                     const auto workspace=text(receipt[0][4]);
                     if(workspace.empty()||(!producing_workspace->empty()&&*producing_workspace!=workspace))
@@ -183,7 +195,8 @@ bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,co
                 throw ContextBindingChanged("Opaque original differs from its captured provider-profile identity");
             producer_identity=captured;
         }
-        if(Json::parse(producer_identity)!=Json::parse(selected_binding.provider_identity_json))
+        if(Json::parse(producer_identity)!=Json::parse(selected_binding.provider_identity_json)&&
+           !(allow_authority_replay&&reproject&&same_responses_history_profile(producer_identity,selected_binding.provider_identity_json)))
             throw ContextBindingChanged("Opaque original belongs to another selected provider identity");
         if(dto.contains("provider_context")&&provider_context(dto.at("provider_context"))!=producer_identity)
             throw ContextBindingChanged("Opaque original provider context differs from its actual model call");
@@ -1639,7 +1652,7 @@ std::vector<ContextHistoryPayload> read_context_payloads(XlangSqlite& db,const C
         if(payload.source.originals.size()!=static_cast<std::size_t>(group->message_count)||
            context_messages_digest(payload.source.originals)!=group->source_binding||validate_context_group(payload.source.originals)!=group->kind)
             throw DatabaseError("Context original group differs from immutable metadata");
-        payload.reproject_provider_items=validate_context_receipts(db,*group,payload.source.originals,current.head.binding,allow_authority_replay,&payload.producing_workspace_identity);
+        payload.reproject_provider_items=validate_context_receipts(db,*group,payload.source.originals,current.head.binding,allow_authority_replay,&payload.producing_workspace_identity,&payload.model_changed);
         result.push_back(std::move(payload));
     }
     return result;
@@ -1725,11 +1738,12 @@ void Repository::record_context_history_replay(const ContextHistoryReplaySpec& s
     context_owner(*this,spec.root_run_id,spec.owner_run_id,spec.role,spec.source.head.scope,spec.source.head.binding);
     const auto loaded=read_context_payloads(db,spec.source,spec.ordinals,{},true);
     const auto workspace=root_budget(spec.root_run_id).spec.workspace_identity;
-    std::size_t groups=0,messages=0;
+    std::size_t groups=0,messages=0;bool model_changed=false;
     for(const auto& payload:loaded)if(payload.reproject_provider_items){
         if(payload.producing_workspace_identity!=workspace)
             throw ContextBindingChanged("History replay belongs to another execution workspace");
         ++groups;
+        model_changed|=payload.model_changed;
         for(const auto& original:payload.source.originals)if(original.role=="assistant"){
             const auto dto=Json::parse(original.json);
             if(dto.contains("provider_items")&&!dto.at("provider_items").empty())++messages;
@@ -1737,7 +1751,7 @@ void Repository::record_context_history_replay(const ContextHistoryReplaySpec& s
     }
     if(!groups||!messages)throw ContextBindingChanged("History replay has no changed producing authority");
     impl_->event(spec.owner_run_id,"context.history_reprojected",Json{
-        {"reason","authority_changed"},{"scope_kind",context_scope_name(spec.source.head.scope.kind)},
+        {"reason",model_changed?"model_changed":"authority_changed"},{"scope_kind",context_scope_name(spec.source.head.scope.kind)},
         {"scope_id",spec.source.head.scope.id},{"head_revision",spec.source.head.revision},
         {"source_watermark",spec.source.source_watermark},{"source_binding",context_source_binding(spec.source,spec.source.source_watermark)},
         {"authority_identity",spec.source.head.binding.authority_identity},{"projection_binding",spec.projection_binding},

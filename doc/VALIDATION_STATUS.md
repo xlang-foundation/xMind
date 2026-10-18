@@ -23,6 +23,25 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Conversation model selection within one Responses profile — 2026-10-18
+
+Active context preparation now permits model selection within the same captured
+Responses provider profile, revision, route, provider and wire. It revalidates
+the original producing receipts and workspace, builds the new request from
+canonical conversation fields, and retains all original history and metrics.
+Each model keeps its own context binding and checkpoint. Broader provider/profile
+switches and unprofiled foreign models remain rejected by this path.
+
+The native integration test passed model A → B → A across database reopens,
+with actual tool reads, per-model compaction and unchanged original prefixes.
+The independent synthetic peer checks selected models and rejects other-model
+native items and canonical checkpoints. Six additional Release contracts pass:
+**7/7 focused native checks** overall. Extension checks pass **394/394** and
+browser checks **136/136**. The hosted view gate inventory now includes terminal
+assets and the current test totals; no hosted result is claimed here.
+Live-provider model switching and rendered clients remain pending at this source
+checkpoint. [Hashes, checks and retained renderer failure](evidence/context-model-switch-20261018.json).
+
 ## Live coding across backend configuration changes — 2026-10-18
 
 Product source `097ee32` completed three real saved-OpenAI runs in one fresh

@@ -1,0 +1,56 @@
+{
+  "recorded_at": "2026-10-18T09:27:34.257Z",
+  "scope": "Native Responses history projection when a selected model changes within the same captured provider profile",
+  "source_base": "4768c86190b1132f30eb1ba688330e292e381779",
+  "source_files": {
+    "Native/include/agentflow/context_records.hpp": "96f7173a57a1925d16e95be65b00e66dff4035da5837d57868b5a6ce52a2c62d",
+    "Native/src/repository.cpp": "e81b0a8ba8c608b50237bcafaf0e3fa69062048c507dfdc57774ce1c012d0a65",
+    "Native/tests/context_engine_contract.cpp": "a9618870a42cb38f735f36cf7c2c044cdb2e8bafb7d615ad59b656b4abf62b98",
+    "Native/tests/context_engine_peer.mjs": "681162002b185797017108d1e2f20f6ae8311ba808207a85387319df4437cfa3",
+    "Tools/ci-views.mjs": "565d04d48b3ef6acd53904b71f7842e2a2ea6db4e0a81538c0450f68e51d2239",
+    "extensions/vscode/media/chat.js": "44c29ffe359e440832f6e0787c6e8078ee72b86723181fe29d446c4f87850d7a",
+    "extensions/vscode/tests/renderer.test.js": "82bafc96b34b7111f6b02206e312fa272be405c1b587b32b84d43853c5769f8e"
+  },
+  "native_executable_sha256": "dbea489ef8fc5a4d021b707bd77c55890eed19f1c8e6cdef74fb867b069f966b",
+  "runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "tests": {
+    "native_engine": 1,
+    "native_engine_seconds": 6.16,
+    "native_regressions": 6,
+    "native_regression_seconds": 17.82,
+    "extension": 394,
+    "browser": 136,
+    "log_sha256": {
+      "engine": "3dd4438a53e9741b90b613f96166740fec974bdf83d93fc94b9d83733a8cae09",
+      "regressions": "30bdfea77d19c78111181831733ad72900c4a02ceafb042e8ce3605cdaa6363b",
+      "extension": "8114178293cfe44c98ae818cda5f4d07ee9fb26c4fecfee742cee07ab01adcc4",
+      "browser": "1a9d1267def12ddcd06e4d5a62ddee1233b21c4d552bf0c7eeb4c1e5522c414a",
+      "build": "f2d182ea93898098ee3d8cda37beb0904664f5fd3bd5a7cb22abc6edf69915c8"
+    }
+  },
+  "checks": [
+    "Actual native AgentRunner tool loops execute under model A, then B after database reopen, then A again after reopen",
+    "Only the model ID may differ within a full captured Responses provider profile/revision/route/provider/wire identity; the strict continuation API still refuses old opaque items",
+    "Typed owning repository history projection validates actual producing inference receipts, workspace, complete original tool groups and source digests",
+    "Independent synthetic peer checks selected request models and absence of other-model native item IDs",
+    "Both selected models perform their own actual native compaction; the peer rejects adoption of another model's canonical checkpoint",
+    "All 12 original messages, tool results, receipts and metrics remain byte-identical prefixes across the three runs",
+    "Different profiles, routes, provider identities, profile revisions and unprofiled foreign models remain rejected",
+    "Shared renderer reports model_changed as a context update without fabricated model responses or metrics",
+    "Hosted view gate inventory now includes 18 browser assets and five vendor sources and expects all 394 extension and 136 browser tests"
+  ],
+  "retained_attempt": {
+    "log": "model-switch-extension-tests-20261018.log",
+    "result": "393/394 passed; new activity summary was not appended",
+    "resolution": "Assigned the fixed summary to the existing bounded activity renderer; final suite 394/394"
+  },
+  "limits": [
+    "Provider models, capacities, counts, opaque replies, usage and key in the native contract are synthetic; AgentRunner, tools, repository and embedded-xlang3 SQLite are real",
+    "No live-provider model-switch acceptance in this receipt",
+    "No current installed VS Code or external rendered webpage acceptance",
+    "The previous development browser remains on 097ee32 and installed VSIX on d7adf96 until a new runtime is staged",
+    "Provider/profile/route/revision switches, unprofiled model changes, changed-authority idle maintenance and over-bound history remain outside this recovery path",
+    "No full current native inventory, hosted Release result, release-accepted package, old-profile migration or repair of the prior failed handoff is claimed"
+  ]
+}

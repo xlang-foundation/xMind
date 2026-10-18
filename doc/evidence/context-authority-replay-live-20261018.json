@@ -8,7 +8,8 @@
     "xlang3_runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
     "manifest_sha256": "06b74d5a49fbf008a887d165548ab200ccf3355c01cf8b58e7ec3848c40ca1df",
     "release_accepted": false,
-    "current_running_image_matches_stage": true
+    "current_running_image_matches_stage": true,
+    "verified_staged_files": 1927
   },
   "fixture": {
     "workspace": "C:\\xMindNativeValidation\\authority-replay-live-workspace-20261018",

@@ -102,10 +102,11 @@ struct ContextGroupPayload {
     std::vector<Message> originals;
 };
 // Checked original bytes remain distinct from the request-only projection.
-// Only a proved authority change under the same provider/policy may request it.
+// A proved authority/model change under the same provider profile/policy may request it.
 struct ContextHistoryPayload {
     ContextGroupPayload source;
     bool reproject_provider_items=false;
+    bool model_changed=false;
     std::string producing_workspace_identity;
 };
 struct ContextHistoryReplaySpec {

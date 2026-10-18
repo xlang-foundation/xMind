@@ -13,7 +13,7 @@ import {tmpdir} from 'node:os';
 const [executable, modules, stdlib] = process.argv.slice(2);
 assert.ok(executable && modules && stdlib, 'Expected native contract and embedded runtime import roots');
 const root = await mkdtemp(join(tmpdir(), 'xmind-context-engine-'));
-const modes = ['rolling', 'authority', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
+const modes = ['rolling', 'authority', 'model-switch', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
 const model = 'synthetic-context-engine-model';
 const key = 'synthetic-context-engine-key-not-live';
 const bytes = 'Actual native context fixture file bytes\n';
@@ -28,11 +28,11 @@ function audit(mode, kind, fields = {}) {
   state.get(mode).requests.push(record);
   appendFileSync(join(root, 'peer-audit.jsonl'), JSON.stringify(record) + '\n');
 }
-function send(response, id, items) {
+function send(response, id, items, selectedModel = model) {
   response.writeHead(200, {'Content-Type': 'text/event-stream'});
   let sequence = 0;
   const emit = (type, fields) => response.write('event: ' + type + '\ndata: ' + JSON.stringify({type, sequence_number: sequence++, ...fields}) + '\n\n');
-  emit('response.created', {response: {id, model, status: 'in_progress'}});
+  emit('response.created', {response: {id, model: selectedModel, status: 'in_progress'}});
   for (let index = 0; index < items.length; ++index) {
     const item = items[index], base = {output_index: index, item_id: item.id};
     const added = {...item, status: 'in_progress'};
@@ -53,7 +53,7 @@ function send(response, id, items) {
     }
     emit('response.output_item.done', {output_index: index, item});
   }
-  emit('response.completed', {response: {id, model, status: 'completed', output: items, usage: {input_tokens: 37, output_tokens: 5, total_tokens: 42, input_tokens_details: {cached_tokens: 0}, output_tokens_details: {reasoning_tokens: 1}}}});
+  emit('response.completed', {response: {id, model: selectedModel, status: 'completed', output: items, usage: {input_tokens: 37, output_tokens: 5, total_tokens: 42, input_tokens_details: {cached_tokens: 0}, output_tokens_details: {reasoning_tokens: 1}}}});
   response.end();
 }
 function completed(mode, owner, count, item) {
@@ -73,6 +73,9 @@ function ownerOf(body) {
   if (prompt.startsWith('fixture-rolling-second:')) return 'second';
   if (prompt.startsWith('fixture-authority-first:')) return 'first';
   if (prompt.startsWith('fixture-authority-second:')) return 'second';
+  if (prompt.startsWith('fixture-model-first:')) return 'first';
+  if (prompt.startsWith('fixture-model-second:')) return 'second';
+  if (prompt.startsWith('fixture-model-third:')) return 'third';
   if (prompt.startsWith('fixture-bootstrap:')) return 'bootstrap';
   if (prompt.startsWith('fixture-held-parent:')) return 'parent';
   if (prompt.startsWith('fixture-probe:')) return 'probe';
@@ -80,11 +83,13 @@ function ownerOf(body) {
   throw new Error('fixture_unknown_actual_objective');
 }
 function validateInput(mode, body, raw, kind) {
-  assert.equal(body.model, model);
+  if(mode==='model-switch')assert.ok([model,model+'-other'].includes(body.model));
+  else assert.equal(body.model, model);
   assert.ok(Array.isArray(body.input) && body.input.length);
   assert.ok(!raw.includes(key));
   const current = state.get(mode);
   if (current.canonical && body.input.some(item => item.type === 'compaction')) {
+    if(mode==='model-switch')assert.equal(body.model,current.canonicalModel,'A canonical checkpoint cannot cross models');
     assert.ok(raw.includes(current.canonical.slice(1, -1)), 'Actual canonical bytes must remain unpruned and lexically exact');
     assert.ok(raw.includes(String.raw`"decimal":1.00000000000000000001`) && raw.includes('18446744073709551617'), 'Native codec cannot normalize canonical numeric metadata');
   }
@@ -102,6 +107,16 @@ function validateInput(mode, body, raw, kind) {
       assert.ok(body.input.some(item=>item.type==='function_call_output'&&item.call_id==='call_authority_first_1'));
     }
     assert.ok(!body.input.some(item=>item.id?.includes('_authority_first_')),'Old provider-native items cannot cross the changed authority');
+  }
+  if(mode==='model-switch'){
+    if(kind==='inference')assert.equal(body.model,ownerOf(body)==='second'?model+'-other':model);
+    const forbidden=body.model===model?'_model-switch_second_':'_model-switch_first_';
+    assert.ok(!body.input.some(item=>item.id?.includes(forbidden)),'Other-model native continuation must be absent');
+    if(kind==='inference'&&!body.input.some(item=>item.type==='compaction')&&users(body).length===2){
+      assert.ok(userText(users(body)[0]).startsWith('fixture-model-first:'));
+      assert.ok(body.input.some(item=>item.type==='function_call_output'&&item.call_id==='call_model-switch_first_1'));
+      assert.ok(body.input.some(item=>item.type==='message'&&item.role==='assistant'&&item.content.some(part=>part.text?.startsWith('Observed actual native README.md reads;'))));
+    }
   }
   if (kind === 'compact') assert.deepEqual(Object.keys(body).sort(), ['input', 'model']);
   else {
@@ -134,6 +149,7 @@ function compact(mode, body) {
   if (retained.length) canonical += ',';
   canonical += String.raw`{"id":"cmp_${mode}_${current.compact}","type":"compaction","encrypted_content":"synthetic-private-canonical-\u0000-\u0061-${current.compact}","metadata":{"decimal":1.00000000000000000001,"large":18446744073709551617,"i\u0064":"retained"}}]`;
   current.canonical = canonical;
+  current.canonicalModel = body.model;
   return String.raw`{"id":"resp_compact_${mode}_${current.compact}","object":"response.compaction","created_at":1764967971,"output":${canonical},"usage":{"input_tokens":31,"output_tokens":7,"total_tokens":38}}`;
 }
 function failureResponse(response, code = 'context_length_exceeded') {
@@ -196,11 +212,11 @@ const peer = createServer((request, response) => {
         send(response, 'resp_held_parent_3', completed(mode, owner, call, message(mode, owner, call, 'Observed the actual answered owned question and once-only corrected continuation.'))); return;
       }
       assert.notEqual(owner, 'maintenance', 'Failed maintenance cannot dispatch its reserved inference');
-      const loops = mode === 'authority' ? 1 : owner === 'first' ? 5 : 2;
-      if (call <= loops) send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, tool(mode, owner, call)));
+      const loops = mode === 'authority'||mode==='model-switch' ? 1 : owner === 'first' ? 5 : 2;
+      if (call <= loops) send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, tool(mode, owner, call)),body.model);
       else {
         assert.equal(call, loops + 1);
-        send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, message(mode, owner, call, 'Observed actual native README.md reads; provider/count/canonical replies are synthetic.')));
+        send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, message(mode, owner, call, 'Observed actual native README.md reads; provider/count/canonical replies are synthetic.')),body.model);
       }
     } catch (error) {failure ??= error; response.destroy();}
   });
@@ -214,6 +230,8 @@ try {
   const counts = mode => Object.fromEntries(['inference', 'count', 'compact'].map(kind => [kind, state.get(mode).requests.filter(record => record.kind === kind).length]));
   assert.deepEqual(counts('rolling'), {inference: 9, count: 16, compact: 6});
   assert.deepEqual(counts('authority'), {inference: 4, count: 5, compact: 1});
+  assert.equal(counts('model-switch').inference,6);
+  assert.ok(counts('model-switch').compact>=2,'Both selected models must perform their own compaction');
   assert.deepEqual(counts('held'), {inference: 6, count: 7, compact: 1});
   assert.deepEqual(counts('held-count-failure'), {inference: 4, count: 5, compact: 0});
   assert.deepEqual(counts('second-overflow'), {inference: 5, count: 6, compact: 1});

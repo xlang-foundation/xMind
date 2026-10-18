@@ -4,7 +4,10 @@
 
 The current implementation rebuilds an outgoing Responses-context request when a proved original
 receipt belongs to a different authority under the same captured provider
-identity, registered context policy and strategy. The producing budget must
+identity, registered context policy and strategy. A selected model may also
+change within the same captured Responses provider profile, profile revision,
+route, provider and wire. Both models use their own context binding and
+checkpoint; a checkpoint from the other model is never relabeled. The producing budget must
 also belong to the active execution workspace. Full original messages, tool
 turns, metrics and opaque receipts stay unchanged in SQLite. Old authority
 heads and checkpoints are not relabeled.
@@ -28,7 +31,7 @@ recorded history was preserved.
 
 This path applies to active run preparation and its compaction input. It does
 not repair a failed profile handoff or migrate package/profile formats. Foreign
-provider/model identities, unregistered policies, unproved originals, different
+provider profiles/routes/revisions, unprofiled model identities, unregistered policies, unproved originals, different
 producing workspaces and histories beyond the native bounds remain rejected.
 Idle maintenance retains its strict loading path. The focused Release gate
 passed **7/7 native contracts in 22.48 seconds**. The independent synthetic
@@ -50,7 +53,7 @@ current browser HTTP adapter exposes the same conversation and saved-key model
 discovery. External rendered interaction remains unverified because Windows
 denied browser activation; the installed VS Code runtime remains `d7adf96`.
 No recovery of the prior failed profile handoff, older-binary migration or
-same-session provider/model change is established by these checks.
+same-session provider/model change is established by those `097ee32` checks.
 [Live coding and browser HTTP evidence](evidence/context-authority-replay-live-20261018.json).
 
 ## Earlier observed limitation and installed-client evidence
