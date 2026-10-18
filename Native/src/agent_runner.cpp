@@ -998,7 +998,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(PatchTool(persistence_,*selected_workspace,*selected_repository_context,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1,selected_folder_index==0).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(run_workspace_tools?process_->invoke_in_workspace(operation_id(),id,call.arguments_json,expiry,*run_workspace_tools,selected_folder_index,token,std::move(guidance),true):process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance),true));
+                        AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=id;
+                        invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id;
+                        invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
+                        invocation.folder_id=selected_folder_id;invocation.arguments_json=call.arguments_json;invocation.expires_unix_ms=expiry;invocation.allow_background=true;
+                        output=Json::parse(process_->invoke(invocation,token,std::move(guidance)));
                     } else if(call.name=="wait_process"&&process_) {
                         output=Json::parse(process_->wait(id,call.arguments_json,token));
                         if(output.value("state",std::string{})=="uncertain")success=false;

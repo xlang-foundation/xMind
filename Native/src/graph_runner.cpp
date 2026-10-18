@@ -268,7 +268,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
                 };
                 result=Json::parse(RestoreExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,authorize,guidance));
             }
-            else result=Json::parse(workspace_tools?process_->invoke_in_workspace(identifier(),id,source,expiry,*workspace_tools,process_folder_index,cancel,std::move(guard)):process_->invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
+            else{
+                AgentProcessInvocation invocation;invocation.operation_id=identifier();invocation.run_id=id;invocation.workspace_id=owner_workspace;
+                invocation.workspace_revision=workspace_revision;invocation.folder_id=effect_folder_id;invocation.arguments_json=source;
+                invocation.expires_unix_ms=expiry;invocation.allow_background=false;
+                result=Json::parse(process_->invoke(invocation,cancel,std::move(guard)));
+            }
         }else if(workspace_tools&&(name=="read_repository_instructions"||name=="read_file"||name=="list_files"||name=="search_files"||name=="find_files"||name=="glob_files"))result=Json::parse(workspace_tools->invoke(name,source,cancel));
         else result=Json::parse(workspace_->invoke(name,source,cancel));
         store_.append_event(id,"tool.completed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();result["source"]="graph_tool";return store_.complete_run(id,result.dump()).get();

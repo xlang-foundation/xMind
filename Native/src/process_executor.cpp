@@ -53,6 +53,35 @@ bool invokes_cpython(const std::string& executable,const std::vector<std::string
     }
     return false;
 }
+std::optional<WorkspaceMembershipSnapshot> process_membership_for_run(PersistenceService& store,const std::string& run_id){
+    std::set<std::string> visited;auto owner=run_id;
+    for(std::size_t depth=0;depth<32&&!owner.empty();++depth){
+        if(!visited.insert(owner).second)throw ToolAccessDenied("Process run ancestry contains a cycle");
+        std::optional<WorkspaceMembershipSnapshot> snapshot;
+        for(const auto& event:store.events(owner).get())if(event.kind=="agent.workspace_membership"){
+            if(snapshot)throw ToolAccessDenied("Run contains duplicate workspace membership snapshots");
+            Json value;try{value=Json::parse(event.json);}catch(const Json::exception&){throw ToolAccessDenied("Saved process workspace membership is invalid");}
+            if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||
+               !value.contains("revision")||!value["revision"].is_number_integer()||
+               !value.contains("primary_folder_id")||!value["primary_folder_id"].is_string()||
+               !value.contains("folders")||!value["folders"].is_array()||value["folders"].empty()||value["folders"].size()>256)
+                throw ToolAccessDenied("Saved process workspace membership is invalid");
+            WorkspaceMembershipSnapshot parsed;parsed.workspace_id=value["workspace_id"].get<std::string>();parsed.revision=value["revision"].get<std::int64_t>();
+            for(const auto& folder:value["folders"]){
+                if(!folder.is_object()||folder.size()!=2||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string())
+                    throw ToolAccessDenied("Saved process folder binding is invalid");
+                parsed.folders.push_back({folder["folder_id"].get<std::string>(),folder["root"].get<std::string>()});
+            }
+            if(parsed.revision<1||parsed.workspace_id.empty()||parsed.folders.front().folder_id!=value["primary_folder_id"].get<std::string>())
+                throw ToolAccessDenied("Saved process workspace membership is inconsistent");
+            snapshot=std::move(parsed);
+        }
+        if(snapshot)return snapshot;
+        const auto run=store.run(owner).get();if(run.parent_id.empty())break;owner=run.parent_id;
+    }
+    if(!owner.empty())throw ToolAccessDenied("Process run ancestry exceeds workspace membership lookup limit");
+    return std::nullopt;
+}
 std::string hex_bytes(std::string_view bytes) {
     constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(bytes.size()*2);
     for(unsigned char b:bytes){encoded.push_back(digits[b>>4]);encoded.push_back(digits[b&15]);}
@@ -176,11 +205,26 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
 std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
     return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background);
 }
-std::string ProcessExecutor::invoke_in_workspace(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,const WorkspaceToolSet& membership,std::size_t folder_index,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background){
-    if(folder_index>=membership.folders().size()||membership.revision()<1||membership.workspace_id().empty())throw ToolAccessDenied("Process folder is not in the admitted workspace snapshot");
-    const auto& binding=membership.folders()[folder_index];auto& selected=membership.folder_tools(folder_index);
-    if(selected.identity()!=binding.folder_id||selected.root_path()!=binding.root)throw ToolAccessDenied("Process folder identity differs from the admitted workspace snapshot");
-    return invoke_scoped(id,run,source,expiry,selected,binding.root,membership.workspace_id(),binding.folder_id,membership.revision(),folder_index==0,cancel,std::move(guidance),allow_background);
+std::string ProcessExecutor::invoke(const AgentProcessInvocation& request,std::stop_token cancel,InstructionPrecondition guidance){
+    const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    if(request.protocol_version!=1||request.operation_id.empty()||!text(request.operation_id,256)||request.run_id.empty()||!text(request.run_id,256)||
+       request.workspace_id.empty()||!text(request.workspace_id,256)||request.folder_id.empty()||!text(request.folder_id,256)||
+       request.workspace_revision<1||request.arguments_json.size()>65536||!text(request.arguments_json,65536)||request.expires_unix_ms<=now)
+        throw std::invalid_argument("Invalid run-scoped process invocation");
+    if(auto membership=process_membership_for_run(store_,request.run_id)){
+        if(request.workspace_id!=membership->workspace_id||request.workspace_revision!=membership->revision)
+            throw ToolAccessDenied("Process invocation does not match the run's admitted workspace revision");
+        WorkspaceToolSet tools(membership->workspace_id,membership->revision,std::move(membership->folders));
+        const auto selected_index=tools.folder_index(request.folder_id);const auto& binding=tools.folders()[selected_index];auto& selected=tools.folder_tools(selected_index);
+        if(selected.identity()!=binding.folder_id||selected.root_path()!=binding.root)
+            throw ToolAccessDenied("Process folder identity differs from the durable workspace membership");
+        return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,selected,
+            binding.root,tools.workspace_id(),binding.folder_id,tools.revision(),selected_index==0,cancel,std::move(guidance),request.allow_background);
+    }
+    if(request.workspace_id!=workspace_.identity()||request.workspace_revision!=1||request.folder_id!=workspace_.identity())
+        throw ToolAccessDenied("Process invocation does not match the admitted primary workspace");
+    return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,workspace_,root_,
+        request.workspace_id,request.folder_id,request.workspace_revision,true,cancel,std::move(guidance),request.allow_background);
 }
 std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");

@@ -117,11 +117,23 @@ in an admitted attached workspace folder. The contract used the current-source
 AgentRunner test executable and the matching isolated Release xMind worker
 binary.
 
-This seam still borrows `WorkspaceToolSet`, stop tokens and native instruction
-verification callbacks. It does not yet define owned-value IPC messages, allow
-remote-host injection, or execute `AgentRunner` out of process. MCP/A2A,
-approval and other workspace-effect dispatch also remain in the concrete
-runner. It is a first capability boundary, not process-placement acceptance.
+The process host now receives a versioned `AgentProcessInvocation` value with
+operation/run IDs, workspace ID and revision, selected folder ID, arguments,
+expiry and background permission. It resolves folder roots from the durable
+run-admission snapshot and rejects mismatched revisions, folders, empty IDs
+and expired requests. The host no longer accepts a caller-owned
+`WorkspaceToolSet` pointer.
+
+The call still carries a local stop token and native instruction-verification
+callback. It is not an authenticated IPC message, does not verify replay or
+active-run authorization, and does not allow remote-host injection or execute
+`AgentRunner` out of process. MCP/A2A, approval and other workspace-effect
+dispatch also remain in the concrete runner. This is a local value boundary,
+not process-placement acceptance.
+
+The Release process-executor, AgentRunner and graph-runner contracts pass with
+the typed process request, including attached-folder dispatch, revision and
+folder mismatch rejection, request expiry and both caller paths.
 
 ### Run-scoped workspace invocation boundary — 2026-10-18
 

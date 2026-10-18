@@ -19,10 +19,22 @@ struct ProcessProfile {
     std::string executable_id;
     bool auto_approve=false;
 };
-// Backend-owned process-tool capability consumed by AgentRunner. This keeps
-// process tool discovery, execution, joins and cancellation behind one host
-// seam. Workspace handles and instruction verifiers remain native backend
-// capabilities; this interface is not an IPC wire contract.
+// Owned process dispatch value. Workspace paths and handles are resolved by
+// the backend from the durable run membership, never supplied by the caller.
+struct AgentProcessInvocation {
+    std::int32_t protocol_version=1;
+    std::string operation_id;
+    std::string run_id;
+    std::string workspace_id;
+    std::int64_t workspace_revision=0;
+    std::string folder_id;
+    std::string arguments_json;
+    std::int64_t expires_unix_ms=0;
+    bool allow_background=false;
+};
+// Backend-owned process-tool capability consumed by AgentRunner. Workspace
+// handles and instruction verifiers remain native backend capabilities; this
+// interface is not yet an authenticated IPC contract.
 class AgentProcessToolHost {
 public:
     virtual ~AgentProcessToolHost()=default;
@@ -30,13 +42,8 @@ public:
     virtual ModelToolDefinition wait_definition() const=0;
     virtual ModelToolDefinition stop_definition() const=0;
     virtual const std::vector<ProcessProfile>& profiles() const noexcept=0;
-    virtual std::string invoke(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},
-        InstructionPrecondition guidance={},bool allow_background=false)=0;
-    virtual std::string invoke_in_workspace(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,const WorkspaceToolSet& membership,
-        std::size_t folder_index,std::stop_token cancel={},InstructionPrecondition guidance={},
-        bool allow_background=true)=0;
+    virtual std::string invoke(const AgentProcessInvocation& invocation,std::stop_token cancel={},
+        InstructionPrecondition guidance={})=0;
     virtual std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={})=0;
     virtual std::string stop(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={})=0;
     virtual std::vector<std::string> join_run(const std::string& run_id,std::stop_token cancel={})=0;
@@ -54,11 +61,10 @@ public:
     ModelToolDefinition wait_definition() const override;
     // Backend-private immutable bindings, including resolved executable IDs.
     const std::vector<ProcessProfile>& profiles() const noexcept override{return profiles_;}
+    std::string invoke(const AgentProcessInvocation& invocation,std::stop_token cancel={},
+        InstructionPrecondition guidance={}) override;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false) override;
-    std::string invoke_in_workspace(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,const WorkspaceToolSet& membership,
-        std::size_t folder_index,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=true) override;
+        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false);
     std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
     ModelToolDefinition stop_definition() const override;
     std::string stop(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
