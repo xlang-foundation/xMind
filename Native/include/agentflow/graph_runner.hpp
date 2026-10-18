@@ -36,6 +36,6 @@ private:
     std::size_t limit_;
     std::unique_ptr<AgentRunner> agents_;
     std::unique_ptr<WorkspaceTools> workspace_;
-    std::unique_ptr<ProcessExecutor> process_;
+    std::unique_ptr<AgentProcessToolHost> process_;
 };
 }

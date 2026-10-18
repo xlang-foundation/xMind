@@ -76,14 +76,15 @@ execution.
 
 ### Process-tool host seam — 2026-10-18
 
-`AgentRunner` now consumes process-tool discovery, invocation, wait, stop and
-run-join through `AgentProcessToolHost`; the existing `ProcessExecutor` is the
-in-process implementation. The Release `agentflow_process_effects` and
-`agentflow_agent` libraries compile, and the updated AgentRunner contract
-passes against the synthetic inference peer and real filesystem/process tools,
-including process execution in an admitted attached workspace folder. The
-contract used the current-source AgentRunner test executable and the matching
-isolated Release xMind worker binary.
+`AgentRunner` and `GraphRunner` now consume process-tool discovery, invocation,
+wait, stop and run-join through `AgentProcessToolHost`; the existing
+`ProcessExecutor` is the in-process implementation. The Release
+`agentflow_process_effects`, `agentflow_agent`, and graph execution libraries
+compile. The updated AgentRunner contract passes against the synthetic
+inference peer and real filesystem/process tools, including process execution
+in an admitted attached workspace folder. The contract used the current-source
+AgentRunner test executable and the matching isolated Release xMind worker
+binary.
 
 This seam still borrows `WorkspaceToolSet`, stop tokens and native instruction
 verification callbacks. It does not yet define owned-value IPC messages, allow
