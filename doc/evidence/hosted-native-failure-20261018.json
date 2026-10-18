@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-18T13:41:00.943Z",
+  "scope": "Authoritative completed hosted native gate failure, before the new AgentFileToolHost source. Not a result of the current local 149-test gate.",
+  "runId": 39128361191,
+  "jobId": 117680105619,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39128361191",
+  "conclusion": "failure",
+  "provenance": {
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain_version": "18.10.12224.181",
+    "build_parallelism": 4,
+    "xmind": "26daafbeae5e7ed9cc14a8ac74626c4147956201",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain": "Visual Studio 18 2026",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "xlang3": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "windows_default_owner_matches_user": false,
+    "processors": 4
+  },
+  "registered": 149,
+  "passed": 143,
+  "failed": 6,
+  "failures": [
+    "native_dynamic_plan_mcp_contract",
+    "native_graph_runner_contract",
+    "native_process_executor_contract",
+    "native_xlang3_default_process_contract",
+    "native_mcp_effect_contract",
+    "native_workspace_registry_contract"
+  ],
+  "observations": [
+    "Process-executor contract reports Process folder binding is invalid before dispatch.",
+    "Default xlang3 process fixture observes an exit status mismatch.",
+    "Dynamic-plan MCP fixture reports no direct-process controller proposal.",
+    "Graph runner retains a running, executing auto-approved multi-folder process at its diagnostic deadline.",
+    "MCP effects complete normal/legacy effects, then roots-continuation dispatch becomes uncertain without an effect marker.",
+    "Workspace registry rejects private storage becoming a workspace member.",
+    "Hosted fixture paths include the Windows short-name alias C:/Users/RUNNER~1/AppData/Local/Temp."
+  ],
+  "nextInvestigation": "Reproduce canonical-path and temporary-directory differences in isolated local fixtures, and separately inspect process deadline behavior. The short-path relationship is a hypothesis, not a verified common cause. Keep production folder, private-storage and effect guards; do not relax them to turn tests green.",
+  "artifact": {
+    "id": 12138397085,
+    "bytes": 61920,
+    "sha256": "3d13890748064c5c76e850d94f0c60476bef0126c1a845516d3078bc20fbc9a1",
+    "matchesGitHubDigest": true
+  },
+  "lastTestLogSha256": "fc292c5873a5d18e16e8646a5c3ceb315c02d69e0faf85f5bc5038fea6a99e1e",
+  "releaseAccepted": false,
+  "fixClaimed": false
+}

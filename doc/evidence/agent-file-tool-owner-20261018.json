@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-18T13:53:05.318Z",
+  "sourceRevision": "5ed8267fc02ebdb08687f3e902cc36872bc1ad61",
+  "nativeTree": "e99120bde34bae51ada028007c10dfe6f0a7396e",
+  "scope": "Native C++ AgentRunner file-tool owner boundary, complete local Release build/gate and real filesystem/approval/xlang3 SQLite contracts. Controller/model-call identities and provider replies in contracts are explicit fixtures; no live provider, GUI, IPC worker or installed-package acceptance.",
+  "behavior": {
+    "ownedInvocationValues": true,
+    "workspaceRootsAndHandlesStayInOwner": true,
+    "preparedPlansAndInstructionVerifiersStayInOwner": true,
+    "expiryAndOperationIdsStayInOwner": true,
+    "activeRunAndMembershipBinding": true,
+    "frozenCatalogueAndInheritedDenials": true,
+    "localPendingAndCompletedCallReplayRejected": true,
+    "guidanceRequiredBeforeProposal": true,
+    "actualApprovedCreateEditRestore": true,
+    "actualCrossFolderPartialPatch": true,
+    "actualXlang3SqliteRestart": true
+  },
+  "sourceSha256": {
+    "Native/include/agentflow/agent_file_tool_host.hpp": "653821be4b8cf40a262db79c0f84c08dc56fbe2c1e65a741fd4d23a96e54c94d",
+    "Native/src/agent_file_tool_host.cpp": "5e56e2b74a7b262d2a616795fb010963710bf9d2932964064cb080b42a323852",
+    "Native/src/agent_runner.cpp": "ca799a2c3d769d247849874ff526b89ae23440341a7d15f16c3654a4136f3e8d",
+    "Native/tests/agent_file_tool_host_contract.cpp": "9dac8f3e6ec26a60d3c259538c703ae940ef1b8f6010b3db422e370e83bba7a8",
+    "Native/CMakeLists.txt": "55358ab7d1eb8a7dd688089cfe7e53d263482a4635a996d6ca52e487558d8a6a",
+    "Tools/ci-native.ps1": "0bbf0811aa26ff2f14b419737796f171ec2187f298387213d3d8b2e29a2bcb08"
+  },
+  "gate": {
+    "recordedAt": "2026-10-18T13:52:07.409Z",
+    "sourceFiles": 2504,
+    "sourceManifestSha256": "bf91ccc9c01021de0890abc409e82ecc09df5d262bfa5552aeb648c71fc38ebe",
+    "sourceAndBinaryUnchanged": true,
+    "nativeExecutableSha256": "467a49160d760b75763eba058696c30e45abdfdb966f1740b0b8312d052ea1ed",
+    "pairedRuntimeSha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "passed": 149,
+    "failed": 0,
+    "seconds": 819.37,
+    "ctestLogSha256": "eda77eeaf1d973ac1c8623c25e130038813e3a866637705c128e1e9cf04c4d46",
+    "detailsLogSha256": "56741e181109b271129ed7576629215ef1904e78389ccba6856ce1efcd3d31e5",
+    "hostedExpectedContracts": 150,
+    "hostedOnlyLocalTrustMutationExcluded": true
+  },
+  "preliminaryFocused": {
+    "passed": 2,
+    "seconds": 10.93,
+    "scope": "AgentRunner plus new owner contract before final envelope-capacity alignment and extra direct rejection cases; the final complete gate above covers those changes."
+  },
+  "build": {
+    "initialFailure": "Misspelled existing permission helper name; corrected before passing builds/tests.",
+    "initialLogSha256": "6cdd8e89d23cffcdbba87acd5d6f0606c813b81be7cfc992b5ec53bf60af9b30",
+    "fullBuildExitCode": 0,
+    "fullBuildLogSha256": "522f056a68b86dc485b4a9702af00c9cd67bfaf6ca11d200584dc17aabb475b2"
+  },
+  "limits": {
+    "processAgentRunnerImplemented": false,
+    "authenticatedWorkerRpcImplemented": false,
+    "durableRpcDeduplicationImplemented": false,
+    "completeAgentExecutionHostImplemented": false,
+    "mcpA2aOwnerExtractionComplete": false,
+    "directGraphFileNodesAdoptThisHost": false,
+    "installedPackageChanged": false,
+    "installedVersion": "0.1.21",
+    "installedNativeRevision": "0e35ac38f6c73d02d7e1456824f2129573f006bc",
+    "hostedNativeAccepted": false,
+    "releaseAccepted": false,
+    "xlang3SourceChanged": false,
+    "cpythonExecuted": false
+  }
+}
