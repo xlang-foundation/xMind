@@ -23,6 +23,30 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Managed handoff and profile publication — 2026-10-18
+
+Managed upgrades now ask the running owner to qualify the replacement before
+quiescing. Invalid digests, incomplete target fields and unsupported inventories
+leave owner state unchanged; the production-server contract also confirms new
+session admission after rejection. Retirement revalidates the target. An
+unresolved exit retains the actual retirement request error and its saved intent.
+
+Encrypted profile publication now retries confirmed Windows reader/lock conflicts
+for up to five seconds and reports the actual Windows error on failure. Access
+denied is retried only when a non-mutating delete-access probe confirms sharing;
+the real read-only permission test still fails immediately. The native profile,
+publication, owner HTTP and production-server handoff contracts passed **4/4 in
+346.62 seconds**, including same-profile edit-policy changes, stopped-owner
+recovery and retained sessions/history.
+
+The first focused gate passed two contracts but failed profile readiness because
+its atomic record publication failed. That attempt did not record its Windows
+error, so its exact cause is still unproven. A prior development profile still
+reports that its replacement package cannot be qualified; this increment does
+not migrate or repair that already saved handoff. The installed VSIX and live
+browser retain the earlier `d7adf96` runtime. No rendered UI or complete current
+Release gate is claimed. [Source hashes, checks and retained failure](evidence/handoff-prequalification-20261018.json).
+
 ## Packaged native-wheel coding checkpoint — 2026-10-18
 
 At product source `d7adf96`, a live OpenAI-backed CLI run used the packaged

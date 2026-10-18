@@ -7,6 +7,7 @@
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
+#include "profile_record_publication.hpp"
 
 #include <aclapi.h>
 #include <algorithm>
@@ -305,9 +306,7 @@ class Store {
             auto old = open(L"profile.state", FILE_READ_ATTRIBUTES, OPEN_EXISTING,
                             FILE_SHARE_READ | FILE_SHARE_DELETE);
         }
-        require(MoveFileExW(extended(directory / name).c_str(), extended(directory / L"profile.state").c_str(),
-                            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0,
-                "Cannot publish local profile record; stored database was preserved");
+        detail::publish_profile_record(extended(directory / name),extended(directory / L"profile.state"));
     }
     Handle lock() {
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(35);
@@ -685,6 +684,7 @@ Json authority_body(const Json& workspace){
 void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace){
     require(state.contains("owner_receipt")&&state.contains("replacement_port")&&state.contains("replacement_manifest")&&state.contains("replacement_runtime"),"Incomplete persisted backend handoff intent; profile was preserved");
     const auto pid=state.at("pid").get<std::uint32_t>();const auto birth=state.value("birth",std::string{});
+    std::string retirement_error;
     if(pid&&!observe_owner_exit(pid,birth,0).exited){
         try{
             Json ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
@@ -692,11 +692,17 @@ void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace
             body["expected_generation"]=receipt.at("generation");body["expected_revision"]=receipt.at("revision");body["receipt_id"]=receipt.at("receipt_id");
             body["target_runtime_root"]=state.at("replacement_runtime");body["target_manifest_sha256"]=state.at("replacement_manifest");body["approved_edits"]=state.at("approved_edits");
             profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/retire",&body);
-        }catch(...){/* retirement may commit before its response or listener remains available */}
+        }catch(const std::exception& error){
+            // A lost reply can follow a committed retirement. Observe the exact
+            // process before deciding; retain a rejection for an unresolved exit.
+            retirement_error=error.what();
+        }catch(...){retirement_error="Unknown managed retirement request failure";}
     }
     const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
     while(pid&&!observe_owner_exit(pid,birth,0).exited&&std::chrono::steady_clock::now()<deadline)std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    require(!pid||observe_owner_exit(pid,birth,0).exited,"Backend retirement is unresolved; reconnect to this profile to resume the same handoff");
+    require(!pid||observe_owner_exit(pid,birth,0).exited,
+        "Backend retirement is unresolved; the saved handoff was preserved"+
+        (retirement_error.empty()?std::string{}:std::string(". ")+retirement_error));
     VerifiedRuntimeGeneration target(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));target.revalidate();
     state["runtime"]=state.at("replacement_runtime");state["manifest"]=state.at("replacement_manifest");state["pid"]=static_cast<std::uint32_t>(0);state["birth"]="";state["port"]=0;state["phase"]="preparing";store.write(state);
 }
@@ -870,6 +876,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                 Json quiesced=owner;
                 if(!owner.value("quiesced",false)){
                     Json request=authority_body(ws);request["expected_generation"]=owner.at("generation");request["expected_revision"]=owner.at("revision");
+                    request["target_runtime_root"]=state.at("replacement_runtime");request["target_manifest_sha256"]=state.at("replacement_manifest");
                     try {
                         quiesced=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/quiesce",&request);
                     } catch(const ProfileRequestError& error) {

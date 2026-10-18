@@ -1,5 +1,32 @@
 # Native replacement startup
 
+Managed clients send `target_runtime_root` and `target_manifest_sha256` with
+`POST /v1/backend/owner/quiesce`. Both fields are required when either is present.
+The running backend qualifies and pins that package before closing admission.
+A bad digest or unsupported inventory leaves the owner generation, revision and
+admission state unchanged. Retirement verifies the target again; this early
+check does not replace target-bound retirement or observed process exit.
+Owner-only quiescence without a replacement remains available.
+
+The client retains retirement request errors while observing the exact process
+for exit. If that process remains alive, it reports the original rejection or
+transport failure alongside the unresolved handoff. A lost response still does
+not prove that retirement failed. No owner is killed and no stored receipt is
+discarded to bypass an unresolved handoff.
+
+Encrypted profile-record publication retains its flushed staging file and
+write-through atomic replacement. Windows sharing and lock conflicts have a
+five-second retry bound. Access denied is retried only when a non-mutating
+delete-access probe confirms a sharing conflict; other errors fail immediately.
+A failure reports the
+actual Windows code and retains the current record and staging file. This
+does not retry model requests or replay tools.
+
+These changes do not migrate older package formats or repair an already saved
+handoff. An owner that does not recognize the target qualification fields
+rejects the request before quiescence. Current installation acceptance continues
+to use a fresh profile, as required by the product scope.
+
 The replacement implementation binds retirement to the target runtime's actual
 package root/file identity, inventory digest, native/SDK/source revisions and
 server hash. It also records the captured workspace root/identity, a digest of

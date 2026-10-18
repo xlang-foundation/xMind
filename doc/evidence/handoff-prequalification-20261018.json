@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-10-18T08:20:47.320Z",
+  "source_base": "018d711f389ebedd03ac9f2bda0df9aca9cf8d2a",
+  "changes": [
+    "Qualify a managed replacement before quiescing the current owner",
+    "Preserve retirement request errors when exact owner exit remains unresolved",
+    "Retry bounded Windows sharing conflicts during atomic encrypted profile publication and report the actual error code"
+  ],
+  "source_files": {
+    "Native/src/http_server.cpp": "bf5f5f4345ac7807305dd09e3bcfcee42ae7b10e81b6e354445b3cfcbbce2c98",
+    "Native/src/local_profile.cpp": "0361c3ab847eaa5522a45d28ab3c2cee295f5490dcb331f65610af013662887e",
+    "Native/src/profile_record_publication.hpp": "b2c1a0173ce4291340a762f3b26e766a8363cfa934cfc8af04fee24f1683e76f",
+    "Native/tests/backend_handoff_contract.mjs": "59c5d3e05b2be5787c2baaba2224419b1ac758db5ad95d3a9e039d7875385743",
+    "Native/tests/profile_record_publication_contract.cpp": "10e89a9d6b62a02b8fadfb7ec4c9a0c65da172467e32d7e37d6148f213f0f07b",
+    "Native/CMakeLists.txt": "dea9bc6ba9079e4fe1877aa7c2bb02930e78e8c2da279e837266e10157a4d0d7",
+    "Tools/ci-native.ps1": "f0eb3ebddfd0a5644d3edf9178abfdbf4ea6ecf04a3bafbe1998f89ad4b3ab2c"
+  },
+  "native_executable_sha256": "7998886861cfb4e40c8e9a42301206c08123468a9066adbf8600dee485c33cc3",
+  "test_names": [
+    "native_local_profile_contract",
+    "native_backend_owner_http_contract",
+    "native_backend_handoff_contract",
+    "native_profile_record_publication_contract"
+  ],
+  "tests_passed": 4,
+  "test_log_sha256": "68020f904a2115ace9b1b86e6969e867bafdc466d846859af8a21696cac2eaaa",
+  "test_elapsed_seconds": 346.62,
+  "production_server_checks": [
+    "Bad digest, missing target field and unsupported CPython wheel inventory reject before quiescence",
+    "Rejected package leaves owner state unchanged and allows creating a session",
+    "Valid target retires the real process, prepares and activates its replacement and retains saved records"
+  ],
+  "publication_checks": [
+    "A real deny-delete Windows reader prevents MoveFileEx; a non-mutating delete-access probe confirms the sharing conflict",
+    "Releasing the reader permits atomic publication of the exact staged bytes",
+    "Persistent sharing conflict times out with its actual Win32 code (32 or 5) and preserves both files",
+    "A read-only destination fails with Win32 5 without sharing retries"
+  ],
+  "retained_failed_attempt": {
+    "log_sha256": "04072c774ceb7be00e50851fdfc698111a028b71ab6ed04779d441947201c689",
+    "tests_passed": 2,
+    "tests_failed": 1,
+    "elapsed_seconds": 279.94,
+    "failure": "The replacement backend exited before readiness; its native log reported Cannot publish local profile record; stored database was preserved",
+    "fixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-local-profile-dipWnM",
+    "limit": "The original Windows error code was not recorded. It is not proven to have been a sharing conflict."
+  },
+  "corrected_contract_assumption": "The initial publication fixture required MoveFileEx to return Win32 32. That assertion failed with both old and staged bytes retained. The final contract accepts access denied only with a separate native delete-access probe confirming a reader sharing conflict, and independently verifies that a read-only permission denial is not retried.",
+  "earlier_binary_result": "The new target-qualified quiescence assertion failed against the previous binary (400 rather than 409). Owner-state continuity was not checked after that assertion failed.",
+  "prior_development_profile": {
+    "result": "still unresolved",
+    "reported_error": "Backend retirement is unresolved; the saved handoff was preserved. Managed backend owner request was rejected: /v1/backend/owner/retire: {\"detail\":\"Native runtime package cannot be qualified\"}",
+    "state_preserved": true,
+    "force_killed": false,
+    "recovery_claimed": false
+  },
+  "limits": [
+    "No older package/profile migration",
+    "Already saved handoff is not repaired",
+    "No rendered browser or installed VS Code acceptance",
+    "Existing installed VSIX and live browser remain at d7adf96",
+    "No provider/model requests in these focused contracts",
+    "No complete native or hosted Release gate for this source"
+  ]
+}
