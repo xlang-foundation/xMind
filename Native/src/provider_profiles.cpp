@@ -32,7 +32,8 @@ const ProviderProfileRoute& ProviderProfiles::route(const std::string& id)const{
 ProviderProfiles::State ProviderProfiles::load()const{
     State state;try{state.source=store_.information("native-provider-profiles","registry").get();}catch(const NotFound&){return state;}
     try{
-        state.record=parse(*state.source);const auto& record=state.record;if(!record.is_object()||record.size()!=4||!record.at("version").is_number_integer()||record["version"]!=1||!record.at("profiles").is_array()||record["profiles"].empty()||record["profiles"].size()>32)throw DatabaseError("Invalid provider profile registry");
+        state.record=parse(*state.source);const auto& record=state.record;
+        if(!record.is_object()||(record.size()!=4&&!(record.size()==5&&record.contains("file_active")))||!record.at("version").is_number_integer()||record["version"]!=1||!record.at("profiles").is_array()||record["profiles"].empty()||record["profiles"].size()>32)throw DatabaseError("Invalid provider profile registry");
         state.snapshot.revision=revision(record.at("revision"));state.snapshot.active=record.at("active").get<std::string>();std::set<std::string> ids;
         for(const auto& value:record["profiles"]){
             if(!value.is_object()||value.size()!=10)throw DatabaseError("Invalid provider profile record");SavedProviderProfile profile{value.at("id").get<std::string>(),value.at("route_id").get<std::string>(),value.at("model").get<std::string>(),value.at("credential_id").get<std::string>(),revision(value.at("revision"))};
@@ -40,7 +41,12 @@ ProviderProfiles::State ProviderProfiles::load()const{
             if(!ids.insert(profile.id).second||profile.revision>state.snapshot.revision||value.at("provider")!=policy.provider||value.at("endpoint")!=policy.endpoint||value.at("wire")!=wire_name(policy.wire)||value.at("credential_scope")!=policy.credential_scope||value.at("credential_purpose")!=policy.credential_purpose)throw DatabaseError("Stored provider profile differs from backend policy");
             state.snapshot.profiles.push_back(std::move(profile));
         }
-        if(!state.snapshot.active.empty()&&!ids.contains(state.snapshot.active))throw DatabaseError("Active provider profile does not exist");return state;
+        if(!state.snapshot.active.empty()&&!ids.contains(state.snapshot.active))throw DatabaseError("Active provider profile does not exist");
+        if(record.contains("file_active")&&!record["file_active"].is_null()){
+            const auto configured=record["file_active"].get<std::string>();identity(configured);
+            if(!ids.contains(configured))throw DatabaseError("Configured provider profile does not exist");
+        }
+        return state;
     }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Stored provider profiles are invalid");}
 }
 ProviderProfileSnapshot ProviderProfiles::snapshot()const{return load().snapshot;}
@@ -69,10 +75,21 @@ ProviderProfileSnapshot ProviderProfiles::save(std::string id,std::string route_
     if(previous==state.snapshot.profiles.end())state.snapshot.profiles.push_back(saved);else *previous=saved;return state.snapshot;
 }
 ProviderProfileSnapshot ProviderProfiles::save_config(std::vector<ProviderProfileConfigEntry> entries,
-    std::optional<std::string> active,std::int64_t expected,Validator validate_each,Validator prepare_active,std::function<void()> before_change){
-    if(entries.size()>32||(entries.empty()&&!active))throw std::invalid_argument("Provider configuration batch requires profiles or an explicit active selection");
+    std::optional<std::string> active,std::int64_t expected,Validator validate_each,Validator prepare_active,std::function<void()> before_change,ProviderConfigSelection selection){
+    if(entries.size()>32)throw std::invalid_argument("Provider configuration profile limit reached");
     auto state=load();if(expected<0||expected!=state.snapshot.revision||expected>maximum)throw Conflict("Provider profile registry revision changed");
+    if(entries.empty()&&!active&&(selection!=ProviderConfigSelection::file_default||!state.source))throw std::invalid_argument("Provider configuration batch requires profiles or an explicit active selection");
     if(active)identity(*active);
+    const auto requested_active=active;
+    if(selection==ProviderConfigSelection::file_default){
+        const Json configured=active?Json(*active):Json(nullptr);
+        // An unchanged file default must not overwrite a later UI/CLI choice.
+        // When first observing an existing registry, retain its owned selection.
+        // Removing/reintroducing the directive is an explicit file change too.
+        const bool apply=state.record.contains("file_active")?state.record["file_active"]!=configured:state.snapshot.active.empty();
+        if(!apply)active.reset();
+        state.record["file_active"]=configured;
+    }
     struct Candidate {SavedProviderProfile profile;const ProviderProfileRoute* policy;SecretBytes secret;bool changed;};
     std::vector<Candidate> candidates;std::set<std::string> supplied;std::size_t additions=0;
     bool changed=active&&*active!=state.snapshot.active;
@@ -104,6 +121,7 @@ ProviderProfileSnapshot ProviderProfiles::save_config(std::vector<ProviderProfil
         const auto old=std::find_if(profiles.begin(),profiles.end(),[&](const auto& value){return value.at("id")==p.id;});
         if(old==profiles.end())profiles.push_back(std::move(encoded));else *old=std::move(encoded);
     }
+    if(requested_active&&std::none_of(profiles.begin(),profiles.end(),[&](const auto& value){return value.at("id")==*requested_active;}))throw NotFound("Configured provider profile not found");
     if(active)state.record["active"]=*active;
     const auto active_id=state.record.at("active").get<std::string>();
     const auto selected=std::find_if(profiles.begin(),profiles.end(),[&](const auto& value){return value.at("id")==active_id;});

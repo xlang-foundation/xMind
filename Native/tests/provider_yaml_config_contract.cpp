@@ -155,6 +155,49 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         require(profiles.snapshot().revision==2&&profiles.snapshot().active=="openai","Bad empty-batch selection cannot mutate actual merged registry");
     }
     {
+        const auto database=(root/"yaml-file-selection.sqlite").string();
+        const auto from_file=[&](ProviderProfiles& profiles,std::optional<std::string> active,std::int64_t expected,
+            ProviderProfiles::Validator prepare={},std::function<void()> guard={}){
+            return profiles.save_config({},std::move(active),expected,{},std::move(prepare),std::move(guard),ProviderConfigSelection::file_default);
+        };
+        {
+            PersistenceService store(database,imports);ProviderProfiles profiles(store,policy(origin));
+            auto config=parse_provider_yaml_config(document(),allowed);
+            const auto initialized=profiles.save_config(std::move(config.profiles),std::move(config.active_profile),0,{},{},{},ProviderConfigSelection::file_default);
+            require(initialized.revision==1&&initialized.active=="claude","A fresh registry applies the file default");
+            profiles.select("openai",1);const auto source=store.information("native-provider-profiles","registry").get();
+            bool prepared=false,guarded=false;
+            auto repeated=from_file(profiles,"claude",2,[&](const auto&,const auto&){prepared=true;},[&]{guarded=true;throw Conflict("Synthetic busy owner");});
+            require(repeated.active=="openai"&&repeated.revision==2&&!prepared&&!guarded&&store.information("native-provider-profiles","registry").get()==source,
+                "Unchanged file default preserves the later user selection without service preparation or registry writes");
+        }
+        {
+            PersistenceService store(database,imports);ProviderProfiles profiles(store,policy(origin));
+            auto repeated=from_file(profiles,"claude",2);require(repeated.active=="openai"&&repeated.revision==2,"File selection provenance survives native SQLite reopen");
+            repeated=from_file(profiles,"openai",2);require(repeated.active=="openai"&&repeated.revision==2,"Changing the file to the already selected provider records provenance without rotating keys/revisions");
+            profiles.select("claude",2);repeated=from_file(profiles,"openai",3);
+            require(repeated.active=="claude"&&repeated.revision==3,"A later user selection wins against another repeated file attachment");
+            from_file(profiles,"claude",3);const auto source=store.information("native-provider-profiles","registry").get();
+            rejects<Conflict>([&]{from_file(profiles,"openai",3,{},[]{throw Conflict("Synthetic busy owner");});});
+            require(store.information("native-provider-profiles","registry").get()==source,"Busy selection change cannot publish its file marker");
+            {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_file_selection BEFORE UPDATE ON information WHEN NEW.category='native-provider-profiles' BEGIN SELECT RAISE(ABORT,'synthetic file selection publication failure'); END");}
+            rejects<DatabaseError>([&]{from_file(profiles,"openai",3);});
+            require(store.information("native-provider-profiles","registry").get()==source&&profiles.snapshot().active=="claude","Actual SQL failure rolls back file provenance and active selection together");
+            {XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_file_selection");}
+            std::size_t prepared=0;
+            repeated=from_file(profiles,"openai",3,[&](const auto& selected,const auto&){++prepared;require(selected.id=="openai","Changed file prepares its actual selected provider");});
+            require(repeated.active=="openai"&&repeated.revision==4&&prepared==1,"A deliberate changed file default applies once after failed publication");
+            from_file(profiles,std::nullopt,4);profiles.select("claude",4);
+            repeated=from_file(profiles,"openai",5);require(repeated.active=="openai"&&repeated.revision==6,"Removing then restoring a file directive is an explicit file change");
+            rejects<NotFound>([&]{from_file(profiles,"absent",6);});rejects<Conflict>([&]{from_file(profiles,"openai",5);});
+            require(profiles.snapshot().revision==6&&store.credentials("server").get().size()==2,"File selection operations never rotate credentials or weaken the expected revision");
+        }
+        // First attaching a file records its default without discarding a user choice.
+        PersistenceService store((root/"yaml-existing-selection.sqlite").string(),imports);ProviderProfiles profiles(store,policy(origin));
+        apply(profiles,document(),0);profiles.select("openai",1);
+        require(from_file(profiles,"claude",2).active=="openai"&&profiles.snapshot().revision==2,"First file observation preserves an existing user-selected provider");
+    }
+    {
         PersistenceService store((root/"yaml-runtime-import.sqlite").string(),imports);AgentSettings base;ProviderProfileRuntime runtime(store,base,runtime_policy(origin),1,8);
         const auto file=root/"synthetic-runtime-providers.yaml";auto write=[&](const std::string& raw){std::ofstream stream(file,std::ios::binary|std::ios::trunc);stream<<raw;require(static_cast<bool>(stream),"Owned synthetic runtime YAML write failed");};
         write("version: 1\nprofiles: {claude: {route: anthropic.messages, api_key: \"\"}}\n");

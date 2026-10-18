@@ -100,8 +100,14 @@ and optional `model`. An omitted model preserves an existing choice. A new
 key-only profile has no selected model; catalogue discovery and the normal
 footer model chooser finish configuration. New empty-key placeholders are
 skipped; an existing empty key reuses that profile's encrypted credential.
-Optional `active_profile` selects an existing or supplied profile without
-inventing a model. Unspecified profiles and the current selection remain.
+Optional `active_profile` supplies the initial provider default without inventing
+a model. After choosing another provider in the UI or console, attaching the
+same file preserves that choice. The backend records the file's last directive
+in the same atomic registry publication; deliberately changing the directive
+applies the new default with the normal idle and revision checks. Removing and
+later restoring it also counts as a change. The first file attachment to an
+already configured registry preserves its existing selection. Unspecified
+profiles remain saved.
 
 OpenRouter is available through the native `openrouter.chat` route. Add an
 `openrouter` profile with its OpenRouter key to this same file; Settings can

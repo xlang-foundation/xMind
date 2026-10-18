@@ -45,6 +45,8 @@ public:
     // Trusted local startup file only. Keys are encrypted by the native batch;
     // absent models preserve existing choices and new key-only profiles remain
     // unconfigured until model discovery/selection through the normal API.
+    // Unchanged file defaults preserve later UI/CLI provider selections;
+    // deliberate directive changes apply with the same idle/revision guards.
     ProviderProfileRuntimeMetadata import_yaml_configuration(const std::filesystem::path& absolute_path,
         std::int64_t expected_revision) override;
     Run submit(std::string id,std::string session,std::string prompt) override;

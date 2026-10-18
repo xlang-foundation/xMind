@@ -157,6 +157,10 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         require(store.runs("openai-first").get().empty()&&store.history("openai-first").get().empty(),"Rejected profile admission cannot create a run or prompt history");
         const auto admitted=client.Post("/v1/runs",authorized,admission.dump(),"application/json");require(admitted&&admitted->status==202,"Current bound profile must admit the real native model run");require(Json::parse(admitted->body).at("provider_context").at("profile_id")=="openai","Admission reply must carry its committed profile context");
         rejects<Conflict>([&]{runtime.select_profile("claude",2);});wait(store,"openai-first-run",RunState::completed);reply(store,"openai-first","Actual OpenAI fixture reply");provenance(store,"openai-first","openai",1,"fixture-openai");
+        const auto initial_config_file=std::filesystem::u8path(argv[1])/"initial-provider-config.yaml";
+        const std::string initial_config="version: 1\nactive_profile: openai\nprofiles:\n  openai: {route: openai.chat, model: fixture-openai, api_key: runtime-openai-fixture-key}\n  claude: {route: anthropic.messages, model: fixture-claude, api_key: runtime-claude-fixture-key}\n";
+        {std::ofstream out(initial_config_file,std::ios::binary);out<<initial_config;require(static_cast<bool>(out),"Initial synthetic config write failed");}
+        require(runtime.import_yaml_configuration(initial_config_file,2).revision==2,"Recording the initial file default must not rotate an identical service");
         require(select(runtime,"claude",2).revision==3&&runtime.models()[0]=="fixture-claude","Selection must publish independently credentialed Claude execution");
         store.create_session("claude-first","Profile Claude fixture").get();runtime.submit("claude-first-run","claude-first","Claude profile fixture");wait(store,"claude-first-run",RunState::completed);reply(store,"claude-first","Actual Claude fixture reply");provenance(store,"claude-first","claude",1,"fixture-claude");
         const auto preserved=store.information("native-provider-profiles","registry").get();
@@ -169,11 +173,16 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto graph_admission=Json{{"id","graph-run"},{"session_id","graph-session"},{"graph_id","review"},{"graph_revision",1},{"prompt","Review fixture"},{"provider_profile_id","claude"},{"expected_provider_revision",3}};
         auto stale_graph=graph_admission;stale_graph["expected_provider_revision"]=2;const auto denied_graph=client.Post("/v1/graph-runs",authorized,stale_graph.dump(),"application/json");require(denied_graph&&denied_graph->status==409&&store.runs("graph-session").get().empty(),"Graph profile conflicts must precede root persistence");
         const auto admitted_graph=client.Post("/v1/graph-runs",authorized,graph_admission.dump(),"application/json");const auto graph_error="Current bound graph must use the same native ownership lock: "+(admitted_graph?std::to_string(admitted_graph->status)+" "+admitted_graph->body:std::string("no response"));require(admitted_graph&&admitted_graph->status==202,graph_error.c_str());wait(store,"graph-run",RunState::paused);
+        const auto selected_registry=store.information("native-provider-profiles","registry").get();
+        const auto reattached=client.Post("/v1/provider/configuration/import",authorized,
+            Json{{"path",initial_config_file.string()},{"expected_revision",3}}.dump(),"application/json");
+        require(reattached&&reattached->status==200&&Json::parse(reattached->body).at("active")=="claude"&&
+            store.information("native-provider-profiles","registry").get()==selected_registry,
+            "Reattaching the unchanged OpenAI-default YAML must preserve the selected Claude provider while its graph owns execution");
         // The real graph owns a paused human gate, so provider mutation is busy.
         // Attaching a view with exactly the same YAML must remain observational.
         const auto config_file=std::filesystem::u8path(argv[1])/"busy-provider-config.yaml";
         const std::string same_config="version: 1\nactive_profile: claude\nprofiles:\n  openai: {route: openai.chat, model: fixture-openai, api_key: runtime-openai-fixture-key}\n  claude: {route: anthropic.messages, model: fixture-claude, api_key: runtime-claude-fixture-key}\n";
-        const auto registry_before=store.information("native-provider-profiles","registry").get();
         const auto credentials_before=store.credentials("server").get().size();
         const auto events_before=store.events("graph-run").get().size();
         const auto checkpoint_before=store.graph_run("graph-run").get().checkpoint_json;
@@ -185,6 +194,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto unchanged_import=import_config(same_config,3);
         require(unchanged_import&&unchanged_import->status==200&&Json::parse(unchanged_import->body).at("revision")==3,
             "Unchanged authenticated YAML import must succeed while a graph owns execution");
+        const auto registry_before=store.information("native-provider-profiles","registry").get();
         const auto template_import=import_config("version: 1\nprofiles: {unused: {route: openai.chat, api_key: \"\"}}\n",3);
         require(template_import&&template_import->status==200,"An empty-key template cannot block observation of busy execution");
         for(const auto& change:std::vector<std::string>{

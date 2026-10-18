@@ -300,13 +300,14 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
     std::unique_lock lock(impl_->mutex);
     if(expected<0||expected!=impl_->state.revision)throw Conflict("Provider profile runtime revision changed");
     if(impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider YAML registry revision changed");
+    const bool supplied_profiles=!configuration.profiles.empty();
     std::erase_if(configuration.profiles,[&](const auto& entry){
         return entry.key.view().empty()&&std::none_of(impl_->state.profiles.begin(),impl_->state.profiles.end(),
             [&](const auto& saved){return saved.id==entry.id;});
     });
     // Empty template placeholders do not create fake credentials/models or
     // replace the running provider. An explicit selection still must exist.
-    if(configuration.profiles.empty()&&!configuration.active_profile)return impl_->metadata();
+    if(configuration.profiles.empty()&&!configuration.active_profile&&(impl_->state.profiles.empty()||supplied_profiles))return impl_->metadata();
     for(const auto& entry:configuration.profiles){
         const auto& allowed=impl_->route(entry.route_id);
         const auto saved=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),
@@ -327,7 +328,7 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
             auto owned=impl_->store.resolve_credential(allowed.credential_scope,profile.credential_id,allowed.credential_purpose).get();
             validate_public_identity(profile.id,profile.model,owned);
         },[&](const auto& profile,const auto&){candidate=impl_->prepare(profile);},
-        [&]{impl_->mutable_state(expected);});
+        [&]{impl_->mutable_state(expected);},ProviderConfigSelection::file_default);
     // Publication succeeded. Adopt exactly that prepared generation only when
     // there is an active selection; inactive imports retain the current service.
     impl_->state=std::move(next);std::unique_ptr<ExecutionPlatform> previous;

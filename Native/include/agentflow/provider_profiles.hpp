@@ -27,6 +27,7 @@ struct ProviderProfileConfigEntry {
     std::optional<std::string> model;
     SecretBytes key{std::span<const std::uint8_t>{}};
 };
+enum class ProviderConfigSelection { explicit_selection, file_default };
 // Backend-owned encrypted profile registry. Never serialize credential references
 // directly as client metadata. Does not publish or replace an execution service.
 // The owner must validate candidate execution policy before activating a profile.
@@ -46,10 +47,17 @@ public:
     // Identical configuration verifies that CAS without rotating revisions/keys.
     // before_change runs only for a semantic change, before key publication or
     // active-service preparation. No-op imports never prepare another service.
-    // An empty batch requires an explicit existing active-profile selection.
+    // An explicit empty batch requires an existing active-profile selection.
+    // file_default records the last file directive in the same registry CAS.
+    // A repeated directive preserves later user selection; a changed directive
+    // applies normally. Metadata-only updates do not rotate keys or revisions.
+    // Existing selections take precedence on the first file observation.
+    // file_default permits an empty batch to record removal of the directive
+    // only when an existing registry owns the profiles/selection.
     ProviderProfileSnapshot save_config(std::vector<ProviderProfileConfigEntry> entries,
         std::optional<std::string> active_profile,std::int64_t expected_revision,
-        Validator validate_each={},Validator prepare_active={},std::function<void()> before_change={});
+        Validator validate_each={},Validator prepare_active={},std::function<void()> before_change={},
+        ProviderConfigSelection selection=ProviderConfigSelection::explicit_selection);
     ProviderProfileSnapshot select(std::string id,std::int64_t expected_revision,Validator validate={});
     // Migration only: retain an existing encrypted reference and configuration
     // revision. Backend policy/ownership must match; an existing registry wins.
