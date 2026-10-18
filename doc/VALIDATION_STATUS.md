@@ -19,11 +19,11 @@ used when they were recorded and should not be read as current parity goals.
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
-| Coding clients | Installed **0.1.19** retains native `0e35ac3`; 1,970 installed payloads and its 1,927-file runtime verify. Current extension/browser tests pass 412/138. A real Claude review used installed host/assets, native HTTP/SSE, and the production controller/renderer in JSDOM: two actual file reads, 547 text events, five saved messages, fenced code, exact persisted Markdown/metrics, and an open detail retained across unchanged refresh. Original ModelZoo source and its earlier 12-message conversation are preserved. Unchanged native source/executable retain the prior 148-test Release evidence. [Installed receipt](evidence/coding-package-0.1.19-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
+| Coding clients | Installed **0.1.20** retains native `0e35ac3`; 1,970 installed payloads and its 1,927-file runtime verify. Local and hosted extension/browser tests pass 414/138. The installed reader recovers 522 actual saved-run events through cursor 1511 after an HTTP response is cut mid-frame, matching uninterrupted replay without duplicates or new inference/effects. Two cut cases pass; prior 0.1.19 stops after three events. History, runs, operation receipts, settings and profiles remain unchanged. The prior real Claude/JSDOM Markdown/metrics review is retained separately. Unchanged native source/executable retain the prior 148-test Release evidence. [Installed receipt](evidence/coding-package-0.1.20-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
-## Source correction: truncated event-stream recovery — 2026-10-18
+## Installed 0.1.20: truncated event-stream recovery — 2026-10-18
 
 The shared production browser/VS Code reader now treats EOF inside a frame or
 UTF-8 character as a transport interruption. It discards unfinished bytes and
@@ -36,9 +36,20 @@ after three events; the corrected reader recovered all 522 events through cursor
 1511, identical to an uninterrupted baseline, without duplicates. A second cut
 also recovered. Saved history, run inventory and operation receipts are unchanged.
 No new model request or run was admitted. The native executable is unchanged;
-no additional native-suite or rendered-client acceptance is claimed. Packaging
-this source as 0.1.20 remains pending at this checkpoint.
-[Recovery evidence](evidence/native-sse-truncation-recovery-20261018.json).
+no additional native-suite or rendered-client acceptance is claimed.
+[Source recovery evidence](evidence/native-sse-truncation-recovery-20261018.json).
+
+The actual VS Code CLI installed and lists 0.1.20, without opening an editor.
+All 1,970 installed payloads and 1,927 runtime files match the verified archive;
+the previous 0.1.19 installation was backed up and its 1,972 files checked.
+Settings and all six profile directories are preserved. The installed shared
+reader/subscription and byte-checked served client asset repeat both real
+native HTTP truncation tests successfully, reusing backend PID 37596. The
+hosted current-source gate at `4a157e4` passes all 414/138 tests. Its downloaded
+artifact matches GitHub's digest, and before/after source and asset hashes agree.
+The native executable and SDK are unchanged. VS Code remained closed; these
+checks do not accept rendered browser/editor behavior or a production release.
+[Installed and hosted receipt](evidence/coding-package-0.1.20-20261018.json).
 
 ## Installed 0.1.19: retained history and streamed Markdown — 2026-10-18
 
