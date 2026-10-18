@@ -23,6 +23,28 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Native console coding and response usage — 2026-10-18
+
+The installed 0.1.15 `xmind.exe` passed a real Windows ConPTY chat with Gemini
+`models/gemini-3.1-pro-preview`, using the saved provider configuration. Console
+commands selected a new conversation/model, discovered the account's models,
+and reviewed/allowed the exact `cli_checks.py` proposal from the same terminal.
+The agent then invoked the registered xlang3 process on that file; the actual
+process exited zero and printed `xMind console assertions passed`. The earlier
+14-message conversation and backend owner remained unchanged. The original
+Claude selection was restored and `/exit` detached the client successfully.
+
+That test exposed repeated usage lines interrupting the streamed answer.
+Native `6a3ce60` keeps each execution owner's latest supplied usage snapshot and
+prints it once at the response boundary, including supplied reasoning/cache
+counts. Seven focused Release contracts pass, including explicitly synthetic
+presentation cases. A separately verified development console replayed the real
+completed run through ConPTY: three final usage lines, with all eight original
+usage events unchanged in NDJSON. The installed VSIX still contains `3165834`;
+this console correction has not replaced its packaged runtime. This is console
+acceptance, not actual editor or external-browser rendering acceptance.
+[Run, process, usage and artifact receipt](evidence/native-console-coding-usage-20261018.json).
+
 ## Installed 0.1.15 and production-adapter coding — 2026-10-18
 
 The actual VS Code CLI installed Windows x64 **0.1.15** with native `3165834`

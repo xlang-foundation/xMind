@@ -1,0 +1,141 @@
+{
+  "recorded_at": "2026-10-18T11:13:06.598Z",
+  "scope": "Actual installed Windows console coding through ConPTY, then read-only replay through the corrected development console. No editor or external-browser rendering.",
+  "installed_native_revision": "316583404a4d4bc6dd806bcf40648008deac2364",
+  "console_fix_revision": "6a3ce6003e7ab9e9926e8a0ca2f123f922e33c2f",
+  "actual_coding": {
+    "status": "completed",
+    "run": "86f2bbd966d3a4c020868f38f8386022",
+    "session": "6634b94c315bd135548956ccd6a637a9",
+    "provider": {
+      "model_id": "models/gemini-3.1-pro-preview",
+      "profile_id": "gemini",
+      "profile_revision": 1,
+      "provider": "gemini",
+      "route_id": "gemini.generate-content",
+      "wire": "gemini-generate-content"
+    },
+    "approved_file": "cef4fa8b8d32cdb9fdab6c7e05c4bc30",
+    "exact_file_bytes": true,
+    "file_sha256": "3f11ef31da5e351e7d074184d1dfb740c85ef13937b63b88cca96e5dfc870a4f",
+    "process_id": "0079292efd1c55d5a183cfff327087c1",
+    "process_exit_code": 0,
+    "actual_executable": "C:\\Users\\shaw9\\.xMind\\p-current\\1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf\\runtime-7aa4762c65c7c56173e816f6665b0013260cb2b80bb2e11ec5550b655cbdd42d\\xlang3.exe",
+    "original_history_unchanged": true,
+    "same_backend": true,
+    "provider_restored": true,
+    "provider_revision": 5,
+    "model_responses": 3,
+    "streamed_usage_events": 8,
+    "final_supplied_usage": [
+      {
+        "candidatesTokenCount": 75,
+        "completion_tokens": 75,
+        "completion_tokens_details": {
+          "reasoning_tokens": 501
+        },
+        "input_tokens": 6852,
+        "output_tokens": 75,
+        "output_tokens_details": {
+          "reasoning_tokens": 501
+        },
+        "promptTokenCount": 6852,
+        "prompt_tokens": 6852,
+        "thoughtsTokenCount": 501,
+        "totalTokenCount": 7428,
+        "total_tokens": 7428
+      },
+      {
+        "candidatesTokenCount": 28,
+        "completion_tokens": 28,
+        "completion_tokens_details": {
+          "reasoning_tokens": 96
+        },
+        "input_tokens": 7611,
+        "output_tokens": 28,
+        "output_tokens_details": {
+          "reasoning_tokens": 96
+        },
+        "promptTokenCount": 7611,
+        "prompt_tokens": 7611,
+        "thoughtsTokenCount": 96,
+        "totalTokenCount": 7735,
+        "total_tokens": 7735
+      },
+      {
+        "candidatesTokenCount": 62,
+        "completion_tokens": 62,
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        },
+        "input_tokens": 7984,
+        "output_tokens": 62,
+        "output_tokens_details": {
+          "reasoning_tokens": 27
+        },
+        "promptTokenCount": 7984,
+        "prompt_tokens": 7984,
+        "thoughtsTokenCount": 27,
+        "totalTokenCount": 8073,
+        "total_tokens": 8073
+      }
+    ],
+    "process_stdout": "xMind console assertions passed\r\n",
+    "actual_executable_sha256": "02f6ed01b3f3785f1904d365ef4471931f1fa7f560e5424d11ac502dfae02ca4",
+    "script": "from slug import slugify\nassert slugify(\" xMind   CLI \") == \"xmind-cli\"\nassert slugify(\"xMind\\tCLI\") == \"xmind-cli\"\nprint(\"xMind console assertions passed\")\n",
+    "terminal_approval": true,
+    "cli_exit_code": 0,
+    "console_output_mode": "Automatically detected Windows console; no XMIND_CLI_OUTPUT override"
+  },
+  "correction": {
+    "description": "Latest supplied usage snapshot per execution owner, emitted once at the response boundary; actual reasoning and cache counts displayed when supplied; raw events unchanged.",
+    "development_binary_sha256": "d1ce44e7345928760bf6b3f843f52ec80bb313be4b4c2c3a9f5043fa7f370d39",
+    "development_runtime_files": 1927,
+    "paired_xlang3_runtime_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+    "sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "hash_verified": true,
+    "real_run_replayed_read_only": true,
+    "usage_events_retained": 8,
+    "final_console_usage_lines": [
+      "Input 6852 · Output 75 · Reasoning 501 · Total 7428 tokens",
+      "Input 7611 · Output 28 · Reasoning 96 · Total 7735 tokens",
+      "Input 7984 · Output 62 · Reasoning 27 · Total 8073 tokens"
+    ],
+    "ndjson_events_unchanged": true,
+    "history_unchanged": true,
+    "installed_package_unchanged": true,
+    "release_accepted": false
+  },
+  "checks": {
+    "focused_native_contracts": 7,
+    "passed": 7,
+    "synthetic_usage_presentation_cases": "Cumulative and duplicate snapshots, distinct response/graph owner boundaries, failure/cancellation, absent and invalid counts, raw NDJSON preservation",
+    "actual_windows_conpty": true,
+    "actual_provider": "Gemini",
+    "actual_runtime": "xlang3",
+    "vscode_windows_opened": false,
+    "rendered_editor_acceptance": false,
+    "rendered_external_browser_acceptance": false
+  },
+  "local_evidence_sha256": {
+    "cli-0.1.15-live-state-20261018.json": "791950212618b3c9d8e4d6bbef89e12c196d313eb9efa218a8d2c3842330fea7",
+    "cli-0.1.15-live-verified-20261018.json": "5614a3e0d5c7905ff93bc4a7eaac67713dfd585273af8d517042a47057d34cea",
+    "cli-0.1.15-live-status-20261018.json": "70a0a7802489a8348a60a7af351a54e624e82e41738eec7559a11b954d235903",
+    "cli-0.1.15-live-operations-20261018.json": "e4ad4a3e8ce2db1f39603757616e131f92b495dbddb9b210d81691ade508163c",
+    "cli-0.1.15-live-events-20261018.json": "ee783c22f9dc8d51b803de101eeb0763893af9390916fccf045e070c574f34e4",
+    "cli-0.1.15-live-history-20261018.json": "327a3e9d3dd8ba1fb45ee435df8007071d37330a6a8020c41fde50c4eb4d390d",
+    "cli-0.1.15-tty-admit-20261018.json": "ae9bab715bf501f1af31a1d4d4fdff4e83039ac5764c2abc4fbda117cf401a06",
+    "cli-0.1.15-tty-approval-view-20261018.json": "fbc59ec1f1ea9e6c40116cf624d77705db5e19b5a56c608c3debc457dd1adff2",
+    "cli-0.1.15-tty-allow-20261018.json": "cb5c097b962f27cff8982edea408c5685ede7c58ac541d29ab3a45b52c1988d1",
+    "cli-0.1.15-tty-completed-20261018.json": "d928e9f1b22990afb3aafaf06d1cb8f60aca7bc1a768322cec23c0b3c9d25a17",
+    "cli-0.1.15-tty-restore-profile-20261018.json": "86912e5f582bfd405ca5f134913cce8aeb1f8e0ddb9fd08e92f8dc9539338b62",
+    "cli-0.1.15-tty-exit-20261018.json": "bd9b402ee5ce7c365e745fa83778380564347d230b75ad9a56a4612fa6c04bdc",
+    "cli-usage-build-20261018.log": "66eb8e3a9b0eac96437113814465ddbcc92243a8b0fe07010488be517a64f938",
+    "cli-usage-contracts-20261018.log": "8472cd04d1eace167b30a5dfd5f75e5dff78b16e06d11e6c24c485501153b41d",
+    "cli-usage-staging-final-20261018.log": "a61481c42126112600967023bb32c0ea49f6998612f16c8a77455543d6f6e671",
+    "cli-usage-real-replay-20261018.json": "5106636e926e3361d431456f45a6812fe046e8b1b28924389a22a4d7177c0396",
+    "cli-usage-real-ndjson-20261018.log": "5492df4f9e2c6c79ed5b3dde2bdd3a74a44379b1c502f7103bf5591ab62cb75a",
+    "verify-cli-0.1.15-completed-20261018.mjs": "61586be1635c9b231b9fee21c5f65d992b35a0ee3cd9c857459917cde1a38cd7",
+    "record-cli-usage-20261018.mjs": "b5ca5ed7c4eca7c6da23e81e87e6e720575511b739606fa41b02afd4433c9239"
+  }
+}
