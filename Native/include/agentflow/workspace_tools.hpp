@@ -73,6 +73,7 @@ struct WorkspaceFind {
 // This invocation crosses the run-loop/host boundary. It carries admitted
 // identity and call metadata, never a path, handle, or caller-selected root.
 struct AgentWorkspaceInvocation {
+    std::int32_t protocol_version=1;
     std::string run_id;
     std::string attempt_id;
     std::string call_id;
@@ -81,6 +82,8 @@ struct AgentWorkspaceInvocation {
     std::string folder_id;
     std::string tool_name;
     std::string arguments_json;
+    std::string serialize()const;
+    static AgentWorkspaceInvocation parse(std::string_view wire_json);
 };
 class AgentWorkspaceToolHost {
 public:

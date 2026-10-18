@@ -130,8 +130,12 @@ with run, attempt, call, workspace revision, folder, tool and bounded argument
 metadata. The request contains no path, OS handle, credential or database
 object. Both the single-folder host and immutable multi-folder host verify the
 workspace revision, selected folder and exposed tool before dispatch. The
-existing `AgentRunner` path remains the owner and invokes the same local hosts;
-this is not yet the complete `AgentToolHost` or an IPC contract.
+request has a strict versioned JSON encoding with duplicate, unknown, missing,
+oversize and out-of-range fields rejected. That encoding does not provide peer
+authentication, replay prevention or active-run authorization; a future IPC
+adapter must add those checks. The existing `AgentRunner` path remains the
+owner and invokes the same local hosts; this is not yet the complete
+`AgentToolHost` or an IPC contract.
 
 The focused current-source Debug workspace-tool and AgentRunner contracts
 passed 2/2 after the change. Coverage rejects stale membership revisions, mismatched
