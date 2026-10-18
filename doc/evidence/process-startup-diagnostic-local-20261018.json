@@ -1,0 +1,275 @@
+{
+  "recordedAt": "2026-10-18T22:10:29.749Z",
+  "scope": "Isolated diagnostic of the actual Windows foreground adapter; not a graph, agent, live-provider, SDK or release qualification",
+  "sourceFiles": {
+    ".github/workflows/process-startup.yml": "7a0bb790a92f302a871a5e9cf5b2e12603255abb9e7469e121ac126f9eafeb58",
+    "Native/tests/process_startup/CMakeLists.txt": "feffaf11a3edfc29dab1466027dd971b38dff8c1de3d764565b247182a4383a9",
+    "Native/tests/process_startup/process_startup_diagnostic.cpp": "4d184842514266eb074cfbb7eee43872e98c111b91874fc57dcaf982f6cf01f6",
+    "Tools/ci-process-startup.mjs": "35d95258a01112dedb4d42929a922597a0e309f03dcadcba9f647f524e01f341"
+  },
+  "local": {
+    "recordedAt": "2026-10-18T22:09:24.402Z",
+    "scope": "Controlled actual native adapter diagnostics, not graph/agent or release qualification",
+    "mode": "guarded local three-case smoke",
+    "originalCommandTextVerified": true,
+    "processDeadlineMs": 30000,
+    "deliberateGraphDelaySeconds": 6,
+    "runRoot": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ",
+    "host": {
+      "release": "10.0.26200",
+      "arch": "x64",
+      "imageVersion": null,
+      "imageOS": null
+    },
+    "sourceAndBinaryUnchanged": true,
+    "binarySha256": "56cb976ba172bd39c23ae136c67d1322066f8351d9cce0895cdab92ab194eeca",
+    "cases": [
+      {
+        "label": "01-graph-default",
+        "scenario": "graph",
+        "control": "default",
+        "observer": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6295,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\01-graph-default",
+          "marker_exists": true,
+          "pid": 56680,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\01-graph-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:85673c00000009000000000000000000"
+        }
+      },
+      {
+        "label": "02-agent-default",
+        "scenario": "agent",
+        "control": "default",
+        "observer": false,
+        "passed": true,
+        "phases": [],
+        "native": {
+          "command": "[IO.File]::WriteAllText('agent-process-folder.txt',(Get-Location).Path)",
+          "control": "default",
+          "elapsed_ms": 224,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\02-agent-default",
+          "marker_exists": true,
+          "pid": 26088,
+          "scenario": "agent",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "",
+          "stdout_bytes": 0,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\02-agent-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:8b673c00000008000000000000000000"
+        }
+      },
+      {
+        "label": "03-dotnet-control-default",
+        "scenario": "dotnet-control",
+        "control": "default",
+        "observer": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); [Threading.Thread]::Sleep(6000); [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',[IO.Directory]::GetCurrentDirectory()); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6208,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\03-dotnet-control-default",
+          "marker_exists": true,
+          "pid": 37636,
+          "scenario": "dotnet-control",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-BftJtQ\\03-dotnet-control-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:8e673c00000008000000000000000000"
+        }
+      }
+    ],
+    "allCasesPassed": true,
+    "causeEstablished": false,
+    "productionCacheOrEnvironmentChanged": false,
+    "providerRequests": 0,
+    "nativeAgentRunnerExecuted": false,
+    "cpythonExecuted": false
+  },
+  "guard": {
+    "recordedAt": "2026-10-18T22:08:51.379Z",
+    "scope": "Synthetic inert PowerShell stdin fixture carrying a benchmark-path marker; no actual benchmark, compiler, native target or provider request executed",
+    "fixturePid": 22296,
+    "fixtureImage": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+    "fixtureReleasedByClosingOwnedStdin": true,
+    "fixtureRetirement": {
+      "exitCode": 0,
+      "signal": null
+    },
+    "guardRefusedNonNodeProcess": true,
+    "outputDirectoryNotCreated": true,
+    "nativeExecuted": false,
+    "passed": true
+  },
+  "workflow": {
+    "workflowParsed": true,
+    "name": "Windows process startup diagnostics",
+    "runner": "windows-2025",
+    "permissions": {
+      "contents": "read"
+    }
+  },
+  "hostedExperimentExecuted": false,
+  "hostedPlan": {
+    "cases": 17,
+    "originals": "Exact graph and AgentRunner command strings checked against their fixture source",
+    "controls": [
+      "default environment",
+      "configured system-module path",
+      "private per-case module cache",
+      "disabled child cache",
+      "dotnet-only control",
+      "default environment with owned read-only observer"
+    ],
+    "alternatingBaselines": true,
+    "processDeadlineMs": 30000,
+    "deliberateGraphDelaySeconds": 6
+  },
+  "productionNativeProcessAdapterChanged": false,
+  "productionCacheOrEnvironmentWorkaroundApplied": false,
+  "causeEstablished": false,
+  "retainedFailures": [
+    {
+      "stage": "Source-command preflight",
+      "nativeDiagnosticBuilt": true,
+      "scenariosExecuted": 0,
+      "reason": "Graph source concatenates a filename variable; the initial whole-literal check failed. The final driver reconstructs and compares the complete command."
+    },
+    {
+      "stage": "Workflow parser lookup",
+      "reason": "The optional yaml package was absent; the installed locked js-yaml dependency parsed the actual workflow successfully. No package was installed."
+    }
+  ],
+  "rawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-20261018/build.json",
+      "sha256": "0783a0a8430b7ffe918598929e197eea3eab2ca48767fc73a0deed0e54e50cc1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-20261018/configure.json",
+      "sha256": "4732d61c2196f1b576daa26876885e5709c45d97db3d3efc7f8ba2233bf5930f"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-20261018/preflight-failure.json",
+      "sha256": "4b2923b48e867fe255bb54a050873c1c20087c2856b7fc7a095d1b29bc9ba5a6"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-20261018/source-before.json",
+      "sha256": "4e4908090f975651487ea129b0025a13c0d31e729cca96a668fed50a92474bd5"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/01-graph-default.json",
+      "sha256": "8b38cd4abcee1e504a5899d25ea0ee58bd3400671e37b756e012445ca305f591"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/02-agent-default.json",
+      "sha256": "5cff8116f86ebbbef2ea13aa048c6768f319fbc8ebbd81e15fcdef48e2506786"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/03-dotnet-control-default.json",
+      "sha256": "3f5ecd6440238692f64efa7d3a676386057239c99d7e4c1c58632a50aa924f5a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/build.json",
+      "sha256": "874e365e7523a85ab496e362109ab322d14aed98e13dd40516ab46593ae5c50b"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/cases-progress.json",
+      "sha256": "6e5c446f85ad071a702c915f1f3a75017f68e597283d255b5eecdd205a5c1d90"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/configure.json",
+      "sha256": "756174f280e7956d1eb9f736f4323eaacecf5d2a5ea59ea68d2c165bd622642e"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/diagnostics.json",
+      "sha256": "a081d30034551085dc123797e3b5fdf76aa37d1fc366daf896c75e49a3bed53d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-verified-20261018/source-before.json",
+      "sha256": "96cc3b163da80ef23952e2470a27db2f6a405da2d8976d6d5c507e8db3d35d14"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/01-graph-default.json",
+      "sha256": "75ccf6e5114a50fde9933589d742153bd0a5fbf578e0676c8ef275a64a30805d"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/02-agent-default.json",
+      "sha256": "c3354aa2a61a6f857ce2b09dec17837d750f5bef00fca6fc28d8f27c4eb1a04a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/03-dotnet-control-default.json",
+      "sha256": "4ba65056ea02d3baaaa0dfbfebe803f48ab240a9b95ce7eebaabcfdda89d2cd8"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/build.json",
+      "sha256": "27713e7f4445091ac9ccc5646682b946ae6b2d4a6c3d4ba848c3e6438315c565"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/cases-progress.json",
+      "sha256": "5ffc12b290f8f6d74beca3e13599aaf8b5d2caa8bc20e745a5087ec41a3e3a6c"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/configure.json",
+      "sha256": "1a22e5e3b1575ab67c7bee9814a86b356d3216a69c86f887de5339947bbde6bd"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/diagnostics.json",
+      "sha256": "f17a32ca80b0fd780f8ec1d39016defa32b59d84c22ccdda102bb01cb0d913d1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-local-final-20261018/source-before.json",
+      "sha256": "1ee323a99f0d23c345d22a07383dac4cf157333efc75533d2430904eb59e4ed6"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-guard-refusal-20261018.json",
+      "sha256": "e76a2be527dca84da9227e0a960e72045796e18c4d0632cf6cf7d37167893eb1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-guard-refusal-20261018.log",
+      "sha256": "fb4d1076192c51577ec6bec8384169b49bd446ea8676aff2a37ee7a2372a6fc0"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-startup-workflow-validation-20261018.json",
+      "sha256": "9c2459481421283f79950b0a4abfbe6898a0ae3a731b59409afae723c454122d"
+    }
+  ]
+}

@@ -126,6 +126,23 @@ production cache or environment workaround has been applied.
 [Later failure evidence](evidence/hosted-native-9e4b118-failure-20261018.json).
 [Phase-marker failure evidence](evidence/hosted-native-f3-phase-failure-20261018.json).
 
+A separate lightweight diagnostic now builds the actual Windows process adapter
+without the agent/SQLite runtime. Its graph and agent command strings are checked
+against the original fixture sources; the graph filename concatenation is
+reconstructed before comparison. Both originals and a clearly separate .NET-only
+control pass locally with unchanged inputs/binary and the original 30-second
+deadline/six-second graph delay. These are three component diagnostics, not
+additional full-suite or hosted acceptance.
+
+The isolated hosted workflow will alternate default baselines with child-only
+module-path/cache controls, then compare default runs with the owned observer
+(17 cases). Original failures remain failures; controls do not replace the
+product contracts. The local concurrency guard refuses a labelled inert
+non-Node benchmark-marker fixture before creating a build directory. The first
+command-text preflight failure is retained; no scenario had executed then.
+Hosted experiment results and the PowerShell failure cause remain pending.
+[Diagnostic scope and local results](evidence/process-startup-diagnostic-local-20261018.json).
+
 The graph fixture now records fixed markers at script entry, after its deliberate
 six-second delay and after the attached-folder file effect. Failure diagnostics
 project only those marker names, preserving output privacy. The command,

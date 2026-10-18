@@ -1,0 +1,37 @@
+name: Windows process startup diagnostics
+on:
+  push:
+    branches: [main]
+    paths: ['Native/src/windows_process.cpp', 'Native/include/agentflow/process.hpp', 'Native/tests/process_startup/**', 'Tools/ci-process-startup.mjs', '.github/workflows/process-startup.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: process-startup-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  diagnostics:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - name: Check out xMind
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Build and exercise the actual native process adapter
+        shell: pwsh
+        run: node Tools/ci-process-startup.mjs
+      - name: Preserve diagnostic results including failed original cases
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: process-startup-diagnostics-${{ github.sha }}
+          path: |
+            build/process-startup-diagnostics/*.json
+            build/process-startup-diagnostics/observations/
+          if-no-files-found: error
+          retention-days: 14

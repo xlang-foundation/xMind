@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+## Process startup diagnostic — 2026-10-18
+
+A separate small native target builds the production Windows foreground
+adapter. Local original graph and AgentRunner commands and a distinct .NET
+control pass with the same 30-second process budget; both originals are checked
+against their actual source text. A guarded local launcher refuses a labelled
+inert benchmark-marker fixture before any build/scenario. Native process source
+and production environment policy stay unchanged.
+
+An isolated Windows CI workflow will run 17 paired module-path/cache/observer
+experiments with alternating default baselines. This is causal investigation,
+not graph/agent or release acceptance; it cannot turn a failed original into a
+pass by substituting a control. The first filename-concatenation preflight error
+and all local raw receipts are preserved.
+[Local scope and planned CI matrix](evidence/process-startup-diagnostic-local-20261018.json).
+
 ## Native source checkpoint — process-tool owner, 2026-10-18
 
 `AgentProcessOwnerHost` now owns process-call preparation from bounded owned
