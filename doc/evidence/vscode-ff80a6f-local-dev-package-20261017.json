@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-17",
+  "scope": "Local development VSIX build and extracted archive verification; not installed or release accepted",
+  "source": {
+    "repository": "https://github.com/xlang-foundation/xMind",
+    "revision": "ff80a6fa574403277329fec697bb08eb1b07f38f",
+    "extension_sources_unchanged_since": "beb68e5fa07cb5e6ce5474b4f817e2d66570576e"
+  },
+  "runtime": {
+    "repository": "https://github.com/CantorAI/xlang3",
+    "revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "runtime_manifest_sha256": "c580db85ce70cef7dbbf1db448db821298ae0cf53ff876e40d7c438577118aa4",
+    "manifest_entries": 1922,
+    "verified_inventory_files_including_manifest": 1923
+  },
+  "package": {
+    "path": "C:/xMindNativeValidation/candidate-ff80a6f/xMind-ff80a6f-dev.vsix",
+    "sha256": "c3c127a5f0cec673fa24d97495281f21d89d9f090696c198bd1289404e5735a1",
+    "bytes": 31074812,
+    "archive_files": 1968,
+    "browser_assets_built": true,
+    "extracted_native_runtime_verified": true,
+    "private_config_files_in_archive": 0,
+    "native_executed_during_packaging": false,
+    "installed": false,
+    "release_accepted": false
+  },
+  "command": "npm.cmd run package -- --out C:/xMindNativeValidation/candidate-ff80a6f/xMind-ff80a6f-dev.vsix",
+  "limitations": [
+    "No fresh VS Code profile installed this package or completed a rendered coding interaction with it.",
+    "The package is a local development candidate; hosted native validation for ff80a6f was still running at evidence time."
+  ]
+}

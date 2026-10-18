@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-17",
+  "scope": "Windows x64 Release build and complete sequential native CTest inventory for xMind main, using the pinned xlang3 runtime",
+  "source": {
+    "repository": "https://github.com/xlang-foundation/xMind",
+    "branch": "main",
+    "revision": "ff80a6fa574403277329fec697bb08eb1b07f38f",
+    "validated_worktree_base": "beb68e5fa07cb5e6ce5474b4f817e2d66570576e",
+    "validated_source_delta": "The two tracked provider YAML files in the isolated build worktree matched the source changes committed as ff80a6f; no other tracked source changes were present.",
+    "working_tree_clean_at_build": false
+  },
+  "runtime": {
+    "repository": "https://github.com/CantorAI/xlang3",
+    "branch": "xmind-fastapi-pydantic-compat",
+    "revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+    "runtime_directory": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+    "runtime_dll_sha256": "BEEC7E860B4A1E5088F28768275D2635988F14A494FE8973B66917C1791A4E47"
+  },
+  "build": {
+    "command": "Tools/native-milestone.ps1 -Action Build -RuntimeSource D:/CantorAI2026/xlang3 -RuntimeDirectory D:/CantorAI2026/xlang3/build-pytest-pathaware/Release -PythonLibSource C:/Python/Python314/Lib -BuildDirectory C:/xMindNativeValidation/wt-c014dee-full-gate-20261017/build/native",
+    "generator": "Visual Studio 18 2026",
+    "configuration": "Release",
+    "completed": true,
+    "xmind_executable": "C:/xMindNativeValidation/wt-c014dee-full-gate-20261017/build/native/Release/xmind.exe",
+    "xmind_executable_sha256": "6C64FAD7909F755A8610D1B34F2AA6158088D456CD10D62F98DB71EB995BE858",
+    "cpython_interpreter_executed": false
+  },
+  "ctest": {
+    "command": "ctest --test-dir C:/xMindNativeValidation/wt-c014dee-full-gate-20261017/build/native -C Release --output-on-failure",
+    "total": 147,
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 835.85
+  },
+  "limitations": [
+    "This is a local Release build and contract run, not release-package or other-host acceptance.",
+    "The GitHub Native Windows contracts run for ff80a6f was in progress when this evidence was recorded."
+  ]
+}
