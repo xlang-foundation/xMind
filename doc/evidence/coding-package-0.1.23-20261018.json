@@ -126,7 +126,7 @@
       "seconds": 0.51
     },
     "completeNative": {
-      "status": "running",
+      "status": "passed",
       "sourceRevision": "878bd88d4bc6c8af662ca1048177cb2ede791010",
       "expected": 149,
       "projectInputs": 2599,
@@ -134,7 +134,15 @@
       "sdkRuntimeInputs": 75,
       "nativeBinaries": 124,
       "log": "C:/xMindNativeValidation/pip-bootstrap-full-ctest-20261018.log",
-      "note": "Historical 149/149 at c23a6cd does not establish completion of this current-source gate."
+      "note": "Complete sequential local gate for native source 878bd88 and SDK 58a8aab9; hosted/rendered/release acceptance remains separate.",
+      "passed": 149,
+      "failed": 0,
+      "seconds": 903.96,
+      "allFrozenInputsUnchanged": true,
+      "evidence": "pip-bootstrap-full-gate-20261018.json",
+      "sourceManifestSha256": "7c45e5a7a2c5814828b8c97dc2f1630613abf640eb9b6bdc35dae4c379c78ab4",
+      "ctestLogSha256": "d4c045bc5c700453caed0d738518917009c1c7a2faa9a1e4bf567ab9a0021aab",
+      "detailsSha256": "e50196b1a2c7d79c47d1993bb04ad0c7df29c001d65fd6beafad12a8e957a9db"
     }
   },
   "liveCoding": {
@@ -483,7 +491,6 @@
     "The follow-up observer initially expected edit_file as a durable operation kind. Source confirms replace_file; observation resumed the same admitted edit and approved its exact before/after content without resubmission."
   ],
   "remaining": [
-    "Finish and hash-verify the live complete 149-test local gate.",
     "Obtain current hosted native acceptance.",
     "Fix nonzero direct process-child classification: an older live dynamic plan treated exit 1 as a successful child and continued success-dependent tasks.",
     "Investigate the older dynamic child anthropic_json_event_invalid outcome before claiming broader failure/recovery coverage.",

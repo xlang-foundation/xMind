@@ -1,0 +1,17 @@
+{
+  "sourceRevision": "878bd88d4bc6c8af662ca1048177cb2ede791010",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "passed": 149,
+  "failed": 0,
+  "seconds": 903.96,
+  "projectFiles": 2599,
+  "pureLibraryFiles": 1870,
+  "nativeBinaries": 124,
+  "allFrozenInputsUnchanged": true,
+  "sourceManifestSha256": "7c45e5a7a2c5814828b8c97dc2f1630613abf640eb9b6bdc35dae4c379c78ab4",
+  "ctestLogSha256": "d4c045bc5c700453caed0d738518917009c1c7a2faa9a1e4bf567ab9a0021aab",
+  "detailsSha256": "e50196b1a2c7d79c47d1993bb04ad0c7df29c001d65fd6beafad12a8e957a9db",
+  "nativeSha256": "a0d6739478b557f5bee174d06057a6807d07a132bc930c6c3e44c841718ea017",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "hostedOnlyTrustMutationExcluded": true
+}

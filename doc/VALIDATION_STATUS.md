@@ -15,7 +15,7 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Installed native `878bd88` / SDK `58a8aab9` passes three focused inventory/profile checks, two SDK smoke checks and real coding below. The complete current 149-test local gate is running with project/library/runtime/binary inputs frozen; the historical c23a6cd 149/149 gate remains separate. Hosted inventory is 150. [Current receipt](evidence/coding-package-0.1.23-20261018.json). | Finish current full local/hosted acceptance; production release acceptance. |
+| Native backend and local persistence | Installed native `878bd88` / SDK `58a8aab9` passes three focused inventory/profile checks, two SDK smoke checks and real coding below. The complete current local gate passes **149/149 in 903.96 seconds**, with all frozen project/library/runtime/binary inputs unchanged; the historical c23a6cd gate remains separate. Hosted inventory is 150. [Current receipt](evidence/coding-package-0.1.23-20261018.json). | Current hosted acceptance; production release acceptance. |
 | Single agents and graphs | Native contracts and prior live planning establish the in-process baseline. The current ordinary coding conversation completes actual commands and approved create/edit effects. | Nonzero direct process children still need failure classification: an older live plan continued success-dependent tasks after exit 1. One older agent child returned an unconfirmed Claude JSON-event failure. Process-bound `AgentRunner` placement is not implemented; existing workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
@@ -70,8 +70,9 @@ run stopped before xMind tests because its Unicode CLI fixture lacked linecache
 support source. CI now provides the pinned pure library through PYTHONPATH only
 for those SDK checks and restores the prior environment afterward. The old native
 baseline still fails its unique Unicode probe, so that test has not been weakened.
-The full current local 149-test gate is running; current hosted native and release
-acceptance remain pending.
+The full current local gate passes **149/149 in 903.96 seconds** with all
+frozen inputs verified unchanged. [Full gate receipt](evidence/pip-bootstrap-full-gate-20261018.json).
+Current hosted native and release acceptance remain pending.
 
 The older failed live dynamic plan also exposes unfinished process-child exit
 classification and a separate unconfirmed `anthropic_json_event_invalid` child
