@@ -484,6 +484,16 @@ test('an accepted old-folder run survives a delayed reply without becoming the n
   assert.equal(submissions.length,1);assert.equal(submissions[0].expected_workspace_id,'windows-local-file-v1:1:0');assert.ok(!h.requests.some(route=>route.includes('accepted-old-folder')));assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
  }finally{view.close();}
 });
+test('VS Code startup retains completed run status through provider setup, discovery success and rejection',async()=>{
+ for(const outcome of ['empty','success','failure']){
+  const registry={revision:outcome==='empty'?0:1,active:outcome==='empty'?'':'saved',profiles:outcome==='empty'?[]:[{id:'saved',route_id:'openai.responses',provider:'openai',model:'fixture-model',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};
+  const h=harness({health:{agent_execution:outcome!=='empty',provider_profile_admission:true},catalogue:{models:[{id:'fixture-model'}],default_model:'fixture-model'},profileRegistry:()=>registry,profileDiscovery:async()=>{if(outcome==='failure')throw Object.assign(new Error('Fixture rejected credential'),{status:401});return [{id:'fixture-model'}];}});
+  await h.commands.get('agentflow.open')();const view=h.views[0];
+  try{view.receive({type:'ready'});await until(()=>view.posted.some(value=>value.type==='settings-state'&&value.busy===false));assert.equal(view.posted.findLast(value=>value.type==='status').text,'completed',outcome);assert.match(view.posted.findLast(value=>value.type==='settings-state').text,outcome==='empty'?/Open Settings/:outcome==='success'?/Fetched 1/:/Fixture rejected credential/);assert.ok(!h.requests.includes('/v1/runs'));assert.deepEqual(h.errors,[]);}
+  finally{view.close();}
+ }
+});
+
 async function until(predicate) {
   const deadline=Date.now()+2000;
   while(Date.now()<deadline) {if(predicate()) return;await new Promise(resolve=>setImmediate(resolve));}

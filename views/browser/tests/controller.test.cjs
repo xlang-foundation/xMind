@@ -175,6 +175,15 @@ test('browser imported key-only profiles guide the footer selection without a ne
  try{await view.discover();assert.deepEqual(calls,[]);assert.equal(view.profileController.state.active,'');assert.ok(!posted.some(value=>value.type==='error'));assert.match(posted.findLast(value=>value.type==='status').text,/Choose a saved provider below/);assert.match(posted.findLast(value=>value.type==='settings-state').text,/saved key will be used/);assert.equal(view.profileController.draft,undefined);}finally{view.dispose();}
 });
 
+test('browser provider discovery leaves the selected run status intact for setup, success and failure',async()=>{
+ for(const outcome of ['empty','success','failure']){
+  const posted=[{type:'status',text:'completed'}],state={revision:outcome==='empty'?0:1,active:outcome==='empty'?'':'saved',profiles:outcome==='empty'?[]:[{id:'saved',provider:'openai',route_id:'openai.responses',model:'fixture-model',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};
+  const view=new BrowserController({providerProfiles:async()=>state,discoverProfileModels:async()=>{if(outcome==='failure')throw Object.assign(new Error('Fixture rejected credential'),{status:401});return {models:[{id:'fixture-model'}]};}},value=>posted.push(value));view.runId='completed-run';
+  try{if(outcome==='failure')await assert.rejects(view.discover(),/Fixture rejected credential/);else await view.discover();assert.equal(posted.findLast(value=>value.type==='status').text,'completed',outcome);assert.match(posted.findLast(value=>value.type==='settings-state').text,outcome==='empty'?/Open Settings/:outcome==='success'?/Fetched 1/:/Fixture rejected credential/);}
+  finally{view.dispose();}
+ }
+});
+
 test('browser initializes saved provider profiles before any session is selected',async()=>{
  const profiles=['claude','gemini','deepseek','openai'].map((id,index)=>({id,provider:['anthropic','gemini','deepseek','openai'][index],route_id:['anthropic.messages','gemini.generate-content','deepseek.chat-completions','openai.responses'][index],model:'',revision:1}));
  const state={revision:1,active:'',profiles,routes:profiles.map(profile=>({id:profile.route_id,provider:profile.provider,wire:'responses',discovery:true}))},posted=[],discoveries=[];

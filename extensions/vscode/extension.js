@@ -535,7 +535,8 @@ async function activate(context) {
     client.bindWorkspace(workspaceBackend);
     await languageServerEditor.connect(client);
     if(!connectionCurrent())throw new Error('Workspace changed while connecting language servers.');
-    const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
+    // Provider setup reports in Settings; a selected run owns the run status.
+    const profileTarget=client;profileController=new ProviderProfileController(client,message=>{if(message.type!=='status'||!runId)post(message);},()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
     selectedModel=chooseModel(modelCatalogue,savedConnection(savedModel)?savedModel.id:undefined);

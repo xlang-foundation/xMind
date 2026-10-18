@@ -13,6 +13,14 @@ test('new workspace with imported keys asks for a saved provider without discove
  }finally{controller.dispose();}
 });
 
+test('empty provider startup gives setup guidance without discovery or an implicit enrollment',async()=>{
+ const state={revision:0,active:'',profiles:[],routes:registry().routes},posted=[],calls=[];
+ const controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async()=>calls.push('discover'),saveProviderProfile:async()=>calls.push('save')},value=>posted.push(value));
+ try{assert.equal(await controller.discover(),true);assert.deepEqual(calls,[]);assert.match(posted.findLast(value=>value.type==='settings-state').text,/Open Settings to add a provider/);assert.ok(!posted.some(value=>/failed|Enter a key/.test(value.text||'')));assert.equal(controller.draft,undefined);
+  await assert.rejects(controller.discover(undefined,'','openai.responses'),/Enter a key for the new provider profile/);assert.deepEqual(calls,[]);
+ }finally{controller.dispose();}
+});
+
 test('an unconfigured backend omits provider admission until a profile is selected',async()=>{
  const state={revision:0,active:'',profiles:[],routes:registry().routes},controller=new ProviderProfileController({providerProfiles:async()=>state},()=>{});
  try{await controller.refresh();assert.equal(await controller.admission(),undefined);}finally{controller.dispose();}
