@@ -855,6 +855,44 @@ Refresh with `node Tools/audit-opencode.mjs`; the generated
 [inventory](OPENCODE_API_INVENTORY.json) records the exact request, response,
 schema and operation-specific acceptance criteria.
 
+## Current-source checkpoint and implementation phases — 2026-10-17
+
+The feature baseline remains pinned to v2.0.26 and is a behavior checklist;
+the generated HTTP operation inventory is a separate implementation aid, not a
+wire-compatibility goal. Current evidence shows the local coding path working
+through each requested client: the interactive CLI completed an approved
+TestProj edit and Vite build, and the browser and VS Code each completed an
+approved edit plus build on the same TestProj profile. The latter two shared
+the same saved provider configuration and conversation. These are scoped live
+tasks, not broad reliability or all-language acceptance: [CLI](evidence/xmind-cli-live-coding-20261016.json),
+[browser and VS Code](evidence/xmind-cross-client-live-coding-20261016.json),
+[current-source browser](evidence/current-source-webpage-coding-20261017.json).
+Current checkout `e8782c4` builds the unified native `xmind` executable; its
+client suites pass **392/392 VS Code** and **136/136 browser** contracts
+([test record](evidence/client-tests-current-main-20261017.json)). A current-
+source worker probe confirms the authenticated xlang3 callable worker, but
+does not run the C++ AgentRunner in a child process
+([worker record](evidence/agent-worker-lrpc-current-source-20261017.json)).
+The last complete native gate passed **147/147** contracts on product source
+`22d923b`; that gate predates the current AgentRunner process-tool host seam.
+The current unified executable has been rebuilt, but its full current-source
+CTest gate remains open.
+
+The remaining work is ordered by the product's in-scope dependencies:
+
+| Phase | Target behavior | Current state and acceptance needed |
+| --- | --- | --- |
+| 1. Shared agent execution boundary | Run the same single-agent loop in-process or in a native worker while browser, CLI and VS Code continue using the same server, SQLite journal, approvals and event stream. Graph children must use that same capability contract. | **Open.** AgentRunner still runs in the xMind owner process. `PersistenceService` acquires the exclusive SQLite backend-owner lease and performs recovery during ordinary startup, so a second worker cannot open the profile as a second owner. The Python-callable worker is not an AgentRunner worker. Add owner-mediated, versioned IPC for persistence and effects; then verify provider/tool continuations, cancellation, approval waits, worker loss around external effects, restart recovery and graph children before exposing placement configuration. |
+| 2. Current-source package acceptance | Install the exact current native runtime and VS Code package on a fresh local profile; use the opened workspace and saved provider from VS Code and the browser. | **Partly verified.** Live coding has succeeded in both clients on earlier recorded product revisions; current-source client suites pass. Fresh installed-package coding on the exact current product/runtime revision remains open. |
+| 3. Functional baseline gaps | Complete the useful local coding workflow and AgentFlow capabilities without adopting OpenCode's API. | **Partly implemented.** Native sessions, approvals, edits/restore, process/PTY, Git review, LSP, agents/graphs, MCP and A2A have scoped contracts. OpenCode-style built-in plan/build roles, full-screen TUI workflows, dynamic plugin lifecycle, complete settings/config precedence, broader diff recovery, broad tool/attachment/reference behavior, and full MCP/A2A peer interoperability remain incomplete. Nexus-only team/server and standalone Electron features stay outside xMind OSS. |
+| 4. Provider/model breadth | Let every supported route expose accurate discovery, capabilities, usage and errors through the same gateway. | **Partly verified.** Native adapters and live saved-profile use exist for selected accounts/models; catalog mappings and per-model live behavior remain incomplete. Treat the pinned LiteLLM catalog as a review reference, not proof of support. |
+
+Phase 1 is the next backend milestone. Do not expose a trusted
+`in_process`/`process` selector until both modes run through the same owner
+capabilities and pass the recovery/effect contracts above. This preserves the
+single backend that current clients share and avoids turning a second SQLite
+owner into an alternate persistence or recovery path.
+
 ## Current native verification scope
 
 The storage source `57da085` has passed all **118 hosted native** contracts in
