@@ -15,13 +15,35 @@ used when they were recorded and should not be read as current parity goals.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
-| Native backend and local persistence | Current source `5ed8267` passed all 149 sequential local Release contracts in 819.37 seconds against unchanged xlang3 `b0da71f2`. The new file-tool owner contract covers actual approved create/edit/restore, membership/catalogue/policy rejection, call replay rejection, guidance delivery, cross-folder partial effects and SQLite restart. All 2,504 frozen source/build inputs and the tested executable remain unchanged. The hosted checklist contains these 149 plus the isolated hosted-only OAuth trust test. Installed 0.1.21 retains native `0e35ac3` and its prior 148-test evidence. [Current source receipt](evidence/agent-file-tool-owner-20261018.json). | Hosted current-source gate, the older six-contract hosted failure below, production release acceptance, and other-host startup. |
+| Native backend and local persistence | Full source gate at `5ed8267` passed all 149 sequential local Release contracts in 819.37 seconds against unchanged xlang3 `b0da71f2`. The file-tool owner contract covers actual approved create/edit/restore, membership/catalogue/policy rejection, call replay rejection, guidance delivery, cross-folder partial effects and SQLite restart. Its 2,504 frozen source/build inputs and tested executable were unchanged during that gate. The hosted checklist contains these 149 plus the isolated hosted-only OAuth trust test. New source `5efe11b` fixes a locally reproduced private-storage alias failure and passes four focused native contracts; it has no new complete local gate. Installed 0.1.21 retains native `0e35ac3` and its prior 148-test evidence. [Full source receipt](evidence/agent-file-tool-owner-20261018.json), [alias fix](evidence/workspace-private-alias-20261018.json). | Hosted current-source gate, five remaining older hosted failures, production release acceptance, and other-host startup. |
 | Single agents and graphs | Native agent, delegation, and graph contracts pass; live local planning completed through the webpage/shared backend. | Process-bound `AgentRunner` placement is not implemented. Existing xlang3 workers isolate trusted callables only. |
 | MCP | Native stdio and Streamable HTTP clients, tools/resources/prompts, approvals, and official SDK peers are covered by Release contracts. | Broader OAuth renewal, HTTP lifecycle recovery, and installed-client acceptance. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls, and selected outbound calls. | Broader peer/version interoperability and full restart/stream recovery acceptance. |
 | Coding clients | Installed **0.1.21** retains native `0e35ac3`; 1,970 payloads and 1,927 runtime files verify. Local and hosted extension/browser checks pass 416/138. Installed host fixture replay retains all 615 captured stream payloads without stream-triggered metadata reads; durable changes still reconcile, and inbox read failure no longer rejects the feed. These are work-count/controller checks, not actual latency. Installed-client/native HTTP cut-response checks recover all 522 saved events without duplicates, with unchanged history/runs/receipts and no inference/effect admission. Settings, profiles and the prior installation are preserved. The prior real Claude/JSDOM review and unchanged native 148-test gate remain separate evidence. [Installed receipt](evidence/coding-package-0.1.21-20261018.json). | Actual browser input/layout/paint and editor activation remain unverified; native hosted/release acceptance, older unresolved profile handoff and broader recovery/long-task reliability remain open. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
+
+## Private-storage path aliases — 2026-10-18
+
+Source `5efe11b` fixes the workspace registry's private-storage boundary.
+Previously, configured storage spelling was compared against normalized native
+workspace paths. Setting process-local TEMP/TMP to the real DOS alias
+`C:\XMINDN~1` reproduces the older hosted assertion failure. Both that existing
+contract and a new deterministic dot-alias regression fail before the fix and
+pass afterward.
+
+Private storage now resolves through its native directory handle before overlap
+checks. It must exist and be a directory. Backend-private .xMind paths remain
+valid storage; they do not become model workspace authorities. Additional
+checks cover equal/child/ancestor rejection, unchanged registry membership,
+Unicode, volume roots, invalid paths, SQLite restart and concurrent attachment.
+The complete Release build and four focused native contracts pass in 126.96
+seconds: registry, console workspace, local view HTTP and local-view provider
+configuration. All 2,504 frozen inputs and tested binaries remain unchanged.
+This is not a new full 149-test gate. xlang3, the installed package and the
+running user backend are unchanged. Current hosted native acceptance and five
+other older hosted failures remain open; actual GUI acceptance is separate.
+[Alias evidence](evidence/workspace-private-alias-20261018.json).
 
 ## Existing browser asset refresh — 2026-10-18
 
@@ -71,13 +93,15 @@ Hosted run `39128361191`, at source `26daafb` and pinned xlang3 `b0da71f2`,
 completed with 143/149 contracts passing. The six failures are dynamic-plan MCP,
 graph runner, process executor, default xlang3 process, MCP effects and workspace
 registry. Its uploaded diagnostic artifact matches GitHub's SHA-256 digest.
-The process contract rejects a folder binding, the registry rejects private
-storage membership, and the MCP roots continuation remains uncertain without
+The process contract rejects a folder binding, the registry test reports that
+private storage could become a member, and the MCP roots continuation remains uncertain without
 an effect. Other cases include process approval/exit/deadline diagnostics.
 Fixture paths include the `RUNNER~1` temporary-directory alias; whether this is
 a common cause still needs local reproduction. This is an older source run,
 not the new file-tool-owner gate. Native hosted/release acceptance remains open;
-no guard relaxation or cross-host fix is claimed.
+no guard relaxation or cross-host fix was claimed at that checkpoint. The
+registry assertion is now reproduced and fixed locally by `5efe11b` above;
+the other five failures and hosted verification remain outstanding.
 [Failure evidence](evidence/hosted-native-failure-20261018.json).
 
 ## Installed 0.1.21: stream reconciliation and inbox read failures — 2026-10-18

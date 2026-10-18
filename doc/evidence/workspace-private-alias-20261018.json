@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-18",
+  "sourceRevision": "5efe11b5c4b81676cd12674580112f322cbd221a",
+  "scope": "Native Windows workspace registry private-storage canonicalization; actual xlang3 SQLite and actual filesystem/console/local-view HTTP contracts. No rendered UI acceptance.",
+  "rootCause": "The private storage boundary retained its configured path spelling while workspace roots came from normalized native handles. A DOS short alias or dot segment could bypass the lexical overlap check.",
+  "reproduction": {
+    "baselineSourceRevision": "96681d2383d4143d758814ad15d2a6c05d84adae",
+    "shortAlias": {
+      "TEMP": "C:/XMINDN~1",
+      "TMP": "C:/XMINDN~1",
+      "canonical": "C:/xMindNativeValidation",
+      "beforeExitCode": 1,
+      "afterExitCode": 0
+    },
+    "deterministicDotAlias": {
+      "beforeExitCode": 1,
+      "afterExitCode": 0
+    },
+    "redLogsPreserved": true
+  },
+  "change": [
+    "Resolve existing private storage through its native directory handle before recording the overlap boundary.",
+    "Permit backend-private configuration directories without constructing a model WorkspaceTools authority for them.",
+    "Compare wide path lengths and honor volume-root boundaries.",
+    "Reject missing, non-directory and NUL private paths before database access."
+  ],
+  "regressions": [
+    "Normal and short-alias TEMP/TMP executions pass.",
+    "Dot/dot-dot private paths reject equal, child and ancestor folders for both create and attach.",
+    "Rejected operations preserve membership revision and group count.",
+    "Backend-private .xMind storage remains usable for public workspaces.",
+    "Unicode private storage rejects its children while allowing public folders.",
+    "Existing duplicate/nested rejection, SQLite restart and concurrent membership checks continue to pass."
+  ],
+  "validation": {
+    "completeReleaseBuild": true,
+    "focused": {
+      "scope": "Four focused actual native Release contracts, not a new full native gate",
+      "passed": 4,
+      "failed": 0,
+      "seconds": 126.96,
+      "sourceFiles": 2504,
+      "sourceAndBinariesUnchanged": true,
+      "binaries": {
+        "xmind.exe": "47b4fa363ed4869505990e04a7b8518902035ab6f59efccf810c0093c56169fb",
+        "agentflow_workspace_registry_contract.exe": "db5640a4519e972b975291037c38fc3837587ac6a463d51e9ee7a7ed84f0dcfc",
+        "xlang3_runtime.dll": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47"
+      },
+      "sdkRevision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+      "sourceManifestSha256": "6f045a081dffc59b3a6cf9a6644d0c95c0ab37d04552d9c5de3ade6b0f72bbca",
+      "ctestLogSha256": "3ac542c314532e3d6fe24eb23c880555a07b501f3873bba9d067e355058dcc1f",
+      "detailsSha256": "0e7efcb8422ce7ffa61954820fc85a52a241604ce7e104fb764ea22b75df8d5b"
+    },
+    "logs": {
+      "workspace-registry-short-alias-red-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-short-alias-red-20261018.log",
+        "sha256": "3b1b3280061898c8c480c6ab47a3ac0c61b4e04c96b035b3e8d65fd9ee4b514e"
+      },
+      "workspace-registry-dot-alias-red-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-dot-alias-red-20261018.log",
+        "sha256": "de34b47e7dd84e25ab64816f7ccd9ea286ab33e15b48a14f50cad01635ce2bbf"
+      },
+      "workspace-registry-alias-normal-green-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-alias-normal-green-20261018.log",
+        "sha256": "181e9a097cb7156fe80d1f44b4cb654cc9c40b7d0233a3a014a8cc9725aa199e"
+      },
+      "workspace-registry-alias-short-green-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-alias-short-green-20261018.log",
+        "sha256": "181e9a097cb7156fe80d1f44b4cb654cc9c40b7d0233a3a014a8cc9725aa199e"
+      },
+      "workspace-registry-alias-full-build-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-alias-full-build-20261018.log",
+        "sha256": "8d6ca7a6cc91d34468e7cfe9c0ac753fe193d9b2b0621d17da406a1b6ac9d8f1"
+      },
+      "workspace-registry-alias-focused-ctest-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-alias-focused-ctest-20261018.log",
+        "sha256": "3ac542c314532e3d6fe24eb23c880555a07b501f3873bba9d067e355058dcc1f"
+      },
+      "workspace-registry-alias-focused-details-20261018.log": {
+        "path": "C:/xMindNativeValidation/workspace-registry-alias-focused-details-20261018.log",
+        "sha256": "0e7efcb8422ce7ffa61954820fc85a52a241604ce7e104fb764ea22b75df8d5b"
+      }
+    }
+  },
+  "preserved": {
+    "xlang3SourceAndSdkUnchanged": true,
+    "cpythonExecuted": false,
+    "installedVsixUnchanged": true,
+    "userBrowserBackendUnchanged": true,
+    "editorOpened": false
+  },
+  "limits": [
+    "Four focused native contracts only; no new complete 149-test local gate is claimed.",
+    "This locally reproduces and fixes the older hosted registry failure; current hosted native acceptance remains pending.",
+    "Other five previously reported hosted failures remain unresolved by this receipt.",
+    "No installed package update or rendered browser/editor acceptance.",
+    "Workspace registry membership is metadata; execution still reopens and authorizes native folder identities."
+  ]
+}
