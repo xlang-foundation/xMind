@@ -4014,7 +4014,22 @@ extension suite passes **392/392**, and a focused set of 14 agent, worker,
 process, permissions, HTTP-edit, and backend-owner CTest contracts passes
 **14/14**. The full native Release build compiled the changed sources but could
 not replace `build/native/contract-bin/Release/xmind.exe` because an active
-local server held that file open; the complete current-main native gate and
-fresh packaged UI acceptance remain outstanding. This is one bounded webpage
-coding task, not broad multi-file reliability or visual screenshot acceptance.
+local server held that file open. A complete current-source native Release gate
+was subsequently run in an isolated output tree and passed 147/147; fresh
+packaged UI acceptance remains outstanding. This is one bounded webpage coding
+task, not broad multi-file reliability or visual screenshot acceptance.
 [Run, process output, hashes, current-source checks and limits](evidence/webpage-model-zoo-component-edit-20261017.json).
+
+## Current-source native Release gate — 2026-10-17
+
+The unified native Release build at product source `22d923b` completed from an
+isolated C: build tree using xlang3 `b0da71f`. All **147/147 registered native
+CTest contracts passed** in **892.63 seconds**, including current agent-runner,
+graph, MCP/A2A, coding tool, xlang3 SQLite, backend-owner, and local-view
+contracts. The original `build/native/contract-bin/Release/xmind.exe` was left
+running for the local TestProj view; the isolated build avoided replacing it.
+The checkout's later `90ec355` commit contains validation documentation only.
+The VS Code extension suite separately passed **392/392** on the same product
+code. A fresh packaged VSIX/live editor acceptance on this exact current
+runtime remains open.
+[Binary hashes, commands, and CTest log](evidence/native-current-main-release-20261017.json).

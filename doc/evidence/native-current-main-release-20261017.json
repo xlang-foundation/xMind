@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-17",
+  "scope": "Full current-source native Release build and CTest gate",
+  "xmind_checkout_head": "90ec355d3dad0e4f7bca2fddc6e6ff265123c339",
+  "compiled_product_code_revision": "22d923b",
+  "xlang3_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "toolchain": "Visual Studio 18 2026, MSVC 19.51.36256.0",
+  "build_directory": "C:\\xMindNativeValidation\\native-22d923b-current-source-20261017",
+  "build_command": "cmake --build C:/xMindNativeValidation/native-22d923b-current-source-20261017 --config Release --parallel 4",
+  "build_result": "passed",
+  "xmind_executable_sha256": "1b273630023fc72dd59b5a65b517fba63c938a3f2ce444f4fdda618a54c6d733",
+  "xlang3_runtime_dll_sha256": "b7339d078f81ba02e4931918238b2b3a7d3f97cfa9cffffde1c2d7eec0f517bc",
+  "ctest_command": "ctest --test-dir C:/xMindNativeValidation/native-22d923b-current-source-20261017 -C Release --output-on-failure --no-tests=error",
+  "ctest_registered": 147,
+  "passed": 147,
+  "failed": 0,
+  "duration_seconds": 892.63,
+  "ctest_log": "C:\\xMindNativeValidation\\native-22d923b-current-source-20261017\\Testing\\Temporary\\LastTest.log",
+  "ctest_log_sha256": "6b7221e859cc7ac2be9d691dbf842f9844a0621d5c4eb7a3bd8a13e3572315f2",
+  "notes": [
+    "Commit 90ec355 adds documentation only; native product code at the gate is source revision 22d923b.",
+    "The regular D: output executable was held by an active local server, so the complete build ran in an isolated C: tree without interrupting it.",
+    "This native gate does not certify a fresh packaged VSIX or broad live editor reliability."
+  ]
+}
