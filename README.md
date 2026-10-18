@@ -13,44 +13,35 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The current local VS Code package is **0.1.30**. Its native source is
-`838e2eb370b989b2d568a94c221af2d4247bfe1c`, paired with xlang3 SDK
+The installed local VS Code package is **0.1.31**, with native source
+`118575e2c9608ee8a6b0d4dd739777040f301737` and xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | All 150 local Release contracts pass; frozen source, dependencies, SDK and binaries verify unchanged. |
-| Clients | Packaged 0.1.30 passes 422 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive files and 2,445 installed non-metadata payloads verify. Actual VS Code activation remains separate. |
-| Installed live run | Through the normal managed-profile browser launcher, saved-key Claude reads through the official MCP filesystem server, creates one reviewed file and verifies it with a successful xlang3 process. |
-| Persistence | The current coding session restores 22 messages and both completed roots without execution replay. The prior MCP session retains eight messages and 321 events. |
-| Current webpage | Isolated headless Edge completes two real coding turns and separately creates/switches workspaces, attaches a folder, approves a file creation and runs xlang3 in that attached folder. Refresh and file previews work after workspace changes. |
-| Still open | Actual VS Code activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
+| Native backend | All 151 local Release contracts pass; source, dependencies, SDK and binaries stay frozen through validation. |
+| Clients | Final package passes 422 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive files and 2,445 installed payloads verify. |
+| Installed coding | A real saved-key Claude task runs 22 ModelZoo tests, adds one reviewed regression test, then runs all 23 successfully under xlang3 through the native process tool. |
+| Persistence | The actual coding run's 13 messages and six provider usage records render and restore after reload, with no effect replay. |
+| Preserved work | Earlier webpage/backend owners and both older 2,402-file native runtime inventories remain intact; settings and existing profile directories are preserved. |
+| Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
-Prior live ModelZoo coding checkpoints separately demonstrate reviewed file
-changes, an actual Vue production build and Python API tests under xlang3.
-The installed 0.1.30 browser assets match both tested live pages. The webpage
-refreshes its explorer after observed agent operations while
-preserving open folders, search and the selected preview. A real Claude file
-creation appeared without a Refresh click. The same browser implementation is
-now included in the installed extension package.
-Its native runtime is byte-identical to the accepted 0.1.27 runtime; the
-existing browser/backend processes and their history remain running. The
-extension was installed through the Code CLI without opening an editor window.
-Actual VS Code pane activation remains unverified.
-[Installed package evidence](doc/evidence/coding-package-0.1.30-20261018.json).
-[Workspace and idle-owner recovery checks](doc/evidence/rendered-workspaces-and-recovery-20261018.json)
-restore 13 messages after explicit backend recovery. This does not establish
-unattended or in-flight recovery; the model's requested bare two-line reply
-format was not satisfied, although its file contents were correct.
-[Automatic explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json).
-[Exact current evidence and remaining work](doc/VALIDATION_STATUS.md).
+The installed native backend now owns process-call preparation and preserves
+unsuccessful uncertain-wait/pending-stop results. The qualified browser explorer
+refresh remains included. The extension was installed through the Code CLI
+without opening an editor window. Actual VS Code pane activation remains
+unverified. [Installed package and live coding evidence](doc/evidence/coding-package-0.1.31-20261018.json).
 
-Newer native source also passes the complete 151-contract local suite. It moves
-process calls behind a backend-owned capability and retains unsuccessful
-uncertain wait/stop results. That source has not yet replaced the installed
-runtime; hosted native acceptance and process-bound agent execution remain open.
-[Native source evidence](doc/evidence/process-tool-owner-20261018.json).
+Earlier, separately verified browser tasks cover the official filesystem MCP
+server, workspace creation/switching, attached-folder execution, automatic
+explorer refresh and explicit idle-owner recovery. Existing sessions remain
+available. Those results do not establish unattended or in-flight recovery;
+one earlier read-only follow-up also missed its requested bare reply format.
+[Workspace and recovery evidence](doc/evidence/rendered-workspaces-and-recovery-20261018.json),
+[explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json),
+[full native qualification](doc/evidence/process-tool-owner-20261018.json),
+and [remaining work](doc/VALIDATION_STATUS.md).
 
 ## Use in VS Code
 

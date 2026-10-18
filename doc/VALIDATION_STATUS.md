@@ -24,29 +24,35 @@ The new process-tool owner source passes all 151 local native contracts in
 909.5 seconds after a complete build. All 2,610 project files, 16 SDK include-tree
 files, 76 SDK runtime/import-library files, 1,870 pure-library files, 18,598
 Node dependency files and 126 binaries verify unchanged through validation.
-This source is newer than the installed runtime described below. It moves
+This source is now installed in preview 0.1.31. It moves
 process preparation behind an owned-value backend capability and preserves
 unsuccessful uncertain-wait/pending-stop results. It does not implement
-process-bound agents or establish installed/live-provider acceptance.
+process-bound agents. Installed/live-provider acceptance is recorded below.
 [Current native source proof](evidence/process-tool-owner-20261018.json).
 
-Installed preview 0.1.30 contains the final UI described below. All 2,448 VSIX
-files and 2,445 installed non-metadata payloads verify; the 2,402-file native
-runtime and its manifest are byte-identical to accepted 0.1.27. All 422/147
-client fixtures pass both in the final C: staging tree (17,438 source,
-dependency, asset and runtime files unchanged) and on hosted CI at 0b23b90.
-The artifact's advertised digest and size verify. The three packaged xlang3/pip
-commands accepted on 0.1.28 are reused by byte-identical runtime evidence;
-they were not rerun on 0.1.30. The 0.1.29 extension is backed up,
-settings and six existing profile directory names are
-preserved, and no editor window was opened. All 18 installed browser assets
-match both live pages. Its existing processes and 22-message coding history
-remain intact after installation. A separate workspace page restores all 17
-messages and 70 new-root events. Both headless pages render the complete
-history with no key prompts, page errors, failed responses or effect POSTs.
-The older runtime directories used by both native views still verify all 2,402
-files. This does not establish actual VS Code pane activation.
-[Installed 0.1.30 evidence](evidence/coding-package-0.1.30-20261018.json).
+Installed preview 0.1.31 packages native source 118575e2 and client source
+fd05a7b. All 2,448 archive files and 2,445 installed payloads verify, including
+the new 2,402-file runtime. The final staging tree passes all 422 extension/147
+browser fixtures; all 17,439 staged files and their hashes remain unchanged
+after packaging. Complete hosted client suites also pass at the exact source
+revision, and the artifact's advertised size and digest verify.
+
+Actual headless Edge with saved-key Claude runs 22 tests in a private ModelZoo
+copy, adds one reviewed case-insensitive name regression, then runs 23 tests
+successfully through the native xlang3 process tool. The original source and
+all other copied files remain unchanged. Independent read-only observation
+binds to the admitted run's authoritative session ID, renders/restores all 13
+messages and six provider usage records, and verifies no effect replay.
+The first observer's zero-message assertion used an earlier empty selection;
+that assertion is explicitly excluded. A separate observer classified model
+discovery POSTs too broadly; its failure is retained and corrected.
+
+The new page is http://127.0.0.1:63383/ui/. Earlier pages at ports 62342 and
+52121 remain running, with exact prior owner identities and both older native
+runtime inventories preserved. Backup 0.1.30, settings and six existing profile
+directory names verify. No editor window was opened; actual VS Code pane
+activation and hosted native/release acceptance remain open.
+[Installed 0.1.31 evidence](evidence/coding-package-0.1.31-20261018.json).
 
 The live webpage and installed package include the explorer update.
 Newly observed terminal operation states schedule a
@@ -111,7 +117,7 @@ section. Pending approvals open it automatically, Review reopens it after
 collapse, and the final follow-up reply is fully visible after refresh.
 Complete local client fixtures pass 422/142 on the final UI source with all
 source/dependency/asset hashes and file sets unchanged; all 18 served assets
-equal the validated build. These UI changes are now installed in 0.1.30;
+equal the validated build. These UI changes are included in installed 0.1.31;
 visible desktop/VS Code activation remain unverified.
 [First coding turn](evidence/rendered-coding-0.1.27-20261018.json),
 [final UI and follow-up](evidence/rendered-tool-activity-20261018.json).
@@ -167,7 +173,7 @@ one focused contract, not another full-suite pass or a hosted timeout fix.
 | Single agents and graphs | Installed 0.1.24 with real saved-key Claude runs one intentional exit-7 deterministic process child, preserves the actual receipt/output, blocks its success-dependent node, completes inspect_plan({}) once, and revises the same plan to skip the unclaimed task. The parent completes after exact reviewed file approval; no process replay. [Installed/live receipt](evidence/coding-package-0.1.24-20261018.json). | Process-bound AgentRunner placement is not implemented; trusted-callable workers are separate. Broader recovery and actual rendered planning acceptance remain open. The model report exceeded its requested 2,000-character limit; the mismatch and original observer failure are retained. |
 | MCP | Native stdio/Streamable HTTP tools, resources and prompts have Release coverage. Managed profiles now import trusted MCP configuration and validate changed documents against persisted revisions and retired IDs before owner handoff. Installed 0.1.27 with real Claude uses the normal managed browser launcher for an official filesystem MCP read, reviewed file creation and successful xlang3 verification. [Installed receipt](evidence/coding-package-0.1.27-20261018.json). | Broader OAuth renewal, HTTP lifecycle recovery and rendered-client acceptance. Older backend builds require a plain runtime upgrade before the new protected MCP import. |
 | A2A | Native A2A 0.3/1.0 paths and independent SDK acceptance cover durable tasks, streaming, controls and selected outbound calls. Installed 0.1.25 with real Claude blocks one stale-instruction proposal before dispatch, then sends one fresh approved request to an explicit synthetic A2A 1.0 peer. Both parent runs complete. [Live receipt](evidence/coding-package-0.1.25-20261018.json). | Broader peer/version interoperability and full restart/stream recovery acceptance. The loopback peer does no actual agent analysis. |
-| Coding clients | Installed 0.1.30 verifies 2,445 non-metadata payloads and the unchanged 2,402-file native runtime, preserving settings and six prior profile directory names. Complete local/hosted client checks pass 422/147. Two rendered coding turns pass; separate attached-folder coding, explicit idle-owner recovery and automatic explorer refresh retain 17 messages without replay. Earlier pages remain preserved. [Current package](evidence/coding-package-0.1.30-20261018.json). | Visible desktop testing and VS Code activation remain unverified. Current hosted native/release acceptance, unattended and in-flight recovery remain open. The earlier read-only follow-up misses its requested bare reply format. |
+| Coding clients | Installed 0.1.31 verifies 2,445 payloads and the new 2,402-file runtime. Complete local/hosted client checks pass 422/147. Actual saved-key Claude edits a ModelZoo regression and runs 22 then 23 tests under xlang3. Its 13 messages and six usage records restore without replay. Earlier owners/settings/runtime inventories remain preserved. [Current package](evidence/coding-package-0.1.31-20261018.json). | Actual VS Code activation, visible desktop testing, hosted native/release acceptance and unattended/in-flight recovery remain open. Earlier format and observer failures remain recorded separately. |
 | Provider gateway | A live OpenAI → Claude → Gemini → DeepSeek → OpenAI coding conversation completed five runs with the saved keys, two actual xlang3 assertions and 23 public messages. Browser HTTP discovery returned 20/13/11/2 models respectively. The selected model survived a new browser session. [Live receipt](evidence/four-provider-live-coding-20261018.json). | Broader models, failure/recovery cases and rendered client acceptance. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 

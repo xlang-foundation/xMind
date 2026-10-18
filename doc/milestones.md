@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## Installed coding checkpoint — 0.1.31, 2026-10-18
+
+The new native process-tool owner is installed. All 151 local native contracts
+and final 422/147 local and hosted client checks pass in their stated scopes.
+All 2,448 archive files/2,445 installed payloads verify; 17,439 staged files stay
+unchanged through packaging. A real saved-key Claude task runs 22 ModelZoo
+tests, adds one approved regression, then runs 23 tests under xlang3. Independent
+observation restores its actual 13-message session and six usage records with
+no replay. Earlier selection/POST-classification observer errors remain retained.
+
+The separate new page is http://127.0.0.1:63383/ui/. Existing pages and exact
+owners stay running; both older 2,402-file runtime inventories, settings and
+profile directory names verify. Actual VS Code activation and hosted native
+acceptance remain open. [Checkpoint evidence](evidence/coding-package-0.1.31-20261018.json).
+
 The first hosted startup-diagnostic job (39171209609) failed before native
 build/scenarios because the fresh checkout had no build parent. Parent creation
 is corrected; a previously absent nested local output passes all three cases,
