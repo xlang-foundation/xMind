@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-17",
+  "scope": "Hosted browser and VS Code source, asset, and adapter contract gate after adding the hash-verified xlang3 package METADATA contract.",
+  "source_revision": "ce0041acef426ee50ae8b45025731a319aa63540",
+  "workflow": {
+    "name": "Browser and VS Code contracts",
+    "run_id": 39083213032,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39083213032"
+  },
+  "source_and_asset_manifests_unchanged": true,
+  "extension": {
+    "tests": 392,
+    "passed": 392,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "tests": 134,
+    "passed": 134,
+    "failed": 0,
+    "skipped": 0
+  },
+  "limitations": [
+    "These contract fixtures do not establish live provider or installed-package acceptance.",
+    "The native Windows workflow at this source revision remains separately pending and is required to validate the updated xlang3 pin."
+  ]
+}

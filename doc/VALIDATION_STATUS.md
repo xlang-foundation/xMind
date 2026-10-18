@@ -50,6 +50,17 @@ tests after the suite had grown to 391; `Tools/ci-views.mjs` now pins the
 current count. This hosted source gate uses synthetic fixtures and does not
 replace the live coding or installed-runtime evidence below.
 
+## Current hosted browser and VS Code gate — 2026-10-17
+
+At source `ce0041acef426ee50ae8b45025731a319aa63540`, the
+[Browser and VS Code contracts workflow](https://github.com/xlang-foundation/xMind/actions/runs/39083213032)
+passed after the extension suite grew to **392 tests**. It verified unchanged
+browser source/assets and passed **392/392 VS Code tests** plus **134/134 browser
+tests**, with no failures or skips. The native Windows workflow for the same
+source commit is separately queued to validate the new xlang3 runtime pin;
+this view gate does not establish native runtime or installed-package
+acceptance. [Exact gate record](evidence/xlang3-pydantic-metadata-view-gate-20261017.json).
+
 ## Current-source native Release gate — 2026-10-17
 
 Rebuilt the native backend and unified `xmind.exe` from current xMind main
