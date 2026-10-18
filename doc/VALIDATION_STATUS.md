@@ -25,6 +25,18 @@ used when they were recorded and should not be read as current parity goals.
 
 ## Installed 0.1.19: retained history and streamed Markdown — 2026-10-18
 
+The isolated hosted browser/extension gate now also passes at `01314c7`:
+412 extension and 138 browser tests, with no failures, skips or cancellations.
+The earlier job ran both complete suites successfully but rejected their totals
+against stale expected counts of 395/136. The corrected gate retains exact
+inventory counts and unchanged-source/asset checks, and reports its expected
+counts explicitly. The downloaded artifact matches GitHub's SHA-256 digest;
+all 69 source/vendor and 18 asset hashes match before and after testing.
+This is hosted adapter/DOM/controller evidence, with no native execution,
+inference, real browser interaction or VS Code activation. The separate native
+hosted gate and rendered-client acceptance remain outstanding. Installed
+0.1.19 is unchanged. [Hosted receipt](evidence/hosted-view-gate-20261018.json).
+
 Windows x64 development **0.1.19** is installed and listed by the actual VS Code
 CLI. Its 1,973-file archive and all 1,970 installed payloads verify. Native
 0e35ac3, its 1,927-file runtime and pinned xlang3 SDK are unchanged. The previous

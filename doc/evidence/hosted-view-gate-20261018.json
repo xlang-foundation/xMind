@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-18T13:08:40.201Z",
+  "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+  "hosted": {
+    "runId": 39130081581,
+    "jobId": 117683279317,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39130081581",
+    "conclusion": "success",
+    "sourceRevision": "01314c76a0e3f5344c794e2ca42ffae74f8a63d0"
+  },
+  "priorFailure": {
+    "runId": 39129156950,
+    "sourceRevision": "d26c7cbb3d3edcce05b41b7b3064d442f77cd48d",
+    "reason": "Both suites passed, but the gate still required 395 extension and 136 browser tests.",
+    "actualPassed": {
+      "extension": 412,
+      "browser": 138
+    },
+    "sourceAndAssetsUnchanged": true
+  },
+  "correction": "Review and require exact current suite counts, retaining exit-zero, zero-failure/skip/cancellation and unchanged-source/asset requirements; include expected counts in the report.",
+  "artifact": {
+    "id": 12137334366,
+    "name": "view-contracts-evidence-01314c76a0e3f5344c794e2ca42ffae74f8a63d0",
+    "bytes": 305876,
+    "sha256": "d3609d5db7a699bcbae99c920b9f90a63ddb885313cc5919d6073000e342b425",
+    "matchesGitHubDigest": true
+  },
+  "sourceHashesBeforeAfterEqual": true,
+  "assetHashesBeforeAfterEqual": true,
+  "gate": {
+    "sourceRevision": "01314c76a0e3f5344c794e2ca42ffae74f8a63d0",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 69,
+    "trackedSourceFiles": 64,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 412,
+      "browser": 138
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 412,
+      "passed": 412,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 138,
+      "passed": 138,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "limits": {
+    "nativeHostedGateAccepted": false,
+    "renderedBrowserAccepted": false,
+    "renderedVSCodeAccepted": false,
+    "installedPackageChanged": false,
+    "productExecutionChanged": false
+  }
+}
