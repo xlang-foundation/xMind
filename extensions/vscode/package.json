@@ -2,7 +2,7 @@
   "name": "agentflow",
   "displayName": "xMind",
   "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "publisher": "agentflow-local",
   "repository": {
     "type": "git",
