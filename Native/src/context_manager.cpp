@@ -84,6 +84,33 @@ class Preparation {
         value.deadline=std::min({value.deadline,remaining,std::chrono::milliseconds(policy.compaction.maintenance_deadline_ms)});
         return value;
     }
+    ModelRequest append_history(const ContextSnapshot& snapshot,ModelRequest request,const std::vector<std::int64_t>& ordinals){
+        check();
+        if(!ordinals.empty()){
+            if(budget){
+                std::vector<std::size_t> reprojected;
+                for(const auto& payload:store.context_history_payloads(snapshot,ordinals,bound).get()){
+                    if(payload.reproject_provider_items){
+                        if(payload.producing_workspace_identity!=budget->snapshot().spec.workspace_identity)
+                            throw ContextBindingChanged("History replay belongs to another execution workspace");
+                    }
+                    for(const auto& original:payload.source.originals){
+                        auto message=decode(original);
+                        if(payload.reproject_provider_items&&message.role==MessageRole::assistant&&message.provider_items_json!="[]")
+                            reprojected.push_back(request.messages.size());
+                        request.messages.push_back(std::move(message));
+                    }
+                }
+                if(!reprojected.empty()){
+                    request=reproject_authority_history(request,reprojected);
+                    store.record_context_history_replay({owner.root_run_id,owner.owner_run_id,owner.role,
+                        snapshot,ordinals,context_digest(serialize_responses_request(provider,request))}).get();
+                }
+            }else for(const auto& payload:store.context_group_payloads(snapshot,ordinals,bound).get())
+                for(const auto& original:payload.originals)request.messages.push_back(decode(original));
+        }
+        return project_provider_history(provider,request);
+    }
     ModelRequest project(const ContextSnapshot& snapshot,const ModelRequest& trusted,
         std::int64_t covered,const std::optional<ResponsesCanonicalWindow>& window){
         check();auto request=trusted;request.canonical_window=window;
@@ -95,9 +122,7 @@ class Preparation {
                 throw ContextCapacityExceeded("Original context tail exceeds its native bound");
             messages+=static_cast<std::size_t>(group.message_count);bytes+=static_cast<std::size_t>(group.payload_bytes);ordinals.push_back(group.ordinal);
         }
-        if(!ordinals.empty())for(const auto& payload:store.context_group_payloads(snapshot,ordinals,bound).get())
-            for(const auto& original:payload.originals)request.messages.push_back(decode(original));
-        return project_provider_history(provider,request);
+        return append_history(snapshot,std::move(request),ordinals);
     }
     ContextInputMeasure count(const ContextSnapshot& snapshot,const ModelRequest& request){
         check();const auto selected=transport_config();
@@ -264,8 +289,7 @@ public:
             auto prefix=trusted;prefix.canonical_window=window;
             std::vector<std::int64_t> ordinals;
             for(const auto& group:result.snapshot.groups)if(group.ordinal<=selection->covered_through_ordinal)ordinals.push_back(group.ordinal);
-            for(const auto& payload:store.context_group_payloads(result.snapshot,ordinals,bound).get())
-                for(const auto& original:payload.originals)prefix.messages.push_back(decode(original));
+            prefix=append_history(result.snapshot,std::move(prefix),ordinals);
             spec.input_json=serialize_responses_compaction_request(provider,prefix);spec.input_binding=context_digest(spec.input_json);
             if(idle)spec.admission=IdleContextAdmission{owner.owner_run_id,policy.compaction.max_maintenance_calls,policy.compaction.maintenance_deadline_ms};
             else if(failed)spec.admission=RebuildContextAdmission{owner.root_run_id,owner.owner_run_id,step_id,failed->inference.attempt_id,identity(),owner.role,owner.planning_call_id,budget->snapshot().revision};

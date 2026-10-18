@@ -81,4 +81,20 @@ ModelRequest project_provider_history(const ChatProviderConfig& target,const Mod
     for(std::size_t index=0;index<receipts.size();++index)if(receipts[index]&&!native_for(target,*receipts[index]))projected.messages[index].provider_items_json="[]";
     return projected;
 }
+ModelRequest reproject_authority_history(const ModelRequest& request,const std::vector<std::size_t>& indices){
+    if(indices.empty())return request;
+    std::vector<std::optional<Receipt>> receipts;receipts.reserve(request.messages.size());
+    for(const auto& message:request.messages)receipts.push_back(receipt(message));
+    for(const auto source:{Source::anthropic,Source::gemini,Source::responses,Source::deepseek})validate_source(request,receipts,source);
+    auto projected=request;std::set<std::size_t> seen;
+    for(const auto index:indices){
+        if(index>=request.messages.size()||!seen.insert(index).second||
+           request.messages[index].role!=MessageRole::assistant||!receipts[index]||
+           receipts[index]->source!=Source::responses)incompatible();
+        const auto& message=request.messages[index];
+        if(message.content.empty()&&message.refusal.empty()&&message.tool_calls.empty())incompatible();
+        projected.messages[index].provider_items_json="[]";
+    }
+    return projected;
+}
 }

@@ -1,10 +1,54 @@
 # Saved conversation context after a backend change
 
+## Native active-run recovery for Responses context
+
+The current implementation rebuilds an outgoing Responses-context request when a proved original
+receipt belongs to a different authority under the same captured provider
+identity, registered context policy and strategy. The producing budget must
+also belong to the active execution workspace. Full original messages, tool
+turns, metrics and opaque receipts stay unchanged in SQLite. Old authority
+heads and checkpoints are not relabeled.
+
+The backend loads bounded original groups through its native context journal.
+Each source must match its immutable group digest, producing inference member,
+completed model-call receipt and committed conversation event. The model gateway
+validates the native receipt against canonical content, refusal and tool-call
+fields. It then omits the old provider continuation from the request copy while
+retaining those canonical fields and their correlated tool results. Current
+trusted instructions and tools are supplied separately. The ordinary strict
+continuation-loading API continues to reject a different authority.
+
+`record_context_history_replay` is a typed repository operation. Before recording
+`context.history_reprojected`, it rechecks the active root/owner, current source
+snapshot, original provenance and producing workspace in a transaction through
+embedded xlang3. Generic event append cannot manufacture this lifecycle event.
+Its observation contains counts and bindings, without provider keys or private
+continuation data. The shared renderer explains that context was refreshed and
+recorded history was preserved.
+
+This path applies to active run preparation and its compaction input. It does
+not repair a failed profile handoff or migrate package/profile formats. Foreign
+provider/model identities, unregistered policies, unproved originals, different
+producing workspaces and histories beyond the native bounds remain rejected.
+Idle maintenance retains its strict loading path. The focused Release gate
+passed **7/7 native contracts in 22.48 seconds**. The independent synthetic
+provider verifies two actual native read loops across a persistence reopen and
+changed instructions, followed by a new current-authority compaction. It checks
+that prior native item IDs are absent from the new request while canonical tool
+results and both user objectives remain. Queued-owner/generic-event forgery,
+foreign identity, stale snapshot and different-workspace cases are rejected.
+The shared client suites passed **393 extension and 136 browser checks**.
+These are native protocol/DOM contracts, not live-provider or rendered installed
+UI acceptance. The installed extension and running browser still use the earlier
+runtime. [Source and validation record](evidence/context-authority-replay-20261018.json).
+
+## Earlier observed limitation and installed-client evidence
+
 The 2026-10-18 runtime update reproduced this limitation: run
 `c74d62c1f86ab26760c1bd34225ca76d` failed `context_unavailable` before any
 model call after the tool/runtime authority changed. A fresh conversation
 completed the coding checks, while the prior history remained stored.
-Automatic continuation across such an authority change is still unfinished.
+At that checkpoint automatic continuation across the authority change was unfinished.
 A separate profile handoff also remained unresolved; fresh-profile acceptance
 does not establish recovery of that handoff.
 [Current run and package evidence](evidence/native-wheel-live-coding-20261018.json).

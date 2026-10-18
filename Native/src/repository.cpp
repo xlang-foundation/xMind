@@ -141,13 +141,14 @@ void backfill_context_groups(XlangSqlite& db,const ContextScope& s,const Context
 }
 ConversationGroup decode_context_group(const ContextScope& scope,const std::vector<SqlValue>& r){ConversationGroup g;g.scope=scope;g.ordinal=integer(r[0]);g.first_message_seq=integer(r[1]);g.last_message_seq=integer(r[2]);if(!std::holds_alternative<std::nullptr_t>(r[3]))g.execution_owner=text(r[3]);if(!std::holds_alternative<std::nullptr_t>(r[4]))g.committed_event_seq=integer(r[4]);const auto k=text(r[5]);g.kind=k=="user"?ConversationGroupKind::user:k=="assistant"?ConversationGroupKind::assistant:ConversationGroupKind::tool_turn;g.message_count=integer(r[6]);g.payload_bytes=integer(r[7]);g.source_binding=text(r[8]);g.legacy_unattributed=integer(r[9])!=0;return g;}
 const char* context_group_columns="ordinal,first_message_seq,last_message_seq,execution_owner,committed_event_seq,kind,message_count,payload_bytes,source_binding,legacy_unattributed";
-void validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,const std::vector<Message>& originals,const ContextBinding& selected_binding){
+bool validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,const std::vector<Message>& originals,const ContextBinding& selected_binding,bool allow_authority_replay=false,std::string* producing_workspace=nullptr){
+    bool reproject=false;
     for(const auto& original:originals){if(original.role!="assistant")continue;const auto dto=Json::parse(original.json);bool has_items=false;
         if(dto.contains("provider_items")){if(!dto["provider_items"].is_array())throw ContextBindingChanged("Stored provider receipt shape is incompatible");has_items=!dto["provider_items"].empty();}
         if(dto.contains("provider_items_json")&&(!dto["provider_items_json"].is_string()||dto["provider_items_json"].get<std::string>()!="[]"))throw ContextBindingChanged("Legacy opaque receipt has no registered native continuation representation");
         if(!has_items)continue;
         if(group.legacy_unattributed||!group.execution_owner||!group.committed_event_seq)throw ContextBindingChanged("Opaque original has no proved producing context owner");
-        const auto receipt=db.execute("SELECT r.inference_step_id,m.binding_json,s.spec_json,e.seq FROM agent_model_call_reservations r LEFT JOIN inference_attempt_members m ON m.root_run_id=r.root_run_id AND m.attempt_id=r.attempt_id LEFT JOIN inference_steps s ON s.id=m.step_id JOIN events e ON e.run_id=r.owner_run_id AND e.kind='budget.model_call.finished' AND json_extract(e.payload,'$.attempt_id')=r.attempt_id AND json_extract(e.payload,'$.was_started')=1 WHERE r.owner_run_id=? AND r.state='finished' AND r.purpose='inference' AND r.actual_assistant_json=? AND e.seq<?",{*group.execution_owner,original.json,*group.committed_event_seq}).rows;
+        const auto receipt=db.execute("SELECT r.inference_step_id,m.binding_json,s.spec_json,e.seq,b.workspace_identity FROM agent_model_call_reservations r LEFT JOIN inference_attempt_members m ON m.root_run_id=r.root_run_id AND m.attempt_id=r.attempt_id LEFT JOIN inference_steps s ON s.id=m.step_id JOIN agent_execution_budgets b ON b.root_run_id=r.root_run_id JOIN events e ON e.run_id=r.owner_run_id AND e.kind='budget.model_call.finished' AND json_extract(e.payload,'$.attempt_id')=r.attempt_id AND json_extract(e.payload,'$.was_started')=1 WHERE r.owner_run_id=? AND r.state='finished' AND r.purpose='inference' AND r.actual_assistant_json=? AND e.seq<?",{*group.execution_owner,original.json,*group.committed_event_seq}).rows;
         if(receipt.size()!=1)throw ContextBindingChanged("Opaque original has no unique completed producing model call");
         std::string producer_identity;
         if(!std::holds_alternative<std::nullptr_t>(receipt[0][0])){
@@ -156,8 +157,18 @@ void validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,co
             if(!spec.is_object()||!spec.contains("binding")||decode_context_binding(spec["binding"].dump())!=source_binding||
                !spec.contains("scope_kind")||!spec.contains("scope_id")||spec.at("scope_kind")!=context_scope_name(group.scope.kind)||spec.at("scope_id")!=group.scope.id)
                 throw ContextBindingChanged("Opaque original belongs to another execution scope or context binding");
-            if(source_binding!=selected_binding)
-                throw ContextBindingChanged("Opaque original belongs to another selected context authority");
+            if(source_binding!=selected_binding){
+                auto compatible=source_binding;compatible.authority_identity=selected_binding.authority_identity;
+                if(!allow_authority_replay||compatible!=selected_binding)
+                    throw ContextBindingChanged("Opaque original belongs to another selected context authority");
+                reproject=true;
+                if(producing_workspace){
+                    const auto workspace=text(receipt[0][4]);
+                    if(workspace.empty()||(!producing_workspace->empty()&&*producing_workspace!=workspace))
+                        throw ContextBindingChanged("Opaque originals have incompatible producing workspaces");
+                    *producing_workspace=workspace;
+                }
+            }
             producer_identity=source_binding.provider_identity_json;
         }else{
             // Provider-profile runs without the Responses context manager still
@@ -178,6 +189,7 @@ void validate_context_receipts(XlangSqlite& db,const ConversationGroup& group,co
             throw ContextBindingChanged("Opaque original provider context differs from its actual model call");
         const auto event=db.execute("SELECT run_id,kind FROM events WHERE seq=?",{*group.committed_event_seq}).rows;if(event.size()!=1||text(event[0][0])!=*group.execution_owner||(text(event[0][1])!="conversation.assistant"&&text(event[0][1])!="conversation.tool_turn"))throw DatabaseError("Opaque source group lacks its actual committed conversation event");
     }
+    return reproject;
 }
 void index_context_event(XlangSqlite& db,const std::string& owner,const std::string& event_kind,std::int64_t event_seq){
     // Existing transcript methods accept older DTO shapes. Such a transcript
@@ -1603,9 +1615,43 @@ ContextStatusObservation Repository::context_status_observation(const ContextSco
     if(result.head.checkpoint_id){const auto checkpoints=db.execute("SELECT k.compaction_id,json(k.actual_usage_json),k.measured_elapsed_ms,c.preparation_elapsed_ms FROM context_checkpoints k JOIN context_compactions c ON c.id=k.compaction_id WHERE k.id=? AND c.state='committed' AND c.scope_kind=? AND c.scope_id=? AND c.binding_key=? AND c.binding_json=? AND c.head_revision=? AND c.covered_ordinal=?",{*result.head.checkpoint_id,kind,scope.id,key,encoded,result.head.revision-1,result.head.covered_through_ordinal}).rows;if(checkpoints.size()!=1)throw DatabaseError("Context status lacks its exact committed checkpoint");const auto& c=checkpoints[0];ContextCheckpointObservation observed{text(c[0]),text(c[1]),integer(c[2]),{}};if(observed.compaction_id!=*result.head.checkpoint_id||observed.actual_usage_json.size()>65536||observed.measured_elapsed_ms<0)throw DatabaseError("Context status checkpoint metrics are invalid");if(!std::holds_alternative<std::nullptr_t>(c[3])){observed.measured_preparation_elapsed_ms=integer(c[3]);if(*observed.measured_preparation_elapsed_ms<0)throw DatabaseError("Context status preparation timing is invalid");}result.checkpoint=std::move(observed);}
     tx.commit();return result;
 }
+namespace {
+std::vector<ContextHistoryPayload> read_context_payloads(XlangSqlite& db,const ContextSnapshot& snapshot,
+    const std::vector<std::int64_t>& ordinals,ContextReadBound bound,bool allow_authority_replay){
+    context_read_bound(bound);
+    if(ordinals.empty()||ordinals.size()>bound.max_groups)throw std::invalid_argument("Invalid context payload selection");
+    const auto current=read_context_snapshot(db,snapshot.head.scope,snapshot.head.binding,bound);
+    if(context_snapshot_json(current)!=context_snapshot_json(snapshot))throw ContextUnavailable("Context source or head changed");
+    std::vector<ContextHistoryPayload> result;std::set<std::int64_t> seen;std::size_t bytes=0;
+    for(const auto ordinal:ordinals){
+        if(!seen.insert(ordinal).second)throw std::invalid_argument("Duplicate context group selection");
+        const ConversationGroup* group=nullptr;
+        for(const auto& value:current.groups)if(value.ordinal==ordinal)group=&value;
+        for(const auto& value:current.protected_users)if(value.ordinal==ordinal)group=&value;
+        if(!group)throw NotFound("Context group is outside this snapshot");
+        ContextHistoryPayload payload;payload.source.group=*group;
+        for(const auto& row:db.execute("SELECT m.seq,m.role,m.payload FROM context_group_members g JOIN messages m ON m.seq=g.message_seq WHERE g.scope_kind=? AND g.scope_id=? AND g.ordinal=? ORDER BY g.position",
+            {std::string(context_scope_name(current.head.scope.kind)),current.head.scope.id,ordinal}).rows){
+            const auto size=text(row[2]).size();
+            if(size>bound.max_payload_bytes-bytes)throw ContextCapacityExceeded("Selected context payload exceeds its byte bound");
+            bytes+=size;payload.source.originals.push_back({integer(row[0]),text(row[1]),text(row[2])});
+        }
+        if(payload.source.originals.size()!=static_cast<std::size_t>(group->message_count)||
+           context_messages_digest(payload.source.originals)!=group->source_binding||validate_context_group(payload.source.originals)!=group->kind)
+            throw DatabaseError("Context original group differs from immutable metadata");
+        payload.reproject_provider_items=validate_context_receipts(db,*group,payload.source.originals,current.head.binding,allow_authority_replay,&payload.producing_workspace_identity);
+        result.push_back(std::move(payload));
+    }
+    return result;
+}
+}
 std::vector<ContextGroupPayload> Repository::context_group_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound){
-    context_read_bound(bound);if(ordinals.empty()||ordinals.size()>bound.max_groups)throw std::invalid_argument("Invalid context payload selection");auto& db=impl_->database;Transaction tx(db);const auto current=read_context_snapshot(db,snapshot.head.scope,snapshot.head.binding,bound);if(context_snapshot_json(current)!=context_snapshot_json(snapshot))throw ContextUnavailable("Context source or head changed");std::vector<ContextGroupPayload> result;std::set<std::int64_t> seen;std::size_t bytes=0;
-    for(const auto ordinal:ordinals){if(!seen.insert(ordinal).second)throw std::invalid_argument("Duplicate context group selection");const ConversationGroup* g=nullptr;for(const auto& v:current.groups)if(v.ordinal==ordinal)g=&v;for(const auto& v:current.protected_users)if(v.ordinal==ordinal)g=&v;if(!g)throw NotFound("Context group is outside this snapshot");ContextGroupPayload payload;payload.group=*g;for(const auto& r:db.execute("SELECT m.seq,m.role,m.payload FROM context_group_members g JOIN messages m ON m.seq=g.message_seq WHERE g.scope_kind=? AND g.scope_id=? AND g.ordinal=? ORDER BY g.position",{std::string(context_scope_name(current.head.scope.kind)),current.head.scope.id,ordinal}).rows){const auto size=text(r[2]).size();if(size>bound.max_payload_bytes-bytes)throw ContextCapacityExceeded("Selected context payload exceeds its byte bound");bytes+=size;payload.originals.push_back({integer(r[0]),text(r[1]),text(r[2])});}if(payload.originals.size()!=static_cast<std::size_t>(g->message_count)||context_messages_digest(payload.originals)!=g->source_binding||validate_context_group(payload.originals)!=g->kind)throw DatabaseError("Context original group differs from immutable metadata");validate_context_receipts(db,*g,payload.originals,current.head.binding);result.push_back(std::move(payload));}
+    Transaction tx(impl_->database);auto loaded=read_context_payloads(impl_->database,snapshot,ordinals,bound,false);
+    std::vector<ContextGroupPayload> result;for(auto& payload:loaded)result.push_back(std::move(payload.source));
+    tx.commit();return result;
+}
+std::vector<ContextHistoryPayload> Repository::context_history_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound){
+    Transaction tx(impl_->database);auto result=read_context_payloads(impl_->database,snapshot,ordinals,bound,true);
     tx.commit();return result;
 }
 std::optional<ContextProjection> Repository::context_projection(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound){
@@ -1673,6 +1719,30 @@ ContextProjection read_observed_projection(XlangSqlite& db,const SavedCompaction
 Json measure_request_json(const ContextMeasureRequestSpec& s){return {{"id",s.id},{"owner",s.owner_id},{"payload",s.payload_binding},{"model",s.model_id},{"root",s.root_run_id?Json(*s.root_run_id):Json(nullptr)},{"compaction",s.compaction_id?Json(*s.compaction_id):Json(nullptr)},{"scope_kind",context_scope_name(s.scope.kind)},{"scope_id",s.scope.id},{"binding",context_binding_json(s.binding)},{"head",s.head_revision},{"watermark",s.source_watermark},{"bytes",s.serialized_bytes},{"max_requests",s.max_requests},{"deadline",s.deadline_ms},{"input",s.input_json},{"count_binding",s.count_request_binding}};}
 ContextMeasureRequestSpec decode_measure(const std::string& raw){const auto j=Json::parse(raw);ContextMeasureRequestSpec s;s.id=j["id"];s.owner_id=j["owner"];s.payload_binding=j["payload"];s.model_id=j["model"];if(!j["root"].is_null())s.root_run_id=j["root"].get<std::string>();if(!j["compaction"].is_null())s.compaction_id=j["compaction"].get<std::string>();s.scope={j["scope_kind"]=="session"?ContextScopeKind::session:ContextScopeKind::execution,j["scope_id"].get<std::string>()};s.binding=decode_context_binding(j["binding"].dump());s.head_revision=j["head"];s.source_watermark=j["watermark"];s.serialized_bytes=j["bytes"];s.max_requests=j["max_requests"];s.deadline_ms=j["deadline"];s.input_json=j["input"];s.count_request_binding=j["count_binding"];return s;}
 Json measure_result_json(const ContextInputMeasure& m){return {{"owner",m.owner_id},{"payload",m.payload_binding},{"model",m.model_id},{"scope_kind",context_scope_name(m.scope.kind)},{"scope_id",m.scope.id},{"binding",context_binding_json(m.binding)},{"head",m.head_revision},{"watermark",m.source_watermark},{"semantics",m.semantics==ContextMeasureSemantics::provider_exact?"provider_exact":m.semantics==ContextMeasureSemantics::provider_estimate?"provider_estimate":"serialized_bytes"},{"value",m.value},{"bytes",m.serialized_bytes},{"elapsed",m.measured_elapsed_ms},{"response",m.actual_response_json}};}
+}
+void Repository::record_context_history_replay(const ContextHistoryReplaySpec& spec){
+    auto& db=impl_->database;Transaction tx(db);context_hash(spec.projection_binding);
+    context_owner(*this,spec.root_run_id,spec.owner_run_id,spec.role,spec.source.head.scope,spec.source.head.binding);
+    const auto loaded=read_context_payloads(db,spec.source,spec.ordinals,{},true);
+    const auto workspace=root_budget(spec.root_run_id).spec.workspace_identity;
+    std::size_t groups=0,messages=0;
+    for(const auto& payload:loaded)if(payload.reproject_provider_items){
+        if(payload.producing_workspace_identity!=workspace)
+            throw ContextBindingChanged("History replay belongs to another execution workspace");
+        ++groups;
+        for(const auto& original:payload.source.originals)if(original.role=="assistant"){
+            const auto dto=Json::parse(original.json);
+            if(dto.contains("provider_items")&&!dto.at("provider_items").empty())++messages;
+        }
+    }
+    if(!groups||!messages)throw ContextBindingChanged("History replay has no changed producing authority");
+    impl_->event(spec.owner_run_id,"context.history_reprojected",Json{
+        {"reason","authority_changed"},{"scope_kind",context_scope_name(spec.source.head.scope.kind)},
+        {"scope_id",spec.source.head.scope.id},{"head_revision",spec.source.head.revision},
+        {"source_watermark",spec.source.source_watermark},{"source_binding",context_source_binding(spec.source,spec.source.source_watermark)},
+        {"authority_identity",spec.source.head.binding.authority_identity},{"projection_binding",spec.projection_binding},
+        {"groups",groups},{"messages",messages}}.dump());
+    tx.commit();
 }
 ContextManualRequest Repository::request_context_compaction(const ContextManualRequestSpec& spec){
     bounded_identity(spec.id);bounded_identity(spec.actor);if(spec.expected_head_revision<0)throw std::invalid_argument("Invalid manual context head");(void)context_binding_json(spec.binding);auto& db=impl_->database;Transaction tx(db);

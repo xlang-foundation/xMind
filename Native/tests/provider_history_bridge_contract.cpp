@@ -41,11 +41,36 @@ int main(){try{
         "Responses context projection must preserve portable canonical text and remove Claude-only receipts");
     auto foreign_reasoning=conversation(saved("Reasoned answer",response_reasoning));rejects([&]{(void)project_provider_history(chat,foreign_reasoning);});
 
+    auto exact_items=Json::parse(responses);exact_items.push_back(Json::parse(response_reasoning).at(0));
+    auto changed_authority=conversation(saved("Responses answer",exact_items.dump()));
+    const auto exact_original=changed_authority.messages[1].provider_items_json;
+    const auto replay=reproject_authority_history(changed_authority,{1});
+    require(replay.messages[1].content=="Responses answer"&&replay.messages[1].provider_items_json=="[]"&&
+        changed_authority.messages[1].provider_items_json==exact_original,
+        "Explicit authority replay preserves public content and immutable originals without old opaque continuation");
+    auto wrong_public=changed_authority;wrong_public.messages[1].content="Unproved replacement";
+    rejects([&]{(void)reproject_authority_history(wrong_public,{1});});
+    rejects([&]{(void)reproject_authority_history(unknown,{1});});
+    rejects([&]{(void)reproject_authority_history(changed_authority,{1,1});});
+    rejects([&]{(void)reproject_authority_history(changed_authority,{0});});
+    rejects([&]{(void)reproject_authority_history(changed_authority,{2});});
+
     ModelMessage canonical;canonical.role=MessageRole::assistant;canonical.content="Calling tool";canonical.tool_calls={{"native-tool-id","read_file",R"({"path":"README.md"})"}};
     canonical.provider_items_json=anthropic_content_receipt(R"([{"type":"text","text":"Calling tool"},{"type":"tool_use","id":"native-tool-id","name":"read_file","input":{"path":"README.md"}}])","tool_calls","tool_use");
     auto with_tool=conversation(canonical);ModelMessage answer;answer.role=MessageRole::tool;answer.tool_call_id="native-tool-id";answer.content="file body";with_tool.messages.push_back(answer);
     const auto projected=project_provider_history(gemini_target,with_tool);require(projected.messages[1].provider_items_json=="[]","Foreign Claude tool receipt must be projected after validation");
     const auto responses_tool_history=project_provider_history(responses_target,with_tool);
+    rejects([&]{(void)reproject_authority_history(with_tool,{1});});
+    auto responses_with_tool=with_tool;
+    responses_with_tool.messages[1].provider_items_json=Json::array({
+        {{"id","msg_native"},{"type","message"},{"role","assistant"},{"content",Json::array({{{"type","output_text"},{"text","Calling tool"}}})}},
+        {{"id","fc_native"},{"type","function_call"},{"call_id","native-tool-id"},{"name","read_file"},{"arguments",R"({"path":"README.md"})"}}
+    }).dump();
+    const auto authority_tool_history=reproject_authority_history(responses_with_tool,{1});
+    require(authority_tool_history.messages[1].tool_calls[0].id=="native-tool-id"&&
+        authority_tool_history.messages[2].tool_call_id=="native-tool-id"&&
+        authority_tool_history.messages[2].content=="file body",
+        "Authority replay retains the complete canonical tool turn without executing it");
     require(responses_tool_history.messages[1].provider_items_json=="[]"&&responses_tool_history.messages[1].tool_calls.size()==1&&
         responses_tool_history.messages[2].tool_call_id=="native-tool-id",
         "Responses context projection must retain canonical Claude tool history without its provider receipt");

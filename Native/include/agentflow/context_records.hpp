@@ -101,6 +101,20 @@ struct ContextGroupPayload {
     ConversationGroup group;
     std::vector<Message> originals;
 };
+// Checked original bytes remain distinct from the request-only projection.
+// Only a proved authority change under the same provider/policy may request it.
+struct ContextHistoryPayload {
+    ContextGroupPayload source;
+    bool reproject_provider_items=false;
+    std::string producing_workspace_identity;
+};
+struct ContextHistoryReplaySpec {
+    std::string root_run_id,owner_run_id;
+    ModelCallRole role=ModelCallRole::parent;
+    ContextSnapshot source;
+    std::vector<std::int64_t> ordinals;
+    std::string projection_binding;
+};
 enum class ContextProjectionKind {responses_canonical,structured_summary};
 struct ContextProjection {
     ContextHead head;

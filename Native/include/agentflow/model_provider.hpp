@@ -52,6 +52,11 @@ struct ChatProviderConfig {
 // projection when conversation history crosses provider wires. The persisted
 // history is never modified.
 ModelRequest project_provider_history(const ChatProviderConfig& target,const ModelRequest& request);
+// Explicit request-only re-projection after native receipt provenance proves an
+// authority change. Validate every source receipt; retain canonical conversation
+// fields and omit only the selected old provider continuations. Never mutate the
+// transcript or label old opaque state as belonging to the new authority.
+ModelRequest reproject_authority_history(const ModelRequest&,const std::vector<std::size_t>& message_indices);
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Mistral uses the Chat Completions shape with its documented max_tokens field.

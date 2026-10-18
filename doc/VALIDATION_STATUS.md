@@ -23,6 +23,24 @@ used when they were recorded and should not be read as current parity goals.
 | Provider gateway | Saved Claude, Gemini, DeepSeek and OpenAI profiles are discoverable; prior live runs report actual usage and timings. The current CLI test reused the saved OpenAI key and discovered 20 models. | Broader live-provider and failure/recovery coverage. |
 | OSS boundary | xMind OSS uses local SQLite and web/VS Code/CLI clients. OpenCode and LiteLLM are references only; compatibility and feature parity are not acceptance criteria. | Nexus team server/PostgreSQL/WebRTC and standalone Electron IDE are separate closed-source work. |
 
+## Active conversation context after an authority change — 2026-10-18
+
+Native Responses-context preparation now reprojects checked original history
+after an authority change under the same captured provider identity, registered
+policy/strategy and execution workspace. Original receipts and history stay
+byte-identical. A typed repository operation verifies the owner/source again
+before recording the recovery event; generic event append cannot forge it.
+Actual provider requests and compaction remain separately budgeted.
+
+The focused Release gate passed **7/7 in 22.48 seconds**, including an independent
+synthetic provider that checks current instructions, preserved user objectives
+and canonical tool results, omission of prior native items, persistence reopen,
+current-authority compaction, and no dispatch for a different workspace. UI
+contracts pass **393 extension and 136 browser checks**. Live-provider recovery,
+rendered clients, foreign provider/model changes, changed-authority idle
+maintenance and over-bound history remain outside this checkpoint. The prior
+failed profile handoff is not repaired by it. [Exact scope and retained attempts](evidence/context-authority-replay-20261018.json).
+
 ## Managed handoff and profile publication — 2026-10-18
 
 Managed upgrades now ask the running owner to qualify the replacement before

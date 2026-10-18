@@ -101,6 +101,8 @@ public:
     ContextSnapshot context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
     ContextStatusObservation context_status_observation(const ContextScope& scope,const ContextBinding& binding);
     std::vector<ContextGroupPayload> context_group_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
+    std::vector<ContextHistoryPayload> context_history_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
+    void record_context_history_replay(const ContextHistoryReplaySpec& spec);
     std::optional<ContextProjection> context_projection(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
     ContextStepReservation begin_context_compaction(const ContextCompactionSpec& spec);
     ContextStepReservation start_context_compaction(const std::string& id,const std::string& maintenance_attempt);

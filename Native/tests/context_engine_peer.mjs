@@ -13,7 +13,7 @@ import {tmpdir} from 'node:os';
 const [executable, modules, stdlib] = process.argv.slice(2);
 assert.ok(executable && modules && stdlib, 'Expected native contract and embedded runtime import roots');
 const root = await mkdtemp(join(tmpdir(), 'xmind-context-engine-'));
-const modes = ['rolling', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
+const modes = ['rolling', 'authority', 'held', 'held-count-failure', 'second-overflow', 'late-overflow', 'generic-400', 'receipt-fault', 'head-fault', 'after-count-failure', 'final-binding-failure'];
 const model = 'synthetic-context-engine-model';
 const key = 'synthetic-context-engine-key-not-live';
 const bytes = 'Actual native context fixture file bytes\n';
@@ -71,6 +71,8 @@ function ownerOf(body) {
   const prompt = userText(users(body).at(-1));
   if (prompt.startsWith('fixture-rolling-first:')) return 'first';
   if (prompt.startsWith('fixture-rolling-second:')) return 'second';
+  if (prompt.startsWith('fixture-authority-first:')) return 'first';
+  if (prompt.startsWith('fixture-authority-second:')) return 'second';
   if (prompt.startsWith('fixture-bootstrap:')) return 'bootstrap';
   if (prompt.startsWith('fixture-held-parent:')) return 'parent';
   if (prompt.startsWith('fixture-probe:')) return 'probe';
@@ -92,6 +94,15 @@ function validateInput(mode, body, raw, kind) {
   }
   assert.equal(body.input[0].role, 'system');
   assert.ok(body.input[0].content[0].text.includes('Current native instructions'));
+  if (mode === 'authority' && users(body).length === 2) {
+    assert.ok(body.input[0].content[0].text.includes('Changed authority instructions.'));
+    assert.ok(userText(users(body)[0]).startsWith('fixture-authority-first:'));
+    if(!body.input.some(item=>item.type==='compaction')){
+      assert.ok(body.input.some(item=>item.type==='message'&&item.role==='assistant'&&item.content.some(part=>part.text?.startsWith('Observed actual native README.md reads;'))));
+      assert.ok(body.input.some(item=>item.type==='function_call_output'&&item.call_id==='call_authority_first_1'));
+    }
+    assert.ok(!body.input.some(item=>item.id?.includes('_authority_first_')),'Old provider-native items cannot cross the changed authority');
+  }
   if (kind === 'compact') assert.deepEqual(Object.keys(body).sort(), ['input', 'model']);
   else {
     assert.deepEqual(body.tools.map(item => item.name).sort(), mode.startsWith('held') ? [...readTools, 'inspect_plan', 'plan_tasks', 'revise_plan'].sort() : readTools);
@@ -185,7 +196,7 @@ const peer = createServer((request, response) => {
         send(response, 'resp_held_parent_3', completed(mode, owner, call, message(mode, owner, call, 'Observed the actual answered owned question and once-only corrected continuation.'))); return;
       }
       assert.notEqual(owner, 'maintenance', 'Failed maintenance cannot dispatch its reserved inference');
-      const loops = owner === 'first' ? 5 : 2;
+      const loops = mode === 'authority' ? 1 : owner === 'first' ? 5 : 2;
       if (call <= loops) send(response, 'resp_' + mode + '_' + owner + '_' + call, completed(mode, owner, call, tool(mode, owner, call)));
       else {
         assert.equal(call, loops + 1);
@@ -202,6 +213,7 @@ try {
   if (failure) throw failure;
   const counts = mode => Object.fromEntries(['inference', 'count', 'compact'].map(kind => [kind, state.get(mode).requests.filter(record => record.kind === kind).length]));
   assert.deepEqual(counts('rolling'), {inference: 9, count: 16, compact: 6});
+  assert.deepEqual(counts('authority'), {inference: 4, count: 5, compact: 1});
   assert.deepEqual(counts('held'), {inference: 6, count: 7, compact: 1});
   assert.deepEqual(counts('held-count-failure'), {inference: 4, count: 5, compact: 0});
   assert.deepEqual(counts('second-overflow'), {inference: 5, count: 6, compact: 1});

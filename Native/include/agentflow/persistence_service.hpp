@@ -89,6 +89,8 @@ public:
     std::future<ContextSnapshot> context_snapshot(ContextScope scope,ContextBinding binding,ContextReadBound bound={});
     std::future<ContextStatusObservation> context_status_observation(ContextScope scope,ContextBinding binding);
     std::future<std::vector<ContextGroupPayload>> context_group_payloads(ContextSnapshot snapshot,std::vector<std::int64_t> ordinals,ContextReadBound bound={});
+    std::future<std::vector<ContextHistoryPayload>> context_history_payloads(ContextSnapshot snapshot,std::vector<std::int64_t> ordinals,ContextReadBound bound={});
+    std::future<void> record_context_history_replay(ContextHistoryReplaySpec spec);
     std::future<std::optional<ContextProjection>> context_projection(ContextScope scope,ContextBinding binding,ContextReadBound bound={});
     std::future<ContextStepReservation> begin_context_compaction(ContextCompactionSpec spec);
     std::future<ContextStepReservation> start_context_compaction(std::string id,std::string maintenance_attempt);

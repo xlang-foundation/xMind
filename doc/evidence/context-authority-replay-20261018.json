@@ -1,0 +1,85 @@
+{
+  "recorded_at": "2026-10-18T08:48:21.413Z",
+  "scope": "Current native Responses active-run history projection; independent synthetic provider and DOM clients",
+  "source_base": "6f3d2f56f7bda4c5703f52df7f14da506e363a1a",
+  "source_files": {
+    "Native/include/agentflow/agent_context_journal.hpp": "8aa917b54b19a87078a922ce066cd253d7bf4df6a6bcb71ce09ad52b539f2aea",
+    "Native/include/agentflow/context_records.hpp": "f262590a138762cb585214cd2714c80b83b60718cd5f820476fe62b49b94736a",
+    "Native/include/agentflow/model_provider.hpp": "7d3cd6ef9628fbe742cccd47ce0808033d98864ab188ecff062b7759c6e86b6c",
+    "Native/include/agentflow/persistence_service.hpp": "49d6419a24f2d98e0f251c7edd40c31690bf359f4e444051c99b616ac74affbe",
+    "Native/include/agentflow/repository.hpp": "37e51bdc1b1623f403a59bf76e1f64e892208e12083077d64d7393a52e459cf8",
+    "Native/src/context_manager.cpp": "da502d4a42c3caddce831ab88af30630e0339a77a30c5b72eb1d295c7fd3dcb6",
+    "Native/src/persistence_service.cpp": "f1b4d808f4925da1f02d420edd0b2b136549ffe5fb0357a66773c4596d636d9c",
+    "Native/src/provider_history_bridge.cpp": "81e0e367f6d1ab98f36ed1c3ddfc8f74ebdc3cefaeccae28dcbee31af60e60f7",
+    "Native/src/repository.cpp": "c0463e291109c79928c42e3bc2383667c8660794ba38d8829280e8a0bcb5db50",
+    "Native/tests/context_engine_contract.cpp": "692107e48de1df427c33658c060074c6656f776a24c137ca276f7fed4bdd69aa",
+    "Native/tests/context_engine_peer.mjs": "5a50eadcf18a25f66266fd70999bf479f1b31a97ee94ca5d25f7be653929887f",
+    "Native/tests/context_repository_contract.cpp": "9ab40e68816d4e4b2a42a5a187ef4d3a9074a6dcee0def0b4e60789f8a2aa0bc",
+    "Native/tests/provider_history_bridge_contract.cpp": "dc1597eaa2be7bc863b1404af07748c84973057f3380c9284c0f4cab0db6ffd8",
+    "extensions/vscode/media/chat.js": "76e96d568584d520cef77ce505127c5755197166a550c21997c614388ecda364",
+    "extensions/vscode/tests/renderer.test.js": "3e06a8bbf8f131f0ea5b13fc1b5175281eb10fd607b15d3214895d0a0b7775bb"
+  },
+  "xlang3_sdk_revision": "b0da71f22e9591b6bd99883b21c50ad85dbe4bed",
+  "native_executable_sha256": "964943994730780289847eff333f76a23a4b93184ecfb9fb9ce5ec4e4dfa7239",
+  "runtime_dll_sha256": "beec7e860b4a1e5088f28768275d2635988f14a494fe8973b66917c1791a4e47",
+  "tests": {
+    "native": 7,
+    "native_seconds": 22.48,
+    "extension": 393,
+    "browser": 136,
+    "log_sha256": {
+      "native": "2c52154e41070c83ce08e3d3b162192d6d095db96039ec1b939b8e3e80a0bb2e",
+      "extension": "2dd31b09ad39143b9e0cae1a26d19a0811eb0d08c9fd07e41fb5bf3c9216f495",
+      "browser": "fd3cfcb2cc30a6c32bc167de4d8daa736356177966f5d09baea043688e5ba4c8"
+    }
+  },
+  "checks": [
+    "Unmodified strict continuation API still rejects old authority receipts",
+    "Actual persisted producing inference/model-call/conversation provenance is checked before request projection",
+    "Two real native read loops span a database reopen and changed instructions under the same provider identity and workspace",
+    "Independent synthetic peer observes both original objectives and canonical tool results without old authority native item IDs",
+    "Current-authority context compaction is performed and budgeted separately",
+    "Original transcript receipts/usage and producing authority head remain unchanged",
+    "Different workspace, foreign provider/model/profile, stale snapshot, unregistered policy and missing provenance are rejected",
+    "Queued owners and generic event append cannot forge the typed recovery lifecycle event",
+    "Shared renderer explains the recorded recovery event"
+  ],
+  "authority_peer_requests": {
+    "inference": 4,
+    "input_count": 5,
+    "compaction": 1,
+    "live_provider": false
+  },
+  "retained_attempts": [
+    {
+      "log": "authority-replay-build-20261018.log",
+      "result": "compile failure",
+      "reason": "New audit used two unavailable local helper names; corrected before subsequent builds."
+    },
+    {
+      "fixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-context-engine-fYX0KQ",
+      "result": "test setup failure",
+      "reason": "Unregistered policy revision was rejected during construction; negative test now uses a foreign model."
+    },
+    {
+      "fixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-context-engine-ZdAHko",
+      "result": "test setup failure",
+      "reason": "Unregistered binding was rejected before payload loading; assertion now checks the registration boundary."
+    },
+    {
+      "fixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-context-engine-mLdnVq",
+      "result": "integration failure",
+      "reason": "Generic context lifecycle append was refused. Fixed with a typed repository operation that revalidates ownership, source and workspace."
+    }
+  ],
+  "limits": [
+    "No live-provider acceptance in this receipt",
+    "No rendered external browser or installed VS Code acceptance",
+    "Installed VSIX and running browser remain on the earlier runtime",
+    "No old package/profile migration or repair of the already saved failed handoff",
+    "Only the current registered Responses context policy is supported",
+    "Foreign provider/model identities, changed-authority idle maintenance and histories outside native bounds remain unsupported by this recovery path",
+    "No complete current native/hosted Release gate or release-accepted package",
+    "Synthetic provider capacity, counts, usage, opaque data and credentials are fixture values; actual native tool execution and SQLite persistence are exercised"
+  ]
+}

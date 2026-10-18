@@ -609,6 +609,9 @@ test('A2A input-required tasks expose a sequenced reply form and quarantine unce
 test('streamed A2A task events show peer, state, task and sequence in selected run activity',()=>{
  const r=renderer(),events=r.dom.window.document.getElementById('events');try{r.send({type:'event',event:{seq:7,run_id:'run',kind:'a2a.task_event',data:{activity_id:'run:turn:0',call_id:'tool-call',name:'a2a_delegate_peer',data:{operation_id:'a2a-operation',agent_id:'research.peer',event_sequence:2,event:{statusUpdate:{taskId:'remote-task',status:{state:'TASK_STATE_WORKING'}}}}}}});assert.match(events.textContent,/A2A task update · research\.peer · TASK_STATE_WORKING · remote-task · event 2/);assert.match(events.textContent,/"operation_id":"a2a-operation"/);assert.equal(events.querySelector('script'),null);}finally{r.dom.window.close();}
 });
+test('authority history replay is explained in selected run activity',()=>{
+ const r=renderer(),events=r.dom.window.document.getElementById('events');try{r.send({type:'event',event:{seq:7,run_id:'run',kind:'context.history_reprojected',data:{reason:'authority_changed',groups:2,messages:2}}});assert.match(events.textContent,/Conversation context refreshed for the current backend\. Recorded history is preserved\./);assert.equal(events.querySelector('script'),null);}finally{r.dom.window.close();}
+});
 test('run activity skips streamed token deltas and remains bounded for long tool sessions',()=>{
  const r=renderer(),events=r.dom.window.document.getElementById('events');try{
   r.send({type:'event',event:{seq:1,run_id:'run',kind:'run.running',data:{}}});
