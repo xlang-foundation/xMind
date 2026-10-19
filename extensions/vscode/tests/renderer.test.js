@@ -913,3 +913,19 @@ test('patch move review discloses both guidance scopes and rejects unbound scope
   plan.repository_guidance.scope_directories=['foreign','dest'];item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});assert.ok([...doc.querySelectorAll('#scroll button')].find(button=>button.textContent==='Allow move').disabled);assert.ok(!r.posted.some(message=>message.type==='decide'));
  }finally{r.dom.window.close();}
 });
+
+
+test('attached-folder approvals bind repository and skill guidance to the captured target folder',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  for(const tool of ['replace_file','create_file','patch_file','run_process']){
+   const item=tool==='run_process'?processProposalFixture():tool==='patch_file'?patchFixture('update'):{id:'attached-'+tool,tool,state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,result_json:'{}',arguments_json:JSON.stringify({path:'file.cpp',before_exists:tool!=='create_file',before_content:tool==='create_file'?'':'old',after_content:'new'})};
+   item.workspace_id='fixture-root';const plan={...JSON.parse(item.arguments_json),workspace_id:item.workspace_id,workspace_revision:2,folder_id:'fixture-extra',target_workspace_id:'fixture-extra'};
+   const source={path:'AGENTS.md',workspace_id:'fixture-extra',file_id:'fixture-guide',content_sha256:'a'.repeat(64),byte_count:40};plan.repository_guidance={version:1,directory:'.',sources:[source],skills:[{...source,id:'fixture-skill',path:'.agents/skills/fixture/SKILL.md'}]};
+   const render=value=>{item.arguments_json=JSON.stringify(value);r.send({type:'operations',operations:[item]});return [...doc.querySelectorAll('#operations button')];};
+   let buttons=render(plan);assert.equal(buttons.find(b=>b.textContent.startsWith('Allow')).disabled,false,tool+' must allow the selected attached-folder binding');if(tool!=='run_process')assert.equal(buttons.find(b=>b.textContent==='Compare changes').disabled,false);
+   const invalid=[{...plan,workspace_id:'other-owner'},{...plan,folder_id:'other-folder'},{...plan,target_workspace_id:''},{...plan,workspace_revision:0},{...plan,target_workspace_id:undefined},{...plan,repository_guidance:{...plan.repository_guidance,sources:[{...source,workspace_id:'fixture-root'}]}},{...plan,repository_guidance:{...plan.repository_guidance,skills:[{...plan.repository_guidance.skills[0],workspace_id:'other-folder'}]}}];
+   for(const bad of invalid){buttons=render(bad);assert.equal(buttons.find(b=>b.textContent.startsWith('Allow')).disabled,true,tool+' must reject mismatched target guidance');assert.equal(buttons.find(b=>b.textContent==='Deny').disabled,false);}
+  }
+ }finally{r.dom.window.close();}
+});

@@ -1,0 +1,281 @@
+{
+  "recordedAt": "2026-10-19T01:37:07.914Z",
+  "scope": "Actual staged C++/xlang3 browser coding with saved-key Claude, plus a qualified shared-renderer refresh. No installed VS Code pane or full native/release acceptance.",
+  "url": "http://127.0.0.1:49702/ui/",
+  "nativeRevision": "2c18ffb310569f32a6cadb6b30c07bfa01807cc7",
+  "nativeSha256": "28e6010184e626850e214b68480a829060abdb52cdf62d77c92a5bdcc6803d05",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "rendererSourceParent": "2c18ffb310569f32a6cadb6b30c07bfa01807cc7",
+  "rendererWorkingTreePatchSha256": "7369ca79783eb4f362d0ccdc7b20e155d7d8d44ef5e0e3d65213a8b3bc56f7c4",
+  "rendererSha256": "31a5208f55487f726143b4b268bc7ba8272951d80737ac9ba47b3ef85863b137",
+  "problem": "The shared approval renderer compared attached-folder repository/skill snapshot identities to the owning primary workspace. A legitimate attached edit therefore disabled Compare changes and Allow.",
+  "fix": "Validate the complete captured owner/revision/folder/target tuple and bind guidance sources to that target folder. Primary-only MCP guidance retains the owner binding. Mismatched scopes remain rejected; backend checks and effect approvals are unchanged.",
+  "qualification": {
+    "recordedAt": "2026-10-19T01:34:30.335Z",
+    "version": "0.1.35-renderer-working-tree",
+    "sourceParent": "2c18ffb310569f32a6cadb6b30c07bfa01807cc7",
+    "workingTreePatchSha256": "7369ca79783eb4f362d0ccdc7b20e155d7d8d44ef5e0e3d65213a8b3bc56f7c4",
+    "sourceFiles": 99,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 426,
+      "passed": 426,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4dc753c410d9758ebf33c60554dffaea764b1ea52eeed88580342e4cd89b1ae9"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "d98810b2f8ea2e93e4678a8849e4d325c766d54e0f60746757f7cb56861a9985"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "live": {
+    "session": "f4ba91f315729273348ab02dbf4ed87c",
+    "run": "a6df1b7c56c63a11fbc9617fa5d3a220",
+    "provider": "claude",
+    "model": "claude-sonnet-4-6",
+    "state": "completed",
+    "acceptedTaskPostStatus": 202,
+    "resumedExistingRun": true,
+    "newTaskSubmissionsDuringContinuation": 0,
+    "noReplay": true,
+    "historyMessages": 11,
+    "savedEvents": 626,
+    "actualUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 219,
+        "input_tokens": 8547,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 219,
+        "prompt_tokens": 8547,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 131,
+        "input_tokens": 9774,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 131,
+        "prompt_tokens": 9774,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 453,
+        "input_tokens": 33427,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 453,
+        "prompt_tokens": 33427,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 303,
+        "input_tokens": 34012,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 303,
+        "prompt_tokens": 34012,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 495,
+        "input_tokens": 35277,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 495,
+        "prompt_tokens": 35277,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "changedFile": "src/views/HomeView.vue",
+    "changedFileSha256": "63c71a36dfc9dc747b6ecb0a02d961b212cf0446af78bb70d0deb50661a92538",
+    "primaryAndOtherSourceFilesUnchanged": true,
+    "restoredHistoryUnchanged": true,
+    "reviewed": [
+      {
+        "id": "4763fccc610ddb75e2815f5c5d7a6259",
+        "tool": "replace_file",
+        "allowed": true
+      }
+    ],
+    "process": {
+      "id": "aa53408c32c15dcf1e0169433a2eb69e",
+      "state": "succeeded",
+      "exitCode": 0,
+      "termination": "exited",
+      "processTreeRetired": true,
+      "stdout": "\nadded 36 packages, and audited 37 packages in 3s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\n> model-zoo-frontend@0.1.0 build\n> vite build\n\n\u001b[36mvite v6.4.4 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 37 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                           \u001b[39m\u001b[1m\u001b[2m  1.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/ModelDetailView-Dz_7Q5cw.css  \u001b[39m\u001b[1m\u001b[2m  5.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  1.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-CaMrmwR3.css            \u001b[39m\u001b[1m\u001b[2m 50.11 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  9.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ModelDetailView-UADGBPMc.js   \u001b[39m\u001b[1m\u001b[2m  9.98 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  3.79 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-CrH7_0gC.js             \u001b[39m\u001b[1m\u001b[2m126.20 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 47.07 kB\u001b[22m\n\u001b[32m✓ built in 759ms\u001b[39m\n",
+      "stderr": ""
+    },
+    "pageErrors": [],
+    "failedHttpResponses": [],
+    "completedAt": "2026-10-19T01:35:38.945Z"
+  },
+  "retainedFailures": {
+    "initialModelSelection": {
+      "error": "page.waitForFunction: Timeout 60000ms exceeded.",
+      "taskPostStatus": 400,
+      "validationMessage": "Select a model before running this provider profile",
+      "createdRunsBeforeCorrectedSubmission": [],
+      "note": "The request reached backend validation, but no execution was admitted. A subsequent authoritative empty history/run-list check preceded the one accepted request."
+    },
+    "attachedEditReview": {
+      "run": "a6df1b7c56c63a11fbc9617fa5d3a220",
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#operations .operation').filter({ hasText: 'Operation 4763fccc610ddb75e2815f5c5d7a6259' }).getByRole('button', { name: 'Compare changes', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>Compare changes</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "editAppliedBeforeFix": false,
+      "screenshot": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/failure.png"
+    },
+    "rendererRegression": {
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "nativeChanged": false
+    }
+  },
+  "deployment": {
+    "changes": [
+      "chat.js"
+    ],
+    "backendRestarted": false,
+    "source": "C:/xMindNativeValidation/attached-guidance-renderer-client-gates-20261019/browser-assets",
+    "target": "C:/xMindNativeValidation/browser-assets-0.1.35-20261019"
+  },
+  "preservation": {
+    "recordedAt": "2026-10-19T01:36:35.084Z",
+    "stageFiles": 17439,
+    "allOriginalStageSourceDependencyAssetsAndRuntimeBytesAndFileSetsUnchanged": true,
+    "hotfixedBrowserAssetsSeparateFromStage": true,
+    "owners": [
+      {
+        "kind": "host",
+        "pid": 64664,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-19T01:28:50.0224330Z"
+      },
+      {
+        "kind": "nativeView",
+        "pid": 43960,
+        "image": "C:\\xMindNativeValidation\\coding-0.1.35-source-20261019\\extensions\\vscode\\native-runtime\\xmind.exe",
+        "birth": "2026-10-19T01:28:52.3259150Z"
+      },
+      {
+        "kind": "backend",
+        "pid": 69648,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a35\\b8d89165c622d42df3df215aa2cbe64ae6b1270191dfa03e3b0c72e1f3db40bb\\runtime-808baf32fa2c0bc01fbea476fecc8bb4fe09f7da8458a8e9e5bf402ac03db133\\xmind.exe",
+        "birth": "2026-10-19T01:29:45.0433680Z"
+      }
+    ],
+    "pages": [
+      {
+        "url": "http://127.0.0.1:54828/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63496/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:62342/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:52121/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:49702/ui/",
+        "status": 200
+      }
+    ],
+    "original035ArchiveInstalled": false
+  },
+  "uninstalledOriginal035Archive": {
+    "version": "0.1.35",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.35-coding-complete-win32-x64.vsix",
+    "sha256": "2161e2edba1fa831094d9a58193725837922c732197b757845c5b68bddd5ccbc",
+    "bytes": 34416418,
+    "archiveFiles": 2448,
+    "nativeFiles": 2402,
+    "nativeRevision": "2c18ffb310569f32a6cadb6b30c07bfa01807cc7",
+    "nativeSha256": "28e6010184e626850e214b68480a829060abdb52cdf62d77c92a5bdcc6803d05",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false,
+    "note": "Structurally valid archive matches its original stage, but contains the renderer fault exposed by live testing. Never installed; preserve it. The running browser receives the separately qualified renderer fix. A corrected extension package remains to be built."
+  },
+  "receipts": {
+    "rendered-coding-0.1.35-20261019/selected/resumed/acceptance.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/resumed/acceptance.json",
+      "sha256": "88321b8af1158b813594ebb4bdcbe77c5514d737734d062e8d299d35ed5c350c"
+    },
+    "rendered-coding-0.1.35-20261019/selected/resumed/history.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/resumed/history.json",
+      "sha256": "7b3d28a2affb8e8a20b01f6a7d67e2a227e9f43cbd0eed7ecda0c05c7bc8e5e5"
+    },
+    "rendered-coding-0.1.35-20261019/selected/resumed/events.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/resumed/events.json",
+      "sha256": "733494c16ceb4e1c17b27a6d7e67bfd6749e042d0a3315b3b034659af063975d"
+    },
+    "rendered-coding-0.1.35-20261019/selected/resumed/operations.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/resumed/operations.json",
+      "sha256": "8ebe068160b317e4df448b912da3fc3a959820ec6f46c2dafe4994899fa12b33"
+    },
+    "rendered-coding-0.1.35-20261019/acceptance.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/acceptance.json",
+      "sha256": "a0a6ec9cb37eed13a2497dd6fb4aebcb10cd5dbf5bec3082537494b7db5771fc"
+    },
+    "rendered-coding-0.1.35-20261019/selected/acceptance.json": {
+      "path": "C:/xMindNativeValidation/rendered-coding-0.1.35-20261019/selected/acceptance.json",
+      "sha256": "abdaca88b4b68f50f83f67c31dda2250e64f84b52a6099f4d6bcd334806f77a3"
+    },
+    "attached-guidance-renderer-baseline-20261019.log": {
+      "path": "C:/xMindNativeValidation/attached-guidance-renderer-baseline-20261019.log",
+      "sha256": "4ebdc3b7e9cea5cedc3c2e3b145deab9a990a98e3ab6a60ab0c743ea0d0dbcbc"
+    }
+  },
+  "limits": {
+    "completeCurrentNativeSuiteRun": false,
+    "actualVSCodePaneAccepted": false,
+    "correctedExtensionPackageInstalled": false,
+    "modelZooFastAPIHttpServerTested": false,
+    "modelZooClearButtonBrowserBehaviorTested": false,
+    "workerPlacementAndIPCComplete": false,
+    "releaseAccepted": false,
+    "cpythonExecuted": false
+  }
+}

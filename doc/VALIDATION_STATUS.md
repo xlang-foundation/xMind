@@ -1,5 +1,30 @@
 # Current native validation
 
+## Live attached-folder coding — 2026-10-19
+
+The staged page http://127.0.0.1:49702/ui/ now completes a saved-key Claude
+coding task against an attached Vue folder. Actual native tools modify only
+HomeView.vue and run locked npm installation plus the existing Vite production
+build: exit zero, 37 modules transformed. The primary comparison project and
+all other source files remain unchanged. Reload restores all 11 messages and
+five supplied usage records; 626 durable events are retained.
+
+Live testing exposed a shared renderer bug: valid attached-folder guidance was
+compared to the primary workspace, disabling edit review. The renderer now
+checks the captured target tuple and selected-folder guidance. The new
+regression fails on old code; all 426 extension and 147 browser tests pass
+with complete source/dependency/asset closures frozen. Only the qualified
+chat.js asset is refreshed; the same backend/run/proposal continues to
+completion without a new task submission. The initial missing-model HTTP 400
+and disabled-review failures remain recorded.
+
+The original 0.1.35 archive matches its stage but retains that renderer fault;
+it was never installed. Installed VS Code remains 0.1.34. A corrected package,
+actual VS Code pane, current full native/hosted acceptance and worker placement
+remain open. This test proves a real coding edit and build, not a complete
+FastAPI website or a separate browser check of the app's Clear filters button.
+[Live execution, regression and preserved failures](evidence/rendered-coding-0.1.35-20261019.json).
+
 ## Browser workspace membership — 2026-10-19
 
 The membership route now works across the browser proxy, native view and backend
