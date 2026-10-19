@@ -6,6 +6,10 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- Startup diagnostics now run private-cache/cache-off as original-command first cases in separate fresh hosted jobs; guarded local8/8 pass with frozen source/binary. Original6277ms/private6750ms/off6413ms. This is diagnostic scope only: no production environment, timeout or installed44 change, no hosted cause/acceptance claim. Local helper23866 closed0. Evidence doc/evidence/process-cache-controls-local-20261019.json. Await exact new hosted matrix; keep prior original failures.
+
+
+
 - Preserve installed44 page http://127.0.0.1:64581/ui/, isolated C:/xMindNativeValidation/coding-0.1.44-live-20261019/workspace/profile p-a44: host29748 born2026-10-19T19:35:03.7901050Z, view59720 born19:35:04.9863920Z, backend20740 born19:35:08.5467900Z. Sessionc0d6c4b3a90b546f8d7cda07554c06b0; completed read-only4da8ba482e863f3ccc23172f6e44e9db and reviewed editcb54813a968374f219d0c923c0989131 must never be replayed. Nativecb94e28a/SDK58a8aab/DLL1ff2a8e7/manifest e1aee2bf. All33 older owners/12 runtimes/12 pages/settings/six existing profiles preserved; backup43 verified2447 files. Actual VS Code pane/visible desktop remain unverified. No local build/test live.
 
 - Original TestProj page http://127.0.0.1:58417/ui/ stays installed43, workspace D:/CantorAI2026/TestProj/model-zoo, profile p-c43; owners66908/35116/69992 from2026-10-19T18:14. Its actual nine tests/build, one reviewed Vue fix and both service stops are complete; never replay. Prior43 coding page http://127.0.0.1:53895/ui/ owners7816/43604/44176 stays unchanged. Exact prior births/roots/results remain in doc/evidence/user-workspace-coding-0.1.43-20261019.json and doc/evidence/coding-package-0.1.43-20261019.json plus verbatim archive.

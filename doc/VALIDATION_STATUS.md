@@ -1,5 +1,23 @@
 # Current native validation
 
+## Fresh-hosted PowerShell cache controls — 2026-10-19
+
+The process-startup diagnostic now includes private-cache and cache-off as
+independent first cases on fresh hosted jobs. Both preserve the original
+unqualified graph command, six-second sleep and 30-second command deadline.
+Later original comparisons remain separately labelled warmed comparisons.
+The cache settings already existed in the throwaway native diagnostic; they
+are now exercised in the guarded local eight-case smoke and the hosted matrix.
+Production process environment, installed44 and its accepted tasks stay unchanged.
+
+All eight local diagnostic cases pass with source and diagnostic binary frozen.
+The original graph takes 6,277 ms, private-cache 6,750 ms and cache-off 6,413 ms.
+That checks the controls on this development machine; it does not establish the
+cause of the fresh hosted timeout or qualify the pending hosted native suite.
+[Exact diagnostic scope and source](evidence/process-cache-controls-local-20261019.json).
+Microsoft documents the per-process cache controls in
+[PowerShell environment variables](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-5.1#powershell-environment-variables).
+
 ## Installed preview 0.1.44 — 2026-10-19
 
 The installed preview includes the saved-journal workspace and owned callable
