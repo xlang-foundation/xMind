@@ -1,0 +1,867 @@
+TAP version 13
+# Subtest: A: api/request helper – timeout covers full round-trip
+    # Subtest: A1. delayed success body aborts after deadline (the fixed bug)
+    ok 1 - A1. delayed success body aborts after deadline (the fixed bug)
+      ---
+      duration_ms: 61.8336
+      type: 'test'
+      ...
+    # Subtest: A2. delayed headers abort after deadline
+    ok 2 - A2. delayed headers abort after deadline
+      ---
+      duration_ms: 61.5388
+      type: 'test'
+      ...
+    # Subtest: A3. normal JSON response resolves before deadline
+    ok 3 - A3. normal JSON response resolves before deadline
+      ---
+      duration_ms: 1.6809
+      type: 'test'
+      ...
+    # Subtest: A4. HTTP error with JSON detail throws ApiError(detail, status)
+    ok 4 - A4. HTTP error with JSON detail throws ApiError(detail, status)
+      ---
+      duration_ms: 0.6092
+      type: 'test'
+      ...
+    # Subtest: A5. HTTP error with non-JSON body throws generic ApiError
+    ok 5 - A5. HTTP error with non-JSON body throws generic ApiError
+      ---
+      duration_ms: 0.9522
+      type: 'test'
+      ...
+    # Subtest: A6. stalled error body aborts after deadline
+    ok 6 - A6. stalled error body aborts after deadline
+      ---
+      duration_ms: 61.0849
+      type: 'test'
+      ...
+    # Subtest: A7. timer cleared after success – no leaked handles
+    ok 7 - A7. timer cleared after success – no leaked handles
+      ---
+      duration_ms: 31.4053
+      type: 'test'
+      ...
+    # Subtest: A8. timer cleared after timeout – abort fires exactly once
+    ok 8 - A8. timer cleared after timeout – abort fires exactly once
+      ---
+      duration_ms: 98.3544
+      type: 'test'
+      ...
+    # Subtest: A9. body-delay shorter than timeout resolves successfully
+    ok 9 - A9. body-delay shorter than timeout resolves successfully
+      ---
+      duration_ms: 31.9855
+      type: 'test'
+      ...
+    1..9
+ok 1 - A: api/request helper – timeout covers full round-trip
+  ---
+  duration_ms: 352.5824
+  type: 'suite'
+  ...
+# Subtest: B: client.js production module – api methods & ApiError identity
+    # Subtest: B1. ApiError re-exported from client.js is the identical class from request.js
+    ok 1 - B1. ApiError re-exported from client.js is the identical class from request.js
+      ---
+      duration_ms: 0.987
+      type: 'test'
+      ...
+    # Subtest: B2. api.health() returns parsed JSON on 200
+    ok 2 - B2. api.health() returns parsed JSON on 200
+      ---
+      duration_ms: 0.8729
+      type: 'test'
+      ...
+    # Subtest: B3. api.listModels() forwards query params and returns parsed JSON
+    ok 3 - B3. api.listModels() forwards query params and returns parsed JSON
+      ---
+      duration_ms: 0.9517
+      type: 'test'
+      ...
+    # Subtest: B4. api.getModel() percent-encodes the model id
+    ok 4 - B4. api.getModel() percent-encodes the model id
+      ---
+      duration_ms: 2.4568
+      type: 'test'
+      ...
+    # Subtest: B5. api.getStats() returns parsed JSON on 200
+    ok 5 - B5. api.getStats() returns parsed JSON on 200
+      ---
+      duration_ms: 0.7139
+      type: 'test'
+      ...
+    # Subtest: B6. api.health() throws ClientApiError on 404 with JSON detail
+    ok 6 - B6. api.health() throws ClientApiError on 404 with JSON detail
+      ---
+      duration_ms: 0.5304
+      type: 'test'
+      ...
+    # Subtest: B7. api.getStats() throws ClientApiError on non-JSON 503
+    ok 7 - B7. api.getStats() throws ClientApiError on non-JSON 503
+      ---
+      duration_ms: 0.4606
+      type: 'test'
+      ...
+    # Subtest: B8. stalled success body times out as ClientApiError via production path
+    ok 8 - B8. stalled success body times out as ClientApiError via production path
+      ---
+      duration_ms: 54.8298
+      type: 'test'
+      ...
+    # Subtest: B9. stalled HTTP error body times out as ClientApiError via production path
+    ok 9 - B9. stalled HTTP error body times out as ClientApiError via production path
+      ---
+      duration_ms: 62.6378
+      type: 'test'
+      ...
+    # Subtest: B10. no leaked timer after successful api.getStats() call
+    ok 10 - B10. no leaked timer after successful api.getStats() call
+      ---
+      duration_ms: 31.5281
+      type: 'test'
+      ...
+    1..10
+ok 2 - B: client.js production module – api methods & ApiError identity
+  ---
+  duration_ms: 157.1211
+  type: 'suite'
+  ...
+# Subtest: formatCount R: regression – missing/blank values must not display as 0
+    # Subtest: R1. null previously produced "0"; must now produce em dash
+    ok 1 - R1. null previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.6119
+      type: 'test'
+      ...
+    # Subtest: R2. undefined previously produced "0"; must now produce em dash
+    ok 2 - R2. undefined previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.1031
+      type: 'test'
+      ...
+    # Subtest: R3. empty string previously produced "0"; must now produce em dash
+    ok 3 - R3. empty string previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.6982
+      type: 'test'
+      ...
+    # Subtest: R4. whitespace-only string previously produced "0"; must now produce em dash
+    ok 4 - R4. whitespace-only string previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.0942
+      type: 'test'
+      ...
+    # Subtest: R5. boolean false previously produced "0"; must now produce em dash
+    ok 5 - R5. boolean false previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.0673
+      type: 'test'
+      ...
+    # Subtest: R6. boolean true previously produced "1"; must now produce em dash
+    ok 6 - R6. boolean true previously produced "1"; must now produce em dash
+      ---
+      duration_ms: 0.0542
+      type: 'test'
+      ...
+    # Subtest: R7. empty array previously produced "0"; must now produce em dash
+    ok 7 - R7. empty array previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.0637
+      type: 'test'
+      ...
+    # Subtest: R8. single-element numeric array previously produced "0"; must now produce em dash
+    ok 8 - R8. single-element numeric array previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.1339
+      type: 'test'
+      ...
+    1..8
+ok 3 - formatCount R: regression – missing/blank values must not display as 0
+  ---
+  duration_ms: 2.7664
+  type: 'suite'
+  ...
+# Subtest: formatCount C: contract – missing/invalid → em dash
+    # Subtest: C1.  null → em dash
+    ok 1 - C1.  null → em dash
+      ---
+      duration_ms: 0.2351
+      type: 'test'
+      ...
+    # Subtest: C2.  undefined → em dash
+    ok 2 - C2.  undefined → em dash
+      ---
+      duration_ms: 0.1652
+      type: 'test'
+      ...
+    # Subtest: C3.  empty string → em dash
+    ok 3 - C3.  empty string → em dash
+      ---
+      duration_ms: 0.0694
+      type: 'test'
+      ...
+    # Subtest: C4.  whitespace string → em dash
+    ok 4 - C4.  whitespace string → em dash
+      ---
+      duration_ms: 0.0418
+      type: 'test'
+      ...
+    # Subtest: C5.  tab/newline string → em dash
+    ok 5 - C5.  tab/newline string → em dash
+      ---
+      duration_ms: 0.0336
+      type: 'test'
+      ...
+    # Subtest: C6.  boolean false → em dash
+    ok 6 - C6.  boolean false → em dash
+      ---
+      duration_ms: 0.0341
+      type: 'test'
+      ...
+    # Subtest: C7.  boolean true → em dash
+    ok 7 - C7.  boolean true → em dash
+      ---
+      duration_ms: 0.0319
+      type: 'test'
+      ...
+    # Subtest: C8.  plain object → em dash
+    ok 8 - C8.  plain object → em dash
+      ---
+      duration_ms: 0.0301
+      type: 'test'
+      ...
+    # Subtest: C9.  array → em dash
+    ok 9 - C9.  array → em dash
+      ---
+      duration_ms: 0.0343
+      type: 'test'
+      ...
+    # Subtest: C10. non-empty array → em dash
+    ok 10 - C10. non-empty array → em dash
+      ---
+      duration_ms: 0.0416
+      type: 'test'
+      ...
+    # Subtest: C11. NaN string → em dash
+    ok 11 - C11. NaN string → em dash
+      ---
+      duration_ms: 0.0358
+      type: 'test'
+      ...
+    # Subtest: C12. Infinity → em dash
+    ok 12 - C12. Infinity → em dash
+      ---
+      duration_ms: 0.0347
+      type: 'test'
+      ...
+    # Subtest: C13. -Infinity → em dash
+    ok 13 - C13. -Infinity → em dash
+      ---
+      duration_ms: 0.0321
+      type: 'test'
+      ...
+    # Subtest: C14. NaN number → em dash
+    ok 14 - C14. NaN number → em dash
+      ---
+      duration_ms: 0.0434
+      type: 'test'
+      ...
+    1..14
+ok 4 - formatCount C: contract – missing/invalid → em dash
+  ---
+  duration_ms: 1.0896
+  type: 'suite'
+  ...
+# Subtest: formatCount C: contract – numeric zero and valid values preserved
+    # Subtest: C15. integer 0 → "0"
+    ok 1 - C15. integer 0 → "0"
+      ---
+      duration_ms: 0.1213
+      type: 'test'
+      ...
+    # Subtest: C16. negative zero (-0) → "0"
+    ok 2 - C16. negative zero (-0) → "0"
+      ---
+      duration_ms: 0.0367
+      type: 'test'
+      ...
+    # Subtest: C17. numeric string "0" → "0"
+    ok 3 - C17. numeric string "0" → "0"
+      ---
+      duration_ms: 0.0322
+      type: 'test'
+      ...
+    # Subtest: C18. small positive int → string
+    ok 4 - C18. small positive int → string
+      ---
+      duration_ms: 0.031
+      type: 'test'
+      ...
+    # Subtest: C19. small negative int → string
+    ok 5 - C19. small negative int → string
+      ---
+      duration_ms: 0.0683
+      type: 'test'
+      ...
+    # Subtest: C20. numeric string "42" → "42"
+    ok 6 - C20. numeric string "42" → "42"
+      ---
+      duration_ms: 0.0373
+      type: 'test'
+      ...
+    # Subtest: C21. 999 → "999" (below K threshold)
+    ok 7 - C21. 999 → "999" (below K threshold)
+      ---
+      duration_ms: 0.0306
+      type: 'test'
+      ...
+    # Subtest: C22. 1000 → "1K"
+    ok 8 - C22. 1000 → "1K"
+      ---
+      duration_ms: 0.0958
+      type: 'test'
+      ...
+    # Subtest: C23. 1500 → "1.5K"
+    ok 9 - C23. 1500 → "1.5K"
+      ---
+      duration_ms: 0.076
+      type: 'test'
+      ...
+    # Subtest: C24. 12345 → "12.3K"
+    ok 10 - C24. 12345 → "12.3K"
+      ---
+      duration_ms: 0.0385
+      type: 'test'
+      ...
+    # Subtest: C25. 999999 → "1000K" (K branch: 999.999 rounds to 1000.0, trimZero → "1000K")
+    ok 11 - C25. 999999 → "1000K" (K branch: 999.999 rounds to 1000.0, trimZero → "1000K")
+      ---
+      duration_ms: 0.0347
+      type: 'test'
+      ...
+    # Subtest: C26. 1000000 → "1M"
+    ok 12 - C26. 1000000 → "1M"
+      ---
+      duration_ms: 0.0724
+      type: 'test'
+      ...
+    # Subtest: C27. 1500000 → "1.5M"
+    ok 13 - C27. 1500000 → "1.5M"
+      ---
+      duration_ms: 0.0439
+      type: 'test'
+      ...
+    # Subtest: C28. 2300000 → "2.3M"
+    ok 14 - C28. 2300000 → "2.3M"
+      ---
+      duration_ms: 0.0389
+      type: 'test'
+      ...
+    # Subtest: C29. numeric string "1000" → "1K"
+    ok 15 - C29. numeric string "1000" → "1K"
+      ---
+      duration_ms: 0.0341
+      type: 'test'
+      ...
+    # Subtest: C30. numeric string "2000000" → "2M"
+    ok 16 - C30. numeric string "2000000" → "2M"
+      ---
+      duration_ms: 0.0349
+      type: 'test'
+      ...
+    # Subtest: C31. negative -1500 → "-1.5K"
+    ok 17 - C31. negative -1500 → "-1.5K"
+      ---
+      duration_ms: 0.0357
+      type: 'test'
+      ...
+    # Subtest: C32. negative -2000000 → "-2M"
+    ok 18 - C32. negative -2000000 → "-2M"
+      ---
+      duration_ms: 0.0321
+      type: 'test'
+      ...
+    1..18
+ok 5 - formatCount C: contract – numeric zero and valid values preserved
+  ---
+  duration_ms: 1.6035
+  type: 'suite'
+  ...
+# Subtest: formatParameters R: regression – missing/blank values must not display as 0M
+    # Subtest: PR1. null previously produced "0M"; must now produce em dash
+    ok 1 - PR1. null previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.2645
+      type: 'test'
+      ...
+    # Subtest: PR2. undefined previously produced "0M"; must now produce em dash
+    ok 2 - PR2. undefined previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0486
+      type: 'test'
+      ...
+    # Subtest: PR3. empty string previously produced "0M"; must now produce em dash
+    ok 3 - PR3. empty string previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0427
+      type: 'test'
+      ...
+    # Subtest: PR4. whitespace-only string previously produced "0M"; must now produce em dash
+    ok 4 - PR4. whitespace-only string previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0426
+      type: 'test'
+      ...
+    # Subtest: PR5. boolean false previously produced "0M"; must now produce em dash
+    ok 5 - PR5. boolean false previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0337
+      type: 'test'
+      ...
+    # Subtest: PR6. boolean true previously produced "1M"; must now produce em dash
+    ok 6 - PR6. boolean true previously produced "1M"; must now produce em dash
+      ---
+      duration_ms: 0.0326
+      type: 'test'
+      ...
+    # Subtest: PR7. empty array previously produced "0M"; must now produce em dash
+    ok 7 - PR7. empty array previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0341
+      type: 'test'
+      ...
+    # Subtest: PR8. single-element numeric array previously produced "0M"; must now produce em dash
+    ok 8 - PR8. single-element numeric array previously produced "0M"; must now produce em dash
+      ---
+      duration_ms: 0.0414
+      type: 'test'
+      ...
+    1..8
+ok 6 - formatParameters R: regression – missing/blank values must not display as 0M
+  ---
+  duration_ms: 0.6453
+  type: 'suite'
+  ...
+# Subtest: formatParameters C: contract – missing/invalid → em dash
+    # Subtest: PC1.  null → em dash
+    ok 1 - PC1.  null → em dash
+      ---
+      duration_ms: 0.1083
+      type: 'test'
+      ...
+    # Subtest: PC2.  undefined → em dash
+    ok 2 - PC2.  undefined → em dash
+      ---
+      duration_ms: 0.0456
+      type: 'test'
+      ...
+    # Subtest: PC3.  empty string → em dash
+    ok 3 - PC3.  empty string → em dash
+      ---
+      duration_ms: 0.0354
+      type: 'test'
+      ...
+    # Subtest: PC4.  whitespace string → em dash
+    ok 4 - PC4.  whitespace string → em dash
+      ---
+      duration_ms: 0.0553
+      type: 'test'
+      ...
+    # Subtest: PC5.  tab/newline string → em dash
+    ok 5 - PC5.  tab/newline string → em dash
+      ---
+      duration_ms: 0.0377
+      type: 'test'
+      ...
+    # Subtest: PC6.  boolean false → em dash
+    ok 6 - PC6.  boolean false → em dash
+      ---
+      duration_ms: 0.0331
+      type: 'test'
+      ...
+    # Subtest: PC7.  boolean true → em dash
+    ok 7 - PC7.  boolean true → em dash
+      ---
+      duration_ms: 0.0345
+      type: 'test'
+      ...
+    # Subtest: PC8.  plain object → em dash
+    ok 8 - PC8.  plain object → em dash
+      ---
+      duration_ms: 0.0321
+      type: 'test'
+      ...
+    # Subtest: PC9.  array → em dash
+    ok 9 - PC9.  array → em dash
+      ---
+      duration_ms: 0.03
+      type: 'test'
+      ...
+    # Subtest: PC10. non-empty array → em dash
+    ok 10 - PC10. non-empty array → em dash
+      ---
+      duration_ms: 0.0324
+      type: 'test'
+      ...
+    # Subtest: PC11. NaN string → em dash
+    ok 11 - PC11. NaN string → em dash
+      ---
+      duration_ms: 0.0347
+      type: 'test'
+      ...
+    # Subtest: PC12. Infinity → em dash
+    ok 12 - PC12. Infinity → em dash
+      ---
+      duration_ms: 0.032
+      type: 'test'
+      ...
+    # Subtest: PC13. -Infinity → em dash
+    ok 13 - PC13. -Infinity → em dash
+      ---
+      duration_ms: 0.0332
+      type: 'test'
+      ...
+    # Subtest: PC14. NaN number → em dash
+    ok 14 - PC14. NaN number → em dash
+      ---
+      duration_ms: 0.0311
+      type: 'test'
+      ...
+    1..14
+ok 7 - formatParameters C: contract – missing/invalid → em dash
+  ---
+  duration_ms: 0.7916
+  type: 'suite'
+  ...
+# Subtest: formatParameters C: contract – numeric zero and valid values preserved
+    # Subtest: PC15. 0 → "0M" (real zero in millions must display)
+    ok 1 - PC15. 0 → "0M" (real zero in millions must display)
+      ---
+      duration_ms: 0.0912
+      type: 'test'
+      ...
+    # Subtest: PC16. -0 → "0M"
+    ok 2 - PC16. -0 → "0M"
+      ---
+      duration_ms: 0.0367
+      type: 'test'
+      ...
+    # Subtest: PC17. numeric string "0" → "0M"
+    ok 3 - PC17. numeric string "0" → "0M"
+      ---
+      duration_ms: 0.0395
+      type: 'test'
+      ...
+    # Subtest: PC18. 1 → "1M"
+    ok 4 - PC18. 1 → "1M"
+      ---
+      duration_ms: 0.0425
+      type: 'test'
+      ...
+    # Subtest: PC19. 0.5 → "0.5M" (trimZero removes trailing zero)
+    ok 5 - PC19. 0.5 → "0.5M" (trimZero removes trailing zero)
+      ---
+      duration_ms: 0.0388
+      type: 'test'
+      ...
+    # Subtest: PC20. 7.5 → "7.5M"
+    ok 6 - PC20. 7.5 → "7.5M"
+      ---
+      duration_ms: 0.0545
+      type: 'test'
+      ...
+    # Subtest: PC21. 100 → "100M"
+    ok 7 - PC21. 100 → "100M"
+      ---
+      duration_ms: 0.0355
+      type: 'test'
+      ...
+    # Subtest: PC22. 999.9 → "999.9M" (just below B threshold)
+    ok 8 - PC22. 999.9 → "999.9M" (just below B threshold)
+      ---
+      duration_ms: 0.0318
+      type: 'test'
+      ...
+    # Subtest: PC23. 1000 → "1B"
+    ok 9 - PC23. 1000 → "1B"
+      ---
+      duration_ms: 0.0393
+      type: 'test'
+      ...
+    # Subtest: PC24. 1500 → "1.50B"
+    ok 10 - PC24. 1500 → "1.50B"
+      ---
+      duration_ms: 0.031
+      type: 'test'
+      ...
+    # Subtest: PC25. 1234.56 → "1.23B"
+    ok 11 - PC25. 1234.56 → "1.23B"
+      ---
+      duration_ms: 0.0306
+      type: 'test'
+      ...
+    # Subtest: PC26. 7000 → "7B"
+    ok 12 - PC26. 7000 → "7B"
+      ---
+      duration_ms: 0.0407
+      type: 'test'
+      ...
+    # Subtest: PC27. numeric string "70" → "70M"
+    ok 13 - PC27. numeric string "70" → "70M"
+      ---
+      duration_ms: 0.0402
+      type: 'test'
+      ...
+    # Subtest: PC28. numeric string "2000" → "2B"
+    ok 14 - PC28. numeric string "2000" → "2B"
+      ---
+      duration_ms: 0.033
+      type: 'test'
+      ...
+    1..14
+ok 8 - formatParameters C: contract – numeric zero and valid values preserved
+  ---
+  duration_ms: 0.7391
+  type: 'suite'
+  ...
+# Subtest: R: regression – missing/blank values must not display as 0
+    # Subtest: R1. null previously produced "0"; must now produce em dash
+    ok 1 - R1. null previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.6634
+      type: 'test'
+      ...
+    # Subtest: R2. empty string previously produced "0"; must now produce em dash
+    ok 2 - R2. empty string previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.105
+      type: 'test'
+      ...
+    # Subtest: R3. whitespace-only string previously produced "0"; must now produce em dash
+    ok 3 - R3. whitespace-only string previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.0757
+      type: 'test'
+      ...
+    # Subtest: R4. boolean false previously produced "0"; must now produce em dash
+    ok 4 - R4. boolean false previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.1618
+      type: 'test'
+      ...
+    # Subtest: R5. boolean true previously produced "1"; must now produce em dash
+    ok 5 - R5. boolean true previously produced "1"; must now produce em dash
+      ---
+      duration_ms: 0.0816
+      type: 'test'
+      ...
+    # Subtest: R6. empty array previously produced "0"; must now produce em dash
+    ok 6 - R6. empty array previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.0607
+      type: 'test'
+      ...
+    # Subtest: R7. single-element numeric array previously produced "0"; must now produce em dash
+    ok 7 - R7. single-element numeric array previously produced "0"; must now produce em dash
+      ---
+      duration_ms: 0.1015
+      type: 'test'
+      ...
+    1..7
+ok 9 - R: regression – missing/blank values must not display as 0
+  ---
+  duration_ms: 2.0425
+  type: 'suite'
+  ...
+# Subtest: C: contract – missing/invalid values → em dash
+    # Subtest: C1. null → em dash
+    ok 1 - C1. null → em dash
+      ---
+      duration_ms: 0.1999
+      type: 'test'
+      ...
+    # Subtest: C2. undefined → em dash
+    ok 2 - C2. undefined → em dash
+      ---
+      duration_ms: 0.1579
+      type: 'test'
+      ...
+    # Subtest: C3. empty string → em dash
+    ok 3 - C3. empty string → em dash
+      ---
+      duration_ms: 0.1914
+      type: 'test'
+      ...
+    # Subtest: C4. whitespace string → em dash
+    ok 4 - C4. whitespace string → em dash
+      ---
+      duration_ms: 0.0648
+      type: 'test'
+      ...
+    # Subtest: C5. tab/newline string → em dash
+    ok 5 - C5. tab/newline string → em dash
+      ---
+      duration_ms: 0.6282
+      type: 'test'
+      ...
+    # Subtest: C6. boolean false → em dash
+    ok 6 - C6. boolean false → em dash
+      ---
+      duration_ms: 0.0639
+      type: 'test'
+      ...
+    # Subtest: C7. boolean true → em dash
+    ok 7 - C7. boolean true → em dash
+      ---
+      duration_ms: 0.0394
+      type: 'test'
+      ...
+    # Subtest: C8. plain object → em dash
+    ok 8 - C8. plain object → em dash
+      ---
+      duration_ms: 0.034
+      type: 'test'
+      ...
+    # Subtest: C9. array → em dash
+    ok 9 - C9. array → em dash
+      ---
+      duration_ms: 0.0308
+      type: 'test'
+      ...
+    # Subtest: C10. non-empty array → em dash
+    ok 10 - C10. non-empty array → em dash
+      ---
+      duration_ms: 0.0342
+      type: 'test'
+      ...
+    # Subtest: C11. NaN string → em dash
+    ok 11 - C11. NaN string → em dash
+      ---
+      duration_ms: 0.0345
+      type: 'test'
+      ...
+    # Subtest: C12. Infinity → em dash
+    ok 12 - C12. Infinity → em dash
+      ---
+      duration_ms: 0.0321
+      type: 'test'
+      ...
+    # Subtest: C13. -Infinity → em dash
+    ok 13 - C13. -Infinity → em dash
+      ---
+      duration_ms: 0.0326
+      type: 'test'
+      ...
+    # Subtest: C14. NaN number → em dash
+    ok 14 - C14. NaN number → em dash
+      ---
+      duration_ms: 0.031
+      type: 'test'
+      ...
+    1..14
+ok 10 - C: contract – missing/invalid values → em dash
+  ---
+  duration_ms: 1.9163
+  type: 'suite'
+  ...
+# Subtest: C: contract – real zero and valid numeric values preserved
+    # Subtest: C15. integer 0 → "0"
+    ok 1 - C15. integer 0 → "0"
+      ---
+      duration_ms: 0.0993
+      type: 'test'
+      ...
+    # Subtest: C16. negative zero (-0) → "0"
+    ok 2 - C16. negative zero (-0) → "0"
+      ---
+      duration_ms: 0.0369
+      type: 'test'
+      ...
+    # Subtest: C17. positive integer → string integer
+    ok 3 - C17. positive integer → string integer
+      ---
+      duration_ms: 0.0354
+      type: 'test'
+      ...
+    # Subtest: C18. negative integer → string integer
+    ok 4 - C18. negative integer → string integer
+      ---
+      duration_ms: 0.0306
+      type: 'test'
+      ...
+    # Subtest: C19. float → two decimal places
+    ok 5 - C19. float → two decimal places
+      ---
+      duration_ms: 0.0369
+      type: 'test'
+      ...
+    # Subtest: C20. float → two decimal places (small)
+    ok 6 - C20. float → two decimal places (small)
+      ---
+      duration_ms: 0.0317
+      type: 'test'
+      ...
+    # Subtest: C21. negative float → two decimal places
+    ok 7 - C21. negative float → two decimal places
+      ---
+      duration_ms: 0.0395
+      type: 'test'
+      ...
+    # Subtest: C22. numeric string integer "0" → "0"
+    ok 8 - C22. numeric string integer "0" → "0"
+      ---
+      duration_ms: 0.0381
+      type: 'test'
+      ...
+    # Subtest: C23. numeric string "42" → "42"
+    ok 9 - C23. numeric string "42" → "42"
+      ---
+      duration_ms: 0.0845
+      type: 'test'
+      ...
+    # Subtest: C24. numeric string float "3.14159" → "3.14"
+    ok 10 - C24. numeric string float "3.14159" → "3.14"
+      ---
+      duration_ms: 0.0455
+      type: 'test'
+      ...
+    # Subtest: C25. numeric string "-5" → "-5"
+    ok 11 - C25. numeric string "-5" → "-5"
+      ---
+      duration_ms: 0.0457
+      type: 'test'
+      ...
+    # Subtest: C26. numeric string "0.5" → "0.50"
+    ok 12 - C26. numeric string "0.5" → "0.50"
+      ---
+      duration_ms: 0.0401
+      type: 'test'
+      ...
+    # Subtest: C27. large integer 1000000 → "1000000"
+    ok 13 - C27. large integer 1000000 → "1000000"
+      ---
+      duration_ms: 0.0335
+      type: 'test'
+      ...
+    # Subtest: C28. integer stored as float 2.0 → "2"
+    ok 14 - C28. integer stored as float 2.0 → "2"
+      ---
+      duration_ms: 0.0327
+      type: 'test'
+      ...
+    1..14
+ok 11 - C: contract – real zero and valid numeric values preserved
+  ---
+  duration_ms: 0.7893
+  type: 'suite'
+  ...
+1..11
+# tests 130
+# suites 11
+# pass 130
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 576.3959

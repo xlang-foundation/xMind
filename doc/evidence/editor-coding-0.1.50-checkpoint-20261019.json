@@ -1,0 +1,226 @@
+{
+  "recordedAt": "2026-10-19T23:49:52.555Z",
+  "installedClientVersion": "0.1.50",
+  "installedClientSource": "1fab4df16a450743ef6979bdc2998a1538c33449",
+  "nativeSource": "d30c6025b987f93a8701e5289e87f05f4e7d9d3f",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "verification": {
+    "recordedAt": "2026-10-19T23:46:24.881Z",
+    "session": "a38351014051ec1600ab354c4b781ab3",
+    "root": "914c83b139d6b7b11bf5c5e7b220c219",
+    "followup": "cbedb9c76ed45ba544039920c983729e",
+    "precisionCorrection": "8f87d7605b6ed084c9161d07646ebdcb",
+    "uiSubmitted": true,
+    "uiFileApprovals": true,
+    "runState": "completed",
+    "fileOperations": [
+      {
+        "id": "43b65693b673eae401254d9239efbf0d",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/utils/format.js"
+      },
+      {
+        "id": "aa2f2df4c3c39def239e9a8c6dbad1c4",
+        "tool": "create_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/tests/count-format.test.mjs"
+      },
+      {
+        "id": "d77ee8433c3b3809775166bdbd98bb4e",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/tests/count-format.test.mjs"
+      },
+      {
+        "id": "4ea8317f109d13f0c5cf879b3d38a41c",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/tests/count-format.test.mjs"
+      }
+    ],
+    "controllerTests": {
+      "pid": 54820,
+      "startedAt": "2026-10-19T23:46:22.948Z",
+      "completedAt": "2026-10-19T23:46:23.600Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "353274107b96910b80ad6e0dbec371c77dc3b86d4a62508b94f77129d93a377b",
+      "tests": 130,
+      "passed": 130,
+      "failed": 0
+    },
+    "controllerBuild": {
+      "pid": 59352,
+      "startedAt": "2026-10-19T23:46:23.600Z",
+      "completedAt": "2026-10-19T23:46:24.653Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "152da468047573136d7f5b91441fd24689d6da605e2f20127a410255a979651b",
+      "tests": null,
+      "passed": null,
+      "failed": 0
+    },
+    "projectSourceAndDependencyFilesUnchangedDuringVerification": 823,
+    "otherProtectedFilesUnchanged": true,
+    "untargetedFormatterFunctionsUnchanged": true,
+    "installedVersion": "0.1.50",
+    "noAgentProcessCommands": true,
+    "queuedFollowupAutomaticallySelected": false,
+    "manualRunSelectionRequired": true,
+    "whitespaceCorrectionPremiseWasWrong": true,
+    "whitespaceLiteralsAlreadyRuntimeTabAndNewline": true,
+    "cpythonExecuted": false,
+    "renderedBrowserAcceptance": false,
+    "fullUiCommandExecutionAcceptance": false
+  },
+  "preservation": {
+    "recordedAt": "2026-10-19T23:49:04.706Z",
+    "priorOwnersPreserved": 41,
+    "priorPagesPreserved": 15,
+    "currentWebAssetsVerified": 13,
+    "isolatedBackend": {
+      "pid": 13676,
+      "birth": "2026-10-19T23:38:18.9267970Z",
+      "image": "C:\\xMindNativeValidation\\editor-coding-0.1.50-20261019\\native-profile\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-c34dd75f3376033363e1a37e6022339b9039b8f22878eaa7a0c5612787e9fd31\\xmind.exe"
+    },
+    "totalTrackedLiveOwners": 42,
+    "priorSessionsUnchanged": 4,
+    "priorRunsUnchanged": 9,
+    "projectChange": "Only the requested formatter and new count-format test; six protected existing files unchanged",
+    "runtimeDirectoryTransitions": [
+      {
+        "version": "0.1.48",
+        "installedDirectoryNowAbsent": true,
+        "observedAfterEditorStartup": true,
+        "manuallyDeleted": false,
+        "preservedBackup": "C:/xMindNativeValidation/preserved-vscode-0.1.48-before-0.1.49",
+        "archivePayloadsVerified": 2445,
+        "nativeManifest": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97"
+      },
+      {
+        "version": "0.1.49",
+        "installedDirectoryNowAbsent": true,
+        "observedAfterEditorStartup": true,
+        "manuallyDeleted": false,
+        "preservedBackup": "C:/xMindNativeValidation/preserved-vscode-0.1.49-before-0.1.50",
+        "archivePayloadsVerified": 2445,
+        "nativeManifest": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97"
+      }
+    ],
+    "previousAllDirectoryStatesVerifierFailed": true,
+    "settingsRestored": {
+      "recordedAt": "2026-10-19T23:47:35.426Z",
+      "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+      "restoredExactly": true,
+      "editorWindowsRemaining": 0
+    }
+  },
+  "initialVerificationFailure": {
+    "recordedAt": "2026-10-19T23:45:49.509Z",
+    "tests": 130,
+    "passed": 129,
+    "failed": 1,
+    "logSha256": "1d8fb0c40903cdd06a08136900e056f3454d9f17079e174e84a1ade9971e937f",
+    "testSourceSha256": "ec829ee7219b346024631cb2a26e5128c344e70ecf9fce7d3be1f8f68f996d3c",
+    "inputHashesUnchanged": 823,
+    "buildRun": false,
+    "reason": "Generated PC24 expectation 1.5B disagrees with preserved production precision 1.50B",
+    "operatorWhitespacePremiseWrong": true,
+    "retryPerformed": false
+  },
+  "sessionMessageCount": 42,
+  "projectFiles": {
+    "src/utils/format.js": "4569ea048656d0120507836dce8fe42391c18a7790555a06013ee2a36ddb08a1",
+    "tests/count-format.test.mjs": "64d838d5c9efd04a9538bf5dbf4cdc05ab15fdfd0edc2fb09364085075fab520"
+  },
+  "actualEditor": {
+    "oneWindow": true,
+    "uiAdmittedRoot": "914c83b139d6b7b11bf5c5e7b220c219",
+    "uiQueuedFollowup": "cbedb9c76ed45ba544039920c983729e",
+    "uiAdmittedVerificationCorrection": "8f87d7605b6ed084c9161d07646ebdcb",
+    "fileApprovals": 4,
+    "savedProvidersAvailable": 4,
+    "claudeModelsDiscovered": 13,
+    "keyEntryRequired": false,
+    "automaticTranscriptAndMetricUpdates": true,
+    "reloadedWithoutReplay": true,
+    "selectedRunRestored": "8f87d7605b6ed084c9161d07646ebdcb",
+    "selectedRunVerifiedFromScreenshot": true,
+    "retainedAccessibilityTreeOmitsSelectorValue": true,
+    "initialCheckpointWriterWronglyExpectedSelectorValueInTree": true,
+    "lastDisplayedMetrics": {
+      "uncachedInput": 30545,
+      "output": 220,
+      "total": null,
+      "cacheWrite": 0,
+      "cacheRead": 0,
+      "firstTokenSeconds": 1.73,
+      "responseSeconds": 7.1
+    },
+    "layoutRestored": true,
+    "closed": true
+  },
+  "confirmedProductGap": {
+    "feature": "Automatic selection of a backend-claimed queued turn",
+    "queuedBackendRun": "cbedb9c76ed45ba544039920c983729e",
+    "sidebarSelected": "914c83b139d6b7b11bf5c5e7b220c219",
+    "firstRunWasCompleted": true,
+    "secondRunWasRunning": true,
+    "manuallySelectedToContinue": true,
+    "sourceFixPending": true,
+    "sourceLocations": [
+      "extensions/vscode/extension.js scheduleInboxObservation/refreshInbox/poll",
+      "views/browser/browser.js scheduleInboxObservation/refreshInbox"
+    ]
+  },
+  "scope": {
+    "actualLiveProviderAndNativeXlang3Sqlite": true,
+    "uiFileCodingVerified": true,
+    "commandVerificationPerformedByController": true,
+    "uiAgentProcessExecution": false,
+    "renderedExternalBrowser": false,
+    "fullCodingMilestoneComplete": false,
+    "cpythonExecuted": false
+  },
+  "artifacts": {
+    "editor-coding-0.1.50-restored-20261019.png": {
+      "bytes": 82964,
+      "sha256": "894a0b51af0eb12bbb2101660d092e67a3a095050d547440e78d2ec967db1a4e"
+    },
+    "editor-coding-0.1.50-queued-selection-failure-20261019.png": {
+      "bytes": 91811,
+      "sha256": "6e0802b6f7ac1194c624bfb5ddc6692a717d4e926797e2d81979f303769d9c78"
+    },
+    "editor-coding-0.1.50-tests-failed-20261019.log": {
+      "bytes": 26313,
+      "sha256": "1d8fb0c40903cdd06a08136900e056f3454d9f17079e174e84a1ade9971e937f"
+    },
+    "editor-coding-0.1.50-tests-final-20261019.log": {
+      "bytes": 25220,
+      "sha256": "353274107b96910b80ad6e0dbec371c77dc3b86d4a62508b94f77129d93a377b"
+    },
+    "editor-coding-0.1.50-build-final-20261019.log": {
+      "bytes": 500,
+      "sha256": "152da468047573136d7f5b91441fd24689d6da605e2f20127a410255a979651b"
+    }
+  },
+  "previousLogBytePreservationCorrection": {
+    "initialIndexHashVerifierFailed": true,
+    "reason": "Git newline normalization changed previously recorded Unicode regression log bytes; restore retained originals and mark raw logs -text",
+    "corrections": [
+      {
+        "file": "unicode-process-reconciliation-baseline-20261019.log",
+        "normalizedIndexSha256": "9014ce9f470f9c3b76a1dcdc36aa3f38612ff8338d23193b0ba236eebba49994",
+        "restoredRawSha256": "7e5c0326027107f01522d02855008325e605325e02e89db3528f335ca8bc6b57",
+        "contentEquivalentApartFromLineEndings": true
+      },
+      {
+        "file": "unicode-process-reconciliation-focused-20261019.log",
+        "normalizedIndexSha256": "ac0ac21e11f74b372f1cdd84bb07af65cdab4001650be6e62f6bab915d2248c4",
+        "restoredRawSha256": "f3dff6b14c813df39da6bc94c6c09fedffff5bbe0d0710eb28d17f18456e4b39",
+        "contentEquivalentApartFromLineEndings": true
+      }
+    ]
+  }
+}

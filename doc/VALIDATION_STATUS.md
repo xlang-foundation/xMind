@@ -2,6 +2,45 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Actual installed editor coding and queued-turn defect — 2026-10-19
+
+One installed 0.1.50 VS Code window submits a real Model Zoo task, uses its
+saved Claude profile, and approves four native file effects through the sidebar.
+Missing download/parameter values now display an em dash while valid numeric
+formatting is preserved. A new test file covers both helpers. Three UI-admitted
+turns complete in one isolated profile; no previous TestProj owner is replaced.
+The final 130/130 frontend tests and production build pass through separate
+controller execution, with 823 project/dependency files unchanged during that
+verification. The agent uses no process command in this UI check.
+
+The first test execution fails 129/130 because a generated expectation drops
+the existing trailing zero in `1.50B`. The failed output is retained; a further
+UI turn corrects only that expectation. An earlier operator assertion that two
+whitespace literals were wrong is itself incorrect: byte inspection confirms
+they already produce tab/newline characters. The agent leaves them intact.
+
+This check exposes a product defect: the queued correction starts in the native
+backend while the sidebar keeps the completed first run selected. Selecting
+the active run manually exposes its approval. Automatic queued-run selection
+is therefore **not accepted**. The inbox observer's session-wide busy and
+already-known-run checks are the next source fix in both clients.
+
+Reload restores the final selected run, model, transcript and displayed metrics
+without replay (30,545 uncached input, 220 output, 1.73s first token, 7.10s
+response; total remains unavailable). The window and sidebar layout are restored,
+the test window is closed, and user settings are byte-identical. All 41 previous
+owners, 15 pages, 13 current webpage assets and prior histories remain intact.
+The additional isolated backend remains available. Extension directories48/49
+are now absent after editor startup; their retained backups each verify 2,445
+archive payloads. The old all-directory-states assertion fails and is replaced
+by an explicit directory-transition/backup check, not an unchanged-state claim.
+
+This proves installed UI file coding with separately executed tests/build.
+Agent process execution through the UI and rendered external-browser coding
+remain open. [Exact checkpoint](evidence/editor-coding-0.1.50-checkpoint-20261019.json),
+[restored editor](evidence/editor-coding-0.1.50-restored-20261019.png),
+[queued-selection failure](evidence/editor-coding-0.1.50-queued-selection-failure-20261019.png).
+
 ## Shared UI audit-note validation — 2026-10-19
 
 The browser and VS Code source now count process-reconciliation notes in UTF-8
