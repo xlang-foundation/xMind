@@ -1,5 +1,23 @@
 # Current native validation
 
+## Actual installed VS Code pane — 2026-10-19
+
+One normal installed 0.1.44 window opens TestProj and connects its backend to
+`D:\CantorAI2026\TestProj`. Its right sidebar lists all four saved provider
+profiles without key entry. Selecting Claude discovers 13 models; selecting
+claude-sonnet-4-6 and submitting one no-tools test returns the exact expected
+response. Actual displayed metrics are 8,186 uncached input tokens, 18 output
+tokens, zero cache writes/reads, 2.44s first token and 2.57s response time. Total
+tokens are unavailable and remain a dash. Reload restores the same completed
+root, selected model and metrics without replay.
+
+The test window is closed; its native backend/history remain available. User
+settings are hash-identical. The first mismatched screen capture was recovered
+by refreshing and activating the uniquely returned Code window before input.
+This qualifies the installed pane, model selection, inference and reload; it
+does not yet qualify editor file-write/process actions. Candidate5dc remains
+uninstalled. [Exact observed scope and screenshot](evidence/vscode-installed-0.1.44-20261019.json).
+
 ## Trusted process module-path policy — 2026-10-19
 
 A new optional `powershell_module_paths` field makes module search order an
@@ -19,8 +37,11 @@ and 30-second budget are retained; it succeeds in 6,338 ms, writes in the actual
 admitted workspace and records process-tree retirement. Config/modules stay
 unchanged; only that identity-bound idle test server is stopped.
 
-Candidate native5dc5bc6c is uninstalled. Complete candidate-suite, actual client
-and installed acceptance remain pending. This opt-in policy does not resolve or
+Candidate native5dc5bc6c passes the complete local 154-contract suite in
+1,028.90 seconds. All checked source, SDK, pure libraries, dependencies and
+129 native binaries retain identical file sets and hashes.
+[Full terminal result and scope](evidence/process-module-profile-full-native-20261019.json).
+The candidate is uninstalled; actual client and installed acceptance remain pending. This opt-in policy does not resolve or
 qualify the unconfigured cold PowerShell failure. Installed44/pages/config stay
 unchanged. [Exact baseline, focus and actual HTTP graph](evidence/process-module-profile-20261019.json).
 Configuration details are in [native process tools](native-process-tools.md).

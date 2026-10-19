@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-19T20:36:16.715Z",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "installedExtension": "0.1.44",
+  "provider": "claude",
+  "model": "claude-sonnet-4-6",
+  "root": "1f63da48dbe3c054ed8985709da26880",
+  "prompt": "Reply exactly XMIND_VSCODE_READY_20261019. Do not call tools or inspect files.",
+  "response": "XMIND_VSCODE_READY_20261019",
+  "state": "completed",
+  "inputUncached": 8186,
+  "output": 18,
+  "cacheWrite": 0,
+  "cacheRead": 0,
+  "total": null,
+  "firstTokenSeconds": 2.44,
+  "responseSeconds": 2.57,
+  "discoveredAnthropicModels": 13,
+  "savedProviderLabels": [
+    "Claude",
+    "Gemini",
+    "DeepSeek",
+    "OpenAI"
+  ],
+  "reloadRequestedAt": "2026-10-19T20:35:48.543Z",
+  "reloadObservedAt": "2026-10-19T20:36:16.715Z",
+  "reloadedSameRootAndModelAndMetrics": true,
+  "taskResubmitted": false,
+  "scope": "Actual installed VS Code pane, saved provider discovery, no-tools inference, response metrics and reload. This does not prove editor write/process tools.",
+  "screenRecovery": "First capture mismatched target; fresh returned target and activation recovered before app input.",
+  "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+  "backendIdentity": {
+    "ProcessId": 62800,
+    "birthUtc": "2026-10-19T20:33:38.5919070Z",
+    "ExecutablePath": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-6ebd2676c8578436a6424b89c4a9a98bcd3b9bfe7d2da72331c8d651acc07d6f\\xmind.exe"
+  },
+  "backendPreservedAfterWindowClose": true,
+  "userSettingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+  "userSettingsUnchanged": true,
+  "onlyOneCodeWindowOpened": true,
+  "finalCodeWindowInventory": [],
+  "providerKeysEntered": false,
+  "privateYamlChanged": false,
+  "cpythonExecuted": false,
+  "candidate5dcInstalled": false,
+  "editorFileWritesProven": false,
+  "processToolsProven": false,
+  "screenshot": {
+    "path": "vscode-installed-0.1.44-20261019.jpg",
+    "sha256": "27a521873c449a9f1502115bf46fa745f6f24f94f6c798d44eeb5f9003fc32fa"
+  },
+  "localTreeSha256": {
+    "before": "b1cc800497efc77e000a014de9e9f3d210fa3d6c46146b5146ed4eed6c73669a",
+    "after": "fce1e6f7ecfcbc0110cc5d59e97811b30d2f07c6e9a102cf8a93d297d1a16c9b"
+  },
+  "scopePassed": true
+}
