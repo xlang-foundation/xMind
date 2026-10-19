@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Actual TestProj through the installed coding UI — 2026-10-19
+
+Installed 0.1.43 works directly against the existing TestProj ModelZoo folder:
+nine xlang3 backend tests, production Vue build and persistent development
+services complete through the browser's coding agent. A real detail-page browser
+error is retained, then repaired through one reviewed native edit. A second build
+and rendered smoke pass; all other checked source/dependency bytes stay unchanged.
+The agent stops both original process trees through its stop tool. CLI and browser
+share the exact 37-message, 14-usage-record conversation; reload takes 1,452 ms.
+The earlier working page remains intact. This differs from the earlier isolated
+32-test fixture and does not establish actual VS Code pane acceptance.
+[Exact scope and original failure](evidence/user-workspace-coding-0.1.43-20261019.json).
+
 ## Shared renderer installed in 0.1.41 — 2026-10-19
 
 The immediate selected-run status fix is installed and matches the webpage.

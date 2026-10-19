@@ -1,0 +1,481 @@
+{
+  "recordedAt": "2026-10-19T18:25:36.542Z",
+  "version": "0.1.43",
+  "clientSource": "7bb54aca2e5eb8941e37ebbe8157d9843af4334b",
+  "nativeSource": "b889df2b44fee31dd6e853c3683276aa01fcf5b2",
+  "nativeSha256": "621413b4c4c32a71a0221514cbeb7f37e8f01bb226a2ac2054259dff4e5d6fec",
+  "workspace": "D:/CantorAI2026/TestProj/model-zoo",
+  "url": "http://127.0.0.1:58417/ui/",
+  "session": "a25609cc1ed45a6889aaa20ac98de331",
+  "roots": {
+    "validation": "7c73dc8bab7779e73b3d6dd845dfeed8",
+    "fix": "344012617e4eadeb54dbbe996d248e82",
+    "stop": "3133b307fb31c80203807ad51dd16101"
+  },
+  "taskSubmissions": {
+    "validation": 1,
+    "fix": 1,
+    "stop": 1
+  },
+  "backendTests": {
+    "profile": "xlang3",
+    "passed": 9,
+    "result": {
+      "elapsed_ms": 9447,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "70c6f1399f6f5659e16fa8337dca94ad",
+      "operation_id": "70c6f1399f6f5659e16fa8337dca94ad",
+      "output_artifact": {
+        "operation_id": "70c6f1399f6f5659e16fa8337dca94ad",
+        "state": "complete",
+        "stderr_bytes": 0,
+        "stdout_bytes": 600
+      },
+      "pid": 68372,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "stdout": {
+        "byte_count": 600,
+        "data": ".........                                                                [100%]\r\n============================== warnings summary ===============================\r\n.xlang3-site\\starlette\\testclient.py:51\r\n  D:\\CantorAI2026\\TestProj\\model-zoo\\backend\\.xlang3-site\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\r\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\r\n\r\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\r\n9 passed, 1 warning in 3.26s\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 600
+      },
+      "termination": "exited",
+      "truncated": false
+    }
+  },
+  "frontendBuilds": [
+    {
+      "id": "eada345ff9aa34ef2f01ee93eb3d2d34",
+      "result": {
+        "elapsed_ms": 1950,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "eada345ff9aa34ef2f01ee93eb3d2d34",
+        "operation_id": "eada345ff9aa34ef2f01ee93eb3d2d34",
+        "output_artifact": {
+          "operation_id": "eada345ff9aa34ef2f01ee93eb3d2d34",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 838
+        },
+        "pid": 9096,
+        "process_tree_retired": true,
+        "profile_id": "powershell",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 838,
+          "data": "\n> model-zoo-frontend@0.1.0 build\n> vite build\n\n\u001b[36mvite v6.4.4 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 37 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                           \u001b[39m\u001b[1m\u001b[2m  1.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/ModelDetailView-Dz_7Q5cw.css  \u001b[39m\u001b[1m\u001b[2m  5.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  1.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-DmQUleAu.css            \u001b[39m\u001b[1m\u001b[2m 50.11 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  9.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ModelDetailView-U95YJZn9.js   \u001b[39m\u001b[1m\u001b[2m  9.98 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  3.79 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-BQ8xKNSv.js             \u001b[39m\u001b[1m\u001b[2m126.19 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 47.07 kB\u001b[22m\n\u001b[32m✓ built in 721ms\u001b[39m\n",
+          "encoding": "utf-8",
+          "retained_bytes": 838
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    {
+      "id": "436f61898d7ff9d2424fd0e2f15c9d87",
+      "result": {
+        "elapsed_ms": 1582,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "436f61898d7ff9d2424fd0e2f15c9d87",
+        "operation_id": "436f61898d7ff9d2424fd0e2f15c9d87",
+        "output_artifact": {
+          "operation_id": "436f61898d7ff9d2424fd0e2f15c9d87",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 838
+        },
+        "pid": 19832,
+        "process_tree_retired": true,
+        "profile_id": "powershell",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 838,
+          "data": "\n> model-zoo-frontend@0.1.0 build\n> vite build\n\n\u001b[36mvite v6.4.4 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 37 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                           \u001b[39m\u001b[1m\u001b[2m  1.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/ModelDetailView-B_TYO142.css  \u001b[39m\u001b[1m\u001b[2m  5.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  1.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-DmQUleAu.css            \u001b[39m\u001b[1m\u001b[2m 50.11 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  9.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ModelDetailView-B0GggQhy.js   \u001b[39m\u001b[1m\u001b[2m 10.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  3.82 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-CkVMLvOC.js             \u001b[39m\u001b[1m\u001b[2m126.19 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 47.07 kB\u001b[22m\n\u001b[32m✓ built in 724ms\u001b[39m\n",
+          "encoding": "utf-8",
+          "retained_bytes": 838
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    }
+  ],
+  "readOnlyPhase": {
+    "recordedAt": "2026-10-19T18:19:37.510Z",
+    "checks": [
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo",
+        "files": 34,
+        "setsAndHashesUnchanged": true
+      },
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo/backend/.xlang3-site",
+        "files": 1004,
+        "setsAndHashesUnchanged": true
+      },
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo/frontend/node_modules",
+        "files": 792,
+        "setsAndHashesUnchanged": true
+      }
+    ],
+    "passed": true
+  },
+  "initialSiteFailure": {
+    "startedAt": "2026-10-19T18:18:34.869Z",
+    "scope": "Existing user TestProj app rendered smoke: API/proxy, catalog, seed disclosure and detail navigation. This is separate from the earlier isolated 32-test fixture and its expanded API contract.",
+    "errors": [
+      "Failed to construct 'IntersectionObserver': rootMargin must be specified in absolute length units or percent."
+    ],
+    "failedRequests": [],
+    "sourceEdits": 0,
+    "health": {
+      "status": "ok",
+      "app": "Model Zoo API",
+      "version": "0.1.0"
+    },
+    "catalogTotal": 12,
+    "pageItems": 9,
+    "apiDemoFlagPresent": true,
+    "findings": [],
+    "visibleSeedDisclosure": true,
+    "detailNavigationVerified": true,
+    "passed": false,
+    "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   \"Failed to construct 'IntersectionObserver': rootMargin must be specified in absolute length units or percent.\"\n+ ]\n- []\n",
+    "completedAt": "2026-10-19T18:18:36.798Z"
+  },
+  "reviewedFix": {
+    "startedAt": "2026-10-19T18:20:23.962Z",
+    "session": "a25609cc1ed45a6889aaa20ac98de331",
+    "url": "http://127.0.0.1:58417/ui/",
+    "taskSubmissions": 1,
+    "approvals": 1,
+    "errors": [],
+    "prompt": "A real browser check of this app found this exact detail-page error: Failed to construct IntersectionObserver: rootMargin must be specified in absolute length units or percent. In frontend/src/views/ModelDetailView.vue the rootMargin uses the raw --topbar-h custom property, which can be rem. Fix only that component through a native reviewed file edit. Derive a valid finite pixel height from the actual topbar DOM measurement or its computed pixel height, with a sensible fallback; preserve the existing section-observer and navigation behavior. Inspect the app/header markup if needed. Do not change other source files, install dependencies, restart or stop the two existing services. After approval, run the frontend production build through the registered powershell profile and forward its actual exit code. Report the actual change and build result; do not claim browser verification.",
+    "run": "344012617e4eadeb54dbbe996d248e82",
+    "state": "completed",
+    "proposal": {
+      "id": "1d81bdf7d10d8a914b2bdbf6f2c86a53",
+      "tool": "replace_file",
+      "afterSha256": "01a16d44d2b0b0d1795d46a4e76bffea90419939af03c39c3878263f6ef9a0cd"
+    },
+    "historyMessages": 32,
+    "usageRecords": 12,
+    "passed": true,
+    "completedAt": "2026-10-19T18:21:26.267Z"
+  },
+  "afterFixSite": {
+    "startedAt": "2026-10-19T18:21:34.464Z",
+    "scope": "After one native reviewed component edit, existing user TestProj app rendered smoke: API/proxy, catalog, seed disclosure and detail navigation. This is separate from the earlier isolated 32-test fixture and its expanded API contract.",
+    "errors": [],
+    "failedRequests": [],
+    "sourceEditsByThisCheck": 0,
+    "nativeReviewedEditsBeforeCheck": 1,
+    "health": {
+      "status": "ok",
+      "app": "Model Zoo API",
+      "version": "0.1.0"
+    },
+    "catalogTotal": 12,
+    "pageItems": 9,
+    "apiDemoFlagPresent": true,
+    "findings": [],
+    "visibleSeedDisclosure": true,
+    "detailNavigationVerified": true,
+    "passed": true,
+    "completedAt": "2026-10-19T18:21:36.406Z"
+  },
+  "shutdown": {
+    "startedAt": "2026-10-19T18:21:42.694Z",
+    "scope": "One explicit follow-up through the real xMind UI to stop only the two test services; no OS-level process retirement or replay of the completed coding task",
+    "originalRun": "7c73dc8bab7779e73b3d6dd845dfeed8",
+    "session": "a25609cc1ed45a6889aaa20ac98de331",
+    "followUpSubmissions": 1,
+    "errors": [],
+    "services": [
+      {
+        "id": "8d6473650d0a78420984c6094c7760f8",
+        "profile": "xlang3"
+      },
+      {
+        "id": "f7f452aa617dd67920d20357d0c96533",
+        "profile": "powershell"
+      }
+    ],
+    "run": "3133b307fb31c80203807ad51dd16101",
+    "status": {
+      "graph_root": false,
+      "id": "3133b307fb31c80203807ad51dd16101",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "a25609cc1ed45a6889aaa20ac98de331",
+      "state": "completed"
+    },
+    "stopped": [
+      {
+        "id": "8d6473650d0a78420984c6094c7760f8",
+        "state": "succeeded",
+        "result": {
+          "elapsed_ms": 298948,
+          "exit_code": 1,
+          "independently_verified": false,
+          "job_id": "8d6473650d0a78420984c6094c7760f8",
+          "operation_id": "8d6473650d0a78420984c6094c7760f8",
+          "output_artifact": {
+            "operation_id": "8d6473650d0a78420984c6094c7760f8",
+            "state": "complete",
+            "stderr_bytes": 203,
+            "stdout_bytes": 1252
+          },
+          "pid": 71332,
+          "process_tree_retired": true,
+          "profile_id": "xlang3",
+          "service_stopped": true,
+          "stderr": {
+            "byte_count": 203,
+            "data": "INFO:     Started server process [71332]\r\nINFO:     Waiting for application startup.\r\nINFO:     Application startup complete.\r\nINFO:     Uvicorn running on http://127.0.0.1:18752 (Press CTRL+C to quit)\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 203
+          },
+          "stdout": {
+            "byte_count": 1252,
+            "data": "INFO:     127.0.0.1:63449 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63454 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63456 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63458 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52051 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52053 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52051 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52055 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:53593 - \"GET /api/catalog/stats HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:53594 - \"GET /api/models?sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:57312 - \"GET /api/models/bert-base-uncased HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58439 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58442 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58439 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:60161 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:55383 - \"GET /api/catalog/stats HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:55384 - \"GET /api/models?sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:51864 - \"GET /api/models/bert-base-uncased HTTP/1.1\" 200 OK\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 1252
+          },
+          "termination": "cancelled",
+          "truncated": false
+        }
+      },
+      {
+        "id": "f7f452aa617dd67920d20357d0c96533",
+        "state": "succeeded",
+        "result": {
+          "elapsed_ms": 299003,
+          "exit_code": 1,
+          "independently_verified": false,
+          "job_id": "f7f452aa617dd67920d20357d0c96533",
+          "operation_id": "f7f452aa617dd67920d20357d0c96533",
+          "output_artifact": {
+            "operation_id": "f7f452aa617dd67920d20357d0c96533",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 296
+          },
+          "pid": 41400,
+          "process_tree_retired": true,
+          "profile_id": "powershell",
+          "service_stopped": true,
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 296,
+            "data": "\n  \u001b[32m\u001b[1mVITE\u001b[22m v6.4.4\u001b[39m  \u001b[2mready in \u001b[0m\u001b[1m416\u001b[22m\u001b[2m\u001b[0m ms\u001b[22m\n\n  \u001b[32m➜\u001b[39m  \u001b[1mLocal\u001b[22m:   \u001b[36mhttp://127.0.0.1:\u001b[1m18753\u001b[22m/\u001b[39m\n\u001b[2m11:21:01 AM\u001b[22m \u001b[36m\u001b[1m[vite]\u001b[22m\u001b[39m \u001b[90m\u001b[2m(client)\u001b[22m\u001b[39m \u001b[32mhmr update \u001b[39m\u001b[2m/src/views/ModelDetailView.vue\u001b[22m\n",
+            "encoding": "utf-8",
+            "retained_bytes": 296
+          },
+          "termination": "cancelled",
+          "truncated": false
+        }
+      }
+    ],
+    "historyMessages": 37,
+    "testPortsClosed": true,
+    "originalWorkspaceRestored": true,
+    "passed": true,
+    "completedAt": "2026-10-19T18:22:00.130Z"
+  },
+  "sourceClosure": {
+    "recordedAt": "2026-10-19T18:22:18.158Z",
+    "checks": [
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo",
+        "files": 34,
+        "fileSetsUnchanged": true
+      },
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo/backend/.xlang3-site",
+        "files": 1004,
+        "fileSetsUnchanged": true
+      },
+      {
+        "root": "D:/CantorAI2026/TestProj/model-zoo/frontend/node_modules",
+        "files": 792,
+        "fileSetsUnchanged": true
+      }
+    ],
+    "changes": [
+      {
+        "path": "frontend/src/views/ModelDetailView.vue",
+        "beforeSha256": "7e44225e293a3db362e01e4a2827f4adce5a830066d08b282ce65f2438788929",
+        "afterSha256": "01a16d44d2b0b0d1795d46a4e76bffea90419939af03c39c3878263f6ef9a0cd"
+      }
+    ],
+    "allOtherHashesUnchanged": true,
+    "passed": true
+  },
+  "sharedCli": {
+    "at": "2026-10-19T18:23:05.604Z",
+    "backendReused": true,
+    "pid": 69992,
+    "historyMessages": 37,
+    "usageRecords": 14,
+    "historyExactlyMatchesBrowser": true,
+    "newTasksSubmitted": 0,
+    "receipts": [
+      {
+        "label": "cli-profile-info",
+        "args": [
+          "profile-info"
+        ],
+        "pid": 66808,
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "label": "cli-history",
+        "args": [
+          "history",
+          "a25609cc1ed45a6889aaa20ac98de331"
+        ],
+        "pid": 18896,
+        "exitCode": 0,
+        "signal": null
+      }
+    ]
+  },
+  "renderedRestore": {
+    "at": "2026-10-19T18:24:52.468Z",
+    "url": "http://127.0.0.1:58417/ui/",
+    "errors": [],
+    "httpFailures": [],
+    "taskSubmissions": 0,
+    "reloadHistoryMs": 1452,
+    "messages": 37,
+    "usageRecords": 14,
+    "exactHistoryRestored": true,
+    "passed": true
+  },
+  "priorPage": {
+    "at": "2026-10-19T18:24:14.873Z",
+    "oldUrl": "http://127.0.0.1:53895/ui/",
+    "checks": [
+      {
+        "kind": "host",
+        "pid": 7816,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-19T18:05:51.0423000Z"
+      },
+      {
+        "kind": "nativeView",
+        "pid": 43604,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+        "birth": "2026-10-19T18:05:52.1707130Z"
+      },
+      {
+        "kind": "backend",
+        "pid": 44176,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a43\\d68f72743ff73862a4e230519f6c0302d25a51634a7f9811269db6b0908e4614\\runtime-52e8b8bb6f8428143a5ed5faba57e0f57259780568deb237dc50692c9e3ce3b6\\xmind.exe",
+        "birth": "2026-10-19T18:05:55.7005620Z"
+      }
+    ],
+    "oldAndNewPages200": true,
+    "passed": true
+  },
+  "owners": {
+    "host": {
+      "pid": 66908,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T18:14:28.4949650Z"
+    },
+    "nativeView": {
+      "pid": 35116,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T18:14:29.4292590Z"
+    },
+    "backend": {
+      "pid": 69992,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-c43\\a94da0db71c58024b766cf6b38c9d268b7cd9db51c380d29e30383db2fa5d1f5\\runtime-6a3a62add7803a2f11cca95d8f5cf303ccddbdabddd43b5b7e469886acc98a59\\xmind.exe",
+      "birth": "2026-10-19T18:14:32.8155730Z"
+    },
+    "profileRoot": "C:/Users/shaw9/.xMind/p-c43"
+  },
+  "rawReceipts": [
+    {
+      "name": "run.json",
+      "sha256": "81a4638216231a77a03039acd45b117c9819cee067d3258c8602ef8a85babda1"
+    },
+    {
+      "name": "read-only-inputs-after.json",
+      "sha256": "deb53b043abcab9002e63559f9edec60e917734a2ff59a2d5b1d7fb29d8baee5"
+    },
+    {
+      "name": "site/site-acceptance.json",
+      "sha256": "3ef24f39a4f27468721f86f8f6522cdd8aa4bf1eadd93999610e51054a0d7c91"
+    },
+    {
+      "name": "fix/acceptance.json",
+      "sha256": "c495fd77c23c743a5f1bfb219818d1c89866e10cf27d3067da2a8f8cc198446c"
+    },
+    {
+      "name": "site-after-fix/site-acceptance.json",
+      "sha256": "87690f52cf51f00ef518dfb28bdce8aa91836d78881870d02e7b7637b85258ff"
+    },
+    {
+      "name": "stop/acceptance.json",
+      "sha256": "08bc66ad87b692b1e82117f24723ba8ca75612d66e28aa42db23fb136912e542"
+    },
+    {
+      "name": "inputs-after-fix.json",
+      "sha256": "70f18722ee84f7693a09fac3c24a246aae68e959129e9191231447df0e5c7283"
+    },
+    {
+      "name": "cli-shared-history.json",
+      "sha256": "8e7033f874066c683f3711cffe05e649eac5a8096ff02e7d3d0e03cfa000aaba"
+    },
+    {
+      "name": "restore/acceptance.json",
+      "sha256": "84ff3e0103d3f9de96c7770510342d353ecc8b567dd7b8546d54b5ba3e61a4f8"
+    },
+    {
+      "name": "prior-page-preserved.json",
+      "sha256": "3f9ad4f2b47c8a5acc36b9a2fa909609b5721bfc377c0c2a5682289f3c311642"
+    }
+  ],
+  "cpythonExecuted": false,
+  "actualVSCodePaneVerified": false,
+  "broaderAppFeatureAcceptance": false,
+  "releaseAccepted": false,
+  "scope": "Actual existing TestProj folder, not the earlier isolated 32-test fixture: 9 backend tests, builds, native persistent service lifecycle, one reviewed component repair after a retained real browser failure, restored history and shared CLI. xMind core/package bytes unchanged."
+}

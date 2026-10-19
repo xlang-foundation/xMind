@@ -1,0 +1,30 @@
+diff --git a/frontend/src/views/ModelDetailView.vue b/frontend/src/views/ModelDetailView.vue
+index 3225c6b..171b266 100644
+--- a/frontend/src/views/ModelDetailView.vue
++++ b/frontend/src/views/ModelDetailView.vue
+@@ -165,6 +165,15 @@ function startObserver() {
+    */
+   const ratioMap = new Map(ids.map((id) => [id, 0]))
+ 
++  // Derive the topbar height in pixels from the actual DOM element so that
++  // rootMargin always receives a valid absolute-length value.  CSS custom
++  // properties such as --topbar-h can be expressed in rem, which
++  // IntersectionObserver rejects with "rootMargin must be specified in
++  // absolute length units or percent".
++  const topbarEl = document.querySelector('header.topbar')
++  const topbarPx = topbarEl ? Math.round(topbarEl.getBoundingClientRect().height) : 0
++  const topbarOffset = topbarPx > 0 ? topbarPx : 68
++
+   sectionObserver = new IntersectionObserver(
+     (entries) => {
+       entries.forEach((e) => {
+@@ -178,7 +187,8 @@ function startObserver() {
+     {
+       // A thin band at the top of the viewport (after the sticky bar) so that
+       // the active item updates as soon as a heading enters that band.
+-      rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--topbar-h').trim() || '68px'} 0px -80% 0px`,
++      // topbarOffset is always a finite integer pixel value.
++      rootMargin: `-${topbarOffset}px 0px -80% 0px`,
+       threshold: [0, 0.1],
+     },
+   )

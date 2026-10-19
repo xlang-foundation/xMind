@@ -1,5 +1,32 @@
 # Current native validation
 
+## Actual TestProj coding workflow — 2026-10-19
+
+Installed 0.1.43 now completes a browser-driven workflow directly in
+`D:/CantorAI2026/TestProj/model-zoo`. The actual project has nine backend tests;
+all pass under the paired xlang3 process profile. Its production Vue build
+passes, and native process tools keep FastAPI/Vite alive after the first reply.
+HTTP checks pass through both backend and frontend proxy. The read-only phase
+leaves all 34 source files, 1,004 pure dependency files and 792 Node dependency
+files unchanged, with generated caches excluded explicitly before admission.
+
+A real browser check then fails on the detail page's invalid `rootMargin`.
+That failure remains recorded. A separate xMind task applies one reviewed
+component edit using the measured topbar pixel height and rebuilds successfully.
+The same rendered smoke assertions now pass without page or HTTP errors.
+Only that component's source hash changes. An explicit follow-up stops both
+original test process trees and closes their ports. No original task is replayed.
+
+The native CLI reuses the same backend and exact 37-message, 14-usage-record
+history. Browser reload restores it in 1,452 ms without a key prompt. The prior
+53895 page and its three owners remain unchanged. Actual VS Code pane
+acceptance and broader app-feature coverage are not established by this case;
+the earlier isolated 32-test fixture is a separate result.
+
+[Actual workspace, original failure, repair and shutdown evidence](evidence/user-workspace-coding-0.1.43-20261019.json),
+[reviewed component diff](evidence/testproj-detail-fix-20261019.diff).
+Retained xMind page: <http://127.0.0.1:58417/ui/>.
+
 ## Installed 0.1.43 browser coding — 2026-10-19
 
 The qualified runtime is now installed. Actual configured-Claude CLI and
