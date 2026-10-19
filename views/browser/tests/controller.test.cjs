@@ -53,6 +53,16 @@ test('browser surfaces and replies to a pending approval from another run in the
  try{await view.refreshSessionPermissions();assert.ok(posted.at(-1).operations.some(item=>item.id===proposal.id));await view.handle({type:'decide',id:proposal.id,decision:'allow'});assert.deepEqual(calls,[['selected-session',proposal.id,'allow']]);assert.equal(view.sessionPermissionRequests.size,0);assert.ok(posted.at(-1).operations.every(item=>item.id!==proposal.id));}finally{view.dispose();}
 });
 
+for(const state of ['running','completed'])test(`browser session refresh discovers an externally admitted ${state} run without changing the inspected run`,async()=>{
+ const old={id:'old',session_id:'session',state:'completed'},external={id:'external',session_id:'session',state},posted=[];
+ const client={sessions:async()=>[{id:'session',title:'Shared conversation'}],activeSessions:async()=>({data:state==='running'?{session:{type:'running'}}:{}}),runs:async()=>[old,external]};
+ const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId='old';view.runs=[old];view.health={active_session_map:true};let reconciled=0;view.poll=async()=>{reconciled++;};
+ try{
+  await view.refreshSessions();const observed=posted.findLast(message=>message.type==='runs');assert.ok(observed?.runs.some(run=>run.id===external.id));assert.equal(observed.selected,'old');assert.equal(observed.busy,state==='running');assert.equal(reconciled,1);
+  await view.refreshSessions();assert.equal(reconciled,1,'An unchanged idle run list must not reload the transcript');
+ }finally{view.dispose();}
+});
+
 for(const state of ['ready','succeeded','denied'])test(`browser stale session approval cannot rewind an observed ${state} operation`,async()=>{
  const proposal={id:'externally-decided',run_id:'root',workspace_id:'workspace',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:'{}',result_json:'{}'},posted=[],changed=[];
  const client={sessionPermissions:async session=>({session_id:session,requests:[proposal]})};

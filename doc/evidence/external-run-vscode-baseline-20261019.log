@@ -1,0 +1,54 @@
+TAP version 13
+# Subtest: session refresh discovers an externally admitted running run without changing the inspected run
+not ok 1 - session refresh discovers an externally admitted running run without changing the inspected run
+  ---
+  duration_ms: 43.2136
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\extension-host.test.js:328:44'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(observed.runs.some(run=>run.id===external.id))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:335:78)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: session refresh discovers an externally admitted completed run without changing the inspected run
+not ok 2 - session refresh discovers an externally admitted completed run without changing the inspected run
+  ---
+  duration_ms: 4.9467
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\extension-host.test.js:328:44'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(observed.runs.some(run=>run.id===external.id))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:335:78)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 127.0739

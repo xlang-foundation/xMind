@@ -93,6 +93,7 @@ function harness(options={}) {
         const value=JSON.parse(requestOptions.body);providerRequests.push(value);options.health={agent_execution:true,status:'ok'};options.catalogue={default_model:value.model,models:[{id:value.model}]};data={...options.providerSetup,revision:options.providerSetup.revision+1,configured:true,model:value.model};
       }else data=options.providerSetup;
     }
+    else if(target.pathname==='/v1/sessions/active') data={data:options.activeSessions||{}};
     else if(target.pathname==='/v1/sessions') data=options.deletedSession?[]:(options.sessions||[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])]);
     else if(target.pathname==='/v1/sessions/saved'&&requestOptions.method==='DELETE'){options.deletedSession=true;return {ok:true,status:204,json:async()=>{throw Error('A 204 response must not be decoded as JSON');}};}
     else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
@@ -321,6 +322,19 @@ test('sidebar renders committed subscription events and refreshes metadata witho
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];assert.equal(feed.id,'finished');assert.equal(feed.options.scope,'run');assert.equal(h.intervals.size,0);
   const event={seq:2,run_id:'finished',kind:'tool.completed',data:{name:'read_file',data:{content:'Synthetic durable result'}}};await feed.options.onEvent(event);assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===2).length,1);const task=h.scheduledTasks.findLast(t=>t.delay===100);assert.ok(task);const requests=h.requests.length;await new Promise(resolve=>setTimeout(resolve,30));assert.equal(h.requests.length,requests,'Idle subscription issues no metadata poll');task.callback();await until(()=>h.requests.length>requests);await new Promise(resolve=>setImmediate(resolve));assert.equal(h.streams.length,1,'Metadata refresh retains the same subscription');assert.equal(h.intervals.size,0);
   h.configureRuns([{id:'finished',state:'completed'}]);feed.resolve({reason:'terminal',cursor:2});await until(()=>view.posted.findLast(m=>m.type==='runs')?.busy===false);assert.ok(view.posted.some(m=>m.type==='transcript'));assert.equal(feed.options.signal.aborted,true);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ }finally{view.close();}
+});
+
+for(const state of ['running','completed'])test(`session refresh discovers an externally admitted ${state} run without changing the inspected run`,async()=>{
+ const old={id:'finished',session_id:'saved',state:'completed',parent_id:'',graph_root:false},external={id:'external-run',session_id:'saved',state,parent_id:'',graph_root:false};
+ const options={health:{agent_execution:true,active_session_map:true},runs:[old]},h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='runs'&&message.selected==='finished'));
+  options.runs=[old,external];options.activeSessions=state==='running'?{saved:{type:'running'}}:{};
+  await h.scheduledTasks.findLast(task=>task.delay===5000).callback();
+  const observed=view.posted.findLast(message=>message.type==='runs');assert.ok(observed.runs.some(run=>run.id===external.id));assert.equal(observed.selected,'finished');assert.equal(observed.busy,state==='running');
+  if(state==='running')assert.ok(h.streams.some(stream=>stream.id===external.id));
+  assert.ok(!h.requests.includes('/v1/runs'));assert.equal(h.decisions.length,0);
  }finally{view.close();}
 });
 

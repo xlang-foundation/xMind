@@ -452,6 +452,15 @@ async function activate(context) {
       if(version!==generation||!panel)return;
     }
     const signature=JSON.stringify([sessionId,sessions.map(item=>[item.id,item.title,item.active===true])]);if(signature!==sessionCatalogueSignature){sessionCatalogueSignature=signature;post({ type: 'sessions', sessions, selected: sessionId });}
+    // A different client can admit and even finish a turn while this view is
+    // idle. Reconcile its run list without replacing the user's inspected run.
+    if(health?.active_session_map===true&&sessionId&&!busySession()){
+      const target=client,session=sessionId,runs=await target.runs(session);
+      if(version!==generation||!panel||target!==client||session!==sessionId)return;
+      if(JSON.stringify(runs)!==JSON.stringify(sessionRuns)){
+        sessionRuns=runs;presentRuns();if(runId)await poll();else watch();
+      }
+    }
   }
 
   async function capabilities() {

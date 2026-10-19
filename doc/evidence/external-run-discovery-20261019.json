@@ -1,0 +1,78 @@
+{
+  "scope": "Idle browser and VS Code clients discover external turns in the selected shared session",
+  "gate": {
+    "recordedAt": "2026-10-19T20:49:59.177Z",
+    "sourceParent": "e69e1e75e37fa3f9c62a21c827d8966202edcaf9",
+    "sourcePatchSha256": "c2729c0d19c9089378ea608445e9e24677e5c1f83da75f4da1afcc12f719042c",
+    "extension": {
+      "pid": 42820,
+      "launchedAt": "2026-10-19T20:49:41.859Z",
+      "completedAt": "2026-10-19T20:49:47.534Z",
+      "exitCode": 0,
+      "tests": 436,
+      "passed": 436,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "ea0a5c5e3fd2b47305de3d83fa3665e951227dd846ecf618965821239b6c8e5e"
+    },
+    "browser": {
+      "pid": 41328,
+      "launchedAt": "2026-10-19T20:49:41.866Z",
+      "completedAt": "2026-10-19T20:49:57.771Z",
+      "exitCode": 0,
+      "tests": 152,
+      "passed": 152,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "d2d7d02313adf1ca309c343d403867adfad1830158b4be279b21d5c5860dcf91"
+    },
+    "sourceFiles": 63,
+    "dependencyFiles": 14908,
+    "assetFiles": 18,
+    "allCheckedSourceDependencyAssetsAndFileSetsUnchanged": true,
+    "nativeSuiteRepeated": false,
+    "nativeCodeChanged": false,
+    "providerRequests": 0,
+    "installed": false,
+    "scopePassed": true
+  },
+  "baseline": {
+    "extension": {
+      "tests": 2,
+      "failed": 2
+    },
+    "browser": {
+      "tests": 2,
+      "failed": 2
+    }
+  },
+  "installed": false,
+  "actualFixedGuiAcceptance": false,
+  "nativeCodeChanged": false,
+  "behavior": [
+    "The existing five-second session refresh also reads the selected idle session run list.",
+    "Running and already-completed external turns are both discovered; the inspected run remains selected.",
+    "Changed run lists reconcile history and attach to existing active execution; no run is submitted or replayed.",
+    "Unchanged idle lists do not reload transcripts; known active execution keeps its event stream."
+  ],
+  "logs": [
+    {
+      "path": "external-run-vscode-baseline-20261019.log",
+      "sha256": "539330d4252a0a6e208c9d67caf2889d5240b7768e5223ee40bf2ad36abc1530"
+    },
+    {
+      "path": "external-run-browser-baseline-20261019.log",
+      "sha256": "eb1bf52d239926d7c55e996ff63b04200ca23b84ae83d4d3d11384f7f3002a92"
+    },
+    {
+      "path": "external-run-vscode-final-20261019.log",
+      "sha256": "ea0a5c5e3fd2b47305de3d83fa3665e951227dd846ecf618965821239b6c8e5e"
+    },
+    {
+      "path": "external-run-browser-final-20261019.log",
+      "sha256": "d2d7d02313adf1ca309c343d403867adfad1830158b4be279b21d5c5860dcf91"
+    }
+  ]
+}

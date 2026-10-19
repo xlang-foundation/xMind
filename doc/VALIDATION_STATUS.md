@@ -1,5 +1,21 @@
 # Current native validation
 
+## Shared-session turn discovery — 2026-10-19
+
+The installed44 live check shows the conversation Running badge after the CLI
+admits a follow-up, but its run selector still contains only the older failed
+run. The source clients now reconcile the selected idle session run list during
+the existing five-second session refresh. They discover both active turns and
+turns that already completed between refreshes, retain the inspected run, update
+history on changes and observe existing active execution without submitting it.
+Unchanged idle run lists do not reload transcripts.
+
+Both baseline variants fail in each client. The fixed complete suites pass
+436 VS Code and 152 browser tests with all checked source/dependencies/assets
+and file sets unchanged. Native code is unchanged. The fix is not installed;
+updated 0.1.45 staging and rendered acceptance are next.
+[Exact regressions and full client results](evidence/external-run-discovery-20261019.json).
+
 ## Coding UI observation fixes — 2026-10-19
 
 The real installed44 coding check exposed a stale approval-card conflict. Both

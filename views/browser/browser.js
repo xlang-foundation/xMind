@@ -110,7 +110,18 @@ class BrowserController {
   scheduleSnapshot(pin){if(this.snapshotTimer||!this.current(pin.generation))return;this.snapshotTimer=setTimeout(()=>{this.snapshotTimer=undefined;if(this.current(pin.generation))this.poll().then(()=>{if(this.current(pin.generation))this.watch();});},100);}
   async sessionCatalog(){const sessions=await this.client.sessions();if(!Array.isArray(sessions)||sessions.some(item=>!item||typeof item.id!=='string'||!item.id))throw new Error('Invalid native session catalogue');if(this.health?.active_session_map!==true||typeof this.client.activeSessions!=='function')return sessions;let response;try{response=await this.client.activeSessions();}catch(error){if(error.status===404)return sessions;throw error;}const data=response?.data;if(!data||typeof data!=='object'||Array.isArray(data)||Object.entries(data).some(([id,value])=>!id||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||value.type!=='running'))throw new Error('Invalid active session map');const active=new Set(Object.keys(data));return sessions.map(session=>({...session,active:active.has(session.id)}));}
   publishSessions(sessions){const signature=JSON.stringify([this.session,sessions.map(item=>[item.id,item.title,item.active===true])]);if(signature===this.sessionCatalogueSignature)return;this.sessionCatalogueSignature=signature;this.post({type:'sessions',sessions,selected:this.session});}
-  async refreshSessions(){const version=this.generation,sessions=await this.sessionCatalog();if(this.current(version))this.publishSessions(sessions);}
+  async refreshSessions(){
+    const version=this.generation,sessions=await this.sessionCatalog();if(!this.current(version))return;this.publishSessions(sessions);
+    // Discover turns admitted by another client, including turns that finish
+    // between catalogue refreshes. Keep the user's inspected run selected.
+    if(this.health?.active_session_map===true&&this.session&&!this.busy()){
+      const target=this.client,session=this.session,runs=await target.runs(session);
+      if(!this.current(version)||target!==this.client||session!==this.session)return;
+      if(JSON.stringify(runs)!==JSON.stringify(this.runs)){
+        this.runs=runs;this.present();if(this.runId)await this.poll();else this.watch();
+      }
+    }
+  }
   scheduleSessionRefresh(){clearTimeout(this.sessionRefreshTimer);if(this.disposed||this.health?.active_session_map!==true)return;this.sessionRefreshTimer=setTimeout(async()=>{this.sessionRefreshTimer=undefined;if(this.disposed)return;try{await this.refreshSessions();}catch(error){if(!this.disposed)this.post({type:'error',text:error.message});}if(!this.disposed)this.scheduleSessionRefresh();},5000);}
   publishOperations(items){if(items)this.runOperations=new Map(items.map(item=>[item.id,item]));const merged=new Map([...this.runOperations].filter(([id,item])=>!this.sessionPermissionsLoaded||item.state!=='awaiting_approval'||this.sessionPermissionRequests.has(id)||item.run_id===this.runId||this.children.has(item.run_id)));
     // A separately refreshed permission list may predate an observed decision.
