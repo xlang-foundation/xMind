@@ -1,5 +1,28 @@
 # Current native validation
 
+## Corrected 0.1.35 installed — 2026-10-19
+
+VS Code CLI installs the corrected guidance archive and lists xMind 0.1.35.
+All 2,448 archive payloads match the stage, 2,445 installed non-metadata
+payloads match the archive, and all 2,402 runtime files verify. The 17,439-file
+stage stays unchanged. Source client 1bf8c1e uses native 2c18ffb (28e60101)
+and SDK 58a8aab (DLL 1ff2a8e); manifest 4bc3b184. Local suites pass 426/147.
+The corrected hosted workflow at 03692fc also passes 426/147 with its exact
+inventory and frozen source/assets. Four cross-host asset differences are
+CRLF/LF only; 14 assets are raw-identical. Packaged product source is unchanged.
+
+Backup 0.1.34 verifies 2,447 files. Settings and six prior profile names remain;
+15 process identities, five older 2,402-file runtimes and six pages survive.
+The tested page http://127.0.0.1:49702/ui/ restores 11 messages/five usage records
+in 2.14 seconds after installation, with no page errors, failed HTTP responses
+or effect POSTs. Its rendered chat bytes match the installed extension.
+
+No editor window was opened. This verifies installation and preserved live
+browser coding, not actual VS Code pane activation, current full native or
+hosted native acceptance, worker IPC or a release. The original uninstalled
+0.1.35 archive with the renderer fault and all earlier failures remain separate.
+[Package, installation, CI and preservation proof](evidence/coding-package-0.1.35-guidance-20261019.json).
+
 ## Hosted client inventory — 2026-10-19
 
 Source 1bf8c1e passes all 426 extension and 147 browser tests with unchanged
