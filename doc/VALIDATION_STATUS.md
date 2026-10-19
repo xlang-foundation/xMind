@@ -1,5 +1,23 @@
 # Current native validation
 
+## Effective module-path controls — 2026-10-19
+
+The throwaway native diagnostic now observes the effective PowerShell module
+search path only after its first command. A private core-only path contains
+bounded, hash-verified copies of the actual Utility/Management module folders.
+The precopy-core comparison copies the same files but retains the normal path,
+so copying the files alone cannot masquerade as a search-path result.
+
+All ten guarded local cases pass with the selected source and diagnostic binary
+unchanged. Core-only completes in 6,259 ms with only its private module root in
+the effective path. Copy-only completes in 6,293 ms with the usual current-user,
+AllUsers and system module paths. All three copied files retain exact hashes.
+These are warm development-machine observations, not a fresh hosted solution.
+The workflow now gives both new controls their own fresh first-command jobs.
+Original command text, six-second sleep, 30-second deadline and production
+process environment remain unchanged; installed44 is preserved.
+[Exact local control evidence](evidence/process-module-path-controls-local-20261019.json).
+
 ## Fresh-hosted cache controls remain failing — 2026-10-19
 
 Run 39312895414 on 7f338089 is terminal failure: 17/24 diagnostic launches pass

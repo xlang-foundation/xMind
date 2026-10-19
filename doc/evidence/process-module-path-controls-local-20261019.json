@@ -1,0 +1,715 @@
+{
+  "scope": "Guarded local ten-case process-startup diagnostic; fresh-hosted core-module path and copy-only controls prepared",
+  "sourceParent": "ec005f87e7a7afa204b5ee1076c1bcd4c7efbb5d",
+  "sourcePatchSha256": "b43563ed738aba0d5038f8ba9e90045e7489fcddb8bf1b6a930393c7039364f3",
+  "diagnosticsSha256": "dd24f689a04031be1ea3d6bd0f003e27728b60e080614d02eebf7d20a55317a4",
+  "diagnostic": {
+    "recordedAt": "2026-10-19T19:48:19.411Z",
+    "scope": "Controlled actual native adapter diagnostics, not graph/agent or release qualification",
+    "mode": "guarded local ten-case smoke",
+    "firstCase": "original",
+    "originalCommandTextVerified": true,
+    "processDeadlineMs": 30000,
+    "deliberateGraphDelaySeconds": 6,
+    "runRoot": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV",
+    "host": {
+      "release": "10.0.26200",
+      "arch": "x64",
+      "imageVersion": null,
+      "imageOS": null
+    },
+    "sourceAndBinaryUnchanged": true,
+    "binarySha256": "6f709318f218c6da00b427310fb497b04df6dddf4921a4f505edfce3b5222ae9",
+    "cases": [
+      {
+        "label": "01-graph-default",
+        "scenario": "graph",
+        "control": "default",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 184,
+          "delay_completed": 6236,
+          "effect_completed": 6268
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6284,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\01-graph-default",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:69df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 203,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 184,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6236,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6268,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 55736,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\01-graph-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:69df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "02-agent-default",
+        "scenario": "agent",
+        "control": "default",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [],
+        "phaseElapsedMs": {},
+        "native": {
+          "command": "[IO.File]::WriteAllText('agent-process-folder.txt',(Get-Location).Path)",
+          "control": "default",
+          "elapsed_ms": 223,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\02-agent-default",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:6fdf1b00000005000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 188,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [],
+          "pid": 27848,
+          "scenario": "agent",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "",
+          "stdout_bytes": 0,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\02-agent-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:6fdf1b00000005000000000000000000"
+        }
+      },
+      {
+        "label": "03-dotnet-control-default",
+        "scenario": "dotnet-control",
+        "control": "default",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 175,
+          "delay_completed": 6179,
+          "effect_completed": 6195
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); [Threading.Thread]::Sleep(6000); [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',[IO.Directory]::GetCurrentDirectory()); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6210,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\03-dotnet-control-default",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:72df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 207,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 175,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6179,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6195,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 34804,
+          "scenario": "dotnet-control",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\03-dotnet-control-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:72df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "04-graph-minimal-path",
+        "scenario": "graph",
+        "control": "minimal-path",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 182,
+          "delay_completed": 6253,
+          "effect_completed": 6269
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "minimal-path",
+          "elapsed_ms": 6285,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\04-graph-minimal-path",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:75df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 197,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 182,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6253,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6269,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 56180,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\04-graph-minimal-path",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:75df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "05-module-qualified-default",
+        "scenario": "module-qualified",
+        "control": "default",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 180,
+          "delay_completed": 6248,
+          "effect_completed": 6264
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Microsoft.PowerShell.Utility\\Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Microsoft.PowerShell.Management\\Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6280,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\05-module-qualified-default",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:78df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 202,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 180,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6248,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6264,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 57292,
+          "scenario": "module-qualified",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\05-module-qualified-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:78df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "06-cmdlet-phases-default",
+        "scenario": "cmdlet-phases",
+        "control": "default",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 184,
+          "delay_completed": 6265,
+          "effect_completed": 6280,
+          "location_resolved": 6280
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); $location=Get-Location; [Console]::Out.WriteLine('xmind-probe:location_resolved'); [IO.File]::WriteAllText('graph-process-folder.txt',$location.Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "default",
+          "elapsed_ms": 6296,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\06-cmdlet-phases-default",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:7bdf1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 194,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 184,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6265,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-probe:location_resolved\r\nxmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6280,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 68600,
+          "scenario": "cmdlet-phases",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-probe:location_resolved\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 136,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\06-cmdlet-phases-default",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:7bdf1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "07-graph-private-cache",
+        "scenario": "graph",
+        "control": "private-cache",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 177,
+          "delay_completed": 6405,
+          "effect_completed": 6421
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "private-cache",
+          "elapsed_ms": 6436,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\07-graph-private-cache",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:7edf1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 201,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 177,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6405,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6421,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 38404,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\07-graph-private-cache",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:7edf1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "08-graph-cache-off",
+        "scenario": "graph",
+        "control": "cache-off",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 187,
+          "delay_completed": 6403,
+          "effect_completed": 6417
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "cache-off",
+          "elapsed_ms": 6434,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\08-graph-cache-off",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:81df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 185,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 187,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6403,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6417,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 62804,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\08-graph-cache-off",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:81df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "09-graph-core-only",
+        "scenario": "graph",
+        "control": "core-only",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 178,
+          "delay_completed": 6212,
+          "effect_completed": 6229
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "core-only",
+          "core_module_copy": {
+            "files": [
+              {
+                "bytes": 2459,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+                "sha256": "c09df190addc67f7c6c38e7ea1dca719fd87807107f688c3f60ed8816e1c48a6"
+              },
+              {
+                "bytes": 30592,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psm1",
+                "sha256": "f9232f3de3c94dd03caf40f54b22876c9d810c657c41e54ab2d10469b45f26b5"
+              },
+              {
+                "bytes": 2562,
+                "relative_path": "Microsoft.PowerShell.Management\\Microsoft.PowerShell.Management.psd1",
+                "sha256": "91ea580e6bbc54148eadac5e8018f6e6edfd04bcd3cf07489a9028fdeea948a0"
+              }
+            ],
+            "root": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\09-graph-core-only\\core-modules",
+            "search_path_overridden": true,
+            "unchanged": true
+          },
+          "elapsed_ms": 6259,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\09-graph-core-only",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:85df1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\09-graph-core-only\\core-modules",
+            "elapsed_ms": 186,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 178,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6212,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6229,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 31908,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\09-graph-core-only",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:85df1b00000006000000000000000000"
+        }
+      },
+      {
+        "label": "10-graph-precopy-core",
+        "scenario": "graph",
+        "control": "precopy-core",
+        "observer": false,
+        "firstOnFreshHostedJob": false,
+        "passed": true,
+        "phases": [
+          "script_entered",
+          "delay_completed",
+          "effect_completed"
+        ],
+        "phaseElapsedMs": {
+          "script_entered": 176,
+          "delay_completed": 6233,
+          "effect_completed": 6278
+        },
+        "native": {
+          "command": "[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')",
+          "control": "precopy-core",
+          "core_module_copy": {
+            "files": [
+              {
+                "bytes": 2459,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+                "sha256": "c09df190addc67f7c6c38e7ea1dca719fd87807107f688c3f60ed8816e1c48a6"
+              },
+              {
+                "bytes": 30592,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psm1",
+                "sha256": "f9232f3de3c94dd03caf40f54b22876c9d810c657c41e54ab2d10469b45f26b5"
+              },
+              {
+                "bytes": 2562,
+                "relative_path": "Microsoft.PowerShell.Management\\Microsoft.PowerShell.Management.psd1",
+                "sha256": "91ea580e6bbc54148eadac5e8018f6e6edfd04bcd3cf07489a9028fdeea948a0"
+              }
+            ],
+            "root": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\10-graph-precopy-core\\core-modules",
+            "search_path_overridden": false,
+            "unchanged": true
+          },
+          "elapsed_ms": 6293,
+          "exit_code": 0,
+          "marker_content": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\10-graph-precopy-core",
+          "marker_directory_id": "windows-local-file-v1:fec0809ac0805ab3:8edf1b00000006000000000000000000",
+          "marker_exists": true,
+          "module_path_probe": {
+            "effective_path": "C:\\Users\\shaw9\\OneDrive\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+            "elapsed_ms": 186,
+            "stderr": "",
+            "success": true
+          },
+          "output_observations": [
+            {
+              "data": "xmind-graph-phase:script_entered\r\n",
+              "elapsed_ms": 176,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:delay_completed\r\n",
+              "elapsed_ms": 6233,
+              "stderr_channel": false,
+              "truncated": false
+            },
+            {
+              "data": "xmind-graph-phase:effect_completed\r\n",
+              "elapsed_ms": 6278,
+              "stderr_channel": false,
+              "truncated": false
+            }
+          ],
+          "pid": 70800,
+          "scenario": "graph",
+          "scope": "Native foreground adapter diagnostic only",
+          "stderr": "",
+          "stderr_bytes": 0,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stdout_bytes": 105,
+          "termination": "exited",
+          "timeout_ms": 30000,
+          "truncated": false,
+          "working_directory": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-startup-probe-wiS6LV\\10-graph-precopy-core",
+          "working_directory_id": "windows-local-file-v1:fec0809ac0805ab3:8edf1b00000006000000000000000000"
+        }
+      }
+    ],
+    "allCasesPassed": true,
+    "causeEstablished": false,
+    "productionCacheOrEnvironmentChanged": false,
+    "providerRequests": 0,
+    "nativeAgentRunnerExecuted": false,
+    "cpythonExecuted": false
+  },
+  "method": [
+    "Core-only copies the actual Utility/Management module folders into a private disposable search root; its manifests remain matched by SHA before and after execution.",
+    "Precopy-core makes the same bounded copy but retains the normal module search path, separating copy-induced file-cache effects from the explicit search-path change.",
+    "A separate five-second module-path metadata query runs only after the original command. The original first process remains unchanged with its six-second sleep and 30-second timeout.",
+    "Both controls will execute first on independent fresh hosted runners. Later comparison commands are warm and do not qualify failed first cases."
+  ],
+  "limits": {
+    "freshHostedAccepted": false,
+    "causeEstablished": false,
+    "productionChanged": false,
+    "installed44Changed": false,
+    "fullSuiteRerun": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false
+  }
+}

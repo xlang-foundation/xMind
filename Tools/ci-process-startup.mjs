@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';import {tmpdir,release} from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';import {spawn,execFileSync} from 'node:child_process';import {createHash} from 'node:crypto';import {fileURLToPath,pathToFileURL} from 'node:url';
 const local=process.argv.includes('--local-guarded'),root=path.resolve(process.argv.find(a=>a.startsWith('--root='))?.slice(7)||fileURLToPath(new URL('..',import.meta.url))),out=path.resolve(process.argv.find(a=>a.startsWith('--output='))?.slice(9)||path.join(root,'build/process-startup-diagnostics'));
 const firstCase=process.argv.find(a=>a.startsWith('--first-case='))?.slice(13)||'original';
-const firstCases={original:['graph','default',false],'minimal-path':['graph','minimal-path',false],'module-qualified':['module-qualified','default',false],'cmdlet-phases':['cmdlet-phases','default',false],'private-cache':['graph','private-cache',false],'cache-off':['graph','cache-off',false]};
+const firstCases={original:['graph','default',false],'minimal-path':['graph','minimal-path',false],'module-qualified':['module-qualified','default',false],'cmdlet-phases':['cmdlet-phases','default',false],'private-cache':['graph','private-cache',false],'cache-off':['graph','cache-off',false],'core-only':['graph','core-only',false],'precopy-core':['graph','precopy-core',false]};
 assert.ok(Object.hasOwn(firstCases,firstCase),'Select a declared first-case experiment');
 if(local)assert.equal(firstCase,'original','The guarded smoke must start with the unchanged original command');
 if(process.platform!=='win32')throw Error('Windows diagnostic only');
@@ -27,7 +27,7 @@ assert.ok(graphCommand,'The diagnostic must reconstruct the actual graph fixture
 // Hosted first cases run on distinct fresh jobs. A successful later original
 // is a warmed comparison, never a retry that qualifies the failed first case.
 const matrix=local?
- [['graph','default',false],['agent','default',false],['dotnet-control','default',false],['graph','minimal-path',false],['module-qualified','default',false],['cmdlet-phases','default',false],['graph','private-cache',false],['graph','cache-off',false]]:
+ [['graph','default',false],['agent','default',false],['dotnet-control','default',false],['graph','minimal-path',false],['module-qualified','default',false],['cmdlet-phases','default',false],['graph','private-cache',false],['graph','cache-off',false],['graph','core-only',false],['graph','precopy-core',false]]:
  [firstCases[firstCase],['graph','default',false],['agent','default',false],['dotnet-control','default',false]];
 const runRoot=await fs.mkdtemp(path.join(tmpdir(),'xmind-startup-probe-'));
 for(const [scenario,control,observer]of matrix){
@@ -41,11 +41,14 @@ for(const [scenario,control,observer]of matrix){
   previousElapsed=item.elapsed_ms;if(item.stderr_channel)continue;observedStdout+=item.data;
   for(const phase of ['script_entered','delay_completed','effect_completed','location_resolved'])if(phaseElapsedMs[phase]===undefined&&observedStdout.includes((phase==='location_resolved'?'xmind-probe:':'xmind-graph-phase:')+phase))phaseElapsedMs[phase]=item.elapsed_ms;
  }
- const passed=execution.exitCode===0&&native?.exit_code===0&&native?.termination==='exited'&&native.marker_exists&&normalize(native.marker_content)===normalize(canonicalFolder)&&normalize(native.working_directory)===normalize(canonicalFolder)&&typeof native.working_directory_id==='string'&&native.marker_directory_id===native.working_directory_id&&(scenario==='agent'||phases.length===3)&&observationsValid&&(scenario!=='cmdlet-phases'||phaseElapsedMs.location_resolved!==undefined);
+ const passed=execution.exitCode===0&&native?.exit_code===0&&native?.termination==='exited'&&native.marker_exists&&normalize(native.marker_content)===normalize(canonicalFolder)&&normalize(native.working_directory)===normalize(canonicalFolder)&&typeof native.working_directory_id==='string'&&native.marker_directory_id===native.working_directory_id&&(scenario==='agent'||phases.length===3)&&observationsValid&&(scenario!=='cmdlet-phases'||phaseElapsedMs.location_resolved!==undefined)&&native?.module_path_probe?.success===true;
+ if(['core-only','precopy-core'].includes(control)){
+  assert.equal(native?.core_module_copy?.unchanged,true);assert.equal(native.core_module_copy.search_path_overridden,control==='core-only');assert.ok(native.core_module_copy.files.length>0&&native.core_module_copy.files.length<=256);
+ }
  if(native&&['graph','agent'].includes(scenario))assert.equal(native.command,scenario==='graph'?originalGraph:originalAgent);
  cases.push({label,scenario,control,observer,firstOnFreshHostedJob:!local&&cases.length===0,passed,phases,phaseElapsedMs,native});
  await fs.writeFile(path.join(out,'cases-progress.json'),JSON.stringify(cases,null,2)+'\n');console.log(JSON.stringify({label,passed,elapsedMs:native?.elapsed_ms,phases,phaseElapsedMs}));
 }
 assert.deepEqual(await hashes(),before);assert.equal(sha(await fs.readFile(executable)),binarySha256);
-const result={recordedAt:new Date().toISOString(),scope:'Controlled actual native adapter diagnostics, not graph/agent or release qualification',mode:local?'guarded local eight-case smoke':'fresh hosted first-case with warmed original comparisons',firstCase,originalCommandTextVerified:true,processDeadlineMs:30000,deliberateGraphDelaySeconds:6,runRoot,host:{release:release(),arch:process.arch,imageVersion:process.env.ImageVersion||null,imageOS:process.env.ImageOS||null},sourceAndBinaryUnchanged:true,binarySha256,cases,allCasesPassed:cases.every(c=>c.passed),causeEstablished:false,productionCacheOrEnvironmentChanged:false,providerRequests:0,nativeAgentRunnerExecuted:false,cpythonExecuted:false};
+const result={recordedAt:new Date().toISOString(),scope:'Controlled actual native adapter diagnostics, not graph/agent or release qualification',mode:local?'guarded local ten-case smoke':'fresh hosted first-case with warmed original comparisons',firstCase,originalCommandTextVerified:true,processDeadlineMs:30000,deliberateGraphDelaySeconds:6,runRoot,host:{release:release(),arch:process.arch,imageVersion:process.env.ImageVersion||null,imageOS:process.env.ImageOS||null},sourceAndBinaryUnchanged:true,binarySha256,cases,allCasesPassed:cases.every(c=>c.passed),causeEstablished:false,productionCacheOrEnvironmentChanged:false,providerRequests:0,nativeAgentRunnerExecuted:false,cpythonExecuted:false};
 await fs.writeFile(path.join(out,'diagnostics.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});if(!result.allCasesPassed)process.exitCode=1;
