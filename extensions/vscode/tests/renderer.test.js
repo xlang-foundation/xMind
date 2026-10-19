@@ -459,6 +459,29 @@ test('model protocol failure shows only recognized diagnostics and preserves con
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'model_response_invalid'}}});assert.equal(card.querySelector('pre').textContent,'model_response_invalid');
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
 });
+for(const [reason,explanation] of [
+ ['agent_timeout',/run reached its time limit/],
+ ['process_effect_uncertain',/command ended without a confirmed outcome/]
+])test(`recorded ${reason} explains why coding stopped without replaying commands`,()=>{
+ const r=renderer(),doc=r.dom.window.document,initialPosts=r.posted.length;
+ try{
+  doc.getElementById('prompt').value='Keep my draft';
+  r.send({type:'event',event:{kind:'run.failed',data:{reason,message:'private command payload'}}});
+  r.send({type:'transcript',history:[]});
+  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);
+  assert.match(card.textContent,explanation);assert.match(card.textContent,/Review the recorded/);
+  if(reason==='process_effect_uncertain'){
+   assert.match(card.textContent,/may already have changed files or started a service/);
+   assert.match(card.textContent,/before running it again/);
+   assert.ok(!card.textContent.includes('timed out'));
+  }
+  assert.equal(doc.getElementById('prompt').value,'Keep my draft');
+  assert.equal(card.querySelector('button'),null);assert.equal(card.querySelector('.metrics'),null);
+  assert.equal(doc.querySelector('#history .assistant'),null);
+  assert.ok(!card.textContent.includes('private command payload'));assert.equal(r.posted.length,initialPosts);
+ }finally{r.dom.window.close();}
+});
+
 for(const reason of ['execution_budget_exhausted','model_turn_limit'])test(`execution limit ${reason} explains saved work and follow-up without replay`,()=>{
  const r=renderer(),doc=r.dom.window.document,initialPosts=r.posted.length;
  try{

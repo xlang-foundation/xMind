@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-10-19T22:38:41.329Z",
+  "baseRevision": "d97eb0605d7d8ee659c5a718dd3e525a5959713d",
+  "candidateInputs": {
+    "extensions/vscode/media/chat.js": "463018a9a8c6118a384aed5a5e45526c79d493f38a52dc6f9b7f162231e7285d",
+    "extensions/vscode/tests/renderer.test.js": "07fdbcaa8f33203c00c540173e5032998c8ac6e16ff35c436e9c867d39a1b66c",
+    "Tools/ci-views.mjs": "5f8e49b32217cbfd85bacfe242abbebbad982e688fe1473623c3367c770003aa"
+  },
+  "extension": {
+    "exitCode": 0,
+    "tests": 440,
+    "passed": 440,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "e6dda823d859f817358512cbb9cb963b1461ab189b90bcf5ba08c38d1a0ff887"
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 154,
+    "passed": 154,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "44b235a4700594ae0d06ae7af0359563f8e7da692f29d8aa1561d7bd5d57104e"
+  },
+  "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+  "stageFiles": 17439,
+  "nativeExecuted": false,
+  "providerRequests": 0,
+  "installed": false,
+  "renderedAcceptance": false,
+  "passed": true
+}

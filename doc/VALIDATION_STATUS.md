@@ -2,6 +2,39 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Automatic VS Code updates and coding failure diagnostics — 2026-10-19
+
+Installed 0.1.47 now passes an actual one-window observation of a first external
+run in an empty selected conversation. The pane automatically selects that run,
+shows its live transcript and metrics, accepts a denial through its approval
+controls, and updates to the failed terminal state without Refresh. Admission
+was through the native CLI; this does not prove UI-submitted coding completion.
+The sidebar/window layout was restored and the test window closed. Backend32704
+remains live.
+
+The fresh coding attempt `ef8c7839bc2089d478d3bb60fc26b647` failed after11 model
+calls with `process_effect_uncertain`: its final PowerShell process timed out
+after10030ms and its tree was retired. No requested file edit was applied; all
+seven protected hashes remain unchanged. A proposed helper was denied, while
+a separate process produced an out-of-scope diagnostic text file, retained in
+the evidence. This attempt is not coding acceptance and was not replayed.
+
+The operator's C5 premise was incorrect: its JavaScript source already contains
+ordinary tab/newline escapes (bytes92,116,92,110), which evaluate to characters9
+and10. The admission and failed run remain unchanged. A separate follow-up
+corrects that instruction and requests only the genuine duplicate C16 coverage
+change; it is still in progress.
+[Actual installed observation and failure](evidence/coding-installed-0.1.47-automatic-discovery-20261019.json).
+
+The shared web/VS Code renderer now explains `agent_timeout` and
+`process_effect_uncertain` directly, instead of its generic execution failure.
+It does not equate an uncertain outcome with a timeout or offer automatic replay.
+Two regression tests fail on the preceding renderer and pass after the fix.
+Complete isolated client suites pass440 VS Code/154 browser cases with all17439
+staged source, dependency, asset and runtime files unchanged during validation.
+This renderer change is source-tested, not installed or visually accepted yet.
+[Complete client gate](evidence/coding-failure-diagnostics-client-gate-20261019.json).
+
 ## Installed 0.1.47 client correction — 2026-10-19
 
 The installed package matches all2445 checked payloads. Staged and hosted client
@@ -16,7 +49,8 @@ settings, previous profile directories, all37 tracked owners and13 pages verify
 after installation. A new browser adapter at http://127.0.0.1:54803/ui/ shares
 that same backend; its Node host30020 and native view64920 are live.
 
-Installed visual acceptance of the automatic transcript correction remains
+The subsequent checkpoint above records actual VS Code acceptance of the
+automatic transcript correction. External browser visual acceptance remains
 pending. The external Chrome connector is unavailable; automatic tool policy
 rejects a direct Chrome launch without a specific reason. Windows Computer Use
 then stops because it cannot confidently determine the existing Edge window's

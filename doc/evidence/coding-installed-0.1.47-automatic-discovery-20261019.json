@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-19T22:38:01.619Z",
+  "installedVersion": "0.1.47",
+  "session": "58ef35476048503c598b5629019379da",
+  "run": "ef8c7839bc2089d478d3bb60fc26b647",
+  "admissionVia": "Native CLI",
+  "provider": "Claude",
+  "model": "claude-sonnet-4-6",
+  "taskSubmissions": 1,
+  "actualVsCode": {
+    "firstRunAutomaticallySelected": true,
+    "liveTranscriptVisible": true,
+    "terminalStatusAutomaticallyUpdated": true,
+    "refreshPressed": false,
+    "approvalDenialViaInstalledPane": true,
+    "sidebarAndWindowRestored": true,
+    "codeWindowsRemaining": 0
+  },
+  "codingAcceptance": false,
+  "terminalState": "failed",
+  "reason": "process_effect_uncertain",
+  "modelCalls": 11,
+  "historyMessages": 22,
+  "process": {
+    "id": "6713c4a70eab80bc1a9c48b4479a9426",
+    "state": "uncertain",
+    "termination": "timed_out",
+    "exitCode": 1,
+    "elapsedMs": 10030,
+    "processTreeRetired": true
+  },
+  "fileProposals": [
+    {
+      "id": "47fedbb266734b9dd0f37245d34ee155",
+      "tool": "create_file",
+      "state": "denied",
+      "path": "model-zoo/frontend/tests/_fix_c5_c16.mjs"
+    }
+  ],
+  "protectedHashesUnchanged": {
+    "model-zoo/frontend/tests/metric-format.test.mjs": "f0f223443ff0f3aa7ba604e3580b1ddabccd148e2a4186d398e5902516f9bd3f",
+    "model-zoo/frontend/src/utils/format.js": "d6ddaf2d001e90b84918b8f5dbaabe458a23dde3b157aa771927c839e526341d",
+    "model-zoo/frontend/src/api/client.js": "44b8ec6568dbc143aaeeffaa7d84ea9dce84a54de59abdb18ae8582c2d1850aa",
+    "model-zoo/frontend/src/api/request.js": "c78405ad6c9cad43e58957f377e3438ce2c89beb7617916949beb038f9eec8d1",
+    "model-zoo/frontend/tests/api-timeout.test.mjs": "8b4ffd2cb2a69f934254bfb3fd147743cb44fca548a746b1d711300e5027875b",
+    "model-zoo/frontend/package.json": "04a8677ed8c63d684fbe414a34188d6c38f56a02d535a8d0a17f343f91f40c04",
+    "model-zoo/frontend/package-lock.json": "c578432525f4caf159d7e74ac6081e6d29b1d13bd8b46bdc44ef9893b6809c76"
+  },
+  "c5PremiseCorrection": {
+    "originalPromptIncorrect": true,
+    "sourceLiteralBytes": [
+      92,
+      116,
+      92,
+      110
+    ],
+    "runtimeCharacterCodes": [
+      9,
+      10
+    ],
+    "conclusion": "C5 already exercises real tab/newline whitespace. No correction was necessary. The original admission and failed attempt are retained unchanged."
+  },
+  "outOfScopeArtifact": {
+    "path": "model-zoo/frontend/tests/_c5_bytes.txt",
+    "sha256": "6b73bf7df837b2c41d291140285f00ee9373275ac26b900d8b5f9364e12975d8",
+    "retained": true,
+    "cleaned": false
+  },
+  "fullTestAndBuildAfterEdit": false,
+  "cpythonExecuted": false,
+  "externalBrowserRenderedAcceptance": false
+}
