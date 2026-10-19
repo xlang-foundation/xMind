@@ -1,0 +1,222 @@
+{
+  "recordedAt": "2026-10-19T07:47:07.202Z",
+  "sourceParent": "cda68f98994b9b99a482c45c10e7f9fc1dec1bb0",
+  "patchSha256": "06afa31ec1739da313f52705524a0e64270a2af0b33873e94474a267d187029e",
+  "problem": "Narrow response tables split headers and code identifiers across lines; the first candidate also capped code-cell widths and could overlap adjacent values.",
+  "implementation": "Wrap sanitized response tables in focusable labelled scroll regions; contain horizontal overflow; preserve header/code whitespace; cap only non-code cells. Shared renderer serves browser and VS Code source.",
+  "localClients": {
+    "recordedAt": "2026-10-19T07:45:14.586Z",
+    "extension": {
+      "pid": 26236,
+      "startedAt": "2026-10-19T07:44:57.535Z",
+      "completedAt": "2026-10-19T07:45:02.500Z",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 428,
+      "passed": 428,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "c5ef48a46ea5fedb7f56ac05d3222d078c432c06f846aa84d7782c2f6b080770"
+    },
+    "browser": {
+      "pid": 55752,
+      "startedAt": "2026-10-19T07:44:57.542Z",
+      "completedAt": "2026-10-19T07:45:13.429Z",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "edd286f257532e644feb04da4e7fc995ce0bbf821fc06bf14b0c65be52379b35"
+    },
+    "sourceFiles": 66,
+    "dependencyFiles": 14908,
+    "assetFiles": 18,
+    "allSourcesDependenciesAssetsAndFileSetsUnchanged": true,
+    "scope": "Complete local Node client fixture suites; no native, live model or actual VS Code pane acceptance",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "passed": true
+  },
+  "candidate": {
+    "startedAt": "2026-10-19T07:44:48.009Z",
+    "mode": "candidate",
+    "url": "http://127.0.0.1:59450/ui/",
+    "scope": "Read-only actual saved coding conversation and current backend; candidate assets intercepted only when mode=candidate; no model task or file effect",
+    "errors": [],
+    "failedHTTP": [],
+    "blockedEffects": [],
+    "layouts": [
+      {
+        "viewport": 1440,
+        "documentWidth": 1440,
+        "regionWidth": 395,
+        "tableWidth": 772,
+        "regionOverflow": "auto",
+        "headerFragments": 1,
+        "headerWhiteSpace": "nowrap",
+        "codeWhiteSpace": "nowrap",
+        "chatWidth": 419,
+        "chatScrollWidth": 419,
+        "keyboardScrollLeft": 2
+      },
+      {
+        "viewport": 390,
+        "documentWidth": 390,
+        "regionWidth": 366,
+        "tableWidth": 772,
+        "regionOverflow": "auto",
+        "headerFragments": 1,
+        "headerWhiteSpace": "nowrap",
+        "codeWhiteSpace": "nowrap",
+        "chatWidth": 390,
+        "chatScrollWidth": 390,
+        "keyboardScrollLeft": 1
+      }
+    ],
+    "assetSha256": {
+      "chat.js": "40b96a3440f81d87e3bd45c7dc227f3fcda907f3601aa7b7ac9bd8ad889fd11c",
+      "chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a"
+    },
+    "historyElapsedMs": 1558,
+    "messages": 36,
+    "usageRecords": 14,
+    "passed": true,
+    "completedAt": "2026-10-19T07:44:49.853Z"
+  },
+  "served": {
+    "startedAt": "2026-10-19T07:46:19.369Z",
+    "mode": "served",
+    "url": "http://127.0.0.1:59450/ui/",
+    "scope": "Read-only actual saved coding conversation and current backend; candidate assets intercepted only when mode=candidate; no model task or file effect",
+    "errors": [],
+    "failedHTTP": [],
+    "blockedEffects": [],
+    "layouts": [
+      {
+        "viewport": 1440,
+        "documentWidth": 1440,
+        "regionWidth": 395,
+        "tableWidth": 772,
+        "regionOverflow": "auto",
+        "headerFragments": 1,
+        "headerWhiteSpace": "nowrap",
+        "codeWhiteSpace": "nowrap",
+        "chatWidth": 419,
+        "chatScrollWidth": 419,
+        "keyboardScrollLeft": 2
+      },
+      {
+        "viewport": 390,
+        "documentWidth": 390,
+        "regionWidth": 366,
+        "tableWidth": 772,
+        "regionOverflow": "auto",
+        "headerFragments": 1,
+        "headerWhiteSpace": "nowrap",
+        "codeWhiteSpace": "nowrap",
+        "chatWidth": 390,
+        "chatScrollWidth": 390,
+        "keyboardScrollLeft": 6
+      }
+    ],
+    "assetSha256": {
+      "chat.js": "40b96a3440f81d87e3bd45c7dc227f3fcda907f3601aa7b7ac9bd8ad889fd11c",
+      "chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a"
+    },
+    "historyElapsedMs": 1663,
+    "messages": 36,
+    "usageRecords": 14,
+    "passed": true,
+    "completedAt": "2026-10-19T07:46:21.322Z"
+  },
+  "publication": {
+    "recordedAt": "2026-10-19T07:46:18.402Z",
+    "source": "C:/xMindNativeValidation/table-readability-candidate-v2-20261019",
+    "target": "C:/xMindNativeValidation/browser-assets-0.1.38-native-20261019",
+    "backup": "C:/xMindNativeValidation/table-readability-assets-before-20261019",
+    "changedAssets": [
+      "chat.css",
+      "chat.js"
+    ],
+    "all18AssetsMatchCandidate": true,
+    "oldAssetsBackedUpExactly": true,
+    "ownersUnchanged": [
+      {
+        "ProcessId": 40732,
+        "CreationDate": "2026-10-19T07:05:42.8122650Z",
+        "ExecutablePath": "C:\\Program Files\\nodejs\\node.exe"
+      },
+      {
+        "ProcessId": 67828,
+        "CreationDate": "2026-10-19T07:05:43.8541970Z",
+        "ExecutablePath": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.38\\native-runtime\\xmind.exe"
+      },
+      {
+        "ProcessId": 27692,
+        "CreationDate": "2026-10-19T07:05:47.2161400Z",
+        "ExecutablePath": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xmind.exe"
+      }
+    ],
+    "backendRestarted": false,
+    "installedExtensionModified": false,
+    "nativeRuntimeModified": false
+  },
+  "installedVSCodeRendererUpdated": false,
+  "actualVSCodePaneAccepted": false,
+  "hostedClientGateAccepted": false,
+  "originalCandidateFailure": {
+    "startedAt": "2026-10-19T07:43:58.458Z",
+    "mode": "candidate",
+    "url": "http://127.0.0.1:59450/ui/",
+    "scope": "Read-only actual saved coding conversation and current backend; candidate assets intercepted only when mode=candidate; no model task or file effect",
+    "errors": [],
+    "failedHTTP": [],
+    "blockedEffects": [],
+    "layouts": [
+      {
+        "viewport": 1440,
+        "documentWidth": 1440,
+        "regionWidth": 395,
+        "tableWidth": 578,
+        "regionOverflow": "auto",
+        "headerFragments": 1,
+        "headerWhiteSpace": "nowrap",
+        "codeWhiteSpace": "nowrap",
+        "chatWidth": 419,
+        "chatScrollWidth": 419,
+        "keyboardScrollLeft": 2
+      }
+    ],
+    "assetSha256": {},
+    "historyElapsedMs": 1809,
+    "passed": false,
+    "error": "locator.scrollIntoViewIfNeeded: Element is not attached to the DOM\nCall log:\n\u001b[2m  - attempting scroll into view action\u001b[22m\n\u001b[2m    - waiting for element to be stable\u001b[22m\n",
+    "completedAt": "2026-10-19T07:44:00.481Z"
+  },
+  "observerPreflightFailures": {
+    "attempts": [
+      {
+        "stage": "module parse",
+        "error": "Unexpected token ')' in local validation helper; no tests executed"
+      },
+      {
+        "stage": "dependency hashing",
+        "error": "EMFILE from unbounded Promise.all reads; no tests executed"
+      }
+    ],
+    "correction": "Fix helper syntax and batch file reads in groups of 32; use a fresh bounded output folder. Product source and test assertions unchanged."
+  },
+  "publicationPreflightFailure": {
+    "stage": "read-only owner identity check before backup or publication",
+    "error": "Windows PowerShell serialized CreationDate using /Date(...)/; JavaScript Date returned NaN",
+    "assetsChanged": false,
+    "correction": "Request explicit UTC ISO timestamp from CIM; retain exact PID, creation-time and normalized-image checks."
+  },
+  "taskSubmissions": 0,
+  "modelInferenceRequests": 0,
+  "releaseAccepted": false
+}

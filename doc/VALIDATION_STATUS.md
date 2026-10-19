@@ -1,5 +1,31 @@
 # Current native validation
 
+## Readable response tables on the live webpage — 2026-10-19
+
+The shared browser/VS Code renderer now gives Markdown tables labelled,
+keyboard-focusable horizontal scroll regions. Headers and inline code remain
+on one line; table overflow stays inside the response. The first candidate
+still capped code-cell widths and could overlap adjacent values; the final
+CSS limits only non-code cells. An initial browser observer also lost its
+element during a transcript refresh; its failed receipt remains preserved.
+
+The complete local client suites pass **428 extension / 147 browser** tests
+with all 66 source files, 14,908 dependency files and 18 built assets unchanged.
+Sandboxed headless Edge verifies the actual saved coding conversation at
+1440px and 390px viewport widths: one-line headers, unbroken code, keyboard
+horizontal scrolling, no document/chat overflow and a usable composer.
+
+Only chat.js/chat.css are applied to http://127.0.0.1:59450/ui/ after exact
+asset backup and candidate validation. The served page passes the same checks,
+restoring 36 messages/14 supplied usage records and saved Claude/model without
+page errors, failed HTTP responses or effect submissions. Host, native view
+and backend identities remain unchanged. The installed 0.1.38 extension and
+native runtime are unchanged; packaging this renderer, exact hosted-client
+qualification and actual VS Code pane testing remain open.
+[Source, retained failures, client gates and served-page proof](evidence/table-readability-20261019.json),
+[desktop capture](evidence/table-readability-desktop-20261019.png),
+[mobile capture](evidence/table-readability-mobile-20261019.png).
+
 ## Native suite result and direct console resume — 2026-10-19
 
 The complete local suite finishes at **151 passed / 1 failed** in 985.94 seconds.

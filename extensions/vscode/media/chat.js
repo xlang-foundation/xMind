@@ -87,6 +87,7 @@ byId('skills-refresh').onclick=()=>{skillPending=true;skillControls();api.postMe
 byId('skills-clear').onclick=()=>{if(!skillSnapshot?.selection?.editable||sessionBusy||activeRun||skillPending)return;skillPending=true;skillControls();const state=skillSnapshot.selection;api.postMessage({type:'skills-change',session:state.session_id,revision:state.revision,ids:[]});};
 function markdown(el,text){
   el.innerHTML=DOMPurify.sanitize(marked.parse(text||'',{gfm:true,breaks:false}),{FORBID_TAGS:['style','iframe','form','input','button'],FORBID_ATTR:['style'],ALLOW_DATA_ATTR:false});
+  for(const table of el.querySelectorAll('table')){const region=node('div',undefined,'markdown-table-scroll');region.setAttribute('role','region');region.setAttribute('aria-label','Response table');region.tabIndex=0;table.before(region);region.append(table);}
   for(const anchor of el.querySelectorAll('a')){anchor.addEventListener('click',event=>{event.preventDefault();api.postMessage({type:'openLink',url:anchor.getAttribute('href')});});}
   for(const block of el.querySelectorAll('pre')){const button=node('button','Copy code','copy-code');button.onclick=()=>api.postMessage({type:'copy',text:block.querySelector('code')?.textContent||block.textContent});block.after(button);}
 }

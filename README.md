@@ -37,6 +37,12 @@ remains unverified. [Installed package and live lifecycle evidence](doc/evidence
 [Native result and fixture correction](doc/evidence/service-lifecycle-native-checkpoint-20261019.json),
 [direct console resume](doc/evidence/console-resume-0.1.38-20261019.json).
 
+The current development webpage also has horizontally scrollable response
+tables with readable headers and code, verified against its saved conversation
+at desktop and mobile widths. This shared-renderer source passes 428 extension
+and 147 browser checks; its VS Code package update remains pending.
+[Live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
+
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic
 explorer refresh and explicit idle-owner recovery. Existing sessions remain

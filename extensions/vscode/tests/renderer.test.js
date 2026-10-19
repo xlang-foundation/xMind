@@ -33,6 +33,20 @@ test('stream text is accumulated before one sanitized frame and terminal text fl
  }finally{r.dom.window.close();}
 });
 
+test('response tables preserve code and link content in keyboard-focusable scroll regions after history and stream rendering',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ const content='| Request | Actual HTTP | Details |\n| --- | --- | --- |\n| `GET /api/models?sort=not-a-valid-sort` | 422 | [API reference](https://example.test/api) |';
+ try{
+  r.send({type:'history',history:[{id:'table-fixture',role:'assistant',data:{content}}]});
+  let region=doc.querySelector('#history [role="region"][aria-label="Response table"]');
+  assert.equal(region.tabIndex,0);assert.equal(region.querySelector('th:nth-child(2)').textContent,'Actual HTTP');assert.equal(region.querySelector('code').textContent,'GET /api/models?sort=not-a-valid-sort');
+  region.querySelector('a').click();assert.equal(r.posted.at(-1).type,'openLink');assert.equal(r.posted.at(-1).url,'https://example.test/api');
+  r.send({type:'event',event:{kind:'model.text',data:{text:content}}});r.send({type:'event',event:{kind:'model.done',data:{}}});
+  region=doc.querySelector('#live [role="region"][aria-label="Response table"]');assert.equal(region.tabIndex,0);assert.equal(region.querySelectorAll('table').length,1);assert.equal(region.querySelector('code').textContent,'GET /api/models?sort=not-a-valid-sort');
+  assert.equal(doc.querySelectorAll('.markdown-table-scroll .markdown-table-scroll').length,0);
+ }finally{r.dom.window.close();}
+});
+
 test('queued stream work cannot repaint a replacement conversation or an obsolete child',()=>{
  const r=renderer({batchFrames:true}),doc=r.dom.window.document;
  try{
