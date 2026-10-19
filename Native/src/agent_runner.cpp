@@ -367,7 +367,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());trusted.tools.push_back(RestoreExecutor::definition());}
-    if(process_){trusted.tools.push_back(process_->definition());trusted.tools.push_back(process_->wait_definition());}
+    if(process_){trusted.tools.push_back(process_->definition());trusted.tools.push_back(process_->wait_definition());trusted.tools.push_back(process_->stop_definition());}
     if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
     struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
@@ -612,7 +612,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(settings_.approved_edits) request.tools.push_back(RestoreExecutor::definition());
-        if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());if(!dynamic_plan_owner&&!leaf)request.tools.push_back(process_->stop_definition());}
+        if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());if(!leaf&&(!dynamic_plan_owner||dynamic_root))request.tools.push_back(process_->stop_definition());}
         if(language_servers_)for(auto& definition:language_servers_->definitions())request.tools.push_back(std::move(definition));
         std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
         for(const auto& registration:settings_.xlang_python_tools){

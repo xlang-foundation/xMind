@@ -14,6 +14,7 @@ assert.ok(executable&&modules&&stdlib&&cliExecutable,'Expected engine contract, 
 const folder=await mkdtemp(join(tmpdir(),'xmind-dynamic-engine-')),workspace=join(folder,'workspace');
 const key='synthetic-dynamic-engine-key-not-live',counts=new Map(),requests=[],barrier=[],planningBarrier=[],held=[];
 let failure;
+const serviceControlCounts={start:0,stop:0};let serviceControlJob;
 const event=value=>'event: '+value.type+'\ndata: '+JSON.stringify(value)+'\n\n';
 const start=input=>event({type:'message_start',message:{id:'synthetic-dynamic-message',type:'message',role:'assistant',model:'synthetic-dynamic-engine',content:[],stop_reason:null,stop_sequence:null,usage:{input_tokens:input,output_tokens:0}}});
 function thought(signature){return event({type:'content_block_start',index:0,content_block:{type:'thinking',thinking:'',signature:''}})+event({type:'content_block_delta',index:0,delta:{type:'thinking_delta',thinking:'Explicit synthetic reasoning for '+signature}})+event({type:'content_block_delta',index:0,delta:{type:'signature_delta',signature}})+event({type:'content_block_stop',index:0});}
@@ -53,6 +54,18 @@ const peer=createServer((request,response)=>{
   assert.equal(request.method,'POST');assert.equal(request.url,'/messages');assert.equal(request.headers['x-api-key'],key);assert.equal(request.headers.authorization,undefined);
   const raw=Buffer.concat(chunks).toString('utf8');assert.ok(!raw.includes(key));const body=JSON.parse(raw);assert.equal(body.model,'synthetic-dynamic-engine');assert.equal(body.stream,true);
   const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),canPlan=names.includes('plan_tasks');
+  const serviceControl=source.includes('fixture-service-stop-parent')?'stop':source.includes('fixture-service-start-parent')?'start':undefined;
+  if(serviceControl){
+   assert.ok(canPlan&&names.includes('run_process')&&names.includes('wait_process')&&names.includes('stop_process'),'Planned coding roots must advertise the complete persistent service lifecycle');
+   const turn=++serviceControlCounts[serviceControl],last=results(body.messages).at(-1),signature='opaque-parent-service-control-'+serviceControl+'-'+turn;
+   if(serviceControl==='start'){
+    if(turn===1){send(response,start(11)+thought(signature)+tool('read_repository_instructions','service-guidance-call',{directory:'.'})+terminal('tool_use',3));return;}
+    if(turn===2){assert.equal(last.tool_use_id,'service-guidance-call');send(response,start(11)+thought(signature)+tool('run_process','service-start-call',{profile:'fixture-service',arguments:[],background:true,persistent:true,timeout_ms:30000})+terminal('tool_use',3));return;}
+    assert.equal(turn,3);assert.equal(last.tool_use_id,'service-start-call');const started=JSON.parse(last.content);assert.equal(started.state,'running',JSON.stringify(started.error??{keys:Object.keys(started)}));assert.ok(started.job_id);serviceControlJob=started.job_id;send(response,start(11)+thought(signature)+text('Actual native fixture service remains running after this response.')+terminal('end_turn',3));return;
+   }
+   if(turn===1){assert.ok(serviceControlJob);send(response,start(11)+thought(signature)+tool('stop_process','service-stop-call',{job_id:serviceControlJob})+terminal('tool_use',3));return;}
+   assert.equal(turn,2);assert.equal(last.tool_use_id,'service-stop-call');const stopped=JSON.parse(last.content);assert.equal(stopped.state,'succeeded');assert.equal(stopped.result.service_stopped,true);assert.equal(stopped.result.process_tree_retired,true);send(response,start(11)+thought(signature)+text('Actual prior native service tree is stopped.')+terminal('end_turn',3));return;
+  }
   const isRoot=['empty-inspect','main','nested','nested-restart','nested-parallel','nested-multihuman','final-human','restart-human','cancel','expiry'].some(label=>source.includes('fixture-'+label+'-parent'));
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
   if(isRoot)assert.deepEqual(names,[...readTools,'language_server','edit_file','create_file','apply_patch','restore_operation','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains its configured coding authority');
@@ -154,6 +167,6 @@ try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');for(const side of ['left','right'])await writeFile(join(workspace,`nested-parallel-${side}-reader.txt`),`Actual nested-parallel-${side}-reader bytes\n`);await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace,cliExecutable],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
-  if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{'empty-inspect':2,main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,46);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
+  if(failure)throw failure;assert.deepEqual(serviceControlCounts,{start:3,stop:2});assert.deepEqual(Object.fromEntries(counts),{'empty-inspect':2,main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,46);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
 }catch(error){if(failure)throw new Error((failure.stack??String(failure))+'; actual native engine: '+(error.stderr??error.message));throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

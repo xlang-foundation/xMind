@@ -1,5 +1,45 @@
 # Current native validation
 
+## Installed 0.1.37 live coding and service-control follow-up — 2026-10-19
+
+0.1.37 is installed through the actual VS Code CLI, with native source 4fba755
+(ebe83d12), SDK 58a8aab/DLL 1ff2a8e and manifest d86b5540. All 2,448 archive
+entries, 2,445 installed payloads plus metadata and 2,402 runtime files verify.
+The complete stage and exact-revision hosted clients pass 427/147; all 17,439
+stage files remain unchanged. Backup 0.1.36, user settings, six prior profile
+names, 15 existing owners, five runtimes and six old pages remain preserved.
+The first test launcher supplied the wrong meaning of --built-server and was
+rejected before native startup; its receipts remain. The corrected launcher
+uses the installed native executable and starts http://127.0.0.1:55921/ui/.
+
+Actual saved-key Claude execution edits only ModelDetailView.vue, passes 32
+backend tests under xlang3 and builds all 37 Vite modules. The coding root
+ed09b7acbee8c26d205bbcd84022adac completes while both persistent services remain
+running, closing the original live completion failure. Reload restores all
+33 messages and 14 supplied usage records. All 1,033 original source/dependency
+inputs stay unchanged; only the intended file in the isolated copy differs.
+Actual browser checks pass for API/proxy responses, search, Reset during pending
+debounce, saved-model storage/reload, detail navigation and return to catalog,
+with no page errors. This is an isolated test workspace, not an edit of TestProj.
+
+The explicit shutdown follow-up is **not accepted**: the model correctly reports
+that stop_process is absent, and both jobs remain running. Source inspection
+confirms planned-root catalogue construction omitted that tool. The new fix
+offers stop_process to primary planned roots and includes it in idle context
+projection; nested planning and leaf restrictions remain. A native engine test
+starts a real bounded child, completes the first response while it remains live,
+then stops that exact child from a follow-up and checks its stored retirement.
+The old catalogue fails the regression. The corrected test and five related
+agent/process/context contracts pass, with a complete product build and frozen
+inputs/binaries. New executable 5d3f7941 is not yet installed; installed 0.1.37
+still uses ebe83d12. Initial fixture compile and unsupported 10-second service
+inputs are retained; the final fixture follows the existing 30-second minimum,
+without extending provider/run/observation/CTest deadlines. Packaging and live
+shutdown verification of this follow-up remain next. No new complete-native,
+actual editor pane or release acceptance is claimed.
+[Installation and live coding proof](evidence/coding-package-0.1.37-20261019.json).
+[Service-control reproduction and correction](evidence/dynamic-service-stop-catalogue-20261019.json).
+
 ## Persistent development-server completion fix — 2026-10-19
 
 The fuller ModelZoo coding test exposed a backend completion bug. The model

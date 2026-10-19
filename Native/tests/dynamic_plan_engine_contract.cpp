@@ -91,12 +91,32 @@ CliProcessResult run_cli(const std::filesystem::path& executable,const std::file
 #endif
 }
 int main(int argc,char** argv){
+    if(argc==2&&std::string(argv[1])=="--persistent-service-peer"){
+        std::cout<<"Actual synthetic service process READY\n"<<std::flush;
+        for(;;)std::this_thread::sleep_for(100ms);
+    }
     if(argc!=7)return 2;
     try{
         const std::filesystem::path folder=argv[1],workspace=argv[5];const auto database=(folder/"state.sqlite").string();const std::vector<std::string> imports={argv[2],argv[3]};const auto frozen=settings(argv[4],workspace.string(),argv[6]);
         DynamicPlanRecord before;std::vector<Message> paused_history;std::vector<OwnedChildRecord> original_children;
         {
             PersistenceService store(database,imports);const std::string key=fixture_key;store.put_credential("fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine","Synthetic fixture credential",SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()}),0).get();
+            {
+                auto control_settings=frozen;control_settings.process_profiles.push_back({"fixture-service",std::filesystem::absolute(argv[0]).string(),1,{"--persistent-service-peer"},30s,{},true});
+                AgentService control_service(store,control_settings,1,4);store.create_session("service-control-session","Actual planned-root persistent service lifecycle").get();
+                auto finished=[&](const char* id){const auto state=store.run(id).get().state;return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;};
+                control_service.submit("service-start-root","service-control-session","fixture-service-start-parent: Start the bounded native fixture service and finish while it remains running.");
+                eventually([&]{return finished("service-start-root");},"Service-start root did not finish");
+                require(store.run("service-start-root").get().state==RunState::completed,"Planned coding root must expose service control and complete with its live service");
+                const auto jobs=store.operations("service-start-root").get();require(jobs.size()==1&&jobs.front().state==OperationState::executing,"Actual persistent fixture service must remain running after the answer");
+                eventually([&]{try{return store.read_process_output(jobs.front().id,"stdout",0,4096).get().bytes.find("READY")!=std::string::npos;}catch(const NotFound&){return false;}},"Actual native service did not publish its readiness output");
+                control_service.submit("service-stop-root","service-control-session","fixture-service-stop-parent: Stop the exact prior service through stop_process and report its actual receipt.");
+                eventually([&]{return finished("service-stop-root");},"Service-stop follow-up did not finish");
+                require(store.run("service-stop-root").get().state==RunState::completed,"Same-session planned follow-up must complete its service stop");
+                const auto stopped=store.operation(jobs.front().id).get();const auto receipt=Json::parse(stopped.result_json);
+                require(stopped.state==OperationState::succeeded&&receipt.value("service_stopped",false)&&receipt.value("process_tree_retired",false),"Follow-up must intentionally stop and retire the actual original service tree");
+                control_service.close();
+            }
             write(workspace/"nested-inner.txt","Actual dynamic nested-inner file bytes\n");
             write(workspace/"nested-deep.txt","Actual dynamic depth-two file bytes\n");
             auto ordinary=frozen;ordinary.planning.reset();AgentService ordinary_service(store,ordinary,1,4);
