@@ -13,19 +13,19 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The installed local VS Code package is **0.1.39**, with native source
-`ffee1245f6355d01c9318bf79396e36ed864c181` and xlang3 SDK
+The installed local VS Code package is **0.1.40**, with native source
+`b44bbdece0a7feb40401287722c9cf6580b9ace7` and xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | New native source passes all 153 local contracts with frozen inputs and binaries; installed 0.1.39 retains its preceding runtime until the next package. |
-| Clients | Final package passes 428 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
+| Native backend | Installed runtime passes all 153 local contracts with frozen inputs and binaries; actual Claude repairs a TypeScript error through native tools and verifies compiler success. |
+| Clients | Installed package passes 428 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. The subsequent status fix passes 429/147 locally. |
 | Installed coding | The unchanged runtime was verified in 0.1.38 through actual Claude execution: xlang3 FastAPI/Vite start, response completion with both services alive, then explicit shutdown. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
-| Shared CLI and persistence | Installed 0.1.39 CLI reuses the existing backend and exact history. Its earlier 0.1.38 CLI task completes actual xlang3 API checks. Browser reload retains all 36 messages and 14 supplied usage records with no effect replay. |
+| Shared CLI and persistence | Installed 0.1.40 CLI and browser use one backend for actual Claude diagnostics; CLI also runs the compiler successfully. Reload retains the 13-message conversation and five usage records. Earlier app lifecycle sessions remain separate. |
 | Console resume | Direct Windows console displays the saved conversation and supplied token metrics, accepts run inspection and exits normally; history and runs stay unchanged. |
-| Preserved work | All 21 checked older owners, seven runtime inventories, eight webpages, settings and prior profile directories remain intact. |
+| Preserved work | All 21 checked older owners, eight runtime inventories, eight older webpages, settings and prior profile directories remain intact. |
 | Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
 The installed native backend lets completed replies leave persistent app servers
@@ -40,17 +40,19 @@ remains unverified. [Installed package and live lifecycle evidence](doc/evidence
 The current development webpage also has horizontally scrollable response
 tables with readable headers and code, verified against its saved conversation
 at desktop and mobile widths. This shared renderer is included in installed
-0.1.39 and matches the live webpage bytes. Actual VS Code pane activation
-remains unverified.
+0.1.40. The test webpage additionally fixes the previous run's completed status
+lingering while a newly selected run starts; that fix is not yet installed in
+the extension. Actual VS Code pane activation remains unverified.
 [Installed package and preserved sessions](doc/evidence/coding-package-0.1.39-20261019.json),
 [live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
 
 New native source also supports push-only language-server diagnostics and
 Node-style Windows file URIs. All 153 native checks and an actual Claude
-diagnostics → reviewed edit → compiler repair task pass. Packaging and
-hosted-native qualification remain pending; installed 0.1.39 is unchanged.
+diagnostics → reviewed edit → compiler repair task pass. The runtime is now
+installed in 0.1.40; hosted-native qualification remains pending.
 The separate Rust semantic-startup failure remains open.
 [Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
+[Installed 0.1.40 and browser status evidence](doc/evidence/coding-package-0.1.40-20261019.json).
 
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic

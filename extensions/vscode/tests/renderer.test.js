@@ -33,6 +33,22 @@ test('stream text is accumulated before one sanitized frame and terminal text fl
  }finally{r.dom.window.close();}
 });
 
+test('selecting a newly admitted run replaces the previous terminal status immediately',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  r.send({type:'status',text:'completed'});
+  r.send({type:'runs',runs:[{id:'previous',state:'completed'},{id:'new',state:'queued'}],selected:'new',busy:true});
+  assert.equal(doc.getElementById('runs').value,'new');
+  assert.equal(doc.getElementById('status').textContent,'queued');
+  assert.equal(doc.getElementById('cancel').hidden,false);
+  r.send({type:'runs',runs:[{id:'previous',state:'completed'},{id:'new',state:'running'}],selected:'new',busy:true});
+  assert.equal(doc.getElementById('status').textContent,'running');
+  r.send({type:'runs',runs:[{id:'previous',state:'completed'},{id:'new',state:'completed'}],selected:'new',busy:false});
+  assert.equal(doc.getElementById('status').textContent,'completed');
+  assert.equal(doc.getElementById('cancel').hidden,true);
+ }finally{r.dom.window.close();}
+});
+
 test('response tables preserve code and link content in keyboard-focusable scroll regions after history and stream rendering',()=>{
  const r=renderer(),doc=r.dom.window.document;
  const content='| Request | Actual HTTP | Details |\n| --- | --- | --- |\n| `GET /api/models?sort=not-a-valid-sort` | 422 | [API reference](https://example.test/api) |';

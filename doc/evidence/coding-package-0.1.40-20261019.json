@@ -1,0 +1,498 @@
+{
+  "recordedAt": "2026-10-19T09:07:03.287Z",
+  "version": "0.1.40",
+  "sourceRevision": "afc9c0291a317e3274463d50f820cc693d474674",
+  "archive": {
+    "recordedAt": "2026-10-19T08:48:26.455Z",
+    "version": "0.1.40",
+    "sourceRevision": "afc9c0291a317e3274463d50f820cc693d474674",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.40-complete-win32-x64.vsix",
+    "archiveBytes": 34421601,
+    "archiveSha256": "554d8f9924d3fb2e5b692dcc6e27e0535e3a195374b995d99e380d76060415ba",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-19T08:47:31.531Z",
+      "completedAt": "2026-10-19T08:48:23.681Z",
+      "pid": 23408,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "459ea3a5e15aa7bad9c1a247c4482bc84cfb498777df31789a4d9a2bc33eef45"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.40",
+    "version": "0.1.40",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "b44bbdece0a7feb40401287722c9cf6580b9ace7",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "8137d60b3c9c471a1d0468449221406f42db251b7c0a56587c4e8c19c1c00ffb",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "localClients": {
+    "recordedAt": "2026-10-19T08:46:14.834Z",
+    "version": "0.1.40",
+    "sourceRevision": "afc9c0291a317e3274463d50f820cc693d474674",
+    "extension": {
+      "exitCode": 0,
+      "tests": 428,
+      "passed": 428,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4a7129d68163eec087445942cef3410f583a243f752930d1070681935477d945"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "48a1e1d1b1ccbbf5058bfc5a459347357befe2229443e4a98e6fd06d6ec2fb6a"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClients": {
+    "recordedAt": "2026-10-19T08:47:06.271Z",
+    "run": 39224716294,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39224716294",
+    "sourceRevision": "afc9c0291a317e3274463d50f820cc693d474674",
+    "artifact": 12173556055,
+    "artifactBytes": 309370,
+    "artifactSha256": "68d734d350bfb506259f14c65a41c75ec44d08e6f54a3df84c689e90f129867c",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "afc9c0291a317e3274463d50f820cc693d474674",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 428,
+        "browser": 147
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 428,
+        "passed": 428,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "crossHostSource": {
+      "rawIdentical": [
+        "extensions/vscode/.vscodeignore",
+        "extensions/vscode/LICENSE",
+        "extensions/vscode/browser-view.js",
+        "extensions/vscode/client.js",
+        "extensions/vscode/edit-review.js",
+        "extensions/vscode/editor-selection.js",
+        "extensions/vscode/extension.js",
+        "extensions/vscode/language-server-editor.js",
+        "extensions/vscode/media/xmind.svg",
+        "extensions/vscode/native-runtime.js",
+        "extensions/vscode/patch-review.js",
+        "extensions/vscode/scripts/package-native-runtime.mjs",
+        "extensions/vscode/terminal.js",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/backend-smoke.js",
+        "extensions/vscode/tests/browser-view.test.js",
+        "extensions/vscode/tests/client-context.test.js",
+        "extensions/vscode/tests/client-mcp-authorization.test.js",
+        "extensions/vscode/tests/client-planning.test.js",
+        "extensions/vscode/tests/client-timer-binding.test.js",
+        "extensions/vscode/tests/client.test.js",
+        "extensions/vscode/tests/editor-selection.test.js",
+        "extensions/vscode/tests/language-server-editor.test.js",
+        "extensions/vscode/tests/mcp-authorization-controller.test.js",
+        "extensions/vscode/tests/native-runtime-package.test.js",
+        "extensions/vscode/tests/native-runtime.test.js",
+        "extensions/vscode/tests/plan-fixture.js",
+        "extensions/vscode/tests/provider-profile-controller.test.js",
+        "extensions/vscode/tests/terminal.test.js",
+        "extensions/vscode/tests/vcs.test.js",
+        "extensions/vscode/tests/workspace-backend.test.js",
+        "extensions/vscode/webview.js",
+        "extensions/vscode/workspace-backend.js",
+        "views/browser/browser.css",
+        "views/browser/build.mjs",
+        "views/browser/page.cjs",
+        "views/browser/tests/classic-script.test.cjs",
+        "views/browser/tests/connection.test.cjs",
+        "views/browser/tests/launcher-build.test.cjs",
+        "views/browser/tests/mcp-authorization-routes.test.cjs",
+        "views/browser/tests/native-contract.mjs",
+        "views/browser/tests/planning-routes.test.cjs",
+        "extensions/vscode/node_modules/marked/lib/marked.umd.js",
+        "extensions/vscode/node_modules/dompurify/dist/purify.min.js",
+        "extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js",
+        "extensions/vscode/node_modules/@xterm/xterm/css/xterm.css",
+        "extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js"
+      ],
+      "lineEndingsOnly": [
+        "extensions/vscode/README.md",
+        "extensions/vscode/git-changes-tree.js",
+        "extensions/vscode/media/chat.css",
+        "extensions/vscode/media/chat.js",
+        "extensions/vscode/package-lock.json",
+        "extensions/vscode/package.json",
+        "extensions/vscode/scripts/pip-bootstrap.mjs",
+        "extensions/vscode/tests/client-mcp-resources.test.js",
+        "extensions/vscode/tests/extension-host.test.js",
+        "extensions/vscode/tests/git-changes-tree.test.js",
+        "extensions/vscode/tests/renderer.test.js",
+        "extensions/vscode/tests/session-model.test.js",
+        "extensions/vscode/tests/session-permissions.test.js",
+        "views/browser/browser.js",
+        "views/browser/server.mjs",
+        "views/browser/terminal.js",
+        "views/browser/tests/controller.test.cjs",
+        "views/browser/tests/launcher-lifecycle.test.cjs",
+        "views/browser/tests/responsive-layout.test.cjs",
+        "views/browser/tests/server.test.cjs",
+        "views/browser/tests/terminal.test.cjs",
+        "Tools/start-browser.mjs",
+        "Tools/browser-host-lifecycle.mjs"
+      ],
+      "total": 70
+    },
+    "crossHostAssets": {
+      "rawIdentical": [
+        "index.html",
+        "patch-review.js",
+        "client.js",
+        "marked.js",
+        "purify.js",
+        "xterm.js",
+        "xterm.css",
+        "xterm-fit.js",
+        "browser.css",
+        "licenses/marked.txt",
+        "licenses/dompurify.txt",
+        "licenses/dompurify-MPL.txt",
+        "licenses/xterm.txt",
+        "licenses/xterm-addon-fit.txt"
+      ],
+      "lineEndingsOnly": [
+        "chat.js",
+        "chat.css",
+        "terminal.js",
+        "browser.js"
+      ],
+      "total": 18
+    },
+    "nativeExecuted": false,
+    "renderedEditorActivated": false,
+    "passed": true
+  },
+  "stage": {
+    "recordedAt": "2026-10-19T08:55:50.787Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.40-source-20261019",
+    "files": 17439,
+    "allFileSetsAndHashesUnchangedAfterPackagingAndInstallation": true
+  },
+  "preservation": {
+    "checkedOlderOwners": 21,
+    "olderRuntimeInventories": 8,
+    "olderWebpages": 8,
+    "priorProfileDirectories": 6,
+    "settingsUnchanged": true
+  },
+  "cli": {
+    "passed": true,
+    "scope": "Actual installed unified CLI submits one read-only configured-Claude coding review to the same native backend used by the browser; existing accepted repair task is not replayed",
+    "session": "d4db15dd8f06c7e9fca9d1795e43e57d",
+    "run": "ef079edce2f9fc8859407c9c6f67e524",
+    "state": "completed",
+    "taskSubmissions": 1,
+    "backendReused": true,
+    "workspaceInputsUnchanged": true,
+    "messages": 8,
+    "usageRecords": 3,
+    "diagnostics": {
+      "diagnostics": [],
+      "language_id": "typescript",
+      "method": "diagnostics",
+      "path": "check.ts",
+      "result": {
+        "items": [],
+        "kind": "full"
+      },
+      "server_id": "typescript"
+    },
+    "compiler": {
+      "elapsed_ms": 1131,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "0ef1487b95f237e5ea474acefbdd476f",
+      "operation_id": "0ef1487b95f237e5ea474acefbdd476f",
+      "output_artifact": {
+        "operation_id": "0ef1487b95f237e5ea474acefbdd476f",
+        "state": "complete",
+        "stderr_bytes": 0,
+        "stdout_bytes": 0
+      },
+      "pid": 55532,
+      "process_tree_retired": true,
+      "profile_id": "powershell",
+      "stderr": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "stdout": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "termination": "exited",
+      "truncated": false
+    }
+  },
+  "installedBrowser": {
+    "at": "2026-10-19T09:05:34.446Z",
+    "scope": "Read-only follow-up of the single already submitted browser task; no task replay",
+    "session": "d4db15dd8f06c7e9fca9d1795e43e57d",
+    "run": "cc4733877dd050a838e8e578ec033efc",
+    "taskSubmissions": 0,
+    "errors": [],
+    "failedHTTP": [],
+    "blockedEffects": [],
+    "assets": {
+      "chat.js": "40b96a3440f81d87e3bd45c7dc227f3fcda907f3601aa7b7ac9bd8ad889fd11c",
+      "chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a",
+      "client.js": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+      "browser.js": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88"
+    },
+    "messages": 13,
+    "usageRecords": 5,
+    "newDiagnostics": [
+      {
+        "diagnostics": [],
+        "language_id": "typescript",
+        "method": "diagnostics",
+        "path": "check.ts",
+        "result": {
+          "items": [],
+          "kind": "full"
+        },
+        "server_id": "typescript"
+      }
+    ],
+    "reloadRetainsHistory": true,
+    "passed": true
+  },
+  "retainedFailedObservers": [
+    {
+      "startedAt": "2026-10-19T08:57:11.208Z",
+      "url": "http://127.0.0.1:53735/ui/",
+      "version": "0.1.40",
+      "scope": "Actual installed native profile, real saved CLI coding review and external headless Edge; read-only restore plus native browser LSP queries; no task replay or visible editor acceptance",
+      "errors": [],
+      "failedHTTP": [],
+      "blockedEffects": [],
+      "assetSha256": {},
+      "historyElapsedMs": 1730,
+      "historyMessages": 8,
+      "usageRecords": 3,
+      "passed": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ [AsyncFunction: textContent]\n- 'export const greeting: string = \"Hello, world!\";\\n'\n",
+      "completedAt": "2026-10-19T08:57:13.393Z"
+    },
+    {
+      "startedAt": "2026-10-19T08:57:33.659Z",
+      "url": "http://127.0.0.1:53735/ui/",
+      "version": "0.1.40",
+      "scope": "Actual installed native profile, real saved CLI coding review and external headless Edge; read-only restore plus native browser LSP queries; no task replay or visible editor acceptance",
+      "errors": [],
+      "failedHTTP": [
+        {
+          "path": "/v1/language-server/query",
+          "status": 404
+        },
+        {
+          "path": "/v1/language-server/query",
+          "status": 404
+        }
+      ],
+      "blockedEffects": [],
+      "assetSha256": {},
+      "historyElapsedMs": 1727,
+      "historyMessages": 8,
+      "usageRecords": 3,
+      "passed": false,
+      "error": "Expected values to be strictly equal:\n\n404 !== 200\n",
+      "completedAt": "2026-10-19T08:57:35.586Z"
+    },
+    {
+      "startedAt": "2026-10-19T09:00:38.186Z",
+      "url": "http://127.0.0.1:53735/ui/",
+      "version": "0.1.40",
+      "scope": "Actual browser UI submits one new read-only diagnostic request to the installed native backend, following the CLI review in the same session; no existing task replay",
+      "errors": [],
+      "failedHTTP": [],
+      "blockedEffects": [],
+      "assetSha256": {},
+      "taskSubmissions": 1,
+      "priorHistoryElapsedMs": 1905,
+      "prompt": "Use the registered typescript language_server now to request actual diagnostics for check.ts. Read the file and report its current greeting value and the observed diagnostic count. This is a new read-only inspection: do not edit files, run commands, install packages or start a service.",
+      "run": "cc4733877dd050a838e8e578ec033efc",
+      "session": "d4db15dd8f06c7e9fca9d1795e43e57d",
+      "passed": false,
+      "error": "New UI task must execute the real native diagnostic tool",
+      "completedAt": "2026-10-19T09:00:41.356Z"
+    }
+  ],
+  "statusFix": {
+    "scope": "Working-source renderer shared by browser and VS Code; live browser asset updated, installed package unchanged",
+    "gate": {
+      "at": "2026-10-19T09:05:20.042Z",
+      "scope": "Shared browser and VS Code renderer status transition; native runtime unchanged",
+      "baselineRegression": {
+        "passed": false,
+        "actual": "completed",
+        "expected": "queued"
+      },
+      "extension": {
+        "code": 0,
+        "tests": 429,
+        "passed": 429,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "logSha256": "8fa2c744818ba576fb84a641bac02a5c5fec040320334b0171ed46d5efddc9cf"
+      },
+      "browser": {
+        "code": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "logSha256": "9b55c7d1789e8381e92aba7d7b1033b4ab7a5a9a6ee70a7f408a44634ce695fe"
+      },
+      "inputsUnchanged": true,
+      "files": 16952,
+      "passed": true
+    },
+    "deployment": {
+      "at": "2026-10-19T09:06:15.446Z",
+      "url": "http://127.0.0.1:53735/ui/",
+      "scope": "Only live browser asset chat.js updated; installed 0.1.40 and native owners unchanged",
+      "priorSha256": "40b96a3440f81d87e3bd45c7dc227f3fcda907f3601aa7b7ac9bd8ad889fd11c",
+      "rendererSha256": "7f2741b3eba672f2ad480b2eda4a52186627b21802c8a69c54f4afdcc04298b6",
+      "installedUnchanged": true
+    },
+    "browser": {
+      "at": "2026-10-19T09:06:16.083Z",
+      "scope": "Read-only follow-up of the single already submitted browser task; no task replay",
+      "session": "d4db15dd8f06c7e9fca9d1795e43e57d",
+      "run": "cc4733877dd050a838e8e578ec033efc",
+      "taskSubmissions": 0,
+      "errors": [],
+      "failedHTTP": [],
+      "blockedEffects": [],
+      "assets": {
+        "chat.js": "7f2741b3eba672f2ad480b2eda4a52186627b21802c8a69c54f4afdcc04298b6",
+        "chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a",
+        "client.js": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+        "browser.js": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88"
+      },
+      "messages": 13,
+      "usageRecords": 5,
+      "newDiagnostics": [
+        {
+          "diagnostics": [],
+          "language_id": "typescript",
+          "method": "diagnostics",
+          "path": "check.ts",
+          "result": {
+            "items": [],
+            "kind": "full"
+          },
+          "server_id": "typescript"
+        }
+      ],
+      "reloadRetainsHistory": true,
+      "passed": true
+    }
+  },
+  "artifacts": {
+    "vscode-0.1.40-install-20261019.log": {
+      "sha256": "a43ada02ba3b82cf030c25d21e673a6c7e425194551d9c5a9007518c2be8c625"
+    },
+    "vscode-0.1.40-extension-list-20261019.log": {
+      "sha256": "60cc9182e0273481add843cf4cbb9cebb0515d2d7a88d99812dfe914456d7157"
+    },
+    "coding-0.1.40-owners-before-install-20261019.json": {
+      "sha256": "2ab41b1316ad93ac986ffba9e0b0fee8016bb793441128174556ab871f8f6f75"
+    },
+    "coding-0.1.40-owners-after-install-20261019.json": {
+      "sha256": "9a33eac1afcdd2a14f91224bc0ef3865f82ae942ea578c686481e555c9b363d7"
+    },
+    "vscode-0.1.40-preservation-20261019.json": {
+      "sha256": "ffa0bf3598a5373dcb30198c862074300063760036eccea9a4e7af9b4b9558a1"
+    },
+    "installed-0.1.40-coding-review-20261019/acceptance.json": {
+      "sha256": "742cb22e7e048e991b8336a092d36545c9c7f761ff0ae211dde39e69da9e52a2"
+    },
+    "browser-0.1.40-settled-20261019/history.json": {
+      "sha256": "655e7f4b2f4bb8f7750f310afd938a9e1b46addbf60395cd1aac421c21afe622"
+    },
+    "run-status-transition-20261019/inputs-before.json": {
+      "sha256": "9be7c7c3bce3b54e2724ca6de73d5c5a4e93df04187e6f782d1702989b0162e0"
+    }
+  },
+  "limitations": [
+    "Actual VS Code editor pane not activated",
+    "Status fix is deployed to test webpage, not installed 0.1.40 extension",
+    "Direct editor LSP query route is not exposed by browser adapter; chat-agent LSP tools are supported",
+    "Earlier Rust semantic startup failure remains unresolved",
+    "Hosted native acceptance and broader platform completion remain open"
+  ],
+  "releaseAccepted": false
+}

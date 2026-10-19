@@ -3,6 +3,7 @@ const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementB
 const patchReview=globalThis.XMindPatchReview.patchReview;
 const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null,promptFiles=[],historySignature;
+function showRunStatus(text){byId('status').textContent=text;activeRun=['queued','running','paused'].includes(text);syncOperationActivity();skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
 let renameCapability=false,forkCapability=false,deleteCapability=false,deletePending=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
 let currentWorkspaceRoot;
@@ -740,7 +741,9 @@ window.addEventListener('message',event=>{
   else if(m.type==='runs'){
     sessionBusy=m.busy;refreshArchiveControls();refreshForkControls();refreshDeleteControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
-    renderRunContext(m.runs.find(run=>run.id===m.selected));
+    const selected=m.runs.find(run=>run.id===m.selected);
+    renderRunContext(selected);
+    if(typeof selected?.state==='string')showRunStatus(selected.state);
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
     refreshSendControl();
   }
@@ -816,7 +819,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='a2a-task-follow-up'){
     const item=currentOperations.find(operation=>operation.id===m.id),followUp=m.followUp;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&followUp?.operation_id===item.id&&Number.isSafeInteger(followUp.sequence)&&followUp.follow_up_state==='acknowledged'){byId('status').textContent='Remote agent acknowledged your follow-up · '+followUp.task_id;}
   }
-  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);syncOperationActivity();skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
+  else if(m.type==='status')showRunStatus(m.text);
   else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect,button.a2a-resubscribe,button.a2a-cancel,button.a2a-follow-up'))button.disabled=false;for(const input of document.querySelectorAll('textarea.a2a-follow-up-input'))input.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;for(const row of nestedPlanRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.

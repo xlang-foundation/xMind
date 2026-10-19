@@ -18,9 +18,17 @@ Response tables scroll horizontally inside their message rather than squeezing
 headers or breaking inline code identifiers. Focus a table and use the arrow
 keys, or scroll it with the pointer/touch controls. This shared-renderer change
 has live webpage validation at desktop and mobile widths and is included in
-installed VS Code package 0.1.39. Actual editor pane activation remains separate.
+installed VS Code package 0.1.40. Actual editor pane activation remains separate.
 [Current scope and captures](evidence/table-readability-20261019.json),
 [installed package evidence](evidence/coding-package-0.1.39-20261019.json).
+
+The current development page also replaces the previous run's status as soon
+as the newly selected run is presented. This prevents a completed label from
+lingering while a new run starts. The shared renderer fix passes 429 extension
+and 147 browser tests and is applied to the test webpage; it is not yet in the
+installed 0.1.40 extension. Actual browser-agent diagnostics and conversation
+reload are verified separately from renderer fixtures.
+[Current browser and installed runtime evidence](evidence/coding-package-0.1.40-20261019.json).
 
 Connect and Disconnect are accessible SVG icon buttons. The OSS page connects directly to the xMind runtime on the same computer; it has no server-token field. The local launcher enrolls the browser session with its private credential, while the durable session stays in an HttpOnly cookie. If a native restart invalidates that cookie, the local adapter renews it automatically from its private launch credential. If the local runtime cannot enroll the page, the dialog explains how to reopen it from xMind or VS Code. It never asks for a server token. Cancel, close and Escape leave an established session intact; a failed reconnect does not clear the current conversation. Team and remote authentication belong to private Nexus.
 

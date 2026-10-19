@@ -1,5 +1,36 @@
 # Current native validation
 
+## Installed 0.1.40 and corrected run status — 2026-10-19
+
+The diagnostics runtime is installed through the actual VS Code CLI. All 2,448
+archive entries, 2,445 installed payloads plus metadata and 2,402 runtime files
+verify. All 17,439 staged files remain unchanged. Exact local and hosted clients
+pass 428/147; native qualification is the complete 153-contract result below.
+Settings, six prior profile names, 21 checked older owners, eight older runtime
+inventories and eight older pages are preserved.
+
+One installed CLI task uses saved Claude configuration, reads actual TypeScript
+diagnostics and runs the real compiler successfully. A separate browser prompt
+in that same session requests fresh diagnostics. The resulting 13-message,
+five-usage-record history survives reload with the saved model and file preview.
+Neither task is replayed. The browser observer initially mistook the previous
+run's completed label for the newly admitted run's completion; its failure is
+retained. The actual new task subsequently completes with native diagnostics.
+Earlier observer failures (a test method typo and an unavailable direct editor
+API route) also remain recorded. Browser agents can use the native LSP tool;
+the browser adapter does not expose the direct editor LSP endpoint.
+
+The shared renderer now applies the selected run's state immediately with the
+run catalogue. A regression fails on the preceding renderer and passes after
+the fix; complete local clients pass 429/147 with 16,952 source, dependency and
+asset files unchanged. This fix is deployed to page 53735 only; installed
+0.1.40 remains byte-for-byte unchanged. Read-only rendered checks pass before
+and after the update, with no errors, failed HTTP responses or effect replay.
+Actual VS Code pane activation, hosted-native qualification and the separate
+Rust startup issue remain open.
+[Installed package, retained failures and status-fix evidence](evidence/coding-package-0.1.40-20261019.json),
+[current browser capture](evidence/browser-coding-0.1.40-20261019.png).
+
 ## Complete native suite and actual diagnostic repair loop — 2026-10-19
 
 Source b44bbde/executable 178dfc41 passes **all 153 local native contracts** in
@@ -23,8 +54,9 @@ The run completes with 13 messages, two diagnostic queries and five supplied
 model-usage records. There is one root submission and one controller-reviewed
 file operation, with no task replay. Product source/runtime checks stay exact;
 the settled private test backend is retired by verified identity. Existing
-installed 0.1.39 and page 59450 remain unchanged. Packaging the new runtime,
-hosted-native acceptance and actual VS Code pane testing remain open.
+installed 0.1.39 and page 59450 remain unchanged during this source test.
+The subsequent 0.1.40 installation is recorded above; hosted-native acceptance
+and actual VS Code pane testing remain open.
 [Actual model, native file operation, diagnostics and compiler receipts](evidence/live-typescript-diagnostics-repair-20261019.json).
 
 ## Native push diagnostics and Windows URI matching — 2026-10-19

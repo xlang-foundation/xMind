@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Installed diagnostics runtime and immediate run status — 2026-10-19
+
+0.1.40 is installed with verified archive/payload/runtime bytes and exact hosted
+client qualification. The installed CLI runs actual Claude diagnostics and
+compiler checks; a browser task requests fresh diagnostics in the same session.
+Reload retains 13 messages and five usage records. The browser observation
+exposed a stale completed label during new-run admission; the shared renderer
+now takes the selected state immediately from the run catalogue. Complete local
+clients pass 429/147. The live test page has the fix; the installed extension
+still has its qualified original renderer. All prior pages and owners remain.
+Actual editor pane acceptance and the unresolved Rust startup issue remain open.
+[Package, actual tasks, retained observer failures and renderer evidence](evidence/coding-package-0.1.40-20261019.json).
+
 ## Complete native diagnostics and actual coding repair — 2026-10-19
 
 The current native source passes all 153 local contracts in 1089.24 seconds,

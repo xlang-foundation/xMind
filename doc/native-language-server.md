@@ -42,8 +42,11 @@ check. It does not close the earlier intermittent Rust startup failure.
 [Complete native qualification](evidence/lsp-diagnostics-full-native-20261019.json),
 [actual coding-agent repair](evidence/live-typescript-diagnostics-repair-20261019.json).
 
-This update is **not in installed 0.1.39**. Packaging, hosted-native and actual
-editor-pane acceptance remain pending; the existing browser/backend stays unchanged.
+This update is now in **installed 0.1.40**. The installed CLI and browser agent
+both execute real TypeScript diagnostics; the CLI also runs the actual compiler
+successfully. Hosted-native and actual editor-pane acceptance remain pending.
+Older browser/backend instances remain preserved.
+[Installed runtime evidence](evidence/coding-package-0.1.40-20261019.json).
 [Source, baseline failures and actual integration evidence](evidence/native-lsp-push-diagnostics-20261019.json).
 Protocol references: [LSP specification](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/),
 [TypeScript language server](https://github.com/typescript-language-server/typescript-language-server).
