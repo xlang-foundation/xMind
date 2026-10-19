@@ -1,5 +1,13 @@
 # Native language-server integration
 
+The current native candidate releases the provider runtime's global lock while
+an editor query waits for its language server. A shared lease keeps that service
+alive; a reply from a replaced generation is rejected. Workspace/settings APIs
+therefore remain available during analysis. A controlled regression reproduces
+the preceding blockage; seven focused contracts and an actual native HTTP
+waiting-server check pass. This change is not yet installed in 0.1.41.
+[Responsiveness fix and precise validation scope](evidence/lsp-runtime-responsiveness-20261019.json).
+
 The original Rust semantic workspace was rechecked with logging on 2026-10-19
 and still returns a null call-site definition through the unchanged 120-query
 contract. Cargo check passes; the complete checked source/runtime/toolchain

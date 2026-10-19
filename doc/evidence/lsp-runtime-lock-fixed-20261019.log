@@ -1,0 +1,19 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  45: native_graph_runner_contract
+1/7 Test  #45: native_graph_runner_contract ..........................   Passed   10.31 sec
+    Start  74: native_language_server_diagnostics_contract
+2/7 Test  #74: native_language_server_diagnostics_contract ...........   Passed    2.04 sec
+    Start  75: native_language_server_configuration_contract
+3/7 Test  #75: native_language_server_configuration_contract .........   Passed    0.29 sec
+    Start  81: native_agent_runner_contract
+4/7 Test  #81: native_agent_runner_contract ..........................   Passed    9.46 sec
+    Start 148: native_provider_profiles_contract
+5/7 Test #148: native_provider_profiles_contract .....................   Passed    0.50 sec
+    Start 149: native_provider_profile_lsp_responsiveness_contract
+6/7 Test #149: native_provider_profile_lsp_responsiveness_contract ...   Passed    0.75 sec
+    Start 150: native_provider_profile_runtime_contract
+7/7 Test #150: native_provider_profile_runtime_contract ..............   Passed    5.76 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =  29.14 sec

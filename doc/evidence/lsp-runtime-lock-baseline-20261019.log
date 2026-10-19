@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 149: native_provider_profile_lsp_responsiveness_contract
+1/1 Test #149: native_provider_profile_lsp_responsiveness_contract ...***Failed    1.39 sec
+A waiting editor LSP query must not block provider/workspace metadata
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.41 sec
+
+The following tests FAILED:
+	149 - native_provider_profile_lsp_responsiveness_contract (Failed)
+Errors while running CTest

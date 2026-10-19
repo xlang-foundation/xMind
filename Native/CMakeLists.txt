@@ -1386,6 +1386,15 @@ if(BUILD_TESTING)
     add_test(NAME native_provider_profiles_contract COMMAND agentflow_provider_profiles_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_provider_profiles_contract PROPERTIES TIMEOUT 60)
+    add_executable(agentflow_provider_profile_lsp_responsiveness_contract tests/provider_profile_lsp_responsiveness_contract.cpp)
+    target_include_directories(agentflow_provider_profile_lsp_responsiveness_contract PRIVATE third_party)
+    target_link_libraries(agentflow_provider_profile_lsp_responsiveness_contract PRIVATE agentflow_runtime)
+    add_custom_command(TARGET agentflow_provider_profile_lsp_responsiveness_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_provider_profile_lsp_responsiveness_contract>")
+    add_test(NAME native_provider_profile_lsp_responsiveness_contract COMMAND agentflow_provider_profile_lsp_responsiveness_contract
+      "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_profile_lsp_responsiveness_peer.mjs"
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_provider_profile_lsp_responsiveness_contract PROPERTIES TIMEOUT 20)
     add_executable(agentflow_provider_profile_runtime_contract tests/provider_profile_runtime_contract.cpp)
     target_include_directories(agentflow_provider_profile_runtime_contract PRIVATE third_party third_party/cpp-httplib)
     target_link_libraries(agentflow_provider_profile_runtime_contract PRIVATE agentflow_runtime agentflow_http)

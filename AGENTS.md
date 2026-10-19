@@ -6,50 +6,27 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- New failures: b44bbde hosted run 39221512591 is terminal 153/154 in 780.70s; graph PowerShell records script_entered then times out, child uncertain/root failed. Official artifact 12175102371 digest bec36e96 verifies. Original Rust workspace also reproduces null definition with logging (Cargo pass, semantic fail 62.49s); complete checked input/binary closure unchanged. Fresh-folder pass does not resolve it. Wrapper4399 is terminal exit1; separate closure check passes. No product change. Independent Node LSP resolves that same call-site after 18.482s/32 attempts with matching initialization and selected environment but no native job budgets; fixture/server unchanged, normal exit. Cause still unproven. Next: native process/VFS/resource sampling and hosted command-discovery cause. See doc/evidence/current-native-failures-20261019.json.
+- Native candidate d83d0e8e fixes provider global-lock blocking during editor LSP requests. Baseline regression fails on native178; complete build/seven focused contracts pass in 29.14s with all checked input/binary sets frozen. A service lease allows settings/workspace access and rejects replies after replacement. Actual HTTP workspace/provider/health return 4–5ms while a synthetic LSP query waits. No model task. Installed 0.1.41/pages unchanged. Inventory 154 local/155 hosted; full candidate suite/packaging pending. Separate Rust failure remains open despite sampled/proxy passes; no resource cause proven. Hosted b44 remains 153/154 (graph PowerShell timeout). See doc/evidence/lsp-runtime-responsiveness-20261019.json and current-native-failures-20261019.json.
 
 - Installed 0.1.41: source 1461783/native b44bbde/exe 178dfc41, unchanged SDK/DLL/manifest from 0.1.40. Shared selected-run status fix is now installed and matches page 53735 chat.js 7f2741b3. Local/exact hosted clients 429/147; all 2,448 archive entries/2,445 installed payloads plus metadata/2,402 runtime files verify; 17,439 stage files frozen. Backup 0.1.40/settings/six prior profiles/24 checked owners/nine older runtimes/nine pages preserved. CLI reuses p-a40/backend 56088 and exact 13 messages/five usage records. Read-only Edge reload matches installed assets without errors/effect replay; no new inference. Source 0.1.40 actual CLI/browser roots and one-edit repair remain separately qualified; never replay. Native full 153 remains applicable because Native/CMake and runtime bytes are unchanged. Actual editor pane/Rust startup/hosted-native acceptance remain open. See doc/evidence/coding-package-0.1.41-20261019.json and predecessor 0.1.40 evidence for retained observer failures.
 
 - Current test page http://127.0.0.1:53735/ui/: p-a40, host 41476 born 2026-10-19T08:49:52.2741370Z, installed 0.1.40 view 18700 born 08:49:53.4660720Z, private native backend 56088 born 08:49:56.9665580Z. All images and births rechecked; no restart. Workspace C:/xMindNativeValidation/live-typescript-diagnostics-agent-20261019/workspace. Live chat.js 7f2741b3 matches installed 0.1.41; installed 0.1.40 chat.js 40b96a34 remains preserved. Existing page59450 and all older owners remain untouched. Read-only Edge checks pass without HTTP/page errors or task replay.
 
-
-
-
-
 - Current page http://127.0.0.1:59450/ui/: host 40732 born 2026-10-19T07:05:42.8122650Z, installed native view 67828 born 07:05:43.8541970Z, backend 27692 born 07:05:47.2161400Z; p-a38. Start root 59dde650022c0af18be3091c2690336e/session d32c5c4fe01bdf159270b6efa3beaaac completes with two real persistent services live; explicit follow-up 023b98c463fbc0be277158ee01958d1c stops both via stop_process, records tree retirement and closes 18742/18743. Never replay either task. Browser app checks pass with zero page errors. Read-only restore retains 26 messages/10 usage records and provider/model in 1.62 seconds. All 1,034 original/copied source/library inputs stay unchanged; this task makes no source edit. Prior 0.1.37 separately proves the Vue edit/32 tests/build. C receipts full-modelzoo-ui-0.1.38-20261019 retain exact scopes.
 
 - Preserve older 55921 page and its 0.1.37 view/runtime: host 30896 born 2026-10-19T06:40:17.2718400Z, view 58140 born 06:40:18.3354560Z, backend 59264 born 06:40:21.7686110Z. Its root ed09b7acbee8c26d205bbcd84022adac/session 2423b09b1809ac6ed7dbdb3576d3441e completes one actual Vue edit plus 32 xlang3 tests/build/HTTP, restoring 33 messages/14 usage records. Do not replay it. Shutdown follow-up 6ecd4a7a5a134298b3bf4e1be5c42e8d is unaccepted because its old catalogue lacks stop_process; preserve bounded timeout/uncertain receipts rather than calling them successful stops. Older 0.1.36 root c3e97514d9b70b9377a096a8b7edcc28 stays unaccepted. Native start/stop regression and five related contracts qualify the installed fix, not a new complete suite.
 
-
-
-
-
-
-
-
-
 - Preserved page http://127.0.0.1:49702/ui/ (p-a35) preserves host 64664 born 2026-10-19T01:28:50.0224330Z, view 43960 born 01:28:52.3259150Z, backend 69648 born 01:29:45.0433680Z. Saved-Claude root a6df1b7c56c63a11fbc9617fa5d3a220/session f4ba91f315729273348ab02dbf4ed87c completes attached Vue editing plus npm/Vite build, exit zero; 11 messages, five usage records and 626 events. Never replay this task. Qualified chat.js now includes attached guidance review and composer selection guidance; it matches installed 0.1.36 bytes. Read-only post-install restore takes 2.14 seconds with no errors/effect POSTs. Membership passes three focused contracts (152.78 seconds); the subsequent complete native suite passes 152/152. Original model-selection 400, disabled-review and stale CI-count failures remain documented. See doc/evidence/rendered-coding-0.1.35-20261019.json and workspace-membership-view-20261019.json.
 
-
-
-
-
-
-
-
 - Separate page http://127.0.0.1:52121/ui/, profile C:/Users/shaw9/.xMind/p-u28, host 63656/native view 53524: actual UI creates a workspace, attaches extra folder and switches scoped history. Session 3bed131c1b0828ed49085e68e6e56505 has completed roots 7070a209a9e80a957186eb79b95f492a (nine messages/266 events), 00bb6b24eee9018937cd673d01ceacad (13 messages/60 new events) and 87a5053a1c68382567b7f5ca2ac908cd (17 messages/70 new events). First task creates extra/workspace-binding-check.txt and runs real xlang3, exit zero. Intentional idle-owner fault retired only identity-bound PID 62284; explicit CLI recovery starts owner 22560 born 2026-10-18T20:49:44.4275690Z. Fifteen expected outage HTTP 503s remain recorded. This proves explicit idle recovery, not unattended/in-flight recovery. Read-only follow-up data is correct but bare-two-line format fails. Latest task creates extra/auto-refresh-check.txt; it appears automatically without Refresh while the previous preview stays open. Post-install headless reload renders all 17 messages. Owner receipts C:/xMindNativeValidation/ui-workspaces-owners-final-20261018.json; full scopes doc/evidence/rendered-workspaces-and-recovery-20261018.json and rendered-explorer-auto-refresh-20261018.json. Do not resubmit completed tasks.
-
-
 
 - Historical native and hosted timeout checkpoints (838e2eb, 9e4b118, 0c93640/a418 and f3e7718) remain in doc/development-checkpoints-20261018.md and doc/evidence. Failed cold commands are not qualified by later warm controls. Do not cancel/restart for observation delay, weaken deadlines or combine focused results into full acceptance.
 
 - Keep VS Code closed and open no visible editor/browser windows unless asked. Visible desktop control previously failed with black capture/GetCursorPos access denied; do not repeat unlock questions or claim visible UI acceptance. Headless sandboxed Edge development checks are separate evidence. Preserve all older user pages/owners, including ports 62084, 54662, 51118 and 52757. Exact older process identities, historical receipts and installation details remain in doc/development-checkpoints-20261018.md and doc/evidence. Verify PID, creation time and image before any intentional retirement; no mass cleanup of user owners, views or profiles.
 
-
 - Fresh startup diagnostic 39176240740 at 1cd75e3 is terminal failure: 11/16 pass across four independent jobs, all four source closures identical and each binary frozen. Original/minimal-PATH/location-marker first cases time out near 30 seconds after script_entered; module-qualified first case completes in 8,143ms, then its original comparison still times out. Exact cause is unproven; command discovery/module autoload is implicated. Original commands, six-second delay, 30-second budget and production environment remain unchanged; no prewarming/substitution. Official PSModulePath rules also show older system-modules does not necessarily exclude AllUsers. See doc/evidence/process-startup-fresh-hosted-20261018.json; retain older raw failures.
 
 - Hosted ce4298d run 39172958425 is terminal failure before the full suite: all 153 tests registered, but CI expected only 151 because both new process/read host contracts were omitted. SDK smoke 2/2 and early local-view 1/1 (62.56 seconds) pass; complete suite and packaging did not run. Tools/ci-native.ps1 now names both contracts explicitly and matches the exact 153-name hosted inventory; local 152 differs only by hosted trusted OAuth. This is inventory validation, not a new full-suite pass. See doc/evidence/hosted-native-ce4298d-inventory-failure-20261018.json.
-
 
 ## Execution and evidence rules
 

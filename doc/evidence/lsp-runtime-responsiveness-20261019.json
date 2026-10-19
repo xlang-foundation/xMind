@@ -1,0 +1,542 @@
+{
+  "recordedAt": "2026-10-19T09:39:14.998Z",
+  "problem": "ProviderProfileRuntime held its global mutex across a potentially slow editor LSP request, blocking workspace/settings APIs",
+  "change": "Lease the selected ExecutionPlatform with shared ownership, release the global lock before querying, then revalidate workspace and execution generation before returning. Reject replies after provider replacement.",
+  "baseline": {
+    "recordedAt": "2026-10-19T09:35:41.947Z",
+    "sourceParent": "2323f7a6271e6a6991b2d9b83e598d955a29fbc1",
+    "sourcePatchSha256": "8823d858ceeb43c08138ad1fb648fadc9625c59297f79f552f9d70985ebc4bf4",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 60764,
+      "launchedAt": "2026-10-19T09:35:17.318Z",
+      "completedAt": "2026-10-19T09:35:30.309Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c6726e1379e247e22e27526cb430ac64fe07d6783a8477d6f775fd98d2ba7e9e"
+    },
+    "test": {
+      "pid": 17620,
+      "launchedAt": "2026-10-19T09:35:37.741Z",
+      "completedAt": "2026-10-19T09:35:39.195Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "0fb21c92e4c6f073eb099f5008e643ba4157dc9b8adbeb52730ff1a2917e07f0"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 1.41,
+    "projectFiles": 2623,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "fixed": {
+    "recordedAt": "2026-10-19T09:38:21.500Z",
+    "sourceParent": "2323f7a6271e6a6991b2d9b83e598d955a29fbc1",
+    "sourcePatchSha256": "b1be1c04514c20ea890546cc359d0fa99376ec2b847d1e7ae6b94c6630418863",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 20532,
+      "launchedAt": "2026-10-19T09:36:47.529Z",
+      "completedAt": "2026-10-19T09:37:46.301Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "09802fe1036f38d8a3b6e9a170edc52fee138a8c60110a312571d218d99ac1e8"
+    },
+    "test": {
+      "pid": 4500,
+      "launchedAt": "2026-10-19T09:37:49.658Z",
+      "completedAt": "2026-10-19T09:38:18.843Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "663e9b7de34e8331f19267872a51a904761256abcb79693baeab18c6d7a2f361"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 29.14,
+    "projectFiles": 2623,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d83d0e8ea2971b0e4f558e40787ae692f008cdb1b6233ca06e41692d0f8258ce",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "http": {
+    "at": "2026-10-19T09:38:35.939Z",
+    "scope": "Actual native configurable-provider HTTP backend remains responsive while an explicitly synthetic language server waits for release; real xlang3 SQLite, no provider or user task",
+    "nativeSha256": "d83d0e8ea2971b0e4f558e40787ae692f008cdb1b6233ca06e41692d0f8258ce",
+    "taskSubmissions": 0,
+    "observations": [
+      {
+        "route": "/v1/workspace",
+        "status": 200,
+        "elapsedMs": 4
+      },
+      {
+        "route": "/v1/provider/profiles",
+        "status": 200,
+        "elapsedMs": 4
+      },
+      {
+        "route": "/v1/health",
+        "status": 200,
+        "elapsedMs": 5
+      }
+    ],
+    "owner": {
+      "pid": 41408,
+      "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+      "birth": "2026-10-19T09:38:35.9285880Z"
+    },
+    "query": {
+      "status": 200,
+      "body": {
+        "diagnostics": [],
+        "language_id": "typescript",
+        "method": "diagnostics",
+        "path": "check.ts",
+        "result": {
+          "items": [],
+          "kind": "full"
+        },
+        "server_id": "waiting"
+      }
+    },
+    "passed": true,
+    "terminal": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "ownedIdleTestServerRetired": true,
+    "finishedAt": "2026-10-19T09:38:38.083Z"
+  },
+  "semanticRustInvestigation": {
+    "resourceObservedPass": {
+      "recordedAt": "2026-10-19T09:25:48.098Z",
+      "sourceParent": "2323f7a6271e6a6991b2d9b83e598d955a29fbc1",
+      "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "projectFiles": 2621,
+      "sdkSourceFiles": 16,
+      "pureLibraries": 1870,
+      "sdkRuntimeFiles": 76,
+      "rustToolchainBinLibLibexecFiles": 3722,
+      "rustShimFiles": 4,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 128,
+      "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+      "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+      "rustAnalyzerSha256": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27",
+      "actualRustAnalyzerContractsPassed": 1,
+      "cargoSemanticFixturePassed": true,
+      "allSourceSdkLibrariesToolchainDependenciesBinariesAndSetsUnchanged": true,
+      "modelScope": "Explicit synthetic gateway for AgentRunner language dispatch and alias regression; actual Rust Analyzer and xlang3 callable; no live provider key",
+      "initialSemanticFailureUnexplained": true,
+      "releaseAccepted": false,
+      "fullNativeSuiteRun": false,
+      "installed": false,
+      "workerIPCImplemented": false,
+      "cpythonExecuted": false,
+      "build": {
+        "buildRun": false,
+        "reusedQualifiedFocusedBuild": true,
+        "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd"
+      },
+      "realLanguage": {
+        "pid": 39848,
+        "launchedAt": "2026-10-19T09:25:33.216Z",
+        "completedAt": "2026-10-19T09:25:44.485Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "fbcdda053dbfd0ce2a967077fcac0e5ffb780266ba05724645d94fe1ebf14e10"
+      },
+      "passed": true,
+      "productQualifiedByThisLeaf": false,
+      "focusedNativeProof": "lsp-diagnostics-uri-fixed-20261019/gate.json"
+    },
+    "additionalSampledTrials": [
+      {
+        "trial": 1,
+        "path": "C:/xMindNativeValidation/rust-native-sampled-trial-1-20261019",
+        "terminal": {
+          "pid": 17644,
+          "code": 0
+        },
+        "passed": true,
+        "sourceFrozen": true,
+        "actual": {
+          "pid": 48308,
+          "launchedAt": "2026-10-19T09:30:40.352Z",
+          "completedAt": "2026-10-19T09:30:51.153Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "bca827cf910d6bf81cdba3ea4093f24cfcbcd690f5f2852ced5d0ea26a991cb6"
+        }
+      },
+      {
+        "trial": 2,
+        "path": "C:/xMindNativeValidation/rust-native-sampled-trial-2-20261019",
+        "terminal": {
+          "pid": 59260,
+          "code": 0
+        },
+        "passed": true,
+        "sourceFrozen": true,
+        "actual": {
+          "pid": 64704,
+          "launchedAt": "2026-10-19T09:31:02.336Z",
+          "completedAt": "2026-10-19T09:31:13.082Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "ad07743c7518e9423003c1a02b91e14dd6a8602ef312b0c4fae452eceaf02de3"
+        }
+      },
+      {
+        "trial": 3,
+        "path": "C:/xMindNativeValidation/rust-native-sampled-trial-3-20261019",
+        "terminal": {
+          "pid": 60084,
+          "code": 0
+        },
+        "passed": true,
+        "sourceFrozen": true,
+        "actual": {
+          "pid": 53416,
+          "launchedAt": "2026-10-19T09:31:24.406Z",
+          "completedAt": "2026-10-19T09:31:35.016Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "645ca51bef793c438917374c7f39f17c5b6c1ce693c746ddba1a0179a6efef4b"
+        }
+      }
+    ],
+    "nativeWireProbe": {
+      "at": "2026-10-19T09:27:48.085Z",
+      "scope": "Native HTTP language client with a transparent diagnostic wire proxy and actual Rust Analyzer; original job budgets unchanged; proxy adds a process and tracing overhead",
+      "workspace": "C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture",
+      "taskSubmissions": 0,
+      "queries": [
+        {
+          "at": "2026-10-19T09:27:49.397Z",
+          "method": "documentSymbol",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "documentSymbol",
+            "path": "src/lib.rs",
+            "result": [
+              {
+                "deprecated": false,
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "name": "add",
+                "range": {
+                  "end": {
+                    "character": 1,
+                    "line": 2
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 0
+                  }
+                },
+                "selectionRange": {
+                  "end": {
+                    "character": 10,
+                    "line": 0
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 0
+                  }
+                },
+                "tags": []
+              },
+              {
+                "deprecated": false,
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "name": "call_add",
+                "range": {
+                  "end": {
+                    "character": 1,
+                    "line": 6
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 4
+                  }
+                },
+                "selectionRange": {
+                  "end": {
+                    "character": 15,
+                    "line": 4
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 4
+                  }
+                },
+                "tags": []
+              }
+            ],
+            "server_id": "rust-trace"
+          }
+        },
+        {
+          "at": "2026-10-19T09:27:49.403Z",
+          "method": "documentSymbol",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "documentSymbol",
+            "path": "src/lib.rs",
+            "result": [
+              {
+                "deprecated": false,
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "name": "add",
+                "range": {
+                  "end": {
+                    "character": 1,
+                    "line": 2
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 0
+                  }
+                },
+                "selectionRange": {
+                  "end": {
+                    "character": 10,
+                    "line": 0
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 0
+                  }
+                },
+                "tags": []
+              },
+              {
+                "deprecated": false,
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "name": "call_add",
+                "range": {
+                  "end": {
+                    "character": 1,
+                    "line": 6
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 4
+                  }
+                },
+                "selectionRange": {
+                  "end": {
+                    "character": 15,
+                    "line": 4
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 4
+                  }
+                },
+                "tags": []
+              }
+            ],
+            "server_id": "rust-trace"
+          }
+        },
+        {
+          "at": "2026-10-19T09:27:49.410Z",
+          "method": "definition",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "definition",
+            "path": "src/lib.rs",
+            "result": [],
+            "server_id": "rust-trace"
+          }
+        },
+        {
+          "at": "2026-10-19T09:27:49.927Z",
+          "method": "definition",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "definition",
+            "path": "src/lib.rs",
+            "result": null,
+            "server_id": "rust-trace"
+          }
+        },
+        {
+          "at": "2026-10-19T09:27:50.445Z",
+          "method": "definition",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "definition",
+            "path": "src/lib.rs",
+            "result": null,
+            "server_id": "rust-trace"
+          }
+        },
+        {
+          "at": "2026-10-19T09:27:53.419Z",
+          "method": "definition",
+          "status": 200,
+          "body": {
+            "diagnostics": [],
+            "language_id": "rust",
+            "method": "definition",
+            "path": "src/lib.rs",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "end": {
+                    "character": 7,
+                    "line": 5
+                  },
+                  "start": {
+                    "character": 4,
+                    "line": 5
+                  }
+                },
+                "targetRange": {
+                  "end": {
+                    "character": 1,
+                    "line": 2
+                  },
+                  "start": {
+                    "character": 0,
+                    "line": 0
+                  }
+                },
+                "targetSelectionRange": {
+                  "end": {
+                    "character": 10,
+                    "line": 0
+                  },
+                  "start": {
+                    "character": 7,
+                    "line": 0
+                  }
+                },
+                "targetUri": "file:///c:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+              }
+            ],
+            "server_id": "rust-trace"
+          }
+        }
+      ],
+      "owner": {
+        "pid": 44396,
+        "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+        "birth": "2026-10-19T09:27:48.0794470Z"
+      },
+      "definition": [
+        {
+          "originSelectionRange": {
+            "end": {
+              "character": 7,
+              "line": 5
+            },
+            "start": {
+              "character": 4,
+              "line": 5
+            }
+          },
+          "targetRange": {
+            "end": {
+              "character": 1,
+              "line": 2
+            },
+            "start": {
+              "character": 0,
+              "line": 0
+            }
+          },
+          "targetSelectionRange": {
+            "end": {
+              "character": 10,
+              "line": 0
+            },
+            "start": {
+              "character": 7,
+              "line": 0
+            }
+          },
+          "targetUri": "file:///c:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        }
+      ],
+      "attempts": 4,
+      "elapsedMs": 4016,
+      "semanticPassed": true,
+      "terminal": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "ownedIdleTestServerRetired": true,
+      "fixtureAndNativeSourceUnchanged": true,
+      "finishedAt": "2026-10-19T09:27:54.626Z"
+    },
+    "nativeAndIndependentInitializePayloadIdentical": true,
+    "originalSemanticFailureStillOpen": true,
+    "resourceLimitCauseEstablished": false,
+    "wireProxyAddsProcessAndTracingOverhead": true
+  },
+  "artifactSha256": {
+    "lsp-runtime-lock-baseline-20261019/source.patch": "8823d858ceeb43c08138ad1fb648fadc9625c59297f79f552f9d70985ebc4bf4",
+    "lsp-runtime-lock-fixed-20261019/source.patch": "b1be1c04514c20ea890546cc359d0fa99376ec2b847d1e7ae6b94c6630418863",
+    "lsp-runtime-lock-fixed-20261019/inputs-before-build.json": "be20373702c75e05f812c78bb92aee1b30d1a8558986d0234bbf820540e7f9ee",
+    "lsp-runtime-lock-fixed-20261019/binaries-before-test.json": "0c1e9c95085d328f15205f9eb6ce4bf1911ba80fcf72cca7e59cd4f3f1380153",
+    "rust-native-resource-diagnostic-20261019/process-samples.jsonl": "a547c2881410bf9f16b29c946a558b3cec448d6dd94983cd2e1189d043e5ded9",
+    "rust-native-wire-20261019/wire.jsonl": "2e590185eb2222b49077c3d111a0832c2830116611bc0639491ea5c3415f52cf"
+  },
+  "installedVersion": "0.1.41",
+  "candidateInstalled": false,
+  "fullCandidateNativeSuiteRun": false,
+  "renderedEditorActivated": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}

@@ -1,5 +1,30 @@
 # Current native validation
 
+## Editor analysis no longer holds the provider runtime lock — 2026-10-19
+
+An editor LSP request previously held ProviderProfileRuntime's global mutex
+while waiting for the language server. That blocked workspace and settings
+operations. A new controlled regression reproduces the blockage against the
+unchanged preceding production code. The fix leases the selected execution
+service, releases the global lock during the query, then revalidates both the
+workspace and service generation. Provider replacement can finish while the
+old query waits; its eventual reply is rejected instead of being applied to
+the new generation.
+
+A complete native build and seven focused contracts pass in 29.14 seconds.
+All checked project/SDK/library/dependency/binary file sets and hashes stay
+unchanged during validation. An actual native HTTP check keeps a synthetic
+language-server query waiting while workspace, provider-profile and health
+requests return HTTP 200 in 4–5 ms. The query then completes after explicit
+fixture release. No provider request or user task is submitted.
+
+Candidate d83d0e8e is not installed; 0.1.41 and existing pages are preserved.
+The full candidate suite and packaging remain pending. Separate Rust sampling
+and protocol tracing pass without source changes but do not resolve the earlier
+null-definition failure or prove a resource-limit cause. The prior hosted
+PowerShell graph timeout remains open.
+[Baseline failure, fixed contracts, actual HTTP and retained Rust scope](evidence/lsp-runtime-responsiveness-20261019.json).
+
 ## Hosted native failure and reproduced Rust semantic failure — 2026-10-19
 
 The exact b44bbde hosted native run is terminal failure: 153 of 154 contracts

@@ -99,7 +99,7 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
 struct ProviderProfileRuntime::Impl {
     PersistenceService& store;AgentSettings base;std::vector<ProviderProfileExecutionPolicy> policy;
     std::size_t workers,capacity;ProviderProfiles profiles;ProviderProfileSnapshot state;
-    std::unique_ptr<ExecutionPlatform> service;mutable std::mutex mutex;
+    std::shared_ptr<ExecutionPlatform> service;mutable std::mutex mutex;
     std::unique_ptr<WorkspaceTools> workspace_binding;std::string workspace_authority;
     Impl(PersistenceService& persistence,AgentSettings settings,std::vector<ProviderProfileExecutionPolicy> allowed,std::size_t count,std::size_t limit)
         :store(persistence),base(std::move(settings)),policy(std::move(allowed)),workers(count),capacity(limit),profiles(store,routes(policy)){
@@ -281,7 +281,7 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::save_profile(std::string 
     const bool replace=activate||impl_->state.active==id;std::unique_ptr<ExecutionPlatform> candidate;
     auto next=impl_->profiles.save(std::move(id),std::move(route),std::move(model),std::move(key),expected,activate,
         [&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
-    impl_->state=std::move(next);std::unique_ptr<ExecutionPlatform> previous;
+    impl_->state=std::move(next);std::shared_ptr<ExecutionPlatform> previous;
     if(replace){previous=std::move(impl_->service);impl_->service=std::move(candidate);}
     const auto result=impl_->metadata();lock.unlock();previous.reset();candidate.reset();return result;
 }
@@ -331,7 +331,7 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
         [&]{impl_->mutable_state(expected);},ProviderConfigSelection::file_default);
     // Publication succeeded. Adopt exactly that prepared generation only when
     // there is an active selection; inactive imports retain the current service.
-    impl_->state=std::move(next);std::unique_ptr<ExecutionPlatform> previous;
+    impl_->state=std::move(next);std::shared_ptr<ExecutionPlatform> previous;
     if(candidate){previous=std::move(impl_->service);impl_->service=std::move(candidate);}
     const auto result=impl_->metadata();lock.unlock();previous.reset();return result;
 }
@@ -425,9 +425,20 @@ WorkspaceFile ProviderProfileRuntime::browse_workspace_file(const std::string& p
 }
 std::vector<LanguageServerMetadata> ProviderProfileRuntime::language_server_profiles()const{std::lock_guard lock(impl_->mutex);return impl_->service->language_server_profiles();}
 std::string ProviderProfileRuntime::language_server_query(const LanguageServerRequest& request){
-    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Language-server queries require an opened workspace");
-    const auto workspace=impl_->workspace_metadata();auto result=impl_->service->language_server_query(request);
-    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return result;
+    std::shared_ptr<ExecutionPlatform> service;ExecutionWorkspaceMetadata workspace;
+    {
+        std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Language-server queries require an opened workspace");
+        service=impl_->service;workspace=impl_->workspace_metadata();
+    }
+    // Editor analysis may wait for a server. Keep that execution generation
+    // alive without holding up unrelated workspace/settings requests.
+    auto result=service->language_server_query(request);
+    {
+        std::lock_guard lock(impl_->mutex);
+        if(impl_->service!=service)throw Conflict("Provider execution changed during language-server query");
+        validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());
+    }
+    return result;
 }
 bool ProviderProfileRuntime::supports_skill_catalogue()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
 WorkspaceSkillCatalogue ProviderProfileRuntime::workspace_skills()const{

@@ -57,6 +57,11 @@ The separate Rust semantic-startup failure remains open.
 [Installed 0.1.40 and browser status evidence](doc/evidence/coding-package-0.1.40-20261019.json).
 [Installed 0.1.41 and shared renderer evidence](doc/evidence/coding-package-0.1.41-20261019.json).
 
+A newer native candidate fixes workspace/settings requests blocking behind a
+slow editor language-server query. Seven focused contracts and an HTTP
+responsiveness check pass; full candidate qualification and installation remain
+pending. [Source and validation](doc/evidence/lsp-runtime-responsiveness-20261019.json).
+
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic
 explorer refresh and explicit idle-owner recovery. Existing sessions remain
