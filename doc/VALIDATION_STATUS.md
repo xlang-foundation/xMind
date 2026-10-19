@@ -1,5 +1,17 @@
 # Current native validation
 
+## Complete responsiveness-candidate suite — 2026-10-19
+
+Committed ce654d2/native d83d0e8e passes all **154 local native contracts** in
+983.54 seconds. The build and CTest exit zero, with all 2,623 checked project
+files, 16 SDK headers, 1,870 pure-library files, 76 SDK runtime files, 18,598
+dependency files, 129 native binaries and their sets unchanged. This qualifies
+the complete registered local inventory; it does not rerun the separate Rust
+semantic leaf or imply installed-editor acceptance. Two copied Rust metadata
+fields in the raw producer receipt are corrected explicitly in the public
+evidence; the original receipt stays unchanged. Packaging follows this gate.
+[Exact full result, inventory and scope correction](evidence/lsp-runtime-full-native-20261019.json).
+
 ## Editor analysis no longer holds the provider runtime lock — 2026-10-19
 
 An editor LSP request previously held ProviderProfileRuntime's global mutex
