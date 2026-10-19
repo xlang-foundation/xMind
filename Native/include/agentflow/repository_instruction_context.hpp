@@ -12,6 +12,9 @@ public:
     std::string prepare(std::stop_token cancel={});
     std::string metadata() const;
     bool ready(const std::string& directory,std::stop_token cancel={});
+    // Queue an explicitly discovered scope even when skill delivery is pending.
+    // This never marks guidance delivered or authorizes a requested effect.
+    void request_scope(const std::string& directory,std::stop_token cancel={});
     InstructionPrecondition precondition(const std::string& directory);
     SkillContext& skills(){return skills_;}
     std::string activate_skill(const std::string& arguments,std::size_t base_instruction_bytes,std::stop_token cancel={});

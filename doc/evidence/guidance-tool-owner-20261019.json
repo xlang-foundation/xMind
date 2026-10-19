@@ -1,0 +1,270 @@
+{
+  "recordedAt": "2026-10-19T00:44:48.907Z",
+  "change": "Own repository-instruction and skill tool invocations with the existing run-scoped workspace envelope; route explicit instruction reads to their admitted attached folder and queue discovered scopes independently of pending skill delivery.",
+  "productionBugReproduction": {
+    "recordedAt": "2026-10-19T00:35:37.400Z",
+    "sourceParent": "be68c211a64f4893230d9c86b4d575fc784cf858",
+    "sourcePatchSha256": "267612e24761a99182fd38e22c65530c41cc71229426dc523c8d6bd6544570a2",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 11992,
+      "launchedAt": "2026-10-19T00:35:07.993Z",
+      "completedAt": "2026-10-19T00:35:28.946Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "120e03a024a0937362bb300922114a233ff058724efca05cbbd96d2f8abd2b54"
+    },
+    "test": {
+      "pid": 57564,
+      "launchedAt": "2026-10-19T00:35:31.909Z",
+      "completedAt": "2026-10-19T00:35:34.570Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "7451869c17b477b5b19828a5650c2220c26a77ea224b807cb9e3746f4eadb4a6"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 2.62,
+    "projectFiles": 2617,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "51bd453f26cac43442d097bfb17cfb827d1c3d593d8f1818297f999b036f735c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false,
+    "productionBugReproduced": true
+  },
+  "initialObserverFailure": {
+    "recordedAt": "2026-10-19T00:39:37.141Z",
+    "sourceParent": "be68c211a64f4893230d9c86b4d575fc784cf858",
+    "sourcePatchSha256": "b90bac150cd6b7cf8ec6693f3ce952f37d57b591f059712d3254216d30aad585",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 58976,
+      "launchedAt": "2026-10-19T00:36:07.616Z",
+      "completedAt": "2026-10-19T00:39:06.884Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c35da66353fde3bde704fe0b4302e49e52902c77ccf39980fbe75685fbbb82b4"
+    },
+    "test": {
+      "pid": 19608,
+      "launchedAt": "2026-10-19T00:39:10.848Z",
+      "completedAt": "2026-10-19T00:39:34.272Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f4567e19841d21dc2cac7e722eea4e5ac617de7cfc9e316bdca079607347ed01"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 23.38,
+    "projectFiles": 2619,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "bff0b2b053cec07fd341cab0a0581ddbd7f2502f53a1994ad9b29c56f48291ef",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "focusedQualification": {
+    "recordedAt": "2026-10-19T00:44:41.957Z",
+    "sourceParent": "be68c211a64f4893230d9c86b4d575fc784cf858",
+    "sourcePatchSha256": "1316c327d3834303b5787d92a33709b11077a5ae0d5e4200b7ffa0d80dc2e0a9",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 17876,
+      "launchedAt": "2026-10-19T00:40:09.187Z",
+      "completedAt": "2026-10-19T00:44:11.572Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "497f868bf58c5104df2e2b24501f33b79215d07b38b44d59e5c177c5cbef6abc"
+    },
+    "test": {
+      "pid": 31496,
+      "launchedAt": "2026-10-19T00:44:15.795Z",
+      "completedAt": "2026-10-19T00:44:39.004Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6e9bd6527e83efda2ea8e9cabb8595243b9f432f1986697c164c983382de7331"
+    },
+    "total": 8,
+    "failed": 0,
+    "passed": 8,
+    "seconds": 23.17,
+    "projectFiles": 2619,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "behavior": [
+    "Check active run, protocol, catalogue, captured membership revision, explicit selected folder, cancellation/deadline, inherited denials and duplicate invocation identity.",
+    "Return actual root-to-directory attached AGENTS.md snapshots and deliver discovered scope in the following model request; reject foreign folders.",
+    "Preserve primary-folder skill discovery and activation, instruction budgets and the requirement that newly selected skills reach the next model request before dependent actions.",
+    "Retain both explicitly discovered nested instructions and a skill activated earlier in the same tool batch."
+  ],
+  "limits": {
+    "fullCurrentNativeSuiteRun": false,
+    "liveProviderInference": false,
+    "installed": false,
+    "actualVSCodePaneActivated": false,
+    "workerIPCImplemented": false,
+    "guidanceLifecycleStillBackendOwnedInRunner": true,
+    "guidanceApprovalsBroadened": false,
+    "attachedSkillCatalogueAdded": false,
+    "releaseAccepted": false,
+    "cpythonExecuted": false
+  },
+  "originalFailureFixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-agent-cmabHi",
+  "observerCorrection": "The initial regex used agent_permission_grants instead of native_permission_grants_contract and selected seven tests. Preserve the failed wrapper; the final gate preflights the exact eight names before execution.",
+  "receipts": {
+    "guidance-owner-regression-baseline-20261019/gate.json": {
+      "bytes": 1824,
+      "sha256": "300538cac0a27ae89ea61edb393ac31b805daf2c5ced7ab759836b8f1942f0bf"
+    },
+    "guidance-owner-regression-baseline-20261019/inputs-before-build.json": {
+      "bytes": 2878345,
+      "sha256": "2907f1d12f8bb6b9105b622c14a5c22ab345dab19b00f375adf131c514afee4e"
+    },
+    "guidance-owner-regression-baseline-20261019/binaries-before-test.json": {
+      "bytes": 14217,
+      "sha256": "1554a41d60a1aae57c278c54be2ce41db005d254bcc503112bfc4a6ba125b9f3"
+    },
+    "guidance-owner-regression-baseline-20261019/source.patch": {
+      "bytes": 10322,
+      "sha256": "267612e24761a99182fd38e22c65530c41cc71229426dc523c8d6bd6544570a2"
+    },
+    "guidance-owner-regression-baseline-20261019/build.log": {
+      "bytes": 17426,
+      "sha256": "120e03a024a0937362bb300922114a233ff058724efca05cbbd96d2f8abd2b54"
+    },
+    "guidance-owner-regression-baseline-20261019/build-terminal.json": {
+      "bytes": 226,
+      "sha256": "40957a045c9d7627fd75cae966a54759efecd2937b3aaf0125c447b650413869"
+    },
+    "guidance-owner-regression-baseline-20261019/ctest.log": {
+      "bytes": 1312,
+      "sha256": "7451869c17b477b5b19828a5650c2220c26a77ea224b807cb9e3746f4eadb4a6"
+    },
+    "guidance-owner-regression-baseline-20261019/ctest-terminal.json": {
+      "bytes": 226,
+      "sha256": "cba782d49457f1814cb4148328dc619086c24b3fbfa0686d9166199ac49852ea"
+    },
+    "guidance-owner-regression-baseline-20261019/LastTest.log": {
+      "bytes": 2140,
+      "sha256": "0c8c94000cc6bee23674e4667de23302bc4e20a89436671060c39262c94cbb48"
+    },
+    "guidance-owner-focused-20261019/gate.json": {
+      "bytes": 1790,
+      "sha256": "6bd03aa5706d9ddcc5bd30076d5e547283ea5c08e975fc4257ff35235c30f227"
+    },
+    "guidance-owner-focused-20261019/inputs-before-build.json": {
+      "bytes": 2878589,
+      "sha256": "440e045a8efcf9d20544e713f0dee7fad7672eb069df9f76f2e9b9287794b79c"
+    },
+    "guidance-owner-focused-20261019/binaries-before-test.json": {
+      "bytes": 14217,
+      "sha256": "b381e537347476431cc645c6277fae11b9608df2996b373107b38d097782c376"
+    },
+    "guidance-owner-focused-20261019/source.patch": {
+      "bytes": 36347,
+      "sha256": "b90bac150cd6b7cf8ec6693f3ce952f37d57b591f059712d3254216d30aad585"
+    },
+    "guidance-owner-focused-20261019/build.log": {
+      "bytes": 37245,
+      "sha256": "c35da66353fde3bde704fe0b4302e49e52902c77ccf39980fbe75685fbbb82b4"
+    },
+    "guidance-owner-focused-20261019/build-terminal.json": {
+      "bytes": 226,
+      "sha256": "43083b2db558ca66c748897528de2935d489de3e32ef965eafa0bcdb46febc56"
+    },
+    "guidance-owner-focused-20261019/ctest.log": {
+      "bytes": 1056,
+      "sha256": "f4567e19841d21dc2cac7e722eea4e5ac617de7cfc9e316bdca079607347ed01"
+    },
+    "guidance-owner-focused-20261019/ctest-terminal.json": {
+      "bytes": 226,
+      "sha256": "d29a0a829ade606367f2a13ba3e5ccb3500516e2e16a7db096268bece20200c8"
+    },
+    "guidance-owner-focused-20261019/LastTest.log": {
+      "bytes": 8736,
+      "sha256": "66b8287ea474f57eaea2a09ee2c17a43660122b3675f41a26460f002ba610c2b"
+    },
+    "guidance-owner-final-focused-20261019/gate.json": {
+      "bytes": 1789,
+      "sha256": "d493b0237a0785a859194a605ec62013bda98dee183ab46968db14d6b063a7fc"
+    },
+    "guidance-owner-final-focused-20261019/inputs-before-build.json": {
+      "bytes": 2878589,
+      "sha256": "54db2cb21771f379cabde3eac8c69f2ef217a286b6e602edf2865bfca184653b"
+    },
+    "guidance-owner-final-focused-20261019/binaries-before-test.json": {
+      "bytes": 14217,
+      "sha256": "e77d8a3c8187dab72899bd17f892114de849450cb495d298aa2e4d6a50564036"
+    },
+    "guidance-owner-final-focused-20261019/source.patch": {
+      "bytes": 39319,
+      "sha256": "1316c327d3834303b5787d92a33709b11077a5ae0d5e4200b7ffa0d80dc2e0a9"
+    },
+    "guidance-owner-final-focused-20261019/build.log": {
+      "bytes": 37112,
+      "sha256": "497f868bf58c5104df2e2b24501f33b79215d07b38b44d59e5c177c5cbef6abc"
+    },
+    "guidance-owner-final-focused-20261019/build-terminal.json": {
+      "bytes": 226,
+      "sha256": "3fc342662c61d09b26259f437176cff92561b43bc745d07b6054de9b320d1668"
+    },
+    "guidance-owner-final-focused-20261019/ctest.log": {
+      "bytes": 1185,
+      "sha256": "6e9bd6527e83efda2ea8e9cabb8595243b9f432f1986697c164c983382de7331"
+    },
+    "guidance-owner-final-focused-20261019/ctest-terminal.json": {
+      "bytes": 226,
+      "sha256": "3dc7f56ab256920f11e2983783e85036046e445c45b6d0bab2d796f11975dde5"
+    },
+    "guidance-owner-final-focused-20261019/LastTest.log": {
+      "bytes": 9642,
+      "sha256": "851e9fb7a6306cee587715983d1077fd1c35c535fd2c62e3bccc523375f4276f"
+    }
+  }
+}

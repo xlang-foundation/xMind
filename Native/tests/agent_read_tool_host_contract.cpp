@@ -1,6 +1,7 @@
 // Actual workspace reads, controller approvals and xlang3-backed SQLite.
 // No model/provider, fake filesystem adapter or worker-placement claim.
 #include "agentflow/agent_read_tool_host.hpp"
+#include "agentflow/agent_guidance_tool_host.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/agent_permission_grants.hpp"
 #include "agentflow/permission_waiter.hpp"
@@ -59,6 +60,33 @@ void language_owner_contract(const std::filesystem::path& primary,const std::fil
     }
     {PersistenceService reopened(database,{modules,pure});need(reopened.operation(approved).get().state==OperationState::succeeded&&reopened.operation(withheld).get().state==OperationState::failed&&reopened.operations("run").get().size()==4,"Language approval receipts must survive xlang3 SQLite reopen without dispatch replay");const auto grants=AgentPermissionGrantStore(reopened).list("session");need(grants.grants.size()==1&&grants.grants.front().workspace_id==attached_id,"Only actual attached language grant may persist");}
 }
+void guidance_owner_contract(const std::filesystem::path& parent,const char* modules,const char* pure){
+    const auto first=parent/"guidance-primary",second=parent/"guidance-attached";
+    std::filesystem::create_directories(first/".agents"/"skills"/"inspect");std::filesystem::create_directories(second/"guide");
+    write(first/"AGENTS.md","Primary guidance only.\n");write(second/"AGENTS.md","Attached root guidance only.\n");write(second/"guide"/"AGENTS.md","Attached nested guidance only.\n");
+    write(first/".agents"/"skills"/"inspect"/"SKILL.md","---\nname: inspect\ndescription: Actual owner skill\n---\nActual selected skill body.\n");
+    WorkspaceTools workspace(first.string()),attached(second.string());const auto primary_id=workspace.identity(),attached_id=attached.identity();
+    WorkspaceToolSet members(primary_id,11,{{primary_id,workspace.root_path()},{attached_id,attached.root_path()}});
+    RepositoryInstructionContext root(workspace,workspace.repository_instructions(".")),other(attached,attached.repository_instructions("."));root.prepare();
+    PersistenceService store((parent/"guidance.sqlite").string(),{modules,pure});store.create_session("guidance-session","Owned native guidance").get();store.start_prompt_run("guidance-run","guidance-session",R"({"content":"read admitted guidance"})").get();store.transition("guidance-run",RunState::queued,RunState::running).get();
+    AgentGuidanceToolOwnerContext owner;owner.run_id="guidance-run";owner.primary_workspace=&workspace;owner.workspace_members=&members;owner.repository_context=[&](std::size_t index){return index==0?&root:&other;};owner.offered_tool=is_agent_guidance_tool;owner.deadline=std::chrono::steady_clock::now()+30s;owner.base_instruction_bytes=100;
+    const auto call=[&](const std::string& id,const std::string& folder,const std::string& tool,Json args){AgentWorkspaceInvocation value;value.run_id="guidance-run";value.attempt_id="guidance-attempt";value.call_id=id;value.workspace_id=primary_id;value.workspace_revision=11;value.folder_id=folder;value.tool_name=tool;value.arguments_json=args.dump();return value;};
+    auto host=make_agent_guidance_tool_host(store,owner);const auto original=call("attached-sources",attached_id,"read_repository_instructions",{{"directory","guide"},{"folder_id",attached_id}});
+    auto invalid=original;invalid.protocol_version=2;rejects<std::invalid_argument>([&]{host->invoke(invalid);});invalid=original;invalid.run_id="foreign";rejects<ToolAccessDenied>([&]{host->invoke(invalid);});invalid=original;invalid.workspace_revision=12;rejects<ToolAccessDenied>([&]{host->invoke(invalid);});invalid=original;invalid.folder_id="foreign";rejects<ToolAccessDenied>([&]{host->invoke(invalid);});invalid=original;invalid.arguments_json=R"({"directory":"guide"})";rejects<ToolAccessDenied>([&]{host->invoke(invalid);});invalid=original;invalid.arguments_json=Json{{"directory","guide"},{"folder_id",primary_id}}.dump();rejects<ToolAccessDenied>([&]{host->invoke(invalid);});invalid=original;invalid.arguments_json=R"({"directory":".","directory":"guide"})";rejects<std::invalid_argument>([&]{host->invoke(invalid);});
+    const auto selected=host->invoke(original);const auto sources=Json::parse(selected.output_json);need(selected.success&&sources["folder_id"]==attached_id&&sources["workspace_id"]==primary_id&&sources["workspace_revision"]==11&&sources["sources"].size()==2,"Explicit guidance must read the actual admitted attached root and nested scope");
+    need(sources["sources"][0]["content"]=="Attached root guidance only.\n"&&sources["sources"][1]["content"]=="Attached nested guidance only.\n","Guidance must never silently use the primary folder");const auto delivered=other.prepare();need(delivered.find("Attached nested guidance only.")!=std::string::npos,"Discovered attached scope must be available for the next provider request");rejects<ToolAccessDenied>([&]{host->invoke(original);});
+    const auto listed=host->invoke(call("catalogue",primary_id,"list_skills",Json::object()));need(listed.success&&Json::parse(listed.output_json)["skills"].size()==1,"Owned skill discovery must read the actual primary catalogue");
+    const auto loaded=host->invoke(call("activate",primary_id,"load_skill",{{"id","inspect"}}));need(loaded.success&&Json::parse(loaded.output_json)["effect_permission"]==false,"Skill activation is guidance, not effect authority");
+    const auto waiting=host->invoke(call("undelivered-skill",primary_id,"load_skill",{{"id","inspect"}}));need(!waiting.success&&Json::parse(waiting.output_json)["error"]["code"]=="repository_instructions_required","A skill changed within a tool batch must wait for model delivery");
+    std::filesystem::create_directory(first/"nested");write(first/"nested"/"AGENTS.md","Primary nested guidance while skill delivery is pending.\n");
+    need(host->invoke(call("guidance-during-skill-activation",primary_id,"read_repository_instructions",{{"directory","nested"}})).success,"Guidance discovery must remain available while skill delivery is pending");
+    const auto combined=root.prepare();need(combined.find("Actual selected skill body.")!=std::string::npos&&combined.find("Primary nested guidance while skill delivery is pending.")!=std::string::npos,"The next provider request must retain both the selected skill and explicitly discovered nested guidance");
+    rejects<std::invalid_argument>([&]{host->invoke(call("extra-list-field",primary_id,"list_skills",{{"ignored",true}}));});rejects<ToolAccessDenied>([&]{host->invoke(call("attached-skill",attached_id,"list_skills",{{"folder_id",attached_id}}));});
+    auto denied_owner=owner;denied_owner.inherited_permission_layers={{{"list_skills","*","deny"}}};denied_owner.permission_rules={{"list_skills","*","allow"}};auto denied=make_agent_guidance_tool_host(store,denied_owner);rejects<AgentPermissionDenied>([&]{denied->invoke(call("inherited-denial",primary_id,"list_skills",Json::object()));});
+    auto hidden_owner=owner;hidden_owner.offered_tool=[](const std::string&){return false;};auto hidden=make_agent_guidance_tool_host(store,hidden_owner);rejects<ToolAccessDenied>([&]{hidden->invoke(call("not-offered",primary_id,"list_skills",Json::object()));});
+    std::stop_source stopped;stopped.request_stop();rejects<ToolCancelled>([&]{host->invoke(call("cancelled-guidance",primary_id,"list_skills",Json::object()),stopped.get_token());});auto expired_owner=owner;expired_owner.deadline=std::chrono::steady_clock::now()-1ms;auto expired=make_agent_guidance_tool_host(store,expired_owner);rejects<ToolCancelled>([&]{expired->invoke(call("expired-guidance",primary_id,"list_skills",Json::object()));});
+    need(store.operations("guidance-run").get().empty(),"Guidance discovery and rejected requests must not manufacture effect proposals");store.transition("guidance-run",RunState::running,RunState::completed).get();rejects<ToolAccessDenied>([&]{host->invoke(call("retired-guidance",primary_id,"list_skills",Json::object()));});
+}
 }
 int main(int argc,char** argv){if(argc!=3)return 2;try{
     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"attached";
@@ -88,5 +116,6 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
     }
     {PersistenceService reopened(database,{argv[1],argv[2]});need(reopened.operation(approved_id).get().state==OperationState::succeeded&&reopened.operation(withheld_id).get().state==OperationState::failed&&reopened.operations("run").get().size()==4,"Read receipts must survive actual xlang3 SQLite reopen without replay");const auto grants=AgentPermissionGrantStore(reopened).list("session");need(grants.grants.size()==1&&grants.grants.front().workspace_id==attached_id,"Only the selected attached-folder grant may persist");}
     language_owner_contract(primary,secondary,argv[1],argv[2]);
+    guidance_owner_contract(directory.path,argv[1],argv[2]);
     std::cout<<"workspace read and owned language-query authority contracts passed\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

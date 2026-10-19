@@ -22,6 +22,29 @@ const server=createServer((request,response)=>{
       assert.deepEqual(body.tools.map(item=>item.function.name),expectedTools);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
+      if(request.url.startsWith('/attached-guidance')){
+        const folderId=new URL(request.url,'http://fixture.local').searchParams.get('folder_id');assert.ok(folderId);
+        const systemMessage=body.messages.find(message=>['system','developer'].includes(message.role));
+        assert.ok(systemMessage?.content.includes(`folder_id=${folderId}`));
+        assert.ok(body.tools.find(tool=>tool.function.name==='read_repository_instructions').function.parameters.properties.folder_id);
+        const previous=body.messages.at(-1);let delta,finish;
+        if(previous.role==='user'){
+          delta={tool_calls:[
+            {index:0,id:'attached-repository-guidance',type:'function',function:{name:'read_repository_instructions',arguments:JSON.stringify({directory:'guide',folder_id:folderId})}},
+            {index:1,id:'foreign-repository-guidance',type:'function',function:{name:'read_repository_instructions',arguments:JSON.stringify({directory:'.',folder_id:'unregistered-folder'})}}
+          ]};finish='tool_calls';
+        }else{
+          const outputs=body.messages.slice(-2);assert.ok(outputs.every(message=>message.role==='tool'));
+          const result=JSON.parse(outputs[0].content);assert.equal(result.folder_id,folderId,'Attached guidance regression: '+JSON.stringify(result));
+          assert.deepEqual(result.sources.map(source=>source.path),['AGENTS.md','guide/AGENTS.md']);
+          assert.ok(result.sources.every(source=>source.workspace_id===folderId));
+          assert.equal(result.sources[0].content,'Attached root guidance marker.\n');assert.equal(result.sources[1].content,'Attached nested guidance marker.\n');
+          assert.equal(JSON.parse(outputs[1].content).error.code,'access_denied');
+          assert.ok(systemMessage.content.includes('Attached root guidance marker.'));assert.ok(systemMessage.content.includes('Attached nested guidance marker.'));
+          delta={content:'Synthetic model received actual attached guidance and retained the foreign-folder rejection.'};finish='stop';
+        }
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
       if(request.url==='/blocked-effect'){
         const previous=body.messages.at(-1);let delta,finish;
         if(previous.role==='user'){
@@ -183,5 +206,5 @@ try {
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   let result;try{result=await withOwnedProcessDiagnostics(execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[]),workerExecutable],{windowsHide:true,timeout:60000}),executable,{label:'agent-runner'});}catch(error){if(failure)throw failure;throw error;}
-  if(failure) throw failure;assert.equal(requests,rustAnalyzer?55:50);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);succeeded=true;
+  if(failure) throw failure;assert.equal(requests,rustAnalyzer?57:52);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);succeeded=true;
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(basename(folder).startsWith('xmind-agent-'));if(succeeded)await rm(folder,{recursive:true,force:true});else process.stderr.write('Agent runner failure evidence retained at '+folder+'\n');}

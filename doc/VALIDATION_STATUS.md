@@ -13,6 +13,30 @@ The original full failure remains retained; the corrected source subsequently pa
 The installed preview remains 0.1.33.
 [Failure, focused result and exact receipts](evidence/local-view-readiness-observer-20261019.json).
 
+## Owned repository and skill tools — 2026-10-19
+
+Explicit attached-folder repository-instruction calls previously built a primary-
+folder invocation and returned access_denied. The actual AgentRunner regression
+reproduces that failure against unchanged native production bytes.
+
+AgentGuidanceToolHost now checks the live run, offered catalogue, membership
+revision, selected folder, inherited denials, cancellation/deadline and duplicate
+call identity. Instruction reads use the selected admitted folder and register
+their scope for the following model request. Explicit discovery also survives a
+skill activated earlier in the same tool batch. Skill catalogue/activation retain
+their primary-folder contract and instruction budget; guidance grants no effects.
+
+The complete native build and eight focused owner/agent/graph/grant/waiter
+contracts pass in 23.17 seconds with all source, SDK, pure-library, dependency
+and binary file sets/hashes unchanged. A first selector omitted the grants
+contract: seven tests passed, but its eight-test wrapper correctly failed. That
+receipt is retained; the final selector preflights all eight exact names.
+This is local controlled model-fixture validation with actual files and xlang3
+SQLite, not live provider or installed client acceptance. Current full native,
+hosted, VS Code pane and worker IPC acceptance remain open. Guidance lifecycle
+and trusted callable/discovery services still depend on the backend runner.
+[Regression, final qualification and limits](evidence/guidance-tool-owner-20261019.json).
+
 ## Owned language-server queries — 2026-10-18
 
 Configured model language-server calls now cross the existing owned read-tool

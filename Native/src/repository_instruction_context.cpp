@@ -44,6 +44,11 @@ std::string RepositoryInstructionContext::metadata() const {
     for(const auto& [directory,files]:delivered_){auto sources=Json::array();for(const auto& file:files)sources.push_back({{"path",file.path},{"workspace_id",file.workspace_id},{"file_id",file.file_id},{"content_sha256",file.content_sha256},{"byte_count",file.content.size()}});scopes.push_back({{"directory",directory},{"sources",std::move(sources)}});}
     auto result=Json{{"snapshot","before_model_request"},{"scopes",std::move(scopes)}};const auto skills=Json::parse(skills_.metadata());if(!skills.empty())result["skills"]=skills;return result.dump();
 }
+void RepositoryInstructionContext::request_scope(const std::string& input,std::stop_token cancel){
+    const auto directory=normalized_directory(input);auto candidate=requested_;
+    candidate[directory]=workspace_.repository_instructions(directory,cancel);
+    render(candidate);requested_=std::move(candidate);
+}
 bool RepositoryInstructionContext::ready(const std::string& input,std::stop_token cancel){
     const auto directory=normalized_directory(input);auto current=workspace_.repository_instructions(directory,cancel);
     if(!skills_.ready(cancel))return false;

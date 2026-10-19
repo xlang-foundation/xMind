@@ -139,3 +139,8 @@ from this archive.
 ## Owned language-query checkpoint before complete suite
 
 - Uninstalled owned LSP query source passes eight owner contracts and two actual Rust Analyzer contracts plus Cargo fixture check. Configured language_server calls use AgentReadToolHost for live run/catalogue/workspace/folder, document guidance, inherited policy, approval/grant and duplicate-call checks; trusted registry and dispatch stay with the backend. A custom same-name xlang3 callable remains available when no native LSP registry is configured. SDK/header/library/dependency/binary inputs and Rust bin/lib/libexec/shims are frozen. First fixture compile/policy failures and initial semantic null-definition failure remain recorded; later passes do not explain that initialization failure. Full native and hosted qualification, installation and worker IPC remain open. See doc/evidence/language-server-read-owner-20261018.json.
+
+
+## Explorer checkpoint archived for guidance-owner work
+
+- Explorer change observes terminal native operations and coalesces read-only refreshes; it preserves expansion, filename query and preview and fences obsolete workspace/connection work. Observation cache caps at 4,096. Prior implementation fails four of five new checks. Arbitrary external filesystem changes still need Refresh. All 18 installed browser assets match both current served pages. The older 0.1.27/0.1.28 runtime directories used by their native views still verify all 2,402 files after installing 0.1.30. Observer failures on modal interception, initial workspace selection, paginated events, early run completion and REPL reset remain recorded separately; none justified a duplicate provider task or a product restart.
