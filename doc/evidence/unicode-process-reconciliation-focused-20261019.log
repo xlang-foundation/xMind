@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: process reconciliation validates UTF-8 byte limits before sending an audit note
+ok 1 - process reconciliation validates UTF-8 byte limits before sending an audit note
+  ---
+  duration_ms: 2.4668
+  type: 'test'
+  ...
+# Subtest: retired uncertain processes require an explicit side-effect acknowledgment and UTF-8 bounded audit note before reconciliation
+ok 2 - retired uncertain processes require an explicit side-effect acknowledgment and UTF-8 bounded audit note before reconciliation
+  ---
+  duration_ms: 141.0394
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 855.2478

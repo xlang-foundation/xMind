@@ -393,7 +393,8 @@ class BackendClient {
     if(run.session_id!==sessionId||run.parent_id||run.graph_root!==true)throw new Error('Native restore run was not bound to this conversation.');return run;
   }
   reconcileProcess(id,note) {
-    executionIdentity(id);if(typeof note!=='string'||note.length<16||note.length>1024||/[\r\n\0]/.test(note))throw new Error('Enter a one-line reconciliation note of at least 16 characters.');
+    executionIdentity(id);const bytes=typeof note==='string'?new TextEncoder().encode(note).length:0;
+    if(bytes<16||bytes>1024||/[\r\n\0]/.test(note))throw new Error('Enter a one-line reconciliation note of 16–1,024 UTF-8 bytes.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/reconcile`,{note,acknowledge_possible_side_effects:true});
   }
   inspectA2aTask(id, includeArtifacts = false) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, includeArtifacts ? {include_artifacts:true} : {}); }

@@ -2,6 +2,21 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared UI audit-note validation — 2026-10-19
+
+The browser and VS Code source now count process-reconciliation notes in UTF-8
+bytes, matching the backend's 16–1,024-byte bound. Previously, valid Chinese
+notes could be rejected as too short, while a note above the native byte limit
+could leave the form enabled. The form and HTTP client now reject oversized or
+multiline notes before submission and retain the explicit acknowledgment.
+
+Both focused regressions fail before the fix and pass afterward. The complete
+frozen client suites pass 442/442 extension and 154/154 browser tests, with all
+17,439 stage source/dependency/asset/runtime files unchanged during validation.
+This is a source candidate: installed50, running services and saved user data
+are unchanged. No rendered UI or live model acceptance is claimed.
+[Regression evidence](evidence/unicode-process-reconciliation-20261019.json).
+
 ## Installed console recovery checkpoint — 2026-10-19
 
 Installed 0.1.50 packages native source `d30c6025` with executable `3ed464a2`.

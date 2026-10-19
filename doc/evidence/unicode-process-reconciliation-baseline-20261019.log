@@ -1,0 +1,51 @@
+TAP version 13
+# Subtest: process reconciliation validates UTF-8 byte limits before sending an audit note
+not ok 1 - process reconciliation validates UTF-8 byte limits before sending an audit note
+  ---
+  duration_ms: 1.7938
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\client.test.js:11:1'
+  failureType: 'testCodeFailure'
+  error: 'Enter a one-line reconciliation note of at least 16 characters.'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    BackendClient.reconcileProcess (D:\CantorAI2026\xMind\extensions\vscode\client.js:396:116)
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\client.test.js:13:81)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: retired uncertain processes require an explicit side-effect acknowledgment and UTF-8 bounded audit note before reconciliation
+not ok 2 - retired uncertain processes require an explicit side-effect acknowledgment and UTF-8 bounded audit note before reconciliation
+  ---
+  duration_ms: 135.0009
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\renderer.test.js:779:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Invalid audit note must disable submission
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\renderer.test.js:782:152)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 868.1476

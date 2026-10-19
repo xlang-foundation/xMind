@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-19T23:36:39.100Z",
+  "sourceParent": "3ae97901",
+  "sourcePatchSha256": "c26fbddda87fde4f341ea9c18ef9436b9dbf43b9d37c1b1436a0cea59fb2ab50",
+  "sourceSha256": {
+    "extensions/vscode/client.js": "917b618b5c1be98ff187008feb5072c07de539d376be17e0e1646319781e96fb",
+    "extensions/vscode/media/chat.js": "9979333cb8f064094d314d11f1ef5126b394067194b2993d1920034f08e9264a",
+    "extensions/vscode/tests/client.test.js": "365b9b657ce957d3e9d5235096901178fa5bb7abad3de81bc90442f26ae2d9bd",
+    "extensions/vscode/tests/renderer.test.js": "10e02e700f93dc28449c786cad10403bdf30f4625527c50eb1bc80784b0f30a4",
+    "Tools/ci-views.mjs": "2cfdcc36594c0a572e1812065622bf06a65444ad7e4ec8caacf253ee1f38fd4c"
+  },
+  "baselineAndFocused": {
+    "baseline": {
+      "file": "unicode-process-reconciliation-baseline-20261019.log",
+      "sha256": "7e5c0326027107f01522d02855008325e605325e02e89db3528f335ca8bc6b57",
+      "tests": 2,
+      "passed": 0,
+      "failed": 2
+    },
+    "focused": {
+      "file": "unicode-process-reconciliation-focused-20261019.log",
+      "sha256": "f3dff6b14c813df39da6bc94c6c09fedffff5bbe0d0710eb28d17f18456e4b39",
+      "tests": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "completeClientGate": {
+    "recordedAt": "2026-10-19T23:36:33.705Z",
+    "sourceParent": "3ae97901",
+    "candidate": "UTF-8 audit note validation; source candidate, installed50 unchanged",
+    "extension": {
+      "exitCode": 0,
+      "tests": 442,
+      "passed": 442,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "578bca29e7b9a7fd55dba118cd3940ff99bef241f6f1ab6a33affd1fa3725f7a"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "111f0a45c997e238623caecc9546796f90f8743fae187d2e3ce6f90b92564eb4"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "scope": {
+    "sharedBrowserAndVsCodeRenderer": true,
+    "nativeBackendChanged": false,
+    "installedVersion": "0.1.50",
+    "installedPayloadChanged": false,
+    "existingBackendsReplaced": false,
+    "providerCalls": 0,
+    "cpythonExecuted": false,
+    "renderedUiAcceptance": false
+  },
+  "behavior": "Client and form enforce the native 16–1024 UTF-8 byte audit-note bound and reject line breaks/NUL before submission; explicit acknowledgment is still required."
+}

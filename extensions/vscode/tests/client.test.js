@@ -8,6 +8,13 @@ const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
 const skillCatalogue={workspace_id:skillWorkspace,authority_id:skillAuthority,skills:[{id:'manual',name:'User guide',path:'.agents/skills/manual.md',model_invocable:false}]};
+test('process reconciliation validates UTF-8 byte limits before sending an audit note',async()=>{
+ const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>({})};});
+ for(const note of ['已检查工作区及输出','é'.repeat(512),'x'.repeat(1024)]){await client.reconcileProcess('operation',note);assert.equal(JSON.parse(requests.at(-1).options.body).note,note);}
+ const sent=requests.length;
+ for(const note of ['短注释','é'.repeat(513),'x'.repeat(1025),'Audit note with\nnewline','Audit note with\rreturn','Audit note with\0null'])assert.throws(()=>client.reconcileProcess('operation',note),/16.*1,024.*UTF-8/);
+ assert.equal(requests.length,sent,'Invalid notes must not reach the backend');
+});
 test('workspace slash commands resolve exact catalogue IDs and preserve raw arguments',()=>{
  const catalogue={commands:[{id:'review/security'},{id:'review'}]};
  assert.deepEqual(parseWorkspaceCommand('/review/security "src/app file.cpp" --strict',catalogue),{id:'review/security',arguments:'"src/app file.cpp" --strict'});

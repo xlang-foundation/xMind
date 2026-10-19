@@ -386,7 +386,7 @@ function operations(items){
         const note=node('textarea');note.rows=2;note.maxLength=1024;note.placeholder='What did you inspect?';note.setAttribute('aria-label','Process reconciliation note');section.append(note);
         const acknowledge=node('input');acknowledge.type='checkbox';const label=node('label','I inspected the workspace and accept possible command side effects.');label.prepend(acknowledge);section.append(label);
         const reconcile=node('button','Acknowledge and release workspace quarantine');reconcile.disabled=true;
-        const update=()=>{reconcile.disabled=!acknowledge.checked||note.value.trim().length<16;};acknowledge.onchange=update;note.oninput=update;
+        const update=()=>{const value=note.value.trim(),bytes=new TextEncoder().encode(value).length;reconcile.disabled=!acknowledge.checked||bytes<16||bytes>1024||/[\r\n\0]/.test(value);};acknowledge.onchange=update;note.oninput=update;
         reconcile.onclick=()=>{reconcile.disabled=true;api.postMessage({type:'reconcile-process',id:item.id,note:note.value.trim()});};section.append(reconcile);
       }
     }
