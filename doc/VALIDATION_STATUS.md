@@ -1,5 +1,28 @@
 # Current native validation
 
+## Fresh module-path contrast — 2026-10-19
+
+Hosted run 39314091865 on cea34ea4 is terminal diagnostic failure: 25/32
+launches pass across eight fresh hosts. All eight official artifact digests
+verify; the selected eleven source hashes match across jobs, with each driver's
+named source/binary check retained.
+
+The original unqualified graph command completes in 8,202 ms using the private
+Utility/Management module path. Copying the same three hash-identical files
+while retaining the normal search path still times out at 30,041 ms. Effective
+paths are observed only after the first command. The normal path includes Azure,
+SQL Server and packer-user module directories as well as normal user/system
+locations. Core-only contains only its private root. This distinguishes the
+path restriction from copying those files alone, but does not identify a
+specific costly module or justify silently restricting production user modules.
+
+The default original first still fails at 30,042 ms; module-qualified first
+passes in 8,039 ms. Fresh cmdlet-phases passes in 25,943 ms, preserving observed
+host timing variation. Cache controls remain failing. Later warm comparisons
+never qualify their failed first command. Production environment/deadline,
+installed44 and user pages are unchanged. This is diagnostic scope only.
+[Exact comparison and artifact provenance](evidence/process-module-path-controls-hosted-20261019.json).
+
 ## Effective module-path controls — 2026-10-19
 
 The throwaway native diagnostic now observes the effective PowerShell module

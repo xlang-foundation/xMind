@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Diagnostic module-path controls: local10/10 pass, source/single diagnostic binary unchanged; core-only6259ms/copy-only6293ms. Three actual Utility/Management files are bounded-copied and hash-verified before/after. Effective module path query occurs only after original first command (no prewarm); core-only contains private root only, copy-only retains default paths. Fresh first-case jobs added for both. No production/install44 change or hosted cause claim. Local57386 closed0; evidence doc/evidence/process-module-path-controls-local-20261019.json. Prior cache6-job17/24 failure remains in doc/evidence/process-cache-controls-hosted-20261019.json.
+- Diagnostic module-path controls: local10/10 pass, source/single diagnostic binary unchanged; core-only6259ms/copy-only6293ms. Three actual Utility/Management files are bounded-copied and hash-verified before/after. Effective module path query occurs only after original first command (no prewarm); core-only contains private root only, copy-only retains default paths. Fresh hosted39314091865/cea34ea4 terminal25/32: core-only8202ms passes; identical-file copy-only30041ms fails. Default path includes Azure/SQL/packer dirs; private root only under core control. Effective paths sampled after first command; exact costly module unproven. Eight official digests verify. No production/install44 change; see doc/evidence/process-module-path-controls-hosted-20261019.json. Local57386 closed0; evidence doc/evidence/process-module-path-controls-local-20261019.json. Prior cache6-job17/24 failure remains in doc/evidence/process-cache-controls-hosted-20261019.json.
 
 
 

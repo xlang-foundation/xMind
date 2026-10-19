@@ -1,0 +1,1059 @@
+{
+  "recordedAt": "2026-10-19T19:52:59.172Z",
+  "run": 39314091865,
+  "revision": "cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+  "artifacts": [
+    {
+      "label": "original",
+      "id": 12217531815,
+      "name": "process-startup-diagnostics-original-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8421,
+      "digest": "sha256:4c3f04d82b9a9df0d2ba3ddd6359160a0b1c45c3b2964562d17907c324408952",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/original.zip"
+    },
+    {
+      "label": "minimal-path",
+      "id": 12217242839,
+      "name": "process-startup-diagnostics-minimal-path-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8583,
+      "digest": "sha256:bee180bd16b130d25f2902db58fe4a7a6ac040aa3f3acbd300f93c452a422f5f",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/minimal-path.zip"
+    },
+    {
+      "label": "module-qualified",
+      "id": 12217033224,
+      "name": "process-startup-diagnostics-module-qualified-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8686,
+      "digest": "sha256:2788bc76297996f1accef8a169ec6b905b58d416d1e74ce463ed60e95052d79d",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/module-qualified.zip"
+    },
+    {
+      "label": "cmdlet-phases",
+      "id": 12215734415,
+      "name": "process-startup-diagnostics-cmdlet-phases-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8703,
+      "digest": "sha256:7ff5cb377963228915c810d9d3bee14c5fc0e696b335f21fb43b1f91e00a6269",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/cmdlet-phases.zip"
+    },
+    {
+      "label": "private-cache",
+      "id": 12216418381,
+      "name": "process-startup-diagnostics-private-cache-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8607,
+      "digest": "sha256:9a2c8f46e61f1fc20be7a284df55e626760d5126b06e9134d9b14e210e57e3d8",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/private-cache.zip"
+    },
+    {
+      "label": "cache-off",
+      "id": 12215744169,
+      "name": "process-startup-diagnostics-cache-off-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 8553,
+      "digest": "sha256:b357c7309c2050d596a44164b069fc40e72c14107ddde9435d13db58b833ba7a",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/cache-off.zip"
+    },
+    {
+      "label": "core-only",
+      "id": 12216879107,
+      "name": "process-startup-diagnostics-core-only-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 9287,
+      "digest": "sha256:fc02d55faedc2fc3f7ee0326b6541d3da79c7f722406a5a6a85a010c9de28be5",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/core-only.zip"
+    },
+    {
+      "label": "precopy-core",
+      "id": 12217108209,
+      "name": "process-startup-diagnostics-precopy-core-cea34ea49026e7f1790ab116aa24b4f6aaebe21e",
+      "bytes": 9441,
+      "digest": "sha256:2fd518ffc8b0fe42d5401b7508f3da660859ca089f4840e4ff8e82435fa7ab98",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-module-path-controls-hosted-20261019/precopy-core.zip"
+    }
+  ],
+  "selectedSourceHashesIdenticalAcrossEightFreshJobs": true,
+  "selectedSourceFiles": 11,
+  "withinJobSourceAndBinaryCheck": "Each diagnostic driver compares its named source hashes and binary SHA before/after; artifacts retain the passed check, without a separate source-after file.",
+  "records": [
+    {
+      "label": "original",
+      "binarySha256": "22923cc240e7441a0f99628e85e2ffed2f641432213e7c05c71a9f4fa7e51e0d",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 5044
+          },
+          "elapsedMs": 30042,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 181,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 147
+          },
+          "elapsedMs": 30033,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 162,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 18059,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 161,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 135,
+            "delay_completed": 6140,
+            "effect_completed": 6156
+          },
+          "elapsedMs": 6171,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 157,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "minimal-path",
+      "binarySha256": "2ec7525f60a2f3f454a34cb0ff1db8c3360cc7067a6cb4b594de01c642c4fae6",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-minimal-path",
+          "scenario": "graph",
+          "control": "minimal-path",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1451
+          },
+          "elapsedMs": 30030,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 199,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 169,
+            "delay_completed": 28049,
+            "effect_completed": 28239
+          },
+          "elapsedMs": 28271,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 182,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22177,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 209,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 164,
+            "delay_completed": 6171,
+            "effect_completed": 6191
+          },
+          "elapsedMs": 6191,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 190,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "module-qualified",
+      "binarySha256": "6a8f092433f4a19b97a0871a3098036cc284c7c3993419778b6f88c597f6f83e",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": true,
+      "cases": [
+        {
+          "label": "01-module-qualified-default",
+          "scenario": "module-qualified",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1493,
+            "delay_completed": 7868,
+            "effect_completed": 8008
+          },
+          "elapsedMs": 8039,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 142,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 125,
+            "delay_completed": 23562,
+            "effect_completed": 23597
+          },
+          "elapsedMs": 23621,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 173,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 12276,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 157,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 140,
+            "delay_completed": 6131,
+            "effect_completed": 6152
+          },
+          "elapsedMs": 6152,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 158,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "cmdlet-phases",
+      "binarySha256": "53e7b03d8d92f9ffa48bd52ff01143873443fcb6af4fd079c265cdf3bac04540",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": true,
+      "cases": [
+        {
+          "label": "01-cmdlet-phases-default",
+          "scenario": "cmdlet-phases",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1615,
+            "delay_completed": 25755,
+            "effect_completed": 25907,
+            "location_resolved": 25907
+          },
+          "elapsedMs": 25943,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 120,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-probe:location_resolved\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 117,
+            "delay_completed": 17470,
+            "effect_completed": 17501
+          },
+          "elapsedMs": 17517,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 125,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 11654,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 125,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 104,
+            "delay_completed": 6134,
+            "effect_completed": 6134
+          },
+          "elapsedMs": 6146,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 114,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "private-cache",
+      "binarySha256": "1d9561093d9d5134be02c0ae8a24cac87cbf063fad491a295615fa2636d23ed4",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-private-cache",
+          "scenario": "graph",
+          "control": "private-cache",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1738
+          },
+          "elapsedMs": 30055,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 214,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 184,
+            "delay_completed": 26034,
+            "effect_completed": 26224
+          },
+          "elapsedMs": 26256,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 186,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 20152,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 195,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 181,
+            "delay_completed": 6175,
+            "effect_completed": 6187
+          },
+          "elapsedMs": 6198,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 199,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "cache-off",
+      "binarySha256": "4776229ccca4b3b5d07e90de923539f0fc6ef188aa202896903b4c40f4969720",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-cache-off",
+          "scenario": "graph",
+          "control": "cache-off",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1691
+          },
+          "elapsedMs": 30044,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 338,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 198,
+            "delay_completed": 29108,
+            "effect_completed": 29306
+          },
+          "elapsedMs": 29330,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 195,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22322,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 222,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 199,
+            "delay_completed": 6211,
+            "effect_completed": 6211
+          },
+          "elapsedMs": 6226,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 592,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "core-only",
+      "binarySha256": "fe36c59933a32d87e5a6290be6be43063402f5a0933a7c6b1fac859469eed530",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-core-only",
+          "scenario": "graph",
+          "control": "core-only",
+          "firstOnFreshHostedJob": true,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1653,
+            "delay_completed": 8044,
+            "effect_completed": 8162
+          },
+          "elapsedMs": 8202,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-startup-probe-CGgirL\\01-graph-core-only\\core-modules",
+            "elapsed_ms": 191,
+            "stderr": "",
+            "success": true
+          },
+          "coreModuleCopy": {
+            "files": [
+              {
+                "bytes": 2459,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+                "sha256": "c09df190addc67f7c6c38e7ea1dca719fd87807107f688c3f60ed8816e1c48a6"
+              },
+              {
+                "bytes": 30592,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psm1",
+                "sha256": "f9232f3de3c94dd03caf40f54b22876c9d810c657c41e54ab2d10469b45f26b5"
+              },
+              {
+                "bytes": 2562,
+                "relative_path": "Microsoft.PowerShell.Management\\Microsoft.PowerShell.Management.psd1",
+                "sha256": "91ea580e6bbc54148eadac5e8018f6e6edfd04bcd3cf07489a9028fdeea948a0"
+              }
+            ],
+            "root": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-startup-probe-CGgirL\\01-graph-core-only\\core-modules",
+            "search_path_overridden": true,
+            "unchanged": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 175
+          },
+          "elapsedMs": 30036,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 195,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22277,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 197,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 181,
+            "delay_completed": 6187,
+            "effect_completed": 6187
+          },
+          "elapsedMs": 6212,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 184,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "precopy-core",
+      "binarySha256": "335a8037d451bd298931ac917d684420388fdbc2e5fc25054be9e3e342def1fd",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-precopy-core",
+          "scenario": "graph",
+          "control": "precopy-core",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1511
+          },
+          "elapsedMs": 30041,
+          "termination": "timed_out",
+          "markerExists": false,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 181,
+            "stderr": "",
+            "success": true
+          },
+          "coreModuleCopy": {
+            "files": [
+              {
+                "bytes": 2459,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+                "sha256": "c09df190addc67f7c6c38e7ea1dca719fd87807107f688c3f60ed8816e1c48a6"
+              },
+              {
+                "bytes": 30592,
+                "relative_path": "Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psm1",
+                "sha256": "f9232f3de3c94dd03caf40f54b22876c9d810c657c41e54ab2d10469b45f26b5"
+              },
+              {
+                "bytes": 2562,
+                "relative_path": "Microsoft.PowerShell.Management\\Microsoft.PowerShell.Management.psd1",
+                "sha256": "91ea580e6bbc54148eadac5e8018f6e6edfd04bcd3cf07489a9028fdeea948a0"
+              }
+            ],
+            "root": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-startup-probe-3vcSP2\\01-graph-precopy-core\\core-modules",
+            "search_path_overridden": false,
+            "unchanged": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 148,
+            "delay_completed": 23945,
+            "effect_completed": 24111
+          },
+          "elapsedMs": 24135,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 161,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 19925,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 324,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 335,
+            "delay_completed": 6337,
+            "effect_completed": 6348
+          },
+          "elapsedMs": 6360,
+          "termination": "exited",
+          "markerExists": true,
+          "modulePathProbe": {
+            "effective_path": "C:\\Users\\runneradmin\\Documents\\WindowsPowerShell\\Modules;C:\\\\Modules\\az_15.6.1;C:\\Users\\packer\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\PowerShell\\Modules\\",
+            "elapsed_ms": 155,
+            "stderr": "",
+            "success": true
+          },
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "total": 32,
+  "passed": 25,
+  "causeEstablished": false,
+  "productionChanged": false,
+  "scope": "Eight independent fresh Windows hosted jobs; native process-adapter diagnostic, not a full product gate",
+  "findings": [
+    "The unchanged original graph command under a private Utility/Management module path completes in 8202ms on its fresh host. The same three copied files with the ordinary search path still time out at 30041ms.",
+    "Private and copy-only files match SHA/size/name and each retains its before/after check. Module path observations occur only after the first command.",
+    "The normal effective path contains runneradmin Documents modules, C:\\\\Modules\\az_15.6.1, packer-user Documents modules, AllUsers modules, system modules and SQL Server modules. The private path contains only its copied core root.",
+    "Original/default first command still times out at30042ms. Module-qualified first completes8039ms. Fresh cmdlet-phases first completes25943ms, retaining host timing variation.",
+    "Private-cache/cache-off controls remain failing. Later warmed comparisons remain distinct from failed first commands."
+  ],
+  "conclusion": "Restricting the module search surface removes the observed cold delay in this controlled comparison. The exact costly module/path remains unproven. This is not authorization to silently restrict production user modules.",
+  "limits": {
+    "causeEstablished": false,
+    "productionEnvironmentChanged": false,
+    "installed44Changed": false,
+    "fullNativeHostedAccepted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false
+  },
+  "collectorNote": "One read-only status query accidentally used an incorrect source SHA and returned no runs; the original known run handle was then checked with git-verified source cea34ea49026e7f1790ab116aa24b4f6aaebe21e. All artifacts use that exact verified source."
+}
