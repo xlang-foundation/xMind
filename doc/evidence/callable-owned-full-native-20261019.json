@@ -1,0 +1,121 @@
+{
+  "scope": "Complete local Release inventory on committed graph-callable source; native HTTP responsiveness separately qualified",
+  "gate": {
+    "recordedAt": "2026-10-19T19:30:04.759Z",
+    "sourceParent": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 31280,
+      "launchedAt": "2026-10-19T19:13:08.645Z",
+      "completedAt": "2026-10-19T19:13:34.129Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "95ff0e34be77bde14170df2c3c044e07f451a0be60aadf1983b8c83080ebc594"
+    },
+    "test": {
+      "pid": 67940,
+      "launchedAt": "2026-10-19T19:13:37.259Z",
+      "completedAt": "2026-10-19T19:30:01.961Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "73d170288983c9b3869e14bcdb115120df5e99ab457fe73715ac5420b8ef0863"
+    },
+    "total": 154,
+    "failed": 0,
+    "passed": 154,
+    "seconds": 984.67,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "earlierRustFailureReceipt": "lsp-diagnostics-rust-diagnostic-20261019/gate.json",
+    "currentSourceActualRustAnalyzerRerun": false,
+    "currentSourceInitialRustLeafPassed": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "http": {
+    "at": "2026-10-19T19:30:12.394Z",
+    "scope": "Actual native configurable-provider HTTP backend remains responsive while an explicitly synthetic language server waits for release; real xlang3 SQLite, no provider or user task",
+    "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+    "taskSubmissions": 0,
+    "observations": [
+      {
+        "route": "/v1/workspace",
+        "status": 200,
+        "elapsedMs": 5
+      },
+      {
+        "route": "/v1/provider/profiles",
+        "status": 200,
+        "elapsedMs": 5
+      },
+      {
+        "route": "/v1/health",
+        "status": 200,
+        "elapsedMs": 5
+      }
+    ],
+    "owner": {
+      "pid": 63432,
+      "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+      "birth": "2026-10-19T19:30:12.3823260Z"
+    },
+    "query": {
+      "status": 200,
+      "body": {
+        "diagnostics": [],
+        "language_id": "typescript",
+        "method": "diagnostics",
+        "path": "check.ts",
+        "result": {
+          "items": [],
+          "kind": "full"
+        },
+        "server_id": "waiting"
+      }
+    },
+    "passed": true,
+    "terminal": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "ownedIdleTestServerRetired": true,
+    "finishedAt": "2026-10-19T19:30:14.707Z"
+  },
+  "installedBackup": {
+    "recordedAt": "2026-10-19T19:24:52.644Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.43",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.43-before-0.1.44",
+    "checkedFiles": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "limits": [
+    "No live model task in these two checks.",
+    "No current installed/browser/editor acceptance; preview44 package is pending.",
+    "Hosted Windows CI remains separate; whole-AgentRunner worker placement and prior Rust semantic failure remain open."
+  ],
+  "cpythonExecuted": false
+}

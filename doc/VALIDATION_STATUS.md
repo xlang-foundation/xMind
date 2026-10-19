@@ -1,5 +1,22 @@
 # Current native validation
 
+## Complete callable-owned native gate — 2026-10-19
+
+Committed source 9c5bedbb passes all 154 registered local Release contracts in
+984.67 seconds. The complete build passes; source, SDK headers/runtime, pure
+libraries, dependencies and all 129 native binaries retain their checked hashes
+and file sets. This qualifies the workspace-journal and callable-host changes,
+including the actual graph callable allow/deny/worker regression, as one suite.
+
+A separate actual native HTTP check holds a synthetic language-server request
+while workspace/provider/health routes all return HTTP 200 in five milliseconds.
+The query then completes; only that identity-verified idle test server is retired.
+No provider task is submitted. Installed43 is backed up: 2,447 files verified,
+settings unchanged and six existing profile directories retained. Preview44
+metadata is prepared; packaging, installation and live client checks remain
+pending. Hosted Windows and actual VS Code-pane acceptance remain separate.
+[Complete gate, responsiveness and backup](evidence/callable-owned-full-native-20261019.json).
+
 ## Graph-owned trusted callables — 2026-10-19
 
 Actual dynamic graphs now validate the callable policy through two real children:
