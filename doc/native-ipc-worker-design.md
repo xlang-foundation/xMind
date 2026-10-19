@@ -1,3 +1,14 @@
+## Run-journal workspace snapshots — 2026-10-19
+
+Saved root/inherited workspace membership and snapshot deduplication now use
+the supplied AgentRunJournal rather than the concrete backend services store.
+A two-store regression reproduces the original missing-run failure and then
+verifies an actual attached-file read against the admitted revision, despite a
+newer live folder list. Seven focused contracts pass; this closes a journal
+dependency error and does not implement process placement. Credentials, effect
+hosts, discovery and other backend dependencies still need their owner bridge.
+[Exact scope and retained failures](evidence/split-journal-membership-20261019.json).
+
 ## Owned repository and skill tools — 2026-10-19
 
 Explicit attached-folder repository-instruction calls previously built a primary-

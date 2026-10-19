@@ -104,9 +104,9 @@ std::string execution_identity(const AgentSettings& settings,const std::string& 
     else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     return identity.dump();
 }
-std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(AgentRunJournal& persistence,const std::string& owner){
+std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(AgentRunJournal& journal,const std::string& owner){
     std::optional<WorkspaceMembershipSnapshot> result;
-    for(const auto& event:persistence.events(owner).get())if(event.kind=="agent.workspace_membership"){
+    for(const auto& event:journal.events(owner).get())if(event.kind=="agent.workspace_membership"){
         if(result)throw ToolAccessDenied("Run contains duplicate workspace membership snapshots");
         const auto value=Json::parse(event.json);
         if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||
@@ -410,8 +410,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     const auto admitted=journal_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){
-        auto membership=admitted.parent_id.empty()?saved_workspace_membership(persistence_,id):
-            (budget?saved_workspace_membership(persistence_,budget->root_id()):saved_workspace_membership(persistence_,admitted.parent_id));
+        auto membership=admitted.parent_id.empty()?saved_workspace_membership(journal_,id):
+            (budget?saved_workspace_membership(journal_,budget->root_id()):saved_workspace_membership(journal_,admitted.parent_id));
         if(!membership&&admitted.parent_id.empty()&&settings_.workspace_membership_snapshot)membership=settings_.workspace_membership_snapshot();
         if(membership){
         if(membership->workspace_id!=workspace_->identity()||membership->folders.empty()||membership->folders.front().root!=workspace_->root_path())
@@ -520,7 +520,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         return journal_.transition(id,RunState::running,state,reason.dump()).get();
     };
     try {
-        if(run_workspace_tools&&!saved_workspace_membership(persistence_,id)){Json folders=Json::array();for(const auto& folder:run_workspace_tools->folders())folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
+        if(run_workspace_tools&&!saved_workspace_membership(journal_,id)){Json folders=Json::array();for(const auto& folder:run_workspace_tools->folders())folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
             journal_.append_event(id,"agent.workspace_membership",Json{{"workspace_id",run_workspace_tools->workspace_id()},{"revision",run_workspace_tools->revision()},{"primary_folder_id",run_workspace_tools->folders().front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();}
         const auto local_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
         if(!leaf&&admitted.parent_id.empty()&&execution_budget(provider.model)){

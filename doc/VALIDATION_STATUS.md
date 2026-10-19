@@ -1,5 +1,26 @@
 # Current native validation
 
+## Separate run-journal workspace admission — 2026-10-19
+
+The existing AgentRunner overload accepted a separate run journal but still
+looked up saved workspace membership in its concrete backend services store.
+An actual two-store regression fails on unchanged production code with
+`Run not found: split-journal`. Root/inherited membership and the duplicate
+snapshot guard now use the supplied journal.
+
+The complete build and seven focused contracts pass in 30.45 seconds with
+checked input and binary sets unchanged. The regression reads the original
+admitted attached folder at revision seven even though the live registry now
+offers a different folder at revision eight. It retains one snapshot and does
+not create a run in the services store. A corrected Windows newline fixture,
+the first 6/7 outcome and observer-script failures are retained separately.
+
+This is controlled-model/native-files/xlang3-SQLite validation. The candidate
+is not installed; its complete suite, actual provider/client acceptance and
+process-bound AgentRunner execution remain pending. The working 0.1.43 pages
+remain in place.
+[Exact regression, failures and focused results](evidence/split-journal-membership-20261019.json).
+
 ## Actual TestProj coding workflow — 2026-10-19
 
 Installed 0.1.43 now completes a browser-driven workflow directly in

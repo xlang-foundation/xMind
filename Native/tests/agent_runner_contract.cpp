@@ -39,6 +39,48 @@ bool streamed(PersistenceService& store,const std::string& id){
     for(const auto& event:store.events(id).get())if(event.kind=="model.text")return true;
     return false;
 }
+// Explicit model fixture: the real runner, filesystem and two independent
+// xlang3 SQLite stores must use the admitted journal's folder snapshot.
+class SplitJournalModel final:public AgentModelGateway {
+public:
+    explicit SplitJournalModel(std::string folder):folder_(std::move(folder)){}
+    ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
+        ++calls;ModelCompletion reply;
+        if(calls>1){
+            require(request.messages.back().role==MessageRole::tool,"Split journal must retain its actual tool result");
+            const auto result=Json::parse(request.messages.back().content);
+            if(!result.contains("error")){
+                require(result.at("content")=="Admitted journal folder\n"&&result.at("folder_id")==folder_&&result.at("workspace_revision")==7,"Split journal must use the admitted folder, not newer backend membership");
+                reply.content="Observed the admitted journal's actual attached file.";reply.finish_reason="stop";return reply;
+            }
+            require(calls==2&&result["error"]["code"]=="repository_instructions_required","Split journal read failed before its admitted file was read");
+        }
+        require(calls<=2,"Split journal fixture exceeded its explicit guidance continuation");
+        reply.finish_reason="tool_calls";reply.tool_calls.push_back({"split-journal-read-"+std::to_string(calls),"read_file",Json{{"path","note.txt"},{"folder_id",folder_}}.dump()});return reply;
+    }
+    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected split-journal token count");}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected split-journal compaction");}
+    unsigned calls=0;
+private:std::string folder_;
+};
+void split_journal_membership(PersistenceService& journal,const std::vector<std::string>& imports,const std::filesystem::path& root){
+    const auto base=root.parent_path(),attached_path=base/"journal-attached",later_path=base/"journal-later";
+    std::filesystem::create_directory(attached_path);std::filesystem::create_directory(later_path);
+    std::ofstream(attached_path/"note.txt",std::ios::binary)<<"Admitted journal folder\n";
+    WorkspaceTools primary(root.string()),attached(attached_path.string()),later(later_path.string());
+    PersistenceService backend((base/"split-backend.sqlite").string(),imports);
+    AgentSettings settings;settings.workspace=root.string();settings.a2a_enabled=false;settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-split-journal",Capability::supported,Capability::supported};
+    settings.workspace_membership_snapshot=[&]{return WorkspaceMembershipSnapshot{primary.identity(),8,{{primary.identity(),primary.root_path()},{later.identity(),later.root_path()}}};};
+    const auto model=std::make_shared<SplitJournalModel>(attached.identity());
+    AgentRunner runner(static_cast<AgentRunJournal&>(journal),backend,std::move(settings),{}, {},false,model);
+    journal.create_session("split-journal","Independent journal workspace admission").get();runner.start("split-journal","split-journal","Read the previously admitted attached folder.");
+    journal.append_event("split-journal","agent.workspace_membership",Json{{"workspace_id",primary.identity()},{"revision",7},{"folders",Json::array({{{"folder_id",primary.identity()},{"root",primary.root_path()}},{{"folder_id",attached.identity()},{"root",attached.root_path()}}})}}.dump()).get();
+    require(runner.execute("split-journal").state==RunState::completed,"Split journal workspace admission must complete through its supplied journal");
+    require(model->calls>=2&&model->calls<=3,"Split journal must receive actual model/tool continuation");
+    const auto events=journal.events("split-journal").get();
+    require(std::count_if(events.begin(),events.end(),[](const auto& event){return event.kind=="agent.workspace_membership";})==1,"Split journal must not replace or duplicate its admitted snapshot");
+    rejects<NotFound>([&]{(void)backend.run("split-journal").get();});
+}
 Run cancel_after_stream(AgentRunner& runner,PersistenceService& store,const std::string& id){
     std::stop_source cancellation;
     // A bounded cleanup timer retires the real owner on fixture failure. The
@@ -65,6 +107,7 @@ int main(int argc,char** argv) {
     try {
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
+        split_journal_membership(store,roots,std::filesystem::path(argv[4]));
         const std::string base=argv[5],synthetic="engine-protocol-test-not-a-real-key";
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         store.put_credential("test","provider","provider:chat","Synthetic test credential",std::move(secret),0).get();

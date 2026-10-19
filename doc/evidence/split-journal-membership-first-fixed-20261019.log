@@ -1,0 +1,47 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  45: native_graph_runner_contract
+1/7 Test  #45: native_graph_runner_contract ..........................   Passed   10.47 sec
+    Start  74: native_language_server_diagnostics_contract
+2/7 Test  #74: native_language_server_diagnostics_contract ...........   Passed    4.20 sec
+    Start  75: native_language_server_configuration_contract
+3/7 Test  #75: native_language_server_configuration_contract .........   Passed    0.28 sec
+    Start  81: native_agent_runner_contract
+4/7 Test  #81: native_agent_runner_contract ..........................***Failed    0.45 sec
+Agent runner failure evidence retained at C:\Users\shaw9\AppData\Local\Temp\xmind-agent-9D1xQp
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-agent-9D1xQp\state.sqlite C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib C:\Users\shaw9\AppData\Local\Temp\xmind-agent-9D1xQp\workspace http://127.0.0.1:52431 C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe
+Split journal workspace admission must complete through its supplied journal
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-agent-9D1xQp\\state.sqlite C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-agent-9D1xQp\\workspace http://127.0.0.1:52431 C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe',
+  stdout: '',
+  stderr: 'Split journal workspace admission must complete through its supplied journal\r\n'
+}
+
+Node.js v22.19.0
+
+    Start 148: native_provider_profiles_contract
+5/7 Test #148: native_provider_profiles_contract .....................   Passed    0.51 sec
+    Start 149: native_provider_profile_lsp_responsiveness_contract
+6/7 Test #149: native_provider_profile_lsp_responsiveness_contract ...   Passed    0.77 sec
+    Start 150: native_provider_profile_runtime_contract
+7/7 Test #150: native_provider_profile_runtime_contract ..............   Passed    5.77 sec
+
+86% tests passed, 1 tests failed out of 7
+
+Total Test time (real) =  22.47 sec
+
+The following tests FAILED:
+	 81 - native_agent_runner_contract (Failed)
+Errors while running CTest
