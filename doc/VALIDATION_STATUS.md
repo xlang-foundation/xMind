@@ -2,6 +2,27 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Prepared 0.1.46 package — 2026-10-19
+
+The installable VSIX is built from client source `fb80689f` and full-suite-qualified
+native source `c636e0c0`. All 2523 native source inputs match the complete gate.
+The staged clients pass 436 VS Code and 152 browser tests with all 17439 stage
+files unchanged. Hosted run [39331089194](https://github.com/xlang-foundation/xMind/actions/runs/39331089194)
+also passes. Its official artifact digest verifies, and all 70 selected source
+inputs and 18 assets match the stage, with explicit CRLF normalization where
+needed. This is the exact packaged client revision.
+
+VSIX SHA-256: `5e4a7a7ec675841bb62eaeba280d1fe63188b9ea73a84e1fbf3538323d29858a`
+(34434775 bytes, 2448 entries). Every extension payload matches the qualified
+stage. Runtime manifest SHA-256 is `7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97`.
+
+The package is **not installed**. Installed 0.1.45 and the existing user owners
+and pages have not been replaced. Next: preserve the installed package, install
+0.1.46, and exercise actual coding through both the browser and VS Code.
+Rendered acceptance, new live-provider coding completion and the historical
+600-second final-report timeout remain unqualified.
+Receipt: [prepared package](evidence/coding-package-0.1.46-20261019.json).
+
 ## Complete coding-turn native gate — 2026-10-19
 
 All 154 native contracts pass in 974.96 seconds on committed source `c636e0c0`.
