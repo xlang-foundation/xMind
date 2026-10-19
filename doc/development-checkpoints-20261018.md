@@ -201,3 +201,10 @@ from this archive.
 ## Historical complete-native reference — 2026-10-19
 
 - Complete local native gate at cbc2635 passes 152/152 in 961.62 seconds; build/CTest exit zero and complete input/binary file sets and hashes stay unchanged. Executable 28e60101 and DLL 1ff2a8e match corrected installed 0.1.35. See doc/evidence/workspace-membership-full-native-20261019.json. User priority is smooth webpage and VS Code coding; defer the worker static audit (no runtime defect confirmed). Current hosted native, actual editor pane, Rust Analyzer revalidation and process-bound agents remain open.
+
+
+## Verbatim preserved-page guidance archived 2026-10-19
+
+- Preserved older main page http://127.0.0.1:62342/ui/: host PID 67948 born 2026-10-18T20:02:32.0466160Z, native view 17248 born 20:02:33.0937180Z, backend 33960 born 20:02:36.4674450Z. Workspace C:/xMindNativeValidation/model-zoo-installed-0.1.27-mcp-20261018, profile C:/Users/shaw9/.xMind/p-a27. Session a2d2abc02773a31a3b4aa76bed134345 has completed roots f9a32590237442deb7a1c0914160adfb and 0dbc93cbc6e728579aedf95b79981a7a, 22 messages and 1,891/428 events. Actual headless Claude coding observes failures, repairs catalog.py and adds tests, passes 21 then 22 tests under xlang3. Original D: sources/4,078 MCP peer inputs remain unchanged. Main browser.js received the qualified explorer refresh without host/backend restart. Post-install headless reload renders all 22 messages; no key prompt, page errors, failed HTTP responses, new events or effect POSTs. Preserve prior MCP session d6c9a047710ba51ca4bfdd9ff89eb33e / root 80af8a0fe10c0c6bac7a1d97a3f4b7ba, eight messages/321 events. See rendered-tool-activity-20261018.json and rendered-coding-0.1.27-20261018.json under doc/evidence.
+
+Current acceptance remains in [validation status](VALIDATION_STATUS.md).

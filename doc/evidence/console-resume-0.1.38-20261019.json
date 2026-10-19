@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-19T07:39:12.884Z",
+  "scope": "Installed unified CLI human history and keyboard inspection through direct Windows pseudoterminal; no model request or new run",
+  "session": "d32c5c4fe01bdf159270b6efa3beaaac",
+  "messages": 36,
+  "backendPid": 27692,
+  "backendReused": true,
+  "historyUnchanged": true,
+  "runsUnchanged": true,
+  "taskSubmissions": 0,
+  "directPtySession": 27950,
+  "normalExit": true,
+  "humanHistoryAndActualUsageRendered": true,
+  "lastAssistantUsage": {
+    "input_tokens": 21465,
+    "input_tokens_scope": "uncached",
+    "output_tokens": 339
+  },
+  "initialNestedHarnessAccepted": false,
+  "initialNestedHarnessResult": "Child returned zero and resized, but emitted JSON history rather than human output; the observer assertion failed. Original logs are retained.",
+  "visibleDesktopInspected": false,
+  "actualVSCodePaneInspected": false,
+  "liveDirectConsoleResizeTested": false,
+  "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+  "receipts": {
+    "console.terminal.json": "8cbfca02d3b87a397618745cbc98b8a5d192c0acd1804e706831abeecd5d79f0",
+    "console.stdout.log": "cd81544f0173746d06a79892fde2080bd0acc7867d85cf40d200d2e2432ec7dc",
+    "console.stderr.log": "90b34e0a3a30a981bcc4cf496db6a4bcaaabd90b0b1b49be36e26f7149fb0f72",
+    "direct-pty-recorded-start.json": "6fe799b791e5a846fc99ecb426d9fa8a00765e7085728ab26b1f84240f353ae1",
+    "direct-pty-recorded-runs.json": "d914d1c25a9eb09eb85fb9d68c7a773f1eece6cd0a5c48ac1fa62c65109ee500",
+    "direct-pty-recorded-exit.json": "d88ca0f20d62a847389647ffa169bcdb13a13f79fed71d7752437d369bf9f118",
+    "after-history.json": "59bdcc5e2bb01ebbcfe7e9dc02f51e0434e0959a47e594dbe148c01f2a580793",
+    "after-runs.json": "019b145a4cf27e8c7f7644c546a08054c29a8415db2f9ea2e8f8f2a44b4087ec",
+    "after-profile.json": "c403208d2ace39da21501a56a48c34a5071524d9a0cca7d725069f9ed5110eb3"
+  },
+  "scopePassed": true
+}

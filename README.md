@@ -20,10 +20,11 @@ no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | The installed service-control fix passes five related native contracts; the complete current 152-test suite is running. |
+| Native backend | Complete local run: 151/152 pass. The sole failure is a stale synthetic process-tool catalogue expectation; its correction and two related contracts pass, with all 127 native binaries unchanged. A new complete-suite pass is not claimed. |
 | Clients | Final package passes 427 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
 | Installed coding | Actual Claude execution starts an xlang3 FastAPI app and Vite, completes with both services alive, then stops both through an explicit follow-up. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
 | Shared CLI and persistence | Installed CLI attaches to the same backend and completes actual xlang3 API checks. Browser reload restores all 36 messages and 14 supplied usage records in 1.64 seconds, with no effect replay. |
+| Console resume | Direct Windows console displays the saved conversation and supplied token metrics, accepts run inspection and exits normally; history and runs stay unchanged. |
 | Preserved work | Checked older webpage/backend owners, six runtime inventories, settings and prior profile directories remain intact. |
 | Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
@@ -33,6 +34,8 @@ have actual installed browser validation. The extension was installed through
 the Code CLI without opening an editor window. Actual VS Code pane activation
 remains unverified. [Installed package and live lifecycle evidence](doc/evidence/coding-package-0.1.38-20261019.json),
 [shared CLI/browser coding evidence](doc/evidence/shared-cli-browser-coding-0.1.38-20261019.json).
+[Native result and fixture correction](doc/evidence/service-lifecycle-native-checkpoint-20261019.json),
+[direct console resume](doc/evidence/console-resume-0.1.38-20261019.json).
 
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic

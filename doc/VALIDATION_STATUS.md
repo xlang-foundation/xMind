@@ -1,5 +1,35 @@
 # Current native validation
 
+## Native suite result and direct console resume — 2026-10-19
+
+The complete local suite finishes at **151 passed / 1 failed** in 985.94 seconds.
+All source, SDK, pure-library, dependency and binary hashes/file sets stay
+unchanged through that run. The failure is native_dynamic_plan_mcp_contract:
+its synthetic provider expects run_process and wait_process but rejects the
+intentionally added stop_process before it returns a process plan. The native
+assertion consequently reports that no controller-approval proposal arrived.
+The exact peer trace establishes this stale catalogue expectation; no process
+deadline or approval policy is changed.
+
+The corrected fixture explicitly expects all three process tools. The dynamic
+MCP contract, dynamic engine contract and context engine contract pass **3/3**
+in 21.37 seconds. All 127 native binaries are identical to the complete run;
+the sole changed frozen project input is that one fixture file. Original logs
+remain retained. These focused results are not a new complete-suite pass;
+complete-current and hosted-native acceptance remain open.
+[Full result, original failure and focused correction](evidence/service-lifecycle-native-checkpoint-20261019.json).
+
+The actual installed 0.1.38 executable also resumes the saved coding session
+through a direct Windows pseudoterminal. It displays human-readable history
+and supplied token counts, accepts `/runs`, then exits normally with `/exit`.
+All 36 stored messages and the run catalogue remain unchanged; backend 27692
+is reused with started=false, and no prompt or task is submitted. The first
+nested-harness attempt instead emitted JSON history and failed its human-output
+assertion; that receipt is preserved separately. This proves direct console
+resume and keyboard inspection, not visible desktop, direct-console resize,
+actual VS Code pane activation or full-screen terminal acceptance.
+[Captured direct console and unchanged backend/history](evidence/console-resume-0.1.38-20261019.json).
+
 ## Installed CLI and webpage share live coding history — 2026-10-19
 
 The installed unified xmind.exe discovers the existing p-a38 backend PID 27692

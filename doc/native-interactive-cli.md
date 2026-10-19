@@ -12,9 +12,24 @@ without `--port` discovers the managed profile for the selected workspace or
 starts its backend with the same `xmind.exe`; browser and VS Code attach to that
 profile. The default workspace is the current directory, overridable with
 `--workspace`. Explicit `--port` remains an operator-selected external backend.
-Managed profile startup on other hosts and first-use acceptance from the
-current installed package remain unverified; agent-worker execution is pending.
+Managed profile startup on other operating systems remains unverified;
+agent-worker execution is pending.
 No legacy profile migration is required.
+
+The installed 0.1.38 unified CLI has attached to the existing browser backend
+without starting a replacement or supplying a manual access token. It reads
+the same saved conversation and completes an actual configured-Claude task
+through `run` and `watch`: xlang3 executes FastAPI API assertions and exits
+zero. The webpage then restores all 36 messages and 14 supplied usage records.
+This is installed noninteractive command/stream acceptance.
+[Exact shared-backend scope](evidence/shared-cli-browser-coding-0.1.38-20261019.json).
+Separately, direct Windows console resume displays the existing human-readable
+conversation and actual token metrics, accepts `/runs`, and exits with `/exit`.
+All 36 stored messages and the run catalogue stay unchanged on the same backend.
+The initial nested-harness attempt emitted JSON rather than human history and
+remains a failed observer result; the direct pseudoterminal captures are separate.
+Visible desktop rendering, direct-console resize and full-screen terminal
+acceptance are not claimed. [Console resume evidence](evidence/console-resume-0.1.38-20261019.json).
 
 Managed profiles accept `--mcp-config FILE` for a trusted MCP server document.
 The native backend persists its server list; reconnecting without that option
@@ -28,8 +43,8 @@ upgrade it without `--mcp-config`, then apply the MCP document. The older
 owner cannot validate this update; xMind leaves it running rather than retire
 it with an unvalidated server configuration.
 
-The preceding full native Release gate passed **118 local CTest contracts**.
-The VCS checkpoint adds workspace-scoped Git metadata and local branch listing
+An earlier full native Release gate passed **118 local CTest contracts**.
+That historical VCS checkpoint added workspace-scoped Git metadata and local branch listing
 alongside status. Backend-owner HTTP coverage exercises a real temporary Git
 repository, the local-view adapter, and xlang3-backed SQLite. CLI metadata and
 status contracts validate authenticated endpoint selection and reject malformed

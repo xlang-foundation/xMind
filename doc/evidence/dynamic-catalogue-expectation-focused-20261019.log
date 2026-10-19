@@ -1,0 +1,11 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 28: native_context_engine_contract
+1/3 Test #28: native_context_engine_contract ........   Passed    5.54 sec
+    Start 34: native_dynamic_plan_engine_contract
+2/3 Test #34: native_dynamic_plan_engine_contract ...   Passed    3.86 sec
+    Start 35: native_dynamic_plan_mcp_contract
+3/3 Test #35: native_dynamic_plan_mcp_contract ......   Passed   11.95 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  21.37 sec

@@ -15,10 +15,18 @@ The actual installed unified CLI discovers the same existing backend, performs
 an xlang3 API smoke task and shares its exact history with the webpage. Browser
 reload restores 36 messages/14 supplied usage records in 1.64 seconds. These
 are live coding and transport results, not actual VS Code pane acceptance or
-completion of process-bound agents. A complete current native gate is in
-progress; no new full-suite result is claimed here.
+completion of process-bound agents. The complete native run finishes at
+151/152: a synthetic provider rejects the newly offered stop_process because
+its expected catalogue predates the service-stop change. Correcting that exact
+expectation passes the dynamic MCP contract and two related contracts, with
+all 127 native binaries unchanged. The original full-suite failure is retained;
+focused results are not counted as a new complete-suite pass. Direct Windows
+console resume also displays human history and supplied usage, accepts run
+inspection and exits normally without changing history or creating a task.
 [Installed lifecycle proof](evidence/coding-package-0.1.38-20261019.json) and
 [CLI/browser proof](evidence/shared-cli-browser-coding-0.1.38-20261019.json).
+[Native failure and focused correction](evidence/service-lifecycle-native-checkpoint-20261019.json),
+[direct console proof](evidence/console-resume-0.1.38-20261019.json).
 
 ## Complete native read-owner checkpoint — 2026-10-18
 
