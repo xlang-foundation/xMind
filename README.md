@@ -13,28 +13,28 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The local development installation is **0.1.42**; **0.1.43** is being packaged
-with the coding-diagnostics fix. This is a development preview, without a
+The local development installation is **0.1.43**, including the coding-diagnostics
+fix. This is a development preview, without a
 Marketplace or general-release claim. The xlang3 SDK is pinned at
 `58a8aab9b40a464e38a741129b4804ac36e27a53`.
 
 | Check | Verified scope |
 | --- | --- |
-| New native candidate | All 154 local contracts pass in 994.99 seconds with checked inputs and binaries unchanged. A separate real TypeScript check returns 0/0/1/0 diagnostics for clean/changed-clean/invalid/repaired buffers. |
-| Installed clients | 0.1.42 passes 429 extension and 147 browser fixtures locally and on exact-source hosted CI; package and installed payloads verify. |
-| Installed coding | Actual configured-Claude CLI diagnostics and compiler checks pass. A later browser edit succeeds, but its old runtime fails the subsequent diagnostic check; that failed task and edit are preserved. |
+| Installed native runtime | All 154 local contracts pass in 994.99 seconds with checked inputs and binaries unchanged. A separate real TypeScript check returns 0/0/1/0 diagnostics for clean/changed-clean/invalid/repaired buffers. |
+| Installed clients | 0.1.43 passes 429 extension and 147 browser fixtures locally and on exact-source hosted CI; package and installed payloads verify. |
+| Installed coding | Actual configured-Claude CLI and browser checks pass: one reviewed edit, fresh clean diagnostics and compiler exit 0. The preview refreshes automatically; reload retains 17 messages/eight usage records. |
 | Earlier application lifecycle | Separate installed 0.1.37/0.1.38 tasks verify a Vue edit, 32 xlang3 tests, production build, FastAPI/Vite startup, and explicit service shutdown. |
-| Preserved work | Before the next install, 27 checked owners, 11 runtime inventories, 10 webpages, settings and prior profile directories remain intact. |
-| Still open | New-runtime rendered coding verification, actual VS Code pane activation, Rust semantic startup, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
+| Preserved work | After installation, 27 checked older owners, 11 runtime inventories, 10 webpages, settings and prior profile directories remain intact. |
+| Still open | Actual VS Code pane activation, Rust semantic startup, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
-The new candidate refreshes invalidated push-only language-server analysis and
+The installed runtime refreshes invalidated push-only language-server analysis and
 returns an unavailable tool result when its transport fails, allowing other
 coding checks to continue. Missing diagnostics are never reported as clean.
 Workspace and provider metadata remain responsive while an editor query waits.
 
 [Current validation status](doc/VALIDATION_STATUS.md),
 [complete native result](doc/evidence/lsp-clean-edit-full-native-20261019.json),
-[installed 0.1.42 coding scope](doc/evidence/coding-package-0.1.42-20261019.json),
+[installed 0.1.43 coding scope](doc/evidence/coding-package-0.1.43-20261019.json),
 [earlier application lifecycle](doc/evidence/coding-package-0.1.38-20261019.json).
 
 ## Use in VS Code

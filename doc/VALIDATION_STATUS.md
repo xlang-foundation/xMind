@@ -1,5 +1,25 @@
 # Current native validation
 
+## Installed 0.1.43 browser coding — 2026-10-19
+
+The qualified runtime is now installed. Actual configured-Claude CLI and
+sandboxed headless Edge checks pass on the same backend. A fresh isolated
+browser task applies exactly one reviewed edit, obtains fresh clean TypeScript
+diagnostics and runs the actual compiler with exit zero. The preview updates
+without manual refresh; reload retains all 17 messages and eight supplied usage
+records. The original failed 0.1.42 task and its successful edit remain intact.
+
+Local and exact hosted client contracts pass 429/147. All 2,448 archive entries,
+2,445 installed payloads plus metadata, 2,402 runtime files and 17,439 frozen
+stage files verify. All 27 checked older owners, 11 runtime inventories, 10
+pages, settings and six prior profile names are preserved. Actual VS Code pane
+activation and visible-desktop acceptance remain unverified. Native hosted,
+Rust semantic startup and broader runtime requirements remain open.
+
+The retained page is <http://127.0.0.1:53895/ui/>.
+[Installed package and actual coding evidence](evidence/coding-package-0.1.43-20261019.json),
+[rendered browser capture](evidence/coding-0.1.43-browser-20261019.png).
+
 ## Complete coding-diagnostic candidate — 2026-10-19
 
 Native source b889df2 / binary 621413b4 passes all **154 local contracts** in
@@ -7,8 +27,8 @@ Native source b889df2 / binary 621413b4 passes all **154 local contracts** in
 sets and hashes remain unchanged. A separate actual HTTP check returns workspace,
 provider and health metadata in 4–5 ms while an LSP query waits. The real
 TypeScript 0/0/1/0 buffer check remains separate from the full inventory.
-Source version 0.1.43 is prepared for packaging; installed 0.1.42 and its failed
-browser task remain intact. New installed/browser acceptance is pending.
+This runtime is installed as 0.1.43; the installed/browser scope is recorded
+above. Older 0.1.42 and its failed browser task remain intact.
 [Complete result, inventory and HTTP observations](evidence/lsp-clean-edit-full-native-20261019.json).
 
 ## Coding diagnostic continuation fix — 2026-10-19
@@ -22,8 +42,8 @@ No absent report is converted into clean diagnostics and no effect is replayed.
 The complete build and seven focused contracts pass in 31.43 seconds with
 checked input and binary sets unchanged. A separate actual TypeScript server
 check returns diagnostic counts 0/0/1/0 for clean, changed clean, invalid and
-repaired unsaved buffers. This candidate is not yet installed; its complete
-native suite has now passed; new installed/browser acceptance remains pending.
+repaired unsaved buffers. This candidate is now installed as 0.1.43; its complete
+native suite and installed/browser results are recorded above.
 [Exact candidate results and initial corrected test-link failure](evidence/lsp-clean-edit-20261019.json).
 
 ## Installed 0.1.42 coding checkpoint — 2026-10-19
@@ -37,8 +57,9 @@ the real compiler successfully without changing files.
 The next actual browser task successfully applies one reviewed edit, then fails
 in its language-server check with `mcp_transport_failure` before compiler
 dispatch. That failure and successful edit are preserved; the task is not
-replayed. Browser end-to-end coding and actual VS Code pane acceptance remain
-open. The retained page is <http://127.0.0.1:55639/ui/>.
+replayed. That 0.1.42 task remains failed; separate 0.1.43 browser qualification
+is recorded above. Actual VS Code pane acceptance remains open. The retained
+0.1.42 page is <http://127.0.0.1:55639/ui/>.
 [Package, actual CLI result and retained browser failure](evidence/coding-package-0.1.42-20261019.json).
 
 ## Complete responsiveness-candidate suite — 2026-10-19

@@ -1,0 +1,602 @@
+{
+  "recordedAt": "2026-10-19T18:08:14.914Z",
+  "version": "0.1.43",
+  "source": "7bb54aca2e5eb8941e37ebbe8157d9843af4334b",
+  "nativeSource": "b889df2b44fee31dd6e853c3683276aa01fcf5b2",
+  "url": "http://127.0.0.1:53895/ui/",
+  "scope": "Actual installed unified CLI and sandboxed headless Edge browser share one native backend and configured Claude account. A fresh isolated fixture starts with clean diagnostics, applies one reviewed edit, obtains fresh clean diagnostics, compiles successfully, updates its preview automatically and restores saved history after reload.",
+  "browserRoot": "da04486b970a8b57f966d71bdc1f3659",
+  "session": "219346e58bb9a4af31f17df2889595f5",
+  "historyMessages": 17,
+  "usageRecords": 8,
+  "olderProcessesPreserved": 27,
+  "olderRuntimeInventoriesPreserved": 11,
+  "olderPagesPreserved": 10,
+  "priorFailedBrowserTask": {
+    "root": "2a69eea7f95b970cb4e961bde6959043",
+    "state": "failed",
+    "editedFileUnchanged": true,
+    "notReplayed": true
+  },
+  "screenshotSha256": "0c7c1030c1ed7ac7dca5956cae0024ca2571572bbe63a1d3f8e42a450bd9787f",
+  "actualVSCodePaneVerified": false,
+  "visibleDesktopVerified": false,
+  "releaseAccepted": false,
+  "receipts": [
+    {
+      "name": "coding-0.1.43-package-20261019.json",
+      "sha256": "fd06f5e3d50ee88da9f71681add3a7be680cf8637e8f5a3933147ed09d36c708",
+      "receipt": {
+        "recordedAt": "2026-10-19T18:04:51.537Z",
+        "version": "0.1.43",
+        "sourceRevision": "7bb54aca2e5eb8941e37ebbe8157d9843af4334b",
+        "archive": "C:/xMindNativeValidation/xmind-0.1.43-complete-win32-x64.vsix",
+        "archiveBytes": 34423824,
+        "archiveSha256": "8c94a72fe3e998c477d26b9d6b7267e1da5bbefa4893f4c8e16f462a456c2f51",
+        "archiveEntries": 2448,
+        "allExtensionPayloadsMatchQualifiedStage": true,
+        "archivePathCaseAliases": [
+          {
+            "archive": "extensions/vscode/readme.md",
+            "stage": "extensions/vscode/README.md"
+          },
+          {
+            "archive": "extensions/vscode/LICENSE.txt",
+            "stage": "extensions/vscode/LICENSE"
+          }
+        ],
+        "stageFilesUnchanged": 17439,
+        "terminal": {
+          "startedAt": "2026-10-19T18:04:22.249Z",
+          "completedAt": "2026-10-19T18:04:48.651Z",
+          "pid": 40024,
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "a1960602fdec60ea4274d5b4b291c640c8a0678616b4144d5c234b75b1065a73"
+        },
+        "installed": false,
+        "editorOpened": false,
+        "releaseAccepted": false
+      }
+    },
+    {
+      "name": "vscode-0.1.43-installed-final-evidence-20261019.json",
+      "sha256": "fa404456cc843287d02c04c276e5673fcc322088fa176a3c69028938d0cc438b",
+      "receipt": {
+        "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.43",
+        "version": "0.1.43",
+        "checkedPayloads": 2445,
+        "nativeFiles": 2402,
+        "nativeRevision": "b889df2b44fee31dd6e853c3683276aa01fcf5b2",
+        "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+        "nativeSha256": "621413b4c4c32a71a0221514cbeb7f37e8f01bb226a2ac2054259dff4e5d6fec",
+        "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "manifestSha256": "67d6c29b5d27f500c012399b0c37f06214fc45b4bc69938fe943a3452a941788",
+        "settingsUnchanged": true,
+        "previousProfileDirectoriesPreserved": true,
+        "listedByActualVSCodeCLI": true,
+        "renderedEditorActivated": false,
+        "releaseAccepted": false
+      }
+    },
+    {
+      "name": "coding-0.1.43-hosted-views-20261019.json",
+      "sha256": "ca3fed57a88daa38e1ad83f49d313ca9758cff750b42a41a636d755b6ce97180",
+      "receipt": {
+        "recordedAt": "2026-10-19T18:04:38.972Z",
+        "run": 39299209216,
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/39299209216",
+        "sourceRevision": "7bb54aca2e5eb8941e37ebbe8157d9843af4334b",
+        "artifact": 12211040654,
+        "artifactBytes": 309564,
+        "artifactSha256": "7923483dcf433cc4f43a3cb321161ca0879de79172c0095764c8c106cc394e1b",
+        "artifactDigestVerified": true,
+        "gate": {
+          "sourceRevision": "7bb54aca2e5eb8941e37ebbe8157d9843af4334b",
+          "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+          "sourceFiles": 70,
+          "trackedSourceFiles": 65,
+          "vendorFiles": 5,
+          "browserAssets": 18,
+          "sourceAndAssetBytesUnchanged": true,
+          "expectedTests": {
+            "extension": 429,
+            "browser": 147
+          },
+          "extension": {
+            "exitCode": 0,
+            "tests": 429,
+            "passed": 429,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0
+          },
+          "browser": {
+            "exitCode": 0,
+            "tests": 147,
+            "passed": 147,
+            "failed": 0,
+            "skipped": 0,
+            "cancelled": 0
+          },
+          "providerRequests": 0,
+          "nativeExecuted": false,
+          "cpythonExecuted": false,
+          "passed": true
+        },
+        "crossHostSource": {
+          "rawIdentical": [
+            "extensions/vscode/.vscodeignore",
+            "extensions/vscode/LICENSE",
+            "extensions/vscode/browser-view.js",
+            "extensions/vscode/client.js",
+            "extensions/vscode/edit-review.js",
+            "extensions/vscode/editor-selection.js",
+            "extensions/vscode/extension.js",
+            "extensions/vscode/language-server-editor.js",
+            "extensions/vscode/media/xmind.svg",
+            "extensions/vscode/native-runtime.js",
+            "extensions/vscode/patch-review.js",
+            "extensions/vscode/scripts/package-native-runtime.mjs",
+            "extensions/vscode/terminal.js",
+            "extensions/vscode/tests/agent-selection.test.js",
+            "extensions/vscode/tests/backend-smoke.js",
+            "extensions/vscode/tests/browser-view.test.js",
+            "extensions/vscode/tests/client-context.test.js",
+            "extensions/vscode/tests/client-mcp-authorization.test.js",
+            "extensions/vscode/tests/client-planning.test.js",
+            "extensions/vscode/tests/client-timer-binding.test.js",
+            "extensions/vscode/tests/client.test.js",
+            "extensions/vscode/tests/editor-selection.test.js",
+            "extensions/vscode/tests/language-server-editor.test.js",
+            "extensions/vscode/tests/mcp-authorization-controller.test.js",
+            "extensions/vscode/tests/native-runtime-package.test.js",
+            "extensions/vscode/tests/native-runtime.test.js",
+            "extensions/vscode/tests/plan-fixture.js",
+            "extensions/vscode/tests/provider-profile-controller.test.js",
+            "extensions/vscode/tests/terminal.test.js",
+            "extensions/vscode/tests/vcs.test.js",
+            "extensions/vscode/tests/workspace-backend.test.js",
+            "extensions/vscode/webview.js",
+            "extensions/vscode/workspace-backend.js",
+            "views/browser/browser.css",
+            "views/browser/build.mjs",
+            "views/browser/page.cjs",
+            "views/browser/tests/classic-script.test.cjs",
+            "views/browser/tests/connection.test.cjs",
+            "views/browser/tests/launcher-build.test.cjs",
+            "views/browser/tests/mcp-authorization-routes.test.cjs",
+            "views/browser/tests/native-contract.mjs",
+            "views/browser/tests/planning-routes.test.cjs",
+            "extensions/vscode/node_modules/marked/lib/marked.umd.js",
+            "extensions/vscode/node_modules/dompurify/dist/purify.min.js",
+            "extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js",
+            "extensions/vscode/node_modules/@xterm/xterm/css/xterm.css",
+            "extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js"
+          ],
+          "lineEndingsOnly": [
+            "extensions/vscode/README.md",
+            "extensions/vscode/git-changes-tree.js",
+            "extensions/vscode/media/chat.css",
+            "extensions/vscode/media/chat.js",
+            "extensions/vscode/package-lock.json",
+            "extensions/vscode/package.json",
+            "extensions/vscode/scripts/pip-bootstrap.mjs",
+            "extensions/vscode/tests/client-mcp-resources.test.js",
+            "extensions/vscode/tests/extension-host.test.js",
+            "extensions/vscode/tests/git-changes-tree.test.js",
+            "extensions/vscode/tests/renderer.test.js",
+            "extensions/vscode/tests/session-model.test.js",
+            "extensions/vscode/tests/session-permissions.test.js",
+            "views/browser/browser.js",
+            "views/browser/server.mjs",
+            "views/browser/terminal.js",
+            "views/browser/tests/controller.test.cjs",
+            "views/browser/tests/launcher-lifecycle.test.cjs",
+            "views/browser/tests/responsive-layout.test.cjs",
+            "views/browser/tests/server.test.cjs",
+            "views/browser/tests/terminal.test.cjs",
+            "Tools/start-browser.mjs",
+            "Tools/browser-host-lifecycle.mjs"
+          ],
+          "total": 70
+        },
+        "crossHostAssets": {
+          "rawIdentical": [
+            "index.html",
+            "patch-review.js",
+            "client.js",
+            "marked.js",
+            "purify.js",
+            "xterm.js",
+            "xterm.css",
+            "xterm-fit.js",
+            "browser.css",
+            "licenses/marked.txt",
+            "licenses/dompurify.txt",
+            "licenses/dompurify-MPL.txt",
+            "licenses/xterm.txt",
+            "licenses/xterm-addon-fit.txt"
+          ],
+          "lineEndingsOnly": [
+            "chat.js",
+            "chat.css",
+            "terminal.js",
+            "browser.js"
+          ],
+          "total": 18
+        },
+        "nativeExecuted": false,
+        "renderedEditorActivated": false,
+        "passed": true
+      }
+    },
+    {
+      "name": "coding-0.1.43-stage-final-20261019.json",
+      "sha256": "7417fc051dcdad15a7b79c788d1cdd5a6081672158b7dd28576f0b2d5b0740da",
+      "receipt": {
+        "recordedAt": "2026-10-19T18:07:27.801Z",
+        "stage": "C:/xMindNativeValidation/coding-0.1.43-source-20261019",
+        "files": 17439,
+        "allFileSetsAndHashesUnchangedAfterPackagingAndInstallation": true
+      }
+    },
+    {
+      "name": "vscode-0.1.43-preservation-20261019.json",
+      "sha256": "ccf63e4a66c90cab601bd86a280dce895f871ed7f943230209c11934e9424b4b",
+      "receipt": {
+        "recordedAt": "2026-10-19T17:48:37.894Z",
+        "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.42",
+        "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.42-before-0.1.43",
+        "checkedFiles": 2447,
+        "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+        "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+        "previousProfiles": [
+          "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+          "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+          "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+          "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+          "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+          "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+        ]
+      }
+    },
+    {
+      "name": "installed-0.1.43-coding-review-20261019/acceptance.json",
+      "sha256": "108a62653db70cb5f43cbdfab7367fb030f4e4aa0a7f7b1e0e0d9fdfc135ff1d",
+      "receipt": {
+        "startedAt": "2026-10-19T18:06:23.530Z",
+        "version": "0.1.43",
+        "scope": "Actual installed unified CLI submits one read-only configured-Claude coding review to the same native backend used by the browser; existing accepted repair task is not replayed",
+        "url": "http://127.0.0.1:53895/ui/",
+        "taskSubmissions": 1,
+        "receipts": [
+          {
+            "label": "profile-before",
+            "args": [
+              "profile-info"
+            ],
+            "pid": 62188,
+            "startedAt": "2026-10-19T18:06:23.535Z",
+            "completedAt": "2026-10-19T18:06:23.766Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "4a5842dafcce79a3e2c87792126055aebf05cd4752db3b6687e8d2a93b822f51",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "profiles-before",
+            "args": [
+              "provider-profiles"
+            ],
+            "pid": 57984,
+            "startedAt": "2026-10-19T18:06:23.829Z",
+            "completedAt": "2026-10-19T18:06:24.028Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "c68fbbe3a5baf7fbc651d36dde9e3a36b193c31d5fae7a92707c0479436c2011",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "discover-claude",
+            "args": [
+              "profile-models",
+              "claude",
+              "anthropic.messages",
+              "1"
+            ],
+            "pid": 34420,
+            "startedAt": "2026-10-19T18:06:24.028Z",
+            "completedAt": "2026-10-19T18:06:24.658Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "85a7087449bdd4fc954aebb748cc46f769eea2cc409e70d61aa21a78a2610633",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "profiles-observed",
+            "args": [
+              "provider-profiles"
+            ],
+            "pid": 70220,
+            "startedAt": "2026-10-19T18:06:24.658Z",
+            "completedAt": "2026-10-19T18:06:24.861Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "c68fbbe3a5baf7fbc651d36dde9e3a36b193c31d5fae7a92707c0479436c2011",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "select-model",
+            "args": [
+              "save-profile",
+              "claude",
+              "anthropic.messages",
+              "claude-sonnet-4-6",
+              "1",
+              "--activate"
+            ],
+            "pid": 51932,
+            "startedAt": "2026-10-19T18:06:24.862Z",
+            "completedAt": "2026-10-19T18:06:25.134Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "99f7e8a3336f726af2e0eee81ee976a985deb168e2e4e6e120e191bac7fd935f",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "create-session",
+            "args": [
+              "create-session",
+              "Installed diagnostics review"
+            ],
+            "pid": 15036,
+            "startedAt": "2026-10-19T18:06:25.135Z",
+            "completedAt": "2026-10-19T18:06:25.363Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "a72ade11ce036d496cfdfc19783a158129e6174b779b1ca2e27ca4e32390b60f",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "admit",
+            "args": [
+              "run",
+              "219346e58bb9a4af31f17df2889595f5",
+              "Review this existing TypeScript workspace without changing any file. Read its repository instructions and check.ts. Use the registered typescript language_server to get actual diagnostics, and run the actual TypeScript compiler through the registered powershell process profile as described in AGENTS.md. Report the current exported greeting value, the observed diagnostic count and the actual compiler exit code. Keep all files unchanged, install nothing and start no persistent server.",
+              "--model",
+              "claude-sonnet-4-6"
+            ],
+            "pid": 47236,
+            "startedAt": "2026-10-19T18:06:25.365Z",
+            "completedAt": "2026-10-19T18:06:25.633Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "b42721a798a462c419d09f52b8630264a5b3370ca3005255c90692486ea349e5",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "history",
+            "args": [
+              "history",
+              "219346e58bb9a4af31f17df2889595f5"
+            ],
+            "pid": 52020,
+            "startedAt": "2026-10-19T18:06:37.558Z",
+            "completedAt": "2026-10-19T18:06:37.830Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "f0bd6214b1d59f8288337b261e85896b0dc3ecf3c47816d969ed07663f13f2d2",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "label": "profile-after",
+            "args": [
+              "profile-info"
+            ],
+            "pid": 31308,
+            "startedAt": "2026-10-19T18:06:37.896Z",
+            "completedAt": "2026-10-19T18:06:38.072Z",
+            "exitCode": 0,
+            "signal": null,
+            "stdoutSha256": "4a5842dafcce79a3e2c87792126055aebf05cd4752db3b6687e8d2a93b822f51",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "cpythonExecuted": false,
+        "session": "219346e58bb9a4af31f17df2889595f5",
+        "prompt": "Review this existing TypeScript workspace without changing any file. Read its repository instructions and check.ts. Use the registered typescript language_server to get actual diagnostics, and run the actual TypeScript compiler through the registered powershell process profile as described in AGENTS.md. Report the current exported greeting value, the observed diagnostic count and the actual compiler exit code. Keep all files unchanged, install nothing and start no persistent server.",
+        "run": "527b9406615b7d58508f141d351532ff",
+        "status": {
+          "graph_root": false,
+          "id": "527b9406615b7d58508f141d351532ff",
+          "node_id": "",
+          "parent_id": "",
+          "provider_context": {
+            "model_id": "claude-sonnet-4-6",
+            "profile_id": "claude",
+            "profile_revision": 2,
+            "provider": "anthropic",
+            "route_id": "anthropic.messages",
+            "wire": "anthropic-messages"
+          },
+          "session_id": "219346e58bb9a4af31f17df2889595f5",
+          "state": "completed"
+        },
+        "workspaceInputsUnchanged": true,
+        "backendReused": true,
+        "historyMessages": 7,
+        "usageRecords": 3,
+        "compilerOperation": {
+          "id": "bf7dbf09ed53fc249bbc7abda9fc23de",
+          "arguments": {
+            "arguments": [
+              "-NoLogo",
+              "-NoProfile",
+              "-NonInteractive",
+              "-Command",
+              "& \"C:\\Program Files\\nodejs\\node.exe\" \"C:/xMindNativeValidation/lsp-typescript-tools-20261019/node_modules/typescript/lib/tsc.js\" --project tsconfig.json --pretty false; exit $LASTEXITCODE"
+            ],
+            "background": false,
+            "directory_id": "windows-local-file-v1:fec0809ac0805ab3:51301b00000007000000000000000000",
+            "environment": [],
+            "executable": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+            "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+            "folder_id": "windows-local-file-v1:fec0809ac0805ab3:51301b00000007000000000000000000",
+            "output_limit": 65536,
+            "persistent": false,
+            "profile_id": "powershell",
+            "profile_revision": 1,
+            "repository_guidance": {
+              "directory": ".",
+              "sources": [
+                {
+                  "byte_count": 802,
+                  "content_sha256": "71d28d83df1766dea50ac2a1caa4f856038c046aaa13b3d6aca933abb077e6e7",
+                  "file_id": "windows-local-file-v1:fec0809ac0805ab3:52301b0000000b000000000000000000",
+                  "path": "AGENTS.md",
+                  "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:51301b00000007000000000000000000"
+                }
+              ],
+              "version": 1
+            },
+            "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:51301b00000007000000000000000000",
+            "timeout_ms": 600000,
+            "workdir": ".",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:51301b00000007000000000000000000",
+            "workspace_revision": 1
+          },
+          "result": {
+            "elapsed_ms": 1213,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "bf7dbf09ed53fc249bbc7abda9fc23de",
+            "operation_id": "bf7dbf09ed53fc249bbc7abda9fc23de",
+            "output_artifact": {
+              "operation_id": "bf7dbf09ed53fc249bbc7abda9fc23de",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 0
+            },
+            "pid": 47792,
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        },
+        "diagnostics": [
+          {
+            "diagnostics": [],
+            "language_id": "typescript",
+            "method": "diagnostics",
+            "path": "check.ts",
+            "result": {
+              "items": [],
+              "kind": "full"
+            },
+            "server_id": "typescript"
+          }
+        ],
+        "passed": true,
+        "completedAt": "2026-10-19T18:06:38.072Z"
+      }
+    },
+    {
+      "name": "browser-0.1.43-installed-coding-20261019/acceptance.json",
+      "sha256": "d50e231c6cd10963391ca3770a42c876d88e4119e2b75421373a3e73c544a75e",
+      "receipt": {
+        "startedAt": "2026-10-19T18:06:51.325Z",
+        "version": "0.1.43",
+        "scope": "Actual installed native backend, saved Claude account and external headless Edge UI: one isolated fresh-regression coding prompt, one reviewed file proposal, real diagnostics/compiler, reload; preceding CLI task is not replayed",
+        "url": "http://127.0.0.1:53895/ui/",
+        "session": "219346e58bb9a4af31f17df2889595f5",
+        "taskSubmissions": 1,
+        "approvalRequests": 1,
+        "errors": [],
+        "failedHTTP": [],
+        "blockedEffects": [],
+        "prompt": "Read the repository instructions. Change only check.ts: keep the exported greeting typed string and set its initializer to \"Native diagnostics stay fresh\". Use the native file edit tool. After the edit, request real diagnostics using the registered typescript language_server and run the real TypeScript compiler through the registered powershell profile as described in AGENTS.md. Report the actual edit, diagnostics and compiler result. Do not install packages, create other files, or start services.",
+        "run": "da04486b970a8b57f966d71bdc1f3659",
+        "state": "completed",
+        "approvedOperation": {
+          "id": "d5101b89b66a141d47e770c38a3f53f4",
+          "tool": "replace_file",
+          "beforeSha256": "34444e1fe9811d0590aea9437679adb16618dfd1423ccd44a8ebb2680af9c935",
+          "afterSha256": "32e2d3566c22260a672849b7dabe6ced6c693688eea72eee8fe58e4ea9d9b0fc"
+        },
+        "previewUpdatedWithoutManualRefresh": true,
+        "historyMessages": 17,
+        "usageRecords": 8,
+        "diagnostics": [
+          {
+            "diagnostics": [],
+            "language_id": "typescript",
+            "method": "diagnostics",
+            "path": "check.ts",
+            "result": {
+              "items": [],
+              "kind": "full"
+            },
+            "server_id": "typescript"
+          }
+        ],
+        "compiler": {
+          "id": "2870eee03dca627e3716466897da980f",
+          "result": {
+            "elapsed_ms": 1114,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "2870eee03dca627e3716466897da980f",
+            "operation_id": "2870eee03dca627e3716466897da980f",
+            "output_artifact": {
+              "operation_id": "2870eee03dca627e3716466897da980f",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 0
+            },
+            "pid": 59792,
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        },
+        "assets": {
+          "chat.js": "7f2741b3eba672f2ad480b2eda4a52186627b21802c8a69c54f4afdcc04298b6",
+          "chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a",
+          "client.js": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+          "browser.js": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88"
+        },
+        "reloadRetainsHistory": true,
+        "otherWorkspaceFilesUnchanged": true,
+        "passed": true,
+        "completedAt": "2026-10-19T18:07:16.703Z"
+      }
+    }
+  ]
+}
