@@ -37,6 +37,7 @@ function refreshPendingApprovals(){
   return pending.length>0;
 }
 byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item){byId('operation-activity').open=true;operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});}else refreshPendingApprovals();};
+byId('failure-review').onclick=()=>{const card=byId('run-failure');if(!card.hidden)card.scrollIntoView({block:'start',behavior:'auto'});};
 const processStreams=new Map();
 const processArtifactWidgets=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
@@ -233,7 +234,7 @@ function entry(role,data,parent=byId('history'),messageId){
 }
 const olderHistoryButton=node('button','Load older messages','history-older');olderHistoryButton.id='history-older';olderHistoryButton.type='button';olderHistoryButton.hidden=true;olderHistoryButton.onclick=()=>{olderHistoryButton.disabled=true;api.postMessage({type:'history-older'});};byId('history').parentNode.insertBefore(olderHistoryButton,byId('history'));
 function resetLive(){if(live)discardMarkdown(live);byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
-function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;}
+function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;byId('failure-notice').hidden=true;}
 const protocolDiagnosticCodes=new Set([
   'responses_function_final_mismatch','responses_arguments_mismatch','responses_terminal_mismatch',
   'responses_event_unsupported','responses_item_unsupported','responses_reasoning_continuation_missing',
@@ -249,6 +250,7 @@ const protocolDiagnosticCodes=new Set([
 ]);
 function runFailure(data){
   const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
+  byId('failure-notice').hidden=false;
   card.append(node('h4','Selected run failed'));
   const status=data?.status;
   card.append(node('p',data?.reason==='provider_http_error'&&status===404

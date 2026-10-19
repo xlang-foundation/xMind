@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-10-19T22:50:19.523Z",
+  "version": "0.1.48",
+  "sourceRevision": "ca33b91e561f490bfcb4f80621ba6356aea40226",
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.48",
+    "version": "0.1.48",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "nativeRebuilt": false,
+  "nativeSuiteReusedFromSource": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+  "nativeOwnerReplaced": false,
+  "package": {
+    "sha256": "1eeaccb27ab261b4cd14672da16607a5c306cce702a937b3adf07065d5f6f105",
+    "bytes": 34435289,
+    "entries": 2448,
+    "allPayloadsMatchStage": true
+  },
+  "localClientGate": {
+    "recordedAt": "2026-10-19T22:45:11.513Z",
+    "version": "0.1.48",
+    "sourceRevision": "ca33b91e561f490bfcb4f80621ba6356aea40226",
+    "extension": {
+      "exitCode": 0,
+      "tests": 440,
+      "passed": 440,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4f634d556e87d7c15eec5b593916e2e11efd6561e35de1767ac2ff4d0068476d"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "073f4e9296367fc8e232cd0b2f0825d8bf52e10f420f3d56f98e546975ce3f64"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClientGate": {
+    "run": 39336928743,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39336928743",
+    "artifact": 12227405194,
+    "sha256": "5dfb3bce107b81d8962ac9b3fc26d3b70cd855782d3e45367749ffd3653a2c5d",
+    "digestVerified": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 440,
+      "passed": 440,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 70,
+    "assets": 18
+  },
+  "preserved": {
+    "owners": 39,
+    "pages": 14,
+    "runtimeDirectoryStates": 16,
+    "previousProfiles": 7,
+    "settingsUnchanged": true
+  },
+  "actualVsCode": {
+    "windowsOpened": 1,
+    "completedReportRestored": true,
+    "restoredRun": "51cf04c154e7c86ab8a4217dec2456dd",
+    "savedProviderAndModelRestored": true,
+    "backendRoot": "D:/CantorAI2026/TestProj",
+    "failure": {
+      "observedAt": "2026-10-19T22:49:48.138Z",
+      "version": "0.1.48",
+      "run": "ef8c7839bc2089d478d3bb60fc26b647",
+      "messageRestoredInAccessibilityTree": true,
+      "messageVisibleInCapturedViewport": false,
+      "expandedCommandActivity": true,
+      "taskSubmissions": 0,
+      "refreshPressed": false,
+      "keysEntered": 0,
+      "requiresVisibilityCorrection": true
+    },
+    "taskSubmissions": 0,
+    "keyEntries": 0,
+    "windowStillOpenForFollowup": true
+  },
+  "releaseAccepted": false,
+  "remaining": "The saved failure explanation is restored but offscreen behind expanded command cards. Add and verify an always-visible review control. External rendered browser acceptance remains unproven."
+}

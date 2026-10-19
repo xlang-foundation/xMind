@@ -459,6 +459,21 @@ test('model protocol failure shows only recognized diagnostics and preserves con
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'model_response_invalid'}}});assert.equal(card.querySelector('pre').textContent,'model_response_invalid');
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
 });
+test('failure review stays outside transcript scrolling and navigates without replay',()=>{
+ const r=renderer(),doc=r.dom.window.document,initialPosts=r.posted.length;
+ try{
+  const notice=doc.getElementById('failure-notice'),button=doc.getElementById('failure-review');
+  assert.ok(notice&&button,'Failed runs need a review control outside long command output');
+  assert.equal(notice.hidden,true);assert.equal(doc.getElementById('scroll').contains(notice),false);
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'process_effect_uncertain'}}});
+  r.send({type:'transcript',history:[]});assert.equal(notice.hidden,false);
+  const card=doc.getElementById('run-failure'),scrolls=[];card.scrollIntoView=options=>scrolls.push(options);
+  button.click();assert.deepEqual(JSON.parse(JSON.stringify(scrolls)),[{block:'start',behavior:'auto'}]);
+  assert.equal(r.posted.length,initialPosts);assert.equal(card.hidden,false);
+  r.send({type:'reset-run'});assert.equal(notice.hidden,true);assert.equal(card.hidden,true);
+ }finally{r.dom.window.close();}
+});
+
 for(const [reason,explanation] of [
  ['agent_timeout',/run reached its time limit/],
  ['process_effect_uncertain',/command ended without a confirmed outcome/]
