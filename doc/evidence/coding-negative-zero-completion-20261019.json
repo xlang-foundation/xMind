@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-19T22:41:42.650Z",
+  "installedVersion": "0.1.47",
+  "nativeOwner": 32704,
+  "run": "0783af2afc7417dbcc40d2197bfb0549",
+  "session": "58ef35476048503c598b5629019379da",
+  "state": "completed",
+  "admissionVia": "Native CLI",
+  "approvalVia": "Native CLI after exact one-line diff review",
+  "taskSubmissions": 1,
+  "renderedUiCodingAcceptance": false,
+  "fullRequestedTestSuiteAccepted": false,
+  "modelCalls": 4,
+  "activeElapsedMs": 30113,
+  "edit": {
+    "operation": "67e464f3242d90e93c329872ea423682",
+    "path": "model-zoo/frontend/tests/metric-format.test.mjs",
+    "afterSha256": "4d5a36310569d8162870e38fd8abf6b6b1a5b3e3aee2f04fc7433390dea5e76b",
+    "changes": [
+      {
+        "line": 87,
+        "before": "  test('C16. integer 0 as number → \"0\"', () => assert.equal(formatMetricValue(0), '0'))",
+        "after": "  test('C16. negative zero (-0) → \"0\"', () => assert.equal(formatMetricValue(-0), '0'))"
+      }
+    ]
+  },
+  "otherSixProtectedFilesUnchanged": true,
+  "c5Unchanged": true,
+  "tests": {
+    "operation": "5440eeb5f775094c37dd07542271b651",
+    "tests": 35,
+    "passed": 35,
+    "failed": 0,
+    "exitCode": 0,
+    "elapsedMs": 393
+  },
+  "build": {
+    "operation": "24819ea2d87245e92cf3ab5cfe78e994",
+    "exitCode": 0,
+    "elapsedMs": 2514,
+    "stdout": "\u001b[36mvite v6.4.4 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 38 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                           \u001b[39m\u001b[1m\u001b[2m  1.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/ModelDetailView-B_TYO142.css  \u001b[39m\u001b[1m\u001b[2m  5.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  1.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-DmQUleAu.css            \u001b[39m\u001b[1m\u001b[2m 50.11 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  9.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ModelDetailView-CID2Ehjq.js   \u001b[39m\u001b[1m\u001b[2m 10.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  3.81 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-CBLtDGAa.js             \u001b[39m\u001b[1m\u001b[2m126.77 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 47.22 kB\u001b[22m\n\u001b[32m✓ built in 735ms\u001b[39m\n"
+  },
+  "priorAttempt": {
+    "run": "9b112c007bbe89be311816aebe1ffd5c",
+    "state": "failed",
+    "reason": "agent_error",
+    "cancelledProposals": [
+      {
+        "id": "b3addcae882cfb444be7a64ab90181c5",
+        "state": "cancelled"
+      },
+      {
+        "id": "e3101bbeff44cf73261e942120709456",
+        "state": "cancelled"
+      }
+    ],
+    "cause": "Workspace quarantine from preceding uncertain command; no proposal dispatched"
+  },
+  "reconciliation": {
+    "recordedAt": "2026-10-19T22:40:26.908Z",
+    "path": "Existing local browser adapter / native backend API; no rendered UI automation",
+    "operation": "6713c4a70eab80bc1a9c48b4479a9426",
+    "priorRun": "ef8c7839bc2089d478d3bb60fc26b647",
+    "priorState": "uncertain",
+    "state": "failed",
+    "reconciliation": {
+      "acknowledges_possible_side_effects": true,
+      "actor": "local-owner",
+      "note": "Inspected retained stdout/stderr and the retired process-tree receipt; verified seven protected file hashes unchanged and retained the generated _c5_bytes.txt artifact. Possible other command side effects are acknowledged; this is not a claim of no effects.",
+      "reconciled_unix_ms": 1792449626899
+    },
+    "commandReplayed": false,
+    "nativeOwnerReplaced": false,
+    "renderedBrowserAcceptance": false
+  },
+  "cpythonExecuted": false
+}

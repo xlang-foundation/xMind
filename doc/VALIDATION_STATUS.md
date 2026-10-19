@@ -2,6 +2,33 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Reconciled workspace and completed coding follow-up — 2026-10-19
+
+The existing backend reconciliation endpoint releases the quarantine after
+inspection of the timed-out command's complete output, retired process-tree
+receipt, seven unchanged file hashes and retained diagnostic artifact. It
+records acknowledgment of possible side effects; it does not rewrite the
+failed run as successful or replay the command. This uses the existing local
+browser adapter/native backend API, not rendered browser automation.
+[Reconciliation receipt](evidence/coding-retired-process-reconciliation-20261019.json).
+
+The first follow-up `9b112c007bbe89be311816aebe1ffd5c` failed before any edit
+because quarantine was still active; both proposals were cancelled. After
+reconciliation, fresh run `0783af2afc7417dbcc40d2197bfb0549` completes in30113ms
+with4 model calls. One approved line changes the duplicate C16 case to numeric
+negative zero; C5 and the six other protected files remain unchanged. It runs35
+metric tests and a successful Vite build. Admission and exact-diff approval
+use the native CLI; this is not UI-submitted coding acceptance.
+[Edit/build result and retained earlier failure](evidence/coding-negative-zero-completion-20261019.json).
+
+Because35 tests did not cover the full requested suite, a separate validation
+task `51cf04c154e7c86ab8a4217dec2456dd` runs both existing frontend test files:
+54/54 pass, no skips/cancellations, exit0. It completes in9342ms with2 model
+calls and makes no edits or build replay. All command trees are retired. The
+test-generated `_c5_bytes.txt` is removed from the project only after verifying
+its retained evidence copy by hash. No CPython is executed.
+[Separate complete test result](evidence/coding-negative-zero-full-tests-20261019.json).
+
 ## Automatic VS Code updates and coding failure diagnostics — 2026-10-19
 
 Installed 0.1.47 now passes an actual one-window observation of a first external
@@ -23,7 +50,8 @@ The operator's C5 premise was incorrect: its JavaScript source already contains
 ordinary tab/newline escapes (bytes92,116,92,110), which evaluate to characters9
 and10. The admission and failed run remain unchanged. A separate follow-up
 corrects that instruction and requests only the genuine duplicate C16 coverage
-change; it is still in progress.
+change; the subsequent checkpoint above records its failures, reconciliation
+and completion separately.
 [Actual installed observation and failure](evidence/coding-installed-0.1.47-automatic-discovery-20261019.json).
 
 The shared web/VS Code renderer now explains `agent_timeout` and

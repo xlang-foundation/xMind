@@ -1,0 +1,17 @@
+{
+  "recordedAt": "2026-10-19T22:40:26.908Z",
+  "path": "Existing local browser adapter / native backend API; no rendered UI automation",
+  "operation": "6713c4a70eab80bc1a9c48b4479a9426",
+  "priorRun": "ef8c7839bc2089d478d3bb60fc26b647",
+  "priorState": "uncertain",
+  "state": "failed",
+  "reconciliation": {
+    "acknowledges_possible_side_effects": true,
+    "actor": "local-owner",
+    "note": "Inspected retained stdout/stderr and the retired process-tree receipt; verified seven protected file hashes unchanged and retained the generated _c5_bytes.txt artifact. Possible other command side effects are acknowledged; this is not a claim of no effects.",
+    "reconciled_unix_ms": 1792449626899
+  },
+  "commandReplayed": false,
+  "nativeOwnerReplaced": false,
+  "renderedBrowserAcceptance": false
+}
