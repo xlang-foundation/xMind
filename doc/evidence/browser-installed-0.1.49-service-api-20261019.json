@@ -1,0 +1,110 @@
+{
+  "recordedAt": "2026-10-19T22:58:36.746Z",
+  "version": "0.1.49",
+  "url": "http://127.0.0.1:64405/ui/",
+  "scope": "Actual local browser service HTTP assets and native command/event API, without rendered external browser automation",
+  "nativeOwner": 32704,
+  "assets": [
+    {
+      "path": "/ui/",
+      "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a"
+    },
+    {
+      "path": "/ui/patch-review.js",
+      "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+    },
+    {
+      "path": "/ui/browser.js",
+      "sha256": "8b25b4d1ee7b9eda817b22a2b7077da972bd9566225fc25fbd6118bace5d5303"
+    },
+    {
+      "path": "/ui/terminal.js",
+      "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+    },
+    {
+      "path": "/ui/browser.css",
+      "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+    },
+    {
+      "path": "/ui/xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+    },
+    {
+      "path": "/ui/xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+    },
+    {
+      "path": "/ui/xterm-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+    },
+    {
+      "path": "/ui/chat.js",
+      "sha256": "c0ff666bbb2d68376bc52669326f8196b1118bd7716a9375b71d47f418e791e4"
+    },
+    {
+      "path": "/ui/chat.css",
+      "sha256": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a"
+    },
+    {
+      "path": "/ui/client.js",
+      "sha256": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801"
+    },
+    {
+      "path": "/ui/marked.js",
+      "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+    },
+    {
+      "path": "/ui/purify.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    }
+  ],
+  "automaticLocalConnection": true,
+  "serverTokenEntered": false,
+  "providerKeyEntered": false,
+  "profiles": [
+    {
+      "id": "claude",
+      "provider": "anthropic",
+      "route": "anthropic.messages",
+      "model": "claude-sonnet-4-6",
+      "revision": 2
+    },
+    {
+      "id": "gemini",
+      "provider": "gemini",
+      "route": "gemini.generate-content",
+      "model": "",
+      "revision": 1
+    },
+    {
+      "id": "deepseek",
+      "provider": "deepseek",
+      "route": "deepseek.chat",
+      "model": "",
+      "revision": 1
+    },
+    {
+      "id": "openai",
+      "provider": "openai",
+      "route": "openai.responses",
+      "model": "",
+      "revision": 1
+    }
+  ],
+  "activeProvider": "claude",
+  "workspace": {
+    "root": "D:\\CantorAI2026\\TestProj",
+    "id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000",
+    "catalogueMatches": true
+  },
+  "session": "58ef35476048503c598b5629019379da",
+  "runs": 4,
+  "historyMessages": 43,
+  "exactRunsAndHistoryMatchNativeBaseline": true,
+  "workspaceFilePreviewMatchesKnownProjectHash": true,
+  "taskSubmissions": 0,
+  "processesStartedByAgent": 0,
+  "providerInferenceRequests": 0,
+  "renderedBrowserAcceptance": false,
+  "passed": true
+}

@@ -1,0 +1,175 @@
+{
+  "recordedAt": "2026-10-19T23:00:20.608Z",
+  "version": "0.1.49",
+  "sourceRevision": "49a7c5699fb8fdb6cabcae5ff5f331bf719c3f5b",
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.49",
+    "version": "0.1.49",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "native": {
+    "revision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdk": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "executableSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+    "rebuilt": false,
+    "reusedQualifiedFullSuiteContracts": 154,
+    "owner": {
+      "pid": 32704,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-079924729f7fd53c119368cd6286fadea05a141cece1dcbaa90d4dfd7ae834dd\\xmind.exe",
+      "birth": "2026-10-19T22:02:59.7270870Z"
+    },
+    "nativeOwnerReplaced": false
+  },
+  "package": {
+    "sha256": "ffcadf19250981418f9710e5094c16e63898c26ac4a24452b2a202f1d49cde75",
+    "bytes": 34435442,
+    "entries": 2448,
+    "payloadsChecked": 2445,
+    "stageFilesUnchanged": 17439
+  },
+  "localClientGate": {
+    "recordedAt": "2026-10-19T22:53:06.169Z",
+    "version": "0.1.49",
+    "sourceRevision": "49a7c5699fb8fdb6cabcae5ff5f331bf719c3f5b",
+    "extension": {
+      "exitCode": 0,
+      "tests": 441,
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "50f40d96400c9ce7808a4f36eedb96cfeed8eb4a0105045d3bfc41afef3ca652"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "0a12f6c04ebac682e5236166e2f6c81b120dac5ada70842be81af38b9948ef58"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClientGate": {
+    "run": 39337699870,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39337699870",
+    "artifact": 12227321698,
+    "sha256": "d9357dd054c5e13a668673e091ca99b9aec08e577106cae3affcc49835dcbb28",
+    "digestVerified": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 441,
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 70,
+    "assets": 18
+  },
+  "preserved": {
+    "priorOwners": 39,
+    "totalOwnersNow": 41,
+    "priorPages": 14,
+    "totalPagesNow": 15,
+    "settingsUnchanged": true,
+    "previousProfiles": 7,
+    "allFourSessionHistoriesAndNineRunsUnchanged": true,
+    "messages": {
+      "58ef35476048503c598b5629019379da": 43,
+      "b6b46ac843ad6b08658f4c568a2e5ea4": 25,
+      "9d170d81910b61a45c21ecd8557936c0": 63,
+      "b49f242b063af1ab6ca13db94c5165a8": 4
+    },
+    "sevenProjectFilesUnchanged": true
+  },
+  "actualVsCode": {
+    "observedAt": "2026-10-19T22:57:26.501Z",
+    "version": "0.1.49",
+    "run": "ef8c7839bc2089d478d3bb60fc26b647",
+    "reviewButtonVisibleAboveTranscript": true,
+    "reviewClicks": 1,
+    "failureExplanationVisibleAfterClick": true,
+    "taskSubmissions": 0,
+    "refreshPressed": false,
+    "keysEntered": 0,
+    "backendRoot": "D:/CantorAI2026/TestProj",
+    "windowsOpened": 1,
+    "reusedTestWindowFrom48": true,
+    "completedReportRestored": true,
+    "completedRun": "51cf04c154e7c86ab8a4217dec2456dd",
+    "failureControlClearsWhenCompletedRunSelected": true,
+    "selectedLatestCompletedRunBeforeClosing": true,
+    "sidebarAndWindowGeometryRestored": true,
+    "codeWindowsRemaining": 0,
+    "renderedFailureReviewAccepted": true,
+    "uiSubmittedCodingTask": false,
+    "agentTimeoutTextValidatedBySyntheticTestsOnly": true
+  },
+  "browser": {
+    "url": "http://127.0.0.1:64405/ui/",
+    "host": {
+      "pid": 71292,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T22:56:01.3516150Z"
+    },
+    "nativeView": {
+      "pid": 18876,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.49\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T22:56:02.1926510Z"
+    },
+    "apiEvidence": "browser-installed-0.1.49-service-api-20261019.json",
+    "httpAssetsVerified": 13,
+    "savedProviders": [
+      "claude",
+      "gemini",
+      "deepseek",
+      "openai"
+    ],
+    "nativeRunsAnd43MessagesMatch": true,
+    "workspaceFilePreviewVerified": true,
+    "automaticLocalConnection": true,
+    "keysEntered": 0,
+    "renderedExternalBrowserAcceptance": false
+  },
+  "earlierInstalled48Issue": "The explanation restored but was outside the visible scroll area. Actual49 review control corrects that case; original evidence retained.",
+  "helperFailuresRetained": [
+    "coding-0.1.49-owner-helper-failure-20261019.json",
+    "browser-0.1.49-api-helper-envelope-failure-20261019.json"
+  ],
+  "clientCheckpointAccepted": true,
+  "fullCodingUiAcceptance": false,
+  "fullGoalComplete": false,
+  "remaining": [
+    "External rendered browser interaction is not verified; do not retry previously blocked browser paths without changed tool availability.",
+    "Native CLI coding and prior installed GUI file approvals remain distinct from a complete UI-submitted coding task."
+  ],
+  "cpythonExecuted": false
+}

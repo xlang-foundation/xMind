@@ -2,6 +2,50 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.49: reachable failure review and shared webpage service — 2026-10-19
+
+0.1.49 is installed from source `49a7c569`. All2445 checked payloads match the
+qualified package:34435442 bytes,2448 archive entries, SHA-256
+`ffcadf19250981418f9710e5094c16e63898c26ac4a24452b2a202f1d49cde75`.
+Complete staged suites pass441 VS Code/154 browser cases with all17439 staged
+files unchanged. Exact-source hosted run39337699870 also passes441/154; the
+official artifact digest verifies and70 selected source inputs/18 assets match
+across hosts, including explicit line-ending differences. The native layer is
+reused byte for byte from qualified sourcec636e0c0/SDK58a8aab; no native rebuild,
+backend replacement or new native-suite execution is claimed.
+
+The actual installed VS Code pane restores the saved completed report, provider,
+model and TestProj root. Selecting the earlier failed run shows **Review failure**
+above transcript scrolling. One click brings its complete recorded explanation
+into the viewport despite expanded command output. Selecting the completed run
+clears the notice. No task is submitted, key entered or command replayed during
+this UI check. The same single test window is reused, its layout restored, and
+then closed. All four checked histories (43/25/63/4 messages), nine run records,
+seven project files, settings and seven prior profile directories remain exact.
+[Installed package and actual editor receipt](evidence/coding-installed-0.1.49-checkpoint-20261019.json).
+
+The updated webpage service is at http://127.0.0.1:64405/ui/. Node host71292 and
+native view18876 share the existing TestProj backend32704, born22:02:59.727Z.
+All39 prior tracked processes and14 pages remain available; totals are now41
+and15. HTTP checks verify all13 served assets against the installed package,
+automatic local attachment without entering a server token, the four saved
+provider profiles, the selected workspace catalogue, four native runs and all43
+messages, plus an exact project-file preview. A temporary validation view session
+is revoked after observation. These are real service/API checks, **not rendered
+external-browser acceptance**, which remains pending under the previously
+recorded tool limitations. UI-submitted complete coding acceptance also remains
+distinct from the prior native CLI coding and GUI approval evidence.
+[Webpage service/API receipt](evidence/browser-installed-0.1.49-service-api-20261019.json).
+
+The installed48 observation is retained as a counterexample: its new explanation
+restored correctly but was outside the visible viewport behind command cards.
+The new review control addresses that observed case. Its regression test fails
+on the earlier renderer and passes after the change. Two local diagnostic-helper
+mistakes (an old output prefix and a history-envelope assumption) are retained
+under C:/xMindNativeValidation; neither dispatched product effects or invalidates
+the separately recorded successful checks.
+[Original installed48 observation](evidence/coding-installed-0.1.48-checkpoint-20261019.json).
+
 ## Reconciled workspace and completed coding follow-up — 2026-10-19
 
 The existing backend reconciliation endpoint releases the quarantine after
@@ -60,7 +104,8 @@ It does not equate an uncertain outcome with a timeout or offer automatic replay
 Two regression tests fail on the preceding renderer and pass after the fix.
 Complete isolated client suites pass440 VS Code/154 browser cases with all17439
 staged source, dependency, asset and runtime files unchanged during validation.
-This renderer change is source-tested, not installed or visually accepted yet.
+That checkpoint covers source tests; the subsequent installed49 checkpoint
+above records actual editor visibility and review-control acceptance.
 [Complete client gate](evidence/coding-failure-diagnostics-client-gate-20261019.json).
 
 ## Installed 0.1.47 client correction — 2026-10-19
