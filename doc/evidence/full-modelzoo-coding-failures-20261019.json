@@ -1,0 +1,935 @@
+{
+  "recordedAt": "2026-10-19T06:31:11.4146611Z",
+  "scope": "Real browser UI with C++/xlang3 backend and configured Claude; isolated ModelZoo project copy. No simulated inference or visible VS Code pane.",
+  "sourceRevision": "8517e79284fe89f5c4391cbcad2e54a16acb3401",
+  "workspace": "C:/xMindNativeValidation/model-zoo-full-ui-0.1.36-20261019",
+  "session": "222d84e5a2d8b9c471ad22f130363117",
+  "run": "c3e97514d9b70b9377a096a8b7edcc28",
+  "taskSubmissions": 1,
+  "originalRunOutcome": "Not accepted: observer deadline reached while durable root state remained running after the final model response",
+  "rootStatusAtObservation": {
+    "graph_root": false,
+    "id": "c3e97514d9b70b9377a096a8b7edcc28",
+    "node_id": "",
+    "parent_id": "",
+    "provider_context": {
+      "model_id": "claude-sonnet-4-6",
+      "profile_id": "claude",
+      "profile_revision": 2,
+      "provider": "anthropic",
+      "route_id": "anthropic.messages",
+      "wire": "anthropic-messages"
+    },
+    "session_id": "222d84e5a2d8b9c471ad22f130363117",
+    "state": "running"
+  },
+  "rootModelDoneEvents": [
+    22,
+    79,
+    574,
+    625,
+    689,
+    749,
+    788,
+    931,
+    1100,
+    1427
+  ],
+  "rootTerminalEvents": [],
+  "actualUsage": [
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 10,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 25,
+        "input_tokens": 8698,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 25,
+        "prompt_tokens": 8698,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 20,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 90,
+        "input_tokens": 8698,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 90,
+        "prompt_tokens": 8698,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 31,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 26,
+        "input_tokens": 9359,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 26,
+        "prompt_tokens": 9359,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 77,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 142,
+        "input_tokens": 9359,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 142,
+        "prompt_tokens": 9359,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 92,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 2923,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 2923,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 142,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 282,
+        "input_tokens": 2923,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 282,
+        "prompt_tokens": 2923,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 161,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 4889,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 4889,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 180,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 79,
+        "input_tokens": 4889,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 79,
+        "prompt_tokens": 4889,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 189,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 5089,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 5089,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "4fbc95d9c8f103824d5012564d281d1a",
+      "seq": 464,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1034,
+        "input_tokens": 5089,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1034,
+        "prompt_tokens": 5089,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 476,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 10939,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 10939,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 572,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 374,
+        "input_tokens": 10939,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 374,
+        "prompt_tokens": 10939,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 596,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 26,
+        "input_tokens": 11539,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 26,
+        "prompt_tokens": 11539,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 623,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 165,
+        "input_tokens": 11539,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 165,
+        "prompt_tokens": 11539,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 641,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 13221,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 13221,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 687,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 205,
+        "input_tokens": 13221,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 205,
+        "prompt_tokens": 13221,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 699,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 21,
+        "input_tokens": 13515,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 21,
+        "prompt_tokens": 13515,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 747,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 221,
+        "input_tokens": 13515,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 221,
+        "prompt_tokens": 13515,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 760,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 26,
+        "input_tokens": 13819,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 26,
+        "prompt_tokens": 13819,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 786,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 174,
+        "input_tokens": 13819,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 174,
+        "prompt_tokens": 13819,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 797,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 14470,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 14470,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 929,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 425,
+        "input_tokens": 14470,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 425,
+        "prompt_tokens": 14470,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 943,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 15168,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 15168,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 1098,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 487,
+        "input_tokens": 15168,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 487,
+        "prompt_tokens": 15168,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 1113,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 1,
+        "input_tokens": 16113,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 1,
+        "prompt_tokens": 16113,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "seq": 1425,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 769,
+        "input_tokens": 16113,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 769,
+        "prompt_tokens": 16113,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    }
+  ],
+  "processes": [
+    {
+      "id": "a0112911d24b69c75d4e9b27706750fc",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "succeeded",
+      "arguments": {
+        "arguments": [
+          "-B",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "background": true,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:bb953f00000004000000000000000000",
+        "environment": [
+          {
+            "name": "XLANG3_PYTHON_LIB",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\stdlib"
+          },
+          {
+            "name": "PIP_FIND_LINKS",
+            "value": "file:///C:/Users/shaw9/.xMind/p-a35/7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58/runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a/wheels"
+          },
+          {
+            "name": "PYTHONPATH",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\modules;C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.36-20261019\\backend\\.xlang3-site"
+          }
+        ],
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:d4a53f00000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "backend",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 120000,
+        "workdir": "backend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {
+        "elapsed_ms": 18224,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "a0112911d24b69c75d4e9b27706750fc",
+        "operation_id": "a0112911d24b69c75d4e9b27706750fc",
+        "output_artifact": {
+          "operation_id": "a0112911d24b69c75d4e9b27706750fc",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 625
+        },
+        "pid": 63076,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 625,
+          "data": "................................                                         [100%]\r\n============================== warnings summary ===============================\r\n.xlang3-site\\starlette\\testclient.py:51\r\n  C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.36-20261019\\backend\\.xlang3-site\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\r\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\r\n\r\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\r\n32 passed, 1 warning in 8.07s\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 625
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    {
+      "id": "094ce52984d48140d393926dc12cc8df",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "succeeded",
+      "arguments": {
+        "arguments": [
+          "-NoLogo",
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          "& 'C:/Program Files/nodejs/node.exe' 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' ci 2>&1; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & 'C:/Program Files/nodejs/node.exe' 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build 2>&1"
+        ],
+        "background": true,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:ce953f00000002000000000000000000",
+        "environment": [],
+        "executable": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "powershell",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "frontend",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 300000,
+        "workdir": "frontend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {
+        "elapsed_ms": 5091,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "094ce52984d48140d393926dc12cc8df",
+        "operation_id": "094ce52984d48140d393926dc12cc8df",
+        "output_artifact": {
+          "operation_id": "094ce52984d48140d393926dc12cc8df",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 978
+        },
+        "pid": 57396,
+        "process_tree_retired": true,
+        "profile_id": "powershell",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 978,
+          "data": "\nadded 36 packages, and audited 37 packages in 3s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\n> model-zoo-frontend@0.1.0 build\n> vite build\n\n\u001b[36mvite v6.4.4 \u001b[32mbuilding for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 37 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mdist/\u001b[22m\u001b[32mindex.html                           \u001b[39m\u001b[1m\u001b[2m  1.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/ModelDetailView-Dz_7Q5cw.css  \u001b[39m\u001b[1m\u001b[2m  5.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  1.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[35massets/index-CaMrmwR3.css            \u001b[39m\u001b[1m\u001b[2m 50.11 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  9.42 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ModelDetailView-UADGBPMc.js   \u001b[39m\u001b[1m\u001b[2m  9.98 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  3.79 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-CrH7_0gC.js             \u001b[39m\u001b[1m\u001b[2m126.20 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 47.07 kB\u001b[22m\n\u001b[32m✓ built in 750ms\u001b[39m\n",
+          "encoding": "utf-8",
+          "retained_bytes": 978
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    {
+      "id": "d9879d1cd5c882caabc8ee8ced7f6d1f",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "executing",
+      "arguments": {
+        "arguments": [
+          "-B",
+          "-m",
+          "uvicorn",
+          "app.main:app",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "18736",
+          "--loop",
+          "asyncio",
+          "--http",
+          "h11"
+        ],
+        "background": true,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:bb953f00000004000000000000000000",
+        "environment": [
+          {
+            "name": "XLANG3_PYTHON_LIB",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\stdlib"
+          },
+          {
+            "name": "PIP_FIND_LINKS",
+            "value": "file:///C:/Users/shaw9/.xMind/p-a35/7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58/runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a/wheels"
+          },
+          {
+            "name": "PYTHONPATH",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\modules;C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.36-20261019\\backend\\.xlang3-site"
+          }
+        ],
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:d4a53f00000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": true,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "backend",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 600000,
+        "workdir": "backend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {}
+    },
+    {
+      "id": "c9476d6c1ba0952e89bda02a32cc164e",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "executing",
+      "arguments": {
+        "arguments": [
+          "-NoLogo",
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          "$env:VITE_API_PROXY_TARGET='http://127.0.0.1:18736'; & 'C:/Program Files/nodejs/node.exe' './node_modules/vite/bin/vite.js' --host 127.0.0.1 --port 18737 --strictPort"
+        ],
+        "background": true,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:ce953f00000002000000000000000000",
+        "environment": [],
+        "executable": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": true,
+        "profile_id": "powershell",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "frontend",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 600000,
+        "workdir": "frontend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {}
+    },
+    {
+      "id": "653c03d3b3ff2c0e936e85c9ed4bc1ac",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "succeeded",
+      "arguments": {
+        "arguments": [
+          "-B",
+          "-c",
+          "import httpx, json\n\nprint('=== Backend direct ===')\nr = httpx.get('http://127.0.0.1:18736/api/health', timeout=10)\nprint(f'GET /api/health  status={r.status_code}  body={r.text}')\n\nr2 = httpx.get('http://127.0.0.1:18736/api/models?page=1&page_size=3', timeout=10)\nprint(f'GET /api/models  status={r2.status_code}  keys={list(r2.json().keys())}')\n\nprint()\nprint('=== Frontend proxy ===')\nr3 = httpx.get('http://127.0.0.1:18737/api/health', timeout=10)\nprint(f'GET /api/health  status={r3.status_code}  body={r3.text}')\n\nr4 = httpx.get('http://127.0.0.1:18737/api/models?page=1&page_size=3', timeout=10)\nprint(f'GET /api/models  status={r4.status_code}  keys={list(r4.json().keys())}')\n"
+        ],
+        "background": false,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "environment": [
+          {
+            "name": "XLANG3_PYTHON_LIB",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\stdlib"
+          },
+          {
+            "name": "PIP_FIND_LINKS",
+            "value": "file:///C:/Users/shaw9/.xMind/p-a35/7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58/runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a/wheels"
+          },
+          {
+            "name": "PYTHONPATH",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\modules"
+          }
+        ],
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:d4a53f00000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": ".",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 30000,
+        "workdir": ".",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {
+        "elapsed_ms": 448,
+        "exit_code": 1,
+        "independently_verified": false,
+        "job_id": "653c03d3b3ff2c0e936e85c9ed4bc1ac",
+        "operation_id": "653c03d3b3ff2c0e936e85c9ed4bc1ac",
+        "output_artifact": {
+          "operation_id": "653c03d3b3ff2c0e936e85c9ed4bc1ac",
+          "state": "complete",
+          "stderr_bytes": 146,
+          "stdout_bytes": 0
+        },
+        "pid": 38188,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 146,
+          "data": "Traceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\n    import httpx, json\r\nModuleNotFoundError: No module named 'httpx'\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 146
+        },
+        "stdout": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    {
+      "id": "abdddf12d9a4fbeb9d2fa1e912f1d9e1",
+      "run": "c3e97514d9b70b9377a096a8b7edcc28",
+      "state": "succeeded",
+      "arguments": {
+        "arguments": [
+          "-B",
+          "-c",
+          "import urllib.request, json\n\ndef get(url):\n    with urllib.request.urlopen(url, timeout=10) as r:\n        return r.status, r.read().decode()\n\nprint('=== Backend direct ===')\nstatus, body = get('http://127.0.0.1:18736/api/health')\nprint(f'GET /api/health  status={status}  body={body}')\n\nstatus, body = get('http://127.0.0.1:18736/api/models?page=1&page_size=3')\ndata = json.loads(body)\nprint(f'GET /api/models  status={status}  keys={list(data.keys())}  total={data.get(\"total\")}  count={len(data.get(\"items\", []))}')\n\nprint()\nprint('=== Frontend proxy ===')\nstatus, body = get('http://127.0.0.1:18737/api/health')\nprint(f'GET /api/health  status={status}  body={body}')\n\nstatus, body = get('http://127.0.0.1:18737/api/models?page=1&page_size=3')\ndata = json.loads(body)\nprint(f'GET /api/models  status={status}  keys={list(data.keys())}  total={data.get(\"total\")}  count={len(data.get(\"items\", []))}')\n"
+        ],
+        "background": false,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "environment": [
+          {
+            "name": "XLANG3_PYTHON_LIB",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\stdlib"
+          },
+          {
+            "name": "PIP_FIND_LINKS",
+            "value": "file:///C:/Users/shaw9/.xMind/p-a35/7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58/runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a/wheels"
+          },
+          {
+            "name": "PYTHONPATH",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\modules"
+          }
+        ],
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a35\\7967512d923ca736ca32114e926ba95fa9df5b9b7a23d1357af77ffff176ae58\\runtime-5a43f8d0a6b10a4478a5e8b6821f9cb67b5cef86a408d0b7b435a3000852b69a\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:d4a53f00000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": ".",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:359a3f00000002000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "timeout_ms": 30000,
+        "workdir": ".",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:ea323f0000000c000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {
+        "elapsed_ms": 719,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "abdddf12d9a4fbeb9d2fa1e912f1d9e1",
+        "operation_id": "abdddf12d9a4fbeb9d2fa1e912f1d9e1",
+        "output_artifact": {
+          "operation_id": "abdddf12d9a4fbeb9d2fa1e912f1d9e1",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 534
+        },
+        "pid": 71548,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 534,
+          "data": "=== Backend direct ===\r\nGET /api/health  status=200  body={\"status\":\"ok\",\"app\":\"Model Zoo API\",\"version\":\"0.1.0\"}\r\nGET /api/models  status=200  keys=['items', 'total', 'page', 'page_size', 'pages', 'demo_data', 'data_notice', 'demo_data_fields']  total=12  count=3\r\n\r\n=== Frontend proxy ===\r\nGET /api/health  status=200  body={\"status\":\"ok\",\"app\":\"Model Zoo API\",\"version\":\"0.1.0\"}\r\nGET /api/models  status=200  keys=['items', 'total', 'page', 'page_size', 'pages', 'demo_data', 'data_notice', 'demo_data_fields']  total=12  count=3\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 534
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    }
+  ],
+  "backendTests": {
+    "passed": 32,
+    "exitCode": 0,
+    "pytestSeconds": 8.07,
+    "processOperation": "a0112911d24b69c75d4e9b27706750fc"
+  },
+  "frontendBuild": {
+    "exitCode": 0,
+    "modules": 37,
+    "viteBuildMs": 750,
+    "processOperation": "094ce52984d48140d393926dc12cc8df"
+  },
+  "browser": {
+    "passed": false,
+    "health": {
+      "status": "ok",
+      "app": "Model Zoo API",
+      "version": "0.1.0"
+    },
+    "catalogTotal": 12,
+    "searchVerified": true,
+    "resetDuringPendingDebounceVerified": true,
+    "savedFilterAndStorageRestoreVerified": true,
+    "detailNavigationVerified": true,
+    "returnToCatalogVerified": true,
+    "pageErrors": [
+      "Failed to construct 'IntersectionObserver': rootMargin must be specified in absolute length units or percent."
+    ],
+    "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+    "rawReceipt": "C:/xMindNativeValidation/full-modelzoo-ui-0.1.36-20261019/site-v2/site-acceptance.json"
+  },
+  "observerFailures": [
+    "Initial test did not wait for the workspace configuration dialog to finish closing; no task submitted",
+    "Fresh browser context needed to select the already-created workspace; no task submitted",
+    "Initial site selector matched the Saved models toggle and a card aria-label; use exact role name"
+  ],
+  "nativeRegression": {
+    "baseline": "C:/xMindNativeValidation/dynamic-persistent-completion-baseline-20261019/gate.json",
+    "baselineFailed": "Dynamic root has unresolved effects",
+    "corrected": "C:/xMindNativeValidation/dynamic-persistent-completion-fixed-20261019/gate.json",
+    "correctedContracts": 1,
+    "installed": false,
+    "broaderValidation": "Complete product build and seven related native contracts pass; source fix is not installed or live-qualified yet",
+    "focusedProof": "doc/evidence/dynamic-persistent-completion-20261019.json"
+  },
+  "fullCodingAcceptance": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}

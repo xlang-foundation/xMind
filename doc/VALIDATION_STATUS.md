@@ -1,5 +1,37 @@
 # Current native validation
 
+## Persistent development-server completion fix — 2026-10-19
+
+The fuller ModelZoo coding test exposed a backend completion bug. The model
+finished its response, but the dynamic coding root could not commit completion
+while its two admitted persistent development servers were running. A new
+native repository regression reproduces `Dynamic root has unresolved effects`
+on the preceding code. Dynamic completion now uses the same effect check as
+ordinary completion. Only an executing persistent service can outlive the
+answer; pending approvals, approved but undispatched work, unrelated edits,
+ordinary background jobs and uncertain service outcomes still block completion.
+
+The regression passes, and a complete product build plus seven related native
+contracts pass in 37.64 seconds with unchanged inputs and binary file sets and
+hashes. The rebuilt executable is ebe83d12; the xlang3 runtime stays 1ff2a8e.
+This is focused qualification, not a new complete 152-test pass. The installed
+0.1.36 runtime is still 28e60101 and does not yet contain the fix. Packaging
+and a new live coding test on the corrected runtime are next.
+
+The original live attempt is retained as failed acceptance, with exactly one
+task submission and no replay. Its actual xlang3 process passes 32 backend tests,
+and npm/Vite builds 37 modules successfully. Both servers answer health/catalog
+requests. Browser checks verify search, pending-debounce Reset, saved-model
+storage/reload and detail navigation, but the detail page raises an invalid
+IntersectionObserver rootMargin error. That application bug remains to be fixed
+through the corrected coding runtime; the website test is not accepted overall.
+The initial HTTP smoke command also failed to import httpx from the root working
+directory; the agent then performed successful checks through urllib. Both
+results are retained. Observer dialog/context/selector failures are recorded
+separately from the product failures.
+[Actual live failure and application checks](evidence/full-modelzoo-coding-failures-20261019.json).
+[Native reproduction and correction](evidence/dynamic-persistent-completion-20261019.json).
+
 ## Installed coding sidebar 0.1.36 — 2026-10-19
 
 The actual VS Code CLI installs and lists 0.1.36 from source ba7113e. The

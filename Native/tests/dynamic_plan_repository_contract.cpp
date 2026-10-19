@@ -65,6 +65,33 @@ void finish_child(PersistenceService& store,const std::string& root,const std::s
     else store.transition(child,RunState::running,RunState::failed,R"({"reason":"synthetic_child_failure","private_detail":"never project arbitrary errors"})").get();
     const auto settled=store.settle_dynamic_child(child).get();require(settled.child_state==(success?"completed":"failed")&&settled.outcome_json.find("provider_items")==std::string::npos&&settled.outcome_json.find("private_detail")==std::string::npos,"Actual typed settlement must omit private response/error material");
 }
+void persistent_service_completion(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
+    PersistenceService store(database,imports);const auto budget=policy(workspace);
+    seed_root(store,"service_owner",budget);
+    const OperationSpec service{"service_owner",workspace,"run_process",R"({"background":true,"persistent":true})",{"process-service:synthetic-service"}};
+    store.request_operation("synthetic-service",service,now()+60000).get();
+    auto complete=[&]{return store.complete_dynamic_owner("service_owner",R"({"content":"Synthetic service startup complete"})","segment_service_owner",1).get();};
+    rejects<Conflict>(complete,"Pending service approval must prevent final completion");
+    store.decide_operation("synthetic-service",OperationDecision::allow,"synthetic_repository_controller").get();
+    rejects<Conflict>(complete,"An approved but undispatched service must prevent final completion");
+    store.claim_operation("synthetic-service",service).get();
+    const OperationSpec pending_edit{"service_owner",workspace,"replace_file","{}"};
+    store.request_operation("synthetic-service-edit",pending_edit,now()+60000).get();
+    rejects<Conflict>(complete,"An active service must not hide a separate pending edit");
+    store.decide_operation("synthetic-service-edit",OperationDecision::deny,"synthetic_repository_controller").get();
+    require(complete().state==RunState::completed&&store.operation("synthetic-service").get().state==OperationState::executing,"A dynamic coding response must complete while its admitted persistent service stays running");
+    require(store.history("s_service_owner").get().size()==2,"Persistent service completion must durably save the final response");
+    store.finish_operation("synthetic-service",OperationState::succeeded,R"({"service_stopped":true,"fixture":"synthetic repository receipt; no actual process"})").get();
+    for(const bool persistent:{false,true}){
+        const std::string root=persistent?"uncertain_service_owner":"ordinary_job_owner",id=root+"_job";seed_root(store,root,budget);
+        const OperationSpec job{root,workspace,"run_process",Json{{"background",true},{"persistent",persistent}}.dump(),{"process-service:"+id}};
+        store.request_operation(id,job,now()+60000).get();store.decide_operation(id,OperationDecision::allow,"synthetic_repository_controller").get();store.claim_operation(id,job).get();
+        if(persistent)store.finish_operation(id,OperationState::uncertain,R"({"fixture":"synthetic uncertain service receipt"})").get();
+        rejects<Conflict>([&]{store.complete_dynamic_owner(root,R"({"content":"Must remain blocked"})","segment_"+root,1).get();},"Ordinary live jobs and uncertain services must still prevent completion");
+        require(store.run(root).get().state==RunState::running&&store.dynamic_budget_segment(root).get().state=="open","Rejected completion must roll back the run and budget-segment transaction");
+    }
+    store.close();
+}
 void pause_and_restart(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
     const auto budget=policy(workspace);std::string call_id,question_id;
     {
@@ -461,6 +488,6 @@ void dynamic_effect_admission(const std::string& database,const std::vector<std:
 }
 int main(int argc,char** argv){
     if(argc!=3)return 2;
-    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());owner_scope_migration_contract((dir.path/"owner-scope.sqlite").string(),imports,dir.path.string());nested_owner_admission_contract((dir.path/"nested-owner.sqlite").string(),imports,dir.path.string());multi_branch_pause_resume_contract((dir.path/"multi-wait.sqlite").string(),imports,dir.path.string());root_wide_nested_planning_bounds((dir.path/"nested-bounds.sqlite").string(),imports,dir.path.string());nested_depth_boundary_contract((dir.path/"nested-depth.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared root-wide node/revision/human limits, concurrent nested wait pause/resume and recovery, nested claimed-owner admission through depth eight, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
+    try{Directory dir;const std::vector<std::string> imports{argv[1],argv[2]};persistent_service_completion((dir.path/"persistent-service.sqlite").string(),imports,dir.path.string());pause_and_restart((dir.path/"plan.sqlite").string(),imports,dir.path.string());fault_and_recovery((dir.path/"fault.sqlite").string(),imports,dir.path.string());failure_revision((dir.path/"revision.sqlite").string(),imports,dir.path.string());migration_contract((dir.path/"migration.sqlite").string(),imports,dir.path.string());owner_scope_migration_contract((dir.path/"owner-scope.sqlite").string(),imports,dir.path.string());nested_owner_admission_contract((dir.path/"nested-owner.sqlite").string(),imports,dir.path.string());multi_branch_pause_resume_contract((dir.path/"multi-wait.sqlite").string(),imports,dir.path.string());root_wide_nested_planning_bounds((dir.path/"nested-bounds.sqlite").string(),imports,dir.path.string());nested_depth_boundary_contract((dir.path/"nested-depth.sqlite").string(),imports,dir.path.string());legacy_held_parent_quota((dir.path/"quota.sqlite").string(),imports,dir.path.string());uncertainty_fixed_point((dir.path/"uncertain.sqlite").string(),imports,dir.path.string());final_human_only((dir.path/"human-only.sqlite").string(),imports,dir.path.string(),false);final_human_only((dir.path/"human-expired.sqlite").string(),imports,dir.path.string(),true);shared_child_limits((dir.path/"shared-children.sqlite").string(),imports,dir.path.string());shared_model_call_limit((dir.path/"shared-calls.sqlite").string(),imports,dir.path.string());rejected_signed_turn((dir.path/"rejected.sqlite").string(),imports,dir.path.string());dynamic_effect_admission((dir.path/"effect-admission.sqlite").string(),imports,dir.path.string());std::cout<<"Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared root-wide node/revision/human limits, concurrent nested wait pause/resume and recovery, nested claimed-owner admission through depth eight, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only\n";return 0;}
     catch(const std::exception& error){std::cerr<<error.what()<<"\n";return 1;}
 }

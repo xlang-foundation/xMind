@@ -523,7 +523,9 @@ struct Repository::Impl {
         return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ("+states+") LIMIT 1",{id}).rows.empty();
     }
     bool has_unresolved_effects(const std::string& id) {
-        return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ('awaiting_approval','ready','executing','uncertain') AND NOT (tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1) LIMIT 1",{id}).rows.empty();
+        // Only an already dispatched persistent service may outlive the answer.
+        // Pending approval, undispatched work and uncertain outcomes still block.
+        return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ('awaiting_approval','ready','executing','uncertain') AND NOT (state='executing' AND tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1) LIMIT 1",{id}).rows.empty();
     }
     void message(const Run& run,const std::string& role,const std::string& json){changed_one(database.execute("INSERT INTO messages(session_id,execution_run_id,role,payload) VALUES(?,?,?,?)",{run.session_id,run.parent_id.empty()?SqlValue(nullptr):SqlValue(run.id),role,json}));changed_one(database.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{run.id}));}
     void root_boundary(const Run& current,RunState next){
@@ -1482,7 +1484,7 @@ DynamicResumeRecord Repository::resume_dynamic_owner(const DynamicResumeSpec& sp
 Run Repository::complete_dynamic_owner(const std::string& root_id,const std::string& assistant,const std::string& segment_id,std::int64_t elapsed){
     (void)object_json(assistant,8*1024*1024);auto& db=impl_->database;Transaction tx(db);auto root=run(root_id);(void)dynamic_capabilities(root.id);if(root.state!=RunState::running)throw Conflict("Dynamic completion owner is not running");
     if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root.id}).rows.empty())throw Conflict("Dynamic completion still owns transport");impl_->close_dynamic_segment(root.id,segment_id,elapsed);impl_->root_boundary(root,RunState::completed);
-    if(impl_->has_operations(root.id,"'awaiting_approval','ready','executing','uncertain'"))throw Conflict("Dynamic root has unresolved effects");impl_->message(root,"assistant",assistant);changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{root.id}));impl_->event(root.id,"conversation.assistant",assistant);impl_->event(root.id,"run.completed","{}");
+    if(impl_->has_unresolved_effects(root.id))throw Conflict("Dynamic root has unresolved effects");impl_->message(root,"assistant",assistant);changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{root.id}));impl_->event(root.id,"conversation.assistant",assistant);impl_->event(root.id,"run.completed","{}");
     db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE root_run_id=? AND state='active'",{root.id});db.execute("UPDATE agent_execution_budgets SET revision=revision+1 WHERE root_run_id=?",{root.id});tx.commit();root.state=RunState::completed;return root;
 }
 Run Repository::retire_dynamic_owner(const std::string& root_id,RunState next,const std::string& reason,const std::string& segment_id,std::int64_t elapsed){
