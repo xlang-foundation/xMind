@@ -1,5 +1,21 @@
 # Current native validation
 
+## Complete native suite — 2026-10-19
+
+The complete local native suite at cbc2635 passes **152/152 tests** in
+961.62 seconds. The build and CTest both exit zero. The complete project,
+consumed SDK headers, runtime, allowed pure libraries, Node dependencies and
+native binary file sets and hashes remain unchanged throughout the gate.
+The tested native executable (28e60101) and xlang3 DLL (1ff2a8e) match those
+in the corrected installed 0.1.35 package. This gate performs no installation.
+
+This closes current local full-native qualification. Actual VS Code pane
+activation, current hosted native acceptance, actual Rust Analyzer revalidation
+and process-bound agent placement remain open. The next priority is smooth
+browser and VS Code coding use; the worker static audit is deferred and is
+not a confirmed runtime defect.
+[Full native result and exact scope](evidence/workspace-membership-full-native-20261019.json).
+
 ## Corrected 0.1.35 installed — 2026-10-19
 
 VS Code CLI installs the corrected guidance archive and lists xMind 0.1.35.
