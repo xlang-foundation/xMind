@@ -1,0 +1,166 @@
+{
+  "scope": "Backend-owned optional PowerShell module search policy in trusted process profiles",
+  "baseline": {
+    "recordedAt": "2026-10-19T19:58:37.603Z",
+    "sourceParent": "10354d8549bad56f9add909f089246b983c43f57",
+    "sourcePatchSha256": "f2555a0e4812aae0545060c39f68b866d931e8823bb4d8aaf28099438e41fe28",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 65332,
+      "launchedAt": "2026-10-19T19:58:00.855Z",
+      "completedAt": "2026-10-19T19:58:30.770Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "42a9d1c235004761f59aad5c1b02bd217152aa6271abd0d9da0b12724a33de61"
+    },
+    "test": {
+      "pid": 48024,
+      "launchedAt": "2026-10-19T19:58:34.025Z",
+      "completedAt": "2026-10-19T19:58:34.271Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "471c81001f930f773c1d599c58572e1bc0be14dc62a7019036821c0656c17805"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 0.2,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "fixed": {
+    "recordedAt": "2026-10-19T20:09:45.254Z",
+    "sourceParent": "10354d8549bad56f9add909f089246b983c43f57",
+    "sourcePatchSha256": "339da25399bda7626ad5f50f663ced2cee54435ff0c63f3d1ad908391242b712",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 13704,
+      "launchedAt": "2026-10-19T20:00:06.243Z",
+      "completedAt": "2026-10-19T20:08:21.444Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d2b966da186840d39e9c3453c86cb68598afd38bca851363ae7cb3c501049027"
+    },
+    "test": {
+      "pid": 28488,
+      "launchedAt": "2026-10-19T20:08:25.470Z",
+      "completedAt": "2026-10-19T20:09:42.441Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c439450caba1ed56264dc3b9d50c73f9f3e46c5561fa02ef5cdb6fbab017c413"
+    },
+    "total": 12,
+    "failed": 0,
+    "passed": 12,
+    "seconds": 76.92,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5dc5bc6cfbf358e35f60190f42e4d735374cc2a56d56a8d10c1ce52d36744890",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "http": {
+    "startedAt": "2026-10-19T20:11:34.331Z",
+    "scope": "Actual candidate unified server, trusted process configuration, controller-approved deterministic graph and real PowerShell process; no model inference",
+    "nativeSha256": "5dc5bc6cfbf358e35f60190f42e4d735374cc2a56d56a8d10c1ce52d36744890",
+    "taskSubmissions": 1,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "owner": {
+      "pid": 65244,
+      "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+      "birth": "2026-10-19T20:11:34.3176000Z"
+    },
+    "origin": "http://127.0.0.1:52544",
+    "session": "a652420e5f6a0c4f2dc82611a3a627b0",
+    "run": "029fa828ea1df12f81816925c9f8f3b6",
+    "operation": "7189549a8a27df1e65098e8294d3ea0a",
+    "status": {
+      "graph_root": true,
+      "id": "029fa828ea1df12f81816925c9f8f3b6",
+      "node_id": "",
+      "parent_id": "",
+      "session_id": "a652420e5f6a0c4f2dc82611a3a627b0",
+      "state": "completed"
+    },
+    "actual": {
+      "operationState": "succeeded",
+      "exitCode": 0,
+      "elapsedMs": 6338,
+      "processTreeRetired": true,
+      "phases": [
+        "script_entered",
+        "delay_completed",
+        "effect_completed"
+      ],
+      "selectedModuleRoot": "C:/xMindNativeValidation/process-module-profile-http-20261019/core-modules",
+      "timeoutMs": 30000
+    },
+    "configAndModulesUnchanged": true,
+    "passed": true,
+    "terminal": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "onlyOwnedIdleServerRetired": true,
+    "finishedAt": "2026-10-19T20:11:42.765Z"
+  },
+  "receipts": [
+    {
+      "name": "process-module-profile-http-20261019/processes.json",
+      "sha256": "4bd7e8a2af489baa5b588a558ed6a9e2445e528d3bdf9db6686ea716dedcfd88"
+    },
+    {
+      "name": "process-module-profile-http-20261019/graphs.json",
+      "sha256": "de1de0525a0db30b38ac8df103a96c1dd6047a8d2409fb7806dc9c56aa7ef7b5"
+    },
+    {
+      "name": "process-module-profile-http-20261019/operation.json",
+      "sha256": "82c7c24608d0ca3639ed4ac277ffb3dc0272fec3c7a38dcd5f1880dc5b704e5d"
+    }
+  ],
+  "behavior": [
+    "Absent/empty policy retains the current profile behavior. Arbitrary environment/credential dictionaries remain rejected.",
+    "Ordered absolute existing directories are bounded and validated; changes rotate SQLite-backed profile revisions and captured agent authority.",
+    "Actual child observes the approved backend-selected value. Model-supplied profile-field override is rejected before proposal.",
+    "Actual no-model unified server imports the trusted configuration and executes one controller-approved deterministic graph using real PowerShell. Original command and 30000ms budget are retained; operation succeeds in6338ms, writes in the admitted workspace and retires its process tree.",
+    "Only identity-bound idle test server65244 is retired. Installed44, configured provider/process YAML and prior user backends remain untouched."
+  ],
+  "limits": [
+    "Complete build and focused12/12 only; no complete candidate suite, actual provider/client or installed candidate acceptance.",
+    "Module paths configure startup lookup; PowerShell may augment paths. Directory/module contents are not pinned or sandboxed.",
+    "Fresh unconfigured hosted PowerShell timeout remains unresolved; this optional policy does not qualify that original failure."
+  ],
+  "cpythonExecuted": false
+}

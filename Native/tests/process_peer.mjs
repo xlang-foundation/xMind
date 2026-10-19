@@ -2,7 +2,9 @@
 import {writeFileSync,existsSync,mkdirSync,renameSync,readFileSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 const [mode,marker,...args]=process.argv.slice(2);
-if(mode==='normal') {
+if(mode==='module-path') {
+  const modulePath=process.env.PSModulePath??null;writeFileSync(marker,JSON.stringify(modulePath));process.stdout.write(JSON.stringify({modulePath}));
+} else if(mode==='normal') {
   const staging=marker+'-staging',published=marker+'-published';
   mkdirSync(staging);writeFileSync(staging+'/cache.txt','published child directory');
   renameSync(staging,published);

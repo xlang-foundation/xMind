@@ -155,6 +155,17 @@ private:
     PersistenceService& store_;const std::string& run_;const std::string& operation_;ProcessOutputArtifact state_;bool finished_=false;
 };
 }
+void validate_process_module_paths(const std::vector<std::string>& paths,bool require_directories){
+    if(paths.size()>16)throw std::invalid_argument("PowerShell module path count exceeds limits");
+    std::vector<std::wstring> seen;std::size_t bytes=0;
+    for(const auto& value:paths){
+        if(value.empty()||!text(value,4096)||(bytes+=value.size()+1)>8192||value.find(';')!=std::string::npos||std::any_of(value.begin(),value.end(),[](unsigned char c){return c<32;}))throw std::invalid_argument("Invalid trusted PowerShell module path");
+        auto path=std::filesystem::u8path(value);if(!path.is_absolute())throw std::invalid_argument("PowerShell module paths must be absolute");
+        const auto normalized=path.lexically_normal().make_preferred().native();
+        for(const auto& previous:seen)if(CompareStringOrdinal(previous.data(),static_cast<int>(previous.size()),normalized.data(),static_cast<int>(normalized.size()),TRUE)==CSTR_EQUAL)throw std::invalid_argument("Duplicate PowerShell module path");
+        seen.push_back(normalized);std::error_code error;if(require_directories&&!std::filesystem::is_directory(path,error))throw std::invalid_argument("PowerShell module directory is unavailable");
+    }
+}
 ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& workspace,std::string root,std::vector<ProcessProfile> profiles)
     :store_(store),workspace_(workspace),root_(std::move(root)),profiles_(std::move(profiles)) {
     if(profiles_.empty() || profiles_.size()>16 || !text(root_,32768) || !std::filesystem::u8path(root_).is_absolute())throw std::invalid_argument("Invalid process configuration");
@@ -167,6 +178,7 @@ ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& works
     for(auto& profile:profiles_) {
         if(profile.id.empty() || profile.id.size()>64 || !ids.insert(profile.id).second || profile.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || profile.revision<=0 || !text(profile.executable,32768) || !std::filesystem::u8path(profile.executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::u8path(profile.executable)) || profile.prefix_arguments.size()>32 || profile.max_timeout<std::chrono::milliseconds(1) || profile.max_timeout>std::chrono::minutes(10))throw std::invalid_argument("Invalid trusted process profile");
         for(const auto& arg:profile.prefix_arguments)if(!text(arg))throw std::invalid_argument("Invalid trusted process prefix argument");
+        validate_process_module_paths(profile.powershell_module_paths,true);
         if(profile.id=="xlang3"&&profile.xlang3_library.empty()){
             const auto adjacent=std::filesystem::u8path(profile.executable).parent_path()/L"stdlib";
             if(std::filesystem::is_directory(adjacent))profile.xlang3_library=utf8(adjacent);
@@ -277,6 +289,11 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(persistent&&!background)throw std::invalid_argument("Persistent services require background=true");
     if(persistent){const auto owner=store_.run(run).get();if(owner.graph_root||!owner.parent_id.empty())throw ToolAccessDenied("Persistent services can only be started by an ordinary session agent");if(!primary_folder)throw ToolAccessDenied("Persistent services must use the primary workspace folder");if(found->max_timeout<std::chrono::seconds(30))throw std::invalid_argument("Persistent services require a trusted process profile with at least a 30-second timeout");if(args.contains("timeout_ms")&&(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<30000))throw std::invalid_argument("Persistent service timeout must be at least 30 seconds; use the session terminal for shorter commands");}
     ProcessConfiguration launch;launch.executable=found->executable;launch.arguments=found->prefix_arguments;launch.timeout=found->max_timeout;launch.output_limit=65536;
+    validate_process_module_paths(found->powershell_module_paths,true);
+    if(!found->powershell_module_paths.empty()){
+        std::string paths;for(const auto& path:found->powershell_module_paths){if(!paths.empty())paths.push_back(';');paths+=path;}
+        launch.environment.emplace_back("PSModulePath",std::move(paths));
+    }
     // xlang3 writes xlang3-specific .pyc files beside pure module facades by
     // default. Keep the paired, hash-verified runtime tree immutable during
     // workspace scripts and tests.

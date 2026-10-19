@@ -72,6 +72,9 @@ int main(){try{
     different=base;different.approved_edits=false;require(identity(different,metadata)!=bound,"Effect capability was not bound");
     different=base;different.a2a_enabled=false;require(identity(different,metadata)!=bound,"Remote-agent capability was not bound");
     different=base;different.process_profiles.front().prefix_arguments.push_back("changed");require(identity(different,metadata)!=bound,"Trusted process command was not bound");
+    different=base;different.process_profiles.front().powershell_module_paths={"C:/synthetic/modules-one","C:/synthetic/modules-two"};const auto module_bound=identity(different,metadata);require(module_bound!=bound,"Trusted process module paths must affect authority");
+    std::reverse(different.process_profiles.front().powershell_module_paths.begin(),different.process_profiles.front().powershell_module_paths.end());require(identity(different,metadata)!=module_bound,"Module search order must affect authority even with an unchanged explicit revision");
+    different=base;different.process_profiles.front().powershell_module_paths={"relative"};rejected([&]{identity(different,metadata);});
     different=base;different.process_profiles.front().executable_id="other-executable-object";require(identity(different,metadata)!=bound,"Executable identity was not bound");
     different=base;different.mcp_servers.front().arguments.push_back("changed");require(identity(different,versions(different))!=bound,"MCP command/purpose was not bound");
     different=base;different.mcp_servers.front().revision=2;require(identity(different,versions(different))!=bound,"MCP generation was not bound");

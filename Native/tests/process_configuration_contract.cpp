@@ -14,11 +14,30 @@ struct Directory {
     Directory(){require(std::filesystem::create_directory(path),"Fixture directory must be new");}
     ~Directory(){if(path.parent_path()==parent && path.filename().string().starts_with("xmind-process-config-")){std::error_code ignored;std::filesystem::remove_all(path,ignored);}}
 };
+void module_paths_contract(const std::filesystem::path& folder,const std::vector<std::string>& imports,Json profile){
+    const auto one=folder/"module one",two=folder/"module-two";std::filesystem::create_directory(one);std::filesystem::create_directory(two);
+    profile["id"]="module-policy";profile["powershell_module_paths"]=Json::array({one.string(),two.string()});const auto paths=profile["powershell_module_paths"];const auto database=(folder/"module-policy.sqlite").string();
+    const auto desired=[&]{return Json{{"profiles",Json::array({profile})}}.dump();};
+    {
+        PersistenceService store(database,imports);ProcessConfigurationStore registry(store);require(registry.apply(desired()).front().revision==1,"Explicit module paths must be accepted by the trusted profile registry");
+        const auto saved=store.information("native-process","profiles").get();require(Json::parse(saved)["profiles"][0]["powershell_module_paths"]==paths,"Exact module search order must persist through actual xlang3 SQLite");
+        for(const auto& invalid:std::vector<Json>{nullptr,Json::object(),"not-an-array",Json::array({"relative"}),Json::array({(folder/"missing").string()}),Json::array({one.string()+";other"}),Json::array({one.string(),one.string()}),Json::array({std::string("bad\0path",8)})}){
+            auto bad=profile;bad["powershell_module_paths"]=invalid;rejects<std::invalid_argument>([&]{registry.apply(Json{{"profiles",Json::array({bad})}}.dump());});require(store.information("native-process","profiles").get()==saved,"Rejected module policies must preserve the actual saved profile");
+        }
+        auto bad=profile;bad["powershell_module_paths"]=Json::array();for(int i=0;i<17;++i)bad["powershell_module_paths"].push_back(one.string());rejects<std::invalid_argument>([&]{registry.apply(Json{{"profiles",Json::array({bad})}}.dump());});
+        require(registry.apply(desired()).front().revision==1,"Identical module paths must preserve their revision");
+        profile["powershell_module_paths"]=Json::array({two.string(),one.string()});require(registry.apply(desired()).front().revision==2,"Changing module search order must rotate the profile revision");
+        profile.erase("powershell_module_paths");require(registry.apply(desired()).front().revision==3,"Restoring ordinary module discovery must rotate the revision");
+        profile["powershell_module_paths"]=paths;require(registry.apply(desired()).front().revision==4,"Restored explicit module paths must receive a new revision");store.close();
+    }
+    {PersistenceService store(database,imports);ProcessConfigurationStore registry(store);require(registry.load().front().revision==4&&Json::parse(store.information("native-process","profiles").get())["profiles"][0]["powershell_module_paths"]==paths,"Exact module paths and revision must survive SQLite close/reopen");store.close();}
+}
 }
 int main(int argc,char** argv){if(argc!=4)return 2;try{
     Directory folder;const auto executable=folder.path/"actual-native-copy.exe",workspace=folder.path/"workspace";std::filesystem::copy_file(std::filesystem::u8path(argv[1]),executable);std::filesystem::create_directory(workspace);
     const auto database=(folder.path/"state.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
     Json p{{"id","fixture"},{"executable",executable.string()},{"prefix_arguments",Json::array({"literal fixture argument"})},{"max_timeout_ms",120000},{"auto_approve",true}};
+    module_paths_contract(folder.path,imports,p);
     const auto desired=[&]{return Json{{"profiles",Json::array({p})}}.dump();};
     const auto yaml=[&]{return std::string("profiles:\n  - id: fixture\n    executable: ")+Json(executable.string()).dump()+"\n    prefix_arguments:\n      - literal fixture argument\n    max_timeout_ms: 120000\n    auto_approve: true\n";};std::string binding;
     {

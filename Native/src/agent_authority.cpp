@@ -121,6 +121,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         if(profile.prefix_arguments.size()>32||profile.revision<1||profile.max_timeout.count()<1||profile.max_timeout.count()>600000)
             throw std::invalid_argument("Private agent authority process policy exceeds limits");
         for(const auto& argument:profile.prefix_arguments)text(argument,4096,false);
+        validate_process_module_paths(profile.powershell_module_paths);
     }
     for(const auto& profile:settings.language_servers){
         text(profile.id,64);text(profile.executable,32768);text(profile.executable_id,4096);text(profile.language_id,64);
@@ -197,6 +198,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         encoded["process_profiles"].push_back({{"id",profile.id},
         {"revision",profile.revision},{"executable",profile.executable},{"executable_id",profile.executable_id},
         {"prefix_arguments",profile.prefix_arguments},{"max_timeout_ms",profile.max_timeout.count()},{"auto_approve",profile.auto_approve}});
+        if(!profile.powershell_module_paths.empty())encoded["process_profiles"].back()["powershell_module_paths"]=profile.powershell_module_paths;
     }
     for(const auto& profile:settings.language_servers){
         Json environment=Json::array();for(const auto& [name,value]:profile.environment)environment.push_back({{"name",name},{"value_sha256",digest(value)}});

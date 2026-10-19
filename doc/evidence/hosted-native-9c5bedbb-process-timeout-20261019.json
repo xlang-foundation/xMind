@@ -1,0 +1,73 @@
+{
+  "recordedAt": "2026-10-19T20:13:50.674Z",
+  "source": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+  "run": 39309088086,
+  "job": 118254958583,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39309088086",
+  "status": "completed",
+  "conclusion": "failure",
+  "contracts": {
+    "total": 155,
+    "passed": 154,
+    "failed": 1,
+    "seconds": 705.36,
+    "failedName": "native_graph_runner_contract"
+  },
+  "sdkSmoke": {
+    "total": 2,
+    "passed": 2,
+    "seconds": 2.5
+  },
+  "failure": {
+    "rootState": "failed",
+    "children": [
+      {
+        "id": "a605a40de03e39555c01dea7d093081f",
+        "state": "failed",
+        "operations": [
+          {
+            "elapsed_ms": 30051,
+            "exit_code": 1,
+            "id": "81b39daebb5c4399f9b812d7ccbc0f2b",
+            "output_artifact": {
+              "operation_id": "81b39daebb5c4399f9b812d7ccbc0f2b",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 34
+            },
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "startup_phases": [
+              "script_entered"
+            ],
+            "state": "uncertain",
+            "termination": "timed_out",
+            "timeout_ms": 30000,
+            "tool": "run_process"
+          }
+        ]
+      }
+    ]
+  },
+  "artifact": {
+    "id": 12218800656,
+    "bytes": 69559,
+    "sha256": "1d68fe7ae70fb773ead0c92d2bdab73d4d190e5c94f171f0c6ea08200b4007d4",
+    "officialDigestVerified": true,
+    "extractedFiles": 30
+  },
+  "ctestLogSha256": "6d9eb453b39578c6662ab0bc573f12e01daa027c438fd3b97efd5440a0b5c819",
+  "provenance": {
+    "toolchain": "Visual Studio 18 2026",
+    "xmind": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain_version": "18.10.12224.181",
+    "windows_default_owner_matches_user": false,
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "processors": 4,
+    "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "build_parallelism": 4
+  },
+  "note": "Source matches installed44 native source before the optional module-path feature. SDK/native build passes; later packaging stages are skipped after suite failure. This is not hosted-native acceptance."
+}

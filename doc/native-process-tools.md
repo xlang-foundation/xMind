@@ -4,6 +4,44 @@ Current validation and installed-package scope are recorded in
 [VALIDATION_STATUS.md](VALIDATION_STATUS.md). The dated acceptance sections below
 are historical checkpoints, not the current installed test inventory.
 
+## Explicit PowerShell module paths
+
+Trusted process profiles may provide `powershell_module_paths`: an ordered list
+of existing absolute directories. The backend joins them with `;` and sets
+`PSModulePath` when launching that profile. Omitting the field, or using an empty
+list, leaves normal module discovery unchanged. It also applies to a PowerShell
+child launched by the configured executable.
+
+For example, a startup process configuration can select an administrator-managed
+module directory:
+
+```yaml
+profiles:
+  - id: build-shell
+    executable: C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+    prefix_arguments: [-NoLogo, -NoProfile, -NonInteractive]
+    max_timeout_ms: 120000
+    auto_approve: true
+    powershell_module_paths:
+      - D:/MyToolchain/PowerShell/Modules
+```
+
+The directory must already exist. Paths are literal; variables are not expanded.
+At most 16 entries are accepted, with a combined UTF-8 size of 8 KiB. Relative
+paths, list separators, control characters and duplicate normalized Windows
+spellings are rejected. Configuration changes, including search-order changes,
+rotate the profile revision and affect its captured agent authority. The exact
+startup environment is retained in the operation proposal before approval.
+Model tool calls cannot supply this profile field; arbitrary environment and
+credential dictionaries remain unsupported in process configuration.
+
+PowerShell may augment `PSModulePath` during startup, especially when its system
+module directory is included. This setting controls startup configuration; it
+does not pin module contents or restrict what an authorized command can execute.
+The Windows CI diagnostic isolates module search-path latency separately; this
+option does not itself qualify the earlier failed cold commands. Validation and
+installation scope are recorded in `VALIDATION_STATUS.md`.
+
 ## Current integrated local acceptance (2026-10-11)
 
 The previous full native gate at source `7acf21f` built in Release and passed

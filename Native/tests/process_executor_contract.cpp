@@ -100,6 +100,20 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         require(Json::parse(result["stdout"]["data"].get<std::string>())["inherited"]==false && store.operation("allowed").get().state==OperationState::succeeded,"Actual output and successful journal required");
         require(output(store,"allowed")==std::pair{result["stdout"]["data"].get<std::string>(),result["stderr"]["data"].get<std::string>()},"Durable channels must equal actual observed output bytes");
         rejects<Conflict>([&]{executor.invoke("allowed","run",args("normal","duplicate.txt"),now()+600000);});require(!std::filesystem::exists(root/"duplicate.txt"),"Duplicate operation must not dispatch again");
+        phase("trusted-module-path-policy");
+        const auto module_one=root/"module one",module_two=root/"module-two";std::filesystem::create_directory(module_one);std::filesystem::create_directory(module_two);
+        auto configured=profiles;configured.front().powershell_module_paths={module_one.string(),module_two.string()};ProcessExecutor module_executor(store,workspace,root.string(),configured);
+        const auto module_path=module_one.string()+";"+module_two.string();
+        require(module_executor.definition().input_schema_json.find(module_path)==std::string::npos,"Trusted module directories must not become model-selected parameters");
+        auto injected=Json::parse(args("module-path","injected-module.txt"));injected["powershell_module_paths"]=Json::array({module_two.string()});
+        rejects<std::invalid_argument>([&]{module_executor.invoke("injected-module","run",injected.dump(),now()+600000);});rejects<NotFound>([&]{store.operation("injected-module").get();});
+        Task module_task(module_executor,"module-bound",args("module-path","module-bound.txt"));const auto module_proposal=proposed(store,"module-bound");const auto module_payload=Json::parse(module_proposal.spec.arguments_json);
+        require(module_payload.at("environment")==Json::array({{{"name","PSModulePath"},{"value",module_path}}})&&!std::filesystem::exists(root/"module-bound.txt"),"Approval must bind the exact backend-selected module order before dispatch");
+        store.decide_operation("module-bound",OperationDecision::allow,"actual-fixture-controller").get();const auto module_result=Json::parse(module_task.result.get());
+        require(module_result["exit_code"]==0&&Json::parse(module_result["stdout"]["data"].get<std::string>())["modulePath"]==module_path&&file(root/"module-bound.txt")==Json(module_path).dump(),"Actual approved child must receive and observe the selected module path");
+        require(store.operation("module-bound").get().state==OperationState::succeeded,"Actual module-path result must retain its successful journal");
+        Task ordinary_module(executor,"module-default",args("module-path","module-default.txt"));const auto default_proposal=proposed(store,"module-default");require(Json::parse(default_proposal.spec.arguments_json).at("environment").empty(),"Unconfigured profiles must keep their existing environment behavior");
+        store.decide_operation("module-default",OperationDecision::allow,"actual-fixture-controller").get();const auto default_result=Json::parse(ordinary_module.result.get());require(default_result["exit_code"]==0&&Json::parse(default_result["stdout"]["data"].get<std::string>())["modulePath"].is_null(),"Ordinary child must not receive an injected module path");
         phase("xlang3-workspace-import-path");
         std::filesystem::create_directories(root/".xlang3-site");
         {std::ofstream module(root/".xlang3-site"/"xmind_process_probe.py");module<<"VALUE = 'xlang3-workspace-package-visible'\n";require(bool(module),"xlang3 package-path fixture must be created");}

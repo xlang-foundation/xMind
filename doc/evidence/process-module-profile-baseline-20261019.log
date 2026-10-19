@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 55: native_process_configuration_contract
+1/1 Test #55: native_process_configuration_contract ...***Failed    0.18 sec
+Unknown process configuration field
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.20 sec
+
+The following tests FAILED:
+	 55 - native_process_configuration_contract (Failed)
+Errors while running CTest

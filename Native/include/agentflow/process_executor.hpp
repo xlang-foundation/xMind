@@ -22,7 +22,11 @@ struct ProcessProfile {
     // in the administrator's process profile document. Packaged hosts can
     // derive the adjacent stdlib directory when no explicit root is supplied.
     std::string xlang3_library;
+    // Optional trusted search order. Empty retains the shell's normal module
+    // discovery; models and views cannot supply or override these directories.
+    std::vector<std::string> powershell_module_paths;
 };
+void validate_process_module_paths(const std::vector<std::string>& paths,bool require_directories=false);
 // Owned process dispatch value. Workspace paths and handles are resolved by
 // the backend from the durable run membership, never supplied by the caller.
 struct AgentProcessInvocation {

@@ -1,5 +1,40 @@
 # Current native validation
 
+## Trusted process module-path policy — 2026-10-19
+
+A new optional `powershell_module_paths` field makes module search order an
+explicit administrator-controlled process-profile setting. The backend validates
+bounded existing absolute directories, retains their order through xlang3 SQLite,
+rotates revisions on changes, binds them into agent authority and records the
+exact startup environment in the approval proposal. Models cannot supply the
+field. Unconfigured profiles and rejection of arbitrary environment/credential
+dictionaries retain their existing behavior.
+
+The baseline rejects the field as unknown. The complete candidate build and 12
+focused contracts pass in 76.92 seconds with all checked source/SDK/library,
+dependency and binary file sets/hashes unchanged. A separate actual unified
+server imports the configuration and runs one controller-approved deterministic
+PowerShell graph with no model/provider. The original command, six-second delay
+and 30-second budget are retained; it succeeds in 6,338 ms, writes in the actual
+admitted workspace and records process-tree retirement. Config/modules stay
+unchanged; only that identity-bound idle test server is stopped.
+
+Candidate native5dc5bc6c is uninstalled. Complete candidate-suite, actual client
+and installed acceptance remain pending. This opt-in policy does not resolve or
+qualify the unconfigured cold PowerShell failure. Installed44/pages/config stay
+unchanged. [Exact baseline, focus and actual HTTP graph](evidence/process-module-profile-20261019.json).
+Configuration details are in [native process tools](native-process-tools.md).
+
+## Hosted installed44 native source remains failing — 2026-10-19
+
+Run 39309088086 on 9c5bedbb completes with 154/155 contracts passing in705.36s;
+only native_graph_runner_contract fails. Its PowerShell child emits script_entered
+then times out at30,051ms with no stderr; the process tree is retired and its
+operation remains uncertain. SDK smoke passes2/2. The official69559-byte artifact
+digest verifies. Later package stages are skipped. This is a terminal hosted
+failure, separate from the complete local154 pass and installed44 coding proof.
+[Exact native failure and artifact](evidence/hosted-native-9c5bedbb-process-timeout-20261019.json).
+
 ## Fresh module-path contrast — 2026-10-19
 
 Hosted run 39314091865 on cea34ea4 is terminal diagnostic failure: 25/32
