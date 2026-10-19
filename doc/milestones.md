@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Installed 0.1.39 shared renderer — 2026-10-19
+
+The table-readability change is installed through the real VS Code CLI and
+matches the existing webpage's renderer. Complete local/exact hosted clients
+pass 428/147, with all archive/installed payloads verified and 17,439 stage
+files unchanged. The C++/xlang3 runtime is reused byte for byte. Settings,
+history, 21 checked older owners, seven runtimes and eight pages are preserved.
+Read-only installed CLI and browser checks retain the same 36-message session;
+no coding task is replayed. Actual editor pane activation remains unverified.
+[Installed package scope](evidence/coding-package-0.1.39-20261019.json).
+
 ## Installed coding and shared-client milestone — 2026-10-19
 
 Installed 0.1.38 uses native ffee124/executable 5d3f7941 and SDK 58a8aab.

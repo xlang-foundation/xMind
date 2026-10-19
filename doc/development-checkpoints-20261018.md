@@ -215,3 +215,12 @@ Current acceptance remains in [validation status](VALIDATION_STATUS.md).
 - Installed unified CLI also attaches to p-a38/backend 27692 with started=false and reads the exact browser history. One real CLI run/watch 0a03833584015f4d81b8c59783f291c2 in session d32c5c4fe01bdf159270b6efa3beaaac passes actual xlang3 FastAPI health/catalog/filter/422 assertions, exit zero; never replay it. Browser read-only restore now shows all 36 messages/14 usage records in 1.64 seconds. Same backend preserved, no key prompt/errors/effect POSTs. Actual human-console/VS Code rendering remain unverified. See doc/evidence/shared-cli-browser-coding-0.1.38-20261019.json.
 
 Current acceptance remains in [validation status](VALIDATION_STATUS.md).
+
+
+## Verbatim pre-0.1.39 package guidance archived 2026-10-19
+
+- Page 59450 now serves the table-readability renderer: focusable horizontal table regions retain whole headers/code at desktop and 390px widths; keyboard scroll works, no page/chat width overflow. All 428 extension/147 browser fixtures pass with frozen inputs. Real read-only browser restore retains 36 messages/14 usage records and saved provider/model, with no errors or effect submissions. Host/view/backend owners are unchanged. Installed 0.1.38 renderer/runtime remains unchanged; package/actual VS Code pane acceptance is still pending. See doc/evidence/table-readability-20261019.json.
+
+- Installed 0.1.38: client b47f280, native ffee124/exe 5d3f7941, SDK 58a8aab/DLL 1ff2a8e, manifest 4f786ac7. Actual CLI install/list, 2,448 archive entries, 2,445 installed payloads plus metadata and 2,402 runtime files verify. Local/exact hosted clients pass 427/147; stage 17,439 files unchanged. Backup 0.1.37/settings/six prior profile names, 18 checked older owners/six runtimes/seven pages survive. Current complete/hosted native, actual editor pane, Rust Analyzer, process-bound agents and release remain open. See doc/evidence/coding-package-0.1.38-20261019.json.
+
+Current acceptance remains in [validation status](VALIDATION_STATUS.md).

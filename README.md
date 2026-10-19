@@ -13,7 +13,7 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The installed local VS Code package is **0.1.38**, with native source
+The installed local VS Code package is **0.1.39**, with native source
 `ffee1245f6355d01c9318bf79396e36ed864c181` and xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
@@ -21,11 +21,11 @@ no Marketplace publication or general release is implied.
 | Check | Verified scope |
 | --- | --- |
 | Native backend | Complete local run: 151/152 pass. The sole failure is a stale synthetic process-tool catalogue expectation; its correction and two related contracts pass, with all 127 native binaries unchanged. A new complete-suite pass is not claimed. |
-| Clients | Final package passes 427 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
-| Installed coding | Actual Claude execution starts an xlang3 FastAPI app and Vite, completes with both services alive, then stops both through an explicit follow-up. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
-| Shared CLI and persistence | Installed CLI attaches to the same backend and completes actual xlang3 API checks. Browser reload restores all 36 messages and 14 supplied usage records in 1.64 seconds, with no effect replay. |
+| Clients | Final package passes 428 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
+| Installed coding | The unchanged runtime was verified in 0.1.38 through actual Claude execution: xlang3 FastAPI/Vite start, response completion with both services alive, then explicit shutdown. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
+| Shared CLI and persistence | Installed 0.1.39 CLI reuses the existing backend and exact history. Its earlier 0.1.38 CLI task completes actual xlang3 API checks. Browser reload retains all 36 messages and 14 supplied usage records with no effect replay. |
 | Console resume | Direct Windows console displays the saved conversation and supplied token metrics, accepts run inspection and exits normally; history and runs stay unchanged. |
-| Preserved work | Checked older webpage/backend owners, six runtime inventories, settings and prior profile directories remain intact. |
+| Preserved work | All 21 checked older owners, seven runtime inventories, eight webpages, settings and prior profile directories remain intact. |
 | Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
 The installed native backend lets completed replies leave persistent app servers
@@ -39,9 +39,11 @@ remains unverified. [Installed package and live lifecycle evidence](doc/evidence
 
 The current development webpage also has horizontally scrollable response
 tables with readable headers and code, verified against its saved conversation
-at desktop and mobile widths. This shared-renderer source passes 428 extension
-and 147 browser checks; its VS Code package update remains pending.
-[Live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
+at desktop and mobile widths. This shared renderer is included in installed
+0.1.39 and matches the live webpage bytes. Actual VS Code pane activation
+remains unverified.
+[Installed package and preserved sessions](doc/evidence/coding-package-0.1.39-20261019.json),
+[live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
 
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic

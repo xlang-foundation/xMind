@@ -1,5 +1,34 @@
 # Current native validation
 
+## Installed 0.1.39 sidebar update — 2026-10-19
+
+0.1.39 is installed and listed by the actual VS Code CLI. Source 39dce6e
+includes the readable-table renderer and reuses the 0.1.38 native runtime byte
+for byte: native ffee124/executable 5d3f7941, SDK 58a8aab/DLL 1ff2a8e and
+manifest 4f786ac7. All 2,448 archive entries, 2,445 installed payloads plus
+package metadata and 2,402 native runtime files verify; all 17,439 staged
+source/dependency/asset/runtime files remain unchanged after packaging/install.
+Local and exact hosted client suites pass **428/147**. The official artifact
+digest verifies; all 70 source inputs and 18 assets match the local stage
+exactly or through recorded CRLF/LF normalization.
+
+Backup 0.1.38, user settings and six prior profile directory names are preserved.
+All 21 checked older process identities, seven older runtime inventories and
+eight webpages remain. The installed unified CLI reuses p-a38/backend 27692
+with started=false and reads the exact same 36 messages and run catalogue.
+No new model task is submitted. The installed renderer bytes match page 59450.
+Post-install sandboxed Edge verifies saved provider/model, 36 messages/14 usage
+records and readable/keyboard-scrollable tables at desktop and mobile widths,
+without errors, failed HTTP responses or effect submissions.
+
+The first post-install observer fails its immediate mobile overflow assertion;
+that receipt remains. A separate observer waits for rendered viewport/visible
+table geometry and two animation frames, retaining all original assertions;
+it passes without product changes. No editor window or replacement backend is
+opened. Actual VS Code pane testing, current complete/hosted-native validation,
+process-bound agents and release acceptance remain open.
+[Archive, installed bytes, CI, preserved sessions and post-install browser evidence](evidence/coding-package-0.1.39-20261019.json).
+
 ## Readable response tables on the live webpage — 2026-10-19
 
 The shared browser/VS Code renderer now gives Markdown tables labelled,
