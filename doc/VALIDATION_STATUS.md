@@ -1,5 +1,14 @@
 # Current native validation
 
+## Hosted client inventory — 2026-10-19
+
+Source 1bf8c1e passes all 426 extension and 147 browser tests with unchanged
+source/assets, but its workflow gate fails because the expected extension
+count was left at 425 after adding the regression. Tools/ci-views.mjs now
+expects exactly 426. The failed workflow and digest-verified artifact remain
+recorded; corrected hosted acceptance is pending. No suite is reduced.
+[Failure and correction](evidence/hosted-views-1bf8c1e-inventory-failure-20261019.json).
+
 ## Live attached-folder coding — 2026-10-19
 
 The staged page http://127.0.0.1:49702/ui/ now completes a saved-key Claude

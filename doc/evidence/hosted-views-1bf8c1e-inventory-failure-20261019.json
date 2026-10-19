@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-19T01:40:15.473Z",
+  "workflowRun": 39186194023,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39186194023",
+  "sourceRevision": "1bf8c1eaeb9c781236101f91ff0fa12adfe7e062",
+  "conclusion": "failure",
+  "artifact": {
+    "advertisedSizeAndDigestVerified": true,
+    "bytes": 308921,
+    "sha256": "fe16748c3384d620351d9c9dc6a64cb6608f4d96cb7cfa1d1e05c859693b6ef8",
+    "path": "C:\\xMindNativeValidation\\coding-0.1.30-source-20261018\\.agentflow\\ci\\artifacts\\view-contracts-evidence-1bf8c1eaeb9c781236101f91ff0fa12adfe7e062.zip"
+  },
+  "sourceAndAssetBeforeAfterEqual": true,
+  "gate": {
+    "sourceRevision": "1bf8c1eaeb9c781236101f91ff0fa12adfe7e062",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 70,
+    "trackedSourceFiles": 65,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 425,
+      "browser": 147
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 426,
+      "passed": 426,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "cause": "The complete extension suite passes 426 tests, but the exact-count gate was not updated from 425 when the attached-folder regression was added. Browser passes all 147. The unchanged-source/asset check passes.",
+  "correction": "Increase expected extension count to 426; retain every exact-count, failure, cancellation, skip and closure check. No product source or test is removed or weakened.",
+  "correctedHostedGateAccepted": false,
+  "nativeAcceptanceClaimed": false,
+  "cpythonExecuted": false
+}
