@@ -1,5 +1,16 @@
 # Current native validation
 
+## Complete coding-diagnostic candidate — 2026-10-19
+
+Native source b889df2 / binary 621413b4 passes all **154 local contracts** in
+994.99 seconds. Checked source, SDK, pure-library, dependency and binary file
+sets and hashes remain unchanged. A separate actual HTTP check returns workspace,
+provider and health metadata in 4–5 ms while an LSP query waits. The real
+TypeScript 0/0/1/0 buffer check remains separate from the full inventory.
+Source version 0.1.43 is prepared for packaging; installed 0.1.42 and its failed
+browser task remain intact. New installed/browser acceptance is pending.
+[Complete result, inventory and HTTP observations](evidence/lsp-clean-edit-full-native-20261019.json).
+
 ## Coding diagnostic continuation fix — 2026-10-19
 
 The new native candidate refreshes invalidated push-only analysis before
@@ -12,7 +23,7 @@ The complete build and seven focused contracts pass in 31.43 seconds with
 checked input and binary sets unchanged. A separate actual TypeScript server
 check returns diagnostic counts 0/0/1/0 for clean, changed clean, invalid and
 repaired unsaved buffers. This candidate is not yet installed; its complete
-native suite and new browser acceptance are pending.
+native suite has now passed; new installed/browser acceptance remains pending.
 [Exact candidate results and initial corrected test-link failure](evidence/lsp-clean-edit-20261019.json).
 
 ## Installed 0.1.42 coding checkpoint — 2026-10-19

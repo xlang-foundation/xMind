@@ -13,64 +13,29 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The installed local VS Code package is **0.1.41**, with native source
-`b44bbdece0a7feb40401287722c9cf6580b9ace7` and xlang3 SDK
-`58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
-no Marketplace publication or general release is implied.
+The local development installation is **0.1.42**; **0.1.43** is being packaged
+with the coding-diagnostics fix. This is a development preview, without a
+Marketplace or general-release claim. The xlang3 SDK is pinned at
+`58a8aab9b40a464e38a741129b4804ac36e27a53`.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | Installed runtime passes all 153 local contracts with frozen inputs and binaries; actual Claude repairs a TypeScript error through native tools and verifies compiler success. |
-| Clients | Installed package passes 429 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
-| Installed coding | The unchanged runtime was verified in 0.1.38 through actual Claude execution: xlang3 FastAPI/Vite start, response completion with both services alive, then explicit shutdown. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
-| Shared CLI and persistence | Installed 0.1.41 CLI reuses the backend and conversation from actual 0.1.40 Claude diagnostics/compiler execution. Browser reload retains 13 messages and five usage records. Earlier app lifecycle sessions remain separate. |
-| Console resume | Direct Windows console displays the saved conversation and supplied token metrics, accepts run inspection and exits normally; history and runs stay unchanged. |
-| Preserved work | All 24 checked older owners, nine runtime inventories, nine webpages, settings and prior profile directories remain intact. |
-| Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
+| New native candidate | All 154 local contracts pass in 994.99 seconds with checked inputs and binaries unchanged. A separate real TypeScript check returns 0/0/1/0 diagnostics for clean/changed-clean/invalid/repaired buffers. |
+| Installed clients | 0.1.42 passes 429 extension and 147 browser fixtures locally and on exact-source hosted CI; package and installed payloads verify. |
+| Installed coding | Actual configured-Claude CLI diagnostics and compiler checks pass. A later browser edit succeeds, but its old runtime fails the subsequent diagnostic check; that failed task and edit are preserved. |
+| Earlier application lifecycle | Separate installed 0.1.37/0.1.38 tasks verify a Vue edit, 32 xlang3 tests, production build, FastAPI/Vite startup, and explicit service shutdown. |
+| Preserved work | Before the next install, 27 checked owners, 11 runtime inventories, 10 webpages, settings and prior profile directories remain intact. |
+| Still open | New-runtime rendered coding verification, actual VS Code pane activation, Rust semantic startup, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
-The installed native backend lets completed replies leave persistent app servers
-running and exposes their stop tool to the next primary coding turn. Both paths
-have actual installed browser validation. The extension was installed through
-the Code CLI without opening an editor window. Actual VS Code pane activation
-remains unverified. [Installed package and live lifecycle evidence](doc/evidence/coding-package-0.1.38-20261019.json),
-[shared CLI/browser coding evidence](doc/evidence/shared-cli-browser-coding-0.1.38-20261019.json).
-[Native result and fixture correction](doc/evidence/service-lifecycle-native-checkpoint-20261019.json),
-[direct console resume](doc/evidence/console-resume-0.1.38-20261019.json).
+The new candidate refreshes invalidated push-only language-server analysis and
+returns an unavailable tool result when its transport fails, allowing other
+coding checks to continue. Missing diagnostics are never reported as clean.
+Workspace and provider metadata remain responsive while an editor query waits.
 
-The current development webpage also has horizontally scrollable response
-tables with readable headers and code, verified against its saved conversation
-at desktop and mobile widths. This shared renderer is included in installed
-0.1.41 and matches the test webpage. It also fixes the previous run's completed
-status lingering while a newly selected run starts. Actual VS Code pane
-activation remains unverified.
-[Installed package and preserved sessions](doc/evidence/coding-package-0.1.39-20261019.json),
-[live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
-
-New native source also supports push-only language-server diagnostics and
-Node-style Windows file URIs. All 153 native checks and an actual Claude
-diagnostics → reviewed edit → compiler repair task pass. The runtime is now
-installed in 0.1.40 and reused unchanged in 0.1.41. Hosted native qualification
-remains open: its latest full run passes 153/154 and fails a graph PowerShell
-command timeout. The original Rust semantic failure also reproduces.
-The separate Rust semantic-startup failure remains open.
-[Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
-[Installed 0.1.40 and browser status evidence](doc/evidence/coding-package-0.1.40-20261019.json).
-[Installed 0.1.41 and shared renderer evidence](doc/evidence/coding-package-0.1.41-20261019.json).
-
-A newer native candidate fixes workspace/settings requests blocking behind a
-slow editor language-server query. Seven focused contracts and an HTTP
-responsiveness check pass; full candidate qualification and installation remain
-pending. [Source and validation](doc/evidence/lsp-runtime-responsiveness-20261019.json).
-
-Earlier, separately verified browser tasks cover the official filesystem MCP
-server, workspace creation/switching, attached-folder execution, automatic
-explorer refresh and explicit idle-owner recovery. Existing sessions remain
-available. Those results do not establish unattended or in-flight recovery;
-one earlier read-only follow-up also missed its requested bare reply format.
-[Workspace and recovery evidence](doc/evidence/rendered-workspaces-and-recovery-20261018.json),
-[explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json),
-[earlier native qualification](doc/evidence/process-tool-owner-20261018.json),
-and [remaining work](doc/VALIDATION_STATUS.md).
+[Current validation status](doc/VALIDATION_STATUS.md),
+[complete native result](doc/evidence/lsp-clean-edit-full-native-20261019.json),
+[installed 0.1.42 coding scope](doc/evidence/coding-package-0.1.42-20261019.json),
+[earlier application lifecycle](doc/evidence/coding-package-0.1.38-20261019.json).
 
 ## Use in VS Code
 
