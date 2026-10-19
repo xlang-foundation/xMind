@@ -49,6 +49,21 @@ bool human_console_output(){
     return ::isatty(STDOUT_FILENO)!=0;
 #endif
 }
+constexpr std::string_view process_reconciliation_flag="--acknowledge-possible-side-effects";
+nlohmann::json process_reconciliation_body(const std::string& operation,const std::string& flag,const std::string& note){
+    if(operation.empty()||operation.size()>128||operation.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid process operation ID");
+    if(flag!=process_reconciliation_flag)throw std::invalid_argument("Process reconciliation requires --acknowledge-possible-side-effects after inspecting the workspace and saved command output");
+    if(note.size()<16||note.size()>1024||note.find_first_of("\r\n")!=std::string::npos||note.find('\0')!=std::string::npos)throw std::invalid_argument("Reconciliation note must be 16 to 1,024 bytes on one line");
+    nlohmann::json body={{"note",note},{"acknowledge_possible_side_effects",true}};(void)body.dump();return body;
+}
+void process_reconciliation_acknowledgement(const nlohmann::json& operation,const std::string& id,const std::string& note){
+    const auto invalid=[](){throw std::runtime_error("Process reconciliation acknowledgement is invalid; inspect the recorded operation before retrying");};
+    if(!operation.is_object()||operation.value("id",std::string{})!=id||operation.value("tool",std::string{})!="run_process"||operation.value("state",std::string{})!="failed"||!operation.contains("result_json")||!operation["result_json"].is_string())invalid();
+    const auto receipt=nlohmann::json::parse(operation["result_json"].get<std::string>(),nullptr,false);
+    if(!receipt.is_object()||!receipt.contains("reconciliation")||!receipt["reconciliation"].is_object())invalid();
+    const auto& audit=receipt["reconciliation"];
+    if(audit.value("note",std::string{})!=note||audit.value("actor",std::string{})!="local-owner"||!audit.contains("acknowledges_possible_side_effects")||audit["acknowledges_possible_side_effects"]!=true||!audit.contains("reconciled_unix_ms")||!audit["reconciled_unix_ms"].is_number_integer()||audit["reconciled_unix_ms"]<=0)invalid();
+}
 std::string terminal_safe_text(std::string_view value){
     std::string result;result.reserve(value.size());
     for(const unsigned char byte:value)if(byte=='\n'||byte=='\t'||byte>=0x20&&byte!=0x7f)result.push_back(static_cast<char>(byte));
@@ -805,8 +820,8 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         if(human)print_human_history(session,history);else std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
-    int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0;std::string prompt;
-    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:agent_result!=0?agent_result:mcp_result;};
+    int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0,recovery_result=0;std::string prompt;
+    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:agent_result!=0?agent_result:mcp_result!=0?mcp_result:recovery_result;};
     auto drain_inbox=[&](){
         if(session.empty())return false;
         for(;;){
@@ -885,6 +900,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"After inspecting a retired command's saved output and workspace, use /reconcile-process OPERATION_ID --acknowledge-possible-side-effects AUDIT NOTE to release its quarantine. This records possible side effects; it never reruns the command or makes its failed run successful. Inspect saved output with the direct process-output command.\n";
             std::cerr<<"MCP sign-in: /mcp lists configured OAuth status; /mcp-login SERVER signs in and /mcp-refresh SERVER renews an existing grant using current native revisions. /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST and /mcp-watch REQUEST inspect, open, cancel or observe that backend-owned attempt. Closing chat only detaches.\n";
             std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
@@ -931,6 +947,18 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
                 if(!acknowledged["editable"].get<bool>()||acknowledged["revision"]!=observed["revision"].get<std::int64_t>()+1||!selection_matches)throw std::runtime_error("Backend agent acknowledgement changed selection or revision");
                 std::cout<<Json{{"type","agent_selection"},{"catalogue",catalogue},{"selection",acknowledged}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Agent selection output unavailable");agent_result=0;
             }catch(const std::invalid_argument&){agent_result=1;std::cerr<<"Use /agents, /agent or /agent ID|default.\n";}catch(const std::exception& error){agent_result=1;std::cerr<<error.what()<<'\n';}
+            continue;
+        }
+        if(prompt=="/reconcile-process"||prompt.starts_with("/reconcile-process ")){
+            try{
+                const auto first=prompt.find(' '),second=first==std::string::npos?first:prompt.find(' ',first+1),third=second==std::string::npos?second:prompt.find(' ',second+1);
+                if(third==std::string::npos)throw std::invalid_argument("Use /reconcile-process OPERATION_ID --acknowledge-possible-side-effects AUDIT NOTE");
+                const auto operation=prompt.substr(first+1,second-first-1),flag=prompt.substr(second+1,third-second-1),note=prompt.substr(third+1);
+                const auto body=process_reconciliation_body(operation,flag,note);
+                const auto result=request("/v1/operations/"+operation+"/reconcile",&body);process_reconciliation_acknowledgement(result,operation,note);
+                std::cout<<Json{{"type","process_reconciliation"},{"operation",result}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Reconciliation output unavailable; inspect the recorded operation before retrying");
+                std::cerr<<"Process reconciliation recorded with an audit note. The command was not rerun and its run remains failed or cancelled.\n";recovery_result=0;
+            }catch(const std::exception& error){std::cerr<<error.what()<<'\n';recovery_result=1;}
             continue;
         }
         if(prompt=="/mcp"||prompt.starts_with("/mcp ")||prompt.starts_with("/mcp-")){
@@ -1424,7 +1452,7 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
 
 int cli_main(int argc,char** argv,const std::string& workspace,const std::function<agentflow::LocalProfileConnection()>& profile) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, info, connections, connection-save ID NAME HTTPS_ORIGIN EXPECTED_REVISION, connection-remove ID EXPECTED_REVISION, connection-select ID EXPECTED_REVISION, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, fork-session SESSION [BEFORE_MESSAGE_ID], export-session SESSION FILE, import-session FILE, delete-session SESSION, restore SESSION OPERATION_ID, session-interrupt SESSION [false], history SESSION, history-page SESSION LIMIT [BEFORE_MESSAGE_ID], message SESSION MESSAGE_ID, terminals, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE] [--console], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run SESSION PROMPT [MODEL] [--file PATH] [--folder-id ID], cancel, status, git-status [FOLDER_ID], git-info [FOLDER_ID], git-branches [FOLDER_ID], git-base [FOLDER_ID], git-diff MODE [BASE [CONTEXT]] [--folder-id ID], events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL] [--file PATH] [--folder-id ID], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, mcp-resources, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID [--include-artifacts], a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, a2a-resubscribe OPERATION_ID, process-profiles, process-output OPERATION_ID stdout|stderr [AFTER [LIMIT]], operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, info, connections, connection-save ID NAME HTTPS_ORIGIN EXPECTED_REVISION, connection-remove ID EXPECTED_REVISION, connection-select ID EXPECTED_REVISION, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, fork-session SESSION [BEFORE_MESSAGE_ID], export-session SESSION FILE, import-session FILE, delete-session SESSION, restore SESSION OPERATION_ID, session-interrupt SESSION [false], history SESSION, history-page SESSION LIMIT [BEFORE_MESSAGE_ID], message SESSION MESSAGE_ID, terminals, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE] [--console], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run SESSION PROMPT [MODEL] [--file PATH] [--folder-id ID], cancel, status, git-status [FOLDER_ID], git-info [FOLDER_ID], git-branches [FOLDER_ID], git-base [FOLDER_ID], git-diff MODE [BASE [CONTEXT]] [--folder-id ID], events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL] [--file PATH] [--folder-id ID], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, mcp-resources, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID [--include-artifacts], a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, a2a-resubscribe OPERATION_ID, process-profiles, process-output OPERATION_ID stdout|stderr [AFTER [LIMIT]], operations, operation, inspect-edit, reconcile-process OPERATION_ID --acknowledge-possible-side-effects NOTE, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -1481,6 +1509,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         else if(command=="tree-events"&&(argc==4||argc==5)){const auto after=event_cursor(argc==5?argv[4]:"0");path="/v1/runs/"+id(argv[3])+"/tree-events?after="+std::to_string(after);}
         else if(command=="operation" && argc==4) path="/v1/operations/"+id(argv[3]);
         else if(command=="inspect-edit" && argc==4) path="/v1/operations/"+id(argv[3])+"/inspection";
+        else if(command=="reconcile-process" && argc==6){path="/v1/operations/"+id(argv[3])+"/reconcile";body=process_reconciliation_body(argv[3],argv[4],argv[5]);post=true;}
         else if(command=="decide" && argc==5) {
             const std::string decision=argv[4];
             if(decision!="allow" && decision!="deny") throw std::invalid_argument("Decision must be allow or deny");
@@ -1705,6 +1734,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(command=="session-interrupt"&&(!result.is_object()||result.size()!=1||!result.contains("interrupted")||!result["interrupted"].is_boolean()))throw std::runtime_error("Invalid native session interruption response");
         if(command=="session-skills")skill_snapshot(result,id(argv[3]));
         if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);
+        if(command=="reconcile-process")process_reconciliation_acknowledgement(result,id(argv[3]),body["note"].get<std::string>());
         std::cout<<result.dump(2)<<'\n';return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

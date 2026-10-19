@@ -56,18 +56,18 @@ int main(int argc,char** argv) {
         store.claim_operation("uncertain-edit",recovery_spec).get();
         store.finish_operation("uncertain-edit",OperationState::uncertain,R"({"fixture":"inspection-only"})").get();
         store.transition("run-recovery",RunState::running,RunState::failed).get();
-        store.create_session("process-recovery","Process reconciliation fixture").get();
-        store.start_prompt_run("run-process-recovery","process-recovery",R"({"content":"process reconciliation fixture"})").get();
-        store.transition("run-process-recovery",RunState::queued,RunState::running).get();
-        OperationSpec process_spec{"run-process-recovery",std::string(argv[2]),"run_process",R"({"command":"fixture"})"};
-        store.request_operation("uncertain-process",process_spec,expiry).get();
-        store.decide_operation("uncertain-process",OperationDecision::allow,"fixture-controller").get();
-        store.claim_operation("uncertain-process",process_spec).get();
-        store.begin_process_output("uncertain-process","run-process-recovery").get();
-        store.append_process_output("uncertain-process","run-process-recovery",false,"fixture output\n").get();
-        store.finish_process_output("uncertain-process","run-process-recovery",true).get();
-        store.finish_operation("uncertain-process",OperationState::uncertain,R"({"termination":"timed_out","process_tree_retired":true,"output_artifact":{"operation_id":"uncertain-process","state":"complete","stdout_bytes":15,"stderr_bytes":0}})").get();
-        store.transition("run-process-recovery",RunState::running,RunState::failed).get();
+        // Seed protocol recovery journals, not a claim that a real child ran.
+        for(const std::string suffix:{"","-chat"}){
+            const auto session="process-recovery"+suffix,run="run-process-recovery"+suffix,operation="uncertain-process"+suffix;
+            store.create_session(session,"Process reconciliation fixture").get();
+            store.start_prompt_run(run,session,R"({"content":"process reconciliation fixture"})").get();
+            store.transition(run,RunState::queued,RunState::running).get();
+            OperationSpec process_spec{run,std::string(argv[2])+suffix,"run_process",R"({"command":"fixture"})"};
+            store.request_operation(operation,process_spec,expiry).get();store.decide_operation(operation,OperationDecision::allow,"fixture-controller").get();store.claim_operation(operation,process_spec).get();
+            store.begin_process_output(operation,run).get();store.append_process_output(operation,run,false,"fixture output\n").get();store.finish_process_output(operation,run,true).get();
+            store.finish_operation(operation,OperationState::uncertain,nlohmann::json{{"termination","timed_out"},{"process_tree_retired",true},{"output_artifact",{{"operation_id",operation},{"state","complete"},{"stdout_bytes",15},{"stderr_bytes",0}}}}.dump()).get();
+            store.transition(run,RunState::running,RunState::failed).get();
+        }
         HttpServer server(store,token,nullptr,&inspector);const auto port=server.bind(0);Serving serving(server);
         Editing allowed(executor,"allow-edit","run-allow",workspace.plan_replacement("allowed.txt","original","approved native"),OperationState::succeeded);
         Editing denied(executor,"deny-edit","run-deny",workspace.plan_replacement("denied.txt","original","must not change"),OperationState::denied);

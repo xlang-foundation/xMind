@@ -2,6 +2,37 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Native console process reconciliation candidate — 2026-10-19
+
+The unified console now implements
+`reconcile-process OPERATION_ID --acknowledge-possible-side-effects NOTE` and
+the matching `/reconcile-process` chat command. An explicit acknowledgment and
+single-line16–1024-byte audit note are required. Both paths use the existing
+native endpoint, validate its returned operation and audit receipt, and never
+retry the command. The failed/cancelled owner run retains its outcome. The
+unified `--help` and [console guide](native-interactive-cli.md) expose the command.
+
+The original c636e0c0 binary rejects a valid command; that negative test and its
+log remain recorded. The logger's initial expected-error wording was corrected
+by qualifying the existing output, without replaying its fixture.
+[Baseline receipt](evidence/cli-process-reconciliation-baseline-20261019.json).
+
+The final candidate passes all three selected native contracts in21.24s:
+approved-edit HTTP/CLI, general HTTP/CLI, and agent-process HTTP. The recovery
+fixture uses the actual C++ HTTP server and embedded-xlang3 SQLite store with
+seeded historical process journals. It verifies both console modes, invalid
+acknowledgments/notes, retained output and failed run, unchanged chat history,
+no new runs, audited transition, and rejection of repeated acknowledgment.
+It does not claim a new real timed-out process or live-provider run. All frozen
+project/SDK/library/runtime/dependency inputs and binary file sets match after
+testing. Candidate native SHA-256 is
+`3ed464a27c96bf820e51cf78887b444576ccb79d53a668b2564919c638507496`,
+paired with unchanged SDK58a8aab/DLL1ff2a8e7.
+[Focused scope](evidence/cli-process-reconciliation-focused-20261019.json).
+
+Complete154-contract validation is the next gate. This candidate is not
+installed; client49, backend32704 and the working webpage remain unchanged.
+
 ## Installed 0.1.49: reachable failure review and shared webpage service — 2026-10-19
 
 0.1.49 is installed from source `49a7c569`. All2445 checked payloads match the

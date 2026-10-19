@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-19T23:06:39.952Z",
+  "baselineNativeSource": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+  "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+  "expectedFailure": true,
+  "reason": "Unified console rejects valid reconcile-process command",
+  "exitCode": 1,
+  "logSha256": "f5a354bd987db37b494aaa2844f5626d11849d70274d8fd54f292d40e5e011b2",
+  "helperExpectationCorrection": "Original logger expected different wording; qualified the existing retained output without re-running the fixture.",
+  "cpythonExecuted": false
+}

@@ -37,6 +37,7 @@ void help(){
         "  xmind [connection options] mcp-login-cancel REQUEST_ID\n"
         "  xmind [connection options] mcp-login-watch REQUEST_ID\n"
         "  xmind [connection options] git-status [FOLDER_ID]\n"
+        "  xmind [connection options] reconcile-process OPERATION_ID --acknowledge-possible-side-effects NOTE\n"
         "  xmind [connection options] git-info [FOLDER_ID]\n"
         "  xmind [connection options] git-branches [FOLDER_ID]\n"
         "  xmind [connection options] git-base [FOLDER_ID]\n"

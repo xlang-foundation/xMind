@@ -16,6 +16,38 @@ Managed profile startup on other operating systems remains unverified;
 agent-worker execution is pending.
 No legacy profile migration is required.
 
+## Recovering a command with an uncertain outcome
+
+The console source supports the backend's process reconciliation contract in
+command mode and chat. This addition is under native validation; installed
+0.1.49 does not contain it yet.
+
+Inspect the saved operation, its complete stdout/stderr, and the workspace
+before acknowledging possible side effects. Use the same workspace and
+`--profile-root` options as the running backend. For an explicitly selected
+backend, use its native `--port` with the existing private authentication.
+
+```text
+xmind [connection options] operation OPERATION_ID
+xmind [connection options] process-output OPERATION_ID stdout
+xmind [connection options] process-output OPERATION_ID stderr
+xmind [connection options] reconcile-process OPERATION_ID --acknowledge-possible-side-effects "Inspected workspace and saved command output; reviewed possible side effects."
+```
+
+In chat, the rest of the line is the audit note:
+
+```text
+/reconcile-process OPERATION_ID --acknowledge-possible-side-effects Inspected workspace and saved command output; reviewed possible side effects.
+```
+
+The explicit acknowledgment and a single-line note of 16–1,024 UTF-8 bytes are
+required. The backend accepts only an uncertain process whose owner has failed
+or been cancelled, whose process tree is confirmed retired, and whose saved
+output is complete. It records the audit note and marks that operation failed,
+releasing its quarantine claim. Other unresolved operations can still block
+effects. Reconciliation neither reruns a command nor changes its run to success;
+repeating the acknowledgment is rejected. A later task is a separate decision.
+
 The installed 0.1.38 unified CLI has attached to the existing browser backend
 without starting a replacement or supplying a manual access token. It reads
 the same saved conversation and completes an actual configured-Claude task

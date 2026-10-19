@@ -1063,7 +1063,7 @@ if(BUILD_TESTING)
     if(AGENTFLOW_NODE_EXECUTABLE)
       add_test(NAME native_approved_edit_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/approved_edit_http_peer.mjs" "$<TARGET_FILE:agentflow_approved_edit_http_fixture>" "$<TARGET_FILE:xmind_cli>"
-        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_server>")
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind>")
       set_tests_properties(native_approved_edit_http_contract PROPERTIES TIMEOUT 45)
     endif()
     target_include_directories(agentflow_workspace_tools_contract PRIVATE third_party)

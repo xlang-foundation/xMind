@@ -7,7 +7,8 @@ import {randomBytes,createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createRequire} from 'node:module';
 const {BackendClient}=createRequire(import.meta.url)('../../extensions/vscode/client.js');
-const [fixture,cliExe,modules,stdlib,serverExe]=process.argv.slice(2);
+const [fixture,cliExe,modules,stdlib,serverExe,xmindExe]=process.argv.slice(2);
+assert.ok(xmindExe,'Pass the unified xmind executable for console reconciliation');
 const folder=await mkdtemp(join(tmpdir(),'xmind-approved-http-')),workspace=join(folder,'workspace');
 const recoveryWorkspace=join(folder,'recovery-workspace');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};
@@ -75,9 +76,29 @@ try {
   assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'},{Authorization:'Bearer wrong'})).status,401);
   assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'})).status,400,'Possible side effects require explicit acknowledgment');
   assert.equal((await request(reconcilePath,{note:'short',acknowledge_possible_side_effects:true})).status,400,'Reconciliation requires an audit note');
-  const reconciled=await request(reconcilePath,{note:'Inspected workspace and command output; accepting possible side effects.',acknowledge_possible_side_effects:true});
-  assert.equal(reconciled.status,200);assert.equal(reconciled.data.state,'failed');
-  const reconciliation=JSON.parse(reconciled.data.result_json).reconciliation;assert.equal(reconciliation.actor,'local-owner');assert.equal(reconciliation.note,'Inspected workspace and command output; accepting possible side effects.');assert.ok(Number.isSafeInteger(reconciliation.reconciled_unix_ms));assert.equal(reconciliation.acknowledges_possible_side_effects,true);
+  const auditNote='Inspected workspace and command output; accepting possible side effects.',acknowledgment='--acknowledge-possible-side-effects';
+  const execute=(args,input)=>spawnSync(xmindExe,['--port',String(port),...args],{env,windowsHide:true,encoding:'utf8',timeout:5000,...(input===undefined?{}:{input})});
+  const pendingProcess=cli('operation','uncertain-process'),pendingEvents=cli('events','run-process-recovery'),pendingOutput=cli('process-output','uncertain-process','stdout');
+  for(const args of [
+    ['reconcile-process','uncertain-process',auditNote],
+    ['reconcile-process','uncertain-process','--not-an-acknowledgment',auditNote],
+    ['reconcile-process','uncertain-process',acknowledgment,'short'],
+    ['reconcile-process','uncertain-process',acknowledgment,'x'.repeat(1025)],
+    ['reconcile-process','uncertain-process',acknowledgment,'A multiline audit\nnote is invalid.']
+  ]){const rejected=execute(args);assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.equal(rejected.stdout,'');assert.deepEqual(cli('operation','uncertain-process'),pendingProcess);assert.deepEqual(cli('events','run-process-recovery'),pendingEvents);}
+  const accepted=execute(['reconcile-process','uncertain-process',acknowledgment,auditNote]);assert.ifError(accepted.error);assert.equal(accepted.status,0,accepted.stderr);
+  const reconciled=JSON.parse(accepted.stdout);assert.equal(reconciled.id,'uncertain-process');assert.equal(reconciled.state,'failed');
+  const reconciliation=JSON.parse(reconciled.result_json).reconciliation;assert.equal(reconciliation.actor,'local-owner');assert.equal(reconciliation.note,auditNote);assert.ok(Number.isSafeInteger(reconciliation.reconciled_unix_ms));assert.equal(reconciliation.acknowledges_possible_side_effects,true);
+  assert.equal(cli('status','run-process-recovery').state,'failed','Acknowledgment must not turn the failed run into success');
+  assert.deepEqual(cli('process-output','uncertain-process','stdout'),pendingOutput,'Saved command output remains unchanged after reconciliation');
+  const replay=execute(['reconcile-process','uncertain-process',acknowledgment,auditNote]);assert.ifError(replay.error);assert.equal(replay.status,1,'Direct reconciliation must not replay an acknowledgment');
+  const chatHistory=cli('history','process-recovery-chat'),chatRuns=cli('runs','process-recovery-chat');
+  const chat=execute(['chat','process-recovery-chat'],`/reconcile-process uncertain-process-chat ${acknowledgment} ${auditNote}\n/exit\n`);assert.ifError(chat.error);assert.equal(chat.status,0,chat.stderr);
+  const chatRecords=chat.stdout.trim().split(/\r?\n/).map(line=>JSON.parse(line)),chatAck=chatRecords.find(record=>record.type==='process_reconciliation');assert.ok(chatAck);assert.equal(chatAck.operation.id,'uncertain-process-chat');assert.equal(chatAck.operation.state,'failed');assert.equal(JSON.parse(chatAck.operation.result_json).reconciliation.note,auditNote);assert.ok(!chatRecords.some(record=>record.type==='run'));
+  assert.deepEqual(cli('history','process-recovery-chat'),chatHistory);assert.deepEqual(cli('runs','process-recovery-chat'),chatRuns,'Chat recovery must not create or change any run');
+  const chatEvents=cli('events','run-process-recovery-chat');assert.equal(chatEvents.filter(event=>event.kind==='operation.reconciled').length,1);
+  const chatReplay=execute(['chat','process-recovery-chat'],`/reconcile-process uncertain-process-chat ${acknowledgment} ${auditNote}\n/exit\n`);assert.ifError(chatReplay.error);assert.equal(chatReplay.status,1);assert.deepEqual(cli('events','run-process-recovery-chat'),chatEvents);
+  const help=spawnSync(xmindExe,['--help'],{env,windowsHide:true,encoding:'utf8',timeout:5000});assert.ifError(help.error);assert.equal(help.status,0);assert.match(help.stdout,/reconcile-process OPERATION_ID --acknowledge-possible-side-effects NOTE/);
   assert.equal((await request(reconcilePath,{note:'Inspected workspace and command output; accepting possible side effects.',acknowledge_possible_side_effects:true})).status,409,'A reconciliation cannot be replayed');
   assert.ok(cli('events','run-process-recovery').some(event=>event.kind==='operation.reconciled'&&event.data.actor==='local-owner'));
   assert.equal((await request('/v1/operations/uncertain-edit/reconcile',{note:'Inspected workspace and output; accepting possible effects.',acknowledge_possible_side_effects:true})).status,409,'File recovery cannot use process reconciliation');
