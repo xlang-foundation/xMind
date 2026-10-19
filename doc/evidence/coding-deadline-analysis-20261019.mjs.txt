@@ -1,0 +1,37 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+const root='C:/xMindNativeValidation/vscode-shared-coding-20261019';
+const output='C:/xMindNativeValidation/coding-deadline-analysis-20261019';
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const inputs={};
+async function read(name){const bytes=await fs.readFile(root+'/'+name);inputs[name]=sha(bytes);return JSON.parse(bytes);}
+const run=await read('follow-up-terminal.json');
+assert.equal(run.status.id,'e10a95fcbeaf11f6bed6d1229bb50378');
+assert.equal(run.status.state,'failed');
+assert.equal(run.events.at(-1).data.reason,'agent_timeout');
+const calls=new Set(run.events.filter(e=>e.kind==='tool.started').map(e=>e.data.call_id));
+const completions=run.history.filter(m=>m.role==='assistant'&&m.data?.tool_calls?.some(c=>calls.has(c.id)));
+assert.equal(completions.length,13);
+const durations=completions.map(m=>m.data.elapsed_ms);assert.ok(durations.every(n=>Number.isSafeInteger(n)&&n>=0));
+const snapshots=[];
+for(const name of (await fs.readdir(root)).filter(n=>/^snapshot-\d+\.json$/.test(n)).sort()){
+  const value=await read(name);if(value.status.id===run.status.id)snapshots.push({name,value,capture:Number(name.match(/\d+/)[0])});
+}
+const observedProposals=run.operations.map(operation=>{
+  const pending=snapshots.filter(s=>s.value.operations.some(o=>o.id===operation.id&&o.state==='awaiting_approval'));
+  const latest=pending.at(-1),preparationStartedUnixMs=operation.expires_unix_ms-600000;
+  return {id:operation.id,tool:operation.tool,outcome:operation.state,pendingSnapshots:pending.length,
+    preparationToObservedPendingMs:latest?Math.max(0,Math.min(latest.capture,Date.parse(latest.value.observedAt))-preparationStartedUnixMs):null};
+});
+const segment=run.events.filter(e=>e.kind==='budget.segment.closed');assert.equal(segment.length,1);
+const responseTotal=durations.reduce((n,value)=>n+value,0),active=segment[0].data.active_elapsed_ms;
+assert.equal(responseTotal,290838);assert.equal(active,600007);
+const result={recordedAt:new Date().toISOString(),historicalRoot:run.status.id,terminal:'failed: agent_timeout',
+  completedParentResponses:durations.length,responseDurationsMs:durations,completedParentResponseElapsedMs:responseTotal,
+  activeSegmentElapsedMs:active,unattributedRemainderMs:active-responseTotal,observedProposals,
+  interpretation:'Completed parent response timings cover 290838 ms. The remainder includes approval/tool/delegation work and the interrupted final request; it cannot be attributed entirely to any one cause.',
+  pendingTimingLimit:'Proposal ages derive from the configured 600000-ms approval expiry and snapshot observations. They include preparation before an operation is published; they are not exact approval-wait durations or strict lower bounds on waiting.',
+  executionDeadlineChanged:false,failedRootReplayed:false,failedRootClaimedComplete:false,cpythonExecuted:false,inputSha256:inputs};
+await fs.mkdir(output);await fs.writeFile(output+'/analysis.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({output,completedParentResponses:durations.length,responseTotalMs:responseTotal,activeMs:active,unattributedMs:active-responseTotal,pendingProposals:observedProposals.filter(p=>p.pendingSnapshots>0).length}));

@@ -1,0 +1,96 @@
+{
+  "recordedAt": "2026-10-19T21:41:54.396Z",
+  "historicalRoot": "e10a95fcbeaf11f6bed6d1229bb50378",
+  "terminal": "failed: agent_timeout",
+  "completedParentResponses": 13,
+  "responseDurationsMs": [
+    4050,
+    40680,
+    21793,
+    26473,
+    2985,
+    23814,
+    81185,
+    2745,
+    71152,
+    5035,
+    2900,
+    4483,
+    3543
+  ],
+  "completedParentResponseElapsedMs": 290838,
+  "activeSegmentElapsedMs": 600007,
+  "unattributedRemainderMs": 309169,
+  "observedProposals": [
+    {
+      "id": "4a7d2e679a90029676929536235d252f",
+      "tool": "replace_file",
+      "outcome": "succeeded",
+      "pendingSnapshots": 1,
+      "preparationToObservedPendingMs": 18688
+    },
+    {
+      "id": "a195d99852deaefab1b09190537ac2d1",
+      "tool": "replace_file",
+      "outcome": "denied",
+      "pendingSnapshots": 1,
+      "preparationToObservedPendingMs": 30794
+    },
+    {
+      "id": "a185da22984c2d6366e51a46dd9b7353",
+      "tool": "replace_file",
+      "outcome": "succeeded",
+      "pendingSnapshots": 1,
+      "preparationToObservedPendingMs": 25040
+    },
+    {
+      "id": "6fd108c91448cba7a0eadfcae29be876",
+      "tool": "replace_file",
+      "outcome": "succeeded",
+      "pendingSnapshots": 1,
+      "preparationToObservedPendingMs": 97513
+    },
+    {
+      "id": "a0f0e528587aefb893827e24bcea37fc",
+      "tool": "run_process",
+      "outcome": "succeeded",
+      "pendingSnapshots": 0,
+      "preparationToObservedPendingMs": null
+    },
+    {
+      "id": "37b95ed29337518ecfb0aaf2df7ff582",
+      "tool": "run_process",
+      "outcome": "succeeded",
+      "pendingSnapshots": 0,
+      "preparationToObservedPendingMs": null
+    }
+  ],
+  "interpretation": "Completed parent response timings cover 290838 ms. The remainder includes approval/tool/delegation work and the interrupted final request; it cannot be attributed entirely to any one cause.",
+  "pendingTimingLimit": "Proposal ages derive from the configured 600000-ms approval expiry and snapshot observations. They include preparation before an operation is published; they are not exact approval-wait durations or strict lower bounds on waiting.",
+  "executionDeadlineChanged": false,
+  "failedRootReplayed": false,
+  "failedRootClaimedComplete": false,
+  "cpythonExecuted": false,
+  "inputSha256": {
+    "follow-up-terminal.json": "7a36adb68718d0dafb89769a32f122c3e349ff26c0147a6990f3b13c9e269cca",
+    "snapshot-1792442342044.json": "8bcfd066a0c6fd4cfd1b9746b3fb0cc37d4041f8daaf37f4676494fbcccac3f2",
+    "snapshot-1792442354378.json": "31d328100911c46a2701f55447f1812a4c333b621e464f0111fdfc1bd87b28e0",
+    "snapshot-1792442422614.json": "7e99083d1f86c49c85cb44c2ff526e139821fc9942bb17c06e7851f73048ad3d",
+    "snapshot-1792442434449.json": "8ad02e5e28834faac8913cddebb946a3a97a3fe0781f9801de73f4b7540867d5",
+    "snapshot-1792442460433.json": "f9f98343deb01fff6dcaec778767e15097082ff396fb664922a71f518fbad6ca",
+    "snapshot-1792442499981.json": "33e574bed8a52c0d8faea1c8006ea91ff02f52ad4e975930dafba4fd9e6fb5da",
+    "snapshot-1792442523488.json": "42c84774221deafe551033e8ebbaa47bb986a6db3853de5350271ebedaa1ca4c",
+    "snapshot-1792442530028.json": "ffe92aeb452bfe8e963b01c3238253489c3ab14335d07747a726a96544f32d1e",
+    "snapshot-1792442563948.json": "818472c6fe10d66a4699880a2c24c00f3dcc8cf8889c0380aff5b048997e3edf",
+    "snapshot-1792442591060.json": "eb0fac707013e771ec82d835af980957108c6c85383406ebdc0a228b4fdee169",
+    "snapshot-1792442718095.json": "6e5457e4a8c4bb478ce492f93d710dce461384524cd47f3cada611cdb0e865ff",
+    "snapshot-1792442762017.json": "f98195891f1d4afcf787f07fe695d42e86ac934e893c8af76ac0c94595a5d969",
+    "snapshot-1792442822735.json": "b846a6407995a0564aeb7e6e61e290a3d872edd8850862d8d1a4b3c524f1aef8",
+    "snapshot-1792442884579.json": "7b548cec25f350b03b7f9318824ed5c73f8339e87758397888f69c6fee84c227",
+    "snapshot-1792442994275.json": "aa6e30ae7f2446956453238fc4a767f5d5506770be7181eabc6cfcd1556bf302",
+    "snapshot-1792443056419.json": "ce52cf794d0070f2db41fb88b53104991dce746e98b90349a89a5071edc69008",
+    "snapshot-1792443150356.json": "fb2e1d45669588e49940466118b565e8f939e8d3c0f9c2a16e14b37202c9ebcb",
+    "snapshot-1792443252831.json": "f824acb597b5ecbfff2344af9f9bcc0c5e10fef8c3070d38007a6c0888f42a6b",
+    "snapshot-1792443292319.json": "bc917cf17e23d69e0213eeebca0b385ad604f094dd22b901a379bdb2fed1cc34"
+  }
+}

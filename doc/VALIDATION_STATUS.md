@@ -2,6 +2,29 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete coding-turn native gate — 2026-10-19
+
+All 154 native contracts pass in 974.96 seconds on committed source `c636e0c0`.
+The full inventory matches the preceding 154-contract gate. The recorded source,
+SDK headers, pure libraries, SDK runtime, Node dependencies and native binary
+file sets and hashes remain unchanged across this gate. Native executable
+`29427794` and xlang3 runtime `1ff2a8e7` are qualified together. No build or test
+process from this gate remains live.
+
+This validates the default 32-turn coding allowance and the retained smaller
+and aggregate limits, along with the complete existing native contract suite.
+It does not qualify a new live-provider coding completion or rendered client
+acceptance. Version 0.1.46 is being prepared; installed 0.1.45 is unchanged.
+Receipt: [complete gate](evidence/coding-turn-budget-full-native-20261019.json).
+
+Analysis of the historical 600-second failure matches 13 completed parent
+responses totaling 290838 ms to that root's tool-call IDs. The remaining
+309169 ms includes approvals, tools, delegation and the interrupted final
+request; it cannot be assigned entirely to provider latency or approval waits.
+Snapshot-derived proposal ages include preparation, so they are not exact
+approval-wait measurements. Neither the deadline nor the failed run was changed.
+Receipt: [timing analysis](evidence/coding-deadline-analysis-20261019.json).
+
 ## Ordinary coding turn allowance — 2026-10-19
 
 The native runner no longer reduces a default 32-turn coding loop to 16 simply
