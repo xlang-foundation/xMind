@@ -1,5 +1,23 @@
 # Current native validation
 
+## Installed CLI and webpage share live coding history — 2026-10-19
+
+The installed unified xmind.exe discovers the existing p-a38 backend PID 27692
+with started=false. Its history command reads the exact same 26 messages as
+the webpage. One noninteractive CLI run/watch submission then uses saved-key
+Claude and the registered xlang3 profile to execute real FastAPI TestClient
+checks: health 200, catalog total 12, gpt2 filtering and invalid-sort 422. The
+actual process exits zero, prints its success marker and retires its tree.
+The same backend remains active before and after; no replacement is launched.
+
+Read-only sandboxed Edge restores the CLI run and all 36 conversation messages,
+with 14 supplied usage records, in 1.64 seconds. History matches the CLI output
+exactly, retains the preceding start/stop conversation and keeps provider/model
+selection without a key prompt, page errors, failed HTTP responses or effect
+submissions. This verifies actual installed CLI command/stream integration;
+human console rendering and actual VS Code pane activation remain separate.
+[Shared backend, actual execution and rendered restore](evidence/shared-cli-browser-coding-0.1.38-20261019.json).
+
 ## Installed 0.1.38 — live server lifecycle verified — 2026-10-19
 
 0.1.38 is installed and listed by the actual VS Code CLI. Client source b47f280

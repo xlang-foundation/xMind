@@ -1,0 +1,679 @@
+{
+  "recordedAt": "2026-10-19T07:17:11.7298479Z",
+  "version": "0.1.38",
+  "readOnlyCli": {
+    "recordedAt": "2026-10-19T07:14:11.456Z",
+    "scope": "Actual installed unified xmind.exe CLI, managed local-profile discovery and real SQLite history previously rendered by the webpage; read-only, no new inference",
+    "version": "0.1.38",
+    "executable": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.38/native-runtime/xmind.exe",
+    "profile": {
+      "origin": "http://127.0.0.1:59442",
+      "process_id": 27692,
+      "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40",
+      "started": false,
+      "workspace": "C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.38-20261019",
+      "workspace_edits": "approved"
+    },
+    "session": "d32c5c4fe01bdf159270b6efa3beaaac",
+    "historyMessages": 26,
+    "completedRuns": [
+      "59dde650022c0af18be3091c2690336e",
+      "023b98c463fbc0be277158ee01958d1c"
+    ],
+    "sameExistingBackend": true,
+    "browserHistoryByteForByteEquivalent": true,
+    "receipts": [
+      {
+        "name": "profile",
+        "pid": 62180,
+        "args": [
+          "profile-info"
+        ],
+        "startedAt": "2026-10-19T07:14:10.775Z",
+        "completedAt": "2026-10-19T07:14:10.978Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "c403208d2ace39da21501a56a48c34a5071524d9a0cca7d725069f9ed5110eb3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "history",
+        "pid": 10032,
+        "args": [
+          "history",
+          "d32c5c4fe01bdf159270b6efa3beaaac"
+        ],
+        "startedAt": "2026-10-19T07:14:10.98Z",
+        "completedAt": "2026-10-19T07:14:11.216Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "bd179f7bb95404bb947aeb81d72aed1aa317232744436406e63301c252d7b5f6",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "runs",
+        "pid": 46660,
+        "args": [
+          "runs",
+          "d32c5c4fe01bdf159270b6efa3beaaac"
+        ],
+        "startedAt": "2026-10-19T07:14:11.218Z",
+        "completedAt": "2026-10-19T07:14:11.452Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "dc730db8c3c5e7385f0167a5036d198989c80b64b6630d57a865f78177a0cd06",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "providerRequests": 0,
+    "passed": true
+  },
+  "coding": {
+    "startedAt": "2026-10-19T07:15:15.253Z",
+    "scope": "Actual installed unified CLI run/watch against the existing browser backend and configured Claude; application API checks use xlang3 only",
+    "session": "d32c5c4fe01bdf159270b6efa3beaaac",
+    "taskSubmissions": 1,
+    "receipts": [
+      {
+        "name": "profile-before",
+        "pid": 33072,
+        "args": [
+          "profile-info"
+        ],
+        "startedAt": "2026-10-19T07:15:15.255Z",
+        "completedAt": "2026-10-19T07:15:15.472Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "c403208d2ace39da21501a56a48c34a5071524d9a0cca7d725069f9ed5110eb3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "admit",
+        "pid": 63156,
+        "args": [
+          "run",
+          "d32c5c4fe01bdf159270b6efa3beaaac",
+          "Run a focused API smoke check of this existing ModelZoo app through the registered xlang3 process profile. Read applicable instructions and backend/app/main.py first. In workdir backend, use FastAPI TestClient with the existing .xlang3-site dependencies to assert /api/health is healthy, /api/models returns its actual catalog entries, filtering search=gpt2 returns a matching model, and sort=not-a-valid-sort returns HTTP 422. Print the actual counts/status values and the marker xMind CLI API smoke passed. Inspect the actual exit code before reporting success. Keep source files unchanged; use xlang3 only and install nothing or start no persistent services.",
+          "--model",
+          "claude-sonnet-4-6"
+        ],
+        "startedAt": "2026-10-19T07:15:15.475Z",
+        "completedAt": "2026-10-19T07:15:15.764Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "cccb144bf033bf9ea3cac49c3f504e019c868bfa3935c4eaedd208ba9f18100d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "watch",
+        "pid": 38212,
+        "args": [
+          "watch",
+          "0a03833584015f4d81b8c59783f291c2"
+        ],
+        "startedAt": "2026-10-19T07:15:15.768Z",
+        "completedAt": "2026-10-19T07:15:45.712Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "40e49f858d585c8a03c6b01d224cf2d97dc3b1949190327f19ca7e14ced0ccf9",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "runs",
+        "pid": 69880,
+        "args": [
+          "runs",
+          "d32c5c4fe01bdf159270b6efa3beaaac"
+        ],
+        "startedAt": "2026-10-19T07:15:45.715Z",
+        "completedAt": "2026-10-19T07:15:45.961Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "019b145a4cf27e8c7f7644c546a08054c29a8415db2f9ea2e8f8f2a44b4087ec",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "history",
+        "pid": 55744,
+        "args": [
+          "history",
+          "d32c5c4fe01bdf159270b6efa3beaaac"
+        ],
+        "startedAt": "2026-10-19T07:15:45.963Z",
+        "completedAt": "2026-10-19T07:15:46.174Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "59bdcc5e2bb01ebbcfe7e9dc02f51e0434e0959a47e594dbe148c01f2a580793",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "profile-after",
+        "pid": 45500,
+        "args": [
+          "profile-info"
+        ],
+        "startedAt": "2026-10-19T07:15:46.179Z",
+        "completedAt": "2026-10-19T07:15:46.381Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "c403208d2ace39da21501a56a48c34a5071524d9a0cca7d725069f9ed5110eb3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "cpythonExecuted": false,
+    "prompt": "Run a focused API smoke check of this existing ModelZoo app through the registered xlang3 process profile. Read applicable instructions and backend/app/main.py first. In workdir backend, use FastAPI TestClient with the existing .xlang3-site dependencies to assert /api/health is healthy, /api/models returns its actual catalog entries, filtering search=gpt2 returns a matching model, and sort=not-a-valid-sort returns HTTP 422. Print the actual counts/status values and the marker xMind CLI API smoke passed. Inspect the actual exit code before reporting success. Keep source files unchanged; use xlang3 only and install nothing or start no persistent services.",
+    "run": "0a03833584015f4d81b8c59783f291c2",
+    "status": {
+      "graph_root": false,
+      "id": "0a03833584015f4d81b8c59783f291c2",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "d32c5c4fe01bdf159270b6efa3beaaac",
+      "state": "completed"
+    },
+    "historyMessages": 36,
+    "newMessages": 10,
+    "actualUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 97,
+        "input_tokens": 16724,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 97,
+        "prompt_tokens": 16724,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 104,
+        "input_tokens": 17888,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 104,
+        "prompt_tokens": 17888,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 920,
+        "input_tokens": 20070,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 920,
+        "prompt_tokens": 20070,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 339,
+        "input_tokens": 21465,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 339,
+        "prompt_tokens": 21465,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "backendProcessPreserved": true,
+    "passed": true,
+    "completedAt": "2026-10-19T07:15:46.383Z"
+  },
+  "actualEffect": {
+    "recordedAt": "2026-10-19T07:16:38.345Z",
+    "run": "0a03833584015f4d81b8c59783f291c2",
+    "session": "d32c5c4fe01bdf159270b6efa3beaaac",
+    "status": {
+      "graph_root": false,
+      "id": "0a03833584015f4d81b8c59783f291c2",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "d32c5c4fe01bdf159270b6efa3beaaac",
+      "state": "completed"
+    },
+    "actualProcess": {
+      "id": "e1583f30f4fa07706411108c33f0338c",
+      "state": "succeeded",
+      "arguments": {
+        "arguments": [
+          "-B",
+          "-c",
+          "import sys\nfrom fastapi.testclient import TestClient\nfrom app.main import app\n\nclient = TestClient(app, raise_server_exceptions=True)\nfailures = []\n\n# 1. /api/health\nr = client.get('/api/health')\nassert r.status_code == 200, f'health: expected 200 got {r.status_code}'\nbody = r.json()\nassert body['status'] == 'ok', f'health status field: {body}'\nprint(f'[1] GET /api/health -> HTTP {r.status_code}  status={body[\"status\"]!r}  app={body[\"app\"]!r}  version={body[\"version\"]!r}')\n\n# 2. /api/models - full catalog\nr = client.get('/api/models')\nassert r.status_code == 200, f'models: expected 200 got {r.status_code}'\nbody = r.json()\ntotal = body['total']\npage_count = body['pages']\nitem_count = len(body['items'])\nprint(f'[2] GET /api/models -> HTTP {r.status_code}  total={total}  pages={page_count}  items_on_page={item_count}')\nassert total > 0, 'catalog is empty'\nassert item_count > 0, 'no items returned on first page'\n\n# 3. /api/models?search=gpt2\nr = client.get('/api/models', params={'search': 'gpt2'})\nassert r.status_code == 200, f'search gpt2: expected 200 got {r.status_code}'\nbody = r.json()\ngpt2_total = body['total']\ngpt2_ids = [m['id'] for m in body['items']]\nprint(f'[3] GET /api/models?search=gpt2 -> HTTP {r.status_code}  total={gpt2_total}  ids={gpt2_ids}')\nassert gpt2_total > 0, 'search=gpt2 returned no results'\nassert any('gpt2' in mid.lower() or 'gpt2' in m['name'].lower() or 'gpt2' in m.get('summary','').lower()\n           for m, mid in zip(body['items'], gpt2_ids)), 'no gpt2-related model found in results'\n\n# 4. /api/models?sort=not-a-valid-sort -> 422\nr = client.get('/api/models', params={'sort': 'not-a-valid-sort'})\nassert r.status_code == 422, f'invalid sort: expected 422 got {r.status_code}'\nprint(f'[4] GET /api/models?sort=not-a-valid-sort -> HTTP {r.status_code}  (Unprocessable Entity, as expected)')\n\nprint()\nprint('xMind CLI API smoke passed')\n"
+        ],
+        "background": false,
+        "directory_id": "windows-local-file-v1:fec0809ac0805ab3:596a4000000001000000000000000000",
+        "environment": [
+          {
+            "name": "XLANG3_PYTHON_LIB",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\stdlib"
+          },
+          {
+            "name": "PIP_FIND_LINKS",
+            "value": "file:///C:/Users/shaw9/.xMind/p-a38/a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40/runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90/wheels"
+          },
+          {
+            "name": "PYTHONPATH",
+            "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\modules;C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.38-20261019\\backend\\.xlang3-site"
+          }
+        ],
+        "executable": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xlang3.exe",
+        "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:53994000000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+        "folder_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+        "output_limit": 65536,
+        "persistent": false,
+        "profile_id": "xlang3",
+        "profile_revision": 1,
+        "repository_guidance": {
+          "directory": "backend",
+          "sources": [
+            {
+              "byte_count": 642,
+              "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:566a4000000001000000000000000000",
+              "path": "AGENTS.md",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000"
+            }
+          ],
+          "version": 1
+        },
+        "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+        "timeout_ms": 30000,
+        "workdir": "backend",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+        "workspace_revision": 1
+      },
+      "result": {
+        "elapsed_ms": 3675,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "e1583f30f4fa07706411108c33f0338c",
+        "operation_id": "e1583f30f4fa07706411108c33f0338c",
+        "output_artifact": {
+          "operation_id": "e1583f30f4fa07706411108c33f0338c",
+          "state": "complete",
+          "stderr_bytes": 312,
+          "stdout_bytes": 343
+        },
+        "pid": 28492,
+        "process_tree_retired": true,
+        "profile_id": "xlang3",
+        "stderr": {
+          "byte_count": 312,
+          "data": "C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.38-20261019\\backend\\.xlang3-site\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\r\n  _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 312
+        },
+        "stdout": {
+          "byte_count": 343,
+          "data": "[1] GET /api/health -> HTTP 200  status='ok'  app='Model Zoo API'  version='0.1.0'\r\n[2] GET /api/models -> HTTP 200  total=12  pages=2  items_on_page=9\r\n[3] GET /api/models?search=gpt2 -> HTTP 200  total=1  ids=['gpt2']\r\n[4] GET /api/models?sort=not-a-valid-sort -> HTTP 422  (Unprocessable Entity, as expected)\r\n\r\nxMind CLI API smoke passed\r\n",
+          "encoding": "utf-8",
+          "retained_bytes": 343
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    },
+    "priorFailedProcessAttempts": [],
+    "browserAndCliHistoryIdentical": true,
+    "historyMessages": 36,
+    "passed": true
+  },
+  "renderedRestore": {
+    "startedAt": "2026-10-19T07:16:39.005Z",
+    "url": "http://127.0.0.1:59450/ui/",
+    "scope": "Read-only sandboxed headless Edge restore after the real CLI API smoke task; no new inference/effect submissions, no visible editor acceptance",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/ui/",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/chat.css",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/browser.css",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/xterm.css",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/patch-review.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/xterm-fit.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/terminal.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/purify.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/client.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/marked.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/browser.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/chat.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/xterm.js",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/ui/session",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/health",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/ui/workspaces",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/workspace",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/health",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/agent/planning",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/models",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/graphs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/provider/profiles",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/active",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/provider/profiles",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/model",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/active",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/permissions",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/v1/provider/profiles/models",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/tree-events",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/tree-events",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/tree-events",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/children",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/operations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/tree-events",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/children",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/operations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/plan",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/runs/0a03833584015f4d81b8c59783f291c2/mcp-inputs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/inbox",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/workspace/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/workspace/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/agents",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/agent",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/inbox",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/workspace/skills",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/workspace/files",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/history",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "blockedEffects": [],
+    "historyMessages": 36,
+    "usageRecords": 14,
+    "historyElapsedMs": 1641,
+    "model": "claude-sonnet-4-6",
+    "provider": "claude",
+    "rendererSha256": "f3eb7c0a25ad704196231a95959eb4011bcf4f198b0ae56c4122fee5ddd38d6f",
+    "passed": true,
+    "completedAt": "2026-10-19T07:16:40.715Z"
+  },
+  "installedExecutable": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.38/native-runtime/xmind.exe",
+  "nativeRevision": "ffee1245f6355d01c9318bf79396e36ed864c181",
+  "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+  "humanConsoleRendered": false,
+  "visibleEditorTested": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}
