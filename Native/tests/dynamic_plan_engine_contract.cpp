@@ -95,7 +95,7 @@ int main(int argc,char** argv){
         std::cout<<"Actual synthetic service process READY\n"<<std::flush;
         for(;;)std::this_thread::sleep_for(100ms);
     }
-    if(argc!=7)return 2;
+    if(argc!=8)return 2;
     try{
         const std::filesystem::path folder=argv[1],workspace=argv[5];const auto database=(folder/"state.sqlite").string();const std::vector<std::string> imports={argv[2],argv[3]};const auto frozen=settings(argv[4],workspace.string(),argv[6]);
         DynamicPlanRecord before;std::vector<Message> paused_history;std::vector<OwnedChildRecord> original_children;
@@ -116,6 +116,29 @@ int main(int argc,char** argv){
                 const auto stopped=store.operation(jobs.front().id).get();const auto receipt=Json::parse(stopped.result_json);
                 require(stopped.state==OperationState::succeeded&&receipt.value("service_stopped",false)&&receipt.value("process_tree_retired",false),"Follow-up must intentionally stop and retire the actual original service tree");
                 control_service.close();
+            }
+            // Actual planned children inherit the frozen trusted callable and
+            // policy, while the inspect preset cannot advertise that effect.
+            const auto callable_code=folder/"callable-code";std::filesystem::create_directory(callable_code);
+            write(callable_code/"graph_probe.py","def invoke(arguments):\n    with open(arguments['marker'], 'a', encoding='utf-8') as output:\n        output.write('called')\n    return {'value': arguments['value'].upper()}\n");
+            for(const std::string mode:{"allow","deny","worker"}){
+                const auto id="callable-"+mode,session=id+"-session";const auto marker=callable_code/(mode+".txt");
+                auto graph=frozen;graph.permission_rules={{"trusted_graph_probe","*","ask"}};
+                graph.xlang_python_tools.push_back({ModelToolDefinition{"trusted_graph_probe","Actual graph callable marker fixture",R"({"type":"object","properties":{"marker":{"type":"string"},"value":{"type":"string"}},"required":["marker","value"],"additionalProperties":false})"},XlangPythonCallable(imports[0],imports[1],callable_code.string(),"graph_probe","invoke",argv[7]),mode=="worker"?XlangPythonExecution::worker:XlangPythonExecution::in_process});
+                AgentService graph_service(store,graph,2,8);store.create_session(session,"Actual graph callable permission fixture").get();graph_service.submit(id,session,"fixture-callable-root-"+mode+": inspect then invoke the registered callable with its inherited approval policy.");
+                std::optional<Operation> proposal;eventually([&]{for(const auto& child:store.owned_children(id).get())for(const auto& operation:store.operations(child.run.id).get())if(operation.state==OperationState::awaiting_approval){proposal=operation;return true;}return false;},"Graph coding callable did not publish its own approval");
+                require(proposal->spec.tool=="xlang3_tool"&&Json::parse(proposal->spec.arguments_json).at("alias")=="trusted_graph_probe"&&!std::filesystem::exists(marker),"Graph callable must retain actual alias and wait before its effect");
+                store.decide_operation(proposal->id,mode=="deny"?OperationDecision::deny:OperationDecision::allow,"fixture-controller").get();
+                eventually([&]{const auto state=store.run(id).get().state;return state==RunState::completed||state==RunState::failed;},"Graph callable parent did not finish");
+                if(store.run(id).get().state!=RunState::completed){
+                    std::cerr<<"Callable graph failed: "<<id<<" operation="<<to_string(store.operation(proposal->id).get().state)<<"\n";
+                    for(const auto& event:store.tree_events(id).get())if(event.kind=="run.failed")std::cerr<<"Callable graph native failure: "<<event.json<<"\n";
+                }
+                require(store.run(id).get().state==RunState::completed,"Graph must continue after the actual callable approval or denial");
+                const auto children=store.owned_children(id).get();require(children.size()==2,"Graph fixture must execute exactly its inspector and coder");
+                for(const auto& child:children){require(child.run.state==RunState::completed,"Both actual graph children must complete");if(child.node_label=="inspect")require(store.operations(child.run.id).get().empty(),"Inspector must not acquire a callable effect");}
+                require(store.operation(proposal->id).get().state==(mode=="deny"?OperationState::denied:OperationState::succeeded),"Graph callable retains actual terminal approval outcome");
+                require(mode=="deny"?!std::filesystem::exists(marker):read(marker)=="called","Only an allowed graph callable may write exactly once");private_absent(store,id);graph_service.close();
             }
             write(workspace/"nested-inner.txt","Actual dynamic nested-inner file bytes\n");
             write(workspace/"nested-deep.txt","Actual dynamic depth-two file bytes\n");

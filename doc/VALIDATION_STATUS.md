@@ -1,5 +1,21 @@
 # Current native validation
 
+## Graph-owned trusted callables — 2026-10-19
+
+Actual dynamic graphs now validate the callable policy through two real children:
+an inspector with no callable effect tool, followed by a coding child. In-process
+allow and deny and shared-memory worker allow all complete their parent and both
+children. Approval precedes the actual effect; allowed calls write exactly once,
+and denied calls create no marker. Actual results and terminal journals are checked.
+
+Complete build and 14 focused contracts pass in 53.25 seconds with checked sets
+frozen. The new worker fixture initially supplied the CLI executable and failed
+with an uncertain operation; explicit CMake runtime input corrects that fixture.
+Production bytes are unchanged. Original logs and the diagnostic fixture remain;
+failed peer fixtures are now retained. Complete-suite/client/install acceptance
+and whole-AgentRunner process placement remain open.
+[Exact graph evidence and prior failures](evidence/callable-graph-20261019.json).
+
 ## Trusted xlang3 callable approvals — 2026-10-19
 
 A real callable regression reproduced an explicit agent `ask` rule being

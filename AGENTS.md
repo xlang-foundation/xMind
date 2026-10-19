@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Candidate nativecb94e28a fixes trusted callable ask being ignored through an owned operation-journal host. Actual allow/deny and write-then-raise/no-retry cases pass; defaults auto-approve without extra prompts. Complete build/14 focused contracts pass52.36s with checked sets frozen. Baseline failure, compiler type error and first13/14 Windows newline fixture mismatch retained; marker correction leaves production unchanged. No full-suite, dedicated dynamic-callable/client/install or authenticated worker-placement acceptance. Installed43/pages preserved. See doc/evidence/callable-approval-20261019.json. No local build/test running.
+- Candidate nativecb94e28a fixes trusted callable ask being ignored through an owned operation-journal host. Actual allow/deny and write-then-raise/no-retry cases pass; defaults auto-approve without extra prompts. Complete build/14 focused contracts pass52.36s with checked sets frozen. Baseline failure, compiler type error and first13/14 Windows newline fixture mismatch retained; marker correction leaves production unchanged. Dynamic graphs now pass allow/deny/worker plus inspect-catalogue exclusion; full build/14 focused53.25s. Worker fixture corrected CLI to explicit xmind runtime; production unchanged. Logs/diagnostic fixture retained: doc/evidence/callable-graph-20261019.json. No full-suite/client/install or whole-agent worker acceptance. Installed43/pages preserved. See doc/evidence/callable-approval-20261019.json. No local build/test running.
 
 
 

@@ -9,11 +9,12 @@ import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 
-const [executable,modules,stdlib,cliExecutable]=process.argv.slice(2);
-assert.ok(executable&&modules&&stdlib&&cliExecutable,'Expected engine contract, actual xmind_cli and runtime module/source roots');
+const [executable,modules,stdlib,cliExecutable,runtimeExecutable]=process.argv.slice(2);
+assert.ok(executable&&modules&&stdlib&&cliExecutable&&runtimeExecutable,'Expected engine contract, actual xmind_cli and runtime module/source roots');
 const folder=await mkdtemp(join(tmpdir(),'xmind-dynamic-engine-')),workspace=join(folder,'workspace');
 const key='synthetic-dynamic-engine-key-not-live',counts=new Map(),requests=[],barrier=[],planningBarrier=[],held=[];
-let failure;
+let failure;let completed=false;
+const callableCounts=new Map();
 const serviceControlCounts={start:0,stop:0};let serviceControlJob;
 const event=value=>'event: '+value.type+'\ndata: '+JSON.stringify(value)+'\n\n';
 const start=input=>event({type:'message_start',message:{id:'synthetic-dynamic-message',type:'message',role:'assistant',model:'synthetic-dynamic-engine',content:[],stop_reason:null,stop_sequence:null,usage:{input_tokens:input,output_tokens:0}}});
@@ -65,6 +66,19 @@ const peer=createServer((request,response)=>{
    }
    if(turn===1){assert.ok(serviceControlJob);send(response,start(11)+thought(signature)+tool('stop_process','service-stop-call',{job_id:serviceControlJob})+terminal('tool_use',3));return;}
    assert.equal(turn,2);assert.equal(last.tool_use_id,'service-stop-call');const stopped=JSON.parse(last.content);assert.equal(stopped.state,'succeeded');assert.equal(stopped.result.service_stopped,true);assert.equal(stopped.result.process_tree_retired,true);send(response,start(11)+thought(signature)+text('Actual prior native service tree is stopped.')+terminal('end_turn',3));return;
+  }
+  const callable=source.match(/fixture-callable-(root|inspect|code)-(allow|deny|worker):/);
+  if(callable){
+   const [,kind,mode]=callable,identity=kind+'-'+mode,turn=(callableCounts.get(identity)??0)+1;callableCounts.set(identity,turn);
+   const last=results(body.messages).at(-1),signature='opaque-callable-'+identity+'-'+turn;
+   if(kind==='inspect'){assert.equal(turn,1);assert.ok(!names.includes('trusted_graph_probe'),'Inspect preset must not advertise custom callable effects');send(response,start(5)+thought(signature)+text('Actual inspect child has no custom callable effect.')+terminal('end_turn',2));return;}
+   assert.ok(names.includes('trusted_graph_probe'),'Frozen coding catalogue must retain its actual registered callable');
+   if(kind==='root'){
+    if(turn===1){send(response,start(7)+thought(signature)+tool('plan_tasks','callable-plan-'+mode,{expected_revision:0,expected_state_sequence:0,add:[agent('inspect','fixture-callable-inspect-'+mode+': report your inspect tool catalogue.'),agent('code','fixture-callable-code-'+mode+': invoke the registered graph callable once.','workspace.coding',[dependency('inspect')])]})+terminal('tool_use',3));return;}
+    assert.equal(turn,2);assert.equal(last.tool_use_id,'callable-plan-'+mode);const actual=JSON.parse(last.content);assert.equal(actual.finished,true);assert.equal(actual.nodes.length,2);for(const node of actual.nodes)assert.equal(node.child_state,'completed');send(response,start(9)+thought(signature)+text('Observed the completed native callable graph.')+terminal('end_turn',3));return;
+   }
+   if(turn===1){send(response,start(5)+thought(signature)+tool('trusted_graph_probe','callable-effect-'+mode,{marker:join(folder,'callable-code',mode+'.txt'),value:mode})+terminal('tool_use',2));return;}
+   assert.equal(turn,2);assert.equal(last.tool_use_id,'callable-effect-'+mode);const actual=JSON.parse(last.content);if(mode==='deny')assert.equal(actual.error.code,'permission_denied');else assert.equal(actual.value,mode.toUpperCase());send(response,start(6)+thought(signature)+text('Observed actual callable '+mode+' result.')+terminal('end_turn',2));return;
   }
   const isRoot=['empty-inspect','main','nested','nested-restart','nested-parallel','nested-multihuman','final-human','restart-human','cancel','expiry'].some(label=>source.includes('fixture-'+label+'-parent'));
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
@@ -166,7 +180,7 @@ const peer=createServer((request,response)=>{
 try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');for(const side of ['left','right'])await writeFile(join(workspace,`nested-parallel-${side}-reader.txt`),`Actual nested-parallel-${side}-reader bytes\n`);await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
- const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace,cliExecutable],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
-  if(failure)throw failure;assert.deepEqual(serviceControlCounts,{start:3,stop:2});assert.deepEqual(Object.fromEntries(counts),{'empty-inspect':2,main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,46);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
+ const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace,cliExecutable,runtimeExecutable],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+  if(failure)throw failure;for(const mode of ['allow','deny','worker']){assert.equal(callableCounts.get('root-'+mode),2);assert.equal(callableCounts.get('inspect-'+mode),1);assert.equal(callableCounts.get('code-'+mode),2);}assert.equal(callableCounts.size,9);assert.deepEqual(serviceControlCounts,{start:3,stop:2});assert.deepEqual(Object.fromEntries(counts),{'empty-inspect':2,main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,46);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');completed=true;process.stdout.write(result.stdout);
 }catch(error){if(failure)throw new Error((failure.stack??String(failure))+'; actual native engine: '+(error.stderr??error.message));throw error;}
-finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}
+finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));if(completed)await rm(folder,{recursive:true,force:true});else process.stderr.write("Dynamic engine failure evidence retained at "+folder+"\n");}
