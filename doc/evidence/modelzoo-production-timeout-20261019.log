@@ -1,0 +1,36 @@
+TAP version 13
+# (node:37060) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: actual api.health deadline covers a stalled HTTP 200 body
+ok 1 - actual api.health deadline covers a stalled HTTP 200 body
+  ---
+  duration_ms: 2.6279
+  type: 'test'
+  ...
+# Subtest: actual api.health deadline covers a stalled HTTP 503 body
+ok 2 - actual api.health deadline covers a stalled HTTP 503 body
+  ---
+  duration_ms: 0.3129
+  type: 'test'
+  ...
+# Subtest: actual production success clears its deadline and shares ApiError identity
+ok 3 - actual production success clears its deadline and shares ApiError identity
+  ---
+  duration_ms: 0.7412
+  type: 'test'
+  ...
+# Subtest: actual production HTTP error preserves detail, query values and timer cleanup
+ok 4 - actual production HTTP error preserves detail, query values and timer cleanup
+  ---
+  duration_ms: 0.4557
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 86.2284

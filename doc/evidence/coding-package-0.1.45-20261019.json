@@ -1,0 +1,537 @@
+{
+  "recordedAt": "2026-10-19T21:08:50.236Z",
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.45",
+    "version": "0.1.45",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "e09259c4608483da90e52f74e3880bc53fc22126",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "5dc5bc6cfbf358e35f60190f42e4d735374cc2a56d56a8d10c1ce52d36744890",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "0d641200792e10c00a0fca38473ec9345598048956ab3a3a3f90b43d34920ffd",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "package": {
+    "recordedAt": "2026-10-19T20:57:12.262Z",
+    "version": "0.1.45",
+    "sourceRevision": "7245cc8fbd94589abce16a525e875cd2fa4014d1",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.45-complete-win32-x64.vsix",
+    "archiveBytes": 34434168,
+    "archiveSha256": "6c9b4f675d73a4b3d133d1a91345e884b5d132f772298429e8a85d0ed2372526",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-19T20:56:41.518Z",
+      "completedAt": "2026-10-19T20:57:09.229Z",
+      "pid": 16304,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cd9e8ceef260cdcf01c83247f909fe9a05658dd9f1ee91b80eea17bb06d1ad1f"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "localClients": {
+    "recordedAt": "2026-10-19T20:53:04.554Z",
+    "version": "0.1.45",
+    "sourceRevision": "7245cc8fbd94589abce16a525e875cd2fa4014d1",
+    "extension": {
+      "exitCode": 0,
+      "tests": 436,
+      "passed": 436,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "2912e23c70c3c0fca34e209ea8de2df1795b2f2e8854c0b2d01e9ff1eccc563a"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 152,
+      "passed": 152,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "8592d6a947fa3538cb45ed8e9a5f54439a6792801bf9eec6af205365c3a36ded"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClients": {
+    "recordedAt": "2026-10-19T20:56:38.398Z",
+    "run": 39323165807,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39323165807",
+    "sourceRevision": "de42d782dc7d2ff19716b1f586da37e4926d3a35",
+    "packagedClientRevision": "7245cc8fbd94589abce16a525e875cd2fa4014d1",
+    "crossRevisionReason": "Only the exact CI test-count metadata and documentation changed; all 70 selected client/source inputs and 18 runtime assets are compared below.",
+    "artifact": 12220199259,
+    "artifactBytes": 310246,
+    "artifactSha256": "17c8d24e732488d1c3c1eacdfa6db08ff136789d4656c5dd7c5793346b393ddc",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "de42d782dc7d2ff19716b1f586da37e4926d3a35",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 436,
+        "browser": 152
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 436,
+        "passed": 436,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 152,
+        "passed": 152,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "crossHostSource": {
+      "rawIdentical": [
+        "extensions/vscode/.vscodeignore",
+        "extensions/vscode/LICENSE",
+        "extensions/vscode/browser-view.js",
+        "extensions/vscode/client.js",
+        "extensions/vscode/edit-review.js",
+        "extensions/vscode/editor-selection.js",
+        "extensions/vscode/extension.js",
+        "extensions/vscode/language-server-editor.js",
+        "extensions/vscode/media/xmind.svg",
+        "extensions/vscode/native-runtime.js",
+        "extensions/vscode/patch-review.js",
+        "extensions/vscode/scripts/package-native-runtime.mjs",
+        "extensions/vscode/terminal.js",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/backend-smoke.js",
+        "extensions/vscode/tests/browser-view.test.js",
+        "extensions/vscode/tests/client-context.test.js",
+        "extensions/vscode/tests/client-mcp-authorization.test.js",
+        "extensions/vscode/tests/client-planning.test.js",
+        "extensions/vscode/tests/client-timer-binding.test.js",
+        "extensions/vscode/tests/client.test.js",
+        "extensions/vscode/tests/editor-selection.test.js",
+        "extensions/vscode/tests/language-server-editor.test.js",
+        "extensions/vscode/tests/mcp-authorization-controller.test.js",
+        "extensions/vscode/tests/native-runtime-package.test.js",
+        "extensions/vscode/tests/native-runtime.test.js",
+        "extensions/vscode/tests/plan-fixture.js",
+        "extensions/vscode/tests/provider-profile-controller.test.js",
+        "extensions/vscode/tests/terminal.test.js",
+        "extensions/vscode/tests/vcs.test.js",
+        "extensions/vscode/tests/workspace-backend.test.js",
+        "extensions/vscode/webview.js",
+        "extensions/vscode/workspace-backend.js",
+        "views/browser/browser.css",
+        "views/browser/build.mjs",
+        "views/browser/page.cjs",
+        "views/browser/tests/classic-script.test.cjs",
+        "views/browser/tests/connection.test.cjs",
+        "views/browser/tests/launcher-build.test.cjs",
+        "views/browser/tests/mcp-authorization-routes.test.cjs",
+        "views/browser/tests/native-contract.mjs",
+        "views/browser/tests/planning-routes.test.cjs",
+        "extensions/vscode/node_modules/marked/lib/marked.umd.js",
+        "extensions/vscode/node_modules/dompurify/dist/purify.min.js",
+        "extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js",
+        "extensions/vscode/node_modules/@xterm/xterm/css/xterm.css",
+        "extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js"
+      ],
+      "lineEndingsOnly": [
+        "extensions/vscode/README.md",
+        "extensions/vscode/git-changes-tree.js",
+        "extensions/vscode/media/chat.css",
+        "extensions/vscode/media/chat.js",
+        "extensions/vscode/package-lock.json",
+        "extensions/vscode/package.json",
+        "extensions/vscode/scripts/pip-bootstrap.mjs",
+        "extensions/vscode/tests/client-mcp-resources.test.js",
+        "extensions/vscode/tests/extension-host.test.js",
+        "extensions/vscode/tests/git-changes-tree.test.js",
+        "extensions/vscode/tests/renderer.test.js",
+        "extensions/vscode/tests/session-model.test.js",
+        "extensions/vscode/tests/session-permissions.test.js",
+        "views/browser/browser.js",
+        "views/browser/server.mjs",
+        "views/browser/terminal.js",
+        "views/browser/tests/controller.test.cjs",
+        "views/browser/tests/launcher-lifecycle.test.cjs",
+        "views/browser/tests/responsive-layout.test.cjs",
+        "views/browser/tests/server.test.cjs",
+        "views/browser/tests/terminal.test.cjs",
+        "Tools/start-browser.mjs",
+        "Tools/browser-host-lifecycle.mjs"
+      ],
+      "total": 70
+    },
+    "crossHostAssets": {
+      "rawIdentical": [
+        "index.html",
+        "patch-review.js",
+        "client.js",
+        "marked.js",
+        "purify.js",
+        "xterm.js",
+        "xterm.css",
+        "xterm-fit.js",
+        "browser.css",
+        "licenses/marked.txt",
+        "licenses/dompurify.txt",
+        "licenses/dompurify-MPL.txt",
+        "licenses/xterm.txt",
+        "licenses/xterm-addon-fit.txt"
+      ],
+      "lineEndingsOnly": [
+        "chat.js",
+        "chat.css",
+        "terminal.js",
+        "browser.js"
+      ],
+      "total": 18
+    },
+    "nativeExecuted": false,
+    "renderedEditorActivated": false,
+    "passed": true
+  },
+  "fullNative": {
+    "recordedAt": "2026-10-19T20:32:50.043Z",
+    "sourceParent": "e09259c4608483da90e52f74e3880bc53fc22126",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 34000,
+      "launchedAt": "2026-10-19T20:14:37.033Z",
+      "completedAt": "2026-10-19T20:15:01.795Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "95ff0e34be77bde14170df2c3c044e07f451a0be60aadf1983b8c83080ebc594"
+    },
+    "test": {
+      "pid": 66916,
+      "launchedAt": "2026-10-19T20:15:04.646Z",
+      "completedAt": "2026-10-19T20:32:13.583Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "64062a52f932d9184807e218d7a8aca6391c4f07ac41a0a6cf71039d36b12ba4"
+    },
+    "total": 154,
+    "failed": 0,
+    "passed": 154,
+    "seconds": 1028.9,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5dc5bc6cfbf358e35f60190f42e4d735374cc2a56d56a8d10c1ce52d36744890",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "earlierRustFailureReceipt": "lsp-diagnostics-rust-diagnostic-20261019/gate.json",
+    "currentSourceActualRustAnalyzerRerun": false,
+    "currentSourceInitialRustLeafPassed": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "stage": {
+    "recordedAt": "2026-10-19T20:58:10.661Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.45-final-source-20261019",
+    "files": 17439,
+    "allFileSetsAndHashesUnchangedAfterPackagingAndInstallation": true
+  },
+  "ui": {
+    "observedAt": "2026-10-19T21:06:30.399Z",
+    "installedExtension": "0.1.45",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "budgetMessageObserved": true,
+    "budgetFailedRoot": "23ca9bd4dac86c7b88fa2de54d709ca5",
+    "discoverySession": "b49f242b063af1ab6ca13db94c5165a8",
+    "discoveredRoot": "453700c7c0e1ea461ced4ddde5a0eb37",
+    "preservedInspectedRoot": "1f63da48dbe3c054ed8985709da26880",
+    "externalResponse": "XMIND_EXTERNAL_DISCOVERY_20261019",
+    "manualRefreshBeforeDiscovery": false,
+    "discoveryObservedAt": "2026-10-19T21:05:16.645Z",
+    "originalSelectionPreserved": true,
+    "completedExternalRunInSelector": true,
+    "reloadRequestedAt": "2026-10-19T21:05:46.225Z",
+    "reloadObservedAt": "2026-10-19T21:06:30.399Z",
+    "reloadPreservesResponseAndSelectedRootAndModel": true,
+    "providerKeysEntered": false,
+    "codingRunsRecovered": false
+  },
+  "discovery": {
+    "startedAt": "2026-10-19T21:05:02.610Z",
+    "scope": "One separate no-tools live-provider CLI probe to verify idle VS Code discovery; this does not recover or qualify the failed coding runs",
+    "session": "b49f242b063af1ab6ca13db94c5165a8",
+    "owner": {
+      "origin": "http://127.0.0.1:57779",
+      "process_id": 44152,
+      "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+      "started": false,
+      "workspace": "D:\\CantorAI2026\\TestProj",
+      "workspace_edits": "approved"
+    },
+    "taskSubmissions": 1,
+    "previousInspectedRoot": "1f63da48dbe3c054ed8985709da26880",
+    "prompt": "Reply exactly XMIND_EXTERNAL_DISCOVERY_20261019. Do not call tools or inspect files.",
+    "cpythonExecuted": false,
+    "run": "453700c7c0e1ea461ced4ddde5a0eb37",
+    "status": "completed",
+    "historyMessages": 4,
+    "operations": 0,
+    "historyPrefixUnchanged": true,
+    "usage": {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "completion_tokens": 17,
+      "input_tokens": 8232,
+      "input_tokens_scope": "uncached",
+      "output_tokens": 17,
+      "prompt_tokens": 8232,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "responseElapsedMs": 1779,
+    "firstTokenMs": 1705,
+    "scopePassed": true
+  },
+  "managedUpgrade": {
+    "oldPid": 62800,
+    "oldBirth": "2026-10-19T20:33:38.5919070Z",
+    "oldOwnerRetired": true,
+    "replacement": {
+      "pid": 44152,
+      "birth": "2026-10-19T21:00:23.5335800Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-2716047730c7fa91b68b1f2f54a6118a19a657e38dffccc6b7886a0e7366926c\\xmind.exe"
+    },
+    "retainedManifestSha256": "0d641200792e10c00a0fca38473ec9345598048956ab3a3a3f90b43d34920ffd",
+    "oldCodingHistoryExactAfterUpgrade": true,
+    "otherOwnersPreserved": 36,
+    "pagesPreserved": 13
+  },
+  "preservation": {
+    "backup44Verified": true,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "settingsUnchanged": true,
+    "obsoleteRuntimeDirectoriesAbsentBeforeInstall": 12,
+    "existingRuntimeDirectoriesBeforeInstall": 1,
+    "precheckFailureRetained": {
+      "recordedAt": "2026-10-19T20:56:09.132Z",
+      "installer45Invoked": false,
+      "originalHelper": "verify-coding-0.1.45-preserved-owners-20261019.mjs",
+      "failure": "ENOENT at obsolete installed0.1.27 native-runtime; only installed0.1.44 extension folder is now present after normal Code launches. Old retained native owners are checked independently. The new collector records absent-before-install entries rather than claiming old directories are preserved.",
+      "originalHelperUnchanged": true,
+      "backup44Verified": true
+    }
+  },
+  "actualCoding": {
+    "session": "9d170d81910b61a45c21ecd8557936c0",
+    "firstRun": {
+      "id": "23ca9bd4dac86c7b88fa2de54d709ca5",
+      "state": "failed",
+      "reason": "execution_budget_exhausted",
+      "modelCalls": 16
+    },
+    "followUp": {
+      "id": "e10a95fcbeaf11f6bed6d1229bb50378",
+      "state": "failed",
+      "reason": "agent_timeout",
+      "modelCalls": 14,
+      "activeElapsedMs": 600007
+    },
+    "tests": {
+      "operation": "a0f0e528587aefb893827e24bcea37fc",
+      "passed": 19,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedMs": 881,
+      "stdoutSha256": "98200756aa1cf1c294f56a31be98314ceaf9b902325d62541571ee34e136b7e8"
+    },
+    "build": {
+      "operation": "37b95ed29337518ecfb0aaf2df7ff582",
+      "exitCode": 0,
+      "elapsedMs": 1792,
+      "stdoutSha256": "e76d3daa53a21334a0fe819b3e29f7db11873598f120ad4830756d8873779e21"
+    },
+    "independentActualApiTests": {
+      "passed": 4,
+      "failed": 0,
+      "logSha256": "42a57ff5c8b69ee3604f57f4e471e6bdecfcd83953f9082b65faeac5c3888a9e",
+      "scope": "Operator Node mock-clock QA imports actual production api methods; distinct from xMind-run tests."
+    },
+    "dependencyFilesUnchanged": true,
+    "changedFiles": [
+      "model-zoo/frontend/src/api/client.js",
+      "model-zoo/frontend/src/api/request.js",
+      "model-zoo/frontend/tests/api-timeout.test.mjs"
+    ],
+    "finalFileHashes": {
+      "model-zoo/frontend/src/api/client.js": "44b8ec6568dbc143aaeeffaa7d84ea9dce84a54de59abdb18ae8582c2d1850aa",
+      "model-zoo/frontend/src/api/request.js": "c78405ad6c9cad43e58957f377e3438ce2c89beb7617916949beb038f9eec8d1",
+      "model-zoo/frontend/tests/api-timeout.test.mjs": "8b4ffd2cb2a69f934254bfb3fd147743cb44fca548a746b1d711300e5027875b"
+    },
+    "completedCodingRunAccepted": false,
+    "recordedFailuresRetained": true,
+    "fileOperations": [
+      {
+        "id": "de9f8daa803d6799ae19f41b4ff5e8ee",
+        "root": "23ca9bd4dac86c7b88fa2de54d709ca5",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/client.js",
+        "beforeSha256": "48646867bfbf348c82d7d6cc35f35e0f714d53aa7218044c91f456421b8866db",
+        "afterSha256": "02a56b8ade2d6af62dc1b400d750f5c4b3022b60cb1a1cb21e01d36dc35e19ec"
+      },
+      {
+        "id": "d36558fd108f0f56cfaec7929cde6081",
+        "root": "23ca9bd4dac86c7b88fa2de54d709ca5",
+        "tool": "create_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/request.js",
+        "beforeSha256": null,
+        "afterSha256": "ea1f23ed0161cecd77abfee4d35e36b1eab4a2344b5ebcee92f95a5605e0cad3"
+      },
+      {
+        "id": "dd7f6299845f9aa0ab1b1e230674218b",
+        "root": "23ca9bd4dac86c7b88fa2de54d709ca5",
+        "tool": "create_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/tests/api-timeout.test.mjs",
+        "beforeSha256": null,
+        "afterSha256": "b6d4ad2c51d3629d062a7c66b795ece4dc426847bac1f5a08a9bc5e7b6484d10"
+      },
+      {
+        "id": "e908272db8efb5bd28d7aba3964ae71c",
+        "root": "23ca9bd4dac86c7b88fa2de54d709ca5",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/request.js",
+        "beforeSha256": "ea1f23ed0161cecd77abfee4d35e36b1eab4a2344b5ebcee92f95a5605e0cad3",
+        "afterSha256": "bc84c033654df9b2a2b800df45832b8f6a86e5a9bd5180a8dfe7d17ef12e4e63"
+      },
+      {
+        "id": "d05858b6def4d8030bd0cf0a604bea10",
+        "root": "23ca9bd4dac86c7b88fa2de54d709ca5",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/client.js",
+        "beforeSha256": "02a56b8ade2d6af62dc1b400d750f5c4b3022b60cb1a1cb21e01d36dc35e19ec",
+        "afterSha256": "a019ecd70bc5ee9ee1ba4615aef5f498cdd9a439ce4976fa659a1e5fa88e3eea"
+      },
+      {
+        "id": "4a7d2e679a90029676929536235d252f",
+        "root": "e10a95fcbeaf11f6bed6d1229bb50378",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/request.js",
+        "beforeSha256": "bc84c033654df9b2a2b800df45832b8f6a86e5a9bd5180a8dfe7d17ef12e4e63",
+        "afterSha256": "c78405ad6c9cad43e58957f377e3438ce2c89beb7617916949beb038f9eec8d1"
+      },
+      {
+        "id": "a195d99852deaefab1b09190537ac2d1",
+        "root": "e10a95fcbeaf11f6bed6d1229bb50378",
+        "tool": "replace_file",
+        "state": "denied",
+        "path": "model-zoo/frontend/src/api/client.js",
+        "beforeSha256": "a019ecd70bc5ee9ee1ba4615aef5f498cdd9a439ce4976fa659a1e5fa88e3eea",
+        "afterSha256": "f13e7face2e0237cb4d51fa6cc44336ae2a859e5a16d55e547d88e8431d5ade7"
+      },
+      {
+        "id": "a185da22984c2d6366e51a46dd9b7353",
+        "root": "e10a95fcbeaf11f6bed6d1229bb50378",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/src/api/client.js",
+        "beforeSha256": "a019ecd70bc5ee9ee1ba4615aef5f498cdd9a439ce4976fa659a1e5fa88e3eea",
+        "afterSha256": "44b8ec6568dbc143aaeeffaa7d84ea9dce84a54de59abdb18ae8582c2d1850aa"
+      },
+      {
+        "id": "6fd108c91448cba7a0eadfcae29be876",
+        "root": "e10a95fcbeaf11f6bed6d1229bb50378",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "path": "model-zoo/frontend/tests/api-timeout.test.mjs",
+        "beforeSha256": "b6d4ad2c51d3629d062a7c66b795ece4dc426847bac1f5a08a9bc5e7b6484d10",
+        "afterSha256": "8b4ffd2cb2a69f934254bfb3fd147743cb44fca548a746b1d711300e5027875b"
+      }
+    ],
+    "finalFileHashesMatchLastSuccessfulNativeOperations": true
+  },
+  "codingEndToEndAccepted": false,
+  "releaseAccepted": false,
+  "goalComplete": false,
+  "cpythonExecuted": false,
+  "scopePassed": true,
+  "artifacts": [
+    {
+      "path": "coding-0.1.45-budget-20261019.jpg",
+      "sha256": "19beb884d3285391a763c6fa93c440f15798cb95188ff2d51cd112b3e0f291f3"
+    },
+    {
+      "path": "coding-0.1.45-discovery-20261019.jpg",
+      "sha256": "c146f14a8470455d4057b1f42986014641197f2f1b883bbc71fb57435529bcb0"
+    },
+    {
+      "path": "coding-0.1.45-selector-20261019.jpg",
+      "sha256": "57fb2791126d0601ee82e36ed99cc0534415326311ce99b5704dafb4ec19692f"
+    },
+    {
+      "path": "coding-0.1.45-reload-20261019.jpg",
+      "sha256": "0b26a4fea9b742557d49b48318a5f697421f7d171babd4320927770729767253"
+    },
+    {
+      "path": "coding-0.1.44-editor-file-update-20261019.jpg",
+      "sha256": "51cd300cfcb308ca94c91e988ac97dd066d1788a43540034a57254d9028cf1ee"
+    },
+    {
+      "path": "modelzoo-production-timeout-20261019.log",
+      "sha256": "42a57ff5c8b69ee3604f57f4e471e6bdecfcd83953f9082b65faeac5c3888a9e"
+    },
+    {
+      "path": "modelzoo-production-timeout-20261019.test.mjs.txt",
+      "sha256": "3377583377c549ad7ada9ff7ae4e88ed0080fe6b797905f74e56896c4ef47792"
+    }
+  ]
+}

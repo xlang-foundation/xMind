@@ -1,0 +1,23 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {api,ApiError} from 'file:///D:/CantorAI2026/TestProj/model-zoo/frontend/src/api/client.js';
+import {ApiError as SharedApiError} from 'file:///D:/CantorAI2026/TestProj/model-zoo/frontend/src/api/request.js';
+// Independent operator QA of the actual production exports. No source rewrite,
+// copied request implementation, real network or wall-clock deadline extension.
+for(const status of [200,503])test(`actual api.health deadline covers a stalled HTTP ${status} body`,async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});let signal,entered=false;
+ t.mock.method(globalThis,'fetch',async(_url,options)=>{signal=options.signal;return{ok:status===200,status,json:()=>{entered=true;return new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true}));}};});
+ const clear=t.mock.method(globalThis,'clearTimeout'),request=api.health();
+ const rejected=assert.rejects(request,error=>{assert.ok(error instanceof ApiError);assert.equal(error.status,0);assert.match(error.message,/did not respond in time/);return true;});
+ await Promise.resolve();await Promise.resolve();assert.equal(entered,true);
+ t.mock.timers.tick(14999);assert.equal(signal.aborted,false);t.mock.timers.tick(1);await rejected;assert.equal(clear.mock.callCount(),1);
+});
+test('actual production success clears its deadline and shares ApiError identity',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});let signal;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{assert.equal(new URL(url).pathname,'/api/catalog/stats');signal=options.signal;return{ok:true,status:200,json:async()=>({total:7})};});
+ const clear=t.mock.method(globalThis,'clearTimeout');assert.equal(ApiError,SharedApiError);assert.deepEqual(await api.getStats(),{total:7});assert.equal(clear.mock.callCount(),1);t.mock.timers.tick(15000);assert.equal(signal.aborted,false);
+});
+test('actual production HTTP error preserves detail, query values and timer cleanup',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});let signal;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{const parsed=new URL(url);assert.equal(parsed.pathname,'/api/models');assert.equal(parsed.searchParams.get('search'),'a b');assert.equal(parsed.searchParams.get('page'), '0');assert.equal(parsed.searchParams.has('empty'),false);signal=options.signal;return{ok:false,status:404,json:async()=>({detail:'Not found'})};});
+ const clear=t.mock.method(globalThis,'clearTimeout');await assert.rejects(api.listModels({search:'a b',page:0,empty:''}),error=>error instanceof ApiError&&error.status===404&&error.message==='Not found');assert.equal(clear.mock.callCount(),1);t.mock.timers.tick(15000);assert.equal(signal.aborted,false);
+});

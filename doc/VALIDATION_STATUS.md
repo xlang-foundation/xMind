@@ -1,5 +1,46 @@
 # Current native validation
 
+Newest checkpoints appear first; older sections retain their original verification scope.
+
+## Installed 0.1.45 and actual shared coding check — 2026-10-19
+
+The installed package includes the approval-card reconciliation, external-turn
+discovery and explicit execution-budget/model-turn explanations. Its native
+5dc5bc6c has the complete154-contract local gate. Both staged and hosted client
+suites pass436 VS Code/152 browser tests; all17439 staged files and2445 installed
+payloads match. Hosted de42d782 changes only CI inventory metadata/docs from the
+packaged7245cc8f client source; all70 selected source inputs and18 assets compare
+exactly, with explicit CRLF normalization where needed. Original failed hosted
+count-check evidence is retained.
+
+The actual installed sidebar shows the saved budget failure and discovers a
+separate CLI no-tools turn automatically, including its response and new run
+selector entry. The original inspected run remains selected. Reload retains
+the response, selection and saved Claude model without key entry or replay.
+The one test window is closed. Its managed upgrade replaces only TestProj
+owner62800 with44152 (native5dc5bc6c); the old coding history is byte-for-byte
+equal as JSON. All36 other tracked owners and13 prior pages remain available.
+Settings are unchanged and the complete installed44 backup verifies. Twelve
+obsolete extension-runtime folders were already absent before installing45;
+the failed preservation precheck and explicit absent/present baseline remain
+recorded. They are not claimed as preserved directories.
+
+Actual coding uses the same TestProj backend and saved Claude profile. Native
+file tools apply the production request-body timeout repair and its tests. The
+editor displays the changed file. Native process tools run19 tests and the Vite
+build successfully; four separate operator mock-clock tests import the actual
+production api methods and verify both success/error body deadlines and cleanup.
+Dependency manifests remain unchanged. A browser-unsafe process-global proposal
+is denied before application and corrected by the agent.
+
+**Coding end-to-end acceptance remains open.** The first run fails after16 model
+calls, despite tests/build passing. Its remaining-work follow-up passes19 tests
+and the build but times out at600007ms during its final streamed report. Both
+failed roots, partial stream and tool receipts are retained. A distinct no-tools
+discovery probe is successful; it does not qualify or recover those coding runs.
+Execution-limit handling and slow cold managed handoff remain next work.
+[Exact installed, native, hosted, rendered and failed-run scope](evidence/coding-package-0.1.45-20261019.json).
+
 ## Hosted view inventory correction — 2026-10-19
 
 Run39322711780 on7245cc8f completes both actual suites with436/152 passes and
