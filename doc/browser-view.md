@@ -90,10 +90,14 @@ can preview files from each attached folder. In the profile-aware local backend,
 single-agent file reads, listings, searches and globs can select an attached
 folder by ID; ordinary root runs capture the membership revision and child
 agents reuse that snapshot. Direct graph read nodes and graph-agent children
-use the membership captured when the graph run is admitted. Editing and
-creation proposals, processes, Git and language-server roots still use the
-primary folder. The CLI can initialize a workspace from one folder and attach
-more folders to it. Unlike VS Code,
+use the membership captured when the graph run is admitted. Editing, creation,
+patches, processes, Git and language-server requests can target an admitted
+member folder; omitting its ID defaults to the primary folder. Actual browser
+coding has edited an attached Vue project and completed its production build.
+See the [membership contract](native-multi-folder-workspaces.md) and
+[installed attached-folder coding evidence](evidence/rendered-coding-0.1.35-20261019.json)
+for the distinct native and rendered scopes. The CLI can initialize a workspace
+from one folder and attach more folders to it. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **New workspace** is
@@ -133,7 +137,7 @@ workspace creation routing and cookie rotation pass the webpage contract.
 
 ## Start
 
-In the updated VS Code extension, run **xMind: Open Browser View**. It validates the selected backend, starts a loopback view adapter for that same origin, privately enrolls a browser session in memory and opens a credential-free URL. Models and history remain on the same server as the editor. This command does not create a second database or copy provider credentials. The launcher reuses its view for the same backend and closes the old access adapter when the configured backend changes. Actual IDE invocation of this newly added command remains pending; host contracts, native sharing and packaged assets are verified.
+In the updated VS Code extension, run **xMind: Open Browser View**. It validates the selected backend, starts a loopback view adapter for that same origin, privately enrolls a durable browser access session and opens a credential-free URL. Models and history remain on the same server as the editor. This command does not create a second agent-history database or copy provider credentials. The launcher reuses its view for the same backend and closes the old access adapter when the configured backend changes. Actual IDE invocation of this command remains pending; host contracts, native sharing and packaged assets are verified.
 
 From the repository, with the native build and extension dependencies available:
 

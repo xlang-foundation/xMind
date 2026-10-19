@@ -13,25 +13,26 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The installed local VS Code package is **0.1.31**, with native source
-`118575e2c9608ee8a6b0d4dd739777040f301737` and xlang3 SDK
+The installed local VS Code package is **0.1.38**, with native source
+`ffee1245f6355d01c9318bf79396e36ed864c181` and xlang3 SDK
 `58a8aab9b40a464e38a741129b4804ac36e27a53`. This is a development preview;
 no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | All 151 local Release contracts pass; source, dependencies, SDK and binaries stay frozen through validation. |
-| Clients | Final package passes 422 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive files and 2,445 installed payloads verify. |
-| Installed coding | A real saved-key Claude task runs 22 ModelZoo tests, adds one reviewed regression test, then runs all 23 successfully under xlang3 through the native process tool. |
-| Persistence | The actual coding run's 13 messages and six provider usage records render and restore after reload, with no effect replay. |
-| Preserved work | Earlier webpage/backend owners and both older 2,402-file native runtime inventories remain intact; settings and existing profile directories are preserved. |
+| Native backend | The installed service-control fix passes five related native contracts; the complete current 152-test suite is running. |
+| Clients | Final package passes 427 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
+| Installed coding | Actual Claude execution starts an xlang3 FastAPI app and Vite, completes with both services alive, then stops both through an explicit follow-up. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
+| Shared CLI and persistence | Installed CLI attaches to the same backend and completes actual xlang3 API checks. Browser reload restores all 36 messages and 14 supplied usage records in 1.64 seconds, with no effect replay. |
+| Preserved work | Checked older webpage/backend owners, six runtime inventories, settings and prior profile directories remain intact. |
 | Still open | Actual VS Code pane activation, visible desktop testing, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
 
-The installed native backend now owns process-call preparation and preserves
-unsuccessful uncertain-wait/pending-stop results. The qualified browser explorer
-refresh remains included. The extension was installed through the Code CLI
-without opening an editor window. Actual VS Code pane activation remains
-unverified. [Installed package and live coding evidence](doc/evidence/coding-package-0.1.31-20261018.json).
+The installed native backend lets completed replies leave persistent app servers
+running and exposes their stop tool to the next primary coding turn. Both paths
+have actual installed browser validation. The extension was installed through
+the Code CLI without opening an editor window. Actual VS Code pane activation
+remains unverified. [Installed package and live lifecycle evidence](doc/evidence/coding-package-0.1.38-20261019.json),
+[shared CLI/browser coding evidence](doc/evidence/shared-cli-browser-coding-0.1.38-20261019.json).
 
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic
@@ -40,7 +41,7 @@ available. Those results do not establish unattended or in-flight recovery;
 one earlier read-only follow-up also missed its requested bare reply format.
 [Workspace and recovery evidence](doc/evidence/rendered-workspaces-and-recovery-20261018.json),
 [explorer refresh evidence](doc/evidence/rendered-explorer-auto-refresh-20261018.json),
-[full native qualification](doc/evidence/process-tool-owner-20261018.json),
+[earlier native qualification](doc/evidence/process-tool-owner-20261018.json),
 and [remaining work](doc/VALIDATION_STATUS.md).
 
 ## Use in VS Code

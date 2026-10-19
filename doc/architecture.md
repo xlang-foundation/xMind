@@ -4,8 +4,18 @@ The October 9 product decision defines three native components: **Agent
 Runtime + Coding Agent / Harness + AI Model Gateway**. One `xmind` executable
 provides backend and console modes; public authoring uses **Agent + Tool +
 Graph**, YAML/Markdown with optional xlang3 Python or a programming API.
-Planning is optional, and worker/IPC and shared UI SSE remain delivery work.
+Planning is optional. Shared backend HTTP/SSE and durable browser/CLI history
+are implemented and have installed live validation. Process-bound agent
+placement and its IPC delivery remain open.
 See [the agreed product design and implementation boundaries](runtime-product-design.md).
+
+The installed 0.1.38 checkpoint validates the unified executable with a fresh
+local profile: real browser coding, an xlang3-hosted application, persistent
+server start/stop and CLI execution against the same backend. The browser
+restores the CLI's exact 36-message conversation and supplied usage records.
+Actual VS Code pane activation and complete current native qualification remain
+separate. See [installed browser lifecycle evidence](evidence/coding-package-0.1.38-20261019.json)
+and [shared CLI/browser evidence](evidence/shared-cli-browser-coding-0.1.38-20261019.json).
 
 The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
 
@@ -20,9 +30,9 @@ in the existing TestProj profile, preserving all 22 messages and seven runs.
 The launcher retains the profile database and explicitly rejects unknown owner
 outcomes. [Installed evidence](native-file-patch.md) and the
 [runtime handoff contract](native-runtime-handoff.md) record the verified scope.
-The new unified executable needs its own installed acceptance with a fresh
-local profile. It uses one current package format and requires no legacy-profile
-migration; the older installation is not evidence of the new package.
+The unified executable's fresh-profile installed validation is recorded above.
+It uses one current package format and requires no legacy-profile migration;
+the older 0.1.4 installation is historical evidence for its own source only.
 
 ## xMind OSS specification — revised 2026-10-07
 

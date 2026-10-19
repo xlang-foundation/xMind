@@ -1,5 +1,25 @@
 # Reviewable milestones
 
+## Installed coding and shared-client milestone — 2026-10-19
+
+Installed 0.1.38 uses native ffee124/executable 5d3f7941 and SDK 58a8aab.
+Local and exact hosted client suites pass 427 extension / 147 browser tests;
+the package, installed files, saved settings and older live pages are verified.
+Actual configured Claude execution completes with persistent app servers alive,
+then an explicit follow-up stops both original process trees. Browser checks
+pass without page errors. The preceding 0.1.37 task separately proves the real
+Vue edit, 32 xlang3 tests and production build; its original shutdown failure
+is retained rather than relabeled.
+
+The actual installed unified CLI discovers the same existing backend, performs
+an xlang3 API smoke task and shares its exact history with the webpage. Browser
+reload restores 36 messages/14 supplied usage records in 1.64 seconds. These
+are live coding and transport results, not actual VS Code pane acceptance or
+completion of process-bound agents. A complete current native gate is in
+progress; no new full-suite result is claimed here.
+[Installed lifecycle proof](evidence/coding-package-0.1.38-20261019.json) and
+[CLI/browser proof](evidence/shared-cli-browser-coding-0.1.38-20261019.json).
+
 ## Complete native read-owner checkpoint — 2026-10-18
 
 All 152 local Release contracts pass in 903.83 seconds after a complete build;
