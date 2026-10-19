@@ -1,5 +1,16 @@
 # Current native validation
 
+## Browser model selection survives refresh — 2026-10-19
+
+A fresh sandboxed headless Edge check of the preserved 0.1.35 page restores
+the saved Claude provider, claude-sonnet-4-6 selection, 11 history messages
+and five supplied usage records. A second page reload retains the same
+provider and model. Initial history restoration takes 2.03 seconds, with
+no page errors, failed HTTP responses or effect submissions. Served chat
+bytes match the installed package. This is browser development verification;
+actual visible browser/editor acceptance remains separate.
+[Exact check](evidence/browser-model-restore-0.1.35-20261019.json).
+
 ## Complete native suite — 2026-10-19
 
 The complete local native suite at cbc2635 passes **152/152 tests** in
