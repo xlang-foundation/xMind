@@ -1,0 +1,831 @@
+{
+  "recordedAt": "2026-10-19T22:31:48.1602450Z",
+  "version": "0.1.47",
+  "stage": {
+    "recordedAt": "2026-10-19T22:24:59.734Z",
+    "version": "0.1.47",
+    "sourceRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+    "nativeRevision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "stage": "C:/xMindNativeValidation/coding-0.1.47-final-source-20261019",
+    "files": {
+      "LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "Tools/agentflow.ps1": "8b0b094b10aacd97e7817e04b9b1e2233ea9a59e472ebdcd7bce0e40fb842636",
+      "Tools/audit-litellm.mjs": "03cf77f1260f0469b0d3a2298f9ed7b0c6b88b76f9db591dbdbf2f9d8ccc4a94",
+      "Tools/audit-opencode.mjs": "9f82d683cd6bc84789f688eea0278a5b60ccd2835eef7407818b26cce5afdb67",
+      "Tools/browser-host-lifecycle.mjs": "cfdb33d9a00b460361915b13d6670a6aa9e91ffac6ca00cd9679aa0cbf659f3e",
+      "Tools/ci-native.ps1": "14a2a2eab445593563d9244a228981f874f32a249f11f169ec43ca790dcaebcd",
+      "Tools/ci-oauth-certificate.ps1": "6c16f82f7506ad6d9cde41f34b1eb293e113e2d94cf8886e142b86bad2741a4e",
+      "Tools/ci-process-startup.mjs": "39a964acc8d1a3a5093e5c0a6c1f5cb3c97293f6c72650e01aa585f31ee7ad1b",
+      "Tools/ci-stage-runtime.mjs": "2ad8253ea4c96f33459770db10e68eef1f490ec82c5564e919629ec7516109b7",
+      "Tools/ci-views.mjs": "335624b2a5af945a905351bbe980be6a0c4477e6b506817ff38f3365c3d3fa76",
+      "Tools/github-ci-artifact.mjs": "a6691b446e1a7476532066a8f553a5593f456d1d1030a4d1d45aced48b896698",
+      "Tools/github-ci-log.mjs": "815b7b8e419baf0574ff1fadd2078b7a0894e4a5bc1c4525aadf94b73dd2c45b",
+      "Tools/github-ci.mjs": "0d9b747e2686c31656bd117ca6b6739773db19da377095719205e0ba304363ff",
+      "Tools/inspect-ui.mjs": "8ee1797bd44059d6e6d775d776432547310bdf9aec0f1f0f97fe06b392ac89d8",
+      "Tools/litellm-native-mapping.mjs": "41d20f5fba7c79af36c72bcdbdad3ca3590f84cd29f0c88e4bce589d303b3973",
+      "Tools/native-milestone.ps1": "40c13f920ac2d52bae3fcf0bea7514f9bbfec4e79188a434aec82a8e93100be1",
+      "Tools/open-vscode-ui.cjs": "ff87abfb189880fe05eef5735d8724f8ba175b33871e4e29fdc899474e07a683",
+      "Tools/opencode-mapping.mjs": "763349879657c88357a4ba4ca1a8d832e863db9ffa6932ca21cd69b9280ce79d",
+      "Tools/opencode-native-mapping.mjs": "b7925c8dcac585b8a3697f4c171ea053da7b815d0ec0e8f984b8e13d587086ab",
+      "Tools/owned-process-diagnostics.mjs": "93985f70753f5efcf21fdeffaeb848345ac287b25c9f05576962046ebe1358c4",
+      "Tools/owned-process-diagnostics.ps1": "82d6e0c92bed711e9d720b7b42f5d0708cf849b954d4815f259f62e2cb414ce7",
+      "Tools/reopen-ui.ps1": "cf435f3468b8bb168d951ba6ed66576785bdda6db6bdbe481101ab75ddb243d6",
+      "Tools/stage-browser-dev-runtime.mjs": "1ef9a3b72010854bd8e051ddf0c3038b54ad70a6c8fe82403947189bd5629140",
+      "Tools/start-browser.mjs": "542672ec1cb61894b5ca2207f94bdced5dd82b84c803df68e7a6318dfb52b3fa",
+      "Tools/start-ui.ps1": "f49bf77a8852129f3d0b1013c80846e4ae22d1c048524657727fb08a4cab1bad",
+      "Tools/test-vscode-review.ps1": "1603ac9135912c02c1951df054c9aa6449e6fb6e60e07bddd717229bdb848827",
+      "Tools/tests/owned-process-diagnostics.test.mjs": "42bb50d7440280c35f79d8cfc99374f636bd840f4ac867d451011da17d8bb926",
+      "Tools/tests/xlang3-runtime.test.ps1": "a8af5f27dd5011e73c60fe2e0de5e8a497408c0d367243e51e55c228c5ee7ab7",
+      "Tools/verify-browser-vsix.ps1": "e310c786a9958535454fac1b18388ceaa135b23427d160cc089fb686787725e4",
+      "Tools/verify-jsoncons.mjs": "30cc347b038f7193eff70f3114ba4d0822bf6accbf3d94e092f5d030d1bfd1ea",
+      "Tools/verify-packaged-pip.mjs": "a62e1c897eaf9c60076f76e4d95db9e4d60797872a4e06afa9a2eac400a96a9d",
+      "Tools/verify-regex-dependencies.mjs": "c2e18189844ed3f0d420880b2c778d3bd47c07e7d62d8444529b05afa4f5705c",
+      "Tools/verify-yaml-cpp.mjs": "bb593fbb8760ad82b5638130cf04b0dd92a436022303312d79b77f90698a3759",
+      "Tools/vscode-review-contract.cjs": "61953f9573678843284964a83726ffeba4b112a15175df431e6ed8dde67c4138",
+      "Tools/xlang3-runtime.ps1": "30c3a01ca14e67742085b9be8ac6a02ca00f0af74e9a8372b758f6ce3eb14ece",
+      "extensions/vscode/.vscodeignore": "4d9378c7f2f539eccea14e3caa53ed33c506c4879cfb5f862a15cc65d9801bfb",
+      "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "extensions/vscode/README.md": "d2e36c1d1d89d2258023287417fb3c02fa0c4b1ab2de3acbeb8646c4ce107285",
+      "extensions/vscode/browser-view.js": "786fa84bfa5afb78a62c37f2edd8eb5d26c0d3f3fc975458fe6725702dab4dcf",
+      "extensions/vscode/client.js": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+      "extensions/vscode/edit-review.js": "154e338f5e9f0d3c1fafae06608867e90693377ffbd78249d2fc34358bef80fc",
+      "extensions/vscode/editor-selection.js": "ed05c4c19a85c9d727a795e76604bf421e77ede19fba6e6a91b8257a26d2cfa3",
+      "extensions/vscode/extension.js": "c5d6f018d8d82b26a8b813928c1bd7cb4e6961df99317ac021387afc18a932e5",
+      "extensions/vscode/git-changes-tree.js": "639221f7b87431748aa032c38301f534ee73652b27cba5c099d28e8460641bdf",
+      "extensions/vscode/language-server-editor.js": "9a776ba582fb653a4ec974afde904f4e9b10028224528add9c22b85a9d1637a8",
+      "extensions/vscode/media/chat.css": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a",
+      "extensions/vscode/media/chat.js": "e456014382c0aa65ff23c2c597c92a5fcc92f53f50c1580411cadd97159d331e",
+      "extensions/vscode/media/xmind.svg": "497797d63fb958ccae4236d1736c2422fb5b4659ac4333537fb04ebb308e1a19",
+      "extensions/vscode/native-runtime.js": "542e88b72e154fc2c480117d2177838519446e209967bdf21f1e1e6e7c6859fc",
+      "extensions/vscode/package-lock.json": "0d93f4acdea6a1a4eca7cc38e0b14a995471b7d460284ba33b0a19334ac43a7e",
+      "extensions/vscode/package.json": "769193ddc10073ed5c046cc68b43b33048b675ab7cb0e920eebdcfc338853c6a",
+      "extensions/vscode/patch-review.js": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "extensions/vscode/scripts/package-native-runtime.mjs": "4cd605ade95ec3540d78a3aff898f6cc493f1b953e859116e7845689441ce5f8",
+      "extensions/vscode/scripts/pip-bootstrap.mjs": "f615f33136d7f330dc7eb10e86b2d03c0e0448aa4126a8dfe5fda6c12e688bd2",
+      "extensions/vscode/terminal.js": "c6cddb7862f9d7074b6c675ef33ea2f84ea8e5f6ec9ff7a68f8360ecd351ecd1",
+      "extensions/vscode/tests/agent-selection.test.js": "5311ad66dcc87a38b33b8bd87cb09a571f3bc526fba7704c2ca34208b44c0933",
+      "extensions/vscode/tests/backend-smoke.js": "374f25f5dcde2f43bfbad37b6bfdada8b1241c9203158a2429d19a7929bc3615",
+      "extensions/vscode/tests/browser-view.test.js": "d6439fed05f02a40f7460758df035c4c58eb924bd994527e4fddb1d23a33b125",
+      "extensions/vscode/tests/client-context.test.js": "ac39b0f80b74565f9bd6bb7a666de991ceceae1110358bc09f6f263cc223c61e",
+      "extensions/vscode/tests/client-mcp-authorization.test.js": "d9eccb97f46d749fb6fd0e1f8775f60d277caade8c13d9c6696c586498669d47",
+      "extensions/vscode/tests/client-mcp-resources.test.js": "f5c5c954ff36542971bf427a5c8c604924bf121901c05b859e25453ffe669a8f",
+      "extensions/vscode/tests/client-planning.test.js": "550ca7675ab37035b109c8ca8885b3a07eb13bcc0cc421d491704f8b9f2a96cf",
+      "extensions/vscode/tests/client-timer-binding.test.js": "cc2091ba43af41eb9da6fce5dc19b31845829e7070b43e2e042996c01511ecee",
+      "extensions/vscode/tests/client.test.js": "30cf8a4d52befe55de860221563296b396756813cd2fdd6a8b0a5ce300c26570",
+      "extensions/vscode/tests/editor-selection.test.js": "7f9c9dbd098314189a9e8f28fdff92bd23b212a2da127f1d78f7d29dfded8fa0",
+      "extensions/vscode/tests/extension-host.test.js": "b78eef5e1d32741487f76878e1d74a744b080a104b20d68985dfbf0bbba8e36e",
+      "extensions/vscode/tests/git-changes-tree.test.js": "d4e8df260457598c7c0adfc9943ea53100711af271ce81265edcaa11f1a701c1",
+      "extensions/vscode/tests/language-server-editor.test.js": "3885999229ba66c8bc901d6bcb41fbcc8e01cc459ba76288c14c5a59c3b56f19",
+      "extensions/vscode/tests/mcp-authorization-controller.test.js": "8fbec26fbf802af3c3c14207e1c5a136ff6d3e7a4193a260c6e449af7a3c48f4",
+      "extensions/vscode/tests/native-runtime-package.test.js": "4fb7368bca499783f1f69d5abb950797f0e97654f1e765857ae10964a890c986",
+      "extensions/vscode/tests/native-runtime.test.js": "045de644413f1cd71f40e38dfed398a8bf266764daa71027d6b246050648105c",
+      "extensions/vscode/tests/plan-fixture.js": "33a63804e16896e03dd3750f56b335f1f2870d086ffe2879a29c6bd8ad8b6cf1",
+      "extensions/vscode/tests/provider-profile-controller.test.js": "5dba7aaa8b0ba1cf58a26aaaaa167a1c4b2e7111f473e6a0f821ba679fc581ec",
+      "extensions/vscode/tests/renderer.test.js": "e6a98372217ddcb336151fe7e56ba635352e8719303f3eb251de86c7e6897c4c",
+      "extensions/vscode/tests/session-model.test.js": "90642318a8bc58601634c35ac3dca0b41c000517742d0f98191792a8f587e12b",
+      "extensions/vscode/tests/session-permissions.test.js": "14451ece1491dba02250b9358fe6aa16b71591ac8e85beabe5134d7171df9c60",
+      "extensions/vscode/tests/terminal.test.js": "6198e380e727a094735cadfc7e01e4490153491688a853df6fc0133c5ea79d8d",
+      "extensions/vscode/tests/vcs.test.js": "dff616b7b288e91aa02cdc8e0fa0e7abbe636200e1bce9b80dc2afc30dea4ee8",
+      "extensions/vscode/tests/workspace-backend.test.js": "b6bfa4831d9774934e682ca724d12a4f0a02de30d033ad90987cd16cba58e391",
+      "extensions/vscode/webview.js": "fd283ff44dc6927a0bb7390789f94c01076c3691265c8c0c6e5ffa71c5b54c80",
+      "extensions/vscode/workspace-backend.js": "e9ae95a877097d1e712bba99046890dd344f27c7077f94d0125efb32c82a5aa0",
+      "views/browser/browser.css": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+      "views/browser/browser.js": "8b25b4d1ee7b9eda817b22a2b7077da972bd9566225fc25fbd6118bace5d5303",
+      "views/browser/build.mjs": "2605023ae539049e696f7aea1563710d0a30133e83ebad4daa2a3cfc900b9e62",
+      "views/browser/page.cjs": "c421fea65529d26e6b4cda390a59f712146b719e1453fbdae870ff4cc94763f3",
+      "views/browser/server.mjs": "2a453a4b941f9e3968e26f1b5f924ea692b93692139da562c8981858d18e2041",
+      "views/browser/terminal.js": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+      "views/browser/tests/classic-script.test.cjs": "4b5645b9f12bf62b14100add2ae2b36fb833f56c59f23e64c810c148ffdb7c94",
+      "views/browser/tests/connection.test.cjs": "60728ff70553ea9d9ab2f7f7fc902230f2ecc4bb51926277692f5048117c687d",
+      "views/browser/tests/controller.test.cjs": "12e93174798a3c837c6d86bbfd58e79db681336151b4efd4df3cd23baa77ab81",
+      "views/browser/tests/launcher-build.test.cjs": "a6c974ec8851329c97adf94e669e7b7fee0f29d30af8da698583fb92cdead2d5",
+      "views/browser/tests/launcher-lifecycle.test.cjs": "74ebdb7e1196a925e11d80350b39b49c9dafea336f01155b98fffeaeb48ad59b",
+      "views/browser/tests/mcp-authorization-routes.test.cjs": "ac8d325f0a36dcf21dd1ba0e9661e3dff3c7d131e149f4e96f8a092873b27223",
+      "views/browser/tests/native-contract.mjs": "13af98e7f6b3829f109bf2e6094a2d34f7a1aafd6d42f6bd9c88c5ac4b4bc3b4",
+      "views/browser/tests/planning-routes.test.cjs": "ddb82952f79846fa5065e8ee142d1838bd987a63f3c964b442050ffc4b38a0e2",
+      "views/browser/tests/responsive-layout.test.cjs": "1ff728f6dfcb540984d88347dbe70d0bc1a48d260b86655d629f27fd35c390a4",
+      "views/browser/tests/server.test.cjs": "a0d3dd3b3a09ab7ca3cec2bcd0d92d53411585e5c69c7d9b50c5583317d200e8",
+      "views/browser/tests/terminal.test.cjs": "ad94c9fb1097b8135e8579dd97f6675a10fea5db46a5203095f3afd4d0f74001"
+    },
+    "sourceFiles": 98,
+    "qualifiedNativeSourceInputs": 2523,
+    "verifiedCopiedDependencies": 14918,
+    "staged": {
+      "output": "C:/xMindNativeValidation/coding-0.1.47-final-source-20261019/extensions/vscode/native-runtime",
+      "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+      "nativeFiles": 6,
+      "pureSourceFiles": 1869,
+      "files": 2402,
+      "nativeExecuted": false,
+      "configAccessed": false,
+      "installed": false,
+      "reusedQualifiedRuntimeFrom": "0.1.46",
+      "runtimeProvenanceOriginClient": "fb80689f2335e1c0bf64255ce96ab737ba526fa5"
+    },
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "completeNativeContracts": 154,
+    "currentFullNativeSuiteRun": true,
+    "actualModelRepairAccepted": false,
+    "nativeSyntheticHttpAgentPlanAccepted": true,
+    "rustStartupFailureStillOpen": true,
+    "installed": false,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false,
+    "cpythonExecuted": false
+  },
+  "clients": {
+    "recordedAt": "2026-10-19T22:25:25.829Z",
+    "version": "0.1.47",
+    "sourceRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+    "extension": {
+      "exitCode": 0,
+      "tests": 438,
+      "passed": 438,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "ca815a479b495f4ee46ad0645ef209d44163faf67dd3fa70619b6f4ed15784f2"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "953b76a3e8514acc0a78fbbab78bf3e637c6c7ba7a08e24e739824562a141782"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hosted": {
+    "recordedAt": "2026-10-19T22:26:48.597Z",
+    "run": 39334592067,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39334592067",
+    "sourceRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+    "packagedClientRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+    "crossRevisionReason": "The packaged and hosted clients use the exact same source revision; selected source and assets are compared across Windows hosts.",
+    "artifact": 12225219701,
+    "artifactBytes": 310512,
+    "artifactSha256": "eebeef210978d398f5385a770e0fc9afdad0d01ced3360e5dd644d35756b7488",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 438,
+        "browser": 154
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 438,
+        "passed": 438,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 154,
+        "passed": 154,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "crossHostSource": {
+      "rawIdentical": [
+        "extensions/vscode/.vscodeignore",
+        "extensions/vscode/LICENSE",
+        "extensions/vscode/browser-view.js",
+        "extensions/vscode/client.js",
+        "extensions/vscode/edit-review.js",
+        "extensions/vscode/editor-selection.js",
+        "extensions/vscode/extension.js",
+        "extensions/vscode/language-server-editor.js",
+        "extensions/vscode/media/xmind.svg",
+        "extensions/vscode/native-runtime.js",
+        "extensions/vscode/patch-review.js",
+        "extensions/vscode/scripts/package-native-runtime.mjs",
+        "extensions/vscode/terminal.js",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/backend-smoke.js",
+        "extensions/vscode/tests/browser-view.test.js",
+        "extensions/vscode/tests/client-context.test.js",
+        "extensions/vscode/tests/client-mcp-authorization.test.js",
+        "extensions/vscode/tests/client-planning.test.js",
+        "extensions/vscode/tests/client-timer-binding.test.js",
+        "extensions/vscode/tests/client.test.js",
+        "extensions/vscode/tests/editor-selection.test.js",
+        "extensions/vscode/tests/language-server-editor.test.js",
+        "extensions/vscode/tests/mcp-authorization-controller.test.js",
+        "extensions/vscode/tests/native-runtime-package.test.js",
+        "extensions/vscode/tests/native-runtime.test.js",
+        "extensions/vscode/tests/plan-fixture.js",
+        "extensions/vscode/tests/provider-profile-controller.test.js",
+        "extensions/vscode/tests/terminal.test.js",
+        "extensions/vscode/tests/vcs.test.js",
+        "extensions/vscode/tests/workspace-backend.test.js",
+        "extensions/vscode/webview.js",
+        "extensions/vscode/workspace-backend.js",
+        "views/browser/browser.css",
+        "views/browser/build.mjs",
+        "views/browser/page.cjs",
+        "views/browser/tests/classic-script.test.cjs",
+        "views/browser/tests/connection.test.cjs",
+        "views/browser/tests/launcher-build.test.cjs",
+        "views/browser/tests/mcp-authorization-routes.test.cjs",
+        "views/browser/tests/native-contract.mjs",
+        "views/browser/tests/planning-routes.test.cjs",
+        "extensions/vscode/node_modules/marked/lib/marked.umd.js",
+        "extensions/vscode/node_modules/dompurify/dist/purify.min.js",
+        "extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js",
+        "extensions/vscode/node_modules/@xterm/xterm/css/xterm.css",
+        "extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js"
+      ],
+      "lineEndingsOnly": [
+        "extensions/vscode/README.md",
+        "extensions/vscode/git-changes-tree.js",
+        "extensions/vscode/media/chat.css",
+        "extensions/vscode/media/chat.js",
+        "extensions/vscode/package-lock.json",
+        "extensions/vscode/package.json",
+        "extensions/vscode/scripts/pip-bootstrap.mjs",
+        "extensions/vscode/tests/client-mcp-resources.test.js",
+        "extensions/vscode/tests/extension-host.test.js",
+        "extensions/vscode/tests/git-changes-tree.test.js",
+        "extensions/vscode/tests/renderer.test.js",
+        "extensions/vscode/tests/session-model.test.js",
+        "extensions/vscode/tests/session-permissions.test.js",
+        "views/browser/browser.js",
+        "views/browser/server.mjs",
+        "views/browser/terminal.js",
+        "views/browser/tests/controller.test.cjs",
+        "views/browser/tests/launcher-lifecycle.test.cjs",
+        "views/browser/tests/responsive-layout.test.cjs",
+        "views/browser/tests/server.test.cjs",
+        "views/browser/tests/terminal.test.cjs",
+        "Tools/start-browser.mjs",
+        "Tools/browser-host-lifecycle.mjs"
+      ],
+      "total": 70
+    },
+    "crossHostAssets": {
+      "rawIdentical": [
+        "index.html",
+        "patch-review.js",
+        "client.js",
+        "marked.js",
+        "purify.js",
+        "xterm.js",
+        "xterm.css",
+        "xterm-fit.js",
+        "browser.css",
+        "licenses/marked.txt",
+        "licenses/dompurify.txt",
+        "licenses/dompurify-MPL.txt",
+        "licenses/xterm.txt",
+        "licenses/xterm-addon-fit.txt"
+      ],
+      "lineEndingsOnly": [
+        "chat.js",
+        "chat.css",
+        "terminal.js",
+        "browser.js"
+      ],
+      "total": 18
+    },
+    "nativeExecuted": false,
+    "renderedEditorActivated": false,
+    "passed": true
+  },
+  "package": {
+    "recordedAt": "2026-10-19T22:26:37.655Z",
+    "version": "0.1.47",
+    "sourceRevision": "41bdea13546179f01fced8fc49921554dffa7d0a",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.47-complete-win32-x64.vsix",
+    "archiveBytes": 34435038,
+    "archiveSha256": "553f6944ebd509eff8716a6cf00da6256fc2444e35c2cb8e70301dd330d2a5b7",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-19T22:26:07.909Z",
+      "completedAt": "2026-10-19T22:26:34.608Z",
+      "pid": 17168,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9cd822394fa3f6281529e14c9c01533ceb3ddae8c37d1e1d613346b11d26db90"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.47",
+    "version": "0.1.47",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "preserved": {
+    "recordedAt": "2026-10-19T22:27:37.5Z",
+    "mode": "after",
+    "identities": [
+      {
+        "pid": 67948,
+        "birth": "2026-10-18T20:02:32.046616Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json"
+      },
+      {
+        "pid": 17248,
+        "birth": "2026-10-18T20:02:33.093718Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json"
+      },
+      {
+        "pid": 33960,
+        "birth": "2026-10-18T20:02:36.467445Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json"
+      },
+      {
+        "pid": 64940,
+        "birth": "2026-10-18T22:22:18.916427Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.31-launch-20261018.json"
+      },
+      {
+        "pid": 40236,
+        "birth": "2026-10-18T22:22:19.938267Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.31\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.31-launch-20261018.json"
+      },
+      {
+        "pid": 67432,
+        "birth": "2026-10-18T22:22:23.198262Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a31\\7679f90d61b9255d17fb4d86b68908507226efbe35add7bf0ade459537da5a3c\\runtime-499e9893c04de140ed395ce604fe9caa81453328c0d3a7629fa4d25de5c40389\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.31-launch-20261018.json"
+      },
+      {
+        "pid": 63316,
+        "birth": "2026-10-18T22:59:30.11138Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.32-launch-20261018.json"
+      },
+      {
+        "pid": 72620,
+        "birth": "2026-10-18T22:59:31.152933Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.32\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.32-launch-20261018.json"
+      },
+      {
+        "pid": 17816,
+        "birth": "2026-10-18T22:59:34.423903Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a32\\1828ebd236c14ec23742196fd7285dfbe5f333993556ea711e438b64a8033074\\runtime-ad940888eb2eb53a85dc3454ebcbeb25f11d3f5bc72d33ae976b1b6b51f2ce1e\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.32-launch-20261018.json"
+      },
+      {
+        "pid": 46036,
+        "birth": "2026-10-19T01:12:03.993266Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.34-launch-20261019.json"
+      },
+      {
+        "pid": 25408,
+        "birth": "2026-10-19T01:12:05.153259Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.34\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.34-launch-20261019.json"
+      },
+      {
+        "pid": 44704,
+        "birth": "2026-10-19T01:12:08.604683Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a34\\b257b78f22c803567a66c2079ca47515c4b101f8c9c81e375cfea6d5011628f0\\runtime-36177501942b3354b9531a56fea3535e5a43458d2787182996e6fb51cb397650\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.34-launch-20261019.json"
+      },
+      {
+        "pid": 64664,
+        "birth": "2026-10-19T01:28:50.022433Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.35-launch-20261019.json"
+      },
+      {
+        "pid": 43960,
+        "birth": "2026-10-19T01:28:52.325915Z",
+        "image": "C:\\xMindNativeValidation\\coding-0.1.35-source-20261019\\extensions\\vscode\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.35-launch-20261019.json"
+      },
+      {
+        "pid": 69648,
+        "birth": "2026-10-19T01:29:45.043368Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a35\\b8d89165c622d42df3df215aa2cbe64ae6b1270191dfa03e3b0c72e1f3db40bb\\runtime-808baf32fa2c0bc01fbea476fecc8bb4fe09f7da8458a8e9e5bf402ac03db133\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.35-launch-20261019.json"
+      },
+      {
+        "pid": 30896,
+        "birth": "2026-10-19T06:40:17.27184Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.37-native-launch-20261019.json"
+      },
+      {
+        "pid": 58140,
+        "birth": "2026-10-19T06:40:18.335456Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.37\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.37-native-launch-20261019.json"
+      },
+      {
+        "pid": 59264,
+        "birth": "2026-10-19T06:40:21.768611Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a37\\ffb23089cbc7275e53687f3e443da239e4b8b9dd85b5a5d3a1b30fdacb92ddbc\\runtime-2a969e8280d1fb0f8e6c0ca1e4f6a025ed1768484fcd328a2b10b4d928c7ccd9\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.37-native-launch-20261019.json"
+      },
+      {
+        "pid": 40732,
+        "birth": "2026-10-19T07:05:42.812265Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.38-native-launch-20261019.json"
+      },
+      {
+        "pid": 67828,
+        "birth": "2026-10-19T07:05:43.854197Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.38\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.38-native-launch-20261019.json"
+      },
+      {
+        "pid": 27692,
+        "birth": "2026-10-19T07:05:47.21614Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.38-native-launch-20261019.json"
+      },
+      {
+        "pid": 41476,
+        "birth": "2026-10-19T08:49:52.274137Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.40-native-launch-20261019.json"
+      },
+      {
+        "pid": 18700,
+        "birth": "2026-10-19T08:49:53.466072Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.40\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.40-native-launch-20261019.json"
+      },
+      {
+        "pid": 56088,
+        "birth": "2026-10-19T08:49:56.966558Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a40\\26d129336525c8dee48f28f44482a6f1032cd68a7a24448ef0bed6ff6fd2546a\\runtime-6e136d7ac591ed6d7eeadeee378a8d8b6908d2b3d4628cde9dec2aeb533d8d8b\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.40-native-launch-20261019.json"
+      },
+      {
+        "pid": 68540,
+        "birth": "2026-10-19T17:31:26.447441Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.42-native-launch-20261019.json"
+      },
+      {
+        "pid": 9152,
+        "birth": "2026-10-19T17:31:27.624697Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.42\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.42-native-launch-20261019.json"
+      },
+      {
+        "pid": 21536,
+        "birth": "2026-10-19T17:31:31.485225Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a42\\e9c8dc8714363a789e8f90a75afdd543e2bb2a50059e4ddd2d4cf58bad8b0fa2\\runtime-02b21db16654dff2c32b9a06689ec9c5e0ffb86e3be4882da35acd156ac63274\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.42-native-launch-20261019.json"
+      },
+      {
+        "pid": 7816,
+        "birth": "2026-10-19T18:05:51.0423Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.43-native-launch-20261019.json"
+      },
+      {
+        "pid": 43604,
+        "birth": "2026-10-19T18:05:52.170713Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.43-native-launch-20261019.json"
+      },
+      {
+        "pid": 44176,
+        "birth": "2026-10-19T18:05:55.700562Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a43\\d68f72743ff73862a4e230519f6c0302d25a51634a7f9811269db6b0908e4614\\runtime-52e8b8bb6f8428143a5ed5faba57e0f57259780568deb237dc50692c9e3ce3b6\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.43-native-launch-20261019.json"
+      },
+      {
+        "pid": 66908,
+        "birth": "2026-10-19T18:14:28.494965Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.43-modelzoo-native-launch-20261019.json"
+      },
+      {
+        "pid": 35116,
+        "birth": "2026-10-19T18:14:29.429259Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.43-modelzoo-native-launch-20261019.json"
+      },
+      {
+        "pid": 69992,
+        "birth": "2026-10-19T18:14:32.815573Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-c43\\a94da0db71c58024b766cf6b38c9d268b7cd9db51c380d29e30383db2fa5d1f5\\runtime-6a3a62add7803a2f11cca95d8f5cf303ccddbdabddd43b5b7e469886acc98a59\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.43-modelzoo-native-launch-20261019.json"
+      },
+      {
+        "pid": 29748,
+        "birth": "2026-10-19T19:35:03.790105Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "kind": "host",
+        "launch": "browser-0.1.44-native-launch-20261019.json"
+      },
+      {
+        "pid": 59720,
+        "birth": "2026-10-19T19:35:04.986392Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.44\\native-runtime\\xmind.exe",
+        "kind": "nativeView",
+        "launch": "browser-0.1.44-native-launch-20261019.json"
+      },
+      {
+        "pid": 20740,
+        "birth": "2026-10-19T19:35:08.54679Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a44\\e5008a9657ecd40be6fb9188bac54d3cb6a78ee45bb97b397b4c724f88814fec\\runtime-ab13c965e5d00f5de32564d1084f7009c38a1c3071333f4184b969dd4bf64ec3\\xmind.exe",
+        "kind": "backend",
+        "launch": "browser-0.1.44-native-launch-20261019.json"
+      },
+      {
+        "pid": 32704,
+        "birth": "2026-10-19T22:02:59.727087Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-079924729f7fd53c119368cd6286fadea05a141cece1dcbaa90d4dfd7ae834dd\\xmind.exe",
+        "kind": "actual-vscode-backend"
+      }
+    ],
+    "pages": [
+      {
+        "url": "http://127.0.0.1:62342/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:52121/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63383/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:54828/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63496/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:49702/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:55921/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:59450/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:53735/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:55639/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:53895/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:58417/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:64581/ui/",
+        "status": 200
+      }
+    ],
+    "runtimes": [
+      {
+        "version": "0.1.27",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.28",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.31",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.32",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.34",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.37",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.38",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.39",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.40",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.41",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.42",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.43",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.44",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.45",
+        "state": "absent"
+      },
+      {
+        "version": "0.1.46",
+        "files": 2402,
+        "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+        "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69"
+      }
+    ],
+    "editorOpened": false
+  },
+  "browserLaunch": {
+    "startedAt": "2026-10-19T22:29:10.177Z",
+    "version": "0.1.47",
+    "installed": true,
+    "scope": "Actual installed browser assets on the shared TestProj backend; browser launch remains separate",
+    "workspace": "D:/CantorAI2026/TestProj",
+    "profileRoot": "C:/Users/shaw9/.xMind/p-current",
+    "pageState": "C:/Users/shaw9/.xMind/BrowserView/xmind-0.1.47-testproj-current-native-20261019",
+    "assets": "C:/xMindNativeValidation/browser-assets-0.1.47-native-20261019",
+    "nativeRevision": "c636e0c0d3e0e629e53b9eb34af4390b9811de04",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7ea44e835cac370cc0336d78ccb793a623ec1870caf24676c8dc78092c4d6a97",
+    "taskSubmissions": 0,
+    "hostPid": 30020,
+    "url": "http://127.0.0.1:54803/ui/",
+    "host": {
+      "pid": 30020,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T22:29:10.182001Z"
+    },
+    "nativeView": {
+      "pid": 64920,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.47\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T22:29:11.22604Z"
+    },
+    "backends": [
+      {
+        "pid": 10080,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e\\runtime-675723989edc2785f248c240a6e9e1dc321ad6c3288d2f259860e1e012461751\\xmind.exe",
+        "birth": "2026-10-18T09:54:18.985391Z"
+      },
+      {
+        "pid": 48656,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf\\runtime-7aa4762c65c7c56173e816f6665b0013260cb2b80bb2e11ec5550b655cbdd42d\\xmind.exe",
+        "birth": "2026-10-18T10:51:20.680139Z"
+      },
+      {
+        "pid": 71380,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508\\runtime-515250d58c1cac1933bb4e7eb264cb3b0330c5f584888951d3ef6e5a6f96f1e1\\xmind.exe",
+        "birth": "2026-10-18T11:25:54.736041Z"
+      },
+      {
+        "pid": 37596,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f\\runtime-bc445a29c2441b81e0825e49eb26564d2f0347812916e7b0ab3c0ba8e86dafd6\\xmind.exe",
+        "birth": "2026-10-18T12:29:48.61949Z"
+      },
+      {
+        "pid": 2876,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233\\runtime-2f8ca7df580cd468c8bc75ef8e8453e916e142b12039bd906027870dad6a8d73\\xmind.exe",
+        "birth": "2026-10-18T12:35:16.541064Z"
+      },
+      {
+        "pid": 67320,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04\\runtime-e50fcb1e17e6728e3b4cd78740e6da5920e3d9c64eb2e3527986d0f5bf98411d\\xmind.exe",
+        "birth": "2026-10-18T12:40:02.083582Z"
+      },
+      {
+        "pid": 32704,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-079924729f7fd53c119368cd6286fadea05a141cece1dcbaa90d4dfd7ae834dd\\xmind.exe",
+        "birth": "2026-10-19T22:02:59.727087Z"
+      }
+    ],
+    "backend": {
+      "pid": 32704,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-079924729f7fd53c119368cd6286fadea05a141cece1dcbaa90d4dfd7ae834dd\\xmind.exe",
+      "birth": "2026-10-19T22:02:59.727087Z"
+    },
+    "readyAt": "2026-10-19T22:29:15.983Z"
+  },
+  "nativeLayerReusedByteForByte": true,
+  "nativeFullGate": "coding-turn-budget-full-native-20261019.json",
+  "priorRealCodingReceipt": "coding-installed-0.1.46-20261019.json",
+  "actualAutomaticTranscriptRetest": false,
+  "actualExternalBrowserVisualAcceptance": false,
+  "automationLimit": {
+    "chromeLaunch": "Rejected by automatic tool policy without a specific reason",
+    "chromeConnector": "Unavailable",
+    "edgeDesktop": "Computer Use stopped because it could not determine the current browser URL confidently"
+  },
+  "releaseAccepted": false,
+  "goalComplete": false
+}

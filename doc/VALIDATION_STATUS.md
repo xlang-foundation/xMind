@@ -2,6 +2,28 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.47 client correction — 2026-10-19
+
+The installed package matches all2445 checked payloads. Staged and hosted client
+tests pass438 VS Code/154 browser cases on source41bdea13; the official hosted
+artifact verifies and all70 selected source inputs/18 assets match. The VSIX is
+34435038 bytes, SHA-256 `553f6944ebd509eff8716a6cf00da6256fc2444e35c2cb8e70301dd330d2a5b7`.
+
+This client-only update reuses the complete qualified native layer byte for
+byte (manifest7ea44e83, native29427794, full154-contract sourcec636e0c0). It
+preserves TestProj backend32704 rather than replacing it. The complete46 backup,
+settings, previous profile directories, all37 tracked owners and13 pages verify
+after installation. A new browser adapter at http://127.0.0.1:54803/ui/ shares
+that same backend; its Node host30020 and native view64920 are live.
+
+Installed visual acceptance of the automatic transcript correction remains
+pending. The external Chrome connector is unavailable; automatic tool policy
+rejects a direct Chrome launch without a specific reason. Windows Computer Use
+then stops because it cannot confidently determine the existing Edge window's
+current URL. These are automation limitations, not successful browser checks.
+Do not retry those blocked browser paths without a relevant state change.
+[Exact installed and remaining scope](evidence/coding-installed-0.1.47-checkpoint-20261019.json).
+
 ## Installed 0.1.46 and real coding completion — 2026-10-19
 
 0.1.46 is installed and its 2445 checked payloads match the qualified package.
