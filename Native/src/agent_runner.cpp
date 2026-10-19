@@ -4,6 +4,7 @@
 #include "agentflow/agent_process_tool_host.hpp"
 #include "agentflow/agent_read_tool_host.hpp"
 #include "agentflow/agent_guidance_tool_host.hpp"
+#include "agentflow/agent_callable_tool_host.hpp"
 #include "agentflow/agent_remote_tool_host.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
@@ -138,7 +139,8 @@ std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,c
         if(binding!=bindings.end()){
             if(!binding->second.contains("input_schema_json")||binding->second["input_schema_json"]!=definition.input_schema_json)
                 throw DynamicPlanUnavailable("Actual external-agent approval binding differs from its native tool schema");
-            if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
+            if(binding->second.value("kind",std::string{})=="trusted_xlang3_callable")captured["xlang3_binding"]=binding->second;
+            else if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
             else if(definition.name.starts_with("a2a_delegate_")&&binding->second.value("kind",std::string{})=="a2a_remote_agent")captured["a2a_binding"]=binding->second;
             else throw DynamicPlanUnavailable("External-agent binding has an unexpected tool namespace");
             ++matched_bindings;
@@ -626,10 +628,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             request.tools.push_back(registration.definition);
         }
         struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::shared_ptr<std::atomic<bool>> catalogue_invalidated=std::make_shared<std::atomic<bool>>(false);std::unique_ptr<McpToolRegistry> registry;};
-        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=Json::array();
+        Json callable_bindings=Json::array();
+        for(const auto& [name,tool]:xlang_tools)callable_bindings.push_back(Json{{"kind","trusted_xlang3_callable"},{"alias",name},{"input_schema_json",tool->definition.input_schema_json},{"execution",tool->execution==XlangPythonExecution::worker?"worker":"in_process"}});
+        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=callable_bindings;
         std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
         const auto native_tools=request.tools;
-        auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();approval_bindings=Json::array();};
+        auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();approval_bindings=callable_bindings;};
         auto discover_mcp=[&]{
         stop_mcp_observers();
         close_mcp();request.tools=native_tools;
@@ -676,7 +680,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!definitions.empty())journal_.append_event(id,"a2a.discovered",Json{{"peer_count",definitions.size()}}.dump()).get();
         };
         auto seal_catalogue=[&]{
-            if(dynamic_child)verify_child_catalogue(request.tools,approval_bindings,*child_caps,*child_preset);
+            Json offered_bindings=Json::array();
+            for(const auto& binding:approval_bindings)if(std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==binding.at("alias").get<std::string>();}))offered_bindings.push_back(binding);
+            if(dynamic_child)verify_child_catalogue(request.tools,offered_bindings,*child_caps,*child_preset);
             if(dynamic_root){
                 validate_dynamic_owner(id,provider.model);
                 auto presets=root_caps->presets;
@@ -686,7 +692,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,agent_authority_credentials(persistence_,child));
                 }
-                root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,approval_bindings),std::move(presets)).get();
+                root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,offered_bindings),std::move(presets)).get();
             }
         };
         auto offer_orchestration=[&]{
@@ -761,6 +767,15 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             guidance_tool_host=make_agent_guidance_tool_host(journal_,std::move(owner));
         }
         std::string planning_continuation;
+        std::unique_ptr<AgentCallableToolHost> callable_tool_host;
+        if(!xlang_tools.empty()){
+            AgentCallableToolOwnerContext owner;owner.run_id=id;owner.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():(workspace_?workspace_->identity():"workspace:none");
+            owner.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;owner.repository_context=repository_context.get();owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
+            owner.permission_layers=inherited_permission_layers;if(!agent_permission_rules.empty())owner.permission_layers.push_back(agent_permission_rules);
+            owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==name;});};
+            for(const auto& [name,tool]:xlang_tools)owner.bindings.push_back({tool->definition,[tool](const std::string& arguments,std::stop_token stop){return tool->execution==XlangPythonExecution::worker?tool->callable.invoke_json_worker(arguments,stop):tool->callable.invoke_json(arguments,stop);}});
+            callable_tool_host=make_agent_callable_tool_host(journal_,std::move(owner));
+        }
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
             if(actual.paused||actual.root.id!=id||actual.call_id.empty()||actual.result_json.empty())throw DynamicOutcomeUnrecorded("Dynamic report does not match its actual running owner");
             journal_.commit_dynamic_tool_turn(id,actual.call_id).get();
@@ -1001,11 +1016,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         auto frozen=execution_settings;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;frozen.selectable_models=models();
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {
-                        JsonSchema schema(registered->second->definition.input_schema_json);schema.validate_object(call.arguments_json);
-                        const auto& tool=*registered->second;
-                        output=Json::parse(tool.execution==XlangPythonExecution::worker?
-                            tool.callable.invoke_json_worker(call.arguments_json,token):
-                            tool.callable.invoke_json(call.arguments_json,token));
+                        if(!callable_tool_host)throw ToolAccessDenied("Trusted callable owner is unavailable");
+                        AgentCallableInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+                        invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():(workspace_?workspace_->identity():"workspace:none");invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
+                        invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
+                        auto result=callable_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);guidance_ready=result.success;
                     } else {
                         throw ToolAccessDenied("Tool has no admitted backend implementation");
                     }
@@ -1067,6 +1082,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const McpOutcomeUnrecorded&) {throw;}
       catch(const A2aOutcomeUnrecorded&) {throw;}
       catch(const ProcessOutcomeUnrecorded&) {throw;}
+      catch(const AgentCallableOutcomeUnrecorded&) {throw;}
+      catch(const AgentCallableEffectUncertain&) {return terminate(RunState::failed,{{"reason","trusted_callable_effect_uncertain"}});}
       catch(const ProcessEffectUncertain&) {return terminate(RunState::failed,{{"reason","process_effect_uncertain"}});}
       catch(const McpEffectUncertain&) {return terminate(RunState::failed,{{"reason","mcp_effect_uncertain"}});}
       catch(const A2aEffectUncertain&) {return terminate(RunState::failed,{{"reason","a2a_effect_uncertain"}});}

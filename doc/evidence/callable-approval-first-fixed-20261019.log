@@ -1,0 +1,61 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start   7: native_permission_grants_contract
+ 1/14 Test   #7: native_permission_grants_contract .....................   Passed    0.19 sec
+      Start  22: native_dynamic_plan_contract
+ 2/14 Test  #22: native_dynamic_plan_contract ..........................   Passed    0.23 sec
+      Start  24: native_dynamic_plan_repository_contract
+ 3/14 Test  #24: native_dynamic_plan_repository_contract ...............   Passed    4.16 sec
+      Start  34: native_dynamic_plan_engine_contract
+ 4/14 Test  #34: native_dynamic_plan_engine_contract ...................   Passed    4.25 sec
+      Start  35: native_dynamic_plan_mcp_contract
+ 5/14 Test  #35: native_dynamic_plan_mcp_contract ......................   Passed   11.70 sec
+      Start  45: native_graph_runner_contract
+ 6/14 Test  #45: native_graph_runner_contract ..........................   Passed   10.27 sec
+      Start  74: native_language_server_diagnostics_contract
+ 7/14 Test  #74: native_language_server_diagnostics_contract ...........   Passed    4.20 sec
+      Start  75: native_language_server_configuration_contract
+ 8/14 Test  #75: native_language_server_configuration_contract .........   Passed    0.30 sec
+      Start  79: native_xlang3_shared_memory_worker_contract
+ 9/14 Test  #79: native_xlang3_shared_memory_worker_contract ...........   Passed    1.23 sec
+      Start  81: native_agent_runner_contract
+10/14 Test  #81: native_agent_runner_contract ..........................***Failed    0.90 sec
+Agent runner failure evidence retained at C:\Users\shaw9\AppData\Local\Temp\xmind-agent-YxPbWL
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-agent-YxPbWL\state.sqlite C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib C:\Users\shaw9\AppData\Local\Temp\xmind-agent-YxPbWL\workspace http://127.0.0.1:61017 C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe
+Uncertain callable must execute its actual effect exactly once
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-agent-YxPbWL\\state.sqlite C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-agent-YxPbWL\\workspace http://127.0.0.1:61017 C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe',
+  stdout: '',
+  stderr: 'Uncertain callable must execute its actual effect exactly once\r\n'
+}
+
+Node.js v22.19.0
+
+      Start 135: native_permission_waiter_contract
+11/14 Test #135: native_permission_waiter_contract .....................   Passed    1.00 sec
+      Start 148: native_provider_profiles_contract
+12/14 Test #148: native_provider_profiles_contract .....................   Passed    0.54 sec
+      Start 149: native_provider_profile_lsp_responsiveness_contract
+13/14 Test #149: native_provider_profile_lsp_responsiveness_contract ...   Passed    0.77 sec
+      Start 150: native_provider_profile_runtime_contract
+14/14 Test #150: native_provider_profile_runtime_contract ..............   Passed    5.83 sec
+
+93% tests passed, 1 tests failed out of 14
+
+Total Test time (real) =  45.59 sec
+
+The following tests FAILED:
+	 81 - native_agent_runner_contract (Failed)
+Errors while running CTest

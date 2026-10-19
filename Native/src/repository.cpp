@@ -1,4 +1,5 @@
 #include "agentflow/repository.hpp"
+#include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/backend_lease.hpp"
 #include "agentflow/graph.hpp"
@@ -428,6 +429,10 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
         if(!proposal.contains("alias")||!proposal["alias"].is_string())throw Conflict("Dynamic MCP proposal lacks its captured alias");
         model_tool=proposal["alias"].get<std::string>();
         if(model_tool.size()!=52||!model_tool.starts_with("mcp_")||model_tool.substr(4).find_first_not_of("0123456789abcdef")!=std::string::npos)throw Conflict("Dynamic MCP alias is invalid");
+    }else if(spec.tool=="xlang3_tool"){
+        const auto proposal=Json::parse(spec.arguments_json);
+        if(!proposal.is_object()||proposal.size()!=2||!proposal.contains("alias")||!proposal["alias"].is_string()||!proposal.contains("arguments")||!proposal["arguments"].is_object())throw Conflict("Dynamic callable proposal lacks its captured alias and arguments");
+        model_tool=proposal["alias"].get<std::string>();validate_agent_tool_allowlist(std::vector<std::string>{model_tool});
     }else throw Conflict("Dynamic child effect adapter is not registered");
     if(std::find(preset.tools.begin(),preset.tools.end(),model_tool)==preset.tools.end())throw Conflict("Dynamic child effect tool is outside its immutable preset");
     const auto catalogue=Json::parse(plan.capabilities.tool_catalog_json);
@@ -435,6 +440,12 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
     const Json* captured=nullptr;
     for(const auto& tool:catalogue["tools"])if(tool.is_object()&&tool.contains("name")&&tool["name"].is_string()&&tool["name"]==model_tool){if(captured)throw Conflict("Dynamic child effect catalogue is ambiguous");captured=&tool;}
     if(!captured)throw Conflict("Dynamic child effect lacks its sealed catalogue entry");
+    if(spec.tool=="xlang3_tool"){
+        if(!captured->contains("xlang3_binding")||!(*captured)["xlang3_binding"].is_object())throw Conflict("Dynamic callable lacks its sealed registration");
+        const auto& binding=(*captured)["xlang3_binding"];
+        if(binding.size()!=4||binding.value("kind",std::string{})!="trusted_xlang3_callable"||binding.value("alias",std::string{})!=model_tool||!binding.contains("input_schema_json")||binding["input_schema_json"]!=captured->at("input_schema_json")||(binding.value("execution",std::string{})!="worker"&&binding.value("execution",std::string{})!="in_process"))throw Conflict("Dynamic callable registration differs from its sealed catalogue");
+        JsonSchema schema(binding["input_schema_json"].get<std::string>());schema.validate_object(Json::parse(spec.arguments_json).at("arguments").dump());return;
+    }
     if(spec.tool!="mcp_tool")return;
     if(!captured->contains("mcp_binding")||!(*captured)["mcp_binding"].is_object())throw Conflict("Dynamic MCP tool lacks its native registry binding");
     const auto& binding=(*captured)["mcp_binding"];const auto proposal=Json::parse(spec.arguments_json);

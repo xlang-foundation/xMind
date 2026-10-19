@@ -1,5 +1,23 @@
 # Current native validation
 
+## Trusted xlang3 callable approvals — 2026-10-19
+
+A real callable regression reproduced an explicit agent `ask` rule being
+ignored. Registered custom tools now use an owned backend host and the same
+operation journal as coding effects. Explicit ask pauses before dispatch;
+allow records the actual result, while deny leaves the marker absent. Default
+trusted calls auto-approve without another prompt. A callable that writes and
+then raises leaves an uncertain operation and stops without a model retry.
+Dynamic child proposals must match captured callable registration metadata.
+
+The complete build and 14 focused contracts pass in 52.36 seconds with source,
+SDK, pure libraries, dependencies and binary sets frozen. The first build's
+C++ type error and first fixed 13/14 fixture newline mismatch are retained;
+the marker correction leaves production bytes unchanged. This candidate is
+not installed. Full-suite, live-client, dedicated dynamic custom-callable
+coverage and authenticated process-bound AgentRunner placement remain open.
+[Regression and exact results](evidence/callable-approval-20261019.json).
+
 ## Separate run-journal workspace admission — 2026-10-19
 
 The existing AgentRunner overload accepted a separate run journal but still

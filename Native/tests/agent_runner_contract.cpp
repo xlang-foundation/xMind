@@ -63,6 +63,60 @@ public:
     unsigned calls=0;
 private:std::string folder_;
 };
+class CallableAskModel final:public AgentModelGateway {
+public:
+    CallableAskModel(std::string marker,bool denied):marker_(std::move(marker)),denied_(denied){}
+    ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
+        ModelCompletion reply;if(++calls==1){reply.finish_reason="tool_calls";reply.tool_calls.push_back({"trusted-ask-call","trusted_probe",Json{{"marker",marker_},{"text","xMind"}}.dump()});return reply;}
+        require(calls==2&&request.messages.back().role==MessageRole::tool,"Trusted callable must continue from its actual owned result");
+        const auto result=Json::parse(request.messages.back().content);
+        if(denied_)require(result["error"]["code"]=="permission_denied","Denied callable must report the recorded controller decision");
+        else require(result["text"]=="XMIND","Allowed callable must return its actual xlang3 result");
+        reply.content="Inspected the actual trusted callable outcome.";reply.finish_reason="stop";return reply;
+    }
+    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected callable count");}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected callable compaction");}
+    unsigned calls=0;
+private:std::string marker_;bool denied_;
+};
+void callable_ask_contract(PersistenceService& store,const std::vector<std::string>& imports,const std::filesystem::path& root){
+    const auto code=root.parent_path()/"trusted-callable";std::filesystem::create_directory(code);
+    std::ofstream(code/"permission_probe.py",std::ios::binary)<<"def invoke(arguments):\n    with open(arguments['marker'], 'a', encoding='utf-8') as output:\n        output.write('called\\n')\n    return {'text': arguments['text'].upper()}\n";
+    for(const bool denied:{false,true}){
+        const std::string id=denied?"trusted-ask-denied":"trusted-ask-allowed";const auto marker=code/(id+".txt");
+        store.create_session(id,"Actual trusted callable approval fixture").get();AgentSettings settings;settings.workspace=root.string();settings.a2a_enabled=false;
+        settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-callable-ask",Capability::supported,Capability::supported};settings.run_timeout=10s;
+        settings.permission_rules={{"trusted_probe","*","ask"}};
+        settings.xlang_python_tools.push_back({ModelToolDefinition{"trusted_probe","Explicit registered side-effect probe",R"({"type":"object","properties":{"marker":{"type":"string"},"text":{"type":"string"}},"required":["marker","text"],"additionalProperties":false})"},XlangPythonCallable(imports[0],imports[1],code.string(),"permission_probe","invoke")});
+        const auto model=std::make_shared<CallableAskModel>(marker.string(),denied);AgentRunner runner(store,std::move(settings),{}, {},false,model);runner.start(id,id,"Invoke the explicitly registered probe under ask policy.");std::stop_source cancel;
+        auto execution=std::async(std::launch::async,[&]{return runner.execute(id,cancel.get_token());});
+        try{
+            std::optional<Operation> proposal;const auto until=std::chrono::steady_clock::now()+5s;
+            while(std::chrono::steady_clock::now()<until&&!proposal){
+                if(execution.wait_for(0ms)==std::future_status::ready){(void)execution.get();throw std::runtime_error("Trusted callable ask must pause for approval before invocation");}
+                for(const auto& op:store.pending_operations_for_session(id).get())if(op.spec.run_id==id){proposal=op;break;}
+                if(!proposal)std::this_thread::sleep_for(5ms);
+            }
+            require(proposal.has_value(),"Trusted callable ask must publish its approval request");require(!std::filesystem::exists(marker),"Trusted callable must not run before controller approval");
+            require(proposal->spec.tool=="xlang3_tool"&&Json::parse(proposal->spec.arguments_json).at("alias")=="trusted_probe","Callable approval must retain the actual registered alias");
+            store.decide_operation(proposal->id,denied?OperationDecision::deny:OperationDecision::allow,"fixture-controller").get();require(execution.get().state==RunState::completed,"Callable approval and denial must continue the actual model loop");
+            require(std::filesystem::exists(marker)!=denied,"Only an approved callable may produce the actual marker");
+            require(store.operation(proposal->id).get().state==(denied?OperationState::denied:OperationState::succeeded),"Callable must retain its actual terminal journal outcome");
+        }catch(...){cancel.request_stop();if(execution.valid())try{(void)execution.get();}catch(...){}throw;}
+    }
+    // A trusted callable may mutate before raising. Preserve uncertainty and
+    // stop the run instead of feeding a retryable error back to the model.
+    std::ofstream(code/"uncertain_probe.py",std::ios::binary)<<"def invoke(arguments):\n    with open(arguments['marker'], 'a', encoding='utf-8') as output:\n        output.write('once')\n    raise RuntimeError('after effect')\n";
+    const std::string id="trusted-effect-uncertain";const auto marker=code/(id+".txt");store.create_session(id,"Actual callable uncertainty fixture").get();
+    const auto isolated=code/"uncertain-workspace";std::filesystem::create_directory(isolated);
+    AgentSettings settings;settings.workspace=isolated.string();settings.a2a_enabled=false;settings.run_timeout=10s;
+    settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-callable-uncertainty",Capability::supported,Capability::supported};
+    settings.xlang_python_tools.push_back({ModelToolDefinition{"trusted_probe","Registered callable that raises after its effect",R"({"type":"object","properties":{"marker":{"type":"string"},"text":{"type":"string"}},"required":["marker","text"],"additionalProperties":false})"},XlangPythonCallable(imports[0],imports[1],code.string(),"uncertain_probe","invoke")});
+    const auto model=std::make_shared<CallableAskModel>(marker.string(),false);AgentRunner runner(store,std::move(settings),{}, {},false,model);runner.start(id,id,"Invoke the explicitly registered callable once.");
+    require(runner.execute(id).state==RunState::failed&&model->calls==1,"Post-dispatch callable failure must stop without a model retry");
+    std::ifstream actual(marker,std::ios::binary);const std::string content((std::istreambuf_iterator<char>(actual)),{});require(content=="once","Uncertain callable must execute its actual effect exactly once");
+    const auto operations=store.operations(id).get();require(operations.size()==1&&operations.front().state==OperationState::uncertain,"Post-dispatch callable failure must retain an uncertain operation");
+}
 void split_journal_membership(PersistenceService& journal,const std::vector<std::string>& imports,const std::filesystem::path& root){
     const auto base=root.parent_path(),attached_path=base/"journal-attached",later_path=base/"journal-later";
     std::filesystem::create_directory(attached_path);std::filesystem::create_directory(later_path);
@@ -108,6 +162,7 @@ int main(int argc,char** argv) {
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
         split_journal_membership(store,roots,std::filesystem::path(argv[4]));
+        callable_ask_contract(store,roots,std::filesystem::path(argv[4]));
         const std::string base=argv[5],synthetic="engine-protocol-test-not-a-real-key";
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         store.put_credential("test","provider","provider:chat","Synthetic test credential",std::move(secret),0).get();
