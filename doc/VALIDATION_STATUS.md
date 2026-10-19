@@ -1,5 +1,32 @@
 # Current native validation
 
+## Installed coding sidebar 0.1.36 — 2026-10-19
+
+The actual VS Code CLI installs and lists 0.1.36 from source ba7113e. The
+missing-model composer fix now ships in both clients. All 2,448 archive entries
+verify; 2,445 installed non-package-metadata payloads match, package metadata
+matches the stage, and all 2,402 native runtime files verify. Native inputs
+and bytes are unchanged from the complete 152-test qualification.
+
+The exact package stage passes 427 extension and 147 browser tests, with all
+17,439 stage files unchanged. The exact-revision GitHub workflow also passes
+427/147, verified from its digest-checked artifact. Four cross-host asset
+differences are line endings only; 14 assets are byte-identical.
+
+The 0.1.35 backup verifies 2,447 files. User settings, six prior profile names,
+15 owner process identities, five older runtimes and six existing pages remain.
+Post-install browser restoration takes 2.06 seconds, retains Claude/model and
+all 11 messages/five usage records, and reports no page errors, failed HTTP
+responses or effect submissions. Served renderer bytes match installed 0.1.36.
+
+Two initial archive observer failures concerned VSCE's readme.md and LICENSE.txt
+naming; explicit path mappings retain exact byte comparisons. The same archive
+was verified and installed without rebuilding. Those failures remain recorded.
+No editor window was opened; actual VS Code pane activation, current hosted
+native acceptance, Rust Analyzer revalidation and process-bound agents remain
+open. This is an installed coding checkpoint, not release completion.
+[Package, installation, hosted checks and preserved sessions](evidence/coding-package-0.1.36-20261019.json).
+
 ## Composer model-selection guidance — 2026-10-19
 
 The shared browser/VS Code renderer no longer submits a new single-agent
