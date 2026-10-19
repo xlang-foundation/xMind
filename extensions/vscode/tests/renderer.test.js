@@ -178,6 +178,25 @@ test('model picker explains that a saved provider must be chosen before model di
  }finally{r.dom.window.close();}
 });
 
+test('a saved provider without a selected model keeps the prompt and guides selection before sending',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  const profiles=[{id:'claude-key-only',provider:'anthropic',model:'',route_id:'anthropic.messages',revision:1}],routes=[{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}];
+  r.send({type:'capabilities',execution:true,models:[]});
+  r.send({type:'provider-profiles',active:'claude-key-only',profiles,routes});
+  r.send({type:'model-list',models:[{id:'fixture-claude-model'}]});
+  const prompt=doc.getElementById('prompt'),send=doc.getElementById('send');prompt.value='Build the current project';
+  assert.equal(send.disabled,true);assert.match(send.title,/Choose a model/);
+  const before=r.posted.length;prompt.dispatchEvent(new r.dom.window.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
+  assert.equal(r.posted.length,before);assert.equal(prompt.value,'Build the current project');assert.match(doc.getElementById('status').textContent,/Choose a model/);assert.equal(doc.activeElement,doc.getElementById('model'));
+  r.send({type:'model-list',models:[{id:'fixture-claude-model'}],model:'fixture-claude-model'});
+  assert.equal(send.disabled,false);send.click();assert.equal(r.posted.at(-1).type,'send');assert.equal(r.posted.at(-1).prompt,prompt.value);
+  r.send({type:'model-list',models:[]});assert.equal(send.disabled,true);
+  r.send({type:'graphs',graphs:[{id:'fixture.tool-only',node_count:1,executable:true}],selected:'fixture.tool-only'});assert.equal(send.disabled,false);
+  r.send({type:'graphs',graphs:[]});r.send({type:'sessions',sessions:[{id:'fixture-session',title:'Current',active:true}],selected:'fixture-session'});r.send({type:'status',text:'running'});assert.equal(send.disabled,false);assert.equal(send.textContent,'Queue ↑');
+ }finally{r.dom.window.close();}
+});
+
 test('DeepSeek Settings enrollment uses the footer model chooser and saved response metrics',()=>{
   const r=renderer(),doc=r.dom.window.document,key='synthetic-deepseek-renderer-key',model='deepseek-flash';
   try{

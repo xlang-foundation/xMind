@@ -1,0 +1,75 @@
+{
+  "problem": "A saved provider without a chosen model could submit a new prompt and receive HTTP 400 before execution.",
+  "change": "Guard new single-agent submission in the shared renderer; preserve the draft and focus the footer chooser. Keep graph and active-session queuing behavior.",
+  "baseline": {
+    "logSha256": "3e328626352d1c42b21fd30388e9d7a0b063fe7f41f4b3b5cba0757dcb3bf2da",
+    "passed": false,
+    "tests": 1,
+    "failed": 1,
+    "log": "C:/xMindNativeValidation/missing-model-composer-baseline-20261019.log"
+  },
+  "qualification": {
+    "recordedAt": "2026-10-19T06:10:01.039Z",
+    "version": "0.1.35-composer-working-tree",
+    "sourceParent": "0eb8989bd3202cf807eb7413c6163ac8cd9ca437",
+    "workingTreePatchSha256": "cfc3793a9cdbfe078da906e914865e601b9a7283572abcdbd3f2910f066346a1",
+    "sourceFiles": 99,
+    "dependencyFiles": 18598,
+    "browserAssets": 18,
+    "extension": {
+      "exitCode": 0,
+      "tests": 427,
+      "passed": 427,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "7393c8c8015ebdc0c613302cdfde996a2624e80efc9627acaf9cde3b0309e110"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "4ac4e86b660e238f6e9f19863881f2321b98e3d39d234a5ba6dad48864520fc8"
+    },
+    "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+    "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+    "passed": true
+  },
+  "liveRenderer": {
+    "installedExtensionChanged": false,
+    "backendRestarted": false,
+    "priorSha256": "31a5208f55487f726143b4b268bc7ba8272951d80737ac9ba47b3ef85863b137",
+    "qualifiedGate": "missing-model-composer-client-gates-20261019/gate.json",
+    "backup": "C:\\xMindNativeValidation\\browser-chat-before-composer-20261019.js",
+    "live": "C:\\xMindNativeValidation\\browser-assets-0.1.35-20261019\\chat.js",
+    "candidateSha256": "f3eb7c0a25ad704196231a95959eb4011bcf4f198b0ae56c4122fee5ddd38d6f"
+  },
+  "browser": {
+    "scope": "Read-only current webpage check in sandboxed headless Edge; no visible external-browser or VS Code acceptance",
+    "url": "http://127.0.0.1:49702/ui/",
+    "readyElapsedMs": 2010,
+    "historyElapsedMs": 2135,
+    "historyMessages": 11,
+    "usageRecords": 5,
+    "modelBeforeReload": "claude-sonnet-4-6",
+    "modelAfterReload": "claude-sonnet-4-6",
+    "providerBeforeReload": "claude",
+    "providerAfterReload": "claude",
+    "sendEnabledWithRestoredModel": true,
+    "effectPosts": 0,
+    "errors": [],
+    "failedHttpResponses": 0,
+    "passed": true,
+    "rawReceipts": "C:/xMindNativeValidation/webpage-composer-qualified-20261019"
+  },
+  "installedExtensionChanged": false,
+  "visibleEditorTested": false,
+  "releaseAccepted": false
+}

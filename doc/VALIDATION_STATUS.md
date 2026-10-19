@@ -1,5 +1,27 @@
 # Current native validation
 
+## Composer model-selection guidance — 2026-10-19
+
+The shared browser/VS Code renderer no longer submits a new single-agent
+prompt when a saved provider has no selected model. Send explains the missing
+selection; Enter keeps the draft and focuses the existing footer chooser.
+Acknowledged model lists refresh Send immediately. Model-free graph execution
+and queuing into an active conversation retain their existing behavior.
+
+The regression fails against the preceding renderer and passes after the fix.
+Complete suites pass **427 extension / 147 browser** tests with unchanged
+source, dependency and generated asset file sets and hashes. CI's exact
+inventory is updated for the additional regression.
+
+The qualified renderer is active on http://127.0.0.1:49702/ui/ without a backend
+restart or task replay. A fresh sandboxed headless Edge check restores Claude,
+claude-sonnet-4-6, all 11 messages and five usage records; Send is enabled and
+the model survives a second reload. No page errors, failed HTTP responses or
+effect submissions occur. The installed 0.1.35 extension is unchanged and
+does not yet contain this follow-up renderer change. Visible editor acceptance
+remains open.
+[Regression, complete suites and live page check](evidence/composer-model-selection-20261019.json).
+
 ## Browser model selection survives refresh — 2026-10-19
 
 A fresh sandboxed headless Edge check of the preserved 0.1.35 page restores
