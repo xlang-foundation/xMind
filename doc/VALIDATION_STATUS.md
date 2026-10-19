@@ -1,5 +1,32 @@
 # Current native validation
 
+## Complete native suite and actual diagnostic repair loop — 2026-10-19
+
+Source b44bbde/executable 178dfc41 passes **all 153 local native contracts** in
+1089.24 seconds. The complete build and test run preserve all 2,621 project
+files, 16 SDK headers, 1,870 pure-library files, 76 SDK runtime files, 18,598
+Node dependency files, 128 native binaries and their file sets. The run begins
+from committed, clean source. This complete suite does not include the separate
+Rust semantic leaf whose intermittent startup failure remains unresolved.
+[Complete native result and raw test log](evidence/lsp-diagnostics-full-native-20261019.json).
+
+One actual configured-Claude task through the unified CLI/native backend then
+completes the diagnostic repair loop in a fresh isolated TypeScript workspace.
+It observes native language diagnostics TS2322 and the actual compiler exit 2,
+requests one reviewed edit to check.ts, then observes clean diagnostics and
+compiler exit 0. An independent compiler invocation also exits zero. The public
+string export is preserved; only its invalid numeric initializer changes to
+"Hello, world!". AGENTS.md and tsconfig.json stay unchanged and no other project
+file is created.
+
+The run completes with 13 messages, two diagnostic queries and five supplied
+model-usage records. There is one root submission and one controller-reviewed
+file operation, with no task replay. Product source/runtime checks stay exact;
+the settled private test backend is retired by verified identity. Existing
+installed 0.1.39 and page 59450 remain unchanged. Packaging the new runtime,
+hosted-native acceptance and actual VS Code pane testing remain open.
+[Actual model, native file operation, diagnostics and compiler receipts](evidence/live-typescript-diagnostics-repair-20261019.json).
+
 ## Native push diagnostics and Windows URI matching — 2026-10-19
 
 Uninstalled native candidate 178dfc41 adds negotiated push/pull diagnostics,

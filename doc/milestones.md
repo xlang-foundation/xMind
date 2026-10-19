@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Complete native diagnostics and actual coding repair — 2026-10-19
+
+The current native source passes all 153 local contracts in 1089.24 seconds,
+with complete source/SDK/library/dependency/binary file sets unchanged. One real
+configured-Claude task then observes a TypeScript diagnostic and compiler
+failure, makes one reviewed native file edit, and verifies clean diagnostics
+and compiler success. An independent compiler check passes. There is exactly
+one task submission, 13 saved messages and two diagnostic queries. Existing
+installed 0.1.39 and the user webpage remain unchanged while packaging is
+pending. The separately retained Rust startup failure and actual editor pane
+acceptance remain open.
+[Native suite](evidence/lsp-diagnostics-full-native-20261019.json),
+[real coding-agent receipts](evidence/live-typescript-diagnostics-repair-20261019.json).
+
 ## Installed 0.1.39 shared renderer — 2026-10-19
 
 The table-readability change is installed through the real VS Code CLI and

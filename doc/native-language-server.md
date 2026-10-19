@@ -33,8 +33,17 @@ VS Code pane acceptance. Five related native contracts pass. The initial Rust
 leaf fails call-site navigation; a separate logged diagnostic passes without
 product changes. That startup failure remains unexplained.
 
-This update is **not in installed 0.1.39**. Complete-current qualification and
-packaging remain pending; the existing browser/backend stays unchanged.
+The complete current local native suite now passes **153/153**. A separate
+actual Claude coding task observes TS2322 and compiler exit 2, makes one
+reviewed initializer edit, and confirms clean diagnostics/compiler exit 0.
+An independent compiler check also passes; the recorded run has 13 messages
+and two diagnostic queries. This closes that specific model-driven repair-loop
+check. It does not close the earlier intermittent Rust startup failure.
+[Complete native qualification](evidence/lsp-diagnostics-full-native-20261019.json),
+[actual coding-agent repair](evidence/live-typescript-diagnostics-repair-20261019.json).
+
+This update is **not in installed 0.1.39**. Packaging, hosted-native and actual
+editor-pane acceptance remain pending; the existing browser/backend stays unchanged.
 [Source, baseline failures and actual integration evidence](evidence/native-lsp-push-diagnostics-20261019.json).
 Protocol references: [LSP specification](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/),
 [TypeScript language server](https://github.com/typescript-language-server/typescript-language-server).
@@ -91,8 +100,9 @@ and applies them through the editor formatter API. A rendered VS Code Extension
 Development Host formatted and saved a Rust fixture through the configured
 provider-profile backend; the saved source also passed `rustfmt --check`.
 AgentRunner's model-visible language-server tool stays read-only. Packaged
-extension acceptance, formatter discovery/configuration and a complete
-edit/build/diagnose repair loop remain open; see [validation status](VALIDATION_STATUS.md) and
+extension acceptance, formatter discovery/configuration and a rendered editor
+edit/build/diagnose repair loop remain open. The native CLI TypeScript loop above
+has its own actual-model acceptance. See [validation status](VALIDATION_STATUS.md) and
 [the 2026-10-11 formatting contract](evidence/native-language-server-formatting-local-20261011.json).
 
 ## Multi-folder editor routing

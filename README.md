@@ -20,7 +20,7 @@ no Marketplace publication or general release is implied.
 
 | Check | Verified scope |
 | --- | --- |
-| Native backend | Complete local run: 151/152 pass. The sole failure is a stale synthetic process-tool catalogue expectation; its correction and two related contracts pass, with all 127 native binaries unchanged. A new complete-suite pass is not claimed. |
+| Native backend | New native source passes all 153 local contracts with frozen inputs and binaries; installed 0.1.39 retains its preceding runtime until the next package. |
 | Clients | Final package passes 428 extension/147 browser fixtures locally and on hosted CI; all 2,448 archive entries and 2,445 installed payloads plus package metadata verify. |
 | Installed coding | The unchanged runtime was verified in 0.1.38 through actual Claude execution: xlang3 FastAPI/Vite start, response completion with both services alive, then explicit shutdown. The preceding 0.1.37 task separately proves a Vue edit, 32 xlang3 tests and production build. |
 | Shared CLI and persistence | Installed 0.1.39 CLI reuses the existing backend and exact history. Its earlier 0.1.38 CLI task completes actual xlang3 API checks. Browser reload retains all 36 messages and 14 supplied usage records with no effect replay. |
@@ -46,9 +46,11 @@ remains unverified.
 [live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
 
 New native source also supports push-only language-server diagnostics and
-Node-style Windows file URIs. Real TypeScript server/compiler checks pass;
-complete-current qualification and packaging remain pending. Installed 0.1.39
-is unchanged. [Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
+Node-style Windows file URIs. All 153 native checks and an actual Claude
+diagnostics → reviewed edit → compiler repair task pass. Packaging and
+hosted-native qualification remain pending; installed 0.1.39 is unchanged.
+The separate Rust semantic-startup failure remains open.
+[Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
 
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic

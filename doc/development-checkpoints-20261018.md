@@ -231,3 +231,10 @@ Current acceptance remains in [validation status](VALIDATION_STATUS.md).
 - Current native full run finishes 151/152 in 985.94 seconds: dynamic MCP synthetic peer rejects the intentionally offered stop_process. Exact catalogue correction passes 3/3 related contracts in 21.37 seconds; all 127 binaries remain identical. Do not combine these into a new full pass. Original logs/evidence: doc/evidence/service-lifecycle-native-checkpoint-20261019.json. Installed direct Windows console resumes p-a38/session d32c5c4fe01bdf159270b6efa3beaaac, displays human history/actual metrics, accepts /runs and exits zero. History remains 36 messages and runs unchanged, backend 27692 reused; no task submitted. Initial nested harness JSON-output assertion fails and is retained. Actual VS Code pane/direct-console resize remain unverified. See doc/evidence/console-resume-0.1.38-20261019.json.
 
 Current acceptance remains in [validation status](VALIDATION_STATUS.md).
+
+
+## Verbatim focused diagnostics checkpoint archived 2026-10-19
+
+- Uninstalled native candidate exe 178dfc41 adds negotiated push/pull LSP diagnostics, explicit-version filtering, changed-buffer cache invalidation, visible pull failures and Node-style Windows URI matching. New protocol regression fails against installed-era code; final five related native contracts pass. Actual TypeScript server 5.3.0/compiler 6.0.3 return TS2322, unsaved clean, disk error again and saved clean; compiler exits 2 then 0. All inputs/sets rechecked. Initial Rust leaf fails call-site definition (2/3); separate logged diagnostic passes (2/2) without product change. Root cause remains open; do not hide/combine them. Current inventory 153 local/154 hosted; new full suite and packaging still pending. Installed 0.1.39/native 5d3f7941 and page 59450 remain unchanged. See doc/evidence/native-lsp-push-diagnostics-20261019.json.
+
+Current acceptance remains in [validation status](VALIDATION_STATUS.md).
