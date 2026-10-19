@@ -5,6 +5,34 @@
 const streamOnlyEventKinds=new Set(['model.text','model.refusal','model.tool_delta','model.reasoning','model.usage','model.finish','model.done','process.output']);
 function eventRequiresSnapshot(event){return !streamOnlyEventKinds.has(event.kind);}
 
+// Queue following is a view selection intent, separate from session activity.
+// Keep its epoch so a later explicit inspection cannot be replaced by a claim.
+class QueuedRunSelection {
+  constructor(){this.observed=new Map();}
+  remember(item,session,epoch){
+    if(this.observed.has(item.id))return;
+    this.observed.set(item.id,{session,epoch});
+    while(this.observed.size>128)this.observed.delete(this.observed.keys().next().value);
+  }
+  observe(items,session,epoch,selected){
+    for(const item of items)if(item.state==='queued'){
+      const prior=this.observed.get(item.id);
+      // Initial session restoration can invalidate metadata before choosing any
+      // run. There is no inspected root to retain in that case.
+      if(selected===undefined&&prior?.session===session)prior.epoch=epoch;
+      else this.remember(item,session,epoch);
+    }
+  }
+  next(items,runs,selected,session,epoch){
+    if(runs.some(run=>run.id===selected&&['queued','running','paused'].includes(run.state)))return;
+    return items.find(item=>{const intent=this.observed.get(item.id);return item.state==='claimed'&&typeof item.run_id==='string'&&item.run_id&&item.run_id!==selected&&intent?.session===session&&intent.epoch===epoch;});
+  }
+  advance(id,session,from,to){
+    this.observed.delete(id);
+    for(const intent of this.observed.values())if(intent.session===session&&intent.epoch===from)intent.epoch=to;
+  }
+}
+
 function backendOrigin(baseUrl) {
     const url = new URL(baseUrl);
     if (url.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(url.hostname) || url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
@@ -1125,5 +1153,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};

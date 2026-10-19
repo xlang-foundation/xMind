@@ -38,6 +38,31 @@ test('browser attaches to a run claimed by the backend after the active run sett
  try{await view.refreshInbox();await new Promise(resolve=>setTimeout(resolve,300));inbox=[{...item,state:'claimed',run_id:run.id}];await new Promise(resolve=>setTimeout(resolve,300));assert.equal(view.runId,run.id);assert.ok(posted.some(message=>message.type==='queued-started'&&message.run.id===run.id));assert.equal(streams.at(-1).id,run.id);}
  finally{view.dispose();for(const stream of streams)stream.resolve({reason:'aborted',cursor:0});}
 });
+for(const inspect of [false,true])test(`browser queued claim ${inspect?'preserves explicit inspection':'follows an already-known active run'}`,async()=>{
+ const old={id:'old',session_id:'session',state:'running',parent_id:'',graph_root:false},next={...old,id:'next'},item={id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'},posted=[],streams=[];
+ const client={baseUrl:'http://127.0.0.1:60405',sessionInbox:async()=>({items:[item]}),status:async id=>{assert.equal(id,next.id);return next;},runs:async()=>[{...old,state:'completed'},next],events:async()=>[],operations:async()=>[],history:async()=>[],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve})),run:async()=>{throw Error('A claimed input must not be admitted again');}};
+ const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId=old.id;view.runs=[old];view.health={agent_execution:true,session_inbox_dispatch:true};
+ try{await view.refreshInbox();if(inspect)view.stop();Object.assign(item,{state:'claimed',run_id:next.id});view.runs=[{...old,state:'completed'},next];await view.refreshInbox();await new Promise(resolve=>setTimeout(resolve,350));assert.equal(view.runId,inspect?old.id:next.id);assert.equal(posted.some(message=>message.type==='queued-started'&&message.run.id===next.id),!inspect);}
+ finally{view.dispose();for(const stream of streams)stream.resolve({reason:'aborted',cursor:0});}
+});
+
+test('browser waits for committed terminal stream acknowledgement before following a queued claim',async()=>{
+ const old={id:'old',session_id:'session',state:'running',parent_id:'',graph_root:false},next={...old,id:'next'},item={id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'},streams=[],posted=[];
+ const client={baseUrl:'http://127.0.0.1:60405',sessionInbox:async()=>({items:[item]}),status:async id=>id===old.id?{...old,state:'completed'}:next,runs:async()=>[{...old,state:'completed'},next],events:async()=>[],operations:async()=>[],history:async()=>[],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId=old.id;view.runs=[old];view.health={agent_execution:true,session_inbox_dispatch:true};
+ try{
+  view.watch();await new Promise(resolve=>setImmediate(resolve));await view.refreshInbox();Object.assign(item,{state:'claimed',run_id:next.id});view.runs=[{...old,state:'completed'},next];await view.refreshInbox();await new Promise(resolve=>setTimeout(resolve,300));assert.equal(view.runId,old.id);assert.equal(streams[0].options.signal.aborted,false);
+  streams[0].resolve({reason:'terminal',cursor:0});await new Promise(resolve=>setTimeout(resolve,350));assert.equal(view.runId,next.id);assert.ok(posted.some(message=>message.type==='queued-started'&&message.run.id===next.id));
+ }finally{view.dispose();for(const stream of streams)stream.resolve({reason:'aborted',cursor:0});}
+});
+
+test('browser reports a queued-selection persistence failure after advancing its observation epoch',async()=>{
+ const old={id:'old',session_id:'session',state:'completed',parent_id:'',graph_root:false},next={...old,id:'next',state:'running'},item={id:'queued',session_id:'session',content:'Saved follow-up',state:'queued'},posted=[];
+ const view=new BrowserController({sessionInbox:async()=>({items:[item]}),status:async()=>next,runs:async()=>[old,next]},message=>posted.push(message),{save:()=>{throw Error('Synthetic view selection save failed');}});view.session='session';view.runId=old.id;view.runs=[old];view.health={agent_execution:true,session_inbox_dispatch:true};
+ try{await view.refreshInbox();Object.assign(item,{state:'claimed',run_id:next.id});view.runs=[old,next];await view.refreshInbox();await new Promise(resolve=>setTimeout(resolve,350));assert.equal(view.runId,next.id);assert.ok(posted.some(message=>message.type==='error'&&message.text==='Synthetic view selection save failed'));}
+ finally{view.dispose();}
+});
+
 test('browser removes only the selected idle session after confirmation and clears its transcript',async()=>{
  const calls=[],posted=[],prompts=[];let sessions=[{id:'session-a',title:'Selected conversation'}];const client={sessions:async()=>sessions,deleteSession:async id=>{calls.push(id);sessions=[];return null;}};const view=new BrowserController(client,message=>posted.push(message),{confirm:message=>{prompts.push(message);return true;}});view.session='session-a';view.runs=[{id:'settled-run',state:'completed'}];view.historyPager.session='session-a';view.historyPager.messages=[{id:'msg_1',seq:1,role:'assistant',data:{content:'private history'}}];
  try{await view.handle({type:'delete-session',id:'session-a'});assert.deepEqual(calls,['session-a']);assert.match(prompts[0],/Selected conversation/);assert.match(prompts[0],/Immutable context and audit records remain stored/);assert.equal(view.session,undefined);assert.deepEqual(view.historyPager.snapshot(),{history:[],historyHasMore:false,historyLoading:false});assert.ok(posted.some(message=>message.type==='sessions'&&message.sessions.length===0));assert.deepEqual(posted.at(-1),{type:'session-delete-result',id:'session-a',success:true});assert.ok(!JSON.stringify(posted).includes('private history'));}

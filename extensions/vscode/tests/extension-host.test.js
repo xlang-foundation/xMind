@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('../client');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -190,7 +190,7 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':key==='openOnStartup'&&options.openOnStartup===true?true:undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(file,data)=>{const value=JSON.parse(data);if(file==='labeled-fixture-marker')ready.push(value);else previewFailures.push(value);}}:originalRequire(name);
@@ -419,10 +419,42 @@ test('VS Code leaves queued-prompt dispatch to the backend and can cancel pendin
  let admission;const pending={id:'inbox-restart',session_id:'saved',content:'Recover queued VS Code prompt',state:'queued',created_ms:1};
  const recoveredOptions={health:{agent_execution:true,session_inbox_dispatch:true},runs:[],inboxItems:[pending],onAdmission:body=>{admission=body;return {ok:true,status:202,json:async()=>({id:'recovered-queued-run',session_id:'saved',state:'queued',graph_root:false,parent_id:'',node_id:''})};}},recovered=harness(recoveredOptions);
  await recovered.commands.get('agentflow.open')();const recoveredView=recovered.views[0];
- try{recoveredView.receive({type:'ready'});await until(()=>recoveredView.posted.some(message=>message.type==='inbox'));
+ try{recoveredView.receive({type:'ready'});await until(()=>recoveredView.posted.some(message=>message.type==='status'&&message.text==='Ready'));
   assert.equal(admission,undefined);assert.ok(!recovered.requests.includes('/v1/runs'),'A backend-owned inbox must not be admitted a second time by VS Code');assert.deepEqual(recoveredOptions.inboxItems,[pending]);assert.ok(!recovered.errors.length);
   const observe=recovered.scheduledTasks.findLast(task=>task.delay===250);assert.ok(observe,'The sidebar must watch for the native backend to claim recovered input');const run={id:'recovered-queued-run',session_id:'saved',state:'running',graph_root:false,parent_id:'',node_id:''};pending.state='claimed';pending.run_id=run.id;recoveredOptions.runs=[run];await observe.callback();assert.ok(recoveredView.posted.some(message=>message.type==='queued-started'&&message.run.id===run.id));assert.ok(recovered.streams.some(stream=>stream.id===run.id&&stream.options.scope==='run'),'VS Code must attach to the backend-created run');assert.ok(!recovered.requests.includes('/v1/runs'));
  }finally{recoveredView.close();}
+});
+
+for(const inspect of [false,true])test(`sidebar queued claim ${inspect?'preserves explicit inspection':'follows an already-known active run after terminal drain'}`,async()=>{
+ const active={id:'active',session_id:'saved',state:'running',parent_id:'',node_id:'',graph_root:false},next={...active,id:'next'},options={health:{agent_execution:true,session_inbox_dispatch:true},runs:[active],inboxItems:[]},h=harness(options);
+ await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(message=>message.type==='inbox'));
+  view.receive({type:'send',prompt:'Follow-up from this sidebar'});await until(()=>view.posted.some(message=>message.type==='queued-input'));
+  if(inspect){view.receive({type:'select-run',id:active.id});await until(()=>h.streams.length===2);}
+  const feed=h.streams.at(-1),completed={...active,state:'completed'};options.runs=[completed,next];Object.assign(options.inboxItems[0],{state:'claimed',run_id:next.id});
+  await feed.options.onObservation({run:completed,scope:'run',after:0});assert.equal(view.posted.findLast(message=>message.type==='runs').selected,active.id);assert.equal(feed.options.signal.aborted,false,'Drain committed terminal frames before following the queue');
+  await feed.options.onEvent({seq:2,run_id:active.id,kind:'run.completed',data:{}});feed.resolve({reason:'terminal',cursor:2});await until(()=>h.streams.some(stream=>stream.id===next.id));
+  const observe=h.scheduledTasks.findLast(task=>task.delay===250);if(!inspect)assert.ok(observe,'Observe a claimed queued input even when its run is already known and active');if(observe)await observe.callback();
+  assert.equal(view.posted.findLast(message=>message.type==='runs').selected,inspect?active.id:next.id);
+  assert.equal(view.posted.some(message=>message.type==='queued-started'&&message.run.id===next.id),!inspect);assert.ok(!h.requests.includes('/v1/runs'),'Observation must never re-admit the saved prompt');
+ }finally{view.close();}
+});
+
+test('sidebar follows successive queued claims across automatic selection epochs without replay',async()=>{
+ const first={id:'first',session_id:'saved',state:'running',parent_id:'',node_id:'',graph_root:false},second={...first,id:'second'},third={...first,id:'third'},options={health:{agent_execution:true,session_inbox_dispatch:true},runs:[first],inboxItems:[]},h=harness(options);
+ await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(message=>message.type==='inbox'));
+  for(const prompt of ['First follow-up','Second follow-up']){view.receive({type:'send',prompt});await until(()=>view.posted.some(message=>message.type==='queued-input'&&message.item.content===prompt));}
+  for(const [prior,next,index]of [[first,second,0],[second,third,1]]){
+   const feed=h.streams.findLast(stream=>stream.id===prior.id),completed={...prior,state:'completed'};
+   options.runs=index===0?[completed,next]:[{...first,state:'completed'},completed,next];Object.assign(options.inboxItems[index],{state:'claimed',run_id:next.id});
+   await feed.options.onObservation({run:completed,scope:'run',after:0});await feed.options.onEvent({seq:2,run_id:prior.id,kind:'run.completed',data:{}});feed.resolve({reason:'terminal',cursor:2});await until(()=>h.streams.some(stream=>stream.id===next.id));
+   await h.scheduledTasks.findLast(task=>task.delay===250).callback();assert.equal(view.posted.findLast(message=>message.type==='runs').selected,next.id);
+  }
+  assert.deepEqual(view.posted.filter(message=>message.type==='queued-started').map(message=>message.run.id),[second.id,third.id]);assert.ok(!h.requests.includes('/v1/runs'));assert.equal(options.inboxItems.length,2);
+ }finally{view.close();}
 });
 
 test('VS Code queues workspace file references with the prompt and membership revision',async()=>{

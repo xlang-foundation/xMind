@@ -2,7 +2,7 @@
 const vscode = require('vscode');
 const crypto = require('node:crypto');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand } = require('./client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview,canRestoreFileOperation}=require('./patch-review');
@@ -143,25 +143,35 @@ async function activate(context) {
   function schedulePermissionRefresh(version=generation){clearTimeout(permissionTimer);if(!panel||!client||!sessionId)return;permissionTimer=setTimeout(async()=>{permissionTimer=undefined;if(!panel||version!==generation)return;try{await refreshSessionPermissions(client,sessionId,version);}catch(error){if(panel&&version===generation)post({type:'error',text:error.message});}if(panel&&version===generation)schedulePermissionRefresh(version);},2500);}
   const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   let inboxDispatching=false;
+  const inboxSelection=new QueuedRunSelection();
   async function refreshInbox(target=client,session=sessionId,version=generation){
     if(!target||!session)return [];
     const observed=await target.sessionInbox(session);if(target!==client||session!==sessionId||version!==generation||!panel)return [];
     if(!observed||!Array.isArray(observed.items)||observed.items.length>128||observed.items.some(item=>!item||item.session_id!==session||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.content!=='string'||!['queued','claimed'].includes(item.state)))throw new Error('Invalid native session inbox.');
+    inboxSelection.observe(observed.items,session,version,runId);
     post({type:'inbox',items:observed.items});scheduleInboxObservation(target,session,version,observed.items);return observed.items;
   }
   function scheduleInboxObservation(target,session,version,items){
     clearTimeout(inboxObservationTimer);inboxObservationTimer=undefined;
-    if(health?.session_inbox_dispatch!==true||target!==client||session!==sessionId||version!==generation||!panel||busySession())return;
-    const queued=items.some(item=>item.state==='queued'),unobserved=items.some(item=>item.state==='claimed'&&item.run_id&&!sessionRuns.some(run=>run.id===item.run_id));if(!queued&&!unobserved)return;
+    if(health?.session_inbox_dispatch!==true||target!==client||session!==sessionId||version!==generation||!panel)return;
+    if(sessionRuns.some(run=>run.id===runId&&['queued','running','paused'].includes(run.state)))return;
+    const queued=items.some(item=>item.state==='queued'),claimed=inboxSelection.next(items,sessionRuns,runId,session,version);if(!queued&&!claimed)return;
     inboxObservationTimer=setTimeout(async()=>{
       inboxObservationTimer=undefined;if(target!==client||session!==sessionId||version!==generation||!panel)return;
-      try{const latest=await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||busySession())return;
-        const item=latest.find(value=>value.state==='claimed'&&value.run_id&&!sessionRuns.some(run=>run.id===value.run_id));if(!item)return;
-        const run=await target.status(item.run_id);if(target!==client||session!==sessionId||version!==generation||busySession())return;
+      const selected=runId;
+      let observationVersion=version;
+      try{const latest=await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||runId!==selected)return;
+        const item=inboxSelection.next(latest,sessionRuns,runId,session,version);if(!item)return;
+        if(eventSubscription?.pin&&eventSubscription.pin.root===runId&&!eventSubscription.finished&&streamCurrent(eventSubscription.pin))return;
+        const run=await target.status(item.run_id);if(target!==client||session!==sessionId||version!==generation||runId!==selected)return;
         if(run.id!==item.run_id||run.session_id!==session||run.parent_id)return;
-        const runs=await target.runs(session);if(target!==client||session!==sessionId||version!==generation)return;
-        clearTimeout(inboxObservationTimer);inboxObservationTimer=undefined;runId=run.id;cursor=0;clearGraph();reviewed.clear();post({type:'operations',operations:[]});sessionRuns=runs;presentRuns();await context.workspaceState.update(runStateKey,{...connectionState(),session_id:session,id:run.id});post({type:'queued-started',item,run});await poll();watch();
-      }catch(error){if(target===client&&session===sessionId&&version===generation&&panel)post({type:'error',text:error.message});}
+        const runs=await target.runs(session);if(target!==client||session!==sessionId||version!==generation||runId!==selected)return;
+        if(!runs.some(value=>value.id===run.id&&value.session_id===session&&!value.parent_id))return;
+        stop();inboxSelection.advance(item.id,session,version,generation);const adopted=generation;observationVersion=adopted;
+        runId=run.id;cursor=0;clearGraph();reviewed.clear();post({type:'operations',operations:[]});post({type:'reset-run'});sessionRuns=runs;presentRuns();await context.workspaceState.update(runStateKey,{...connectionState(),session_id:session,id:run.id});
+        if(target!==client||session!==sessionId||adopted!==generation||!panel)return;
+        post({type:'queued-started',item,run});await poll();watch();
+      }catch(error){if(target===client&&session===sessionId&&observationVersion===generation&&panel)post({type:'error',text:error.message});}
     },250);
   }
   async function queuePrompt(prompt,files=[],workspaceRevision){
@@ -169,6 +179,7 @@ async function activate(context) {
     const id='inbox_'+crypto.randomBytes(16).toString('hex'),item=await target.enqueueSessionInput(session,prompt,id,files,workspaceRevision);
     if(target!==client||session!==sessionId||version!==generation||!panel)return;
     if(!item||item.id!==id||item.session_id!==session||item.content!==prompt||!['queued','claimed'].includes(item.state))throw new Error('Native inbox acknowledgement changed.');
+    inboxSelection.remember(item,session,version);
     await refreshInbox(target,session,version);if(target!==client||session!==sessionId||version!==generation||!panel)return;
     post({type:'queued-input',item});if(!busySession())await drainInbox();
   }
@@ -305,9 +316,9 @@ async function activate(context) {
         // This optional read must not turn a committed-stream observation into
         // a rejected consumer callback. Leave run/event ownership intact and
         // expose the failed inbox refresh without dispatching anything again.
-        if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version).catch(error=>{if(version===generation&&panel)post({type:'error',text:error.message});});
-        else await drainInbox();
+        if(health?.session_inbox_dispatch!==true)await drainInbox();
       }
+      if(health?.session_inbox_dispatch===true)await refreshInbox(client,sessionId,version).catch(error=>{if(version===generation&&panel)post({type:'error',text:error.message});});
       await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();
     } }
   }
