@@ -45,6 +45,11 @@ remains unverified.
 [Installed package and preserved sessions](doc/evidence/coding-package-0.1.39-20261019.json),
 [live webpage evidence and captures](doc/evidence/table-readability-20261019.json).
 
+New native source also supports push-only language-server diagnostics and
+Node-style Windows file URIs. Real TypeScript server/compiler checks pass;
+complete-current qualification and packaging remain pending. Installed 0.1.39
+is unchanged. [Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
+
 Earlier, separately verified browser tasks cover the official filesystem MCP
 server, workspace creation/switching, attached-folder execution, automatic
 explorer refresh and explicit idle-owner recovery. Existing sessions remain

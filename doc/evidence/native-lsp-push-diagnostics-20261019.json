@@ -1,0 +1,315 @@
+{
+  "recordedAt": "2026-10-19T08:14:26.627Z",
+  "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd",
+  "sourceFiles": {
+    "Native/CMakeLists.txt": "ff69deaf15eb27db451b0ea3dba040eb5f599aa18af64fc3e461524786a18eaa",
+    "Native/src/language_server.cpp": "8aa6c840dcd2d0c250c22d6cbad013bc7b58aa63e0e73ebbef8b4f56adf6d4ef",
+    "Native/tests/language_server_diagnostics_contract.cpp": "5f555e4e09a1dff294004b31e147b2fcdb2d86d855845a4cc021dce196923681",
+    "Native/tests/language_server_diagnostics_peer.mjs": "47281be9d5f55b50ab0eb5805987c6ebea663faae59581aadae60d6ace2693da",
+    "Tools/ci-native.ps1": "67f3823303281f84d475a64946d07e7e400c3aaf546d80d0f97a4a4b64ee692f"
+  },
+  "baseline": {
+    "recordedAt": "2026-10-19T08:00:44.961Z",
+    "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd",
+    "sourcePatchSha256": "e104a951e7e857fde1f3e5920d7078f742e47ac491ffbbcaa2ce53cc5dad5378",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 31596,
+      "launchedAt": "2026-10-19T08:00:07.537Z",
+      "completedAt": "2026-10-19T08:00:38.562Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b563c137646b86a59764e54583027530daeb1f454ed98625c33c84748dd34963"
+    },
+    "test": {
+      "pid": 36424,
+      "launchedAt": "2026-10-19T08:00:41.994Z",
+      "completedAt": "2026-10-19T08:00:42.323Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "638369d33764692a1e2723642924563853c2c00c61f05ebef98124bd9c995fb4"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 0.28,
+    "projectFiles": 2621,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 128,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "baselineActualFailure": "An explicit stale publication cannot satisfy the current version",
+  "baselineObserverExpectedDifferentError": true,
+  "baselineObserverResult": "The wrapper correctly records the failed test and unchanged inputs, then its overly specific error-text assertion also fails. Original receipts remain unchanged.",
+  "initialPushFix": {
+    "recordedAt": "2026-10-19T08:04:00.716Z",
+    "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd",
+    "sourcePatchSha256": "a7bf366eee89c4fac55d4bb8613b0605e9e69e47ef7a0bf91b3022627d5c9e73",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 34184,
+      "launchedAt": "2026-10-19T08:02:18.257Z",
+      "completedAt": "2026-10-19T08:03:38.249Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "77be77f39601b9243d0594f49a56a5b66bf6cf914e6de4c4fad423439801c443"
+    },
+    "test": {
+      "pid": 41180,
+      "launchedAt": "2026-10-19T08:03:41.961Z",
+      "completedAt": "2026-10-19T08:03:57.996Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d524921b0cfcd5ce6325e482fd3d646159564f96a4043ccbfe7814b57553e80b"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 15.99,
+    "projectFiles": 2621,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 128,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "1b4c1bee6c9533c770e0d27d6a5aa20bcaca5c06f446f28b9f5de44e6de77337",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "initialActualTypeScriptFailure": {
+    "startedAt": "2026-10-19T08:04:19.632Z",
+    "scope": "Actual TypeScript language server and compiler through current native authenticated HTTP and embedded xlang3 SQLite; no provider inference or editor activation",
+    "languageServerVersion": "5.3.0",
+    "typescriptVersion": "6.0.3",
+    "queries": [
+      {
+        "label": "actual-error",
+        "status": 500,
+        "bodySha256": "4fdff08c77b863592b95fe7925af09e7c4e2695087fe15f6b6aa509a9928ce5b"
+      }
+    ],
+    "compiler": [],
+    "taskSubmissions": 0,
+    "cpythonExecuted": false,
+    "owner": {
+      "pid": 69972,
+      "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+      "birth": "2026-10-19T08:04:19.6361170Z"
+    },
+    "passed": false,
+    "error": "{\"detail\":\"Backend operation failed\"}\n\n500 !== 200\n",
+    "testOwnerTerminal": {
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    "ownedIdleTestServerRetired": true,
+    "completedAt": "2026-10-19T08:04:51.539Z"
+  },
+  "actualWireEvidence": {
+    "inputUri": "file:///C:/xMindNativeValidation/real-typescript-diagnostics-20261019/workspace/check.ts",
+    "publishedUri": "file:///c%3A/xMindNativeValidation/real-typescript-diagnostics-20261019/workspace/check.ts",
+    "diagnosticCode": 2322,
+    "traceSha256": "694d96d8d8d0e800d6a78c223f400f62a7661eb8ca1f00657df2fb0324f12f18"
+  },
+  "finalFocusedNative": {
+    "recordedAt": "2026-10-19T08:09:24.096Z",
+    "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd",
+    "sourcePatchSha256": "ef033610ae2d8669106bca2d549a9e7b8411572daea83050b08610ee307bc717",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 21860,
+      "launchedAt": "2026-10-19T08:07:40.705Z",
+      "completedAt": "2026-10-19T08:09:01.942Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "77be77f39601b9243d0594f49a56a5b66bf6cf914e6de4c4fad423439801c443"
+    },
+    "test": {
+      "pid": 58372,
+      "launchedAt": "2026-10-19T08:09:05.696Z",
+      "completedAt": "2026-10-19T08:09:21.319Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "464c7b0053ec2c42ff19cbe83c5578fb8f32dfac33e45f1f5043f1d6abdcda08"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 15.57,
+    "projectFiles": 2621,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 128,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "actualTypeScript": {
+    "startedAt": "2026-10-19T08:09:28.694Z",
+    "scope": "Actual TypeScript language server and compiler through current native authenticated HTTP and embedded xlang3 SQLite; no provider inference or editor activation",
+    "languageServerVersion": "5.3.0",
+    "typescriptVersion": "6.0.3",
+    "queries": [
+      {
+        "label": "actual-error",
+        "status": 200,
+        "bodySha256": "26887ad39a81ac8fcf82e88b66f6436176eab6a92f006bc36bea32c831fd7247"
+      },
+      {
+        "label": "actual-unsaved-clean",
+        "status": 200,
+        "bodySha256": "1960f93b411f84878c1e6b47157c5f9fd266e66bd02056a105606fc007651ae1"
+      },
+      {
+        "label": "actual-disk-error-again",
+        "status": 200,
+        "bodySha256": "26887ad39a81ac8fcf82e88b66f6436176eab6a92f006bc36bea32c831fd7247"
+      },
+      {
+        "label": "actual-saved-clean",
+        "status": 200,
+        "bodySha256": "1960f93b411f84878c1e6b47157c5f9fd266e66bd02056a105606fc007651ae1"
+      }
+    ],
+    "compiler": [
+      {
+        "label": "compiler-before",
+        "pid": 45376,
+        "startedAt": "2026-10-19T08:09:30.781Z",
+        "completedAt": "2026-10-19T08:09:31.794Z",
+        "exitCode": 2,
+        "signal": null,
+        "logSha256": "cc3cb43ee5fff9d5f6bfdccb35ff7932fdb14d2c6ccf1007fbfa681c2530a314"
+      },
+      {
+        "label": "compiler-after",
+        "pid": 10032,
+        "startedAt": "2026-10-19T08:09:32.972Z",
+        "completedAt": "2026-10-19T08:09:33.924Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "taskSubmissions": 0,
+    "cpythonExecuted": false,
+    "owner": {
+      "pid": 21788,
+      "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+      "birth": "2026-10-19T08:09:28.6971110Z"
+    },
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "libraryRuntimeAndSourceInputsUnchanged": true,
+    "passed": true,
+    "testOwnerTerminal": {
+      "exitCode": null,
+      "signal": "SIGTERM"
+    },
+    "ownedIdleTestServerRetired": true,
+    "completedAt": "2026-10-19T08:09:35.641Z"
+  },
+  "actualRustInitial": {
+    "terminal": {
+      "pid": 31696,
+      "launchedAt": "2026-10-19T08:10:12.451Z",
+      "completedAt": "2026-10-19T08:11:17.446Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "8672be4aff65f3f22085f5f7c900ce41382d0dc04ec0bbd22816bcfd90b0ec36"
+    },
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "reason": "Call-site definition remained null; prior semantic-startup issue remains unexplained."
+  },
+  "actualRustDiagnostic": {
+    "recordedAt": "2026-10-19T08:12:52.209Z",
+    "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd",
+    "sourcePatchSha256": "ef033610ae2d8669106bca2d549a9e7b8411572daea83050b08610ee307bc717",
+    "projectFiles": 2619,
+    "sdkSourceFiles": 16,
+    "pureLibraries": 1870,
+    "sdkRuntimeFiles": 76,
+    "rustToolchainBinLibLibexecFiles": 3722,
+    "rustShimFiles": 4,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 128,
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "rustAnalyzerSha256": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27",
+    "actualRustAnalyzerContractsPassed": 1,
+    "cargoSemanticFixturePassed": true,
+    "allSourceSdkLibrariesToolchainDependenciesBinariesAndSetsUnchanged": true,
+    "modelScope": "Explicit synthetic gateway for AgentRunner language dispatch and alias regression; actual Rust Analyzer and xlang3 callable; no live provider key",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "fullNativeSuiteRun": false,
+    "installed": false,
+    "workerIPCImplemented": false,
+    "cpythonExecuted": false,
+    "build": {
+      "buildRun": false,
+      "reusedQualifiedFocusedBuild": true,
+      "sourceParent": "010341a21fda107f6b67911cf042aa9746f641cd"
+    },
+    "realLanguage": {
+      "pid": 61004,
+      "launchedAt": "2026-10-19T08:12:26.983Z",
+      "completedAt": "2026-10-19T08:12:48.629Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a1772453cda53c3c87e15a939c1dedd73b8ef944f8c4e08ab0e1dfc821cb55d0"
+    },
+    "passed": true,
+    "productQualifiedByThisLeaf": false,
+    "focusedNativeProof": "lsp-diagnostics-uri-fixed-20261019/gate.json"
+  },
+  "rustFailureExplained": false,
+  "allFocusedSourceSdkPureLibrariesRuntimeDependenciesBinariesAndFileSetsRecheckedAfterIntegration": true,
+  "publicLibraryScope": "Pure source under xlang3; no CPython execution",
+  "taskSubmissions": 0,
+  "actualModelRepairLoopAccepted": false,
+  "installedRuntimeChanged": false,
+  "installedVersion": "0.1.39",
+  "currentCompleteNativeSuiteRun": false,
+  "localNativeInventory": 153,
+  "hostedNativeExpectedInventory": 154,
+  "releaseAccepted": false
+}

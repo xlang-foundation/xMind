@@ -1,5 +1,35 @@
 # Current native validation
 
+## Native push diagnostics and Windows URI matching — 2026-10-19
+
+Uninstalled native candidate 178dfc41 adds negotiated push/pull diagnostics,
+version filtering, cache invalidation on changed buffers and file-URI matching
+for Node-style escaped Windows drives. A new framed-protocol regression fails
+against the installed-era code because it accepts a stale document version.
+The first push implementation passes synthetic checks but fails the actual
+TypeScript HTTP query. Captured wire traffic identifies the URI spelling
+difference; the final implementation handles it and the new peer tests it.
+
+Five related native contracts pass in 15.57 seconds after a complete build,
+with source, SDK, libraries, dependencies, binaries and file sets unchanged.
+Actual TypeScript server 5.3.0/compiler 6.0.3 pass four authenticated native
+queries: disk TS2322, unsaved clean, disk TS2322 again and saved clean. Compiler
+exit codes are 2 before and 0 after. No inference task is submitted, and the
+fixture changes are made by the validation harness. An independent closing
+check verifies all source/SDK/pure-library/runtime/dependency/binary inputs.
+
+Actual Rust's first three-test leaf finishes 2/3: call-site definition remains
+null, while cargo and multi-folder symbols pass. A fresh logged diagnostic
+passes its two tests without product changes, including actual Rust navigation,
+formatting and owned AgentRunner queries. Original failures remain retained;
+the underlying semantic-startup issue is not explained or closed.
+
+The new diagnostics contract makes the local inventory 153 and intended hosted
+inventory 154. No new complete suite or installed-native acceptance is claimed.
+Installed 0.1.39/native 5d3f7941 and page 59450 remain unchanged. Project
+acceptance remains open beyond this coding diagnostics increment.
+[Exact baseline, source, native gates, real server/compiler and retained Rust results](evidence/native-lsp-push-diagnostics-20261019.json).
+
 ## Installed 0.1.39 sidebar update — 2026-10-19
 
 0.1.39 is installed and listed by the actual VS Code CLI. Source 39dce6e

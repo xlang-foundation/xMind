@@ -1,0 +1,17 @@
+Test project C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/real-language-ctest
+    Start 1: cargo_semantic_fixture
+1/3 Test #1: cargo_semantic_fixture ...........   Passed    1.70 sec
+    Start 2: actual_owned_language_agent
+2/3 Test #2: actual_owned_language_agent ......***Failed   62.42 sec
+Real rust-analyzer must resolve a call-site definition through the native editor query; received: null
+
+    Start 3: actual_multifolder_language
+3/3 Test #3: actual_multifolder_language ......   Passed    0.49 sec
+
+67% tests passed, 1 tests failed out of 3
+
+Total Test time (real) =  64.95 sec
+
+The following tests FAILED:
+	  2 - actual_owned_language_agent (Failed)
+Errors while running CTest

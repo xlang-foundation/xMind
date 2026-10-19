@@ -7,6 +7,38 @@ can select only a registered server, a workspace-relative file, and one of
 cannot choose the executable, arguments, environment, or a path outside the
 active workspace. Language servers cannot apply edits through this client.
 
+## Diagnostics source update — 2026-10-19
+
+The new native source negotiates pull diagnostics through the server's
+`diagnosticProvider` capability. A push-only server instead supplies
+`textDocument/publishDiagnostics`; xMind advertises version support, waits for
+an actual publication within the configured request deadline, and clears the
+cached publication when the opened buffer changes. Explicitly mismatched
+document versions are ignored. Unversioned publications remain server-reported
+snapshots, with no claim that they prove all project analysis has finished.
+Missing publications and failed pull requests are errors, never invented clean
+results or a fallback to a cached empty publication.
+
+Notifications bind to an already opened document after decoding file-URI
+escapes and normalizing its Windows drive letter. This handles TypeScript's
+`file:///c%3A/...` response to a `file:///C:/...` request without opening a new
+path. Path spelling beyond the drive letter is preserved.
+
+Actual TypeScript language server 5.3.0 and compiler 6.0.3 validate the native
+HTTP path: TS2322 on disk, clean diagnostics for an unsaved correction, the
+disk error again, then clean diagnostics after saving the fixture correction.
+The compiler exits 2 before and 0 after. This is a real language-server/compiler
+check with harness-authored fixture changes, not a model-driven repair loop or
+VS Code pane acceptance. Five related native contracts pass. The initial Rust
+leaf fails call-site navigation; a separate logged diagnostic passes without
+product changes. That startup failure remains unexplained.
+
+This update is **not in installed 0.1.39**. Complete-current qualification and
+packaging remain pending; the existing browser/backend stays unchanged.
+[Source, baseline failures and actual integration evidence](evidence/native-lsp-push-diagnostics-20261019.json).
+Protocol references: [LSP specification](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/),
+[TypeScript language server](https://github.com/typescript-language-server/typescript-language-server).
+
 Register servers from a trusted JSON or YAML file at backend startup. For
 example:
 

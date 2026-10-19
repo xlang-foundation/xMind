@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 74: native_language_server_diagnostics_contract
+1/1 Test #74: native_language_server_diagnostics_contract ...***Failed    0.27 sec
+An explicit stale publication cannot satisfy the current version
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.28 sec
+
+The following tests FAILED:
+	 74 - native_language_server_diagnostics_contract (Failed)
+Errors while running CTest

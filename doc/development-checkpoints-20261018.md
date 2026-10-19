@@ -224,3 +224,10 @@ Current acceptance remains in [validation status](VALIDATION_STATUS.md).
 - Installed 0.1.38: client b47f280, native ffee124/exe 5d3f7941, SDK 58a8aab/DLL 1ff2a8e, manifest 4f786ac7. Actual CLI install/list, 2,448 archive entries, 2,445 installed payloads plus metadata and 2,402 runtime files verify. Local/exact hosted clients pass 427/147; stage 17,439 files unchanged. Backup 0.1.37/settings/six prior profile names, 18 checked older owners/six runtimes/seven pages survive. Current complete/hosted native, actual editor pane, Rust Analyzer, process-bound agents and release remain open. See doc/evidence/coding-package-0.1.38-20261019.json.
 
 Current acceptance remains in [validation status](VALIDATION_STATUS.md).
+
+
+## Verbatim pre-diagnostics native checkpoint archived 2026-10-19
+
+- Current native full run finishes 151/152 in 985.94 seconds: dynamic MCP synthetic peer rejects the intentionally offered stop_process. Exact catalogue correction passes 3/3 related contracts in 21.37 seconds; all 127 binaries remain identical. Do not combine these into a new full pass. Original logs/evidence: doc/evidence/service-lifecycle-native-checkpoint-20261019.json. Installed direct Windows console resumes p-a38/session d32c5c4fe01bdf159270b6efa3beaaac, displays human history/actual metrics, accepts /runs and exits zero. History remains 36 messages and runs unchanged, backend 27692 reused; no task submitted. Initial nested harness JSON-output assertion fails and is retained. Actual VS Code pane/direct-console resize remain unverified. See doc/evidence/console-resume-0.1.38-20261019.json.
+
+Current acceptance remains in [validation status](VALIDATION_STATUS.md).

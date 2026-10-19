@@ -1,0 +1,15 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 74: native_language_server_diagnostics_contract
+1/5 Test #74: native_language_server_diagnostics_contract .....   Passed    2.03 sec
+    Start 75: native_language_server_configuration_contract
+2/5 Test #75: native_language_server_configuration_contract ...   Passed    0.31 sec
+    Start 81: native_agent_runner_contract
+3/5 Test #81: native_agent_runner_contract ....................   Passed    8.86 sec
+    Start 96: native_agent_read_tool_host_contract
+4/5 Test #96: native_agent_read_tool_host_contract ............   Passed    1.24 sec
+    Start 99: native_workspace_tools_contract
+5/5 Test #99: native_workspace_tools_contract .................   Passed    3.10 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  15.57 sec

@@ -20,6 +20,18 @@ std::string file_uri(const std::filesystem::path& path){
     return uri;
 }
 std::string lower(std::string value){for(auto& c:value)c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));return value;}
+std::string diagnostic_uri_key(std::string_view uri){
+    // Bind publications to an already opened document. Node LSP servers encode
+    // the Windows drive separator and lowercase its letter; Rust Analyzer may
+    // preserve the original URI spelling. Do not canonicalize filesystem paths
+    // or introduce a new document through an unsolicited publication.
+    if(uri.size()>32768||uri.size()<8||lower(std::string(uri.substr(0,8)))!="file:///"||uri.find_first_of("?#")!=std::string_view::npos)return {};
+    std::string key="file:///";
+    const auto hex=[](unsigned char c)->int{if(c>='0'&&c<='9')return c-'0';if(c>='a'&&c<='f')return c-'a'+10;if(c>='A'&&c<='F')return c-'A'+10;return -1;};
+    for(std::size_t i=8;i<uri.size();++i){unsigned char c=uri[i];if(c=='%'){if(i+2>=uri.size())return {};const auto high=hex(uri[i+1]),low=hex(uri[i+2]);if(high<0||low<0)return {};c=static_cast<unsigned char>(high*16+low);i+=2;}if(c==0)return {};key.push_back(static_cast<char>(c));}
+    if(key.size()>9&&key[9]==':'&&key[8]>='A'&&key[8]<='Z')key[8]=static_cast<char>(key[8]-'A'+'a');
+    return key;
+}
 std::string header_value(std::string_view headers,std::string_view wanted){
     std::size_t start=0;bool found=false;std::string result;
     while(start<headers.size()){
@@ -56,8 +68,39 @@ struct LanguageServerClient::Impl {
     std::uint64_t next=1;
     bool initialized=false;
     bool document_formatting=false;
+    bool pull_diagnostics=false;
 
     Impl(WorkspaceTools& value,const LanguageServerProfile& setting):workspace(value),profile(setting){}
+
+    void observe(const Json& message,Clock::time_point deadline,std::stop_token cancel){
+        if(!message.is_object())return;
+        if(message.value("method",std::string{})=="textDocument/publishDiagnostics"){
+            const auto payload=message.value("params",Json::object());const auto uri=diagnostic_uri_key(payload.value("uri",std::string{}));
+            const auto document=documents.find(uri);if(document==documents.end())return;
+            if(!payload.contains("diagnostics")||!payload["diagnostics"].is_array())throw std::runtime_error("Invalid language-server diagnostics publication");
+            if(payload.contains("version")){
+                if(!payload["version"].is_number_integer()||payload["version"]<0)throw std::runtime_error("Invalid language-server diagnostic version");
+                if(payload["version"]!=document->second.first)return;
+            }
+            published_diagnostics[uri]=payload["diagnostics"];return;
+        }
+        if(!message.contains("method")||!message.contains("id"))return;
+        const auto server_method=message.value("method",std::string{});Json response={{"jsonrpc","2.0"},{"id",message["id"]}};
+        if(server_method=="workspace/configuration"){
+            const auto requested=message.value("params",Json::object()).value("items",Json::array());Json result=Json::array();
+            if(requested.is_array())for(std::size_t i=0;i<requested.size();++i)result.push_back(Json::object());
+            response["result"]=std::move(result);
+        }else if(server_method=="workspace/applyEdit")response["result"]={{"applied",false},{"failureReason","Language servers cannot edit workspace files through this read-only client"}};
+        else if(server_method=="window/workDoneProgress/create"||server_method=="client/registerCapability"||server_method=="client/unregisterCapability"||server_method=="window/showMessageRequest")response["result"]=nullptr;
+        else response["error"]={{"code",-32601},{"message","Client request is not supported"}};
+        channel->send(response,deadline,cancel);
+    }
+
+    Json published(const std::string& uri,Clock::time_point deadline,std::stop_token cancel){
+        const auto key=diagnostic_uri_key(uri);
+        while(!published_diagnostics.contains(key))observe(channel->receive(deadline,cancel),deadline,cancel);
+        return Json{{"kind","full"},{"items",published_diagnostics.at(key)}};
+    }
 
     Json exchange(const std::string& method,Json params,Clock::time_point deadline,std::stop_token cancel){
         for(unsigned attempt=0;attempt<4;++attempt){
@@ -66,10 +109,6 @@ struct LanguageServerClient::Impl {
             for(;;){
                 const auto message=channel->receive(deadline,cancel);
                 if(!message.is_object())continue;
-                if(message.value("method",std::string{})=="textDocument/publishDiagnostics"){
-                    const auto payload=message.value("params",Json::object());const auto uri=payload.value("uri",std::string{});
-                    if(!uri.empty())published_diagnostics[uri]=payload.value("diagnostics",Json::array());continue;
-                }
                 if(message.value("id",Json())==id){
                     if(message.contains("error")){
                         const auto& error=message["error"];
@@ -82,17 +121,7 @@ struct LanguageServerClient::Impl {
                     }
                     return message.value("result",Json());
                 }
-                if(message.contains("method")&&message.contains("id")){
-                    const auto server_id=message["id"];const auto server_method=message.value("method",std::string{});Json response={{"jsonrpc","2.0"},{"id",server_id}};
-                    if(server_method=="workspace/configuration"){
-                        const auto requested=message.value("params",Json::object()).value("items",Json::array());Json result=Json::array();
-                        if(requested.is_array())for(std::size_t i=0;i<requested.size();++i)result.push_back(Json::object());
-                        response["result"]=std::move(result);
-                    }else if(server_method=="workspace/applyEdit")response["result"]={{"applied",false},{"failureReason","Language servers cannot edit workspace files through this read-only client"}};
-                    else if(server_method=="window/workDoneProgress/create"||server_method=="client/registerCapability"||server_method=="client/unregisterCapability"||server_method=="window/showMessageRequest")response["result"]=nullptr;
-                    else response["error"]={{"code",-32601},{"message","Client request is not supported"}};
-                    channel->send(response,deadline,cancel);
-                }
+                observe(message,deadline,cancel);
             }
         }
         throw std::runtime_error("Language-server retry budget exhausted");
@@ -105,25 +134,31 @@ struct LanguageServerClient::Impl {
         McpStdioConfiguration config{profile.executable,workspace.root_path(),profile.arguments,profile.environment,4*1024*1024,512*1024*1024,std::chrono::seconds(45),32};
         process=std::make_unique<McpStdioProcess>(config);channel=std::make_unique<LspChannel>(*process);
         const auto root=std::filesystem::u8path(workspace.root_path());const auto root_uri=file_uri(root);
-        const auto capabilities=exchange("initialize",Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}},{"formatting",{{"dynamicRegistration",false}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}} ,deadline,cancel);
+        auto initialization=Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}},{"formatting",{{"dynamicRegistration",false}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}};
+        initialization["capabilities"]["textDocument"]["publishDiagnostics"]={{"versionSupport",true}};
+        initialization["capabilities"]["textDocument"]["diagnostic"]={{"dynamicRegistration",false},{"relatedDocumentSupport",false}};
+        const auto capabilities=exchange("initialize",std::move(initialization),deadline,cancel);
         const auto formatting=capabilities.is_object()?capabilities.value("capabilities",Json::object()).value("documentFormattingProvider",Json()):Json();document_formatting=formatting.is_boolean()?formatting.get<bool>():formatting.is_object();
+        const auto diagnostic=capabilities.is_object()?capabilities.value("capabilities",Json::object()).value("diagnosticProvider",Json()):Json();pull_diagnostics=diagnostic.is_object()||(diagnostic.is_boolean()&&diagnostic.get<bool>());
         channel->send(Json{{"jsonrpc","2.0"},{"method","initialized"},{"params",Json::object()}},deadline,cancel);initialized=true;
     }
     void open(const std::string& uri,const std::string& language,const std::string& path,const std::string& text,Clock::time_point deadline,std::stop_token cancel){
-        const auto found=documents.find(uri);
+        const auto key=diagnostic_uri_key(uri);const auto found=documents.find(key);
         if(found==documents.end()){
+            published_diagnostics.erase(key);
             channel->send(Json{{"jsonrpc","2.0"},{"method","textDocument/didOpen"},{"params",{{"textDocument",{{"uri",uri},{"languageId",language},{"version",1},{"text",text}}}}}},deadline,cancel);
-            documents.emplace(uri,std::make_pair(1,text));return;
+            documents.emplace(key,std::make_pair(1,text));return;
         }
         if(found->second.second==text)return;
         if(found->second.first>=std::numeric_limits<std::int64_t>::max())throw std::runtime_error("Language-server document version exhausted");
         ++found->second.first;found->second.second=text;
+        published_diagnostics.erase(key);
         channel->send(Json{{"jsonrpc","2.0"},{"method","textDocument/didChange"},{"params",{{"textDocument",{{"uri",uri},{"version",found->second.first}}},{"contentChanges",Json::array({{{"text",text}}})}}}},deadline,cancel);
         (void)path;
     }
     void stop()noexcept{
         if(process){try{const auto deadline=Clock::now()+std::chrono::seconds(2);(void)exchange("shutdown",nullptr,deadline,{});channel->send(Json{{"jsonrpc","2.0"},{"method","exit"},{"params",nullptr}},deadline,{});}catch(...){}process->shutdown();}
-        channel.reset();process.reset();initialized=false;document_formatting=false;documents.clear();published_diagnostics.clear();
+        channel.reset();process.reset();initialized=false;document_formatting=false;pull_diagnostics=false;documents.clear();published_diagnostics.clear();
     }
 };
 
@@ -162,9 +197,9 @@ std::string LanguageServerClient::request(const LanguageServerRequest& call,std:
     const auto method=call.method=="documentSymbol"?"textDocument/documentSymbol":call.method=="diagnostics"?"textDocument/diagnostic":call.method=="formatting"?"textDocument/formatting":"textDocument/"+call.method;
     Json result;
     if(call.method=="diagnostics"){
-        try{result=impl_->exchange(method,params,deadline,cancel);}catch(const std::runtime_error&){const auto found=impl_->published_diagnostics.find(uri);if(found!=impl_->published_diagnostics.end())result=Json{{"kind","full"},{"items",found->second}};else throw;}
+        result=impl_->pull_diagnostics?impl_->exchange(method,params,deadline,cancel):impl_->published(uri,deadline,cancel);
     }else result=impl_->exchange(method,params,deadline,cancel);
-    const auto diagnostic=impl_->published_diagnostics.find(uri);const auto diagnostics=diagnostic==impl_->published_diagnostics.end()?Json::array():diagnostic->second;
+    const auto diagnostic=impl_->published_diagnostics.find(diagnostic_uri_key(uri));const auto diagnostics=diagnostic==impl_->published_diagnostics.end()?Json::array():diagnostic->second;
     return Json{{"server_id",profile_.id},{"language_id",profile_.language_id},{"path",file.path},{"method",call.method},{"result",std::move(result)},{"diagnostics",diagnostics}}.dump();
     }catch(...){impl_->stop();throw;}
 }

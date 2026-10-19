@@ -1,0 +1,9 @@
+Test project C:/xMindNativeValidation/lsp-diagnostics-rust-diagnostic-20261019/real-language-ctest
+    Start 1: cargo_semantic_fixture
+1/2 Test #1: cargo_semantic_fixture ...........   Passed    0.20 sec
+    Start 2: actual_owned_language_agent
+2/2 Test #2: actual_owned_language_agent ......   Passed   21.38 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  21.60 sec
