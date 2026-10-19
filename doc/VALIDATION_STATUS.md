@@ -1,5 +1,41 @@
 # Current native validation
 
+## Installed 0.1.38 — live server lifecycle verified — 2026-10-19
+
+0.1.38 is installed and listed by the actual VS Code CLI. Client source b47f280
+uses native ffee124/executable 5d3f7941, SDK 58a8aab/DLL 1ff2a8e and manifest
+4f786ac7. All 2,448 archive entries, 2,445 installed payloads plus metadata and
+2,402 runtime files verify. Local and exact hosted clients pass 427/147, with
+all 17,439 stage files unchanged after packaging and installation. Backup
+0.1.37 and user settings/six prior profile names remain; 18 checked older owner
+identities, six older runtimes and seven pages survive, including the installed
+0.1.37 native view. The final installed observer initially refused to overwrite
+its existing receipt; a fresh receipt verifies the unchanged installation.
+
+The current page is http://127.0.0.1:59450/ui/. In a new isolated copy of the
+already-fixed ModelZoo project, actual configured Claude execution starts
+FastAPI through xlang3 and Vite through the trusted shell profile. The first
+response completes with both bounded persistent services still executing.
+Actual browser checks pass for backend/proxy API responses, search, pending
+Reset, saved-model reload, detail navigation and return to catalog, with no
+page errors. A separate follow-up uses stop_process to intentionally stop both
+original jobs: each records service_stopped and process_tree_retired, and both
+test ports close. This closes the prior live missing-tool shutdown failure.
+
+There is exactly one start submission and one explicit stop follow-up, with no
+task replay or source edits. All 1,034 original/copied source and pure-library
+inputs remain unchanged. Read-only reload restores 26 messages and 10 supplied
+usage records in 1.62 seconds, keeps Claude/model selection and reports no
+page/HTTP errors or effect submissions. Served renderer bytes match installed
+0.1.38. The earlier 0.1.37 coding task separately proves the actual Vue edit,
+32 xlang3 backend tests and Vite production build; those scopes stay distinct.
+
+No editor window was opened. Actual VS Code pane activation, complete current
+native/hosted-native qualification, Rust Analyzer revalidation, process-bound
+agents and release acceptance remain open. This is a verified browser coding
+and process-lifecycle milestone, not completion of the entire project goal.
+[Installation, preserved sessions and live lifecycle proof](evidence/coding-package-0.1.38-20261019.json).
+
 ## Installed 0.1.37 live coding and service-control follow-up — 2026-10-19
 
 0.1.37 is installed through the actual VS Code CLI, with native source 4fba755

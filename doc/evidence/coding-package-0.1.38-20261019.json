@@ -1,0 +1,1565 @@
+{
+  "recordedAt": "2026-10-19T07:13:03.0784271Z",
+  "version": "0.1.38",
+  "sourceRevision": "b47f280b48788a144220cf49aba150b3af144910",
+  "nativeRevision": "ffee1245f6355d01c9318bf79396e36ed864c181",
+  "archive": {
+    "recordedAt": "2026-10-19T07:04:26.079Z",
+    "version": "0.1.38",
+    "sourceRevision": "b47f280b48788a144220cf49aba150b3af144910",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.38-complete-win32-x64.vsix",
+    "archiveBytes": 34416949,
+    "archiveSha256": "f0fc1ee7f605ca966fc916ab421ff863b535f73eb18ed1a0ed150741d4dcab64",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-19T07:03:55.837Z",
+      "completedAt": "2026-10-19T07:04:23.146Z",
+      "pid": 27888,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "158cc2281f4175fc2a68c1996f7d3c5f215dd34b1226cb17191c46d26e27a45d"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "localClients": {
+    "recordedAt": "2026-10-19T07:02:50.108Z",
+    "version": "0.1.38",
+    "sourceRevision": "b47f280b48788a144220cf49aba150b3af144910",
+    "extension": {
+      "exitCode": 0,
+      "tests": 427,
+      "passed": 427,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "b8a20b7f9012e45d0e2b7dde53ca00845bd0f8415deaa7eeda74297602b06f61"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "e1fe3eaf52575d48820b64b499b1ef6511e1b32917a2af730b528ce0477e9186"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClients": {
+    "recordedAt": "2026-10-19T07:05:05.476Z",
+    "run": 39213269649,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39213269649",
+    "sourceRevision": "b47f280b48788a144220cf49aba150b3af144910",
+    "artifact": 12168582239,
+    "artifactBytes": 309178,
+    "artifactSha256": "f05eaa1b6f2644be88e276aa5e9de17a090db0209981544875ebf92d92ceccef",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "b47f280b48788a144220cf49aba150b3af144910",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 427,
+        "browser": 147
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 427,
+        "passed": 427,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "crossHostAssets": {
+      "rawIdentical": [
+        "index.html",
+        "patch-review.js",
+        "client.js",
+        "marked.js",
+        "purify.js",
+        "xterm.js",
+        "xterm.css",
+        "xterm-fit.js",
+        "browser.css",
+        "licenses/marked.txt",
+        "licenses/dompurify.txt",
+        "licenses/dompurify-MPL.txt",
+        "licenses/xterm.txt",
+        "licenses/xterm-addon-fit.txt"
+      ],
+      "lineEndingsOnly": [
+        "chat.js",
+        "chat.css",
+        "terminal.js",
+        "browser.js"
+      ],
+      "total": 18
+    },
+    "nativeExecuted": false,
+    "renderedEditorActivated": false,
+    "passed": true
+  },
+  "relatedNativeQualification": {
+    "recordedAt": "2026-10-19T06:58:02.841Z",
+    "sourceParent": "cdacbd56d5f0da45837b5bee9b920ced9e4bb423",
+    "sourcePatchSha256": "4c6b1923154ef1c3e772189d809cb2bb8b401ca7c3f660b94902d6ea2c29079b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 46956,
+      "launchedAt": "2026-10-19T06:56:05.817Z",
+      "completedAt": "2026-10-19T06:57:20.192Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "15184705b14fe0a157bb064c0da99788d75b2f1a501ee19bf000b078e577f500"
+    },
+    "test": {
+      "pid": 62044,
+      "launchedAt": "2026-10-19T06:57:23.671Z",
+      "completedAt": "2026-10-19T06:58:00.163Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7d4b907adad104082db62dfe862c54a753e6f1c911cef692185427c3ebc2d349"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 36.45,
+    "projectFiles": 2619,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "installation": {
+    "startedAt": "2026-10-19T07:05:34.6971025Z",
+    "completedAt": "2026-10-19T07:05:40.2014087Z",
+    "exitCode": 0,
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.38-complete-win32-x64.vsix",
+    "editorOpened": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.38",
+    "version": "0.1.38",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "ffee1245f6355d01c9318bf79396e36ed864c181",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "4f786ac715f798dae37235b3b745fb4a18fc472850a9b4b8d5db4a3b93b23bd2",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "finalInstalledVerification": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.38",
+    "version": "0.1.38",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "ffee1245f6355d01c9318bf79396e36ed864c181",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "4f786ac715f798dae37235b3b745fb4a18fc472850a9b4b8d5db4a3b93b23bd2",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "finalObserverReceiptReuse": {
+    "outcome": "Initial recheck reached receipt publication but EEXIST prevented overwriting the installation receipt",
+    "correction": "Run the same verification with a fresh final receipt path",
+    "productFilesModified": false
+  },
+  "stageAfterInstallation": {
+    "recordedAt": "2026-10-19T07:06:17.902Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.38-source-20261019",
+    "files": 17439,
+    "allFileSetsAndHashesUnchangedAfterPackagingAndInstallation": true
+  },
+  "preservation": {
+    "recordedAt": "2026-10-19T07:02:20.811Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.37",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.37-before-0.1.38",
+    "checkedFiles": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "preservedOlderOwners": {
+    "recordedAt": "2026-10-19T07:06:31.575Z",
+    "mode": "after",
+    "identities": [
+      {
+        "pid": 67948,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T20:02:32.046616Z",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json",
+        "kind": "host"
+      },
+      {
+        "pid": 17248,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T20:02:33.093718Z",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 33960,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+        "birth": "2026-10-18T20:02:36.467445Z",
+        "launch": "browser-0.1.27-mcp-launch-20261018.json",
+        "kind": "backend"
+      },
+      {
+        "pid": 64940,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T22:22:18.916427Z",
+        "launch": "browser-0.1.31-launch-20261018.json",
+        "kind": "host"
+      },
+      {
+        "pid": 40236,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.31\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T22:22:19.938267Z",
+        "launch": "browser-0.1.31-launch-20261018.json",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 67432,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a31\\7679f90d61b9255d17fb4d86b68908507226efbe35add7bf0ade459537da5a3c\\runtime-499e9893c04de140ed395ce604fe9caa81453328c0d3a7629fa4d25de5c40389\\xmind.exe",
+        "birth": "2026-10-18T22:22:23.198262Z",
+        "launch": "browser-0.1.31-launch-20261018.json",
+        "kind": "backend"
+      },
+      {
+        "pid": 63316,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T22:59:30.11138Z",
+        "launch": "browser-0.1.32-launch-20261018.json",
+        "kind": "host"
+      },
+      {
+        "pid": 72620,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.32\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T22:59:31.152933Z",
+        "launch": "browser-0.1.32-launch-20261018.json",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 17816,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a32\\1828ebd236c14ec23742196fd7285dfbe5f333993556ea711e438b64a8033074\\runtime-ad940888eb2eb53a85dc3454ebcbeb25f11d3f5bc72d33ae976b1b6b51f2ce1e\\xmind.exe",
+        "birth": "2026-10-18T22:59:34.423903Z",
+        "launch": "browser-0.1.32-launch-20261018.json",
+        "kind": "backend"
+      },
+      {
+        "pid": 46036,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-19T01:12:03.993266Z",
+        "launch": "browser-0.1.34-launch-20261019.json",
+        "kind": "host"
+      },
+      {
+        "pid": 25408,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.34\\native-runtime\\xmind.exe",
+        "birth": "2026-10-19T01:12:05.153259Z",
+        "launch": "browser-0.1.34-launch-20261019.json",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 44704,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a34\\b257b78f22c803567a66c2079ca47515c4b101f8c9c81e375cfea6d5011628f0\\runtime-36177501942b3354b9531a56fea3535e5a43458d2787182996e6fb51cb397650\\xmind.exe",
+        "birth": "2026-10-19T01:12:08.604683Z",
+        "launch": "browser-0.1.34-launch-20261019.json",
+        "kind": "backend"
+      },
+      {
+        "pid": 64664,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-19T01:28:50.022433Z",
+        "launch": "browser-0.1.35-launch-20261019.json",
+        "kind": "host"
+      },
+      {
+        "pid": 43960,
+        "image": "C:\\xMindNativeValidation\\coding-0.1.35-source-20261019\\extensions\\vscode\\native-runtime\\xmind.exe",
+        "birth": "2026-10-19T01:28:52.325915Z",
+        "launch": "browser-0.1.35-launch-20261019.json",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 69648,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a35\\b8d89165c622d42df3df215aa2cbe64ae6b1270191dfa03e3b0c72e1f3db40bb\\runtime-808baf32fa2c0bc01fbea476fecc8bb4fe09f7da8458a8e9e5bf402ac03db133\\xmind.exe",
+        "birth": "2026-10-19T01:29:45.043368Z",
+        "launch": "browser-0.1.35-launch-20261019.json",
+        "kind": "backend"
+      }
+    ],
+    "runtimes": [
+      {
+        "version": "0.1.27",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+        "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea"
+      },
+      {
+        "version": "0.1.28",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec",
+        "nativeSha256": "bfd0fec98868fa3de1d69a0436c423064868cec23d5a213a90ca6fc6d8720cea"
+      },
+      {
+        "version": "0.1.31",
+        "files": 2402,
+        "manifestSha256": "836ec4685dbdc2c66153705e28d9b241b697711663f41e7c750d0f689b2f018f",
+        "nativeSha256": "45fb8de43162a6852282d26cf8f31b6447d4d8350f49fc67f128bdb61cbb7cb9"
+      },
+      {
+        "version": "0.1.32",
+        "files": 2402,
+        "manifestSha256": "5ac9fae8d75297a14c01b7e8cea698c48c0c4d8b67258cc0b630976fe4c84ed6",
+        "nativeSha256": "dd3dcace2e5f3bc5db821aa9129f38dddfab8984afe9b7de1fb4cd4a218fbcd2"
+      },
+      {
+        "version": "0.1.34",
+        "files": 2402,
+        "manifestSha256": "8c50e5cf00e7596905a7805c9d2ee6ea5b334a3b7f888d89d8eb277166b7366d",
+        "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084"
+      }
+    ],
+    "pages": [
+      {
+        "url": "http://127.0.0.1:62342/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:52121/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63383/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:54828/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63496/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:49702/ui/",
+        "status": 200
+      }
+    ],
+    "editorOpened": false
+  },
+  "preservedCurrent37": {
+    "at": "2026-10-19T07:06:36.882Z",
+    "mode": "after",
+    "identities": [
+      {
+        "pid": 30896,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-19T06:40:17.27184Z",
+        "kind": "host"
+      },
+      {
+        "pid": 58140,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.37\\native-runtime\\xmind.exe",
+        "birth": "2026-10-19T06:40:18.335456Z",
+        "kind": "nativeView"
+      },
+      {
+        "pid": 59264,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a37\\ffb23089cbc7275e53687f3e443da239e4b8b9dd85b5a5d3a1b30fdacb92ddbc\\runtime-2a969e8280d1fb0f8e6c0ca1e4f6a025ed1768484fcd328a2b10b4d928c7ccd9\\xmind.exe",
+        "birth": "2026-10-19T06:40:21.768611Z",
+        "kind": "backend"
+      }
+    ],
+    "runtimeFiles": 2402,
+    "manifestSha256": "d86b55406edfa4a30050479314f438d7cbb7488662e5762b660c2940407e27b3",
+    "url": "http://127.0.0.1:55921/ui/",
+    "pageStatus": 200
+  },
+  "checkedOlderOwnerCount": 18,
+  "checkedOlderRuntimeCount": 6,
+  "checkedOlderPageCount": 7,
+  "launch": {
+    "startedAt": "2026-10-19T07:05:42.808Z",
+    "version": "0.1.38",
+    "installed": true,
+    "scope": "Actual installed runtime and browser assets in a new isolated coding profile; no visible editor or browser opened",
+    "workspace": "C:/xMindNativeValidation/model-zoo-full-ui-0.1.38-20261019",
+    "profileRoot": "C:/Users/shaw9/.xMind/p-a38",
+    "pageState": "C:/Users/shaw9/.xMind/BrowserView/xmind-0.1.38-full-modelzoo-native-20261019",
+    "assets": "C:/xMindNativeValidation/browser-assets-0.1.38-native-20261019",
+    "nativeRevision": "ffee1245f6355d01c9318bf79396e36ed864c181",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "5d3f7941e7f94abb630156404c4bd3c85b305f396c51cef5f0734609cbb10ed5",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "4f786ac715f798dae37235b3b745fb4a18fc472850a9b4b8d5db4a3b93b23bd2",
+    "taskSubmissions": 0,
+    "hostPid": 40732,
+    "url": "http://127.0.0.1:59450/ui/",
+    "host": {
+      "pid": 40732,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T07:05:42.812265Z"
+    },
+    "nativeView": {
+      "pid": 67828,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.38\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T07:05:43.854197Z"
+    },
+    "backends": [
+      {
+        "pid": 27692,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xmind.exe",
+        "birth": "2026-10-19T07:05:47.21614Z"
+      }
+    ],
+    "backend": {
+      "pid": 27692,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xmind.exe",
+      "birth": "2026-10-19T07:05:47.21614Z"
+    },
+    "readyAt": "2026-10-19T07:05:52.131Z"
+  },
+  "liveServiceLifecycle": {
+    "recordedAt": "2026-10-19T07:10:45.791Z",
+    "version": "0.1.38",
+    "url": "http://127.0.0.1:59450/ui/",
+    "workspace": "C:/xMindNativeValidation/model-zoo-full-ui-0.1.38-20261019",
+    "session": "d32c5c4fe01bdf159270b6efa3beaaac",
+    "startRun": "59dde650022c0af18be3091c2690336e",
+    "stopRun": "023b98c463fbc0be277158ee01958d1c",
+    "scope": "Actual installed C++/xlang3 backend, real configured Claude and sandboxed headless Edge; existing fixed ModelZoo source copied into an isolated workspace",
+    "startTaskSubmissions": 1,
+    "stopTaskSubmissions": 1,
+    "startState": "completed",
+    "stopState": "completed",
+    "sourceAndPureDependencyInputsVerified": 1034,
+    "projectSourceInputs": 33,
+    "allOriginalAndCopiedSourcesUnchanged": true,
+    "sourceEdits": 0,
+    "effects": [
+      {
+        "id": "ffdb50996e4a9ee6bb139c7efa669e33",
+        "tool": "run_process",
+        "stateAtCodingCompletion": "succeeded",
+        "arguments": {
+          "arguments": [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "& 'C:/Program Files/nodejs/node.exe' 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' ci"
+          ],
+          "background": false,
+          "directory_id": "windows-local-file-v1:fec0809ac0805ab3:6c6a4000000001000000000000000000",
+          "environment": [],
+          "executable": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+          "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "output_limit": 65536,
+          "persistent": false,
+          "profile_id": "powershell",
+          "profile_revision": 1,
+          "repository_guidance": {
+            "directory": "frontend",
+            "sources": [
+              {
+                "byte_count": 642,
+                "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+                "file_id": "windows-local-file-v1:fec0809ac0805ab3:566a4000000001000000000000000000",
+                "path": "AGENTS.md",
+                "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000"
+              }
+            ],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "timeout_ms": 180000,
+          "workdir": "frontend",
+          "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "workspace_revision": 1
+        },
+        "result": {
+          "elapsed_ms": 3236,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "ffdb50996e4a9ee6bb139c7efa669e33",
+          "operation_id": "ffdb50996e4a9ee6bb139c7efa669e33",
+          "output_artifact": {
+            "operation_id": "ffdb50996e4a9ee6bb139c7efa669e33",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 140
+          },
+          "pid": 61248,
+          "process_tree_retired": true,
+          "profile_id": "powershell",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 140,
+            "data": "\nadded 36 packages, and audited 37 packages in 3s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+            "encoding": "utf-8",
+            "retained_bytes": 140
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      },
+      {
+        "id": "d0522c67dafe2983286a9380a8724827",
+        "tool": "run_process",
+        "stateAtCodingCompletion": "executing",
+        "arguments": {
+          "arguments": [
+            "-B",
+            "-m",
+            "uvicorn",
+            "app.main:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18742",
+            "--loop",
+            "asyncio",
+            "--http",
+            "h11"
+          ],
+          "background": true,
+          "directory_id": "windows-local-file-v1:fec0809ac0805ab3:596a4000000001000000000000000000",
+          "environment": [
+            {
+              "name": "XLANG3_PYTHON_LIB",
+              "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\stdlib"
+            },
+            {
+              "name": "PIP_FIND_LINKS",
+              "value": "file:///C:/Users/shaw9/.xMind/p-a38/a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40/runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90/wheels"
+            },
+            {
+              "name": "PYTHONPATH",
+              "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\modules;C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.38-20261019\\backend\\.xlang3-site"
+            }
+          ],
+          "executable": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xlang3.exe",
+          "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:53994000000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "output_limit": 65536,
+          "persistent": true,
+          "profile_id": "xlang3",
+          "profile_revision": 1,
+          "repository_guidance": {
+            "directory": "backend",
+            "sources": [
+              {
+                "byte_count": 642,
+                "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+                "file_id": "windows-local-file-v1:fec0809ac0805ab3:566a4000000001000000000000000000",
+                "path": "AGENTS.md",
+                "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000"
+              }
+            ],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "timeout_ms": 600000,
+          "workdir": "backend",
+          "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "workspace_revision": 1
+        },
+        "result": {}
+      },
+      {
+        "id": "69944c41a75dcf4d92935d4af60729fa",
+        "tool": "run_process",
+        "stateAtCodingCompletion": "executing",
+        "arguments": {
+          "arguments": [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "$env:VITE_API_PROXY_TARGET='http://127.0.0.1:18742'; & 'C:/Program Files/nodejs/node.exe' './node_modules/vite/bin/vite.js' --host 127.0.0.1 --port 18743 --strictPort"
+          ],
+          "background": true,
+          "directory_id": "windows-local-file-v1:fec0809ac0805ab3:6c6a4000000001000000000000000000",
+          "environment": [],
+          "executable": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+          "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "output_limit": 65536,
+          "persistent": true,
+          "profile_id": "powershell",
+          "profile_revision": 1,
+          "repository_guidance": {
+            "directory": "frontend",
+            "sources": [
+              {
+                "byte_count": 642,
+                "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+                "file_id": "windows-local-file-v1:fec0809ac0805ab3:566a4000000001000000000000000000",
+                "path": "AGENTS.md",
+                "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000"
+              }
+            ],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "timeout_ms": 600000,
+          "workdir": "frontend",
+          "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "workspace_revision": 1
+        },
+        "result": {}
+      },
+      {
+        "id": "c2ec470d5fe05447e5f76294d44ce14a",
+        "tool": "run_process",
+        "stateAtCodingCompletion": "succeeded",
+        "arguments": {
+          "arguments": [
+            "-B",
+            "-c",
+            "import httpx, json\n\nresults = {}\nfor label, base in [('backend-direct', 'http://127.0.0.1:18742'), ('frontend-proxy', 'http://127.0.0.1:18743')]:\n    for path in ['/api/health', '/api/models']:\n        r = httpx.get(base + path, timeout=10)\n        results[f'{label} {path}'] = {'status': r.status_code, 'body': r.text[:300]}\n\nfor k, v in results.items():\n    print(f'--- {k} ---')\n    print(f'  HTTP {v[\"status\"]}')\n    print(f'  {v[\"body\"][:200]}')\n"
+          ],
+          "background": false,
+          "directory_id": "windows-local-file-v1:fec0809ac0805ab3:596a4000000001000000000000000000",
+          "environment": [
+            {
+              "name": "XLANG3_PYTHON_LIB",
+              "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\stdlib"
+            },
+            {
+              "name": "PIP_FIND_LINKS",
+              "value": "file:///C:/Users/shaw9/.xMind/p-a38/a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40/runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90/wheels"
+            },
+            {
+              "name": "PYTHONPATH",
+              "value": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\modules;C:\\xMindNativeValidation\\model-zoo-full-ui-0.1.38-20261019\\backend\\.xlang3-site"
+            }
+          ],
+          "executable": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xlang3.exe",
+          "executable_id": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:53994000000001000000000000000000:210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+          "folder_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "output_limit": 65536,
+          "persistent": false,
+          "profile_id": "xlang3",
+          "profile_revision": 1,
+          "repository_guidance": {
+            "directory": "backend",
+            "sources": [
+              {
+                "byte_count": 642,
+                "content_sha256": "761511351bccb8625f607da52a7fbf94de6fb12618123c397ffec9351f296485",
+                "file_id": "windows-local-file-v1:fec0809ac0805ab3:566a4000000001000000000000000000",
+                "path": "AGENTS.md",
+                "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000"
+              }
+            ],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "timeout_ms": 30000,
+          "workdir": "backend",
+          "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:556a4000000002000000000000000000",
+          "workspace_revision": 1
+        },
+        "result": {
+          "elapsed_ms": 4412,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "c2ec470d5fe05447e5f76294d44ce14a",
+          "operation_id": "c2ec470d5fe05447e5f76294d44ce14a",
+          "output_artifact": {
+            "operation_id": "c2ec470d5fe05447e5f76294d44ce14a",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 718
+          },
+          "pid": 57932,
+          "process_tree_retired": true,
+          "profile_id": "xlang3",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 718,
+            "data": "--- backend-direct /api/health ---\r\n  HTTP 200\r\n  {\"status\":\"ok\",\"app\":\"Model Zoo API\",\"version\":\"0.1.0\"}\r\n--- backend-direct /api/models ---\r\n  HTTP 200\r\n  {\"items\":[{\"id\":\"bert-base-uncased\",\"name\":\"BERT Base (uncased)\",\"owner\":\"google\",\"task\":\"fill-mask\",\"framework\":\"transformers\",\"modalities\":[\"text\"],\"parameters_millions\":110.0,\"license\":\"Apache-2.0\"\r\n--- frontend-proxy /api/health ---\r\n  HTTP 200\r\n  {\"status\":\"ok\",\"app\":\"Model Zoo API\",\"version\":\"0.1.0\"}\r\n--- frontend-proxy /api/models ---\r\n  HTTP 200\r\n  {\"items\":[{\"id\":\"bert-base-uncased\",\"name\":\"BERT Base (uncased)\",\"owner\":\"google\",\"task\":\"fill-mask\",\"framework\":\"transformers\",\"modalities\":[\"text\"],\"parameters_millions\":110.0,\"license\":\"Apache-2.0\"\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 718
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      }
+    ],
+    "servicesAtFirstResponse": [
+      {
+        "id": "d0522c67dafe2983286a9380a8724827",
+        "state": "executing",
+        "profile": "xlang3"
+      },
+      {
+        "id": "69944c41a75dcf4d92935d4af60729fa",
+        "state": "executing",
+        "profile": "powershell"
+      }
+    ],
+    "actualStartUsage": [
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 90,
+        "input_tokens": 8739,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 90,
+        "prompt_tokens": 8739,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 89,
+        "input_tokens": 9394,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 89,
+        "prompt_tokens": 9394,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 128,
+        "input_tokens": 9845,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 128,
+        "prompt_tokens": 9845,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 174,
+        "input_tokens": 10647,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 174,
+        "prompt_tokens": 10647,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 423,
+        "input_tokens": 11097,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 423,
+        "prompt_tokens": 11097,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 183,
+        "input_tokens": 11737,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 183,
+        "prompt_tokens": 11737,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 343,
+        "input_tokens": 12282,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 343,
+        "prompt_tokens": 12282,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 923,
+        "input_tokens": 13154,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 923,
+        "prompt_tokens": 13154,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    ],
+    "historyAtFirstResponse": 21,
+    "website": {
+      "startedAt": "2026-10-19T07:08:13.75Z",
+      "backend": "http://127.0.0.1:18742",
+      "frontend": "http://127.0.0.1:18743",
+      "agentRun": "59dde650022c0af18be3091c2690336e",
+      "agentTaskCompletedAtStart": true,
+      "scope": "Actual xlang3-hosted FastAPI plus Vite/Vue in sandboxed headless Edge, launched by xMind native process tools. Seeded catalog data remains labeled demo data.",
+      "errors": [],
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/main.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/@vite/client",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/vue.js?v=95d723eb",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/App.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/router/index.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/style.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/vite/dist/client/env.mjs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/vue-router.js?v=fe40d90a",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/@id/__x00__plugin-vue:export-helper",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/HomeView.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/chunk-KOZD35AO.js?v=ef6d9e71",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/api/client.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/ModelCard.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/StatusMessage.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/utils/format.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/HomeView.vue?vue&type=style&index=0&scoped=b4e148ca&lang.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/ModelCard.vue?vue&type=style&index=0&scoped=7de9915a&lang.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/catalog/stats",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=9",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?search=gpt2&sort=downloads&page=1&page_size=9",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=9",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=60",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/?saved=1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/main.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/@vite/client",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/vue.js?v=95d723eb",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/router/index.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/App.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/style.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/vite/dist/client/env.mjs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/@id/__x00__plugin-vue:export-helper",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/vue-router.js?v=fe40d90a",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/HomeView.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/node_modules/.vite/deps/chunk-KOZD35AO.js?v=ef6d9e71",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/api/client.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/ModelCard.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/StatusMessage.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/utils/format.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/HomeView.vue?vue&type=style&index=0&scoped=b4e148ca&lang.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/components/ModelCard.vue?vue&type=style&index=0&scoped=7de9915a&lang.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/catalog/stats",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=60",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/ModelDetailView.vue",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/src/views/ModelDetailView.vue?vue&type=style&index=0&scoped=4df92bcc&lang.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models/bert-base-uncased",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/catalog/stats",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=60",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "url": "http://127.0.0.1:18743/api/models?sort=downloads&page=1&page_size=9",
+          "status": 200
+        }
+      ],
+      "cpythonExecuted": false,
+      "health": {
+        "status": "ok",
+        "app": "Model Zoo API",
+        "version": "0.1.0"
+      },
+      "catalogTotal": 12,
+      "pageSize": 9,
+      "unknownModelStatus": 404,
+      "invalidSortStatus": 422,
+      "pageTitle": "Model Zoo · model registry catalog",
+      "initialCards": 9,
+      "searchVerified": true,
+      "resetDuringPendingDebounceVerified": true,
+      "savedFilterAndStorageRestoreVerified": true,
+      "detailNavigationVerified": true,
+      "returnToCatalogVerified": true,
+      "passed": true,
+      "completedAt": "2026-10-19T07:08:17.037Z"
+    },
+    "shutdown": {
+      "stopped": [
+        {
+          "id": "d0522c67dafe2983286a9380a8724827",
+          "state": "succeeded",
+          "result": {
+            "elapsed_ms": 80901,
+            "exit_code": 1,
+            "independently_verified": false,
+            "job_id": "d0522c67dafe2983286a9380a8724827",
+            "operation_id": "d0522c67dafe2983286a9380a8724827",
+            "output_artifact": {
+              "operation_id": "d0522c67dafe2983286a9380a8724827",
+              "state": "complete",
+              "stderr_bytes": 203,
+              "stdout_bytes": 1680
+            },
+            "pid": 68480,
+            "process_tree_retired": true,
+            "profile_id": "xlang3",
+            "service_stopped": true,
+            "stderr": {
+              "byte_count": 203,
+              "data": "INFO:     Started server process [68480]\r\nINFO:     Waiting for application startup.\r\nINFO:     Application startup complete.\r\nINFO:     Uvicorn running on http://127.0.0.1:18742 (Press CTRL+C to quit)\r\n",
+              "encoding": "utf-8",
+              "retained_bytes": 203
+            },
+            "stdout": {
+              "byte_count": 1680,
+              "data": "INFO:     127.0.0.1:53996 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58062 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58074 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:58078 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63153 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63155 - \"GET /api/health HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63153 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63157 - \"GET /api/models HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:63153 - \"GET /api/models/no-such-model-0-1-36 HTTP/1.1\" 404 Not Found\r\nINFO:     127.0.0.1:63160 - \"GET /api/models?sort=no-such-sort HTTP/1.1\" 422 Unprocessable Content\r\nINFO:     127.0.0.1:54375 - \"GET /api/catalog/stats HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:54376 - \"GET /api/models?sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:50830 - \"GET /api/models?search=gpt2&sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:59281 - \"GET /api/models?sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:60044 - \"GET /api/models?sort=downloads&page=1&page_size=60 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52793 - \"GET /api/catalog/stats HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52794 - \"GET /api/models?sort=downloads&page=1&page_size=60 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52795 - \"GET /api/models/bert-base-uncased HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52796 - \"GET /api/catalog/stats HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:52797 - \"GET /api/models?sort=downloads&page=1&page_size=60 HTTP/1.1\" 200 OK\r\nINFO:     127.0.0.1:50740 - \"GET /api/models?sort=downloads&page=1&page_size=9 HTTP/1.1\" 200 OK\r\n",
+              "encoding": "utf-8",
+              "retained_bytes": 1680
+            },
+            "termination": "cancelled",
+            "truncated": false
+          }
+        },
+        {
+          "id": "69944c41a75dcf4d92935d4af60729fa",
+          "state": "succeeded",
+          "result": {
+            "elapsed_ms": 80969,
+            "exit_code": 1,
+            "independently_verified": false,
+            "job_id": "69944c41a75dcf4d92935d4af60729fa",
+            "operation_id": "69944c41a75dcf4d92935d4af60729fa",
+            "output_artifact": {
+              "operation_id": "69944c41a75dcf4d92935d4af60729fa",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 160
+            },
+            "pid": 55760,
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "service_stopped": true,
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 160,
+              "data": "\n  \u001b[32m\u001b[1mVITE\u001b[22m v6.4.4\u001b[39m  \u001b[2mready in \u001b[0m\u001b[1m418\u001b[22m\u001b[2m\u001b[0m ms\u001b[22m\n\n  \u001b[32m➜\u001b[39m  \u001b[1mLocal\u001b[22m:   \u001b[36mhttp://127.0.0.1:\u001b[1m18743\u001b[22m/\u001b[39m\n",
+              "encoding": "utf-8",
+              "retained_bytes": 160
+            },
+            "termination": "cancelled",
+            "truncated": false
+          }
+        }
+      ],
+      "testPortsClosed": true,
+      "originalWorkspaceRestored": true,
+      "historyMessages": 26,
+      "errors": []
+    },
+    "readOnlyRestore": {
+      "startedAt": "2026-10-19T07:09:45.709Z",
+      "url": "http://127.0.0.1:59450/ui/",
+      "scope": "Read-only sandboxed headless Edge restore after real start and stop tasks; no new inference/effect submissions, no visible editor acceptance",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/ui/",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/chat.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/browser.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/xterm.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/patch-review.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/xterm-fit.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/terminal.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/client.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/purify.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/marked.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/browser.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/chat.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/xterm.js",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/ui/session",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/health",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ui/workspaces",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/workspace",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/health",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agent/planning",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/models",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/graphs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/provider/profiles",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/active",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/provider/profiles",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/model",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/active",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/permissions",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/v1/provider/profiles/models",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/tree-events",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/tree-events",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/children",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/operations",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/tree-events",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/children",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/operations",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/plan",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/runs/023b98c463fbc0be277158ee01958d1c/mcp-inputs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/inbox",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/workspace/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/workspace/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/agents",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/agent",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/inbox",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/workspace/skills",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/workspace/files",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/messages",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/history",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/sessions/d32c5c4fe01bdf159270b6efa3beaaac/runs",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "blockedEffects": [],
+      "historyMessages": 26,
+      "usageRecords": 10,
+      "historyElapsedMs": 1622,
+      "model": "claude-sonnet-4-6",
+      "provider": "claude",
+      "rendererSha256": "f3eb7c0a25ad704196231a95959eb4011bcf4f198b0ae56c4122fee5ddd38d6f",
+      "passed": true,
+      "completedAt": "2026-10-19T07:09:47.403Z"
+    },
+    "startStopAndWebsiteChecksPassed": true,
+    "visibleEditorTested": false,
+    "releaseAccepted": false,
+    "cpythonExecuted": false
+  },
+  "priorLiveEditTestsAndBuild": "doc/evidence/coding-package-0.1.37-20261019.json",
+  "browserCodingAndServiceLifecycleMilestone": true,
+  "actualVsCodePaneVerified": false,
+  "currentCompleteNativeSuiteRun": false,
+  "currentHostedNativeAccepted": false,
+  "processBoundAgentRunnerImplemented": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}
