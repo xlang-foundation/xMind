@@ -1,5 +1,18 @@
 # Current native validation
 
+## Native view readiness observer — 2026-10-19
+
+The complete owned-language-query build passed 151/152 local contracts. The
+provider-configuration contract failed when its readiness poll read a file
+while the native publisher still held its exclusive write handle (`EBUSY`).
+Production browser and VS Code launchers already retry this temporary state.
+The test now does so within its unchanged 60-second deadline, retaining all
+provider/workspace/security assertions. The focused contract passes in 52.04
+seconds with unchanged native binaries and frozen source/SDK/dependency sets.
+The original full failure remains retained; a fresh complete gate is required.
+The installed preview remains 0.1.33.
+[Failure, focused result and exact receipts](evidence/local-view-readiness-observer-20261019.json).
+
 ## Owned language-server queries — 2026-10-18
 
 Configured model language-server calls now cross the existing owned read-tool

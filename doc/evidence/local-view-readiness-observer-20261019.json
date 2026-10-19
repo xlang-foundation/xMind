@@ -1,0 +1,181 @@
+{
+  "recordedAt": "2026-10-19T00:17:58.627Z",
+  "change": "Retry only ENOENT, EBUSY and incomplete JSON within the original readiness polling loop; match existing production EBUSY handling.",
+  "originalFailure": {
+    "recordedAt": "2026-10-19T00:13:19.236Z",
+    "sourceParent": "0c96bd0483dcf9764ed3f84298afaa75020be0ae",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 41368,
+      "launchedAt": "2026-10-18T23:57:11.398Z",
+      "completedAt": "2026-10-18T23:58:25.758Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "15184705b14fe0a157bb064c0da99788d75b2f1a501ee19bf000b078e577f500"
+    },
+    "test": {
+      "pid": 60072,
+      "launchedAt": "2026-10-18T23:58:29.124Z",
+      "completedAt": "2026-10-19T00:13:16.492Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "f039f986f9844e57326fe406deda279d29f41adc6b99cd31cb7d4883ad8add80"
+    },
+    "total": 152,
+    "failed": 1,
+    "passed": 151,
+    "seconds": 887.33,
+    "projectFiles": 2617,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "51bd453f26cac43442d097bfb17cfb827d1c3d593d8f1818297f999b036f735c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "focusedQualification": {
+    "recordedAt": "2026-10-19T00:17:54.999Z",
+    "sourceParent": "0c96bd0483dcf9764ed3f84298afaa75020be0ae",
+    "sourcePatchSha256": "491eff0eb361c41fd34624e4c3f1e1c10d2b632b87b1db0b03d83fba8673b18a",
+    "uncommittedSource": true,
+    "build": {
+      "exitCode": 0,
+      "reusedUnchangedBinariesFrom": "language-read-owner-full-sdk-headers-20261018",
+      "buildRun": false
+    },
+    "test": {
+      "pid": 32124,
+      "launchedAt": "2026-10-19T00:17:00.040Z",
+      "completedAt": "2026-10-19T00:17:52.136Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e8ec775b1a2277e498a0e410b675749fa4164e29f87e0e13fcce2cc119a67f60"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 52.04,
+    "projectFiles": 2617,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 127,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "51bd453f26cac43442d097bfb17cfb827d1c3d593d8f1818297f999b036f735c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "assertionsAndDeadlinesUnchanged": true,
+  "nativeProductionBytesUnchanged": true,
+  "fullNativePass": false,
+  "installed": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false,
+  "diagnosis": {
+    "publisher": "Native/src/local_profile.cpp publish_local_view_ready creates and flushes the private ready file with an exclusive handle; the file can exist before that handle closes.",
+    "productionReaders": [
+      "Tools/start-browser.mjs",
+      "extensions/vscode/workspace-backend.js"
+    ],
+    "test": "Native/tests/local_view_provider_config_contract.mjs previously retried missing/incomplete files but rejected EBUSY.",
+    "limits": "The corrected focused result does not turn the retained 151/152 failure into a complete pass. A fresh complete gate is required."
+  },
+  "retainedFailurePaths": [
+    "C:/Users/shaw9/AppData/Local/Temp/xmind-local-view-provider-ready-42b51328903dab82",
+    "C:/Users/shaw9/AppData/Local/Temp/xmind-local-view-provider-bxD5Z5"
+  ],
+  "observerAdapterPreparation": {
+    "firstAttempt": "Failed before writing generated gates or launching CTest because a replacement string interpreted a JavaScript dollar suffix.",
+    "correction": "Use a replacement callback to preserve literal characters.",
+    "productOrContractChanged": false
+  },
+  "receipts": {
+    "language-read-owner-full-sdk-headers-20261018/gate.json": {
+      "sha256": "c77667e48a889c13c34d5b586f781de21c561a01d513fbf49bd13ada4c00ac3f",
+      "bytes": 1795
+    },
+    "language-read-owner-full-sdk-headers-20261018/inputs-before-build.json": {
+      "sha256": "2aea82d7e36e34b24e49edca8e40e94a00a4e5382dca616d95e1b4fdfbba563c",
+      "bytes": 2878345
+    },
+    "language-read-owner-full-sdk-headers-20261018/binaries-before-test.json": {
+      "sha256": "b6cd32f7e2d81858f124b6d6ab8be0808440555fcbb37e0f8b212a8c3c56d499",
+      "bytes": 14217
+    },
+    "language-read-owner-full-sdk-headers-20261018/contract-inventory.json": {
+      "sha256": "8a36440160c7058883e6e5f7b8152a016e3a03dcb199fe7e73eaa7b41ac73b13",
+      "bytes": 124474
+    },
+    "language-read-owner-full-sdk-headers-20261018/ctest.log": {
+      "sha256": "f039f986f9844e57326fe406deda279d29f41adc6b99cd31cb7d4883ad8add80",
+      "bytes": 22925
+    },
+    "language-read-owner-full-sdk-headers-20261018/ctest-terminal.json": {
+      "sha256": "899a96715c5bc3343fcd2c0f78e7c62b0b6965291d6ee9ecd4db1d548bb42240",
+      "bytes": 226
+    },
+    "language-read-owner-full-sdk-headers-20261018/LastTest.log": {
+      "sha256": "5aa6627faf6cee966723ff62d23f211529cd59a251cbac5049911b1a271297c4",
+      "bytes": 190769
+    },
+    "language-read-owner-full-sdk-headers-20261018/source.patch": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "language-read-owner-readiness-focused-20261019/gate.json": {
+      "sha256": "48e25b9ded2da211f6bd61d2e91c57641e981e466942d68ba4a1621c94251cf3",
+      "bytes": 1680
+    },
+    "language-read-owner-readiness-focused-20261019/inputs-before-build.json": {
+      "sha256": "84a105ae96465ce06e5ec95947fc7d3ce3064a201aae5999ba7934afefbd9a5f",
+      "bytes": 2878345
+    },
+    "language-read-owner-readiness-focused-20261019/binaries-before-test.json": {
+      "sha256": "7bb8e5e16114ed1bbb12cbeec12c3bd9d65278bff07d3d77b4b516c8b1077c67",
+      "bytes": 14217
+    },
+    "language-read-owner-readiness-focused-20261019/contract-inventory.json": {
+      "sha256": "8a36440160c7058883e6e5f7b8152a016e3a03dcb199fe7e73eaa7b41ac73b13",
+      "bytes": 124474
+    },
+    "language-read-owner-readiness-focused-20261019/ctest.log": {
+      "sha256": "e8ec775b1a2277e498a0e410b675749fa4164e29f87e0e13fcce2cc119a67f60",
+      "bytes": 287
+    },
+    "language-read-owner-readiness-focused-20261019/ctest-terminal.json": {
+      "sha256": "fc54ca132360ff57f6256f4dd5b91b727c5a0e9dc4c0bde9f3c7a05d4b9b0b1a",
+      "bytes": 226
+    },
+    "language-read-owner-readiness-focused-20261019/LastTest.log": {
+      "sha256": "dfcb890558781a8fb8cf8a9cc97d4e448e50e2cd9794211a6abe4cc306fee528",
+      "bytes": 1669
+    },
+    "language-read-owner-readiness-focused-20261019/source.patch": {
+      "sha256": "491eff0eb361c41fd34624e4c3f1e1c10d2b632b87b1db0b03d83fba8673b18a",
+      "bytes": 2242
+    }
+  }
+}
