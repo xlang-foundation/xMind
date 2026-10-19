@@ -1,5 +1,20 @@
 # Current native validation
 
+## Installed 0.1.41 shared status fix — 2026-10-19
+
+The corrected renderer is now installed through the actual VS Code CLI and
+matches the live webpage. Complete local and exact hosted clients pass
+429/147. All 2,448 archive entries, 2,445 installed payloads plus metadata,
+2,402 runtime files and 17,439 unchanged stage files verify. This package
+reuses the qualified native runtime byte for byte; no native rebuild or new
+inference task is claimed. The installed CLI reuses the existing p-a40 backend
+and its exact 13-message, five-usage-record history. Read-only Edge reload
+matches installed assets and retains the conversation and file preview without
+errors, failed HTTP responses or effects. Backup40, settings, six prior profile
+names, 24 checked owners, nine older runtime inventories and nine webpages are
+preserved. Actual VS Code pane activation and broader acceptance remain open.
+[Exact package, hosted/local checks and shared history](evidence/coding-package-0.1.41-20261019.json).
+
 ## Installed 0.1.40 and corrected run status — 2026-10-19
 
 The diagnostics runtime is installed through the actual VS Code CLI. All 2,448

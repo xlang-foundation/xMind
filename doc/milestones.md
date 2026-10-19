@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Shared renderer installed in 0.1.41 — 2026-10-19
+
+The immediate selected-run status fix is installed and matches the webpage.
+Local/exact hosted clients pass 429/147; archive, installed bytes and all
+17,439 stage files verify. Native runtime bytes are unchanged. Installed CLI
+and browser reload retain the existing 13-message conversation without a new
+task. Settings, prior profiles, 24 checked owners, nine runtimes and nine pages
+survive installation. Actual editor pane acceptance remains open.
+[Installation and exact validation scope](evidence/coding-package-0.1.41-20261019.json).
+
 ## Installed diagnostics runtime and immediate run status — 2026-10-19
 
 0.1.40 is installed with verified archive/payload/runtime bytes and exact hosted
