@@ -2,6 +2,23 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete native console recovery validation — 2026-10-19
+
+Source `d30c6025` passes the complete154-contract native inventory in891.72s,
+with zero failures. The source patch is empty. All project, SDK, allowed pure
+library, runtime, Node-dependency and native binary hashes and file sets remain
+unchanged through the gate. The native executable is3ed464a2, paired with
+SDK58a8aab and DLL1ff2a8e7. This includes actual native HTTP/CLI and embedded
+xlang3 SQLite checks for command-mode and interactive reconciliation, in
+addition to profile, ownership, view, provider, graph and protocol contracts.
+Model peers and seeded process journals in those contracts remain fixtures;
+this does not establish live provider or rendered UI acceptance for a new build.
+[Complete native receipt](evidence/cli-process-reconciliation-full-20261019.json),
+[full terminal output](evidence/cli-process-reconciliation-full-20261019.log).
+
+Client0.1.50 packaging is next. Installed49 and its existing backend remain
+unchanged at this checkpoint; no native build or test is still running.
+
 ## Native console process reconciliation candidate — 2026-10-19
 
 The unified console now implements
@@ -30,8 +47,9 @@ testing. Candidate native SHA-256 is
 paired with unchanged SDK58a8aab/DLL1ff2a8e7.
 [Focused scope](evidence/cli-process-reconciliation-focused-20261019.json).
 
-Complete154-contract validation is the next gate. This candidate is not
-installed; client49, backend32704 and the working webpage remain unchanged.
+The subsequent checkpoint above records complete154-contract validation.
+This candidate is not installed at this checkpoint; client49, backend32704
+and the working webpage remain unchanged.
 
 ## Installed 0.1.49: reachable failure review and shared webpage service — 2026-10-19
 
