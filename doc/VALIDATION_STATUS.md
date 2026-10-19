@@ -1,5 +1,23 @@
 # Current native validation
 
+## Browser workspace membership — 2026-10-19
+
+The membership route now works across the browser proxy, native view and backend
+view-session authentication. Startup registers the trusted initial workspace;
+browser reads validate the selected workspace, bound origin and active credential.
+The complete native build and three focused integration contracts pass in 152.78
+seconds, including actual browser folder attachment, workspace selection and old-
+credential revocation. All source, SDK, pure-library, dependency and binary sets
+and hashes remain unchanged. The complete client suites pass 425/147.
+
+The original browser/native 404 receipts remain; the native baseline wrapper
+incorrectly expected 401 and remains recorded as failed. Preview metadata is now
+0.1.35, with packaging and live coding validation pending. This is focused local
+validation, not a new complete native or hosted/editor acceptance claim.
+The existing page at http://127.0.0.1:54828/ui/ restores 15 messages and seven usage
+records in sandboxed headless Edge without failed HTTP responses or page errors.
+[Exact qualification and limits](evidence/workspace-membership-view-20261019.json).
+
 ## Installed preview 0.1.34 — live workspace gap
 
 The archive and installation verify, including all sidebar dependencies. Local
@@ -23,7 +41,7 @@ The test now does so within its unchanged 60-second deadline, retaining all
 provider/workspace/security assertions. The focused contract passes in 52.04
 seconds with unchanged native binaries and frozen source/SDK/dependency sets.
 The original full failure remains retained; the corrected source subsequently passes all 152 contracts in the fresh complete gate documented below.
-The installed preview remains 0.1.33.
+That observer checkpoint predates the current 0.1.34 installation.
 [Failure, focused result and exact receipts](evidence/local-view-readiness-observer-20261019.json).
 
 ## Owned repository and skill tools — 2026-10-19

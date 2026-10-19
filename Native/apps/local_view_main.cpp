@@ -247,7 +247,9 @@ int run_local_view(int argc, char **argv) {
             profile_registry_file,
             std::vector<std::string>{client_package_root + "/modules", client_package_root + "/stdlib"},
             profile_root_utf8);
-        const auto selected_workspace_id = agentflow::WorkspaceTools(connection->workspace).identity();
+        // Register the trusted initial root before any host or browser client
+        // requests membership; opening a view already admits this workspace.
+        const auto selected_workspace_id = workspace_registry->create(connection->workspace).workspace_id;
         std::mutex browser_state_mutex;
         std::mutex browser_switch_mutex;
         std::map<std::string, std::shared_ptr<agentflow::LocalProfileConnection>> workspaces;
@@ -577,13 +579,27 @@ int run_local_view(int argc, char **argv) {
                     }
                     return;
                 }
-                if (request.path == "/v1/workspace/membership" && request.method == "GET") {
-                    if (!host || request.target != request.path) {
-                        response(output, 400, "Workspace membership requires the local backend owner");
+                if (request.path == "/v1/workspace/membership") {
+                    if (request.method != "GET") {
+                        response(output, 405, "Workspace membership is read-only");
                         return;
                     }
+                    if (request.target != request.path) {
+                        response(output, 400, "Workspace membership does not accept query parameters");
+                        return;
+                    }
+                    auto target = connection;
+                    if (!host) {
+                        require(request.get_header_value_count("X-XMind-View-Origin") == 1,
+                                "Workspace membership requires the bound browser origin");
+                        target = browser_workspace(supplied, browser_origin).second;
+                        if (!validate_browser_session(supplied, target, browser_origin)) {
+                            response(output, 401, "Browser view session expired or was revoked");
+                            return;
+                        }
+                    }
                     try {
-                        const agentflow::WorkspaceTools primary(connection->workspace);
+                        const agentflow::WorkspaceTools primary(target->workspace);
                         const auto group = workspace_registry->get(primary.identity());
                         require(!group.folders.empty() && group.primary_folder_id == primary.identity() &&
                                     group.folders.front().root == primary.root_path(),

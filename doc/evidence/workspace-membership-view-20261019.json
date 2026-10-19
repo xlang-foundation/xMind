@@ -1,0 +1,190 @@
+{
+  "recordedAt": "2026-10-19T01:26:44.068Z",
+  "problem": "The actual installed webpage attached a folder, then GET /v1/workspace/membership returned 404 before any model task.",
+  "behavior": "Register the trusted startup workspace and expose GET membership through the browser proxy, native view and native view-session read allowlist. The native view resolves the selected browser workspace and validates the bound origin and live session before reading metadata.",
+  "baseline": {
+    "browser": {
+      "launchedAt": "2026-10-19T01:16:30.475Z",
+      "completedAt": "2026-10-19T01:16:30.928Z",
+      "pid": 62552,
+      "exitCode": 1,
+      "signal": null,
+      "logSha256": "10cf5930a92569a4615e7ca141894c71c011255b797b555cbbf8d7c754c3f7c4",
+      "before": {
+        "views/browser/server.mjs": "ddfe2bee7796815981a31047282dbafe1b4a9e09ffc37b16977dfb7f3561e265",
+        "views/browser/tests/server.test.cjs": "a0d3dd3b3a09ab7ca3cec2bcd0d92d53411585e5c69c7d9b50c5583317d200e8"
+      },
+      "sourceUnchanged": true,
+      "productionBugReproduced": true
+    },
+    "native": {
+      "recordedAt": "2026-10-19T01:17:19.501Z",
+      "sourceParent": "0f1883181899690713bcb3286ae2f756a120a558",
+      "sourcePatchSha256": "29b1d2d04491768fa928d8fde7149e4edc5969b599bb98d742886b09be61e991",
+      "uncommittedSource": true,
+      "build": {
+        "buildRun": false,
+        "reusedFullNativeBuild": true
+      },
+      "test": {
+        "pid": 50432,
+        "launchedAt": "2026-10-19T01:16:18.763Z",
+        "completedAt": "2026-10-19T01:17:16.724Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "85f6d36960e5b8172719e781e1f3bcd2c19531270d654f445fe2468cd201a127"
+      },
+      "total": 1,
+      "failed": 1,
+      "passed": 0,
+      "seconds": 57.92,
+      "projectFiles": 2619,
+      "sdkSourceFiles": 16,
+      "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 76,
+      "nativeBinaries": 127,
+      "nodeDependencyFiles": 18598,
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084",
+      "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+      "fullNativeSuiteRun": false,
+      "earlierActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+      "currentSourceActualRustAnalyzerRerun": false,
+      "initialSemanticFailureUnexplained": true,
+      "releaseAccepted": false,
+      "providerInference": "Synthetic fixtures only; no live model key used",
+      "processBoundAgentRunnerImplemented": false,
+      "installed": false,
+      "cpythonExecuted": false,
+      "scopePassed": false,
+      "productionBugReproduced": false
+    },
+    "nativeFailureObserved": "HTTP 404: Workspace is not registered",
+    "nativeObserverError": "The retained wrapper expected HTTP 401. It therefore reports productionBugReproduced false; its actual 404 failure and log are retained without alteration."
+  },
+  "qualification": {
+    "native": {
+      "recordedAt": "2026-10-19T01:26:19.168Z",
+      "sourceParent": "0f1883181899690713bcb3286ae2f756a120a558",
+      "sourcePatchSha256": "139f82b88f340b2fcf8906e33686d44d7084a080a75b8d0d3edb44e7e6e4b97f",
+      "uncommittedSource": true,
+      "build": {
+        "pid": 55532,
+        "launchedAt": "2026-10-19T01:22:04.510Z",
+        "completedAt": "2026-10-19T01:23:40.779Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "4ebcaf8e8ae1bf9afcabc42f4b371d0b1b614eeea3f6950426d7fbd69b12fdaf"
+      },
+      "test": {
+        "pid": 5832,
+        "launchedAt": "2026-10-19T01:23:43.742Z",
+        "completedAt": "2026-10-19T01:26:16.559Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "897f22950a2c60e45ac87c9102830adac3a05daf2efaa3ff2caf0ac9192ea070"
+      },
+      "total": 3,
+      "failed": 0,
+      "passed": 3,
+      "seconds": 152.78,
+      "projectFiles": 2619,
+      "sdkSourceFiles": 16,
+      "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 76,
+      "nativeBinaries": 127,
+      "nodeDependencyFiles": 18598,
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "nativeSha256": "28e6010184e626850e214b68480a829060abdb52cdf62d77c92a5bdcc6803d05",
+      "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+      "fullNativeSuiteRun": false,
+      "earlierActualRustAnalyzerProof": "language-read-owner-complete-focused-20261018/gate.json",
+      "currentSourceActualRustAnalyzerRerun": false,
+      "initialSemanticFailureUnexplained": true,
+      "releaseAccepted": false,
+      "providerInference": "Synthetic fixtures only; no live model key used",
+      "processBoundAgentRunnerImplemented": false,
+      "installed": false,
+      "cpythonExecuted": false,
+      "scopePassed": true
+    },
+    "client": {
+      "recordedAt": "2026-10-19T01:21:56.655Z",
+      "version": "0.1.34-working-tree",
+      "sourceParent": "0f1883181899690713bcb3286ae2f756a120a558",
+      "workingTreePatchSha256": "139f82b88f340b2fcf8906e33686d44d7084a080a75b8d0d3edb44e7e6e4b97f",
+      "sourceFiles": 99,
+      "dependencyFiles": 18598,
+      "browserAssets": 18,
+      "extension": {
+        "exitCode": 0,
+        "tests": 425,
+        "passed": 425,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "logSha256": "22bf3517648d813c0669112ef36d047cafae95b4e01e1e0089baba8f4275d8d5"
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "logSha256": "05559a885c9d62de67f14f528d0eeaa62304b46472b8473f705c3cd387cc1e22"
+      },
+      "sourceDependencyAssetHashesAndFileSetsUnchanged": true,
+      "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+      "nativeExecuted": false,
+      "providerRequests": 0,
+      "renderedAcceptance": false,
+      "scope": "Complete Node extension host/controller and JSDOM/browser fixtures on the recorded working tree. Native compilation was separate; no native build output was used by these fixtures.",
+      "passed": true
+    }
+  },
+  "coverage": [
+    "Initial host membership before workspace catalogue enumeration",
+    "Actual browser membership after folder attachment",
+    "Actual backend membership through its delegated view credential",
+    "Query and write-method rejection",
+    "Wrong-origin rejection by backend and view",
+    "Membership follows browser workspace selection",
+    "Old browser and backend credentials revoked on switch",
+    "Membership after another folder is attached",
+    "Retired native view cannot serve membership"
+  ],
+  "existingPage": {
+    "url": "http://127.0.0.1:54828/ui/",
+    "readyElapsedMs": 2195,
+    "historyElapsedMs": 2396,
+    "historyMessages": 15,
+    "usageRecords": 7,
+    "errors": [],
+    "failedHttpResponses": [],
+    "effectPosts": 0,
+    "taskSubmissions": 0,
+    "renderedScreenshot": "C:/xMindNativeValidation/available-webpage-followup-20261019/available.png",
+    "scope": "Sandboxed headless Edge, read-only history restore; no visible editor or browser acceptance"
+  },
+  "receipts": {
+    "native": "C:/xMindNativeValidation/membership-route-focused-20261019",
+    "client": "C:/xMindNativeValidation/membership-route-client-gates-20261019",
+    "browserBaseline": "C:/xMindNativeValidation/membership-route-browser-baseline-20261019.json",
+    "nativeBaseline": "C:/xMindNativeValidation/membership-route-native-baseline-20261019",
+    "existingPage": "C:/xMindNativeValidation/available-webpage-followup-20261019/acceptance.json"
+  },
+  "limits": {
+    "currentFullNativeSuiteRun": false,
+    "currentHostedNativeAccepted": false,
+    "installed": false,
+    "newLiveProviderTaskSubmitted": false,
+    "renderedVSCodePaneAccepted": false,
+    "workerAgentPlacementAndIPCComplete": false,
+    "releaseAccepted": false,
+    "cpythonExecuted": false
+  },
+  "toolingFailure": "A generated external test wrapper had a JavaScript syntax error before execution. Its original source remains membership-route-focused-wrapper-syntax-failure-20261019.mjs; the corrected wrapper passed syntax checking before launching the captured build and tests."
+}
