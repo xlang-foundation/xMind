@@ -1,0 +1,280 @@
+{
+  "at": "2026-10-19T09:21:37.638Z",
+  "scope": "Newly terminal hosted native gate and original-workspace Rust reproduction; no product change or task replay",
+  "hosted": {
+    "run": 39221512591,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39221512591",
+    "sourceRevision": "b44bbdece0a7feb40401287722c9cf6580b9ace7",
+    "conclusion": "failure",
+    "artifact": 12175102371,
+    "artifactBytes": 69304,
+    "artifactSha256": "bec36e96384c72e299f53625687daeda0243d98ca93b89dbb3e68726c7e74c24",
+    "officialArtifactDigestVerified": true,
+    "registeredTests": 154,
+    "passed": 153,
+    "failed": 1,
+    "seconds": 780.7,
+    "failedContract": "native_graph_runner_contract",
+    "graphFailure": {
+      "checkpoint": "{\"nodes\":[{\"id\":\"process\",\"state\":\"uncertain\"}],\"spec\":{\"nodes\":[{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:20850f00000093000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"id\":\"process\",\"tool\":\"run_process\",\"type\":\"tool\"}]},\"version\":1}",
+      "children": [
+        {
+          "events": [
+            {
+              "json": "{\"node_id\":\"process\",\"parent_run_id\":\"multi-process-root\"}",
+              "kind": "run.queued"
+            },
+            {
+              "json": "{}",
+              "kind": "run.running"
+            },
+            {
+              "json": "{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:20850f00000093000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"name\":\"run_process\",\"source\":\"graph\"}",
+              "kind": "tool.started"
+            },
+            {
+              "json": "{\"operation_id\":\"efea715e99154dedb34f90f946e7de3a\",\"tool\":\"run_process\"}",
+              "kind": "operation.awaiting_approval"
+            },
+            {
+              "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"efea715e99154dedb34f90f946e7de3a\",\"tool\":\"run_process\"}",
+              "kind": "operation.ready"
+            },
+            {
+              "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"efea715e99154dedb34f90f946e7de3a\",\"tool\":\"run_process\"}",
+              "kind": "operation.executing"
+            },
+            {
+              "json": "{\"channel\":\"stdout\",\"data\":\"786d696e642d67726170682d70686173653a7363726970745f656e74657265640d0a\",\"encoding\":\"hex\",\"offset\":0,\"operation_id\":\"efea715e99154dedb34f90f946e7de3a\",\"profile_id\":\"powershell\",\"retained_bytes\":34}",
+              "kind": "process.output"
+            },
+            {
+              "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"efea715e99154dedb34f90f946e7de3a\",\"tool\":\"run_process\"}",
+              "kind": "operation.uncertain"
+            },
+            {
+              "json": "{\"reason\":\"graph_process_effect_uncertain\"}",
+              "kind": "run.failed"
+            }
+          ],
+          "id": "e2e5260f369e2f4c102b57e7b6223a8b",
+          "operations": [
+            {
+              "elapsed_ms": 30060,
+              "exit_code": 1,
+              "id": "efea715e99154dedb34f90f946e7de3a",
+              "output_artifact": {
+                "operation_id": "efea715e99154dedb34f90f946e7de3a",
+                "state": "complete",
+                "stderr_bytes": 0,
+                "stdout_bytes": 34
+              },
+              "process_tree_retired": true,
+              "profile_id": "powershell",
+              "startup_phases": [
+                "script_entered"
+              ],
+              "state": "uncertain",
+              "termination": "timed_out",
+              "timeout_ms": 30000,
+              "tool": "run_process"
+            }
+          ],
+          "state": "failed"
+        }
+      ],
+      "events": [
+        {
+          "json": "{\"folders\":[{\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000046000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-Xclobw\"},{\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:20850f00000093000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-Xclobw\\\\attached\"}],\"primary_folder_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000046000000000000000000\",\"revision\":2,\"snapshot\":\"graph_admission\",\"workspace_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000046000000000000000000\"}",
+          "kind": "agent.workspace_membership"
+        },
+        {
+          "json": "{\"graph_id\":\"secondary-process\",\"graph_revision\":1,\"kind\":\"graph\"}",
+          "kind": "run.queued"
+        },
+        {
+          "json": "{}",
+          "kind": "run.running"
+        },
+        {
+          "json": "{\"child_run_id\":\"e2e5260f369e2f4c102b57e7b6223a8b\",\"node_id\":\"process\"}",
+          "kind": "graph.child.queued"
+        },
+        {
+          "json": "{\"checkpoint_revision\":3,\"child_run_id\":\"e2e5260f369e2f4c102b57e7b6223a8b\",\"child_state\":\"failed\",\"node_id\":\"process\"}",
+          "kind": "graph.child.settled"
+        },
+        {
+          "json": "{\"reason\":\"graph_child_failed\"}",
+          "kind": "run.failed"
+        }
+      ],
+      "state": "failed"
+    },
+    "rawSha256": {
+      "ci-evidence/provenance.json": "38fd7c13491a28b76187aa1ebd81c8860dd4633038c51463fedf341038a53a76",
+      "ci-evidence/native-ctest.log": "c2fe06be33aa1b41906c3aab39b5ff87a5a9e4b8a6f22796a508d7a2d30462f0",
+      "native/Testing/Temporary/LastTest.log": "a124b4fb9aca4f9851a060964e360bfca47c16f0d29a302e150ae9cc2a39ed2a",
+      "native/Testing/Temporary/LastTestsFailed.log": "6604d1a5546b358cc17a60aa1f58c10fe71e3ae9dff2d63ddc5383282f41947d",
+      "ci-evidence/contracts.json": "5461f17db4278065dd73f680e1a5484c00c8f76a83bf6db725d36e47040fe2ce"
+    },
+    "provenance": {
+      "windows_default_owner_matches_user": false,
+      "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+      "toolchain": "Visual Studio 18 2026",
+      "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+      "toolchain_version": "18.10.12224.181",
+      "runtime": "Native xlang3; no CPython execution or bridge",
+      "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+      "build_parallelism": 4,
+      "processors": 4,
+      "xmind": "b44bbdece0a7feb40401287722c9cf6580b9ace7"
+    },
+    "accepted": false
+  },
+  "rust": {
+    "at": "2026-10-19T09:19:47.9Z",
+    "terminal": true,
+    "contractPassed": false,
+    "cargoPassed": true,
+    "nativeSourceUnchanged": true,
+    "sourceSdkLibrariesDependenciesToolchainBinariesAndSetsUnchanged": true,
+    "sourceRevision": "ee29f13b83be7bd0e335de84c14369bbebfa1611",
+    "nativeSha256": "178dfc41787e8c646b5fb76d4f81e92b2162c8fc7cf2057d77fa7e5606b0b79a",
+    "originalFailedWorkspaceReproduced": true,
+    "rootCauseProven": false,
+    "logSha256": "e4a52f450c9bcf683a3edd12dd02ae11c47a888b82ea9520e8e4faa4f2b3779e",
+    "workspace": "C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture",
+    "tests": 2,
+    "passed": 1,
+    "failed": 1,
+    "seconds": 62.67,
+    "diagnostic": "Call-site definition remains null through the original 120 attempts; Cargo check passes. Real Rust server logs captured without changing request policy or runtime.",
+    "serverLogSha256": {
+      "rust-83967222.log": "78bc58df54599e04fdece730ea8d88b2eb4d6376836e94834ad00d8b4fe23da7"
+    },
+    "originalFailurePreserved": true,
+    "laterFreshWorkspacePassDoesNotResolveThisFailure": true
+  },
+  "productCodeChanged": false,
+  "installedVersion": "0.1.41",
+  "installedCodingAcceptanceInvalidated": false,
+  "releaseAccepted": false,
+  "nextEvidenceNeeded": [
+    "Sample native Rust Analyzer and child-process state/resource usage during the failing original-workspace case; independent LSP client succeeds in that workspace without native job budgets, which does not establish an exact cause",
+    "Identify the hosted PowerShell command-discovery delay with original commands and budgets preserved"
+  ],
+  "independentRustClient": {
+    "at": "2026-10-19T09:23:02.233Z",
+    "scope": "Independent Node LSP client against original failing workspace; actual Rust Analyzer, same initialize payload/document/position and selected environment, without native Windows job budgets",
+    "owner": {
+      "pid": 60684,
+      "image": "C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\rust-analyzer.exe",
+      "birth": "2026-10-19T09:23:01.270028Z"
+    },
+    "exeSha256": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27",
+    "workspace": "C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture",
+    "productModified": false,
+    "taskSubmissions": 0,
+    "symbols": [
+      {
+        "name": "add",
+        "detail": "fn(left: i32, right: i32) -> i32",
+        "kind": 12,
+        "tags": [],
+        "deprecated": false,
+        "range": {
+          "start": {
+            "line": 0,
+            "character": 0
+          },
+          "end": {
+            "line": 2,
+            "character": 1
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 0,
+            "character": 7
+          },
+          "end": {
+            "line": 0,
+            "character": 10
+          }
+        }
+      },
+      {
+        "name": "call_add",
+        "detail": "fn() -> i32",
+        "kind": 12,
+        "tags": [],
+        "deprecated": false,
+        "range": {
+          "start": {
+            "line": 4,
+            "character": 0
+          },
+          "end": {
+            "line": 6,
+            "character": 1
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 4,
+            "character": 7
+          },
+          "end": {
+            "line": 4,
+            "character": 15
+          }
+        }
+      }
+    ],
+    "definition": [
+      {
+        "originSelectionRange": {
+          "start": {
+            "line": 5,
+            "character": 4
+          },
+          "end": {
+            "line": 5,
+            "character": 7
+          }
+        },
+        "targetUri": "file:///c:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs",
+        "targetRange": {
+          "start": {
+            "line": 0,
+            "character": 0
+          },
+          "end": {
+            "line": 2,
+            "character": 1
+          }
+        },
+        "targetSelectionRange": {
+          "start": {
+            "line": 0,
+            "character": 7
+          },
+          "end": {
+            "line": 0,
+            "character": 10
+          }
+        }
+      }
+    ],
+    "attempts": 32,
+    "elapsedMs": 18482,
+    "semanticPassed": true,
+    "terminal": {
+      "code": 0,
+      "signal": null
+    },
+    "fixtureAndServerBinaryUnchanged": true,
+    "finishedAt": "2026-10-19T09:23:20.889Z"
+  }
+}

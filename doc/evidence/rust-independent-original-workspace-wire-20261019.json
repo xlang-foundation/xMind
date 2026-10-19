@@ -1,0 +1,1380 @@
+[
+  {
+    "at": "2026-10-19T09:23:02.234Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-1",
+      "method": "initialize",
+      "params": {
+        "capabilities": {
+          "textDocument": {
+            "definition": {
+              "linkSupport": true
+            },
+            "diagnostic": {
+              "dynamicRegistration": false,
+              "relatedDocumentSupport": false
+            },
+            "documentSymbol": {
+              "hierarchicalDocumentSymbolSupport": true
+            },
+            "formatting": {
+              "dynamicRegistration": false
+            },
+            "hover": {
+              "contentFormat": [
+                "plaintext",
+                "markdown"
+              ]
+            },
+            "publishDiagnostics": {
+              "versionSupport": true
+            },
+            "references": {
+              "dynamicRegistration": false
+            }
+          }
+        },
+        "clientInfo": {
+          "name": "xMind",
+          "version": "native"
+        },
+        "processId": null,
+        "rootUri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture",
+        "workspaceFolders": [
+          {
+            "name": "semantic-fixture",
+            "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.235Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-1",
+      "result": {
+        "capabilities": {
+          "positionEncoding": "utf-16",
+          "textDocumentSync": {
+            "openClose": true,
+            "change": 2,
+            "save": {}
+          },
+          "selectionRangeProvider": true,
+          "hoverProvider": true,
+          "completionProvider": {
+            "resolveProvider": false,
+            "triggerCharacters": [
+              ":",
+              ".",
+              "'",
+              "("
+            ],
+            "completionItem": {
+              "labelDetailsSupport": false
+            }
+          },
+          "signatureHelpProvider": {
+            "triggerCharacters": [
+              "(",
+              ",",
+              "<"
+            ]
+          },
+          "definitionProvider": true,
+          "typeDefinitionProvider": true,
+          "implementationProvider": true,
+          "referencesProvider": true,
+          "documentHighlightProvider": true,
+          "documentSymbolProvider": true,
+          "workspaceSymbolProvider": true,
+          "codeActionProvider": true,
+          "codeLensProvider": {
+            "resolveProvider": true
+          },
+          "documentFormattingProvider": true,
+          "documentRangeFormattingProvider": false,
+          "documentOnTypeFormattingProvider": {
+            "firstTriggerCharacter": ".",
+            "moreTriggerCharacter": [
+              "=",
+              "<",
+              ">",
+              "{",
+              "(",
+              "|",
+              "+"
+            ]
+          },
+          "renameProvider": {
+            "prepareProvider": true
+          },
+          "foldingRangeProvider": true,
+          "declarationProvider": true,
+          "workspace": {
+            "workspaceFolders": {
+              "supported": true,
+              "changeNotifications": true
+            },
+            "fileOperations": {
+              "willRename": {
+                "filters": [
+                  {
+                    "scheme": "file",
+                    "pattern": {
+                      "glob": "**/*.rs",
+                      "matches": "file"
+                    }
+                  },
+                  {
+                    "scheme": "file",
+                    "pattern": {
+                      "glob": "**",
+                      "matches": "folder"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "callHierarchyProvider": true,
+          "semanticTokensProvider": {
+            "legend": {
+              "tokenTypes": [
+                "comment",
+                "decorator",
+                "enumMember",
+                "enum",
+                "function",
+                "interface",
+                "keyword",
+                "macro",
+                "method",
+                "namespace",
+                "number",
+                "operator",
+                "parameter",
+                "property",
+                "string",
+                "struct",
+                "typeParameter",
+                "variable",
+                "type",
+                "angle",
+                "arithmetic",
+                "attributeBracket",
+                "attribute",
+                "bitwise",
+                "boolean",
+                "brace",
+                "bracket",
+                "builtinAttribute",
+                "builtinType",
+                "character",
+                "colon",
+                "comma",
+                "comparison",
+                "constParameter",
+                "const",
+                "deriveHelper",
+                "derive",
+                "dot",
+                "escapeSequence",
+                "formatSpecifier",
+                "generic",
+                "invalidEscapeSequence",
+                "label",
+                "lifetime",
+                "logical",
+                "macroBang",
+                "negation",
+                "parenthesis",
+                "procMacro",
+                "punctuation",
+                "selfKeyword",
+                "selfTypeKeyword",
+                "semicolon",
+                "static",
+                "toolModule",
+                "typeAlias",
+                "union",
+                "unresolvedReference"
+              ],
+              "tokenModifiers": [
+                "async",
+                "documentation",
+                "declaration",
+                "static",
+                "defaultLibrary",
+                "deprecated",
+                "associated",
+                "attribute",
+                "callable",
+                "constant",
+                "consuming",
+                "controlFlow",
+                "crateRoot",
+                "injected",
+                "intraDocLink",
+                "library",
+                "macro",
+                "mutable",
+                "procMacro",
+                "public",
+                "reference",
+                "trait",
+                "unsafe"
+              ]
+            },
+            "range": true,
+            "full": {
+              "delta": true
+            }
+          },
+          "inlayHintProvider": {
+            "resolveProvider": false
+          },
+          "diagnosticProvider": {
+            "identifier": "rust-analyzer",
+            "interFileDependencies": true,
+            "workspaceDiagnostics": false
+          },
+          "experimental": {
+            "externalDocs": true,
+            "hoverRange": true,
+            "joinLines": true,
+            "matchingBrace": true,
+            "moveItem": true,
+            "onEnter": true,
+            "openCargoToml": true,
+            "parentModule": true,
+            "childModules": true,
+            "runnables": {
+              "kinds": [
+                "cargo"
+              ]
+            },
+            "ssr": true,
+            "workspaceSymbolScopeKindFiltering": true
+          }
+        },
+        "serverInfo": {
+          "name": "rust-analyzer",
+          "version": "1.98.1 (48a229ce 2026-09-01)"
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.236Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "method": "initialized",
+      "params": {}
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.236Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "method": "textDocument/didOpen",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs",
+          "languageId": "rust",
+          "version": 1,
+          "text": "pub fn add(left: i32, right: i32) -> i32 {\r\n    left + right\r\n}\r\n\r\npub fn call_add() -> i32 {\r\n    add(1, 2)\r\n}\r\n"
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.236Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-2",
+      "method": "textDocument/documentSymbol",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.244Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-2",
+      "result": [
+        {
+          "name": "add",
+          "detail": "fn(left: i32, right: i32) -> i32",
+          "kind": 12,
+          "tags": [],
+          "deprecated": false,
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 2,
+              "character": 1
+            }
+          },
+          "selectionRange": {
+            "start": {
+              "line": 0,
+              "character": 7
+            },
+            "end": {
+              "line": 0,
+              "character": 10
+            }
+          }
+        },
+        {
+          "name": "call_add",
+          "detail": "fn() -> i32",
+          "kind": 12,
+          "tags": [],
+          "deprecated": false,
+          "range": {
+            "start": {
+              "line": 4,
+              "character": 0
+            },
+            "end": {
+              "line": 6,
+              "character": 1
+            }
+          },
+          "selectionRange": {
+            "start": {
+              "line": 4,
+              "character": 7
+            },
+            "end": {
+              "line": 4,
+              "character": 15
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.244Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-3",
+      "method": "textDocument/documentSymbol",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.245Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-3",
+      "result": [
+        {
+          "name": "add",
+          "detail": "fn(left: i32, right: i32) -> i32",
+          "kind": 12,
+          "tags": [],
+          "deprecated": false,
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 2,
+              "character": 1
+            }
+          },
+          "selectionRange": {
+            "start": {
+              "line": 0,
+              "character": 7
+            },
+            "end": {
+              "line": 0,
+              "character": 10
+            }
+          }
+        },
+        {
+          "name": "call_add",
+          "detail": "fn() -> i32",
+          "kind": 12,
+          "tags": [],
+          "deprecated": false,
+          "range": {
+            "start": {
+              "line": 4,
+              "character": 0
+            },
+            "end": {
+              "line": 6,
+              "character": 1
+            }
+          },
+          "selectionRange": {
+            "start": {
+              "line": 4,
+              "character": 7
+            },
+            "end": {
+              "line": 4,
+              "character": 15
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.245Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-4",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.246Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-4",
+      "result": []
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.753Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-5",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:02.753Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-5",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:03.267Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-6",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:03.267Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-6",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:03.768Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-7",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:03.768Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-7",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:04.282Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-8",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:04.282Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-8",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:04.796Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-9",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:04.796Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-9",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:05.299Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-10",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:05.299Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-10",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:05.815Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-11",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:05.816Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-11",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:06.331Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-12",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:06.331Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-12",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:06.847Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-13",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:06.848Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-13",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:07.362Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-14",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:07.362Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-14",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:07.873Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-15",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:07.873Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-15",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:08.378Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-16",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:08.378Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-16",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:08.881Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-17",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:08.881Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-17",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:09.387Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-18",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:09.388Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-18",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:09.891Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-19",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:09.891Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-19",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:10.392Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-20",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:10.393Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-20",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:10.908Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-21",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:10.908Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-21",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:11.424Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-22",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:11.425Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-22",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:11.928Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-23",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:11.929Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-23",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:12.430Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-24",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:12.430Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-24",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:12.938Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-25",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:12.938Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-25",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:13.445Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-26",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:13.445Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-26",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:13.955Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-27",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:13.956Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-27",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:14.462Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-28",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:14.462Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-28",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:14.983Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-29",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:14.984Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-29",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:15.496Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-30",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:15.497Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-30",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:16.002Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-31",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:16.002Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-31",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:16.508Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-32",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:16.509Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-32",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:17.013Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-33",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:17.013Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-33",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:17.526Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-34",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:17.526Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-34",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:18.041Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-35",
+      "method": "textDocument/definition",
+      "params": {
+        "textDocument": {
+          "uri": "file:///C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs"
+        },
+        "position": {
+          "line": 5,
+          "character": 5
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:20.727Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-35",
+      "result": [
+        {
+          "originSelectionRange": {
+            "start": {
+              "line": 5,
+              "character": 4
+            },
+            "end": {
+              "line": 5,
+              "character": 7
+            }
+          },
+          "targetUri": "file:///c:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/src/lib.rs",
+          "targetRange": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 2,
+              "character": 1
+            }
+          },
+          "targetSelectionRange": {
+            "start": {
+              "line": 0,
+              "character": 7
+            },
+            "end": {
+              "line": 0,
+              "character": 10
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:20.727Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-36",
+      "method": "shutdown",
+      "params": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:20.730Z",
+    "direction": "received",
+    "message": {
+      "jsonrpc": "2.0",
+      "id": "independent-36",
+      "result": null
+    }
+  },
+  {
+    "at": "2026-10-19T09:23:20.730Z",
+    "direction": "sent",
+    "message": {
+      "jsonrpc": "2.0",
+      "method": "exit",
+      "params": null
+    }
+  }
+]

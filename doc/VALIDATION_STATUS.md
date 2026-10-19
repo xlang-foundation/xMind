@@ -1,5 +1,31 @@
 # Current native validation
 
+## Hosted native failure and reproduced Rust semantic failure — 2026-10-19
+
+The exact b44bbde hosted native run is terminal failure: 153 of 154 contracts
+pass in 780.70 seconds. The failed graph contract starts its real PowerShell
+process, records script_entered, then reaches its unchanged command deadline.
+The graph child records an uncertain process outcome and the root fails.
+The official artifact digest verifies. This is not hosted-native acceptance;
+the separately qualified local 153-contract suite remains its own result.
+
+The original failing Rust workspace now reproduces the null call-site
+definition with real server logging enabled: Cargo passes, but the semantic
+contract fails after its original 120 attempts (62.49 seconds). Source, SDK,
+libraries, dependencies, complete checked toolchain and binary file sets/hashes
+remain unchanged. The server discovers the project and switches its workspace,
+then logs further build-data loading; these observations do not prove the
+cause. The later pass in a fresh folder therefore does not resolve this issue.
+No runtime policy, deadline, product code, installed package or user task is
+changed. An independent Node LSP client then resolves the same call-site in
+the same workspace after 32 attempts/18.482 seconds. It uses the same server,
+initialization payload, document and position, with a matching selected
+environment, but runs without the native Windows job budgets. Fixture and
+server bytes stay unchanged and the server exits normally. This narrows the
+comparison to client/launch/timing differences without establishing a cause.
+Next diagnosis must sample native process/VFS/resource state during failure.
+[Exact failures, source closure and verified artifact](evidence/current-native-failures-20261019.json).
+
 ## Installed 0.1.41 shared status fix — 2026-10-19
 
 The corrected renderer is now installed through the actual VS Code CLI and

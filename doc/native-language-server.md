@@ -1,5 +1,15 @@
 # Native language-server integration
 
+The original Rust semantic workspace was rechecked with logging on 2026-10-19
+and still returns a null call-site definition through the unchanged 120-query
+contract. Cargo check passes; the complete checked source/runtime/toolchain
+closure is unchanged. A pass in a separate fresh workspace does not resolve
+this failure. An independent LSP client resolves the call-site in that original
+workspace after 18.482 seconds using the same server, initialization payload,
+document and position, without the native Windows job budgets. This identifies
+a useful client/launch comparison; the underlying cause remains unproven.
+[Original-workspace reproduction](evidence/current-native-failures-20261019.json).
+
 xMind starts configured language servers inside the native backend and exposes
 their read-only queries to AgentRunner as one `language_server` tool. The model
 can select only a registered server, a workspace-relative file, and one of

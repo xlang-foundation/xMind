@@ -1,0 +1,35 @@
+Start testing: Oct 19 02:16 Pacific Daylight Time
+----------------------------------------------------------
+1/2 Testing: cargo_semantic_fixture
+1/2 Test: cargo_semantic_fixture
+Command: "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/cargo.exe" "check" "--offline" "--manifest-path" "C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture/Cargo.toml"
+Directory: C:/xMindNativeValidation/rust-original-failed-path-diagnostic-20261019/real-language-ctest
+"cargo_semantic_fixture" start time: Oct 19 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+<end of output>
+Test time =   0.13 sec
+----------------------------------------------------------
+Test Passed.
+"cargo_semantic_fixture" end time: Oct 19 02:16 Pacific Daylight Time
+"cargo_semantic_fixture" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: actual_owned_language_agent
+2/2 Test: actual_owned_language_agent
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_language_server_contract.exe" "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rust-analyzer.exe" "C:/xMindNativeValidation/lsp-diagnostics-real-rust-20261019/semantic-fixture" "src/lib.rs" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/rust-original-failed-path-diagnostic-20261019/real-language-ctest
+"actual_owned_language_agent" start time: Oct 19 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Real rust-analyzer must resolve a call-site definition through the native editor query; received: null
+<end of output>
+Test time =  62.49 sec
+----------------------------------------------------------
+Test Failed.
+"actual_owned_language_agent" end time: Oct 19 02:18 Pacific Daylight Time
+"actual_owned_language_agent" time elapsed: 00:01:02
+----------------------------------------------------------
+
+End testing: Oct 19 02:18 Pacific Daylight Time

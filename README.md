@@ -49,7 +49,9 @@ activation remains unverified.
 New native source also supports push-only language-server diagnostics and
 Node-style Windows file URIs. All 153 native checks and an actual Claude
 diagnostics → reviewed edit → compiler repair task pass. The runtime is now
-installed in 0.1.40; hosted-native qualification remains pending.
+installed in 0.1.40 and reused unchanged in 0.1.41. Hosted native qualification
+remains open: its latest full run passes 153/154 and fails a graph PowerShell
+command timeout. The original Rust semantic failure also reproduces.
 The separate Rust semantic-startup failure remains open.
 [Diagnostics source status](doc/native-language-server.md#diagnostics-source-update--2026-10-19).
 [Installed 0.1.40 and browser status evidence](doc/evidence/coding-package-0.1.40-20261019.json).
