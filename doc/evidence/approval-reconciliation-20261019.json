@@ -1,0 +1,86 @@
+{
+  "scope": "VS Code and browser operation snapshot reconciliation plus explicit persisted execution-limit explanations",
+  "gate": {
+    "recordedAt": "2026-10-19T20:45:09.356Z",
+    "sourceParent": "9572457b7481d3117e0f460eac58581b35295a91",
+    "sourcePatchSha256": "0b46a1444f3d2658eb330e33dd2b3f2904d785e50d8b4d4b4fe5fdf9d157dfbb",
+    "extension": {
+      "pid": 61260,
+      "launchedAt": "2026-10-19T20:44:52.173Z",
+      "completedAt": "2026-10-19T20:44:57.671Z",
+      "exitCode": 0,
+      "tests": 434,
+      "passed": 434,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "568e9031b385c4a03272a5c867d0d9ce55a4f6848c3cae4daeaf4477ac08cb4c"
+    },
+    "browser": {
+      "pid": 48908,
+      "launchedAt": "2026-10-19T20:44:52.180Z",
+      "completedAt": "2026-10-19T20:45:08.099Z",
+      "exitCode": 0,
+      "tests": 150,
+      "passed": 150,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "28e47ce901fd1fad93890190150f7df1211941f093413e7ceb11aad2fd5c8849"
+    },
+    "sourceFiles": 63,
+    "dependencyFiles": 14908,
+    "assetFiles": 18,
+    "allCheckedSourceDependencyAssetsAndFileSetsUnchanged": true,
+    "nativeSuiteRepeated": false,
+    "nativeCodeChanged": false,
+    "providerRequests": 0,
+    "installed": false,
+    "scopePassed": true
+  },
+  "baseline": {
+    "extension": {
+      "tests": 3,
+      "failed": 3
+    },
+    "browser": {
+      "tests": 3,
+      "failed": 3
+    },
+    "budgetMessages": {
+      "tests": 2,
+      "failed": 2
+    }
+  },
+  "installed": false,
+  "actualFixedGuiAcceptance": false,
+  "nativeCodeChanged": false,
+  "executionBudgetsChanged": false,
+  "notes": [
+    "An observed ready, succeeded or denied operation is never replaced by an older session pending-approval snapshot.",
+    "Execution budget and model turn exhaustion preserve draft/history and explain follow-up without resubmitting effects.",
+    "The actual installed44 Model Zoo run reached 16 model-call reservations after its eight tests and Vite build passed. Production/helper duplication remains under review in an explicitly separate follow-up; no complete coding success is claimed for that failed run."
+  ],
+  "logs": [
+    {
+      "path": "approval-reconciliation-vscode-baseline-20261019.log",
+      "sha256": "46d2463cd877f3ad278d265d160e6861df2f324c5dfcd5ba4f70f4f1340ef446"
+    },
+    {
+      "path": "approval-reconciliation-browser-baseline-20261019.log",
+      "sha256": "055ba79c00d4d3a58cdcf918426f2ba34154688bbb5422e41cf6de2fbd035955"
+    },
+    {
+      "path": "coding-budget-message-baseline-20261019.log",
+      "sha256": "192a8941d703246194b221ec2947a89f2103bd3036378ed5f3110e428d934b07"
+    },
+    {
+      "path": "approval-reconciliation-extension-final-20261019.log",
+      "sha256": "568e9031b385c4a03272a5c867d0d9ce55a4f6848c3cae4daeaf4477ac08cb4c"
+    },
+    {
+      "path": "approval-reconciliation-browser-final-20261019.log",
+      "sha256": "28e47ce901fd1fad93890190150f7df1211941f093413e7ceb11aad2fd5c8849"
+    }
+  ]
+}

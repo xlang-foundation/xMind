@@ -131,7 +131,14 @@ async function activate(context) {
   let contextProfileAdmission=false;
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
-  function publishOperations(items){const base=items?new Map(items.map(operation=>[operation.id,operation])):reviewed;reviewed=new Map([...base].filter(([id,operation])=>!sessionPermissionsLoaded||operation.state!=='awaiting_approval'||sessionPermissionRequests.has(id)||observedOperation(operation.run_id)));for(const [id,operation] of sessionPermissionRequests)reviewed.set(id,operation);post({type:'operations',operations:[...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});}
+  function publishOperations(items){
+    const base=items?new Map(items.map(operation=>[operation.id,operation])):reviewed;
+    reviewed=new Map([...base].filter(([id,operation])=>!sessionPermissionsLoaded||operation.state!=='awaiting_approval'||sessionPermissionRequests.has(id)||observedOperation(operation.run_id)));
+    // Permission lists refresh independently of run snapshots. Once a decision
+    // is observed, an older pending-list response cannot restore its controls.
+    for(const [id,operation] of sessionPermissionRequests)if(!reviewed.has(id)||reviewed.get(id).state==='awaiting_approval')reviewed.set(id,operation);
+    post({type:'operations',operations:[...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});
+  }
   async function refreshSessionPermissions(target=client,session=sessionId,version=generation){if(!target||!session)return;const observed=await target.sessionPermissions(session);if(target!==client||session!==sessionId||version!==generation||!panel)return;if(!observed||observed.session_id!==session||!Array.isArray(observed.requests)||observed.requests.length>256||observed.requests.some(operation=>!operation||typeof operation.id!=='string'||typeof operation.run_id!=='string'||operation.state!=='awaiting_approval'||!Number.isSafeInteger(operation.expires_unix_ms)))throw new Error('Invalid session permission request list.');sessionPermissionRequests=new Map(observed.requests.map(operation=>[operation.id,operation]));sessionPermissionsLoaded=true;publishOperations();}
   function schedulePermissionRefresh(version=generation){clearTimeout(permissionTimer);if(!panel||!client||!sessionId)return;permissionTimer=setTimeout(async()=>{permissionTimer=undefined;if(!panel||version!==generation)return;try{await refreshSessionPermissions(client,sessionId,version);}catch(error){if(panel&&version===generation)post({type:'error',text:error.message});}if(panel&&version===generation)schedulePermissionRefresh(version);},2500);}
   const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};

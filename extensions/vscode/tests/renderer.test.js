@@ -459,6 +459,16 @@ test('model protocol failure shows only recognized diagnostics and preserves con
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'model_response_invalid'}}});assert.equal(card.querySelector('pre').textContent,'model_response_invalid');
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
 });
+for(const reason of ['execution_budget_exhausted','model_turn_limit'])test(`execution limit ${reason} explains saved work and follow-up without replay`,()=>{
+ const r=renderer(),doc=r.dom.window.document,initialPosts=r.posted.length;
+ try{
+  doc.getElementById('prompt').value='Keep my draft';
+  r.send({type:'event',event:{kind:'run.failed',data:{reason,message:'private backend diagnostic'}}});r.send({type:'transcript',history:[]});
+  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);assert.match(card.textContent,/reached its (execution budget|model turn limit)/);assert.match(card.textContent,/Completed edits and command results remain saved/);assert.match(card.textContent,/follow-up prompt/);assert.match(card.textContent,/Review the recorded outcomes/);
+  assert.equal(doc.getElementById('prompt').value,'Keep my draft');assert.equal(card.querySelector('button'),null);assert.equal(doc.querySelector('#history .assistant'),null);assert.ok(!card.textContent.includes('private backend diagnostic'));assert.equal(r.posted.length,initialPosts);
+ }finally{r.dom.window.close();}
+});
+
 test('provider failures remain visible through transcript refresh without invented replies or metrics',()=>{
   const r=renderer(),doc=r.dom.window.document,failure={type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,message:'<script>fixtureAttack()</script> private body'}}};
   r.send(failure);r.send(failure);r.send({type:'transcript',history:[]});

@@ -52,6 +52,19 @@ test('browser surfaces and replies to a pending approval from another run in the
  const view=new BrowserController(client,message=>posted.push(message));view.session='selected-session';view.runId='newer-run';
  try{await view.refreshSessionPermissions();assert.ok(posted.at(-1).operations.some(item=>item.id===proposal.id));await view.handle({type:'decide',id:proposal.id,decision:'allow'});assert.deepEqual(calls,[['selected-session',proposal.id,'allow']]);assert.equal(view.sessionPermissionRequests.size,0);assert.ok(posted.at(-1).operations.every(item=>item.id!==proposal.id));}finally{view.dispose();}
 });
+
+for(const state of ['ready','succeeded','denied'])test(`browser stale session approval cannot rewind an observed ${state} operation`,async()=>{
+ const proposal={id:'externally-decided',run_id:'root',workspace_id:'workspace',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:'{}',result_json:'{}'},posted=[],changed=[];
+ const client={sessionPermissions:async session=>({session_id:session,requests:[proposal]})};
+ const view=new BrowserController(client,message=>posted.push(message),{workspaceChanged:items=>changed.push(items)});view.session='session';view.runId='root';
+ try{
+  await view.refreshSessionPermissions();view.publishOperations([{...proposal,state}]);
+  assert.equal(view.operations.get(proposal.id).state,state);
+  await view.refreshSessionPermissions();assert.equal(view.operations.get(proposal.id).state,state);
+  assert.equal(posted.at(-1).operations.find(item=>item.id===proposal.id).state,state);
+  assert.equal(changed.length,state==='succeeded'?1:0);
+ }finally{view.dispose();}
+});
 test('browser accepts only a path-bound read-only inspection for an uncertain patch addition',async()=>{
  const id='uncertain-add',plan={action:'add',path:'new.txt',target_workspace_id:'workspace',after_sha256:'b'.repeat(64),after_content:'new\n',create_directories:[]};
  const operation={id,run_id:'run',workspace_id:'workspace',tool:'patch_file',state:'uncertain',expires_unix_ms:0,arguments_json:JSON.stringify(plan),result_json:'{}'};

@@ -738,6 +738,26 @@ test('session read approval can save its exact resource scope through the native
  const h=harness({sessionPermissions:[proposal],permissionOperation:proposal,runs:[{id:'finished',session_id:'saved',state:'completed'}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===proposal.id)));
  view.receive({type:'decide',id:proposal.id,decision:'allow',grantResource:true});await until(()=>h.sessionPermissionReplies.length===1);assert.deepEqual(h.sessionPermissionReplies,[{session_id:'saved',request_id:proposal.id,decision:'allow',grant_resource:true}]);assert.equal(h.decisions.length,0);view.close();
 });
+
+for(const observedState of ['ready','succeeded','denied'])test(`a stale session approval cannot rewind an observed ${observedState} operation`,async()=>{
+ const proposal={id:'externally-decided-edit',run_id:'finished',workspace_id:'fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'src/main.cpp',before_content:'before',after_content:'after'}),result_json:'{}'};
+ const operations=[proposal],options={running:true,operations,sessionPermissions:[proposal]};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===proposal.id)));
+  // Another controller decides the request. The run snapshot observes the new
+  // state before the separately refreshed session permission list catches up.
+  operations[0]={...proposal,state:observedState,decision_actor:'other-controller'};
+  const feed=h.streams[0];await feed.options.onEvent({seq:2,run_id:'finished',kind:'tool.completed',data:{name:'replace_file'}});
+  const snapshot=h.scheduledTasks.findLast(task=>task.delay===100);assert.ok(snapshot);const count=view.posted.filter(message=>message.type==='operations').length;snapshot.callback();
+  await until(()=>view.posted.filter(message=>message.type==='operations').length>count);
+  assert.equal(view.posted.findLast(message=>message.type==='operations').operations.find(item=>item.id===proposal.id)?.state,observedState);
+  // Even another stale permissions response must not restore Allow/Deny controls.
+  await h.scheduledTasks.findLast(task=>task.delay===2500).callback();
+  assert.equal(view.posted.findLast(message=>message.type==='operations').operations.find(item=>item.id===proposal.id)?.state,observedState);
+  assert.equal(h.decisions.length,0);assert.equal(h.sessionPermissionReplies.length,0);
+ }finally{view.close();}
+});
 test('graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs',async()=>{
  const options=graphFixture();options.runs=[];options.health={agent_execution:false,status:'ok'};const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));
  view.receive({type:'graph-select',id:'forged'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.graphRequests.length,0);view.receive({type:'graph-select',id:'fixture.flow'});view.receive({type:'send',prompt:'Actual requested task',spec:{nodes:[]},graph_revision:99});await until(()=>h.graphRequests.length===1);assert.deepEqual(h.graphRequests,[{session_id:'saved',graph_id:'fixture.flow',graph_revision:2,prompt:'Actual requested task',expected_workspace_id:'windows-local-file-v1:1:0',expected_workspace_authority_id:'b'.repeat(32)}]);view.close();

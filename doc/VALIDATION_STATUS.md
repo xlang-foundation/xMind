@@ -1,5 +1,24 @@
 # Current native validation
 
+## Coding UI observation fixes — 2026-10-19
+
+The real installed44 coding check exposed a stale approval-card conflict. Both
+clients now retain an observed decided operation when an older session pending
+list arrives. Separate baseline tests fail for ready/succeeded/denied in each
+client; the fixed complete client suites pass 434 VS Code and 150 browser tests.
+All checked source, dependency and built-asset file sets/hashes stay unchanged.
+
+The actual coding run also reaches its 16-call budget after its eight tests and
+Vite build pass. This remains a failed run, with edits/results preserved. The
+shared renderer now explains execution-budget and model-turn limits and directs
+the user to review recorded outcomes before a follow-up. It retains drafts and
+never resubmits work. Both message baseline tests fail before the fix.
+
+These client fixes are not installed yet. Native code and execution limits are
+unchanged. Actual production-path coding verification continues in a separate
+follow-up; the previous failed run is retained.
+[Baseline failures, complete client gate and exact scope](evidence/approval-reconciliation-20261019.json).
+
 ## Actual installed VS Code pane — 2026-10-19
 
 One normal installed 0.1.44 window opens TestProj and connects its backend to
