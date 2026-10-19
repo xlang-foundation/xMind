@@ -1,0 +1,401 @@
+{
+  "startedAt": "2026-10-19T00:19:20.619Z",
+  "url": "http://127.0.0.1:54828/ui/",
+  "session": "12cb9446b11b67a63679aaec020d8694",
+  "run": "4b959300a34426ddfc26a89b2f935cc4",
+  "scope": "Read-only current webpage check in sandboxed headless Edge; no visible external-browser or VS Code acceptance",
+  "taskSubmissions": 0,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/ui/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/chat.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/browser.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/xterm.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/patch-review.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/xterm-fit.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/terminal.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/client.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/purify.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/marked.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/browser.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/chat.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/xterm.js",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/ui/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ui/workspaces",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workspace",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/agent/planning",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/graphs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/provider/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/active",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/runs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/provider/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/model",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/active",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/permissions",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/v1/provider/profiles/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/tree-events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/children/58c36cce2b814fa37d77243643ef5ab2/history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/operations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/58c36cce2b814fa37d77243643ef5ab2/operations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/tree-events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/children",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/children/58c36cce2b814fa37d77243643ef5ab2/history",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/operations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/58c36cce2b814fa37d77243643ef5ab2/operations",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/plan",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/69678a2cd7efe64ee27535e1541547c0/mcp-inputs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/runs/58c36cce2b814fa37d77243643ef5ab2/mcp-inputs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/runs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/inbox",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workspace/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workspace/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/agents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/agent",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/inbox",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/c69b1f6e2d11e994a77499b5ca744e54/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workspace/skills",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workspace/files",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/12cb9446b11b67a63679aaec020d8694/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/12cb9446b11b67a63679aaec020d8694/runs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/provider/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/12cb9446b11b67a63679aaec020d8694/model",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/active",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/v1/provider/profiles/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/12cb9446b11b67a63679aaec020d8694/permissions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/12cb9446b11b67a63679aaec020d8694/history",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "blockedEffects": [],
+  "readyElapsedMs": 2339,
+  "servedClientSha256": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+  "historyMessages": 15,
+  "usageRecords": 7,
+  "providers": [
+    {
+      "value": "",
+      "label": "Choose provider"
+    },
+    {
+      "value": "claude",
+      "label": "Claude"
+    },
+    {
+      "value": "gemini",
+      "label": "Gemini · Choose a model"
+    },
+    {
+      "value": "deepseek",
+      "label": "DeepSeek · Choose a model"
+    },
+    {
+      "value": "openai",
+      "label": "OpenAI · Choose a model"
+    }
+  ],
+  "modelOptions": [
+    {
+      "value": "",
+      "label": "Choose a model"
+    },
+    {
+      "value": "claude-sonnet-4-6",
+      "label": "claude-sonnet-4-6"
+    }
+  ],
+  "renderedStatus": "completed",
+  "historyElapsedMs": 2533,
+  "effectPosts": 0,
+  "passed": true,
+  "completedAt": "2026-10-19T00:19:23.226Z",
+  "screenshotSha256": "799b4d9ddd671c969228dd5cc4e1ec7bc904e72ecbdc80de3397bc7d6660c404",
+  "visibleExternalBrowserAcceptance": false,
+  "VSCodePaneAcceptance": false
+}

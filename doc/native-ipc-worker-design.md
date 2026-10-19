@@ -15,7 +15,12 @@ libexec and four tool shims. This is not live model inference or worker IPC.
 The first semantic definition lookup failed before the new AgentRunner case;
 its cause is unexplained despite later diagnostic and final fresh-fixture
 passes. Fixture compile and wildcard-input failures remain separately recorded.
-This source is uninstalled; complete native and hosted gates remain open.
+The complete local build and all 152 registered Release contracts now pass
+in 964.83 seconds with all project, SDK header/runtime, pure-library, dependency
+and binary file sets/hashes unchanged. The real LSP checks above are separate
+from that default inventory. Source remains uninstalled; hosted/release
+acceptance and the earlier unexplained semantic failure remain open.
+[Complete local source qualification](evidence/language-server-read-owner-full-20261019.json).
 [Exact source, outcomes and limits](evidence/language-server-read-owner-20261018.json).
 
 Permissions and guidance apply to the requested document. Language-server

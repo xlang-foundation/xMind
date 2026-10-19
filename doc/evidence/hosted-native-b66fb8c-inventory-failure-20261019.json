@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-10-19T00:06:37.4911875Z",
+  "run": 39175782447,
+  "job": 117819379678,
+  "revision": "b66fb8cb1474ff9e62b2e668fd8ae6c94d1759ae",
+  "conclusion": "failure",
+  "artifact": 12155343355,
+  "artifactBytes": 30884,
+  "artifactSha256": "100f2f5f51c2b311cad43152050921a48b5b0b3642a24f49b144b679145ee1f1",
+  "advertisedSizeAndDigestVerified": true,
+  "registeredContracts": 153,
+  "expectedContracts": 151,
+  "difference": [
+    {
+      "InputObject": "native_agent_process_tool_host_contract",
+      "SideIndicator": "=>"
+    },
+    {
+      "InputObject": "native_agent_read_tool_host_contract",
+      "SideIndicator": "=>"
+    }
+  ],
+  "completeNativeSuiteStarted": false,
+  "earlyLocalViewLog": "Test project D:/a/xMind/xMind/xmind/build/native\r\n    Start 129: native_local_view_contract\r\n1/1 Test #129: native_local_view_contract .......   Passed   62.49 sec\r\n\r\n100% tests passed, 0 tests failed out of 1\r\n\r\nTotal Test time (real) =  62.51 sec\r\n",
+  "correctedIn": "25d8e159f32cbe37ab5149c362e144a64dd61c9a",
+  "currentHostedRevision": "0c96bd0483dcf9764ed3f84298afaa75020be0ae",
+  "currentHostedRun": 39178581714
+}
