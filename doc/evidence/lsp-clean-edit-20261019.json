@@ -1,0 +1,100 @@
+{
+  "recordedAt": "2026-10-19T17:44:13.466Z",
+  "problem": "After an approved coding edit, a read-only language-server transport failure aborted the run before compiler dispatch. Push-only TypeScript servers suppress repeated empty diagnostics, so a clean-to-clean edit can invalidate the cache without another publication.",
+  "fix": "For changed push-only diagnostic buffers, create a fresh analysis lifetime before dispatch. Preserve pull-server incremental reuse. Return transport failures as explicit language_server_unavailable tool results; cancellation and access controls still propagate. Never invent clean diagnostics or automatically retry effects.",
+  "focused": {
+    "recordedAt": "2026-10-19T17:43:37.973Z",
+    "sourceParent": "12a835ff2632bf404f2e33206fb4b4dfef0abb1f",
+    "sourcePatchSha256": "379d946962a2bb551899ea0411e5862970aa9bd3de7a3bcb34e98e261f5daf52",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 23008,
+      "launchedAt": "2026-10-19T17:41:30.100Z",
+      "completedAt": "2026-10-19T17:42:55.004Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b6a8f82efb627bc1473f703f3aac99d5c6f2cba413fee4aa82422f669204bc78"
+    },
+    "test": {
+      "pid": 62788,
+      "launchedAt": "2026-10-19T17:43:03.623Z",
+      "completedAt": "2026-10-19T17:43:35.095Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "70c1c86efd5eb89846484bdc28785fc1fd2a041e4b656cc043831b33372cb3fe"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 31.43,
+    "projectFiles": 2623,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "621413b4c4c32a71a0221514cbeb7f37e8f01bb226a2ac2054259dff4e5d6fec",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "standaloneActualRustAnalyzerProof": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "actualTypeScript": {
+    "startedAt": "2026-10-19T17:43:44.662Z",
+    "scope": "Real TypeScript LSP through native LanguageServerClient: unsaved clean, different clean, error, repaired buffer. No model, browser, user workspace or CPython execution.",
+    "paths": [
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_language_server_diagnostics_contract.exe",
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe",
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:/CantorAI2026/xMind/Native/tests/language_server_diagnostics_peer.mjs",
+      "C:/xMindNativeValidation/lsp-typescript-tools-20261019/node_modules/typescript-language-server/lib/cli.mjs"
+    ],
+    "before": {
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_language_server_diagnostics_contract.exe": "315c753a2de7ab3b9fb52b2b5dd8879dcf3a6d6a1de79f627ad1877e7fb216a4",
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe": "621413b4c4c32a71a0221514cbeb7f37e8f01bb226a2ac2054259dff4e5d6fec",
+      "C:\\Program Files\\nodejs\\node.exe": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+      "D:/CantorAI2026/xMind/Native/tests/language_server_diagnostics_peer.mjs": "67b0e2da5ce621fe4e6655e087ba255fc7723419ed86a3d4643c0d5c2c144d68",
+      "C:/xMindNativeValidation/lsp-typescript-tools-20261019/node_modules/typescript-language-server/lib/cli.mjs": "86ef128358dcd71d0c684d786d7751ee09fbbbbb2a521482b160007b8228be2e"
+    },
+    "pid": 68372,
+    "terminal": {
+      "exitCode": 0,
+      "signal": null
+    },
+    "completedAt": "2026-10-19T17:43:48.812Z",
+    "stdout": "Actual TypeScript buffer diagnostic count: 0\r\nActual TypeScript buffer diagnostic count: 0\r\nActual TypeScript buffer diagnostic count: 1\r\nActual TypeScript buffer diagnostic count: 0\r\n",
+    "stderr": "",
+    "after": {
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_language_server_diagnostics_contract.exe": "315c753a2de7ab3b9fb52b2b5dd8879dcf3a6d6a1de79f627ad1877e7fb216a4",
+      "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe": "621413b4c4c32a71a0221514cbeb7f37e8f01bb226a2ac2054259dff4e5d6fec",
+      "C:\\Program Files\\nodejs\\node.exe": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+      "D:/CantorAI2026/xMind/Native/tests/language_server_diagnostics_peer.mjs": "67b0e2da5ce621fe4e6655e087ba255fc7723419ed86a3d4643c0d5c2c144d68",
+      "C:/xMindNativeValidation/lsp-typescript-tools-20261019/node_modules/typescript-language-server/lib/cli.mjs": "86ef128358dcd71d0c684d786d7751ee09fbbbbb2a521482b160007b8228be2e"
+    },
+    "checkedInputsUnchanged": true,
+    "passed": true
+  },
+  "initialBuildFailure": {
+    "receipt": {
+      "pid": 69376,
+      "launchedAt": "2026-10-19T17:38:59.648Z",
+      "completedAt": "2026-10-19T17:40:31.721Z",
+      "exitCode": 1,
+      "signal": null,
+      "logSha256": "dc65d390bff131cebd4fcaf2785a44fe20078d63f3237412d25bbd5ac4fe9363"
+    },
+    "reason": "New registry regression initially omitted its tools-library link; fixed in Native/CMakeLists.txt before the passing build."
+  },
+  "installed": false,
+  "browserFailurePreserved": true,
+  "fullSuiteForThisFixPending": true,
+  "releaseAccepted": false
+}

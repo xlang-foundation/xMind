@@ -796,7 +796,7 @@ if(BUILD_TESTING)
     set_tests_properties(native_mcp_http_fallback_contract PROPERTIES TIMEOUT 45)
     add_executable(agentflow_language_server_diagnostics_contract tests/language_server_diagnostics_contract.cpp)
     target_include_directories(agentflow_language_server_diagnostics_contract PRIVATE third_party)
-    target_link_libraries(agentflow_language_server_diagnostics_contract PRIVATE agentflow_language_server)
+    target_link_libraries(agentflow_language_server_diagnostics_contract PRIVATE agentflow_language_server_tools)
     add_test(NAME native_language_server_diagnostics_contract COMMAND agentflow_language_server_diagnostics_contract
       "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/language_server_diagnostics_peer.mjs")
     set_tests_properties(native_language_server_diagnostics_contract PROPERTIES TIMEOUT 20)

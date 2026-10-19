@@ -1,5 +1,35 @@
 # Current native validation
 
+## Coding diagnostic continuation fix — 2026-10-19
+
+The new native candidate refreshes invalidated push-only analysis before
+querying changed buffers. This avoids waiting for repeated empty reports that
+TypeScript suppresses. Transport failures return an explicit unavailable tool
+result so coding can continue with other checks; cancellation still propagates.
+No absent report is converted into clean diagnostics and no effect is replayed.
+
+The complete build and seven focused contracts pass in 31.43 seconds with
+checked input and binary sets unchanged. A separate actual TypeScript server
+check returns diagnostic counts 0/0/1/0 for clean, changed clean, invalid and
+repaired unsaved buffers. This candidate is not yet installed; its complete
+native suite and new browser acceptance are pending.
+[Exact candidate results and initial corrected test-link failure](evidence/lsp-clean-edit-20261019.json).
+
+## Installed 0.1.42 coding checkpoint — 2026-10-19
+
+The complete responsiveness candidate is installed as 0.1.42. Local and exact
+hosted client contracts pass 429/147; package, installed payload and frozen
+stage checks pass. The actual installed CLI reuses the browser's native backend
+and configured Claude account, obtains clean TypeScript diagnostics and runs
+the real compiler successfully without changing files.
+
+The next actual browser task successfully applies one reviewed edit, then fails
+in its language-server check with `mcp_transport_failure` before compiler
+dispatch. That failure and successful edit are preserved; the task is not
+replayed. Browser end-to-end coding and actual VS Code pane acceptance remain
+open. The retained page is <http://127.0.0.1:55639/ui/>.
+[Package, actual CLI result and retained browser failure](evidence/coding-package-0.1.42-20261019.json).
+
 ## Complete responsiveness-candidate suite — 2026-10-19
 
 Committed ce654d2/native d83d0e8e passes all **154 local native contracts** in
@@ -9,7 +39,7 @@ dependency files, 129 native binaries and their sets unchanged. This qualifies
 the complete registered local inventory; it does not rerun the separate Rust
 semantic leaf or imply installed-editor acceptance. Two copied Rust metadata
 fields in the raw producer receipt are corrected explicitly in the public
-evidence; the original receipt stays unchanged. Packaging follows this gate.
+evidence; the original receipt stays unchanged. Installed 0.1.42 uses this candidate.
 [Exact full result, inventory and scope correction](evidence/lsp-runtime-full-native-20261019.json).
 
 ## Editor analysis no longer holds the provider runtime lock — 2026-10-19
@@ -30,8 +60,8 @@ language-server query waiting while workspace, provider-profile and health
 requests return HTTP 200 in 4–5 ms. The query then completes after explicit
 fixture release. No provider request or user task is submitted.
 
-Candidate d83d0e8e is not installed; 0.1.41 and existing pages are preserved.
-The full candidate suite and packaging remain pending. Separate Rust sampling
+Candidate d83d0e8e is now installed as 0.1.42 after the complete suite;
+0.1.41 and existing pages are preserved. Separate Rust sampling
 and protocol tracing pass without source changes but do not resolve the earlier
 null-definition failure or prove a resource-limit cause. The prior hosted
 PowerShell graph timeout remains open.

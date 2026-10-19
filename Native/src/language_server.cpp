@@ -179,6 +179,16 @@ std::string LanguageServerClient::request(const LanguageServerRequest& call,std:
     auto file=workspace_.read_file(call.path,cancel);if(call.document_text)file.content=*call.document_text;if(file.content.size()>1024*1024)throw ToolFileError("Language-server document exceeds limits");
     std::lock_guard lock(impl_->mutex);const auto deadline=Clock::now()+profile_.request_timeout;
     const auto root=std::filesystem::u8path(workspace_.root_path());const auto uri=file_uri(root/std::filesystem::u8path(call.path));
+    // Push-only servers may suppress unchanged empty diagnostics after an
+    // edit. A cached result belongs to the old buffer, and waiting for another
+    // publication can then time out forever. Start a fresh analysis lifetime
+    // before this query when that buffer's diagnostics are invalidated. This
+    // is not a retry after dispatch and never invents a clean result. Pull
+    // servers retain their persistent incremental document path.
+    if(call.method=="diagnostics"&&impl_->initialized&&!impl_->pull_diagnostics){
+        const auto key=diagnostic_uri_key(uri);const auto document=impl_->documents.find(key);
+        if(document!=impl_->documents.end()&&(document->second.second!=file.content||!impl_->published_diagnostics.contains(key)))impl_->stop();
+    }
     try{impl_->start(deadline,cancel);if(call.method=="formatting"&&!impl_->document_formatting)throw std::runtime_error("Configured language server does not support document formatting");impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}
     catch(...){impl_->stop();throw;}
     try{

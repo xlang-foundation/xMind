@@ -47,6 +47,7 @@ std::string LanguageServerToolRegistry::invoke(const std::string& source,std::st
     const auto method=args["method"].get<std::string>();if(method!="hover"&&method!="definition"&&method!="references"&&method!="documentSymbol"&&method!="diagnostics")throw ToolAccessDenied("The AgentRunner language-server tool is read-only");
     const auto id=args["server_id"].get<std::string>();const auto found=clients_.find(id);if(found==clients_.end())throw ToolAccessDenied("Language-server profile is not registered");
     LanguageServerRequest request;request.path=args["path"].get<std::string>();request.method=args["method"].get<std::string>();request.line=position(args,"line");request.character=position(args,"character");
+    try {
     if(args.contains("folder_id")){
         if(!args["folder_id"].is_string())throw std::invalid_argument("Language-server folder ID must be text");
         request.folder_id=args["folder_id"].get<std::string>();
@@ -57,6 +58,20 @@ std::string LanguageServerToolRegistry::invoke(const std::string& source,std::st
         return dispatch(id,request,*admitted_folders);
     }
     return query(request,id,cancel);
+    }catch(const McpTransportCancelled&){throw;}
+    catch(const McpTransportError& error){
+        // A failed read-only LSP check is not an uncertain remote effect.
+        // Return its failure without aborting coding or replaying the call.
+        std::string detail;
+        for(const unsigned char c:std::string(error.what())){
+            if(detail.size()>=512)break;
+            if(c=='\r'||c=='\n'||c=='\t')detail.push_back(' ');
+            else if(c>=0x20&&c!=0x7f)detail.push_back(static_cast<char>(c));
+        }
+        return Json{{"error",{{"code","language_server_unavailable"},{"server_id",id},{"method",method},
+            {"message","The language-server check failed; no diagnostic result was obtained. Report this limitation and use other available checks. This call was not retried."},
+            {"detail",detail}}}}.dump();
+    }
 }
 std::string LanguageServerToolRegistry::query(const LanguageServerRequest& request,std::stop_token cancel){
     const auto extension=lower(std::filesystem::u8path(request.path).extension().string());const LanguageServerProfile* selected=nullptr;

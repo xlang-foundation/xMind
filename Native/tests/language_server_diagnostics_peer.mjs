@@ -1,8 +1,8 @@
 // Explicit synthetic LSP peer. This tests native protocol behavior, not a real
 // TypeScript/Python language service or model inference.
 import assert from 'node:assert/strict';
-const mode=process.argv[2];assert.ok(['push','unversioned','pull','pull-error','silent'].includes(mode));
-let buffer=Buffer.alloc(0),clientPush=false;
+const mode=process.argv[2];assert.ok(['push','unversioned','suppress-clean','pull','pull-error','silent'].includes(mode));
+let buffer=Buffer.alloc(0),clientPush=false,wasClean=false;
 const send=message=>{const body=Buffer.from(JSON.stringify({jsonrpc:'2.0',...message}));process.stdout.write('Content-Length: '+body.length+'\r\n\r\n');process.stdout.write(body);};
 const diagnostic=(version,uri)=>({range:{start:{line:0,character:6},end:{line:0,character:14}},severity:1,code:2322,message:'Explicit fixture type mismatch',data:{version,clientPush},source:'synthetic-language-peer'});
 function publish(uri,version,items){uri=uri.replace(/^file:\/\/\/([A-Za-z]):/,(_,drive)=>'file:///'+drive.toLowerCase()+'%3A');send({method:'textDocument/publishDiagnostics',params:{uri,...(mode==='unversioned'?{}:{version}),diagnostics:items}});}
@@ -19,7 +19,11 @@ function accept(message){
   // empty publication is an actual clean result, not an absent response.
   if(mode==='push')publish(uri,version-1,[diagnostic(version-1,uri)]);
   if(mode==='pull-error')return publish(uri,version,[]);
-  if(!mode.startsWith('pull'))setTimeout(()=>publish(uri,version,version===1?[diagnostic(version,uri)]:[]),30);
+  const text=message.method==='textDocument/didOpen'?doc.text:message.params.contentChanges[0].text;
+  const clean=!text.includes('= 42;');
+  if(mode==='suppress-clean'&&wasClean&&clean)return;
+  wasClean=clean;
+  if(!mode.startsWith('pull'))setTimeout(()=>publish(uri,version,clean?[]:[diagnostic(version,uri)]),30);
   return;
  }
  if(message.method==='textDocument/diagnostic'){
