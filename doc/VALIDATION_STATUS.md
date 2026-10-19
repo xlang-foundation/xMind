@@ -2,6 +2,34 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed console recovery checkpoint — 2026-10-19
+
+Installed 0.1.50 packages native source `d30c6025` with executable `3ed464a2`.
+All 2,445 installed payloads match the qualified package; the VSIX contains
+2,448 entries and its SHA-256 is
+`31602cce763e4d36bafcf2565fb4a955285a078d0c264e96d0e74c1da24ee93d`.
+The complete local native gate passes 154/154. Exact client source `1fab4df1`
+passes 441 extension and 154 browser contracts locally and in
+[hosted validation](https://github.com/xlang-foundation/xMind/actions/runs/39341787472).
+
+The actual installed unified console passes command and chat reconciliation
+against the native HTTP/embedded xlang3 SQLite fixture. Explicit acknowledgment,
+audit-note validation, replay rejection and preservation of failed runs/output
+pass. Historical uncertain-process journals are seeded fixtures; no new real
+timed-out child or provider call is claimed by this check.
+
+The installed console's managed health check attaches to the existing TestProj
+backend. That backend remains PID32704, native `c636e0c0`/executable `29427794`;
+it has not been replaced by the new packaged native runtime. All 41 tracked
+owners, 15 pages, 18 previous runtime-directory states, four saved histories,
+nine runs and seven project file hashes are preserved. Settings and seven
+previous profiles are unchanged; the installed49 backup verifies 2,447 files.
+
+The existing webpage at <http://127.0.0.1:64405/ui/> still serves 0.1.49 assets.
+This checkpoint opens no editor window and establishes no new rendered browser
+or UI-submitted coding acceptance. Those remain required for the coding
+milestone. [Installed evidence](evidence/coding-installed-0.1.50-checkpoint-20261019.json).
+
 ## Complete native console recovery validation — 2026-10-19
 
 Source `d30c6025` passes the complete154-contract native inventory in891.72s,

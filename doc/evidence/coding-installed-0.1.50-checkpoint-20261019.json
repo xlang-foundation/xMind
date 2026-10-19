@@ -1,0 +1,152 @@
+{
+  "recordedAt": "2026-10-19T23:33:52.434Z",
+  "version": "0.1.50",
+  "sourceRevision": "1fab4df16a450743ef6979bdc2998a1538c33449",
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.50",
+    "version": "0.1.50",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "d30c6025b987f93a8701e5289e87f05f4e7d9d3f",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "3ed464a27c96bf820e51cf78887b444576ccb79d53a668b2564919c638507496",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "a55b22202f7db5933b96c7c22f4d5d20163fec847f35e6f786881fa4c7397f8b",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "archive": {
+    "bytes": 34440824,
+    "sha256": "31602cce763e4d36bafcf2565fb4a955285a078d0c264e96d0e74c1da24ee93d",
+    "entries": 2448,
+    "stageFiles": 17439
+  },
+  "completeLocalClientGate": {
+    "recordedAt": "2026-10-19T23:30:22.479Z",
+    "version": "0.1.50",
+    "sourceRevision": "1fab4df16a450743ef6979bdc2998a1538c33449",
+    "extension": {
+      "exitCode": 0,
+      "tests": 441,
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "dbe906721294b17e48b1a93d63b48827170b6bd2828ce82fcc2eef98d60d929c"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 154,
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "734f780007cafe46f5429e2f835a1e82428a26c4d0eb0e916e5d25d858045729"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClientGate": {
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39341787472",
+    "artifactSha256": "f1d18d03edc8419a5c90c806a660cc8c6c708e390dfc5d56c605bc10aedfbfe8",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "1fab4df16a450743ef6979bdc2998a1538c33449",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 441,
+        "browser": 154
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 441,
+        "passed": 441,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 154,
+        "passed": 154,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "completeNativeGate": {
+    "receipt": "cli-process-reconciliation-full-20261019.json",
+    "passed": 154,
+    "failed": 0,
+    "seconds": 891.72
+  },
+  "actualInstalledConsoleContract": {
+    "startedAt": "2026-10-19T23:32:11.786Z",
+    "completedAt": "2026-10-19T23:32:14.733Z",
+    "pid": 53004,
+    "exitCode": 0,
+    "logSha256": "9b97b61e7ed5d7b79fb243e7cfce11a6eff0a0f878f5c4fe3b442828469ade1f",
+    "version": "0.1.50",
+    "nativeSha256": "3ed464a27c96bf820e51cf78887b444576ccb79d53a668b2564919c638507496",
+    "installedUnifiedBinary": true,
+    "commandAndChatReconciliation": true,
+    "explicitAcknowledgmentAndAuditNoteEnforced": true,
+    "replayRejected": true,
+    "failedRunAndOutputPreserved": true,
+    "nativeServerAndEmbeddedXlang3Sqlite": true,
+    "seededHistoricalProcessJournals": true,
+    "newRealTimedOutChildClaimed": false,
+    "liveProviderCalls": 0,
+    "userProfileMutated": false,
+    "renderedUiAcceptance": false,
+    "cpythonExecuted": false
+  },
+  "existingBackend": {
+    "pid": 32704,
+    "birth": "2026-10-19T22:02:59.7270870Z",
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "replaced": false,
+    "managedInstalledConsoleHealthPassed": true
+  },
+  "preservation": {
+    "owners": 41,
+    "pages": 15,
+    "previousRuntimeDirectoryStates": 18,
+    "savedSessionMessageCounts": [
+      43,
+      25,
+      63,
+      4
+    ],
+    "savedRuns": 9,
+    "projectFileHashes": 7,
+    "historiesUnchanged": true,
+    "settingsUnchanged": true
+  },
+  "currentWebpage": {
+    "url": "http://127.0.0.1:64405/ui/",
+    "assetVersion": "0.1.49",
+    "renderedBrowserAcceptance": false
+  },
+  "newEditorViewActivated": false,
+  "completeUiSubmittedCodingAcceptance": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false
+}

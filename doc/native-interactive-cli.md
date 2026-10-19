@@ -18,9 +18,13 @@ No legacy profile migration is required.
 
 ## Recovering a command with an uncertain outcome
 
-The console source supports the backend's process reconciliation contract in
-command mode and chat. This addition is under native validation; installed
-0.1.49 does not contain it yet.
+Installed 0.1.50 supports the backend's process reconciliation contract in
+command mode and chat. Its actual packaged console passes both modes against
+the native HTTP/embedded xlang3 SQLite fixture, including audit validation and
+replay rejection. The fixture seeds historical process journals; it does not
+claim a newly timed-out process or a live model run. The console also attaches
+to the existing local backend without replacing it.
+[Installed checkpoint](evidence/coding-installed-0.1.50-checkpoint-20261019.json).
 
 Inspect the saved operation, its complete stdout/stderr, and the workspace
 before acknowledging possible side effects. Use the same workspace and
