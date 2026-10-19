@@ -1,0 +1,360 @@
+{
+  "recordedAt": "2026-10-19T19:37:12.639Z",
+  "version": "0.1.44",
+  "source": "49e151abee5d3be6b3ec48aa171d98fb7fb52bd7",
+  "nativeSource": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+  "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+  "url": "http://127.0.0.1:64581/ui/",
+  "workspace": "C:/xMindNativeValidation/coding-0.1.44-live-20261019/workspace",
+  "profile": "C:/Users/shaw9/.xMind/p-a44",
+  "owners": {
+    "host": {
+      "pid": 29748,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T19:35:03.7901050Z"
+    },
+    "view": {
+      "pid": 59720,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.44\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T19:35:04.9863920Z"
+    },
+    "backend": {
+      "pid": 20740,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a44\\e5008a9657ecd40be6fb9188bac54d3cb6a78ee45bb97b397b4c724f88814fec\\runtime-ab13c965e5d00f5de32564d1084f7009c38a1c3071333f4184b969dd4bf64ec3\\xmind.exe",
+      "birth": "2026-10-19T19:35:08.5467900Z"
+    }
+  },
+  "scope": "Actual installed unified CLI and sandboxed headless Edge share one native backend using configured Claude. Fresh isolated read-only diagnostics/compiler task followed by one reviewed edit, fresh diagnostics/compiler, automatic preview refresh and history reload.",
+  "session": "c0d6c4b3a90b546f8d7cda07554c06b0",
+  "readOnlyRoot": "4da8ba482e863f3ccc23172f6e44e9db",
+  "browserRoot": "cb54813a968374f219d0c923c0989131",
+  "reviewPassed": true,
+  "browserPassed": true,
+  "reviewTaskSubmissions": 1,
+  "browserTaskSubmissions": 1,
+  "approvedFileOperation": {
+    "id": "f316c7b7913aa40c4d48008dffec8d90",
+    "tool": "replace_file",
+    "beforeSha256": "34444e1fe9811d0590aea9437679adb16618dfd1423ccd44a8ebb2680af9c935",
+    "afterSha256": "32e2d3566c22260a672849b7dabe6ced6c693688eea72eee8fe58e4ea9d9b0fc"
+  },
+  "diagnosticCount": 0,
+  "compilerExit": 0,
+  "historyMessages": 15,
+  "usageRecords": 6,
+  "automaticPreviewRefresh": true,
+  "reloadRetainsHistory": true,
+  "errors": [],
+  "failedHTTP": [],
+  "olderOwnersPreserved": 33,
+  "olderRuntimeInventoriesPreserved": 12,
+  "olderPagesPreserved": 12,
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.44",
+    "version": "0.1.44",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "e1aee2bfccc4445e9523b5df103b3587d546f5ef161828f5b8669bf556dede99",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "archive": {
+    "recordedAt": "2026-10-19T19:33:09.648Z",
+    "version": "0.1.44",
+    "sourceRevision": "49e151abee5d3be6b3ec48aa171d98fb7fb52bd7",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.44-complete-win32-x64.vsix",
+    "archiveBytes": 34431557,
+    "archiveSha256": "a136e8baea9ea72ef64ddbfd2c06633e1c59a3fbc04725f73b3f8d420f5f8ed0",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-19T19:32:31.826Z",
+      "completedAt": "2026-10-19T19:33:06.843Z",
+      "pid": 22748,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "bd45b7fabaa125bc2577a56f6d58ccc81f5e431ffb8433817e29b6aabb9cfab4"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "localNative": {
+    "recordedAt": "2026-10-19T19:30:04.759Z",
+    "sourceParent": "9c5bedbb0ce63add72a6d1f2feebdfbdde421f74",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 31280,
+      "launchedAt": "2026-10-19T19:13:08.645Z",
+      "completedAt": "2026-10-19T19:13:34.129Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "95ff0e34be77bde14170df2c3c044e07f451a0be60aadf1983b8c83080ebc594"
+    },
+    "test": {
+      "pid": 67940,
+      "launchedAt": "2026-10-19T19:13:37.259Z",
+      "completedAt": "2026-10-19T19:30:01.961Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "73d170288983c9b3869e14bcdb115120df5e99ab457fe73715ac5420b8ef0863"
+    },
+    "total": 154,
+    "failed": 0,
+    "passed": 154,
+    "seconds": 984.67,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "cb94e28a1eb49d39552794296f3434fb9d27c0ec72bbf16fa6b6dd83e744ece7",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "earlierRustFailureReceipt": "lsp-diagnostics-rust-diagnostic-20261019/gate.json",
+    "currentSourceActualRustAnalyzerRerun": false,
+    "currentSourceInitialRustLeafPassed": null,
+    "initialSemanticFailureUnexplained": true,
+    "releaseAccepted": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "processBoundAgentRunnerImplemented": false,
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "hostedViews": {
+    "recordedAt": "2026-10-19T19:32:31.750Z",
+    "run": 39311575346,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39311575346",
+    "sourceRevision": "49e151abee5d3be6b3ec48aa171d98fb7fb52bd7",
+    "artifact": 12216835806,
+    "artifactBytes": 309409,
+    "artifactSha256": "cefea32697101cc190ac9d2632dbd40234df14a3d7654a6feb37e63acc1f95ba",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "49e151abee5d3be6b3ec48aa171d98fb7fb52bd7",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 429,
+        "browser": 147
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 429,
+        "passed": 429,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "crossHostSource": {
+      "rawIdentical": [
+        "extensions/vscode/.vscodeignore",
+        "extensions/vscode/LICENSE",
+        "extensions/vscode/browser-view.js",
+        "extensions/vscode/client.js",
+        "extensions/vscode/edit-review.js",
+        "extensions/vscode/editor-selection.js",
+        "extensions/vscode/extension.js",
+        "extensions/vscode/language-server-editor.js",
+        "extensions/vscode/media/xmind.svg",
+        "extensions/vscode/native-runtime.js",
+        "extensions/vscode/patch-review.js",
+        "extensions/vscode/scripts/package-native-runtime.mjs",
+        "extensions/vscode/terminal.js",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/backend-smoke.js",
+        "extensions/vscode/tests/browser-view.test.js",
+        "extensions/vscode/tests/client-context.test.js",
+        "extensions/vscode/tests/client-mcp-authorization.test.js",
+        "extensions/vscode/tests/client-planning.test.js",
+        "extensions/vscode/tests/client-timer-binding.test.js",
+        "extensions/vscode/tests/client.test.js",
+        "extensions/vscode/tests/editor-selection.test.js",
+        "extensions/vscode/tests/language-server-editor.test.js",
+        "extensions/vscode/tests/mcp-authorization-controller.test.js",
+        "extensions/vscode/tests/native-runtime-package.test.js",
+        "extensions/vscode/tests/native-runtime.test.js",
+        "extensions/vscode/tests/plan-fixture.js",
+        "extensions/vscode/tests/provider-profile-controller.test.js",
+        "extensions/vscode/tests/terminal.test.js",
+        "extensions/vscode/tests/vcs.test.js",
+        "extensions/vscode/tests/workspace-backend.test.js",
+        "extensions/vscode/webview.js",
+        "extensions/vscode/workspace-backend.js",
+        "views/browser/browser.css",
+        "views/browser/build.mjs",
+        "views/browser/page.cjs",
+        "views/browser/tests/classic-script.test.cjs",
+        "views/browser/tests/connection.test.cjs",
+        "views/browser/tests/launcher-build.test.cjs",
+        "views/browser/tests/mcp-authorization-routes.test.cjs",
+        "views/browser/tests/native-contract.mjs",
+        "views/browser/tests/planning-routes.test.cjs",
+        "extensions/vscode/node_modules/marked/lib/marked.umd.js",
+        "extensions/vscode/node_modules/dompurify/dist/purify.min.js",
+        "extensions/vscode/node_modules/@xterm/xterm/lib/xterm.js",
+        "extensions/vscode/node_modules/@xterm/xterm/css/xterm.css",
+        "extensions/vscode/node_modules/@xterm/addon-fit/lib/addon-fit.js"
+      ],
+      "lineEndingsOnly": [
+        "extensions/vscode/README.md",
+        "extensions/vscode/git-changes-tree.js",
+        "extensions/vscode/media/chat.css",
+        "extensions/vscode/media/chat.js",
+        "extensions/vscode/package-lock.json",
+        "extensions/vscode/package.json",
+        "extensions/vscode/scripts/pip-bootstrap.mjs",
+        "extensions/vscode/tests/client-mcp-resources.test.js",
+        "extensions/vscode/tests/extension-host.test.js",
+        "extensions/vscode/tests/git-changes-tree.test.js",
+        "extensions/vscode/tests/renderer.test.js",
+        "extensions/vscode/tests/session-model.test.js",
+        "extensions/vscode/tests/session-permissions.test.js",
+        "views/browser/browser.js",
+        "views/browser/server.mjs",
+        "views/browser/terminal.js",
+        "views/browser/tests/controller.test.cjs",
+        "views/browser/tests/launcher-lifecycle.test.cjs",
+        "views/browser/tests/responsive-layout.test.cjs",
+        "views/browser/tests/server.test.cjs",
+        "views/browser/tests/terminal.test.cjs",
+        "Tools/start-browser.mjs",
+        "Tools/browser-host-lifecycle.mjs"
+      ],
+      "total": 70
+    },
+    "crossHostAssets": {
+      "rawIdentical": [
+        "index.html",
+        "patch-review.js",
+        "client.js",
+        "marked.js",
+        "purify.js",
+        "xterm.js",
+        "xterm.css",
+        "xterm-fit.js",
+        "browser.css",
+        "licenses/marked.txt",
+        "licenses/dompurify.txt",
+        "licenses/dompurify-MPL.txt",
+        "licenses/xterm.txt",
+        "licenses/xterm-addon-fit.txt"
+      ],
+      "lineEndingsOnly": [
+        "chat.js",
+        "chat.css",
+        "terminal.js",
+        "browser.js"
+      ],
+      "total": 18
+    },
+    "nativeExecuted": false,
+    "renderedEditorActivated": false,
+    "passed": true
+  },
+  "stage": {
+    "recordedAt": "2026-10-19T19:34:34.873Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.44-source-20261019",
+    "files": 17439,
+    "allFileSetsAndHashesUnchangedAfterPackagingAndInstallation": true
+  },
+  "screenshotSha256": "3810a453628b1b5b868d691bd37bf79df5ddd35782f34864aaf9749a9cac9132",
+  "actualVSCodePaneVerified": false,
+  "visibleDesktopVerified": false,
+  "hostedNative": {
+    "run": 39309088086,
+    "lastObserved": "2026-10-19T19:36:11.412Z",
+    "status": "in_progress",
+    "accepted": false
+  },
+  "processBoundAgentRunnerImplemented": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false,
+  "receipts": [
+    {
+      "name": "coding-0.1.44-package-20261019.json",
+      "sha256": "edc153c454533046641f92fe9af9e3f943fc76849de792b01667888fc1ee7b97",
+      "bytes": 1011
+    },
+    {
+      "name": "vscode-0.1.44-installed-final-evidence-20261019.json",
+      "sha256": "6da49102f81f9c8b3aa5cb28949f46268bcb02f28e714c9a2970e714072e7609",
+      "bytes": 732
+    },
+    {
+      "name": "coding-0.1.44-hosted-views-20261019.json",
+      "sha256": "d2bb33ff3c071fb6a6c8831b6262aaba9d309b286d77f13d8056b797ab6b894d",
+      "bytes": 5478
+    },
+    {
+      "name": "coding-0.1.44-client-gate-20261019/gate.json",
+      "sha256": "87c5acc6b5b6bcb872e4f5f3075b35618e59703a60f9fd6248ad1bf24be7267c",
+      "bytes": 752
+    },
+    {
+      "name": "coding-0.1.44-stage-final-20261019.json",
+      "sha256": "6a3ece25bcd669efb252d787faffe41028cb790261da7ebbdaba9b4a84bd12dd",
+      "bytes": 204
+    },
+    {
+      "name": "browser-0.1.44-native-launch-20261019.json",
+      "sha256": "fbfde690ed5df67d3544f1e8fe0081fad5bf718116617c3e18b6256089cea7f3",
+      "bytes": 1951
+    },
+    {
+      "name": "installed-0.1.44-coding-review-20261019/acceptance.json",
+      "sha256": "719e464db5066ca80edfc43373288e021947a9a22361a4e000e30af9d7e5a390",
+      "bytes": 9205
+    },
+    {
+      "name": "browser-0.1.44-installed-coding-20261019/acceptance.json",
+      "sha256": "c84afc946749c055674fc6ee97b4b77a9071d25d7837dfde8b15d08efea96182",
+      "bytes": 3082
+    },
+    {
+      "name": "coding-0.1.44-owners-after-install-20261019.json",
+      "sha256": "5c6a6a02d365740182a14a295ccf6fe81e035dac520ebbfbdae8610960cc4f6e",
+      "bytes": 13473
+    }
+  ]
+}

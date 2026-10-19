@@ -1,5 +1,34 @@
 # Current native validation
 
+## Installed preview 0.1.44 — 2026-10-19
+
+The installed preview includes the saved-journal workspace and owned callable
+fixes, with the complete 154/154 native gate. The exact staged clients pass
+429 extension and 147 browser tests locally and in hosted CI. All 70 hosted
+source files and 18 assets match, allowing only explicitly verified line endings.
+The digest-verified archive contains 2,448 entries; 2,445 installed payloads plus
+package metadata and all 2,402 runtime files verify. All 17,439 stage files stay
+unchanged. The previous extension backup, settings, six profile directories,
+33 prior owners, 12 runtime inventories and 12 existing pages remain intact.
+
+Page http://127.0.0.1:64581/ui/ uses an isolated TypeScript fixture and the installed
+native backend. Actual saved-key Claude first completes read-only diagnostics
+and compiler checks through the unified CLI, then the headless browser submits
+one fresh coding task and approves one file edit. Fresh diagnostics are empty,
+compiler exit is zero, preview updates automatically and reload retains 15
+messages with six supplied usage records. There are no page or HTTP failures.
+Original TestProj remains on its preserved 0.1.43 page; no user task is replayed.
+
+The screenshot was inspected: right sidebar, bottom provider/model controls,
+file preview and per-response metrics render. Wide response tables intentionally
+have their own accessible horizontal scroll region. Actual VS Code-pane and
+visible desktop acceptance are still open; no Code window was launched. Current
+hosted native CI remains separate, as do whole-AgentRunner process placement and
+the prior Rust semantic failure. This is a development preview, not complete
+release acceptance.
+[Exact installation/live evidence](evidence/coding-package-0.1.44-20261019.json).
+[Rendered installed page](evidence/coding-package-0.1.44-20261019.png).
+
 ## Complete callable-owned native gate — 2026-10-19
 
 Committed source 9c5bedbb passes all 154 registered local Release contracts in
