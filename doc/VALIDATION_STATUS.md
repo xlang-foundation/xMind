@@ -2,6 +2,40 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.46 and real coding completion — 2026-10-19
+
+0.1.46 is installed and its 2445 checked payloads match the qualified package.
+The complete installed45 backup verifies; settings and previous profile
+directories are preserved. Managed handoff retires only TestProj owner44152 and
+starts owner32704 (native29427794, runtime manifest7ea44e83). All36 other tracked
+owners and13 existing pages remain available. Both earlier histories (63 and4
+messages) remain exact. The one test Code window is now closed; owner32704
+remains live.
+
+Using the saved Claude account, fresh root `ffd03a1014103b2cb02fc3ea766c1538`
+completes a real Model Zoo metric-display fix in185503ms with11 model calls.
+Native file tools change only the formatter and add its test file, after review
+through installed VS Code controls. Native process receipts record54 frontend
+tests passing and a successful Vite build; both process trees retire. Five
+protected API/dependency inputs remain unchanged. This task was admitted through
+the native CLI; it is not a claim of a UI-submitted coding task. The operator
+observed the production bug before changes. The agent added its tests after the
+fix, so no pre-fix agent test execution is claimed.
+
+Actual UI testing finds a remaining defect: a previously empty conversation
+discovers an external root and approvals but leaves the transcript blank and
+the run selector stale. Manual Refresh loads all25 messages and the completed
+report/metrics without replay. Four added controller regressions reproduce the
+first-root defect in both clients; strengthening browser observation also
+reproduces a missing stream when inspecting an older root (five failures in
+eight checks before correction). The source fix passes all eight focused
+checks. Full client suites and installed47/browser acceptance remain pending.
+The CI inventories now expect438 VS Code and154 browser tests.
+
+Receipts: [installed and coding scope](evidence/coding-installed-0.1.46-20261019.json),
+[native test output](evidence/coding-0.1.46-modelzoo-tests-20261019.log),
+[native build output](evidence/coding-0.1.46-modelzoo-build-20261019.log).
+
 ## Prepared 0.1.46 package — 2026-10-19
 
 The installable VSIX is built from client source `fb80689f` and full-suite-qualified

@@ -1,0 +1,90 @@
+TAP version 13
+# Subtest: empty conversation adopts its first externally admitted running run and transcript
+ok 1 - empty conversation adopts its first externally admitted running run and transcript
+  ---
+  duration_ms: 22.4656
+  type: 'test'
+  ...
+# Subtest: empty conversation adopts its first externally admitted completed run and transcript
+ok 2 - empty conversation adopts its first externally admitted completed run and transcript
+  ---
+  duration_ms: 4.931
+  type: 'test'
+  ...
+# Subtest: session refresh discovers an externally admitted running run without changing the inspected run
+ok 3 - session refresh discovers an externally admitted running run without changing the inspected run
+  ---
+  duration_ms: 5.0328
+  type: 'test'
+  ...
+# Subtest: session refresh discovers an externally admitted completed run without changing the inspected run
+ok 4 - session refresh discovers an externally admitted completed run without changing the inspected run
+  ---
+  duration_ms: 3.2164
+  type: 'test'
+  ...
+# Subtest: browser empty conversation adopts its first externally admitted running run and transcript
+not ok 5 - browser empty conversation adopts its first externally admitted running run and transcript
+  ---
+  duration_ms: 8.7675
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\views\\browser\\tests\\controller.test.cjs:56:44'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(!posted.some(message=>message.type==='error'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\controller.test.cjs:68:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: browser empty conversation adopts its first externally admitted completed run and transcript
+not ok 6 - browser empty conversation adopts its first externally admitted completed run and transcript
+  ---
+  duration_ms: 0.5876
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\views\\browser\\tests\\controller.test.cjs:56:44'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(!posted.some(message=>message.type==='error'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\controller.test.cjs:68:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: browser session refresh discovers an externally admitted running run without changing the inspected run
+ok 7 - browser session refresh discovers an externally admitted running run without changing the inspected run
+  ---
+  duration_ms: 0.4012
+  type: 'test'
+  ...
+# Subtest: browser session refresh discovers an externally admitted completed run without changing the inspected run
+ok 8 - browser session refresh discovers an externally admitted completed run without changing the inspected run
+  ---
+  duration_ms: 0.1382
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 6
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 119.3768

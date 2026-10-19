@@ -325,6 +325,23 @@ test('sidebar renders committed subscription events and refreshes metadata witho
  }finally{view.close();}
 });
 
+for(const state of ['running','completed'])test(`empty conversation adopts its first externally admitted ${state} run and transcript`,async()=>{
+ const run={id:'finished',session_id:'saved',state,parent_id:'',graph_root:false},options={health:{agent_execution:true,active_session_map:true},runs:[],running:state==='running'},h=harness(options);
+ h.pauseHistory(Promise.resolve([]));await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='status'&&message.text==='Ready'));
+  assert.equal(view.posted.findLast(message=>message.type==='runs').selected,undefined);
+  h.pauseHistory(Promise.resolve([{seq:1,role:'user',data:{content:'External coding request'}},{seq:2,role:'assistant',data:{content:'External committed coding response'}}]));
+  h.configureRuns([run]);options.activeSessions=state==='running'?{saved:{type:'running'}}:{};
+  await h.scheduledTasks.findLast(task=>task.delay===5000).callback();
+  assert.equal(view.posted.findLast(message=>message.type==='runs').selected,run.id);
+  assert.ok(view.posted.some(message=>message.type==='transcript'&&message.history.some(row=>row.data.content==='External committed coding response')));
+  assert.equal(view.posted.findLast(message=>message.type==='status').text,state);
+  if(state==='running')assert.ok(h.streams.some(stream=>stream.id===run.id));
+  assert.ok(!h.requests.includes('/v1/runs'));assert.equal(h.decisions.length,0);
+ }finally{view.close();}
+});
+
 for(const state of ['running','completed'])test(`session refresh discovers an externally admitted ${state} run without changing the inspected run`,async()=>{
  const old={id:'finished',session_id:'saved',state:'completed',parent_id:'',graph_root:false},external={id:'external-run',session_id:'saved',state,parent_id:'',graph_root:false};
  const options={health:{agent_execution:true,active_session_map:true},runs:[old]},h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];

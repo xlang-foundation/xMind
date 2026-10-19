@@ -53,12 +53,29 @@ test('browser surfaces and replies to a pending approval from another run in the
  try{await view.refreshSessionPermissions();assert.ok(posted.at(-1).operations.some(item=>item.id===proposal.id));await view.handle({type:'decide',id:proposal.id,decision:'allow'});assert.deepEqual(calls,[['selected-session',proposal.id,'allow']]);assert.equal(view.sessionPermissionRequests.size,0);assert.ok(posted.at(-1).operations.every(item=>item.id!==proposal.id));}finally{view.dispose();}
 });
 
+for(const state of ['running','completed'])test(`browser empty conversation adopts its first externally admitted ${state} run and transcript`,async()=>{
+ const run={id:'external-first',session_id:'session',state,parent_id:'',node_id:'',graph_root:false},posted=[],saved=[],streams=[];let available=false;
+ const history=[{seq:1,role:'user',data:{content:'External coding request'}},{seq:2,role:'assistant',data:{content:'External committed coding response'}}];
+ const client={baseUrl:'http://127.0.0.1:8765',sessions:async()=>[{id:'session',title:'Shared conversation'}],activeSessions:async()=>({data:available&&state==='running'?{session:{type:'running'}}:{}}),runs:async()=>available?[run]:[],status:async id=>{assert.equal(id,run.id);return run;},events:async()=>[],operations:async()=>[],history:async()=>available?history:[],sessionInbox:async()=>({items:[]}),eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,message=>posted.push(message),{save:value=>saved.push(value)});view.session='session';view.health={active_session_map:true};
+ try{
+  await view.readHistory();await view.refreshSessions();assert.equal(view.runId,undefined);
+  available=true;await view.refreshSessions();
+  assert.equal(view.runId,run.id);assert.equal(posted.findLast(message=>message.type==='runs').selected,run.id);
+  assert.ok(posted.some(message=>message.type==='transcript'&&message.history.some(row=>row.data.content==='External committed coding response')));
+  assert.equal(posted.findLast(message=>message.type==='status').text,state);assert.equal(saved.at(-1).run,run.id);
+  if(state==='running')assert.ok(streams.some(stream=>stream.id===run.id));
+  assert.deepEqual(posted.filter(message=>message.type==='error'),[]);
+ }finally{view.dispose();}
+});
+
 for(const state of ['running','completed'])test(`browser session refresh discovers an externally admitted ${state} run without changing the inspected run`,async()=>{
- const old={id:'old',session_id:'session',state:'completed'},external={id:'external',session_id:'session',state},posted=[];
- const client={sessions:async()=>[{id:'session',title:'Shared conversation'}],activeSessions:async()=>({data:state==='running'?{session:{type:'running'}}:{}}),runs:async()=>[old,external]};
+ const old={id:'old',session_id:'session',state:'completed'},external={id:'external',session_id:'session',state},posted=[],streams=[];
+ const client={baseUrl:'http://127.0.0.1:8765',sessions:async()=>[{id:'session',title:'Shared conversation'}],activeSessions:async()=>({data:state==='running'?{session:{type:'running'}}:{}}),runs:async()=>[old,external],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
  const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId='old';view.runs=[old];view.health={active_session_map:true};let reconciled=0;view.poll=async()=>{reconciled++;};
  try{
   await view.refreshSessions();const observed=posted.findLast(message=>message.type==='runs');assert.ok(observed?.runs.some(run=>run.id===external.id));assert.equal(observed.selected,'old');assert.equal(observed.busy,state==='running');assert.equal(reconciled,1);
+  if(state==='running')assert.ok(streams.some(stream=>stream.id===external.id),'An inspected older run must not prevent live observation of the external run');
   await view.refreshSessions();assert.equal(reconciled,1,'An unchanged idle run list must not reload the transcript');
  }finally{view.dispose();}
 });

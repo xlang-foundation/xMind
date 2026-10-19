@@ -118,7 +118,11 @@ class BrowserController {
       const target=this.client,session=this.session,runs=await target.runs(session);
       if(!this.current(version)||target!==this.client||session!==this.session)return;
       if(JSON.stringify(runs)!==JSON.stringify(this.runs)){
-        this.runs=runs;this.present();if(this.runId)await this.poll();else this.watch();
+        this.runs=runs;
+        // Preserve an inspected root, but adopt the first root when this
+        // conversation was empty so transcript/status polling has an owner.
+        if(!this.runId&&runs.length){this.runId=runs.at(-1).id;this.cursor=0;this.remember();}
+        this.present();if(this.runId)await this.poll();if(this.current(version))this.watch();
       }
     }
   }

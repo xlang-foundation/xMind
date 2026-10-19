@@ -458,7 +458,12 @@ async function activate(context) {
       const target=client,session=sessionId,runs=await target.runs(session);
       if(version!==generation||!panel||target!==client||session!==sessionId)return;
       if(JSON.stringify(runs)!==JSON.stringify(sessionRuns)){
-        sessionRuns=runs;presentRuns();if(runId)await poll();else watch();
+        sessionRuns=runs;
+        // An empty conversation has no inspected root to preserve. Bind its
+        // first external run before polling, or neither history nor status
+        // advances after the run list first becomes busy.
+        if(!runId&&runs.length)await selectRun(runs.at(-1).id);
+        else{presentRuns();if(runId)await poll();watch();}
       }
     }
   }
