@@ -1,0 +1,616 @@
+{
+  "recordedAt": "2026-10-19T19:44:03.390Z",
+  "run": 39312895414,
+  "revision": "7f3380898c13cff5d241e62feabbd7ff1062a28c",
+  "artifacts": [
+    {
+      "label": "original",
+      "id": 12217086825,
+      "name": "process-startup-diagnostics-original-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7418,
+      "digest": "sha256:a9ff2e7ae96aff40656cc888d90944776927dbc0c48539428f4070096c06e9ed",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/original.zip"
+    },
+    {
+      "label": "minimal-path",
+      "id": 12215613308,
+      "name": "process-startup-diagnostics-minimal-path-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7638,
+      "digest": "sha256:6c3d9f038354f0d8d94bcc5233a0fc1fbec2a8a2209a77b334a759aae57f1cc3",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/minimal-path.zip"
+    },
+    {
+      "label": "module-qualified",
+      "id": 12216478719,
+      "name": "process-startup-diagnostics-module-qualified-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7711,
+      "digest": "sha256:24acd6a9bfc721938296010a04c29207dbf63e9f9f8fbd2be5bd119e47d856d1",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/module-qualified.zip"
+    },
+    {
+      "label": "cmdlet-phases",
+      "id": 12216548543,
+      "name": "process-startup-diagnostics-cmdlet-phases-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7720,
+      "digest": "sha256:f8d546429c7871274bc23ea921f4f4af001ce7cc77e44dc54a4dfcf37c75c122",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/cmdlet-phases.zip"
+    },
+    {
+      "label": "private-cache",
+      "id": 12216518707,
+      "name": "process-startup-diagnostics-private-cache-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7620,
+      "digest": "sha256:2211a43ba6611240c3eb91777699476e784a15764a1da11a7f44bfdc0e55fbf6",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/private-cache.zip"
+    },
+    {
+      "label": "cache-off",
+      "id": 12217450896,
+      "name": "process-startup-diagnostics-cache-off-7f3380898c13cff5d241e62feabbd7ff1062a28c",
+      "bytes": 7584,
+      "digest": "sha256:662d42bf319e7ef54741d29767c220f50b1554767077047651290be92e1740fd",
+      "digestVerified": true,
+      "file": "C:/xMindNativeValidation/process-cache-controls-hosted-verified-20261019/cache-off.zip"
+    }
+  ],
+  "selectedSourceHashesIdenticalAcrossSixFreshJobs": true,
+  "selectedSourceFiles": 11,
+  "withinJobSourceAndBinaryCheck": "Each diagnostic driver compares its named source hashes and binary SHA before/after; the artifact records the passed check, without a separate source-after file.",
+  "records": [
+    {
+      "label": "original",
+      "binarySha256": "3e89b1ff3d28b64bea2fd432e445ea1fdcf936c65151df978be7b791b9652131",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1536
+          },
+          "elapsedMs": 30042,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 121
+          },
+          "elapsedMs": 30044,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 12190,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 123,
+            "delay_completed": 6130,
+            "effect_completed": 6130
+          },
+          "elapsedMs": 6147,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "minimal-path",
+      "binarySha256": "ca93883a7370d260fdc7ac29141a5619824b999c95d330fada8b21c6ae955d59",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-minimal-path",
+          "scenario": "graph",
+          "control": "minimal-path",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1749
+          },
+          "elapsedMs": 30030,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 144,
+            "delay_completed": 25814,
+            "effect_completed": 25988
+          },
+          "elapsedMs": 26023,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 17608,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 139,
+            "delay_completed": 6137,
+            "effect_completed": 6153
+          },
+          "elapsedMs": 6153,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "module-qualified",
+      "binarySha256": "3e89b1ff3d28b64bea2fd432e445ea1fdcf936c65151df978be7b791b9652131",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-module-qualified-default",
+          "scenario": "module-qualified",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1848,
+            "delay_completed": 8346,
+            "effect_completed": 8536
+          },
+          "elapsedMs": 8568,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 184
+          },
+          "elapsedMs": 30039,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22154,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 185,
+            "delay_completed": 6196,
+            "effect_completed": 6196
+          },
+          "elapsedMs": 6212,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "cmdlet-phases",
+      "binarySha256": "7f66b2fb0dc1f6aa9b95cca01ae5b2a8e00d36180623cb5582bc97f5b3cc43c0",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-cmdlet-phases-default",
+          "scenario": "cmdlet-phases",
+          "control": "default",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1820
+          },
+          "elapsedMs": 30046,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 175,
+            "delay_completed": 29244,
+            "effect_completed": 29430
+          },
+          "elapsedMs": 29497,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22372,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 198,
+            "delay_completed": 6193,
+            "effect_completed": 6204
+          },
+          "elapsedMs": 6216,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "private-cache",
+      "binarySha256": "f297afb1c50ab41f6f83b43b25229ca7a05870a2740db2a5d9642133017d8299",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-private-cache",
+          "scenario": "graph",
+          "control": "private-cache",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1731
+          },
+          "elapsedMs": 30048,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 183,
+            "delay_completed": 29329,
+            "effect_completed": 29511
+          },
+          "elapsedMs": 29551,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22268,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 192,
+            "delay_completed": 6185,
+            "effect_completed": 6185
+          },
+          "elapsedMs": 6201,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "label": "cache-off",
+      "binarySha256": "7f66b2fb0dc1f6aa9b95cca01ae5b2a8e00d36180623cb5582bc97f5b3cc43c0",
+      "host": {
+        "release": "10.0.26100",
+        "arch": "x64",
+        "imageVersion": "20261007.264.1",
+        "imageOS": "win25-vs2026"
+      },
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-cache-off",
+          "scenario": "graph",
+          "control": "cache-off",
+          "firstOnFreshHostedJob": true,
+          "passed": false,
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1887
+          },
+          "elapsedMs": 30044,
+          "termination": "timed_out",
+          "markerExists": false,
+          "stdout": "xmind-graph-phase:script_entered\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "02-graph-default",
+          "scenario": "graph",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 188,
+            "delay_completed": 29236,
+            "effect_completed": 29442
+          },
+          "elapsedMs": 29474,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        },
+        {
+          "label": "03-agent-default",
+          "scenario": "agent",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [],
+          "phaseElapsedMs": {},
+          "elapsedMs": 22458,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "scenario": "dotnet-control",
+          "control": "default",
+          "firstOnFreshHostedJob": false,
+          "passed": true,
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 199,
+            "delay_completed": 6202,
+            "effect_completed": 6202
+          },
+          "elapsedMs": 6227,
+          "termination": "exited",
+          "markerExists": true,
+          "stdout": "xmind-graph-phase:script_entered\r\nxmind-graph-phase:delay_completed\r\nxmind-graph-phase:effect_completed\r\n",
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "total": 24,
+  "passed": 17,
+  "causeEstablished": false,
+  "productionChanged": false,
+  "scope": "Six independent fresh GitHub Windows runners; controlled native process-adapter launches, not hosted full-product acceptance",
+  "findings": [
+    "Fresh private-cache and cache-off original graph commands both time out at 30 seconds with only script_entered and no marker. These file-cache controls do not resolve this cold failure.",
+    "Module-qualified first command completes in 8568ms. Its later original unqualified command still times out.",
+    "Warmed original comparisons on four other hosts complete in 26023–29551ms; they do not qualify the corresponding failed original first commands.",
+    "All six jobs share the same selected eleven source hashes. Each driver verifies those named source hashes and its own native binary before/after."
+  ],
+  "collectorNotes": [
+    "First parallel artifact collector encountered an authentication retry race; a separate collector retries using its memory-only configured Git credential. All six successful downloads match advertised official digests.",
+    "The artifact records the passed within-job source/binary comparison; it has source-before.json but no separate source-after.json. An initial collector assertion expecting that nonexistent file was corrected without modifying the artifacts."
+  ],
+  "next": "Inspect the effective module search path and module-discovery behavior on a fresh runner; do not change production environment based on cache controls that failed.",
+  "productionEnvironmentChanged": false,
+  "installed44Changed": false,
+  "providerRequests": 0,
+  "cpythonExecuted": false
+}

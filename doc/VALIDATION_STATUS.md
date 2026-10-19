@@ -1,5 +1,22 @@
 # Current native validation
 
+## Fresh-hosted cache controls remain failing — 2026-10-19
+
+Run 39312895414 on 7f338089 is terminal failure: 17/24 diagnostic launches pass
+across six independent fresh Windows jobs. Every official artifact digest verifies.
+The selected eleven source hashes match across all six jobs; each driver checks
+its named source hashes and native binary unchanged around its own launches.
+
+The original first command times out at 30,042 ms. Fresh private-cache and
+cache-off first commands also time out (30,048/30,044 ms), with script_entered
+only and no marker. Neither cache-file control resolves the cold failure.
+Module-qualified first command completes in 8,568 ms; its later original still
+times out. Four other warmed original comparisons finish in 26,023–29,551 ms;
+these do not qualify the failed first commands. Command/module lookup remains
+implicated; its exact cause is unproven. Production command text/environment,
+30-second budget, installed44 and existing user pages remain unchanged.
+[Exact artifacts, results and collector limitations](evidence/process-cache-controls-hosted-20261019.json).
+
 ## Fresh-hosted PowerShell cache controls — 2026-10-19
 
 The process-startup diagnostic now includes private-cache and cache-off as

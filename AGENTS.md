@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Startup diagnostics now run private-cache/cache-off as original-command first cases in separate fresh hosted jobs; guarded local8/8 pass with frozen source/binary. Original6277ms/private6750ms/off6413ms. This is diagnostic scope only: no production environment, timeout or installed44 change, no hosted cause/acceptance claim. Local helper23866 closed0. Evidence doc/evidence/process-cache-controls-local-20261019.json. Await exact new hosted matrix; keep prior original failures.
+- Startup diagnostics now run private-cache/cache-off as original-command first cases in separate fresh hosted jobs; guarded local8/8 pass with frozen source/binary. Original6277ms/private6750ms/off6413ms. This is diagnostic scope only: no production environment, timeout or installed44 change, no hosted cause/acceptance claim. Local helper23866 closed0. Evidence doc/evidence/process-cache-controls-local-20261019.json. Fresh hosted39312895414/7f338089 is terminal failure17/24: private/off first commands still30s timeout, module-qualified first8568ms succeeds; later warmed originals do not qualify failures. Six official digests verify/11 selected source hashes match. Evidence doc/evidence/process-cache-controls-hosted-20261019.json; module lookup implicated, cause unproven. No production change.
 
 
 
