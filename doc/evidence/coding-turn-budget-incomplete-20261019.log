@@ -1,0 +1,50 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 22: native_dynamic_plan_contract
+1/7 Test #22: native_dynamic_plan_contract ..............   Passed    0.16 sec
+    Start 23: native_agent_authority_contract
+2/7 Test #23: native_agent_authority_contract ...........   Passed    0.10 sec
+    Start 24: native_dynamic_plan_repository_contract
+3/7 Test #24: native_dynamic_plan_repository_contract ...***Failed    0.20 sec
+Invalid dynamic capability admission
+
+    Start 28: native_context_engine_contract
+4/7 Test #28: native_context_engine_contract ............   Passed    5.97 sec
+    Start 31: native_planning_http_contract
+5/7 Test #31: native_planning_http_contract .............   Passed    0.93 sec
+    Start 34: native_dynamic_plan_engine_contract
+6/7 Test #34: native_dynamic_plan_engine_contract .......***Failed    0.31 sec
+Dynamic engine failure evidence retained at C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-QSMOzY
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_dynamic_plan_engine_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-QSMOzY C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:55239/messages C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-QSMOzY\workspace C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe
+Invalid dynamic capability admission
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_dynamic_plan_engine_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-dynamic-engine-QSMOzY C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:55239/messages C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-dynamic-engine-QSMOzY\\workspace C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe',
+  stdout: '',
+  stderr: 'Invalid dynamic capability admission\r\n'
+}
+
+Node.js v22.19.0
+
+    Start 81: native_agent_runner_contract
+7/7 Test #81: native_agent_runner_contract ..............   Passed   10.13 sec
+
+71% tests passed, 2 tests failed out of 7
+
+Total Test time (real) =  17.81 sec
+
+The following tests FAILED:
+	 24 - native_dynamic_plan_repository_contract (Failed)
+	 34 - native_dynamic_plan_engine_contract (Failed)
+Errors while running CTest

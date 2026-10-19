@@ -2,6 +2,33 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Ordinary coding turn allowance — 2026-10-19
+
+The native runner no longer reduces a default 32-turn coding loop to 16 simply
+because planning tools are available. The captured parent allowance honors the
+smaller of the agent and registered planning limits. Both native admission
+validators accept the same 1–32 range. The aggregate 32-call parent/child budget
+and execution deadline remain unchanged; persisted allowances are not rewritten.
+
+The original runtime fails the regression after exactly 16 actual provider
+attempts with `execution_budget_exhausted`. After correcting the runner and both
+validators, all seven focused native contracts pass in 26.76 seconds. The actual
+AgentService/HTTP peer/xlang3 SQLite fixture completes 20 native tool rounds and
+a final response, enforces explicit 4/6 limits, and stops at 32. The repository
+fixture still enforces its explicitly captured 16-turn allowance, including a
+held continuation. Supplied provider replies are synthetic; this does not claim
+a new live-provider coding completion. The first fixture mistake and incomplete
+fix failures remain recorded alongside the successful gate.
+
+Native executable SHA-256: `294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69`.
+SDK/runtime pin is unchanged. Source, dependencies, libraries, SDK and native
+binaries/file sets verify unchanged around the focused gate. This candidate is
+not installed and has not yet passed the full suite. Installed 0.1.45 and its
+existing owners/pages remain unchanged. The separate 600-second final-report
+timeout from the real coding task remains open.
+
+Receipt: [coding turn budget](evidence/coding-turn-budget-20261019.json).
+
 ## Installed 0.1.45 and actual shared coding check — 2026-10-19
 
 The installed package includes the approval-card reconciliation, external-turn

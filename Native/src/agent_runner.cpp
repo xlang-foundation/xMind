@@ -201,12 +201,12 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_j
     if(settings_.planning){auto& policy=*settings_.planning;
         if(!workspace_||!planning_||policy.max_nodes<1||policy.max_nodes>32||policy.max_revisions<1||policy.max_revisions>16||
             policy.max_humans<1||policy.max_humans>8||policy.change_bytes<1||policy.change_bytes>262144||
-            policy.human_expiry_ms<1||policy.human_expiry_ms>900000)throw std::invalid_argument("Invalid registered dynamic planning policy");
-        // Planning has its own bounded parent-call allowance. Keep the normal
-        // coding loop's larger turn limit, while never granting a planner more
-        // than the native policy ceiling. Child settings may preserve the
-        // parent policy because their run limits are already captured.
-        if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{16}));
+            policy.human_expiry_ms<1||policy.human_expiry_ms>900000||policy.max_parent_turns<1||policy.max_parent_turns>32)throw std::invalid_argument("Invalid registered dynamic planning policy");
+        // Offering planning must not halve the ordinary coding allowance.
+        // Honor both registered limits; all parent/child attempts still share
+        // the root's separate total-call budget. Children preserve the frozen
+        // parent policy because their own run limits are captured separately.
+        if(!preserve_dynamic_child_planning_policy)policy.max_parent_turns=static_cast<std::int64_t>(std::min(settings_.max_turns,static_cast<std::size_t>(policy.max_parent_turns)));
     }
     if(settings_.context&&!settings_.provider.model.empty()){
         if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");

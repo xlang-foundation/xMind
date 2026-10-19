@@ -15,6 +15,7 @@ const folder=await mkdtemp(join(tmpdir(),'xmind-dynamic-engine-')),workspace=joi
 const key='synthetic-dynamic-engine-key-not-live',counts=new Map(),requests=[],barrier=[],planningBarrier=[],held=[];
 let failure;let completed=false;
 const callableCounts=new Map();
+const codingTurnCounts=new Map();
 const serviceControlCounts={start:0,stop:0};let serviceControlJob;
 const event=value=>'event: '+value.type+'\ndata: '+JSON.stringify(value)+'\n\n';
 const start=input=>event({type:'message_start',message:{id:'synthetic-dynamic-message',type:'message',role:'assistant',model:'synthetic-dynamic-engine',content:[],stop_reason:null,stop_sequence:null,usage:{input_tokens:input,output_tokens:0}}});
@@ -55,6 +56,17 @@ const peer=createServer((request,response)=>{
   assert.equal(request.method,'POST');assert.equal(request.url,'/messages');assert.equal(request.headers['x-api-key'],key);assert.equal(request.headers.authorization,undefined);
   const raw=Buffer.concat(chunks).toString('utf8');assert.ok(!raw.includes(key));const body=JSON.parse(raw);assert.equal(body.model,'synthetic-dynamic-engine');assert.equal(body.stream,true);
   const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),canPlan=names.includes('plan_tasks');
+  const codingTurns=source.match(/fixture-coding-turns-(default|explicit|runner|aggregate):/);
+  if(codingTurns){
+   assert.ok(canPlan&&names.includes('read_repository_instructions'));
+   const mode=codingTurns[1],turn=(codingTurnCounts.get(mode)??0)+1;codingTurnCounts.set(mode,turn);
+   const last=results(body.messages).at(-1);
+   if(turn>1){assert.equal(last.tool_use_id,'coding-read-'+(turn-1));assert.ok(!JSON.parse(last.content).error,'Each continued turn must receive its actual native read result');}
+   const signature='opaque-coding-turn-'+mode+'-'+turn;
+   if(mode==='default'&&turn===21)send(response,start(11)+thought(signature)+text('Completed twenty actual native read rounds and the final report.')+terminal('end_turn',3));
+   else send(response,start(11)+thought(signature)+tool('read_repository_instructions','coding-read-'+turn,{directory:'.'})+terminal('tool_use',3));
+   return;
+  }
   const serviceControl=source.includes('fixture-service-stop-parent')?'stop':source.includes('fixture-service-start-parent')?'start':undefined;
   if(serviceControl){
    assert.ok(canPlan&&names.includes('run_process')&&names.includes('wait_process')&&names.includes('stop_process'),'Planned coding roots must advertise the complete persistent service lifecycle');
@@ -181,6 +193,7 @@ try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');for(const side of ['left','right'])await writeFile(join(workspace,`nested-parallel-${side}-reader.txt`),`Actual nested-parallel-${side}-reader bytes\n`);await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace,cliExecutable,runtimeExecutable],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+  assert.deepEqual(Object.fromEntries(codingTurnCounts),{default:21,explicit:4,runner:6,aggregate:32});
   if(failure)throw failure;for(const mode of ['allow','deny','worker']){assert.equal(callableCounts.get('root-'+mode),2);assert.equal(callableCounts.get('inspect-'+mode),1);assert.equal(callableCounts.get('code-'+mode),2);}assert.equal(callableCounts.size,9);assert.deepEqual(serviceControlCounts,{start:3,stop:2});assert.deepEqual(Object.fromEntries(counts),{'empty-inspect':2,main:3,left:2,right:2,code:2,nested:2,'nested-outer':3,'nested-restart':2,'nested-restart-outer':2,'nested-inner':2,'nested-deep':2,'nested-parallel':2,'nested-parallel-left-planner':2,'nested-parallel-right-planner':2,'nested-parallel-left-reader':2,'nested-parallel-right-reader':2,'nested-multihuman':2,'nested-multihuman-left':2,'nested-multihuman-right':2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,46);assert.equal(barrier.length,0);assert.equal(planningBarrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');completed=true;process.stdout.write(result.stdout);
 }catch(error){if(failure)throw new Error((failure.stack??String(failure))+'; actual native engine: '+(error.stderr??error.message));throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));if(completed)await rm(folder,{recursive:true,force:true});else process.stderr.write("Dynamic engine failure evidence retained at "+folder+"\n");}

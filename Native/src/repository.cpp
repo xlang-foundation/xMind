@@ -385,7 +385,7 @@ DynamicPlanCapabilities dynamic_caps(const std::string& source){
 }
 void validate_dynamic_caps(const DynamicPlanCapabilities& c,const RootBudgetSpec& b,bool finalized){
     private_identity(c.backend_identity);if(c.revision!=1||c.catalogue_finalized!=finalized||c.workspace_identity!=b.workspace_identity||Json::parse(object_json(c.provider_identity_json))!=budget_provider_identity(b)||b.policy_id!="native.dynamic-plan"||
-        c.max_nodes<1||c.max_nodes>32||c.max_revisions<1||c.max_revisions>16||c.max_humans<1||c.max_humans>8||c.change_bytes<1||c.change_bytes>262144||c.human_expiry_ms<1||c.human_expiry_ms>3600000||c.max_parent_turns<1||c.max_parent_turns>16||c.presets.empty()||c.presets.size()>2)throw std::invalid_argument("Invalid dynamic capability admission");
+        c.max_nodes<1||c.max_nodes>32||c.max_revisions<1||c.max_revisions>16||c.max_humans<1||c.max_humans>8||c.change_bytes<1||c.change_bytes>262144||c.human_expiry_ms<1||c.human_expiry_ms>3600000||c.max_parent_turns<1||c.max_parent_turns>32||c.presets.empty()||c.presets.size()>2)throw std::invalid_argument("Invalid dynamic capability admission");
     (void)object_json(c.tool_catalog_json,262144);std::set<std::string> ids;
     for(const auto& p:c.presets){if(!ids.insert(p.id).second||(p.id!="workspace.inspect"&&p.id!="workspace.coding")||p.revision!=1||p.readonly!=(p.id=="workspace.inspect")||p.turn_limit<1||p.turn_limit>(p.readonly?4:16))throw std::invalid_argument("Invalid dynamic registered preset");
         if(finalized)private_identity(p.backend_identity);else if(!p.backend_identity.empty())private_identity(p.backend_identity);

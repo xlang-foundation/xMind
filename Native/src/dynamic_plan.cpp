@@ -103,7 +103,7 @@ DynamicNodeDefinition node(const Json& value){
 void capabilities(const DynamicPlanCapabilities& value){
     if(value.revision<1||value.revision>safe_integer||value.backend_identity.size()!=64||value.backend_identity.find_first_not_of("0123456789abcdef")!=std::string::npos||
        value.max_nodes<1||value.max_nodes>32||value.max_revisions<1||value.max_revisions>16||value.max_humans<1||value.max_humans>8||
-       value.change_bytes<1||value.change_bytes>static_cast<std::int64_t>(change_limit)||value.human_expiry_ms<1||value.human_expiry_ms>3600000||value.max_parent_turns<1||value.max_parent_turns>16)
+       value.change_bytes<1||value.change_bytes>static_cast<std::int64_t>(change_limit)||value.human_expiry_ms<1||value.human_expiry_ms>3600000||value.max_parent_turns<1||value.max_parent_turns>32)
         throw std::invalid_argument("Invalid admitted dynamic plan policy");
     valid_text(value.workspace_identity,4096);(void)object(value.provider_identity_json,4096);(void)object(value.tool_catalog_json,change_limit);
     if(value.presets.empty()||value.presets.size()>2)throw std::invalid_argument("Invalid registered dynamic presets");

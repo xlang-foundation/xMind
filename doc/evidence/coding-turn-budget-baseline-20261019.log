@@ -1,0 +1,39 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 34: native_dynamic_plan_engine_contract
+1/1 Test #34: native_dynamic_plan_engine_contract ...***Failed    0.71 sec
+Dynamic engine failure evidence retained at C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-KnZYwe
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_dynamic_plan_engine_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-KnZYwe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:53101/messages C:\Users\shaw9\AppData\Local\Temp\xmind-dynamic-engine-KnZYwe\workspace C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe
+Coding fixture default stopped after 16 actual model attempts
+{"reason":"execution_budget_exhausted"}
+Ordinary coding must cross sixteen turns while explicit and aggregate limits remain enforced
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_dynamic_plan_engine_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-dynamic-engine-KnZYwe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:53101/messages C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-dynamic-engine-KnZYwe\\workspace C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe',
+  stdout: '',
+  stderr: 'Coding fixture default stopped after 16 actual model attempts\r\n' +
+    '{"reason":"execution_budget_exhausted"}\r\n' +
+    'Ordinary coding must cross sixteen turns while explicit and aggregate limits remain enforced\r\n'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.73 sec
+
+The following tests FAILED:
+	 34 - native_dynamic_plan_engine_contract (Failed)
+Errors while running CTest

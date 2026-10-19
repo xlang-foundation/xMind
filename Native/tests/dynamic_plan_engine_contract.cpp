@@ -101,6 +101,27 @@ int main(int argc,char** argv){
         DynamicPlanRecord before;std::vector<Message> paused_history;std::vector<OwnedChildRecord> original_children;
         {
             PersistenceService store(database,imports);const std::string key=fixture_key;store.put_credential("fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine","Synthetic fixture credential",SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()}),0).get();
+            // Planning is available to ordinary coding roots even when no graph
+            // is created. It must not silently halve their registered turn limit.
+            for(const std::string mode:{"default","explicit","runner","aggregate"}){
+                auto coding=frozen;coding.max_turns=32;
+                if(mode=="explicit")coding.planning->max_parent_turns=4;
+                if(mode=="runner")coding.max_turns=6;
+                const auto id="coding-turns-"+mode;
+                AgentService coding_service(store,coding,1,4);store.create_session(id,"Ordinary coding turn allowance").get();
+                coding_service.submit(id,id,"fixture-coding-turns-"+mode+": Read repository instructions repeatedly, then report the actual tool outcomes.");
+                eventually([&]{const auto state=store.run(id).get().state;return state==RunState::completed||state==RunState::failed;},"Ordinary coding turn fixture did not finish");
+                const auto expected=mode=="default"?21:mode=="explicit"?4:mode=="runner"?6:32;
+                const auto budget=store.root_budget(id).get();
+                if(store.run(id).get().state!=(mode=="default"?RunState::completed:RunState::failed)){
+                    std::cerr<<"Coding fixture "<<mode<<" stopped after "<<budget.model_calls_reserved<<" actual model attempts\n";
+                    for(const auto& event:store.events(id).get())if(event.kind=="run.failed")std::cerr<<event.json<<"\n";
+                }
+                require(store.run(id).get().state==(mode=="default"?RunState::completed:RunState::failed),"Ordinary coding must cross sixteen turns while explicit and aggregate limits remain enforced");
+                require(budget.model_calls_reserved==expected&&budget.parent_model_calls_reserved==expected,"Actual provider attempts must match the configured coding allowance");
+                require(!store.dynamic_plan_for_root(id).get(),"Ordinary coding fixture must not create a graph to receive its registered allowance");
+                private_absent(store,id);
+            }
             {
                 auto control_settings=frozen;control_settings.process_profiles.push_back({"fixture-service",std::filesystem::absolute(argv[0]).string(),1,{"--persistent-service-peer"},30s,{},true});
                 AgentService control_service(store,control_settings,1,4);store.create_session("service-control-session","Actual planned-root persistent service lifecycle").get();

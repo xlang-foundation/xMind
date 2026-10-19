@@ -1,0 +1,126 @@
+{
+  "recordedAt": "2026-10-19T21:35:14.5570627Z",
+  "scope": "Ordinary coding parent-turn allowance; focused native validation only",
+  "baseline": {
+    "sourceParent": "8e422019b51c68d60c9acd13418f40e910e6931f",
+    "sourcePatchSha256": "6310a6dd70e64eb7b9f71e677ed0960ee3b38e154ae12d3c4b8cdb95663aa845",
+    "build": {
+      "pid": 63228,
+      "launchedAt": "2026-10-19T21:16:16.299Z",
+      "completedAt": "2026-10-19T21:16:39.51Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c1d6ff7f339cc57330b714eb3a4edefe640424e0a4758a48049432e79b327e7e"
+    },
+    "test": {
+      "pid": 64528,
+      "launchedAt": "2026-10-19T21:16:42.373Z",
+      "completedAt": "2026-10-19T21:16:43.152Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "88541db9ab3a8830126b37e932eb198057403dee9778f7d6f0ef5467ea2578cd"
+    },
+    "tests": [
+      "native_dynamic_plan_engine_contract"
+    ],
+    "allInputsAndBinariesUnchanged": true,
+    "nativeSha256": "5dc5bc6cfbf358e35f60190f42e4d735374cc2a56d56a8d10c1ce52d36744890",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullSuite": false,
+    "installed": false,
+    "syntheticProvider": true,
+    "cpythonExecuted": false
+  },
+  "incompleteFix": {
+    "sourceParent": "8e422019b51c68d60c9acd13418f40e910e6931f",
+    "sourcePatchSha256": "3b138eae9f944805db1e7e5d8fc8951cbd3c17c9fb0fcb6cfd3ab133a98376c6",
+    "build": {
+      "pid": 26584,
+      "launchedAt": "2026-10-19T21:17:05.977Z",
+      "completedAt": "2026-10-19T21:32:38.434Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fd7ce5cf6892ebc40445c06552ddff6895f3ee07c87d4f6e7b2ed9d6e029ce28"
+    },
+    "test": {
+      "pid": 63088,
+      "launchedAt": "2026-10-19T21:32:41.795Z",
+      "completedAt": "2026-10-19T21:32:59.655Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "2745dea343e26bb442bde8c731549d6d7b2c03c88a1c0e2ca81fc5c057fae839"
+    },
+    "tests": [
+      "native_dynamic_plan_contract",
+      "native_agent_authority_contract",
+      "native_dynamic_plan_repository_contract",
+      "native_context_engine_contract",
+      "native_planning_http_contract",
+      "native_dynamic_plan_engine_contract",
+      "native_agent_runner_contract"
+    ],
+    "allInputsAndBinariesUnchanged": true,
+    "nativeSha256": "c8633f41907529bb3fed0cf0223068d5d6caf8d29021031c10fdd86ac5d74e90",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullSuite": false,
+    "installed": false,
+    "syntheticProvider": true,
+    "cpythonExecuted": false
+  },
+  "fixed": {
+    "sourceParent": "8e422019b51c68d60c9acd13418f40e910e6931f",
+    "sourcePatchSha256": "fd722e557418cdc9a7252f2f733502d8cc1dfcbe6d715f7cef5d83585ee6ab0f",
+    "build": {
+      "pid": 51636,
+      "launchedAt": "2026-10-19T21:33:16.152Z",
+      "completedAt": "2026-10-19T21:34:20.554Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4beb3c83dda73915246b7febe749761a61da6e9d87c48622c30251f33dba168d"
+    },
+    "test": {
+      "pid": 72188,
+      "launchedAt": "2026-10-19T21:34:23.81Z",
+      "completedAt": "2026-10-19T21:34:50.612Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fe6c67e7e438d2a798e42aeda324e593059279f64b74f022c9d8b8700d8b7370"
+    },
+    "tests": [
+      "native_dynamic_plan_contract",
+      "native_agent_authority_contract",
+      "native_dynamic_plan_repository_contract",
+      "native_context_engine_contract",
+      "native_planning_http_contract",
+      "native_dynamic_plan_engine_contract",
+      "native_agent_runner_contract"
+    ],
+    "allInputsAndBinariesUnchanged": true,
+    "nativeSha256": "294277948b8d0269b2c0d121b60030daa3a6058afb0ff9e7a076f3d9a5a6cb69",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullSuite": false,
+    "installed": false,
+    "syntheticProvider": true,
+    "cpythonExecuted": false
+  },
+  "fixtures": {
+    "capturedRepositoryQuota": 16,
+    "aggregateMaximum": 32,
+    "defaultModelAttempts": 21,
+    "agentLimit": 6,
+    "explicitPlanningLimit": 4
+  },
+  "initialFixtureFailure": "The first baseline used an invalid empty read_repository_instructions argument. Its failed evidence is retained locally; baseline-v2 corrects directory and baseline-v3 records exact 16-call failure.",
+  "localEvidenceRoot": "C:/xMindNativeValidation",
+  "inputCounts": {
+    "runtime": 76,
+    "sdkSource": 16,
+    "project": 2625,
+    "pureLibraries": 1870
+  },
+  "fullSuitePassed": false,
+  "installed": false,
+  "liveProviderCodingQualified": false,
+  "existingCodingFailuresRetained": true,
+  "openIssue": "Real coding follow-up exceeded the unchanged 600-second deadline during final report."
+}

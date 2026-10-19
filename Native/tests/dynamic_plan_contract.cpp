@@ -55,6 +55,8 @@ DynamicPlanRecord persisted_candidate_fixture(const DynamicPlanRecord& old,const
 }
 int main(){try{
     const auto caps=capabilities();
+    require(caps.max_parent_turns==32,"Default planning availability must retain the ordinary coding allowance");
+    for(const auto turns:{0,33}){auto invalid=caps;invalid.max_parent_turns=turns;rejects<std::invalid_argument>([&]{dynamic_plan_tool_definitions(invalid);});}
     const auto initial=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({task("left"),task("right"),
         {{"id","gate"},{"type","human"},{"question","Synthetic user choice 🌍"},{"depends_on",Json::array({dependency("left"),dependency("right")})}},
         task("repair","workspace.coding",Json::array({dependency("gate")})),task("verify","workspace.inspect",Json::array({dependency("repair")})),

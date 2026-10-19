@@ -198,13 +198,18 @@ Legacy delegation and dependency plans share one child pool per AgentService:
 four workers, 64 pending jobs, at most two concurrent leaves per root and eight
 executable children over that root's lifetime. Every model attempt counts
 against the same 32-call root budget; held parent continuations count too.
-Planning additionally admits at most 16 parent turns, 32 lifetime labels, 16
+Planning additionally admits at most 32 parent turns, 32 lifetime labels, 16
 revisions and eight published or reserved human questions. Actual captured
 policy and counters are returned by the backend rather than inferred by views.
 
 An ordinary root is eligible only when its configured provider supports tools,
-its workspace exists and its configured turn limit is at most 16. The engine
-does not silently reduce a higher configured limit to enable planning.
+its workspace exists and its registered policy enables planning. Ordinary
+coding defaults to 32 turns whether or not it uses a plan. The captured parent
+allowance is the smaller of the configured agent turn limit and registered
+planning parent limit; explicit smaller limits remain enforced. Parent and
+child attempts still share the same 32-call root budget. Already captured
+roots retain their original allowance; changing the default does not rewrite
+their policy or replay them.
 Registered graph agent nodes retain their existing graph owner and do not
 start an independent planning root.
 

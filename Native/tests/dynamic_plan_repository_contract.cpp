@@ -34,8 +34,9 @@ DynamicPlanCapabilities capabilities(const RootBudgetSpec& budget,std::int64_t m
     c.max_nodes=max_nodes;c.max_revisions=max_revisions;c.max_humans=max_humans;
     c.presets={{"workspace.inspect",1,true,{},4,{}},{"workspace.coding",1,false,{},16,{}}};return c;
 }
-void seed_root(PersistenceService& store,const std::string& root,const RootBudgetSpec& budget,const std::vector<Json>& additional_tools={},std::int64_t max_nodes=32,std::int64_t max_revisions=16,std::int64_t max_humans=8){
-    store.create_session("s_"+root,"Synthetic typed plan repository").get();store.start_prompt_run(root,"s_"+root,R"({"content":"Synthetic repository plan boundary"})",budget,capabilities(budget,max_nodes,max_revisions,max_humans)).get();store.transition(root,RunState::queued,RunState::running).get();
+void seed_root(PersistenceService& store,const std::string& root,const RootBudgetSpec& budget,const std::vector<Json>& additional_tools={},std::int64_t max_nodes=32,std::int64_t max_revisions=16,std::int64_t max_humans=8,std::int64_t max_parent_turns=32){
+    auto captured=capabilities(budget,max_nodes,max_revisions,max_humans);captured.max_parent_turns=max_parent_turns;
+    store.create_session("s_"+root,"Synthetic typed plan repository").get();store.start_prompt_run(root,"s_"+root,R"({"content":"Synthetic repository plan boundary"})",budget,captured).get();store.transition(root,RunState::queued,RunState::running).get();
     auto b=store.root_budget(root).get();store.open_dynamic_budget_segment({root,"segment_"+root,authority,b.revision}).get();
     rejects<DynamicPlanUnavailable>([&]{store.reserve_model_call(root,root,"before_catalogue",ModelCallRole::parent).get();},"Provisional capabilities must not dispatch model attempts");
     auto catalog=Json{{"tools",Json::array({{{"name","read_file"}},{{"name","list_files"}},{{"name","search_files"}},{{"name","read_repository_instructions"}},{{"name","edit_file"}}})}};
@@ -341,7 +342,7 @@ DelegationBatchSpec legacy_spec(PersistenceService& store,const std::string& roo
     s.arguments_json=Json{{"tasks",tasks}}.dump();s.parent_assistant_json=Json{{"content",""},{"tool_calls",Json::array({{{"id",s.provider_tool_call_id},{"name","delegate_tasks"},{"arguments",s.arguments_json}}})}}.dump();return s;
 }
 void legacy_held_parent_quota(const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
-    PersistenceService store(database,imports);seed_root(store,"quota_owner",policy(workspace));
+    PersistenceService store(database,imports);seed_root(store,"quota_owner",policy(workspace),{},32,16,8,16);
     for(int i=0;i<15;++i){const auto id="quota_parent_"+std::to_string(i);store.reserve_model_call("quota_owner","quota_owner",id,ModelCallRole::parent).get();store.start_model_call("quota_owner","quota_owner",id).get();store.finish_model_call("quota_owner","quota_owner",id,R"({"content":"Synthetic parent quota DTO"})").get();}
     const auto spec=legacy_spec(store,"quota_owner","quota_legacy",{"quota_leaf"});const auto batch=store.accept_delegation_batch(spec).get();
     store.transition("quota_leaf",RunState::queued,RunState::running).get();store.complete_run("quota_leaf",R"({"content":"Synthetic legacy repository completion"})").get();store.settle_delegation_child("quota_leaf").get();const auto joined=store.settle_delegation_batch(batch.id).get();store.record_tool_turn("quota_owner",spec.parent_assistant_json,{Json{{"content",joined.result_json},{"tool_call_id",spec.provider_tool_call_id}}.dump()}).get();

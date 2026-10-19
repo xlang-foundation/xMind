@@ -25,7 +25,7 @@ struct DynamicPlanRejected : std::runtime_error {
 // Native registered policy. Model arguments never choose these limits.
 struct DynamicPlanningPolicy {
     std::int64_t max_nodes=32,max_revisions=16,max_humans=8;
-    std::int64_t change_bytes=262144,human_expiry_ms=900000,max_parent_turns=16;
+    std::int64_t change_bytes=262144,human_expiry_ms=900000,max_parent_turns=32;
 };
 struct DynamicPresetCapability {
     std::string id;
