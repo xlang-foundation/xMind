@@ -1,5 +1,18 @@
 # Current native validation
 
+## Installed preview 0.1.34 — live workspace gap
+
+The archive and installation verify, including all sidebar dependencies. Local
+and hosted client suites pass 425/147, and old pages/owners/settings survive.
+The actual browser attached a second folder but then found that the proxy
+returns 404 for GET /v1/workspace/membership. Native view-session authentication
+also omits this read-only metadata route. This blocks attachment clients and
+requires a product fix; no model task was submitted or replayed. The new page
+is preserved at http://127.0.0.1:63496/ui/ and the original page remains live.
+Initial incomplete archive and cross-host raw-byte observer failures remain
+recorded. This installation is not complete coding or editor acceptance.
+[Installation and exact failure](evidence/coding-package-0.1.34-20261019.json).
+
 ## Native view readiness observer — 2026-10-19
 
 The complete owned-language-query build passed 151/152 local contracts. The

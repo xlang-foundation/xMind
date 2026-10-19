@@ -1,0 +1,733 @@
+{
+  "recordedAt": "2026-10-19T01:15:16.193Z",
+  "version": "0.1.34",
+  "sourceRevision": "cfcf075f9c11b12e30a41cb26376993c459bec16",
+  "nativeRevision": "796bda1929cfe08f1c317fd5b98a40a5b53af82e",
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.34",
+    "version": "0.1.34",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "796bda1929cfe08f1c317fd5b98a40a5b53af82e",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "8c50e5cf00e7596905a7805c9d2ee6ea5b334a3b7f888d89d8eb277166b7366d",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "payload": {
+    "version": "0.1.34",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.34-coding-complete-win32-x64.vsix",
+    "sha256": "d84d4b030df0dde3b42bdfcf8d8995cebd9644321cd3a10313b6a843250590c9",
+    "bytes": 34417997,
+    "archiveFiles": 2448,
+    "nativeFiles": 2402,
+    "nativeRevision": "796bda1929cfe08f1c317fd5b98a40a5b53af82e",
+    "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allPayloadsMatchSource": true,
+    "dedicatedSecondarySidebar": true,
+    "packagingOnlyAdvisoryDependenciesAbsent": true,
+    "releaseAccepted": false
+  },
+  "stage": {
+    "checkedAt": "2026-10-19T01:10:34.168Z",
+    "stageFiles": 17439,
+    "allStageBytesAndFileSetsUnchangedAfterPackaging": true,
+    "currentServedBrowserAssetsMatchQualifiedPackage": 18,
+    "nativeManifestSha256": "8c50e5cf00e7596905a7805c9d2ee6ea5b334a3b7f888d89d8eb277166b7366d",
+    "nativeRevision": "796bda1929cfe08f1c317fd5b98a40a5b53af82e",
+    "nativeSha256": "f78047badeaa39c4b11573092c9104dad8a515e87e69e6a222c0e2e251281084",
+    "passed": true
+  },
+  "preserved": {
+    "checkedAt": "2026-10-19T01:11:31.402Z",
+    "identities": [
+      {
+        "pid": 67948,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T20:02:32.0466160Z"
+      },
+      {
+        "pid": 17248,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T20:02:33.0937180Z"
+      },
+      {
+        "pid": 33960,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+        "birth": "2026-10-18T20:02:36.4674450Z"
+      },
+      {
+        "pid": 64940,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T22:22:18.9164270Z"
+      },
+      {
+        "pid": 40236,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.31\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T22:22:19.9382670Z"
+      },
+      {
+        "pid": 67432,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a31\\7679f90d61b9255d17fb4d86b68908507226efbe35add7bf0ade459537da5a3c\\runtime-499e9893c04de140ed395ce604fe9caa81453328c0d3a7629fa4d25de5c40389\\xmind.exe",
+        "birth": "2026-10-18T22:22:23.1982620Z"
+      },
+      {
+        "pid": 63316,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-18T22:59:30.1113800Z"
+      },
+      {
+        "pid": 72620,
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.32\\native-runtime\\xmind.exe",
+        "birth": "2026-10-18T22:59:31.1529330Z"
+      },
+      {
+        "pid": 17816,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-a32\\1828ebd236c14ec23742196fd7285dfbe5f333993556ea711e438b64a8033074\\runtime-ad940888eb2eb53a85dc3454ebcbeb25f11d3f5bc72d33ae976b1b6b51f2ce1e\\xmind.exe",
+        "birth": "2026-10-18T22:59:34.4239030Z"
+      }
+    ],
+    "olderViewRuntimePayloadsPreserved": [
+      {
+        "version": "0.1.27",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec"
+      },
+      {
+        "version": "0.1.28",
+        "files": 2402,
+        "manifestSha256": "3adfcd47d51e9924240f8a861ac29754622a5faaba84328051604dddf8a9d0ec"
+      },
+      {
+        "version": "0.1.31",
+        "files": 2402,
+        "manifestSha256": "836ec4685dbdc2c66153705e28d9b241b697711663f41e7c750d0f689b2f018f"
+      },
+      {
+        "version": "0.1.32",
+        "files": 2402,
+        "manifestSha256": "5ac9fae8d75297a14c01b7e8cea698c48c0c4d8b67258cc0b630976fe4c84ed6"
+      }
+    ],
+    "pages": [
+      {
+        "url": "http://127.0.0.1:62342/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:52121/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:63383/ui/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:54828/ui/",
+        "status": 200
+      }
+    ],
+    "settingsUnchanged": true,
+    "previousProfileDirectoryNamesPreserved": true,
+    "oldMainOwnerRestarted": false,
+    "editorOpened": false
+  },
+  "localClients": {
+    "recordedAt": "2026-10-19T01:04:13.528Z",
+    "version": "0.1.34",
+    "sourceRevision": "cfcf075f9c11b12e30a41cb26376993c459bec16",
+    "extension": {
+      "exitCode": 0,
+      "tests": 425,
+      "passed": 425,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "9dfcfae1724e3f627a8ad54524dea74e4da6f04a0f8971de59aa8084642ee028"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 147,
+      "passed": 147,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "d100a0bd0a298dda13811692f7db6dcd3baa127aef65aae4ff7be2c1609a69b2"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "hostedClients": {
+    "artifactId": 12157252003,
+    "recordedAt": "2026-10-19T01:07:23.3880710Z",
+    "renderedAcceptance": false,
+    "artifactBytes": 308862,
+    "completeClientGate": {
+      "sourceRevision": "cfcf075f9c11b12e30a41cb26376993c459bec16",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 425,
+        "browser": 147
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 425,
+        "passed": 425,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "advertisedSizeAndDigestVerified": true,
+    "hostedSourcesAndAssetsUnchanged": true,
+    "run": 39183538796,
+    "nativeExecuted": false,
+    "allAssetTextEqualAfterCrLfNormalization": true,
+    "assetComparison": [
+      {
+        "localSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+        "onlyCrLfDifference": false,
+        "asset": "browser.css",
+        "localBytes": 14348,
+        "hostedSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+        "byteIdentical": true,
+        "hostedBytes": 14348
+      },
+      {
+        "localSha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88",
+        "onlyCrLfDifference": true,
+        "asset": "browser.js",
+        "localBytes": 127903,
+        "hostedSha256": "830c8b1186855c0620c14cc6bc6bb3c3b9bfc0da0d378420ddee22c518701181",
+        "byteIdentical": false,
+        "hostedBytes": 128358
+      },
+      {
+        "localSha256": "397511615aaa9ec9d94780cacf7d135eba972af4a3fdfb7d2748cb66cbd8e39b",
+        "onlyCrLfDifference": true,
+        "asset": "chat.css",
+        "localBytes": 16695,
+        "hostedSha256": "c99abbfea423d1af407c43fb875f5bde6ed64725b989093750556a9c1edca92d",
+        "byteIdentical": false,
+        "hostedBytes": 16697
+      },
+      {
+        "localSha256": "ca7f2607fabca16fa03736f1bd3ce5a0c5a4368cacd785b75c54c392b6bb0590",
+        "onlyCrLfDifference": true,
+        "asset": "chat.js",
+        "localBytes": 126782,
+        "hostedSha256": "00f566bcebc4c1043505fd5442a37468a1939ba2c9fde4fd2199918904601189",
+        "byteIdentical": false,
+        "hostedBytes": 127599
+      },
+      {
+        "localSha256": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+        "onlyCrLfDifference": false,
+        "asset": "client.js",
+        "localBytes": 150267,
+        "hostedSha256": "0c9ab00fee06958a9c3f83c4b4cff59d90c4b2208b8e9f647e44fa099d161801",
+        "byteIdentical": true,
+        "hostedBytes": 150267
+      },
+      {
+        "localSha256": "74d5c6e5a09e7f77559dd59d644598a09d2ba09b45893e456d89b404280a3613",
+        "onlyCrLfDifference": false,
+        "asset": "index.html",
+        "localBytes": 19893,
+        "hostedSha256": "74d5c6e5a09e7f77559dd59d644598a09d2ba09b45893e456d89b404280a3613",
+        "byteIdentical": true,
+        "hostedBytes": 19893
+      },
+      {
+        "localSha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+        "onlyCrLfDifference": false,
+        "asset": "licenses/dompurify-MPL.txt",
+        "localBytes": 16726,
+        "hostedSha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+        "byteIdentical": true,
+        "hostedBytes": 16726
+      },
+      {
+        "localSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "onlyCrLfDifference": false,
+        "asset": "licenses/dompurify.txt",
+        "localBytes": 11358,
+        "hostedSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "byteIdentical": true,
+        "hostedBytes": 11358
+      },
+      {
+        "localSha256": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+        "onlyCrLfDifference": false,
+        "asset": "licenses/marked.txt",
+        "localBytes": 2942,
+        "hostedSha256": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+        "byteIdentical": true,
+        "hostedBytes": 2942
+      },
+      {
+        "localSha256": "e256f01188af527e4d06d21d06fbf785ae9c50d4b328bf03cbe0ba7f0aa4228f",
+        "onlyCrLfDifference": false,
+        "asset": "licenses/xterm-addon-fit.txt",
+        "localBytes": 1103,
+        "hostedSha256": "e256f01188af527e4d06d21d06fbf785ae9c50d4b328bf03cbe0ba7f0aa4228f",
+        "byteIdentical": true,
+        "hostedBytes": 1103
+      },
+      {
+        "localSha256": "b569f629d00f2626a8100df2a1798210535621e42164dfd426a6fe5aac7b0ccd",
+        "onlyCrLfDifference": false,
+        "asset": "licenses/xterm.txt",
+        "localBytes": 1261,
+        "hostedSha256": "b569f629d00f2626a8100df2a1798210535621e42164dfd426a6fe5aac7b0ccd",
+        "byteIdentical": true,
+        "hostedBytes": 1261
+      },
+      {
+        "localSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+        "onlyCrLfDifference": false,
+        "asset": "marked.js",
+        "localBytes": 47225,
+        "hostedSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+        "byteIdentical": true,
+        "hostedBytes": 47225
+      },
+      {
+        "localSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+        "onlyCrLfDifference": false,
+        "asset": "patch-review.js",
+        "localBytes": 6467,
+        "hostedSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+        "byteIdentical": true,
+        "hostedBytes": 6467
+      },
+      {
+        "localSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+        "onlyCrLfDifference": false,
+        "asset": "purify.js",
+        "localBytes": 28885,
+        "hostedSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+        "byteIdentical": true,
+        "hostedBytes": 28885
+      },
+      {
+        "localSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+        "onlyCrLfDifference": true,
+        "asset": "terminal.js",
+        "localBytes": 5749,
+        "hostedSha256": "5353bb5d264705f32ddff0ca80fce74d5934d83fdd26cd14e147cba48156c25e",
+        "byteIdentical": false,
+        "hostedBytes": 5800
+      },
+      {
+        "localSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+        "onlyCrLfDifference": false,
+        "asset": "xterm-fit.js",
+        "localBytes": 1521,
+        "hostedSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+        "byteIdentical": true,
+        "hostedBytes": 1521
+      },
+      {
+        "localSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+        "onlyCrLfDifference": false,
+        "asset": "xterm.css",
+        "localBytes": 7112,
+        "hostedSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+        "byteIdentical": true,
+        "hostedBytes": 7112
+      },
+      {
+        "localSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+        "onlyCrLfDifference": false,
+        "asset": "xterm.js",
+        "localBytes": 488663,
+        "hostedSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+        "byteIdentical": true,
+        "hostedBytes": 488663
+      }
+    ],
+    "lineEndingOnlyDifferentAssets": 4,
+    "rawByteIdenticalAssets": 14,
+    "artifactSha256": "65d9e63b4557546f8f0afffdf4a17c7e7287bfed9511319454d94f16f9f8316e",
+    "initialObserverFailure": {
+      "observer": "Initial cross-host raw-byte comparison",
+      "recordedAt": "2026-10-19T01:07:23.3841689Z",
+      "productChangedToObtainPass": false,
+      "reason": "Four text assets differ only by CRLF/LF; no source content differs. Both source-bound client suites passed independently.",
+      "passed": false,
+      "nativeOrProductionTestFailed": false,
+      "differentAssets": [
+        {
+          "localSha256": "eda48518988ae03a1c23ef731790a10dc067f66e5ebce015b5f3ff82a81e6b88",
+          "onlyCrLfDifference": true,
+          "asset": "browser.js",
+          "localBytes": 127903,
+          "hostedSha256": "830c8b1186855c0620c14cc6bc6bb3c3b9bfc0da0d378420ddee22c518701181",
+          "byteIdentical": false,
+          "hostedBytes": 128358
+        },
+        {
+          "localSha256": "397511615aaa9ec9d94780cacf7d135eba972af4a3fdfb7d2748cb66cbd8e39b",
+          "onlyCrLfDifference": true,
+          "asset": "chat.css",
+          "localBytes": 16695,
+          "hostedSha256": "c99abbfea423d1af407c43fb875f5bde6ed64725b989093750556a9c1edca92d",
+          "byteIdentical": false,
+          "hostedBytes": 16697
+        },
+        {
+          "localSha256": "ca7f2607fabca16fa03736f1bd3ce5a0c5a4368cacd785b75c54c392b6bb0590",
+          "onlyCrLfDifference": true,
+          "asset": "chat.js",
+          "localBytes": 126782,
+          "hostedSha256": "00f566bcebc4c1043505fd5442a37468a1939ba2c9fde4fd2199918904601189",
+          "byteIdentical": false,
+          "hostedBytes": 127599
+        },
+        {
+          "localSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+          "onlyCrLfDifference": true,
+          "asset": "terminal.js",
+          "localBytes": 5749,
+          "hostedSha256": "5353bb5d264705f32ddff0ca80fce74d5934d83fdd26cd14e147cba48156c25e",
+          "byteIdentical": false,
+          "hostedBytes": 5800
+        }
+      ]
+    },
+    "sourceRevision": "cfcf075f9c11b12e30a41cb26376993c459bec16",
+    "passed": true
+  },
+  "incompletePackage": {
+    "recordedAt": "2026-10-19T01:09:56.670Z",
+    "archive": "C:\\xMindNativeValidation\\xmind-0.1.34-coding-win32-x64.vsix",
+    "sha256": "65892721eca19b9426851f1c055bea77e1beaff547d784b30b4309b0a547d2f2",
+    "bytes": 34380613,
+    "archiveFiles": 2443,
+    "nativePayloadsMatchQualifiedStage": true,
+    "wholePackageAccepted": false,
+    "installed": false,
+    "reason": "Developer packaging wrapper used --no-dependencies; vsce omitted the five required marked/DOMPurify runtime and license files despite their .vscodeignore exceptions.",
+    "missingRequiredRuntime": [
+      "extension/node_modules/marked/lib/marked.umd.js",
+      "extension/node_modules/dompurify/dist/purify.min.js"
+    ],
+    "correction": "Use the repository default dependency collection with the pinned installed dependency tree; retain this original archive and every original receipt."
+  },
+  "renderedPreparationFailure": {
+    "startedAt": "2026-10-19T01:12:58.515Z",
+    "url": "http://127.0.0.1:63496/ui/",
+    "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.34-20261019",
+    "attachedFolder": "C:/xMindNativeValidation/model-zoo-ui-0.1.34-20261019",
+    "taskSubmissions": 0,
+    "errors": [],
+    "requests": [
+      {
+        "path": "/ui/",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/chat.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/browser.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/patch-review.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm-fit.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/terminal.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/client.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/purify.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/marked.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/chat.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/browser.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/xterm.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/session",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/workspaces",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/health",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/agent/planning",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/graphs",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/provider/profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/sessions/active",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/skills",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/ui/workspaces/add",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/ui/workspaces",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/folders/files",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/workspace/membership",
+        "method": "GET",
+        "status": 404
+      }
+    ],
+    "ready": false,
+    "error": "page.evaluate: Error: HTTP 404 /v1/workspace/membership\n    at eval (eval at evaluate (:311:30), <anonymous>:1:71)\n    at async <anonymous>:337:30",
+    "completedAt": "2026-10-19T01:12:59.289Z"
+  },
+  "launch": {
+    "startedAt": "2026-10-19T01:12:03.988Z",
+    "version": "0.1.34",
+    "workspace": "C:/xMindNativeValidation/model-zoo-installed-0.1.34-20261019",
+    "source": "C:/xMindNativeValidation/model-zoo-installed-0.1.32-20261018",
+    "sourceFiles": {
+      "NATIVE_MCP_CHECK.md": "ebbc7b79d558950371500d4d42229faf59e02686de8028f7c00e33fc225df2d7",
+      "README.md": "639799ad3a6c4ccce140031945537430ff9527f370190824eeaa438ec32b4b99",
+      "backend/app/__init__.py": "50a540d66ee183c0cefde6f44df0872dbc522aa6f6e9b1f5b9d7b733eaf8a2e5",
+      "backend/app/catalog.py": "dc7866d101a9333d8ff7ae4317bf672ece3e795bfd880eb0a3eb4848c16bc828",
+      "backend/app/config.py": "f7abedd0daa47f5bfa0da1412f9fc8cb61d6f17967e99d2542b376b68680d6ad",
+      "backend/app/data.py": "04fa3f64d102d5c54992ddc09034f6d288ca1af4c72c4e0c68ecfe487eb35ece",
+      "backend/app/deps.py": "d2c78b1d2e3dcc2760cc1675e971ab1e87f9b2f05499048ffeae188ded4f4216",
+      "backend/app/main.py": "0676e018f6627969c6877176eb1a3414ce7e975822ba9ee3949e2b1fdfcb1e02",
+      "backend/app/routers/__init__.py": "3b634affde4590799c6a04b64517d49a3ec6a42d083ec98d9593eec2e06056e2",
+      "backend/app/routers/catalog.py": "b894a69c5364f9499747f2dd491a8e0120f8a4b71535122a644ab9cdfc6109b3",
+      "backend/app/routers/models.py": "735d54cb5b72c066ae9eb8b7c7ea042b156c4ee7e08b4b9404430131e165f67a",
+      "backend/app/schemas.py": "b5f89a8d1edc1399cb24c91e838c30df85a26630d3cb99e2aeb321985c80eb60",
+      "backend/pytest.ini": "b160d82f7811555051f8966d8e02750a985227c1d022208c784e606946f2eada",
+      "backend/requirements-dev.txt": "7f2238585b233b7aaa77817180588fbefcfcda634c33c4c22699093f5337b1d9",
+      "backend/requirements.txt": "065211ed7cf114a558a1cbeb07879f1554ec6680d3e340a5e44f15fc8cbc7ec6",
+      "backend/tests/test_api.py": "61631ccba17874eaac244317ca0e2c90b902d93f63d0ac5e7085b54115632cba",
+      "backend/tests/test_sort_tiebreaks.py": "7dba60766c0d17f56550263a8f66e47d1ee67bc40bd92067e497a5ad9d9ae2e1",
+      "frontend/.env.example": "c501f752878b81ff909053e469c3df2a322a2bc2fc576f2a2bb9ff41e1229185",
+      "frontend/index.html": "c3d4295990d06abfb17ab0020fbb84cced0358465a2eb9d88d881a2175100ece",
+      "frontend/package-lock.json": "c578432525f4caf159d7e74ac6081e6d29b1d13bd8b46bdc44ef9893b6809c76",
+      "frontend/package.json": "04a8677ed8c63d684fbe414a34188d6c38f56a02d535a8d0a17f343f91f40c04",
+      "frontend/src/App.vue": "657bb5cb3a92486552f6a043ad12530b25d584e7b972624c9da74bc73412e2ab",
+      "frontend/src/api/client.js": "48646867bfbf348c82d7d6cc35f35e0f714d53aa7218044c91f456421b8866db",
+      "frontend/src/components/ModelCard.vue": "fb7b3ec8ee1c465cbf289fc10df2417f5c4caf51f3f47eda539b1bf78580f1ae",
+      "frontend/src/components/StatusMessage.vue": "3664f81066cbb5c4026f43d4d86cd7acb8a48c2357c2d2a9c88c96acb186004b",
+      "frontend/src/main.js": "6358c8deba9a99c63429eca8ddb543d8d06a8a2e6d99abd573554cb46235fad1",
+      "frontend/src/router/index.js": "3c7b80d9c58d9d7ee17262163294d6abdba973a559c766063976fe267e7ec5a2",
+      "frontend/src/style.css": "e086d6de608a564a40720bdd59fe6208c2a987c1ddef59ede35bb364c8c194cb",
+      "frontend/src/utils/format.js": "c6eec111af10caf83254b8eea72e7fd5e76617c84a8c09b8967da6b2833a6270",
+      "frontend/src/views/HomeView.vue": "71e1038c732bab22d2bbde37e9413c03ad8cfb1b1d010530769088da12723bb4",
+      "frontend/src/views/ModelDetailView.vue": "7e44225e293a3db362e01e4a2827f4adce5a830066d08b282ce65f2438788929",
+      "frontend/vite.config.js": "8ebafc055d8b46acb04d4b74dbb0e7f86a217313d09e0a72f2402ec37d62bcbe"
+    },
+    "workspaceFilesBefore": {
+      "NATIVE_MCP_CHECK.md": "ebbc7b79d558950371500d4d42229faf59e02686de8028f7c00e33fc225df2d7",
+      "README.md": "639799ad3a6c4ccce140031945537430ff9527f370190824eeaa438ec32b4b99",
+      "backend/app/__init__.py": "50a540d66ee183c0cefde6f44df0872dbc522aa6f6e9b1f5b9d7b733eaf8a2e5",
+      "backend/app/catalog.py": "dc7866d101a9333d8ff7ae4317bf672ece3e795bfd880eb0a3eb4848c16bc828",
+      "backend/app/config.py": "f7abedd0daa47f5bfa0da1412f9fc8cb61d6f17967e99d2542b376b68680d6ad",
+      "backend/app/data.py": "04fa3f64d102d5c54992ddc09034f6d288ca1af4c72c4e0c68ecfe487eb35ece",
+      "backend/app/deps.py": "d2c78b1d2e3dcc2760cc1675e971ab1e87f9b2f05499048ffeae188ded4f4216",
+      "backend/app/main.py": "0676e018f6627969c6877176eb1a3414ce7e975822ba9ee3949e2b1fdfcb1e02",
+      "backend/app/routers/__init__.py": "3b634affde4590799c6a04b64517d49a3ec6a42d083ec98d9593eec2e06056e2",
+      "backend/app/routers/catalog.py": "b894a69c5364f9499747f2dd491a8e0120f8a4b71535122a644ab9cdfc6109b3",
+      "backend/app/routers/models.py": "735d54cb5b72c066ae9eb8b7c7ea042b156c4ee7e08b4b9404430131e165f67a",
+      "backend/app/schemas.py": "b5f89a8d1edc1399cb24c91e838c30df85a26630d3cb99e2aeb321985c80eb60",
+      "backend/pytest.ini": "b160d82f7811555051f8966d8e02750a985227c1d022208c784e606946f2eada",
+      "backend/requirements-dev.txt": "7f2238585b233b7aaa77817180588fbefcfcda634c33c4c22699093f5337b1d9",
+      "backend/requirements.txt": "065211ed7cf114a558a1cbeb07879f1554ec6680d3e340a5e44f15fc8cbc7ec6",
+      "backend/tests/test_api.py": "61631ccba17874eaac244317ca0e2c90b902d93f63d0ac5e7085b54115632cba",
+      "backend/tests/test_sort_tiebreaks.py": "7dba60766c0d17f56550263a8f66e47d1ee67bc40bd92067e497a5ad9d9ae2e1",
+      "frontend/.env.example": "c501f752878b81ff909053e469c3df2a322a2bc2fc576f2a2bb9ff41e1229185",
+      "frontend/index.html": "c3d4295990d06abfb17ab0020fbb84cced0358465a2eb9d88d881a2175100ece",
+      "frontend/package-lock.json": "c578432525f4caf159d7e74ac6081e6d29b1d13bd8b46bdc44ef9893b6809c76",
+      "frontend/package.json": "04a8677ed8c63d684fbe414a34188d6c38f56a02d535a8d0a17f343f91f40c04",
+      "frontend/src/App.vue": "657bb5cb3a92486552f6a043ad12530b25d584e7b972624c9da74bc73412e2ab",
+      "frontend/src/api/client.js": "48646867bfbf348c82d7d6cc35f35e0f714d53aa7218044c91f456421b8866db",
+      "frontend/src/components/ModelCard.vue": "fb7b3ec8ee1c465cbf289fc10df2417f5c4caf51f3f47eda539b1bf78580f1ae",
+      "frontend/src/components/StatusMessage.vue": "3664f81066cbb5c4026f43d4d86cd7acb8a48c2357c2d2a9c88c96acb186004b",
+      "frontend/src/main.js": "6358c8deba9a99c63429eca8ddb543d8d06a8a2e6d99abd573554cb46235fad1",
+      "frontend/src/router/index.js": "3c7b80d9c58d9d7ee17262163294d6abdba973a559c766063976fe267e7ec5a2",
+      "frontend/src/style.css": "e086d6de608a564a40720bdd59fe6208c2a987c1ddef59ede35bb364c8c194cb",
+      "frontend/src/utils/format.js": "c6eec111af10caf83254b8eea72e7fd5e76617c84a8c09b8967da6b2833a6270",
+      "frontend/src/views/HomeView.vue": "71e1038c732bab22d2bbde37e9413c03ad8cfb1b1d010530769088da12723bb4",
+      "frontend/src/views/ModelDetailView.vue": "7e44225e293a3db362e01e4a2827f4adce5a830066d08b282ce65f2438788929",
+      "frontend/vite.config.js": "8ebafc055d8b46acb04d4b74dbb0e7f86a217313d09e0a72f2402ec37d62bcbe"
+    },
+    "attachedFolder": "C:/xMindNativeValidation/model-zoo-ui-0.1.34-20261019",
+    "attachedFilesBefore": {
+      ".env.example": "c501f752878b81ff909053e469c3df2a322a2bc2fc576f2a2bb9ff41e1229185",
+      "index.html": "c3d4295990d06abfb17ab0020fbb84cced0358465a2eb9d88d881a2175100ece",
+      "package-lock.json": "c578432525f4caf159d7e74ac6081e6d29b1d13bd8b46bdc44ef9893b6809c76",
+      "package.json": "04a8677ed8c63d684fbe414a34188d6c38f56a02d535a8d0a17f343f91f40c04",
+      "src/App.vue": "657bb5cb3a92486552f6a043ad12530b25d584e7b972624c9da74bc73412e2ab",
+      "src/api/client.js": "48646867bfbf348c82d7d6cc35f35e0f714d53aa7218044c91f456421b8866db",
+      "src/components/ModelCard.vue": "fb7b3ec8ee1c465cbf289fc10df2417f5c4caf51f3f47eda539b1bf78580f1ae",
+      "src/components/StatusMessage.vue": "3664f81066cbb5c4026f43d4d86cd7acb8a48c2357c2d2a9c88c96acb186004b",
+      "src/main.js": "6358c8deba9a99c63429eca8ddb543d8d06a8a2e6d99abd573554cb46235fad1",
+      "src/router/index.js": "3c7b80d9c58d9d7ee17262163294d6abdba973a559c766063976fe267e7ec5a2",
+      "src/style.css": "e086d6de608a564a40720bdd59fe6208c2a987c1ddef59ede35bb364c8c194cb",
+      "src/utils/format.js": "c6eec111af10caf83254b8eea72e7fd5e76617c84a8c09b8967da6b2833a6270",
+      "src/views/HomeView.vue": "71e1038c732bab22d2bbde37e9413c03ad8cfb1b1d010530769088da12723bb4",
+      "src/views/ModelDetailView.vue": "7e44225e293a3db362e01e4a2827f4adce5a830066d08b282ce65f2438788929",
+      "vite.config.js": "8ebafc055d8b46acb04d4b74dbb0e7f86a217313d09e0a72f2402ec37d62bcbe",
+      "AGENTS.md": "cbfc12367dfda72414f8be8c21a8f9aab74d8b9c8af7542ad9663e2d829ae361",
+      "src/AGENTS.md": "3f06f6196698355ed998a3351cc2e4c692d31b65cb1b9c7ca3141959019a402e"
+    },
+    "profileRoot": "C:/Users/shaw9/.xMind/p-a34",
+    "pageState": "C:/Users/shaw9/.xMind/BrowserView/xmind-0.1.34-modelzoo-20261019",
+    "providerRequests": 0,
+    "taskSubmissions": 0,
+    "renderedAcceptance": false,
+    "host": {
+      "pid": 46036,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T01:12:03.9932660Z"
+    },
+    "url": "http://127.0.0.1:63496/ui/",
+    "nativeView": {
+      "pid": 25408,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.34\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T01:12:05.1532590Z"
+    },
+    "backend": {
+      "pid": 44704,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a34\\b257b78f22c803567a66c2079ca47515c4b101f8c9c81e375cfea6d5011628f0\\runtime-36177501942b3354b9531a56fea3535e5a43458d2787182996e6fb51cb397650\\xmind.exe",
+      "birth": "2026-10-19T01:12:08.6046830Z",
+      "origin": "http://127.0.0.1:62967",
+      "directory": "C:\\Users\\shaw9\\.xMind\\p-a34\\b257b78f22c803567a66c2079ca47515c4b101f8c9c81e375cfea6d5011628f0"
+    },
+    "readyAt": "2026-10-19T01:12:12.826Z"
+  },
+  "completeLiveCodingAccepted": false,
+  "actualVSCodePaneActivated": false,
+  "releaseAccepted": false,
+  "cpythonExecuted": false,
+  "screenshotSha256": "741bf12eaa8d250a87fc9f3bda904116b7eda77de41e3e70ddfbd8ae1455f740",
+  "nextFix": "The browser adapter and native view-session route lists omit read-only GET /v1/workspace/membership, which the shared attachment client consumes. Preserve the successful folder attachment; no task has been submitted."
+}

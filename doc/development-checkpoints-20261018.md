@@ -149,3 +149,13 @@ from this archive.
 ## Guidance-owner focused checkpoint before complete suite
 
 - Native guidance tools now use AgentGuidanceToolHost with run/catalogue/membership/folder, inherited-denial, cancellation/deadline and lifetime duplicate checks. Explicit attached-folder repository reads return that folder's actual AGENTS.md files and queue their scopes for the next model request, including a pending-skill batch. Primary-folder skill contracts and effect authorization remain unchanged. The new actual AgentRunner regression fails against unchanged native 0c96bd0; final eight owner/agent/graph/grant/waiter contracts pass in 23.17 seconds with all inputs/binaries frozen. Initial seven-test selector/count failure is retained. This source is uninstalled; complete current native/hosted gates, VS Code pane and worker IPC remain open. See doc/evidence/guidance-tool-owner-20261019.json.
+
+
+## Installed 0.1.33 checkpoint before 0.1.34
+
+- Installed 0.1.33 packages corrected shared client b66fb8c and the byte-identical 0.1.32 native read-owner runtime ce4298d (152 local contracts; manifest 5ac9fae8). Local and hosted client suites pass 425/147; all 17,439 staged bytes/file sets survive packaging unchanged. Archive 2,448 and installed 2,445 payloads verify, including 2,402 runtime files. Backup 0.1.32 verifies 2,447 files; settings/six prior profile directory names and nine owner identities remain. Corrected page http://127.0.0.1:54828/ui/ restores the original 15-message coding history and completes an actual delegated read-only task with 173 events/four messages/two usage records. Its 18 served assets match 0.1.33; existing older pages receive the same client-only correction without restart. Original 0.1.32 coding UI timeout and no-delegation prompt violation remain failures. Actual VS Code pane activation, hosted native, worker placement and release acceptance remain open. See doc/evidence/coding-package-0.1.33-20261018.json and dotted-node-stream-20261018.json.
+
+
+## Older 0.1.31 owner checkpoint archived for current preview
+
+- Preserve installed 0.1.31 page http://127.0.0.1:63383/ui/ and its exact owner identities, p-a31 profile, 13-message/six-usage coding history and 2,402-file runtime. Details remain in doc/evidence/coding-package-0.1.31-20261018.json and doc/development-checkpoints-20261018.md.
