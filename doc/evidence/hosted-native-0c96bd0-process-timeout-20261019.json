@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-19T01:01:42.0304276Z",
+  "run": 39178581714,
+  "revision": "0c96bd0483dcf9764ed3f84298afaa75020be0ae",
+  "conclusion": "failure",
+  "artifactId": 12156324784,
+  "artifactBytes": 69015,
+  "artifactSha256": "36ff2b49f846f056a2b5862cc918f7b21f4d98284f3d92c7b6b8b71b8300f1a0",
+  "advertisedSizeAndDigestVerified": true,
+  "artifactPath": "C:\\xMindNativeValidation\\coding-0.1.30-source-20261018\\.agentflow\\ci\\artifacts\\native-windows-evidence-0c96bd0483dcf9764ed3f84298afaa75020be0ae.zip",
+  "completeNativeSuiteStarted": true,
+  "registeredTests": 153,
+  "passed": 152,
+  "failed": 1,
+  "seconds": 716.52,
+  "failingTest": "native_graph_runner_contract",
+  "actualOperation": {
+    "elapsed_ms": 30052,
+    "exit_code": 1,
+    "id": "3aad83575da7afcbc64120f859abb782",
+    "output_artifact": {
+      "operation_id": "3aad83575da7afcbc64120f859abb782",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "graphChildState": "failed",
+  "graphRootState": "failed",
+  "commandAndThirtySecondBudgetUnchanged": true,
+  "exactColdCommandDiscoveryCauseEstablished": false,
+  "sdkSmokePassed": 2,
+  "sdkSmokeSeconds": 2.42,
+  "sourceProvenance": {
+    "xmind": "0c96bd0483dcf9764ed3f84298afaa75020be0ae",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain": "Visual Studio 18 2026",
+    "processors": 4,
+    "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "toolchain_version": "18.10.12224.181",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "windows_default_owner_matches_user": false,
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "build_parallelism": 4
+  },
+  "releaseAccepted": false,
+  "rawEntries": [
+    "ci-evidence/native-ctest.log",
+    "native/Testing/Temporary/LastTest.log",
+    "native/Testing/Temporary/LastTestsFailed.log",
+    "ci-evidence/process-observations/graph-runner-14c4968c-04dd-44d4-9dde-5e326ae0434c/observations.jsonl"
+  ]
+}

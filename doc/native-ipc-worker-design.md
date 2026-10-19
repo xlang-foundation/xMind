@@ -17,10 +17,17 @@ and binary file sets/hashes unchanged. A first selector omitted the grants
 contract: seven tests passed, but its eight-test wrapper correctly failed. That
 receipt is retained; the final selector preflights all eight exact names.
 This is local controlled model-fixture validation with actual files and xlang3
-SQLite, not live provider or installed client acceptance. Current full native,
-hosted, VS Code pane and worker IPC acceptance remain open. Guidance lifecycle
+SQLite, not live provider or installed client acceptance. Current hosted, VS Code pane and worker IPC acceptance remain open. Guidance lifecycle
 and trusted callable/discovery services still depend on the backend runner.
 [Regression, final qualification and limits](evidence/guidance-tool-owner-20261019.json).
+
+The complete local build and all 152 registered Release contracts subsequently
+pass in 968.11 seconds with every source/SDK/library/dependency/binary set
+and hash unchanged. Two actual Rust Analyzer contracts and the Cargo fixture
+pass separately on this source with source, SDK and complete toolchain/shim
+sets frozen; the earlier semantic failure remains unexplained. This source
+is still uninstalled.
+[Full current native qualification](evidence/guidance-tool-owner-full-20261019.json).
 
 ## Owned language-server queries — 2026-10-18
 

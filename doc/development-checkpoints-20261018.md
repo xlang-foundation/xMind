@@ -144,3 +144,8 @@ from this archive.
 ## Explorer checkpoint archived for guidance-owner work
 
 - Explorer change observes terminal native operations and coalesces read-only refreshes; it preserves expansion, filename query and preview and fences obsolete workspace/connection work. Observation cache caps at 4,096. Prior implementation fails four of five new checks. Arbitrary external filesystem changes still need Refresh. All 18 installed browser assets match both current served pages. The older 0.1.27/0.1.28 runtime directories used by their native views still verify all 2,402 files after installing 0.1.30. Observer failures on modal interception, initial workspace selection, paginated events, early run completion and REPL reset remain recorded separately; none justified a duplicate provider task or a product restart.
+
+
+## Guidance-owner focused checkpoint before complete suite
+
+- Native guidance tools now use AgentGuidanceToolHost with run/catalogue/membership/folder, inherited-denial, cancellation/deadline and lifetime duplicate checks. Explicit attached-folder repository reads return that folder's actual AGENTS.md files and queue their scopes for the next model request, including a pending-skill batch. Primary-folder skill contracts and effect authorization remain unchanged. The new actual AgentRunner regression fails against unchanged native 0c96bd0; final eight owner/agent/graph/grant/waiter contracts pass in 23.17 seconds with all inputs/binaries frozen. Initial seven-test selector/count failure is retained. This source is uninstalled; complete current native/hosted gates, VS Code pane and worker IPC remain open. See doc/evidence/guidance-tool-owner-20261019.json.
