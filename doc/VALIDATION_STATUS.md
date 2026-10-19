@@ -1,5 +1,15 @@
 # Current native validation
 
+## Hosted view inventory correction — 2026-10-19
+
+Run39322711780 on7245cc8f completes both actual suites with436/152 passes and
+zero failures, with its70 source and18 asset hashes unchanged. Its CI gate
+correctly fails because expected counts were still429/147. The exact counts
+now include the seven extension and five browser regressions. The original
+failed run and digest-verified artifact remain retained; corrected hosted
+qualification is pending. This changes only CI inventory metadata.
+[Exact failed run and official artifact](evidence/hosted-view-inventory-failure-20261019.json).
+
 ## Shared-session turn discovery — 2026-10-19
 
 The installed44 live check shows the conversation Running badge after the CLI

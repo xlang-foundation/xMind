@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-19T20:53:29.125Z",
+  "run": 39322711780,
+  "sourceRevision": "7245cc8fbd94589abce16a525e875cd2fa4014d1",
+  "conclusion": "failure",
+  "artifact": 12220697695,
+  "artifactBytes": 310304,
+  "artifactSha256": "2e16428ee77378f134b0b76b8fc0d8a128688deecacf52f4603efdb31bd49d3d",
+  "artifactDigestVerified": true,
+  "gate": {
+    "sourceRevision": "7245cc8fbd94589abce16a525e875cd2fa4014d1",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 70,
+    "trackedSourceFiles": 65,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 429,
+      "browser": 147
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 436,
+      "passed": 436,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 152,
+      "passed": 152,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "failure": "The exact-count gate still expected 429 extension and 147 browser tests after seven extension and five browser regressions were added. Both full actual suites pass; the CI run remains failed."
+}
