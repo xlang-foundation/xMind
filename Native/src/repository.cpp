@@ -539,6 +539,20 @@ struct Repository::Impl {
         return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ('awaiting_approval','ready','executing','uncertain') AND NOT (state='executing' AND tool='run_process' AND json_extract(arguments,'$.background')=1 AND json_extract(arguments,'$.persistent')=1) LIMIT 1",{id}).rows.empty();
     }
     void message(const Run& run,const std::string& role,const std::string& json){changed_one(database.execute("INSERT INTO messages(session_id,execution_run_id,role,payload) VALUES(?,?,?,?)",{run.session_id,run.parent_id.empty()?SqlValue(nullptr):SqlValue(run.id),role,json}));changed_one(database.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{run.id}));}
+    std::pair<std::string,std::int64_t> graph_lineage(const std::string& id,bool active=false){
+        std::string current=id,session,root;std::int64_t depth=0;std::set<std::string> visited;
+        for(;;){
+            if(!visited.insert(current).second||visited.size()>4)throw Conflict("Graph invocation ancestry exceeds limits");
+            const auto rows=database.execute("SELECT r.session_id,COALESCE(r.parent_run_id,''),r.state,g.specification,g.graph_id,g.graph_revision,COALESCE(r.node_id,'') FROM runs r JOIN graph_roots g ON g.run_id=r.id WHERE r.id=?",{current}).rows;
+            if(rows.empty())throw Conflict("Graph invocation ancestor is not a graph owner");const auto& row=rows[0];if(session.empty())session=text(row[0]);if(session!=text(row[0])||(active&&text(row[2])!="running"))throw Conflict("Graph invocation ancestor differs or is not running");
+            const auto parent=text(row[1]);if(parent.empty()){if(!root.empty()&&(root!=current||visited.size()!=static_cast<std::size_t>(depth+1)))throw Conflict("Graph invocation root or depth differs");return {current,depth};}
+            const auto pins=database.execute("SELECT root_run_id,parent_run_id,depth FROM graph_invocations WHERE run_id=?",{current}).rows;
+            if(pins.size()!=1||text(pins[0][1])!=parent)throw Conflict("Graph invocation has no immutable owner record");const auto& pin=pins[0];if(root.empty()){root=text(pin[0]);depth=integer(pin[2]);}if(root!=text(pin[0])||integer(pin[2])!=depth-static_cast<std::int64_t>(visited.size())+1)throw Conflict("Graph invocation depth differs");
+            const auto parents=database.execute("SELECT specification FROM graph_roots WHERE run_id=?",{parent}).rows;if(parents.empty())throw Conflict("Graph invocation parent specification is absent");const auto spec=Json::parse(text(parents[0][0]));bool matched=false;
+            for(const auto& node:spec.at("nodes"))if(node.at("id")==text(row[6])&&node.at("type")=="graph"&&node.at("graph_id")==text(row[4])&&node.at("graph_revision")==integer(row[5])&&node.at("graph_spec").dump()==text(row[3]))matched=true;
+            if(!matched)throw Conflict("Graph invocation differs from its parent's immutable snapshot");current=parent;
+        }
+    }
     void root_boundary(const Run& current,RunState next){
         if(next==RunState::paused||terminal(next)){
             if(!database.execute("SELECT id FROM context_compactions WHERE owner_run_id=? AND state IN ('reserved','started','received')",{current.id}).rows.empty()||!database.execute("SELECT id FROM context_measures WHERE owner_id=? AND state IN ('reserved','started')",{current.id}).rows.empty())throw Conflict("Execution still owns context maintenance or counting transport");
@@ -600,7 +614,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>33)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>34)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -629,7 +643,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>33) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>34) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -1057,6 +1071,20 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TRIGGER retain_mcp_input_requests BEFORE DELETE ON mcp_input_requests BEGIN SELECT RAISE(ABORT,'MCP input request evidence cannot be deleted'); END");
         db.execute("PRAGMA user_version=33");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("MCP input request migration did not preserve repository ownership");
+    }
+    if(version<34){
+        db.execute("CREATE TABLE graph_invocations(run_id TEXT PRIMARY KEY NOT NULL REFERENCES graph_roots(run_id),root_run_id TEXT NOT NULL REFERENCES graph_roots(run_id),parent_run_id TEXT NOT NULL REFERENCES graph_roots(run_id),depth INTEGER NOT NULL CHECK(depth BETWEEN 1 AND 3),CHECK(run_id!=root_run_id AND run_id!=parent_run_id))");
+        // Earlier metadata admission could only create first-level invocations.
+        db.execute("INSERT INTO graph_invocations SELECT c.id,p.id,p.id,1 FROM runs c JOIN graph_roots g ON g.run_id=c.id JOIN runs p ON p.id=c.parent_run_id JOIN graph_roots pg ON pg.run_id=p.id JOIN json_each(pg.specification,'$.nodes') n WHERE p.parent_run_id IS NULL AND c.session_id=p.session_id AND json_extract(n.value,'$.id')=c.node_id AND json_extract(n.value,'$.type')='graph' AND json_extract(n.value,'$.graph_id')=g.graph_id AND json_extract(n.value,'$.graph_revision')=g.graph_revision AND json_extract(n.value,'$.graph_spec')=g.specification");
+        if(integer(db.execute("SELECT count(*) FROM graph_roots g JOIN runs r ON r.id=g.run_id WHERE r.parent_run_id IS NOT NULL").rows[0][0])!=integer(db.execute("SELECT count(*) FROM graph_invocations").rows[0][0]))throw DatabaseError("Existing graph invocation has an invalid immutable parent binding");
+        db.execute("CREATE TRIGGER graph_invocation_admission BEFORE INSERT ON graph_invocations BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM runs c JOIN graph_roots cg ON cg.run_id=c.id JOIN runs p ON p.id=c.parent_run_id JOIN graph_roots pg ON pg.run_id=p.id JOIN runs r ON r.id=NEW.root_run_id JOIN graph_roots rg ON rg.run_id=r.id JOIN json_each(pg.specification,'$.nodes') n WHERE c.id=NEW.run_id AND p.id=NEW.parent_run_id AND c.session_id=p.session_id AND c.session_id=r.session_id AND c.state='queued' AND p.state='running' AND r.parent_run_id IS NULL AND r.state='running' AND NOT EXISTS(SELECT 1 FROM graph_context_owners co WHERE co.root_run_id=r.id) AND ((p.id=r.id AND NEW.depth=1) OR EXISTS(SELECT 1 FROM graph_invocations pi WHERE pi.run_id=p.id AND pi.root_run_id=r.id AND NEW.depth=pi.depth+1)) AND json_extract(n.value,'$.id')=c.node_id AND json_extract(n.value,'$.type')='graph' AND json_extract(n.value,'$.graph_id')=cg.graph_id AND json_extract(n.value,'$.graph_revision')=cg.graph_revision AND json_extract(n.value,'$.graph_spec')=cg.specification) THEN RAISE(ABORT,'invalid immutable graph invocation ownership') END; END");
+        db.execute("CREATE TRIGGER immutable_graph_invocations BEFORE UPDATE ON graph_invocations BEGIN SELECT RAISE(ABORT,'graph invocation ownership is immutable'); END");
+        db.execute("CREATE TRIGGER retain_graph_invocations BEFORE DELETE ON graph_invocations BEGIN SELECT RAISE(ABORT,'graph invocation ownership evidence cannot be deleted'); END");
+        auto trigger=text(db.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='owned_child_boundary'").rows.at(0).at(0));
+        const std::string original="p.parent_run_id IS NULL";const auto position=trigger.find(original);if(position==std::string::npos)throw DatabaseError("Graph ownership migration found an incompatible child boundary");
+        trigger.replace(position,original.size(),"(p.parent_run_id IS NULL OR EXISTS(SELECT 1 FROM graph_invocations gi JOIN runs root ON root.id=gi.root_run_id WHERE gi.run_id=p.id AND root.parent_run_id IS NULL AND root.state='running' AND root.session_id=NEW.session_id AND NOT EXISTS(SELECT 1 FROM graph_context_owners co WHERE co.root_run_id=root.id)))");
+        db.execute("DROP TRIGGER owned_child_boundary");db.execute(trigger);db.execute("PRAGMA user_version=34");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Graph invocation migration did not preserve repository ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -2178,16 +2206,17 @@ DelegationBatchRecord Repository::accept_delegation_batch(const DelegationBatchS
 }
 ChildAdmissionRecord Repository::child_admission(const std::string& id){
     const auto child=run(id);if(child.parent_id.empty())throw std::invalid_argument("Child admission requires a child run");
-    const auto parent=run(child.parent_id);if(!parent.parent_id.empty()||parent.session_id!=child.session_id)throw Conflict("Owned child boundary differs");
+    const auto parent=run(child.parent_id);if(parent.session_id!=child.session_id||(!parent.parent_id.empty()&&!parent.graph_root))throw Conflict("Owned child boundary differs");
     if(parent.graph_root){
+        const auto graph_owner=impl_->graph_lineage(parent.id).first;
         const auto graph=Json::parse(graph_run(parent.id).specification_json);for(const auto& node:graph["nodes"])if(node["id"]==child.node_id){
-            if(node["type"]=="agent"){ChildAdmissionRecord result{ChildAdmissionKind::graph_agent,parent.id,{},{},0};if(!impl_->database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent.id}).rows.empty()){const auto capture=graph_context_owner(parent.id);result.backend_identity=graph_context_agent(capture.authority,child.node_id).backend_identity;}return result;}
-            if(node["type"]=="tool")return {ChildAdmissionKind::graph_tool,parent.id,{},{},0};
+            if(node["type"]=="agent"){ChildAdmissionRecord result{ChildAdmissionKind::graph_agent,graph_owner,{},{},0};if(!impl_->database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent.id}).rows.empty()){const auto capture=graph_context_owner(parent.id);result.backend_identity=graph_context_agent(capture.authority,child.node_id).backend_identity;}return result;}
+            if(node["type"]=="tool")return {ChildAdmissionKind::graph_tool,graph_owner,{},{},0};
             if(node["type"]=="graph"){
                 if(!child.graph_root)throw Conflict("Graph invocation has no owned graph record");
                 const auto owned=graph_run(id);
                 if(owned.graph_id!=node.at("graph_id").get<std::string>()||owned.graph_revision!=node.at("graph_revision").get<std::int64_t>()||owned.specification_json!=node.at("graph_spec").dump())throw Conflict("Graph invocation differs from its parent's immutable snapshot");
-                return {ChildAdmissionKind::graph_invocation,parent.id,{},{},0};
+                (void)impl_->graph_lineage(id);return {ChildAdmissionKind::graph_invocation,graph_owner,{},{},0};
             }
         }throw Conflict("Graph child is not its declared executable node");
     }
@@ -2202,7 +2231,7 @@ ChildAdmissionRecord Repository::child_admission(const std::string& id){
     (void)root_budget(parent.id);return {ChildAdmissionKind::delegated_leaf,parent.id,text(r[0]),text(r[2]),integer(r[3])};
 }
 std::vector<OwnedChildRecord> Repository::owned_children(const std::string& id){
-    const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Owned child observation requires a root parent");std::vector<OwnedChildRecord> result;
+    const auto parent=run(id);if(!parent.parent_id.empty()){if(!parent.graph_root)throw std::invalid_argument("Owned child observation requires a graph owner or root parent");(void)impl_->graph_lineage(id);}std::vector<OwnedChildRecord> result;
     for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows){const auto child=run(text(row[0]));const auto admission=child_admission(child.id);std::string label;
         if(admission.kind==ChildAdmissionKind::delegated_leaf){const auto task=impl_->database.execute("SELECT task_id FROM delegation_tasks WHERE child_run_id=?",{child.id}).rows;label=text(task.at(0).at(0));}
         const auto kind=admission.kind==ChildAdmissionKind::dynamic_agent?"dynamic_agent":admission.kind==ChildAdmissionKind::dynamic_tool?"dynamic_tool":admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":admission.kind==ChildAdmissionKind::graph_invocation?"graph_invocation":"graph_tool";
@@ -2210,11 +2239,11 @@ std::vector<OwnedChildRecord> Repository::owned_children(const std::string& id){
     }return result;
 }
 std::vector<Message> Repository::owned_child_history(const std::string& parent,const std::string& child){
-    const auto root=run(parent),owned=run(child);if(!root.parent_id.empty()||owned.parent_id!=parent||owned.session_id!=root.session_id)throw NotFound("Child does not belong to this root");(void)child_admission(child);return run_history(child);
+    const auto root=run(parent),owned=run(child);if(!root.parent_id.empty()||owned.parent_id.empty()||owned.session_id!=root.session_id)throw NotFound("Child does not belong to this root");if(child_admission(child).root_run_id!=parent)throw NotFound("Child does not belong to this root");return run_history(child);
 }
 std::vector<Event> Repository::tree_events(const std::string& id,std::int64_t after,std::size_t count){
     if(after<0||count<1||count>256)throw std::invalid_argument("Invalid execution tree cursor");const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Tree events require a root parent");std::vector<Event> result;
-    for(const auto& row:impl_->database.execute("SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN runs r ON r.id=e.run_id WHERE (r.id=? OR r.parent_run_id=?) AND r.session_id=? AND e.seq>? ORDER BY e.seq LIMIT ?",{id,id,parent.session_id,after,static_cast<std::int64_t>(count)}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;
+    for(const auto& row:impl_->database.execute("WITH RECURSIVE subtree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,s.depth+1 FROM runs r JOIN subtree s ON r.parent_run_id=s.id WHERE s.depth<4) SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN subtree s ON s.id=e.run_id JOIN runs r ON r.id=e.run_id WHERE r.session_id=? AND e.seq>? ORDER BY e.seq LIMIT ?",{id,parent.session_id,after,static_cast<std::int64_t>(count)}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;
 }
 DelegationTaskRecord Repository::settle_delegation_child(const std::string& id){
     auto& db=impl_->database;Transaction transaction(db);const auto rows=db.execute("SELECT batch_id FROM delegation_tasks WHERE child_run_id=?",{id}).rows;
@@ -2305,8 +2334,8 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
     identifier(id);if(expected<1)throw std::invalid_argument("Invocation admission requires an observed checkpoint revision");
     auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
     if(parent.run.state!=RunState::running)throw Conflict("Invocation parent is not running");
-    if(!parent.run.parent_id.empty())throw RunUnavailable("Descendant graph admission requires the pending nested ownership contract");
-    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent_id}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
+    const auto lineage=impl_->graph_lineage(parent_id,true);if(lineage.second>=3)throw Conflict("Graph invocation depth exceeds limits");
+    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
     if(parent.checkpoint_revision!=expected)throw Conflict("Graph checkpoint revision changed");
     if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph invocation identity already exists");
     GraphCoordinator coordinator(GraphPlan(parent.specification_json),parent.checkpoint_json,GraphRestoreMode::live);
@@ -2338,6 +2367,7 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
     impl_->graph_checkpoint(parent,coordinator,expected);
     changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{id,parent.run.session_id,parent_id,node_id}));
     changed_one(db.execute("INSERT INTO graph_roots(run_id,graph_id,graph_revision,specification,checkpoint,input) VALUES(?,?,?,?,?,?)",{id,binding.graph_id,binding.revision,child_plan.json(),GraphCoordinator(child_plan).checkpoint(),prompt}));
+    changed_one(db.execute("INSERT INTO graph_invocations(run_id,root_run_id,parent_run_id,depth) VALUES(?,?,?,?)",{id,lineage.first,parent_id,lineage.second+1}));
     const Run child{id,parent.run.session_id,RunState::queued,parent_id,node_id,true,prompt_context(prompt)};impl_->message(child,"user",prompt);
     changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));
     impl_->event(id,"run.queued",Json{{"kind","graph_invocation"},{"parent_run_id",parent_id},{"node_id",node_id},{"graph_id",binding.graph_id},{"graph_revision",binding.revision}}.dump());
@@ -2348,6 +2378,7 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
 Run Repository::start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt,std::int64_t expected){
     identifier(id);if(node_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || node_id.empty())throw std::invalid_argument("Invalid graph node identity");if(node_id.size()>64)throw std::invalid_argument("Graph node ID exceeds limits");object_json(prompt);const auto provider=prompt_context(prompt);auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
     if(parent.run.state!=RunState::running)throw Conflict("Graph parent is not running");
+    const auto lineage=impl_->graph_lineage(parent_id,true);if(lineage.second>0&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
     const auto specification=Json::parse(parent.specification_json);bool executable=false,agent=false;for(const auto& node:specification.at("nodes"))if(node.at("id")==node_id && (node.at("type")=="agent" || node.at("type")=="tool")){executable=true;agent=node.at("type")=="agent";}if(!executable)throw std::invalid_argument("Child must name a declared executable node");
     if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent_id}).rows.empty()){const auto capture=graph_context_owner(parent_id);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph child requires its open owner clock");if(agent){(void)graph_context_agent(capture.authority,node_id);const auto budget=root_budget(parent_id);const auto active=integer(db.execute("SELECT count(*) FROM runs r WHERE r.parent_run_id=? AND r.state IN ('queued','running','paused') AND EXISTS(SELECT 1 FROM json_each((SELECT authority_json FROM graph_context_owners WHERE root_run_id=?),'$.agents') a WHERE json_extract(a.value,'$.node_id')=r.node_id)",{parent_id,parent_id}).rows[0][0]);if(budget.children_admitted>=budget.spec.max_children||active>=budget.spec.max_parallel)throw RootBudgetExhausted("Registered graph child allowance exhausted");changed_one(db.execute("UPDATE agent_execution_budgets SET children_admitted=children_admitted+1,revision=revision+1 WHERE root_run_id=? AND revision=?",{parent_id,budget.revision}));}}
     if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph child identity already exists");
@@ -2379,7 +2410,7 @@ Run Repository::retire_graph_run(const std::string& id,RunState next,const std::
 }
 std::vector<Run> Repository::children(const std::string& id){graph_run(id);std::vector<Run> result;for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows)result.push_back(run(text(row[0])));return result;}
 std::vector<Message> Repository::run_history(const std::string& id){const auto current=run(id);if(current.parent_id.empty())return history(current.session_id);std::vector<Message> result;for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE execution_run_id=? ORDER BY seq",{id}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2])});return result;}
-std::vector<Event> Repository::graph_events(const std::string& id,std::int64_t after){if(after<0)throw std::invalid_argument("Negative cursor");graph_run(id);std::vector<Event> result;for(const auto& row:impl_->database.execute("SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN runs r ON r.id=e.run_id WHERE (r.id=? OR r.parent_run_id=?) AND e.seq>? ORDER BY e.seq",{id,id,after}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;}
+std::vector<Event> Repository::graph_events(const std::string& id,std::int64_t after){if(after<0)throw std::invalid_argument("Negative cursor");graph_run(id);std::vector<Event> result;for(const auto& row:impl_->database.execute("WITH RECURSIVE subtree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,s.depth+1 FROM runs r JOIN subtree s ON r.parent_run_id=s.id WHERE s.depth<4) SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN subtree s ON s.id=e.run_id WHERE e.seq>? ORDER BY e.seq",{id,after}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;}
 SkillSelections Repository::run_skills(const std::string& id){
     run(id);const auto rows=impl_->database.execute("SELECT workspace_id,selections_json FROM run_skills WHERE run_id=?",{id}).rows;if(rows.empty())throw NotFound("Run skills not initialized");
     auto result=skill_selections(text(rows[0][1]));if(result.workspace_id!=text(rows[0][0]))throw DatabaseError("Saved run skill workspace differs");return result;

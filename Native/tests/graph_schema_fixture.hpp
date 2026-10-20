@@ -72,7 +72,16 @@ inline void remove_dynamic_plan_multiplicity_fixture(agentflow::XlangSqlite& dat
         database.execute("RELEASE downgrade_dynamic_plan_multiplicity");
     }catch(const std::exception& error){database.execute("ROLLBACK TO downgrade_dynamic_plan_multiplicity");database.execute("RELEASE downgrade_dynamic_plan_multiplicity");throw std::runtime_error("Legacy fixture v25 downgrade failed at "+stage+": "+error.what());}
 }
+inline void remove_graph_invocation_schema_fixture(agentflow::XlangSqlite& database){
+    if(std::get<std::int64_t>(database.execute("PRAGMA user_version").rows[0][0])<34)return;
+    if(std::get<std::int64_t>(database.execute("SELECT count(*) FROM graph_invocations").rows[0][0])!=0)throw std::runtime_error("Legacy fixture cannot discard actual nested graph ownership");
+    auto trigger=std::get<std::string>(database.execute("SELECT sql FROM sqlite_master WHERE name='owned_child_boundary'").rows[0][0]);
+    const std::string current="(p.parent_run_id IS NULL OR EXISTS(SELECT 1 FROM graph_invocations gi JOIN runs root ON root.id=gi.root_run_id WHERE gi.run_id=p.id AND root.parent_run_id IS NULL AND root.state='running' AND root.session_id=NEW.session_id AND NOT EXISTS(SELECT 1 FROM graph_context_owners co WHERE co.root_run_id=root.id)))";
+    const auto at=trigger.find(current);if(at==std::string::npos)throw std::runtime_error("Legacy fixture found an incompatible graph child boundary");trigger.replace(at,current.size(),"p.parent_run_id IS NULL");
+    database.execute("DROP TRIGGER owned_child_boundary");database.execute(trigger);database.execute("DROP TRIGGER immutable_graph_invocations");database.execute("DROP TRIGGER retain_graph_invocations");database.execute("DROP TRIGGER graph_invocation_admission");database.execute("DROP TABLE graph_invocations");database.execute("PRAGMA user_version=33");
+}
 inline void remove_dynamic_plan_owner_scope_fixture(agentflow::XlangSqlite& database){
+    remove_graph_invocation_schema_fixture(database);
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     if(scalar("PRAGMA user_version")>=33){if(scalar("SELECT count(*) FROM mcp_input_requests")!=0)throw std::runtime_error("Legacy fixture cannot discard actual pending MCP input requests");database.execute("DROP TRIGGER retain_mcp_input_requests");database.execute("DROP TRIGGER mcp_input_request_settlement");database.execute("DROP TRIGGER mcp_input_request_identity");database.execute("DROP TRIGGER mcp_input_request_insert");database.execute("DROP INDEX mcp_input_requests_run");database.execute("DROP TABLE mcp_input_requests");database.execute("PRAGMA user_version=32");}
     if(scalar("PRAGMA user_version")>=32){if(scalar("SELECT count(*) FROM session_agent_events")!=0)throw std::runtime_error("Legacy fixture cannot discard actual agent-switch events");database.execute("DROP INDEX session_agent_events_cursor");database.execute("DROP TABLE session_agent_events");database.execute("PRAGMA user_version=31");}

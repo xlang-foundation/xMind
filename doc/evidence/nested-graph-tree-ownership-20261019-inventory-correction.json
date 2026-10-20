@@ -1,0 +1,8 @@
+{
+  "initialGate": "nested-graph-tree-ownership-focused-20261019",
+  "buildPassed": true,
+  "testsExecuted": false,
+  "error": "Inventory assertion: observed17, expected18. persistence_service_contract has no native_ prefix and was omitted by the selector.",
+  "correctedGate": "nested-graph-tree-ownership-20261019.json",
+  "testSelection": "17 named native contracts plus persistence_service_contract"
+}

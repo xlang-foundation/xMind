@@ -2,6 +2,17 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Bounded durable graph invocation tree — 2026-10-19
+
+Schema34 adds immutable graph_invocations records with immediate graph parent, ultimate session root and depth1..3. Its admission trigger binds actual child/root/session identities and the parent's captured graph identity, revision and complete specification. Only admitted graph owners can acquire descendant runs. Registered context roots remain excluded until shared context/budget support exists. Backend lineage checks verify every pinned ancestor and active ancestor state before further admission. Root event cursors now traverse up to three invocation levels plus their leaves; root child-history observation and immediate-owner child listings retain identified ownership.
+
+The migration backfills valid schema33 first-level metadata without changing old messages; inconsistent stored pins abort and roll back all schema/version changes. Disposable legacy-fixture reconstruction now removes empty schema34 metadata and restores the exact earlier owned-child trigger, refusing to discard actual invocation evidence. Current-version assertions and legacy owner compatibility advance to34. Installed56 profiles are untouched.
+
+Actual embedded-xlang3 SQLite contracts cover three invocation levels and a fourth-level leaf under one session root, immutable lineage rows, foreign-session rejection, root-scoped descendant histories/events, leaf-to-root cancellation settlement, deep interrupted-owner quarantine with retained inputs and no replay, invalid v33 pin rollback, corrected migration and valid foreign keys. Complete Release build plus18focused contracts pass62.84seconds, CTest47072 terminal0. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary file sets/hashes remain frozen. Candidate0883b724 is uninstalled, with no full-suite qualification. The initial gate built successfully but stopped before tests because its selector omitted the unprefixed persistence_service_contract; this observer failure is retained separately.
+
+Runtime remains closed in GraphRunner validation and public GraphCoordinator start. This establishes durable ownership and observation, not nested execution, shared physical leaf capacity/root deadline, authenticated nested human pause/resume or context authority. Those integration requirements and a full native suite remain necessary before packaging or adoption. See evidence/nested-graph-tree-ownership-20261019.*.
+
+
 ## Nested invocation workspace inheritance — 2026-10-19
 
 Child graph admission now inherits the exact agent.workspace_membership snapshot captured by its parent, within the same SQLite transaction. It never consults a later workspace registry selection. Duplicate snapshots, nonpositive revisions, empty folder sets, malformed folder bindings, mismatched primary folders and duplicate folder IDs reject before claiming parent work. The inherited event remains metadata; GraphRunner must reopen and verify actual folders before any future child execution.
