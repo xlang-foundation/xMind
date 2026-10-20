@@ -3,6 +3,10 @@
 Latest installed implementation: client39565fbb/native3bfecb58/cc854ad0, version55, adopted by TestProj owner56032. Full154 native and445/158 client contracts pass. All six sessions/150 messages/eleven runs and configuration survive explicit native upgrade exactly. Existing browser API restores them; no new task was replayed. Exact hosted run39360428093 remains in progress. See coding55 evidence in doc/evidence.
 This is not a completion declaration.
 
+## Installed55 CLI coding evidence
+
+One new isolated task on installed55 completes native reads, reviewed CLI file approval and a real registered process: Node4/4 exit0 from failing2/4 baseline, tests unchanged. Terminal run.completed and9messages restore; all six earlier sessions/150messages/eleven runs and configuration remain exact. See evidence/coding55-cli-live-coding-20261019.json. This adds command-mode coding proof, with the recorded inaccurate model prose, and leaves current VS Code/external browser rendering open.
+
 ## Installed54 adoption evidence
 
 - Full154 native and445/158 client gates, archive/installed verification, backup and settings preservation: coding54-installed-checkpoint-20261019.json.

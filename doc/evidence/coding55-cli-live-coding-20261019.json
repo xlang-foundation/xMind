@@ -1,0 +1,115 @@
+{
+  "observedAt": "2026-10-20T03:10:35.031Z",
+  "scope": "Installed55 native CLI command-mode real Claude coding through existing shared backend; no direct-console or current VS Code rendering claim.",
+  "session": "f5eebd145890d132cfc59b0589491803",
+  "root": "cc3d14ff5b4c570cebf41a92c85c6d52",
+  "backend": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 56032,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "taskSubmissions": 1,
+  "state": "completed",
+  "historyMessages": 9,
+  "toolCalls": [
+    "read_file",
+    "read_file",
+    "edit_file",
+    "run_process"
+  ],
+  "editOperation": "0ba4a36421cea3fd907455cffe09472c",
+  "processOperation": "a482a0756a4c50694e9dfc8ccd20a803",
+  "baseline": {
+    "tests": 4,
+    "pass": 2,
+    "fail": 2,
+    "exitCode": 1
+  },
+  "after": {
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "exitCode": 0,
+    "processTreeRetired": true
+  },
+  "testSha256": "b1e773f7536712ba5582a04a3d4f215f98028c21fcc4a500e7383e6d5f984c4f",
+  "testsUnchanged": true,
+  "sourceBeforeSha256": "8e61a7f2d79f8e6a2666ff644bdc5c6a561c07d39edfacdfb0a51ab010fce93b",
+  "sourceAfterSha256": "f71db1839fdabcbff61685eb45c76c7aa9f15a7db20c1b5d804f283fdd3cba8f",
+  "previousSixSessionsExact": true,
+  "previous150MessagesAnd11RunsExact": true,
+  "configurationExact": true,
+  "backendOwnerPreserved": true,
+  "rawUsageAndTimings": [
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 124,
+        "input_tokens": 8553,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 124,
+        "prompt_tokens": 8553,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2210,
+      "first_token_ms": 1337
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 201,
+        "input_tokens": 9257,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 201,
+        "prompt_tokens": 9257,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3960,
+      "first_token_ms": 1004
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 140,
+        "input_tokens": 9622,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 140,
+        "prompt_tokens": 9622,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 4054,
+      "first_token_ms": 2199
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 204,
+        "input_tokens": 10256,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 204,
+        "prompt_tokens": 10256,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 4851,
+      "first_token_ms": 923
+    }
+  ],
+  "modelExplanationLimitation": "The edit and counts are correct; the prose incorrectly says every chunk starts at zero. The buggy start remains index, while end remains the constant size.",
+  "cpythonExecuted": false,
+  "passed": true
+}

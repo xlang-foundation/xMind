@@ -10,7 +10,9 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Initial observer UTF-8 split failure retained; byte-safe reread and earlier HTTP snapshot prove no history change. See coding54-primary-adoption and adopted-live-read receipts. External Edge/current VS Code acceptance remain open.
 
-- Installed53 native9eb26146 now passes the complete154-contract gate in1069.74s on source0a8ec093; all2625project/16SDK/1870pure/76runtime/18598dependency/129binary sets/hashes unchanged, complete build matches installed executable. CTest64788 exited0; no gate remains live. See coding53-full-native receipt and doc/delivery-requirement-audit-20261019.md for remaining scope. Older focused-only statements below are historical.
+- Native53 full154/1069.74s on0a8ec093 matches installed9eb26146; frozen closure unchanged, CTest64788 exited0. Details: coding53-full-native receipt.
+
+- Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 
 - Historical53 actual IAB sessioncb160a995f28f81865b47f95f294999d/root5fdd5b9dfea15f7eeb110fa00d3e0af7 completed the reviewed cart edit/Node4/4/reload11messages; NEVER replay it. TestProj/xmind-browser-acceptance-20261019 is an acceptance fixture. Exact prior process identities, absent48owners/18pages and installed52 backup receipts remain in doc/VALIDATION_STATUS.md and coding53-iab-coding-api. Older live-owner claims below are historical.
 

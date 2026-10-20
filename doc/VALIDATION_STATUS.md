@@ -2,6 +2,12 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed55 CLI-originated coding — 2026-10-19
+
+A new isolated chunking fixture establishes a failing2/4 baseline. One real Claude task submitted through installed55 CLI run/watch reads both files, proposes the single slice-end correction, and waits for native CLI approval. The approved replacement succeeds; its one registered PowerShell process runs Node tests4/4, exit0, complete output and retired process tree. Tests remain byte-identical. The terminal stream contains run.completed and history restores9messages. All six prior sessions/150messages/eleven runs plus provider/process/MCP/membership configuration remain exact on owner56032. No earlier task is replayed. This is command-mode coding evidence, not new direct-console or editor rendering. The model explanation incorrectly says slices start at zero; the actual patch and test counts are correct.
+
+See evidence/coding55-cli-live-coding-20261019.json, coding55-cli-baseline.log, coding55-cli-watch.stdout.log and the retained operation review/decision receipts. Sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 must never be resubmitted.
+
 ## Installed 0.1.55 and preserved native adoption — 2026-10-19
 
 Client source39565fbb packages qualified native3bfecb58/cc854ad0. All154 native,445 extension and158 browser contracts pass;2448 archive entries and2445 installed payloads verify. The prior installation backup and settings remain verified. Explicit native upgrade retires owner36040 and starts56032 born2026-10-20T03:07:41.9202850Z in the same SQLite profile and origin57779. All six sessions,150 messages,eleven runs and provider/process/MCP/membership data compare exactly before/after using byte-safe UTF-8 capture. Existing page55684 serves the preserved state through its API. No model task or effect was replayed. A subsequent actual hidden IAB reload restores the saved four-message native54 marker conversation, completed run, Claude model and exact usage/timings with Send enabled. The existing host/view were retained: this proves rendered restoration against adopted native55, not newly installed55 client assets, a new coding task, external browser or VS Code rendering. See evidence/coding55-iab-restore-20261019.json and its screenshot. Hosted39360428093 remains in progress independently.

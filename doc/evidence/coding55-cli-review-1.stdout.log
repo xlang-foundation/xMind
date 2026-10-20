@@ -1,0 +1,14 @@
+[
+  {
+    "arguments_json": "{\"after_content\":\"export function chunks(values, size) {\\n  if (!Number.isInteger(size) || size < 1) throw new RangeError(\\\"size must be a positive integer\\\");\\n  const result = [];\\n  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size));\\n  return result;\\n}\\n\",\"after_sha256\":\"f71db1839fdabcbff61685eb45c76c7aa9f15a7db20c1b5d804f283fdd3cba8f\",\"before_content\":\"export function chunks(values, size) {\\n  if (!Number.isInteger(size) || size < 1) throw new RangeError(\\\"size must be a positive integer\\\");\\n  const result = [];\\n  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, size));\\n  return result;\\n}\\n\",\"before_sha256\":\"8e61a7f2d79f8e6a2666ff644bdc5c6a561c07d39edfacdfb0a51ab010fce93b\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:020000000000000027a9090000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"path\":\"xmind-cli55-coding-20261019/chunks.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\"xmind-cli55-coding-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+    "decision_actor": "",
+    "expires_unix_ms": 1792466393758,
+    "id": "0ba4a36421cea3fd907455cffe09472c",
+    "resources": [],
+    "result_json": "{}",
+    "run_id": "cc3d14ff5b4c570cebf41a92c85c6d52",
+    "state": "awaiting_approval",
+    "tool": "replace_file",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "arguments_json": "{\"after_content\":\"export function chunks(values, size) {\\n  if (!Number.isInteger(size) || size < 1) throw new RangeError(\\\"size must be a positive integer\\\");\\n  const result = [];\\n  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size));\\n  return result;\\n}\\n\",\"after_sha256\":\"f71db1839fdabcbff61685eb45c76c7aa9f15a7db20c1b5d804f283fdd3cba8f\",\"before_content\":\"export function chunks(values, size) {\\n  if (!Number.isInteger(size) || size < 1) throw new RangeError(\\\"size must be a positive integer\\\");\\n  const result = [];\\n  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, size));\\n  return result;\\n}\\n\",\"before_sha256\":\"8e61a7f2d79f8e6a2666ff644bdc5c6a561c07d39edfacdfb0a51ab010fce93b\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:020000000000000027a9090000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"path\":\"xmind-cli55-coding-20261019/chunks.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\"xmind-cli55-coding-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+    "decision_actor": "local-owner",
+    "expires_unix_ms": 1792466393758,
+    "id": "0ba4a36421cea3fd907455cffe09472c",
+    "resources": [],
+    "result_json": "{\"after_sha256\":\"f71db1839fdabcbff61685eb45c76c7aa9f15a7db20c1b5d804f283fdd3cba8f\",\"before_sha256\":\"8e61a7f2d79f8e6a2666ff644bdc5c6a561c07d39edfacdfb0a51ab010fce93b\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:020000000000000027a9090000000000\",\"path\":\"xmind-cli55-coding-20261019/chunks.mjs\",\"size\":287,\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\"}",
+    "run_id": "cc3d14ff5b4c570cebf41a92c85c6d52",
+    "state": "succeeded",
+    "tool": "replace_file",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  },
+  {
+    "arguments_json": "{\"arguments\":[\"-NoLogo\",\"-NoProfile\",\"-NonInteractive\",\"-Command\",\"node --test chunks.test.mjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000027a9090000000000\",\"environment\":[],\"executable\":\"C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"powershell\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\"xmind-cli55-coding-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"timeout_ms\":30000,\"workdir\":\"xmind-cli55-coding-20261019\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+    "decision_actor": "trusted-process-profile:powershell",
+    "expires_unix_ms": 1792466411213,
+    "id": "a482a0756a4c50694e9dfc8ccd20a803",
+    "resources": [
+      "process-profile:powershell"
+    ],
+    "result_json": "{\"elapsed_ms\":320,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"a482a0756a4c50694e9dfc8ccd20a803\",\"operation_id\":\"a482a0756a4c50694e9dfc8ccd20a803\",\"output_artifact\":{\"operation_id\":\"a482a0756a4c50694e9dfc8ccd20a803\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":632},\"pid\":59008,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":632,\"data\":\"TAP version 13\\n# Subtest: preserves every item in uneven chunks\\nok 1 - preserves every item in uneven chunks\\n  ---\\n  duration_ms: 0.9099\\n  type: 'test'\\n  ...\\n# Subtest: size one returns singletons\\nok 2 - size one returns singletons\\n  ---\\n  duration_ms: 0.1364\\n  type: 'test'\\n  ...\\n# Subtest: empty input stays empty\\nok 3 - empty input stays empty\\n  ---\\n  duration_ms: 0.1125\\n  type: 'test'\\n  ...\\n# Subtest: rejects zero and fractional sizes\\nok 4 - rejects zero and fractional sizes\\n  ---\\n  duration_ms: 0.7642\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 61.5079\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":632},\"termination\":\"exited\",\"truncated\":false}",
+    "run_id": "cc3d14ff5b4c570cebf41a92c85c6d52",
+    "state": "succeeded",
+    "tool": "run_process",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  }
+]
