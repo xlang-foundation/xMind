@@ -2,6 +2,18 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Pre-0.1.53 process inventory — 2026-10-19
+
+Before installing 0.1.53, all 48 identities from the installed52 receipt are
+absent and all 18 recorded pages are unavailable. An independent process query
+also finds no xmind process. Earlier preservation claims retain their historical
+scope; current live continuity is not established. No process retirement was
+performed during this recovery. Existing installed52 backup verifies 2,447 files,
+settings retain SHA256 5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b,
+and seven profile directories remain. A fresh connection must verify the existing
+profile and histories rather than assert reuse of old PID63876. See the
+[pre-installation inventory](evidence/pre-coding53-absent-owners-20261019.json).
+
 ## Conversation space with expanded controls — 2026-10-19
 
 The shared chat stylesheet now bounds the footer at every panel height, keeping

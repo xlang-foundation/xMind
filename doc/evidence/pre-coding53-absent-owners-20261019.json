@@ -1,0 +1,417 @@
+{
+  "observedAt": "2026-10-20T01:29:08.022Z",
+  "scope": "Read-only identity and HTML availability inventory; no backend effects, credentials or inference.",
+  "identities": [
+    {
+      "pid": 67948,
+      "birth": "2026-10-18T20:02:32.0466160Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 17248,
+      "birth": "2026-10-18T20:02:33.0937180Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.27\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 33960,
+      "birth": "2026-10-18T20:02:36.4674450Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a27\\6b0c837f940b8a1ecbb5212d6f31741cc15ff7b9a044c7c39837073cdc9d1867\\runtime-d07d82ba198dedbe5d946c77266c4f0fcbc29ff802981e91116902a635f6a6c6\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 64940,
+      "birth": "2026-10-18T22:22:18.9164270Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 40236,
+      "birth": "2026-10-18T22:22:19.9382670Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.31\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 67432,
+      "birth": "2026-10-18T22:22:23.1982620Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a31\\7679f90d61b9255d17fb4d86b68908507226efbe35add7bf0ade459537da5a3c\\runtime-499e9893c04de140ed395ce604fe9caa81453328c0d3a7629fa4d25de5c40389\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 63316,
+      "birth": "2026-10-18T22:59:30.1113800Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 72620,
+      "birth": "2026-10-18T22:59:31.1529330Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.32\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 17816,
+      "birth": "2026-10-18T22:59:34.4239030Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a32\\1828ebd236c14ec23742196fd7285dfbe5f333993556ea711e438b64a8033074\\runtime-ad940888eb2eb53a85dc3454ebcbeb25f11d3f5bc72d33ae976b1b6b51f2ce1e\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 46036,
+      "birth": "2026-10-19T01:12:03.9932660Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 25408,
+      "birth": "2026-10-19T01:12:05.1532590Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.34\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 44704,
+      "birth": "2026-10-19T01:12:08.6046830Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a34\\b257b78f22c803567a66c2079ca47515c4b101f8c9c81e375cfea6d5011628f0\\runtime-36177501942b3354b9531a56fea3535e5a43458d2787182996e6fb51cb397650\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 64664,
+      "birth": "2026-10-19T01:28:50.0224330Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 43960,
+      "birth": "2026-10-19T01:28:52.3259150Z",
+      "image": "C:\\xMindNativeValidation\\coding-0.1.35-source-20261019\\extensions\\vscode\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 69648,
+      "birth": "2026-10-19T01:29:45.0433680Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a35\\b8d89165c622d42df3df215aa2cbe64ae6b1270191dfa03e3b0c72e1f3db40bb\\runtime-808baf32fa2c0bc01fbea476fecc8bb4fe09f7da8458a8e9e5bf402ac03db133\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 30896,
+      "birth": "2026-10-19T06:40:17.2718400Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 58140,
+      "birth": "2026-10-19T06:40:18.3354560Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.37\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 59264,
+      "birth": "2026-10-19T06:40:21.7686110Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a37\\ffb23089cbc7275e53687f3e443da239e4b8b9dd85b5a5d3a1b30fdacb92ddbc\\runtime-2a969e8280d1fb0f8e6c0ca1e4f6a025ed1768484fcd328a2b10b4d928c7ccd9\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 40732,
+      "birth": "2026-10-19T07:05:42.8122650Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 67828,
+      "birth": "2026-10-19T07:05:43.8541970Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.38\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 27692,
+      "birth": "2026-10-19T07:05:47.2161400Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a38\\a277ed2407d8d1397a402e9792237ab1afe18e2475ecccb1fed5b588fe0b4f40\\runtime-5ce1457263c8742c704c151e80e948839539090cc32cb3515629b1fcecb51c90\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 41476,
+      "birth": "2026-10-19T08:49:52.2741370Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 18700,
+      "birth": "2026-10-19T08:49:53.4660720Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.40\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 56088,
+      "birth": "2026-10-19T08:49:56.9665580Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a40\\26d129336525c8dee48f28f44482a6f1032cd68a7a24448ef0bed6ff6fd2546a\\runtime-6e136d7ac591ed6d7eeadeee378a8d8b6908d2b3d4628cde9dec2aeb533d8d8b\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 68540,
+      "birth": "2026-10-19T17:31:26.4474410Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 9152,
+      "birth": "2026-10-19T17:31:27.6246970Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.42\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 21536,
+      "birth": "2026-10-19T17:31:31.4852250Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a42\\e9c8dc8714363a789e8f90a75afdd543e2bb2a50059e4ddd2d4cf58bad8b0fa2\\runtime-02b21db16654dff2c32b9a06689ec9c5e0ffb86e3be4882da35acd156ac63274\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 7816,
+      "birth": "2026-10-19T18:05:51.0423000Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 43604,
+      "birth": "2026-10-19T18:05:52.1707130Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 44176,
+      "birth": "2026-10-19T18:05:55.7005620Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a43\\d68f72743ff73862a4e230519f6c0302d25a51634a7f9811269db6b0908e4614\\runtime-52e8b8bb6f8428143a5ed5faba57e0f57259780568deb237dc50692c9e3ce3b6\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 66908,
+      "birth": "2026-10-19T18:14:28.4949650Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 35116,
+      "birth": "2026-10-19T18:14:29.4292590Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.43\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 69992,
+      "birth": "2026-10-19T18:14:32.8155730Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-c43\\a94da0db71c58024b766cf6b38c9d268b7cd9db51c380d29e30383db2fa5d1f5\\runtime-6a3a62add7803a2f11cca95d8f5cf303ccddbdabddd43b5b7e469886acc98a59\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 29748,
+      "birth": "2026-10-19T19:35:03.7901050Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 59720,
+      "birth": "2026-10-19T19:35:04.9863920Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.44\\native-runtime\\xmind.exe",
+      "kind": "nativeView",
+      "preserved": false
+    },
+    {
+      "pid": 20740,
+      "birth": "2026-10-19T19:35:08.5467900Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-a44\\e5008a9657ecd40be6fb9188bac54d3cb6a78ee45bb97b397b4c724f88814fec\\runtime-ab13c965e5d00f5de32564d1084f7009c38a1c3071333f4184b969dd4bf64ec3\\xmind.exe",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 30020,
+      "birth": "2026-10-19T22:29:10.1820010Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "kind": "installed47-browser-host",
+      "preserved": false
+    },
+    {
+      "pid": 64920,
+      "birth": "2026-10-19T22:29:11.2260400Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.47\\native-runtime\\xmind.exe",
+      "kind": "installed47-native-view",
+      "preserved": false
+    },
+    {
+      "pid": 71292,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-19T22:56:01.3516150Z",
+      "kind": "installed49-browser-host",
+      "preserved": false
+    },
+    {
+      "pid": 18876,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.49\\native-runtime\\xmind.exe",
+      "birth": "2026-10-19T22:56:02.1926510Z",
+      "kind": "installed49-native-view",
+      "preserved": false
+    },
+    {
+      "pid": 13676,
+      "birth": "2026-10-19T23:38:18.9267970Z",
+      "image": "C:\\xMindNativeValidation\\editor-coding-0.1.50-20261019\\native-profile\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-c34dd75f3376033363e1a37e6022339b9039b8f22878eaa7a0c5612787e9fd31\\xmind.exe",
+      "preserved": false
+    },
+    {
+      "pid": 52184,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-20T00:08:46.8528290Z",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 49704,
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.51\\native-runtime\\xmind.exe",
+      "birth": "2026-10-20T00:08:47.9301140Z",
+      "kind": "native-view",
+      "preserved": false
+    },
+    {
+      "pid": 65448,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-20T00:26:13.8734910Z",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 55364,
+      "image": "C:\\xMindNativeValidation\\pinned-view-runtime-20261019\\xmind.exe",
+      "birth": "2026-10-20T00:26:15.7541120Z",
+      "kind": "native-view",
+      "preserved": false
+    },
+    {
+      "pid": 63876,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-55c5b5dca7b4bd478c80560c42fcee79e7a00b88d840cd049b48c48899408009\\xmind.exe",
+      "birth": "2026-10-20T00:27:24.1375610Z",
+      "kind": "backend",
+      "preserved": false
+    },
+    {
+      "pid": 8624,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-20T00:42:35.6099110Z",
+      "kind": "host",
+      "preserved": false
+    },
+    {
+      "pid": 27300,
+      "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe",
+      "birth": "2026-10-20T00:42:37.7683930Z",
+      "kind": "native-view",
+      "preserved": false
+    }
+  ],
+  "pages": [
+    {
+      "url": "http://127.0.0.1:62342/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:52121/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:63383/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:54828/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:63496/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:49702/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:55921/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:59450/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:53735/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:55639/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:53895/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:58417/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:64581/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:54803/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:64405/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:53242/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:51321/ui/",
+      "error": "fetch failed"
+    },
+    {
+      "url": "http://127.0.0.1:53530/ui/",
+      "error": "fetch failed"
+    }
+  ],
+  "allPriorIdentitiesPreserved": false,
+  "allPriorPagesAvailable": false
+}
