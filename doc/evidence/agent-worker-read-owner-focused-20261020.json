@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-20T22:47:22.519Z",
+  "gate": {
+    "recordedAt": "2026-10-20T22:47:11.502Z",
+    "sourceParent": "e28ffec1122c88c5e8d237ff5eb7d6eedab6661c",
+    "sourcePatchSha256": "638cb20d6562e0554b5aa475ce8a34cf5202d5483ed6d5a5d8d67c32359c172b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 67044,
+      "launchedAt": "2026-10-20T22:43:28.854Z",
+      "completedAt": "2026-10-20T22:44:29.005Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0070b762f20df4278cadac2635bd559a655be1d569079f75f1aeb7674094e106"
+    },
+    "test": {
+      "pid": 66396,
+      "launchedAt": "2026-10-20T22:44:32.278Z",
+      "completedAt": "2026-10-20T22:47:08.952Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f4d3d95ac346836557e56e542c70e632a544758fa1356a73d1f3af0d4a3788db"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 156.63,
+    "projectFiles": 2686,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "89dbf9c4fa48a081f8b422ecd1fb5cf9c54f9725bed271306d3ec70cbfa51798",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-read-owner-focused-20261020-build.log": "0070b762f20df4278cadac2635bd559a655be1d569079f75f1aeb7674094e106",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-build-terminal.json": "87d3a36b1fb0a5bc5c43943053033e587ed7fb2e0e8c13790fc28d139dfd3ff0",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-ctest.log": "f4d3d95ac346836557e56e542c70e632a544758fa1356a73d1f3af0d4a3788db",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-ctest-terminal.json": "4ab49171d2f95bc7fb5849122f604ac492d9a194ac7990e64435c725b087fb91",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-LastTest.log": "e7325daf9a7cd29bbafa1c6921346be3fb475c7789a95c2829e0e37e3bf2de27",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-test-inventory.json": "6afc6cbe18f94d9d6ce863ba6bfd04976468fa540e13e55689fb0bea4b4767ff",
+    "doc/evidence/agent-worker-read-owner-focused-20261020-gate.json": "9d231276a3d33f7cf0a2a1e6ada8a86d8bae1e3b50b9f9c07b64a038b6de1bca"
+  },
+  "fixtureSha256": "449d487a2bd2b0f4e5e7218d64d1e453f6a9c3e17c1ce2670ddafd9b55d4368e",
+  "scope": "Production backend-side lifetime owner composes captured ordinary-worker read context, model authority and exact-lease journal RPC, replacing fixture-local assembly",
+  "verified": [
+    "Backend context owns copied request policy and stable model callbacks until peer drain",
+    "Common captured read/model deadline required; mismatched deadline rejected",
+    "Exact lease/channel scope required; altered run rejected",
+    "All actual context/AgentRunner/product child cases dispatch through production owner",
+    "Ordinary read, empty tools, six-field profile identity, approval cancellation, provider failure, typed denial and canonical completion/drain cases pass",
+    "Independent controlled peer verifies exactly 45 intentional requests"
+  ],
+  "limitations": [
+    "The owner requires persistence/workspace/peer lifetime management by its backend supervisor; it is not a scheduler or process supervisor",
+    "AgentService/GraphService placement remains open",
+    "Broader effect/context/graph worker capabilities and generic Local/Nexus integration remain open",
+    "No new full-suite, installation, hosted, live-provider or rendered-client acceptance claim"
+  ],
+  "passed": true
+}

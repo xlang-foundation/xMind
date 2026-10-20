@@ -1,3 +1,25 @@
+## Native backend worker read owner — 2026-10-20
+
+`AgentWorkerReadOwner` now owns the backend request context, model authority and
+exact-lease journal/read/model RPC bindings for one ordinary child. It copies the
+captured provider/request policy, retains stable context callbacks, requires a common
+read/model deadline and binds the channel to the exact captured lease. The backend
+supervisor must retain this owner, workspace and persistence until peer drain/join.
+It does not schedule or supervise the process itself.
+
+Actual context, shared AgentRunner and unified-product child fixtures now dispatch
+through this production owner instead of assembling its hosts in fixture code.
+Mismatched deadline and scope construction are rejected. Read guidance, empty tools,
+profile identity, approval cancellation, provider failure, typed denial, canonical
+completion and physical drain pass; the independent peer observes exactly 45
+intentional requests. Serial Release build and 53 contracts pass in 156.63 seconds
+with all frozen inputs/file sets and 133 native binaries unchanged during validation.
+
+AgentService/GraphService placement, broader worker effects/context/graphs and
+Local/Nexus integration remain open. Installed59 and user owners/history/settings
+are untouched; no full-suite, installed, live-provider or rendered acceptance is
+claimed. See [receipt](evidence/agent-worker-read-owner-focused-20261020.json).
+
 ## Actual product child with no tools — 2026-10-20
 
 An actual unified `xmind.exe` worker now completes an ordinary root with a

@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_read_context.hpp"
+#include "agentflow/agent_worker_read_owner.hpp"
 #include <future>
 #include <thread>
 namespace worker_context_fixture {
@@ -35,7 +36,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     if(approval_cancel)owner.permission_rules={{"read_file","**","ask"}};
     AgentWorkerReadRequestPolicy context_policy;context_policy.instructions="Native context owner policy.";context_policy.include_usage=true;for(const auto& tool:workspace.definitions())if(tool.name=="read_file")context_policy.tools.push_back(tool);
     if(no_tools)context_policy.tools.clear();
-    AgentWorkerReadContext context(store,store,lease,owner,context_policy);auto read_dispatch=bind_agent_worker_read_rpc(context,lease,worker->channel().scope());
+    AgentWorkerReadContext context(store,store,lease,owner,context_policy);
     if(!runner){
         auto no_tools_policy=context_policy;no_tools_policy.tools.clear();
         AgentWorkerReadContext no_tools(store,store,lease,owner,no_tools_policy);
@@ -51,10 +52,19 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         std::cout<<"Worker explicit empty tool catalogue verified: backend guidance/history retained, no default tools, forged catalogue/read rejected without funding."<<std::endl;
     }
     if(!runner){const auto initial=context.prepare();rejects<NotFound>([&]{context.admit("unclaimed-model",initial);});std::stop_source stopped;stopped.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{context.prepare(stopped.get_token());});auto expired_owner=owner;expired_owner.deadline=Clock::now()-1ms;AgentWorkerReadContext expired(store,store,lease,expired_owner,context_policy);rejects<AgentWorkerAuthorityExpired>([&]{expired.prepare();});}
-    AgentWorkerModelPolicy policy{true,{},profiled?identity:std::string{}};policy.request_context=[&](std::stop_token cancel){return context.prepare(cancel);};policy.admit_context=[&](const std::string& attempt,const ModelRequest& request,std::stop_token cancel){context.admit(attempt,request,cancel);};
-    ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;AgentWorkerModelHost model(store,lease,config,context_policy.tools,std::move(policy),make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);
-    auto model_dispatch=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_dispatch=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{if(method.starts_with("model."))return model_dispatch(method,payload,std::move(sink),cancel);if((mode.starts_with("product_admission_")&&method=="journal.run")||(mode.starts_with("product_journal_")&&method=="journal.history"))throw AgentWorkerRpcRemoteError(mode.ends_with("_cancel")?"cancelled":"timeout");if(method.starts_with("journal."))return journal_dispatch(method,payload,std::move(sink),cancel);return read_dispatch(method,payload,std::move(sink),cancel);},deadline);
+    ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
+    const auto gateway=make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"});
+    if(!runner){
+        auto wrong_owner=owner;wrong_owner.deadline-=1ms;
+        rejects<std::invalid_argument>([&]{AgentWorkerReadOwner rejected(store,lease,worker->channel().scope(),wrong_owner,context_policy,config,{},gateway,deadline);});
+        auto wrong_scope=worker->channel().scope();wrong_scope.run_id="foreign-run";
+        rejects<Conflict>([&]{AgentWorkerReadOwner rejected(store,lease,wrong_scope,owner,context_policy,config,{},gateway,deadline);});
+    }
+    AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline);
+    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+        if((mode.starts_with("product_admission_")&&method=="journal.run")||(mode.starts_with("product_journal_")&&method=="journal.history"))throw AgentWorkerRpcRemoteError(mode.ends_with("_cancel")?"cancelled":"timeout");
+        return backend_owner.dispatch(method,payload,std::move(sink),cancel);
+    },deadline);
     worker->channel().send({product_entry?"worker.boot":"fixture.boot",product_entry?"{\"version\":1}":mode},deadline);peer.start();
     const auto execute_method=product_entry?"worker.execute":"fixture.run";
     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
