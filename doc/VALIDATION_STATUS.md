@@ -2,6 +2,39 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Primary webpage repair and explicit view upgrades — 2026-10-19
+
+The repaired connection is <http://127.0.0.1:51321/ui/>. Its 13 HTTP assets match
+the tested 0.1.51 UI; it loads seven workspaces and all four saved provider
+profiles without entering a server token or provider key. All four original
+sessions, 135 messages and nine runs match the pre-connection snapshot exactly.
+No model prompt, project edit or process command was submitted in this check.
+This is HTTP/controller evidence, not rendered external-browser acceptance.
+
+The initial preservation check failed: native view startup unconditionally set
+`upgrade_backend`, despite the launcher omitting `--upgrade-backend`. It performed
+an idle handoff from owner 32704 to 63876, changing the workspace authority.
+An initial whole-snapshot assertion also caught that authority change; separate
+comparisons confirm the stored sessions, histories and runs are unchanged.
+Existing browser hosts remain; 43 prior owner identities are intact, one backend
+was replaced, and the two new view processes bring the inventory to 46 owners
+and 17 pages. Do not describe this as preservation of the old backend PID.
+
+Native startup now honors the explicit upgrade option. An actual-native
+regression opens a different package generation against a healthy owner: the
+old binary fails by replacing the PID, and the corrected binary preserves it.
+The view, provider-import and runtime contracts pass 3/3 in 183.50 seconds with
+the complete recorded input closure unchanged. Explicit upgrade contracts still
+pass. Native `9eb26146` includes both this correction and library lifetime pins;
+the running development webpage/backend still use the earlier `a26bed3f` pin fix.
+Version 0.1.52 is being packaged; installed 0.1.51 is not yet updated. No new
+complete native-suite or installed/rendered acceptance is claimed here.
+
+See [native gate](evidence/view-explicit-upgrade-focused-20261019.json),
+[original counterexample](evidence/view-implicit-upgrade-baseline-20261019.log),
+[focused log](evidence/view-explicit-upgrade-focused-20261019.log) and
+[primary API evidence](evidence/primary-pinned-view-service-api-20261019.json).
+
 ## Native view library lifetime fix — 2026-10-19
 
 The original browser on port 64405 still has a live native view, but its old

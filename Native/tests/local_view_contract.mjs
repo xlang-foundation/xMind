@@ -45,6 +45,13 @@ try{
  try{await fs.rename(library,retired);await fs.rename(retired,library);}catch(error){retirementError=error;}
  assert.ok(retirementError,'A live native view must prevent removal of its verified pure libraries');
  assert.ok(['EPERM','EACCES','EBUSY'].includes(retirementError.code),retirementError.message);
+ // A newer view package must attach without silently replacing a healthy owner.
+ const alternate=path.join(base,'alternate-runtime');await fs.cp(runtime,alternate,{recursive:true,errorOnExist:true,force:false});
+ const alternateManifest=path.join(alternate,'native-runtime-manifest.json'),alternateDocument=JSON.parse(await fs.readFile(alternateManifest,'utf8'));
+ alternateDocument.nativeRevision='c'.repeat(40);await fs.writeFile(alternateManifest,JSON.stringify(alternateDocument));
+ settings.runtimeDirectory=alternate;
+ try{const attached=await manager().connect();pids.add(attached.backendPid);assert.equal(attached.backendPid,first.process_id,'Ordinary view connection must preserve the existing backend across package generations');}
+ finally{settings.runtimeDirectory=runtime;}
  const ready=await fs.readFile(path.join(owner.privateDirectory,'ready.json'),'utf8');assert.ok(!ready.includes(access));assert.ok(!ready.includes('"auth"'));assert.ok(!ready.includes('"token"'));
  const native=client(owner).bindWorkspace(host),nativeRequest=native.request.bind(native);native.request=async(...args)=>{try{return await nativeRequest(...args);}catch(error){console.error(`Native view route failed: ${typeof args[0]==='string'?args[0]:'<request>'} · HTTP ${error.status||'unknown'}`);throw error;}};const title='Shared console and editor native profile 雪 "quoted"',session=await native.createSession(title);assert.equal(session.title,title);assert.ok((await command('sessions')).some(s=>s.id===session.id&&s.title===title));assert.deepEqual(await native.request('/v1/process/profiles'),{profiles:[{id:'fixture-node',revision:1,max_timeout_ms:5000}],runtime_state:'per_operation'});
  // Exercise body reading in the actual native adapter, including chunked UTF-8.

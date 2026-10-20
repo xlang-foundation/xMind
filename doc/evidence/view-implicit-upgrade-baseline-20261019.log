@@ -1,0 +1,25 @@
+Owned profile cleanup: Cannot inspect native owner process
+
+
+1 !== 0
+
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-view-fsskgj"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Ordinary view connection must preserve the existing backend across package generations
+
+15136 !== 3456
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:53:84
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 15136,
+  expected: 3456,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
