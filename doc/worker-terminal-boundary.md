@@ -48,6 +48,29 @@ the actual child AgentRunner failure/cancellation journal and AgentService
 integration remain open. Dedicated timeout and post-drain storage-failure
 injections also remain open.
 
+Those two drain fault boundaries are now covered by the
+[fault-injection checkpoint](evidence/agent-worker-drain-faults-observed-20261020.json).
+An actual child acknowledges that it is blocked on an explicit owned release
+event. An expired observation deadline closes RPC but leaves that same PID and
+creation time alive, the run running, the lease active, events unchanged and the
+reservation charged. Explicit owner release then permits observation and
+termination of the same process without restart or model dispatch. A separate
+actual model-proxy case injects a lease-retirement SQL abort after the child has
+exited. Run state, lease/revision, charged uncertain model, history and event
+counts remain unchanged; removing the fixture fault permits recording against
+the same exited process without a second model request. Both cases passed in
+both recorded gates; the independent peer still observes exactly 23 requests.
+
+The first fault gate was 51/52 because the existing Responses HTTP contract
+received empty CLI stdout with exit status zero. The original logs are retained.
+Its synchronous command wrapper now reports command name, status, signal and
+output byte counts and explicitly rejects empty/invalid JSON; deadlines and
+inference assertions are unchanged and no retry was added. A fresh diagnostic
+gate passed 52/52 in 178.22 seconds, with source/dependency closures and all 133
+native binaries frozen. This passing observation does not establish the cause
+or a production fix for the intermittent empty CLI output. That issue remains
+open alongside actual AgentRunner failure/cancellation and service placement.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

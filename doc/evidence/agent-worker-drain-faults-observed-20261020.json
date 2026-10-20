@@ -1,0 +1,96 @@
+{
+  "recordedAt": "2026-10-20T19:08:40.087Z",
+  "gate": {
+    "recordedAt": "2026-10-20T19:08:24.270Z",
+    "sourceParent": "45c0976839b52bde486d4ff29d41581c5de25111",
+    "sourcePatchSha256": "b6e849387809f09a214827c984407d6e65f9ca8be521956357c9ab98f0e66e9f",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 66816,
+      "launchedAt": "2026-10-20T19:04:32.682Z",
+      "completedAt": "2026-10-20T19:05:20.174Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cc08b674132a2dd7d48c185df8e4c354d10eff025307b9c58332a45b645b6fa3"
+    },
+    "test": {
+      "pid": 69412,
+      "launchedAt": "2026-10-20T19:05:23.184Z",
+      "completedAt": "2026-10-20T19:08:21.457Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e10987b3f4f6939f9185ff27db8935b032dcf6ba27c786da410982d2fec7d32c"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 178.22,
+    "projectFiles": 2668,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "438af630e3965f1e092d2523bb8b22fc6963efe21b73e57c65fb60e3497e569f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-drain-faults-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-build.log": "9e23ad16cd956fb145d418ab5178d1391c77abd82204a6df5f2a542a55efbd8a",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-build-terminal.json": "858c924d35f9a9670fa3fb0751f8120fa836891ac2c412ff11da5a5d99154a74",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-ctest.log": "020fbf27e100faab6094d17bb2b11d0ee84b175b50a3005bccc0c3fac9bc4880",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-ctest-terminal.json": "36eb9acfa614a3b012b5ba87ded72a0189dbae42702f59efe5f62894ae120c3c",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-LastTest.log": "673d7af396bb28e4d0f796e8c19856cb8889e51b4a3b98a440434bee4b71f172",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-test-inventory.json": "05f787960254aa6662053b0872edb435c12a02a077b9b2661128f82ff0219ddd",
+        "doc/evidence/agent-worker-drain-faults-focused-20261020-gate.json": "f06e96fbd5cbe42472c605d971fdf25de7e7576e904e54a7d06f6e548e1fb168"
+      },
+      "localManifestHashes": {
+        "source.patch": "21e561b26520835d9e2b32ec6bcbb3591fa75577beabbd9ad7577a8bb7014af5",
+        "inputs-before-build.json": "5b4913376a4e785520daedaeed37e09e3945959e0f4c5f6a1e7919e1f61e9fcf",
+        "binaries-before-test.json": "68c02ded58852106ad3662199d852e57273c5a8770507108c5ab8b4f9d4ba543"
+      }
+    },
+    "agent-worker-drain-faults-observed-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-build.log": "cc08b674132a2dd7d48c185df8e4c354d10eff025307b9c58332a45b645b6fa3",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-build-terminal.json": "6cb3b4c18107bbdcd2eebde10ab5aa73237e0a743a1dc6ab15542852b29a7a6c",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-ctest.log": "e10987b3f4f6939f9185ff27db8935b032dcf6ba27c786da410982d2fec7d32c",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-ctest-terminal.json": "22069b5b2032250dda87089177d6ed9f2488356e490c80f09d3d0f0b4562ec96",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-LastTest.log": "127638eb6a1f6d794a92f0d797814369fc7a67fa6f86061c5050d12c9574a530",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-test-inventory.json": "05f787960254aa6662053b0872edb435c12a02a077b9b2661128f82ff0219ddd",
+        "doc/evidence/agent-worker-drain-faults-observed-20261020-gate.json": "2b8409dab7610c68ca37682fe3a6a72a289a98f4ba4880a771b22ea6cfc0fa11"
+      },
+      "localManifestHashes": {
+        "source.patch": "b6e849387809f09a214827c984407d6e65f9ca8be521956357c9ab98f0e66e9f",
+        "inputs-before-build.json": "f9da1f72cd3567a3f2856071301ef185be845f4e9dd79ba517ece9db8feb26b8",
+        "binaries-before-test.json": "9c9cf85623cb4c0099406ac37ab5adb87d83414659ffcf78749cb3fff2ad8fdf"
+      }
+    }
+  },
+  "fixtureSha256": "e8e5ca6ae00094dd06abce4eb2f392531181e9e3fe94b63b6da4eed951dc9c1d",
+  "ledgerFixtureSha256": "7bbc4163a6c839b0dd82a717e6f4171987b60a94649c8ac656ed8f52e50d5272",
+  "initialFailure": "Initial focused gate was 51/52: the Responses HTTP fixture parsed empty CLI stdout with status zero. The worker timeout and post-drain rollback cases passed. Added command/status/signal/byte-count diagnostics with identical deadlines and no retries; a fresh full focused gate is recorded separately. This does not establish the cause or a production fix for the intermittent CLI output issue.",
+  "scope": "Actual owned-child drain observation timeout and terminal storage fault, through the existing backend component. No production code changes in this checkpoint.",
+  "verified": [
+    "An explicit owned release event holds the actual child alive independently of channel closure",
+    "Expired observation deadline closes RPC but preserves the same live PID/birth, active lease, running root, event count and charged reservation",
+    "Explicit release permits reobservation and terminal commit for the same child with no restart or dispatch",
+    "Injected lease-retirement SQL abort occurs only after actual model-proxy child exit",
+    "Post-drain write failure preserves running root, active lease/revision, charged uncertain model, history and event counts",
+    "Removing the injected fault allows terminal recording against the same exited process without repeating the model request",
+    "Independent HTTP peer still observes exactly 23 requests"
+  ],
+  "limitations": [
+    "No AgentService placement or actual child AgentRunner failure/cancellation journal",
+    "Intermittent empty CLI stdout remains unexplained; fresh passing observation does not resolve it",
+    "No full native, hosted, installed, rendered UI or live-provider acceptance claim"
+  ]
+}
