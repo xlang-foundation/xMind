@@ -10,7 +10,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Observer failure and byte-safe preservation proof remain in coding54 adoption receipts. External Edge/current VS Code acceptance remain open.
 
-- Schema35 repository tree-budget foundation418f3f9f passes22focused/90.58s; initial15of22 fixture failures retained. Public nested-context runner stays closed pending shared clock/pause/recovery. See doc/VALIDATION_STATUS.md.
+- Schema35 tree-budget/pause/recovery4c87be3c passes22focused/90.43s; original15of22 fixture failures retained. Public nested-context runner stays closed pending input/resume/retirement/live-clock integration. See doc/VALIDATION_STATUS.md.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 
