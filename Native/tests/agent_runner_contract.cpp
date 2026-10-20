@@ -2,6 +2,7 @@
 #include "agentflow/agent_permission_grants.hpp"
 #include "agentflow/agent_definitions.hpp"
 #include "agentflow/delegation_executor.hpp"
+#include "agentflow/a2a_tool_registry.hpp"
 #include "agentflow/xlang_authoring_program.hpp"
 #include "agentflow/xlang_python_config.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -97,6 +98,22 @@ public:
     unsigned files=0,processes=0,reads=0,read_calls=0,remotes=0,guides=0,callables=0;bool unavailable=false;
 private:std::shared_ptr<AgentToolHostFactory> inner;
 };
+class RecordingBackendRuntime final:public AgentBackendRuntime {
+public:
+    explicit RecordingBackendRuntime(std::shared_ptr<AgentBackendRuntime> runtime):inner(std::move(runtime)){}
+    std::unique_ptr<AgentProcessToolHost> process(WorkspaceTools& workspace,const std::string& root,std::vector<ProcessProfile> profiles)override{
+        ++processes;if(missing_process)return {};return inner->process(workspace,root,std::move(profiles));
+    }
+    std::shared_ptr<AgentMcpPeer> connect_mcp(const McpServerSetting& server,std::chrono::steady_clock::time_point deadline,std::stop_token stop)override{
+        ++mcps;if(missing_mcp)return {};return inner->connect_mcp(server,deadline,stop);
+    }
+    A2aRemoteAgentCatalog a2a_catalog()override{++catalogs;return inner->a2a_catalog();}
+    std::unique_ptr<A2aAgentToolRegistry> discover_a2a(WorkspaceTools& workspace,std::chrono::milliseconds timeout,std::stop_token stop)override{
+        ++a2as;if(missing_a2a)return {};return inner->discover_a2a(workspace,timeout,stop);
+    }
+    unsigned processes=0,mcps=0,catalogs=0,a2as=0;bool missing_process=false,missing_mcp=false,missing_a2a=false;
+private:std::shared_ptr<AgentBackendRuntime> inner;
+};
 class CatalogPortModel final:public AgentModelGateway {
 public:
     ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
@@ -115,9 +132,16 @@ void backend_catalog_port(PersistenceService& journal,const std::vector<std::str
     AgentDefinitionStore(metadata).apply(R"({"agents":[{"id":"catalog-inspector","mode":"subagent","instructions":"Synthetic registered inspection."},{"id":"catalog-hidden","mode":"subagent","hidden":true,"instructions":"Synthetic hidden entry."},{"id":"catalog-primary","mode":"primary","instructions":"Synthetic primary entry."}]})");
     auto catalog=std::make_shared<RecordingBackendCatalog>(make_persistence_agent_backend_catalog(metadata));AgentSettings settings;settings.workspace=root.string();settings.a2a_enabled=false;settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-catalog-port",Capability::supported,Capability::supported};settings.credential=CredentialReference{"provider","catalog-only","model-api"};settings.delegation=AgentDelegationPolicy{};
     rejects<Conflict>([&]{agent_authority_credentials(journal,settings);});const auto versions=catalog->credential_versions(settings);require(versions.size()==1&&versions[0].scope=="provider"&&versions[0].id=="catalog-only"&&versions[0].purpose=="model-api"&&versions[0].revision==1,"Catalogue adapter must resolve only configured metadata from its own backend");auto missing=settings;missing.credential->id="not-registered";rejects<Conflict>([&]{catalog->credential_versions(missing);});
-    std::ofstream(root/"catalog-port.txt",std::ios::binary)<<"Actual injected catalogue read\n";const auto model=std::make_shared<CatalogPortModel>();auto delegation=std::make_shared<DelegationExecutor>(journal,1,8);auto hosts=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));AgentRunner runner(journal,settings,delegation,{},false,model,catalog,hosts);
+    std::ofstream(root/"catalog-port.txt",std::ios::binary)<<"Actual injected catalogue read\n";const auto model=std::make_shared<CatalogPortModel>();auto delegation=std::make_shared<DelegationExecutor>(journal,1,8);auto hosts=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));auto runtime=std::make_shared<RecordingBackendRuntime>(make_persistence_agent_backend_runtime(metadata));settings.a2a_enabled=true;
+    AgentRunJournal& run_port=journal;AgentContextJournal& context_port=journal;AgentRunnerPorts ports{model,catalog,hosts,runtime};
+    for(unsigned missing_port=0;missing_port<4;++missing_port){auto incomplete=ports;if(missing_port==0)incomplete.model.reset();if(missing_port==1)incomplete.catalog.reset();if(missing_port==2)incomplete.tools.reset();if(missing_port==3)incomplete.runtime.reset();rejects<std::invalid_argument>([&]{AgentRunner invalid(run_port,context_port,settings,incomplete,delegation);});}
+    AgentRunner runner(run_port,context_port,settings,ports,delegation);
     journal.create_session("catalog-port-session","Actual injected backend catalogue loop").get();runner.start("catalog-port-run","catalog-port-session","Read the scoped fixture once.");require(runner.execute("catalog-port-run").state==RunState::completed&&model->calls==2&&catalog->definition_queries==1,"Actual agent loop must use injected definitions and native file continuation");require(catalog->credential_queries==2,"Metadata lookup and rejection must use the injected configured owner");rejects<NotFound>([&]{metadata.run("catalog-port-run").get();});require(journal.root_budget("catalog-port-run").get().children_admitted==0,"Discovery must not launch a named subagent or grant another admission");require(hosts->reads==1&&hosts->read_calls==1&&hosts->guides==1&&hosts->remotes==1&&hosts->files==0&&hosts->processes==0&&hosts->callables==0,"Actual loop must construct and invoke supplied tool owners without local fallback");
-    auto unavailable=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));unavailable->unavailable=true;const auto blocked_model=std::make_shared<CatalogPortModel>();AgentRunner blocked(journal,settings,delegation,{},false,blocked_model,catalog,unavailable);journal.create_session("missing-tool-owner-session","Unavailable injected tool owner").get();blocked.start("missing-tool-owner-run","missing-tool-owner-session","Do not fall back to a local owner.");require(blocked.execute("missing-tool-owner-run").state==RunState::failed&&blocked_model->calls==0&&unavailable->reads==1&&unavailable->read_calls==0,"Unavailable injected owner must fail before model or tool dispatch");
+    auto unavailable=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));unavailable->unavailable=true;const auto blocked_model=std::make_shared<CatalogPortModel>();AgentRunner blocked(run_port,context_port,settings,AgentRunnerPorts{blocked_model,catalog,unavailable,runtime},delegation);journal.create_session("missing-tool-owner-session","Unavailable injected tool owner").get();blocked.start("missing-tool-owner-run","missing-tool-owner-session","Do not fall back to a local owner.");require(blocked.execute("missing-tool-owner-run").state==RunState::failed&&blocked_model->calls==0&&unavailable->reads==1&&unavailable->read_calls==0,"Unavailable injected owner must fail before model or tool dispatch");
+    require(runtime->a2as==2&&runtime->processes==0&&runtime->mcps==0,"Explicit dependency path must use the injected remote runtime and avoid absent transports");
+    runtime->missing_a2a=true;const auto missing_model=std::make_shared<CatalogPortModel>();AgentRunner missing_remote(run_port,context_port,settings,AgentRunnerPorts{missing_model,catalog,hosts,runtime},delegation);journal.create_session("missing-remote-runtime-session","Missing injected remote runtime").get();missing_remote.start("missing-remote-runtime-run","missing-remote-runtime-session","No runtime fallback.");require(missing_remote.execute("missing-remote-runtime-run").state==RunState::failed&&missing_model->calls==0&&runtime->a2as==3,"Missing injected A2A runtime must fail before inference");runtime->missing_a2a=false;
+    auto process_settings=settings;ProcessProfile absent;absent.id="unavailable-process";absent.executable="must-not-be-launched";absent.revision=1;process_settings.process_profiles.push_back(absent);runtime->missing_process=true;rejects<std::runtime_error>([&]{AgentRunner missing_process(run_port,context_port,process_settings,ports,delegation);});require(runtime->processes==1,"Missing injected process runtime must not construct a local executor");runtime->missing_process=false;
+    auto mcp_settings=settings;McpServerSetting server;server.id="unavailable-mcp";server.revision=1;server.executable="must-not-be-launched";mcp_settings.mcp_servers.push_back(server);runtime->missing_mcp=true;AgentRunner missing_peer(run_port,context_port,mcp_settings,AgentRunnerPorts{missing_model,catalog,hosts,runtime},delegation);journal.create_session("missing-mcp-runtime-session","Missing injected MCP runtime").get();missing_peer.start("missing-mcp-runtime-run","missing-mcp-runtime-session","No peer fallback.");require(missing_peer.execute("missing-mcp-runtime-run").state==RunState::failed&&missing_model->calls==0&&runtime->mcps==1,"Missing injected MCP runtime must not launch a peer or infer");
     delegation->close();metadata.close();
 }
 class CallableAskModel final:public AgentModelGateway {

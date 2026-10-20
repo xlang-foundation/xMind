@@ -1,0 +1,463 @@
+Start testing: Oct 20 05:10 Pacific Daylight Time
+----------------------------------------------------------
+8/156 Testing: native_permission_grants_contract
+8/156 Test: native_permission_grants_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_permission_grants_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_permission_grants_contract" start time: Oct 20 05:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native scoped permission grant contract passed
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_permission_grants_contract" end time: Oct 20 05:10 Pacific Daylight Time
+"native_permission_grants_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/156 Testing: native_a2a_agent_registry_contract
+11/156 Test: native_a2a_agent_registry_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_a2a_agent_registry_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_agent_registry_contract" start time: Oct 20 05:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-4310957b9b9465fc804b33fa4e13442b\",\"operation_id\":\"4310957b9b9465fc804b33fa4e13442b\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.38 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 20 05:10 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+24/156 Testing: native_agent_authority_contract
+24/156 Test: native_agent_authority_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_authority_contract.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_authority_contract" start time: Oct 20 05:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native private agent authority bindings passed (synthetic settings and credential metadata; no key resolution, peer or provider execution).
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_authority_contract" end time: Oct 20 05:10 Pacific Daylight Time
+"native_agent_authority_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/156 Testing: native_context_engine_contract
+29/156 Test: native_context_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/context_engine_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_context_engine_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_context_engine_contract" start time: Oct 20 05:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native context engine contract passed actual repeated/mid-run/session compaction, original users and exact canonical replay, real file reads, independent counts/usage, idle manual ownership, clean signed human pause/reopen/held overflow and pre-admission count-failure retirement, second/late/generic failure refusal, full-authority/source isolation and durable receipt/publication/final-binding faults with no recovery replay. Provider replies/counts/opaque data/key are synthetic.
+<end of output>
+Test time =   5.11 sec
+----------------------------------------------------------
+Test Passed.
+"native_context_engine_contract" end time: Oct 20 05:10 Pacific Daylight Time
+"native_context_engine_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+30/156 Testing: native_context_graph_engine_contract
+30/156 Test: native_context_graph_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/context_graph_engine_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_context_graph_engine_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_context_graph_engine_contract" start time: Oct 20 05:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native contextual registered graph boundary passed; synthetic Responses/count/compact replies and credential only, actual native transports/files/xlang3 SQLite.
+Native contextual registered graph boundary passed; synthetic Responses/count/compact replies and credential only, actual native transports/files/xlang3 SQLite.
+<end of output>
+Test time =   1.64 sec
+----------------------------------------------------------
+Test Passed.
+"native_context_graph_engine_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_context_graph_engine_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+31/156 Testing: native_nested_context_graph_engine_contract
+31/156 Test: native_nested_context_graph_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/nested_context_graph_engine_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_context_graph_engine_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_nested_context_graph_engine_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native contextual registered graph boundary passed; synthetic Responses/count/compact replies and credential only, actual native transports/files/xlang3 SQLite.
+<end of output>
+Test time =   0.76 sec
+----------------------------------------------------------
+Test Passed.
+"native_nested_context_graph_engine_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_nested_context_graph_engine_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/156 Testing: native_dynamic_plan_engine_contract
+36/156 Test: native_dynamic_plan_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_engine_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_dynamic_plan_engine_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_dynamic_plan_engine_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native dynamic engine contract passed: actual dependency children/failure, same-plan revision, closed-pause reopen, same-owner human wake, child edit approval/effect, dependent read, independent signed histories/usage, A2A human continuation and idempotent retry, paused cancel and native expiry. Provider replies/key are synthetic.
+<end of output>
+Test time =   6.44 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_engine_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_dynamic_plan_engine_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+39/156 Testing: native_a2a_task_control_http_contract
+39/156 Test: native_a2a_task_control_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/a2a_task_control_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_task_control_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native A2A task controls passed authenticated JSON-RPC boundaries, exact IDs, native graph artifacts isolated by run, real paused-root cancellation, repeated finish/cancel scheduling positive task-local history and invalid/unsupported-request rejection. Full A2A compliance is not established.
+<end of output>
+Test time =   1.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_task_control_http_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_a2a_task_control_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+40/156 Testing: native_a2a_message_http_contract
+40/156 Test: native_a2a_message_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/a2a_message_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_message_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native A2A message contract passed real admission, concurrent durable retries, default model transport, context reuse, isolated history, rejected requests and restart reuse. Provider replies are synthetic; full A2A compliance is not established.
+<end of output>
+Test time =   0.41 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_message_http_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_a2a_message_http_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/156 Testing: native_a2a_stream_http_contract
+41/156 Test: native_a2a_stream_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/a2a_stream_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_stream_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native A2A streaming passed actual persisted partial output, Task-first JSON-RPC SSE, reconnect/backfill without reexecution, bounded stream capacity and control fairness, disconnect isolation, terminal/failure/cancel/input-required closure, authenticated discovery, real file-tool turn replacement, multi-page event draining, refusal preservation and restart. Official SDK 1.3.0 passed explicit v0.3 discovery/stream/get interoperability. Provider replies are synthetic; full A2A compliance and native v1 wire support remain unproven.
+<end of output>
+Test time =   1.49 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_stream_http_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_a2a_stream_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+42/156 Testing: native_a2a_v1_http_contract
+42/156 Test: native_a2a_v1_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/a2a_v1_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_v1_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native A2A 1.0 passed official SDK discovery/send/get/list/cancel/stream/subscribe without compatibility translation, default and legacy blocking, version/shape rejection, control capacity, disconnect isolation, actual status times and scoped cursor pagination, cross-version durable retries, text and structured-data multipart/metadata history fidelity, inline UTF-8 text attachments in current and legacy wire formats, same-context terminal referenceTaskIds, and restart. Provider replies are synthetic. Continuation, non-text file parts/push/delegation/team scope and full compliance remain incomplete.
+<end of output>
+Test time =   1.35 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_v1_http_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_a2a_v1_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+47/156 Testing: native_graph_runner_contract
+47/156 Test: native_graph_runner_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_runner_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_graph_runner_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_graph_runner_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Graph PowerShell phase observations: ["script_entered","delay_completed","effect_completed"]
+Native graph runner/service passed actual workspace reads, concurrent agent transport, durable human pause/resume, typed references, conditional skip, observed joins, failure/cancellation, separately approved creation, approval cancellation, owner handoff, queued shutdown and actual effect journal fault/recovery without replay. Provider replies are synthetic fixture data.
+<end of output>
+Test time =  12.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_runner_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_graph_runner_contract" time elapsed: 00:00:12
+----------------------------------------------------------
+
+48/156 Testing: native_graph_mcp_contract
+48/156 Test: native_graph_mcp_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_graph_mcp_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_graph_mcp_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph MCP contract passed actual owned peer file writes, real GraphRunner/GraphService and embedded-xlang3 SQLite: exact enrollment/approval, raw literal precision, typed human references and pause/reopen, dependent native read, denied/cancelled/invalid/drift/stale paths, serialized root claims, lost-reply uncertainty, acknowledged output bounds, journal fail-stop and quarantine without replay. Peer descriptors/replies are synthetic; no live model, UI or independent peer acknowledgement verification claimed.
+<end of output>
+Test time =   6.70 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_graph_mcp_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+49/156 Testing: native_graph_mcp_http_contract
+49/156 Test: native_graph_mcp_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_admin.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_graph_mcp_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph MCP HTTP/CLI passed offline alias discovery, no-model graph admission, paused SQLite reopen, exact decimal proposal/wire, controller-approved actual external write/dependent read, view history/events/cursor replay, denial/cancellation without tool dispatch, and stale connector inspection/input rejection/cancellation. MCP protocol replies are synthetic; no live model or rendered IDE acceptance.
+<end of output>
+Test time =   2.76 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_http_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_graph_mcp_http_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+50/156 Testing: native_graph_mcp_http_subscription_contract
+50/156 Test: native_graph_mcp_http_subscription_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/graph_mcp_http_subscription_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_admin.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_graph_mcp_http_subscription_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native graph HTTP MCP subscription contract passed: unexpected listener completion invalidates the pinned alias, retires any approved-but-undispatched operation, and closes the listener before the graph child fails. No peer tool effect is sent.
+<end of output>
+Test time =   0.73 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_http_subscription_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_graph_mcp_http_subscription_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/156 Testing: native_delegation_contract
+51/156 Test: native_delegation_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/delegation_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_native_delegation_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_delegation_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native delegation contract passed real signed parent/leaf provider transport, independent filesystem reads/history/metrics, one controller-approved parent edit, observed failure follow-up, cancellation/draining, atomic admission rollback, coupled conversation/settlement fail-stop, encoded output bounds, shared call allowances, exact deduplication/ownership and xlang3 SQLite recovery without replay. Provider replies/signatures/key and direct repository lifecycle inputs are synthetic; no live provider or rendered UI acceptance claimed.
+<end of output>
+Test time =   2.77 sec
+----------------------------------------------------------
+Test Passed.
+"native_delegation_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_delegation_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+58/156 Testing: native_process_executor_contract
+58/156 Test: native_process_executor_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/Users/shaw9/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_process_executor_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, trusted-profile grant audit, real PowerShell PATH inheritance with secret isolation, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Shell discovery/semantics parity and model/server/editor integration remain separate.
+[process-contract] phase=workspace-setup elapsed_ms=0
+[process-contract] phase=repository-open elapsed_ms=1
+[process-contract] phase=request-validation elapsed_ms=140
+[process-contract] phase=aliased-root-approval elapsed_ms=141
+[process-contract] phase=request-validation elapsed_ms=469
+[process-contract] phase=approval-denial elapsed_ms=473
+[process-contract] phase=approval-cancellation elapsed_ms=577
+[process-contract] phase=approval-expiry elapsed_ms=594
+[process-contract] phase=stale-directory elapsed_ms=1615
+[process-contract] phase=approved-dispatch elapsed_ms=1822
+[process-contract] phase=trusted-module-path-policy elapsed_ms=2078
+[process-contract] phase=xlang3-workspace-import-path elapsed_ms=2651
+[process-contract] phase=trusted-process-profile elapsed_ms=3046
+[process-contract] phase=attached-workspace-dispatch elapsed_ms=3407
+[process-contract] phase=approved-powershell-shell elapsed_ms=3672
+[process-contract] phase=block-cpython-launches elapsed_ms=3673
+[process-contract] phase=binary-output elapsed_ms=6455
+[process-contract] phase=streamed-output elapsed_ms=6699
+[process-contract] phase=background-process elapsed_ms=6984
+[process-contract] phase=persistent-service elapsed_ms=7316
+[process-contract] phase=background-cancellation elapsed_ms=7707
+[process-contract] phase=output-flood elapsed_ms=8058
+[process-contract] phase=changed-executable elapsed_ms=8547
+[process-contract] phase=result-journal-fault elapsed_ms=13488
+[process-contract] phase=result-fault-close elapsed_ms=13767
+[process-contract] phase=restart-recovery elapsed_ms=13771
+[process-contract] phase=cross-workspace-quarantine elapsed_ms=13797
+[process-contract] phase=recovery-close elapsed_ms=13981
+[process-contract] phase=output-journal-fault elapsed_ms=13991
+[process-contract] phase=output-fault-close elapsed_ms=14435
+[process-contract] phase=timeout elapsed_ms=14439
+[process-contract] phase=interruption-close elapsed_ms=16233
+[process-contract] phase=cancel elapsed_ms=16240
+[process-contract] phase=interruption-close elapsed_ms=16678
+[process-contract] phase=complete elapsed_ms=16685
+<end of output>
+Test time =  18.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_executor_contract" end time: Oct 20 05:11 Pacific Daylight Time
+"native_process_executor_contract" time elapsed: 00:00:18
+----------------------------------------------------------
+
+59/156 Testing: native_agent_process_http_contract
+59/156 Test: native_agent_process_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_process_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_admin.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_conpty_cli_harness.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_process_http_contract" start time: Oct 20 05:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process admin/server/model/CLI contract passed actual persisted registry, owner lease, exact approved process/file effects, denial/cancelled approval, changed-executable rejection, real tool-result continuation, metadata privacy and model-free restart. Inference is synthetic; no live-provider/editor/process parity completion claimed.
+<end of output>
+Test time =  16.78 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_http_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_process_http_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+83/156 Testing: native_agent_runner_contract
+83/156 Test: native_agent_runner_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_runner_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_runner_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called
+<end of output>
+Test time =   9.40 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_runner_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_runner_contract" time elapsed: 00:00:09
+----------------------------------------------------------
+
+95/156 Testing: native_agent_remote_tool_host_contract
+95/156 Test: native_agent_remote_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_remote_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_remote_tool_host_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Remote-tool owner: actual approvals, inherited denial, admitted membership/catalogue, pending/completed replay rejection, root guidance delivery/change and xlang3 SQLite restart pass. MCP client/model identities are synthetic; no worker IPC, live provider or GUI acceptance.
+<end of output>
+Test time =   0.57 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_remote_tool_host_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_remote_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+96/156 Testing: native_agent_file_tool_host_contract
+96/156 Test: native_agent_file_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_file_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_file_tool_host_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native file-tool owner passed actual approved create/edit/restore, scoped membership and policy rejection, pending/completed call replay rejection, guidance delivery, cross-folder partial effects and xlang3 SQLite restart. No worker IPC/process placement, provider or GUI acceptance.
+<end of output>
+Test time =   1.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_file_tool_host_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_file_tool_host_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+97/156 Testing: native_agent_process_tool_host_contract
+97/156 Test: native_agent_process_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_process_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_process_tool_host_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Process-owner actual receipt: {"elapsed_ms":137,"exit_code":0,"independently_verified":false,"job_id":"8f186cbbb5d2c07fb7a6d1f13820c9c4","operation_id":"8f186cbbb5d2c07fb7a6d1f13820c9c4","output_artifact":{"operation_id":"8f186cbbb5d2c07fb7a6d1f13820c9c4","state":"complete","stderr_bytes":0,"stdout_bytes":18},"pid":61140,"process_tree_retired":true,"profile_id":"xlang3","stderr":{"byte_count":0,"data":"","encoding":"utf-8","retained_bytes":0},"stdout":{"byte_count":18,"data":"owner-process-ok\r\n","encoding":"utf-8","retained_bytes":18},"termination":"exited","truncated":false}
+Process-owner actual folders: {"attached_marker_content":"actual attached process\n","attached_marker_exists":true,"primary_marker_exists":false}
+process tool owner contract passed
+<end of output>
+Test time =   0.50 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_tool_host_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_process_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+98/156 Testing: native_agent_read_tool_host_contract
+98/156 Test: native_agent_read_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_read_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_read_tool_host_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+workspace read and owned language-query authority contracts passed
+<end of output>
+Test time =   1.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_read_tool_host_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_read_tool_host_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+117/156 Testing: native_agent_mcp_http_contract
+117/156 Test: native_agent_mcp_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_admin.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_mcp_http_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native MCP agent/server/admin/CLI contract passed: encrypted configured environment, exact arguments, actual approved file effect, denial/cancellation, result continuation, persisted uncertainty without replay, and authenticated paginated resource discovery with credential-reflection suppression. Inference is synthetic.
+<end of output>
+Test time =   3.37 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_mcp_http_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_mcp_http_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+118/156 Testing: native_agent_mcp_http_subscription_contract
+118/156 Test: native_agent_mcp_http_subscription_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_subscription_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_admin.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_mcp_http_subscription_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native HTTP MCP AgentRunner subscription lifecycle passed: list-change invalidation blocks stale aliases, refreshes the catalogue within the same run, and permits only the reconsidered approved effect. Notifications are bounded and sanitized; listener closure precedes terminal state.
+<end of output>
+Test time =   0.84 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_mcp_http_subscription_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_agent_mcp_http_subscription_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+152/156 Testing: native_provider_profile_runtime_contract
+152/156 Test: native_provider_profile_runtime_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_provider_profile_runtime_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_provider_profile_runtime_contract" start time: Oct 20 05:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+fixture-discovery-committed
+fixture-workspace-alias-captured
+Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit output overrides and saved-profile defaults for legacy and adaptive-thinking Anthropic models, authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested
+<end of output>
+Test time =   5.67 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_profile_runtime_contract" end time: Oct 20 05:12 Pacific Daylight Time
+"native_provider_profile_runtime_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 20 05:12 Pacific Daylight Time

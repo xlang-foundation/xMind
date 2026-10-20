@@ -173,11 +173,17 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistenc
 AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
-    :journal_(journal),context_journal_(context_journal),persistence_(persistence),settings_(std::move(settings)),
-     model_gateway_(model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings_.credential)),
-     backend_catalog_(backend_catalog?std::move(backend_catalog):make_persistence_agent_backend_catalog(persistence)),
-     tool_hosts_(tool_hosts?std::move(tool_hosts):make_persistence_agent_tool_host_factory(journal,persistence)),
-     delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
+    :AgentRunner(journal,context_journal,settings,AgentRunnerPorts{
+        model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings.credential),
+        backend_catalog?std::move(backend_catalog):make_persistence_agent_backend_catalog(persistence),
+        tool_hosts?std::move(tool_hosts):make_persistence_agent_tool_host_factory(journal,persistence),
+        make_persistence_agent_backend_runtime(persistence)},std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy){}
+AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,AgentSettings settings,AgentRunnerPorts ports,
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
+    :journal_(journal),context_journal_(context_journal),settings_(std::move(settings)),
+     model_gateway_(std::move(ports.model)),backend_catalog_(std::move(ports.catalog)),tool_hosts_(std::move(ports.tools)),backend_runtime_(std::move(ports.runtime)),
+     delegation_(std::move(delegation)),planning_(std::move(planning)) {
+    if(!model_gateway_||!backend_catalog_||!tool_hosts_||!backend_runtime_)throw std::invalid_argument("Agent execution requires every explicit backend port");
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if((settings_.provider.model.empty()&&!settings_.provider_identity) || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -189,7 +195,7 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_j
     if(settings_.approved_edits && !workspace_) throw std::invalid_argument("Approved edits require a workspace");
     if(!settings_.process_profiles.empty()) {
         if(!workspace_)throw std::invalid_argument("Process profiles require a verified workspace");
-        process_=std::make_unique<ProcessExecutor>(persistence_,*workspace_,*settings_.workspace,settings_.process_profiles);
+        process_=checked_tool_host(backend_runtime_->process(*workspace_,*settings_.workspace,settings_.process_profiles));
         settings_.process_profiles=process_->profiles();
     }
     if(!settings_.language_servers.empty()){
@@ -261,7 +267,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     for(const auto& definition:workspace_->definitions())inspect.tools.push_back(definition.name);
     for(const auto& definition:SkillContext::definitions())inspect.tools.push_back(definition.name);
     caps.presets.push_back(inspect);
-    const auto a2a_catalog=a2a_registry_->list();
+    const auto a2a_catalog=backend_runtime_->a2a_catalog();
     const auto a2a_available=settings_.a2a_enabled&&std::any_of(a2a_catalog.entries.begin(),a2a_catalog.entries.end(),[](const auto& agent){return agent.enabled;});
     if(settings_.approved_edits||process_||a2a_available||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
@@ -377,14 +383,13 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());trusted.tools.push_back(RestoreExecutor::definition());}
     if(process_){trusted.tools.push_back(process_->definition());trusted.tools.push_back(process_->wait_definition());trusted.tools.push_back(process_->stop_definition());}
     if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
-    struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
-    std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
+    std::vector<std::shared_ptr<AgentMcpPeer>> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
     for(const auto& server:settings_.mcp_servers){
         if(!server.enabled)continue;check();
-        check();McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,deadline,token,runtime.private_credentials.get());
+        auto runtime=backend_runtime_->connect_mcp(server,deadline,token);if(!runtime)throw std::runtime_error("Configured MCP runtime is unavailable");
         auto roots=settings_.workspace_membership_snapshot?settings_.workspace_membership_snapshot().folders:std::vector<WorkspaceToolFolder>{};
-        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token,runtime.private_credentials.get(),std::shared_ptr<std::atomic<bool>>{},std::move(roots));
-        for(const auto& definition:runtime.registry->definitions()){
+        runtime->discover(*workspace_,std::move(roots));
+        for(const auto& definition:runtime->definitions()){
             if(trusted.tools.size()>=64||!aliases.insert(definition.name).second)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits or has an alias collision");
             trusted.tools.push_back(definition);
         }
@@ -518,8 +523,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     std::atomic<bool> timed_out=false;
     std::jthread timer;
     token=linked.get_token();
-    std::vector<std::unique_ptr<McpRunSubscriptionObserver>> mcp_observers;
-    auto stop_mcp_observers=[&]{for(auto& observer:mcp_observers)observer->stop();mcp_observers.clear();};
+    std::vector<std::shared_ptr<AgentMcpPeer>> mcp_observers;
+    auto stop_mcp_observers=[&]{for(auto& observer:mcp_observers)observer->stop_observer();mcp_observers.clear();};
     auto terminate=[&](RunState state,const Json& reason) {
         stop_mcp_observers();
         if(dynamic_root)return journal_.retire_dynamic_owner(id,state,reason.dump(),
@@ -633,10 +638,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             JsonSchema schema(registration.definition.input_schema_json);(void)schema;
             request.tools.push_back(registration.definition);
         }
-        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::shared_ptr<std::atomic<bool>> catalogue_invalidated=std::make_shared<std::atomic<bool>>(false);std::unique_ptr<McpToolRegistry> registry;};
         Json callable_bindings=Json::array();
         for(const auto& [name,tool]:xlang_tools)callable_bindings.push_back(Json{{"kind","trusted_xlang3_callable"},{"alias",name},{"input_schema_json",tool->definition.input_schema_json},{"execution",tool->execution==XlangPythonExecution::worker?"worker":"in_process"}});
-        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=callable_bindings;
+        std::vector<std::shared_ptr<AgentMcpPeer>> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=callable_bindings;
         std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
         const auto native_tools=request.tools;
         auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();approval_bindings=callable_bindings;};
@@ -647,29 +651,19 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!server.enabled)continue;cancelled(token);
             journal_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
-            McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token,runtime.private_credentials.get());
-            journal_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
+            auto runtime=backend_runtime_->connect_mcp(server,run_deadline,token);if(!runtime)throw std::runtime_error("Configured MCP runtime is unavailable");
+            journal_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime->protocol_version()}}.dump()).get();
             auto roots=run_workspace_tools?run_workspace_tools->folders():std::vector<WorkspaceToolFolder>{};
-            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get(),runtime.catalogue_invalidated,std::move(roots));
-            const auto definitions=runtime.registry->definitions();
-            for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
-            const auto bindings=Json::parse(runtime.registry->approval_bindings_json());
+            runtime->discover(*workspace_,std::move(roots));
+            const auto definitions=runtime->definitions();
+            for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime->owner_registry()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
+            const auto bindings=Json::parse(runtime->approval_bindings_json());
             if(!bindings.is_array())throw DynamicPlanUnavailable("Native MCP registry returned invalid approval bindings");
             for(const auto& binding:bindings)approval_bindings.push_back(binding);
             journal_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
-            if(const auto filter=mcp_run_subscription_filter(runtime.client->server())) {
-                try {
-                    auto observer_client=connect_mcp_client(server,persistence_,run_deadline,token);
-                    auto observer=std::make_unique<McpRunSubscriptionObserver>(persistence_,id,
-                        server.id,server.revision,std::move(observer_client),*filter,run_deadline,runtime.catalogue_invalidated);
-                    observer->start();mcp_observers.push_back(std::move(observer));
-                } catch(const std::exception&) {
-                    runtime.catalogue_invalidated->store(true,std::memory_order_release);
-                    journal_.append_event(id,"mcp.subscription.unavailable",
-                        Json{{"server_id",server.id},{"config_revision",server.revision},
-                             {"reason","listener_unavailable"}}.dump()).get();
-                }
-            }
+            if(runtime->start_observer(id))mcp_observers.push_back(runtime);
+            else journal_.append_event(id,"mcp.subscription.unavailable",
+                Json{{"server_id",server.id},{"config_revision",server.revision},{"reason","listener_unavailable"}}.dump()).get();
             mcp_runtimes.push_back(std::move(runtime));
         }
         };
@@ -677,7 +671,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.a2a_enabled||!workspace_)return;
             const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(run_deadline-std::chrono::steady_clock::now());
             if(remaining.count()<=0)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before A2A discovery");
-            if(!a2a_tools)a2a_tools=std::make_unique<A2aAgentToolRegistry>(*a2a_registry_,persistence_,*workspace_,std::min(remaining,std::chrono::milliseconds(5000)),token);
+            if(!a2a_tools)a2a_tools=checked_tool_host(backend_runtime_->discover_a2a(*workspace_,std::min(remaining,std::chrono::milliseconds(5000)),token));
             for(const auto& agent:a2a_tools->unavailable_agent_ids())journal_.append_event(id,"a2a.discovery_failed",Json{{"agent_id",agent},{"reason","peer_unavailable_or_invalid"}}.dump()).get();
             const auto definitions=a2a_tools->definitions();
             for(const auto& definition:definitions){if(request.tools.size()>=64||std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& existing){return existing.name==definition.name;}))throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}

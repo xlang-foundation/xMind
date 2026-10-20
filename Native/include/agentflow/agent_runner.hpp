@@ -4,6 +4,7 @@
 #include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/agent_backend_catalog.hpp"
 #include "agentflow/agent_tool_host_factory.hpp"
+#include "agentflow/agent_backend_runtime.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
@@ -72,11 +73,22 @@ struct AgentSettings {
     std::vector<XlangPythonToolRegistration> xlang_python_tools;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
-// Shared native single-agent/model-tool loop, callable by backend workers and
-// future graph nodes. Always invokes the configured real provider transport.
-// PersistenceService must outlive this runner and all execute calls.
+// Explicit trusted dependencies; no implicit owner fallback on this path.
+// Adapters and their referenced capabilities must outlive all execute calls.
+struct AgentRunnerPorts {
+    std::shared_ptr<AgentModelGateway> model;
+    std::shared_ptr<AgentBackendCatalog> catalog;
+    std::shared_ptr<AgentToolHostFactory> tools;
+    std::shared_ptr<AgentBackendRuntime> runtime;
+};
+// Shared native single-agent/model-tool loop. Backend adapters own persistence
+// and credentials. Explicit ports permit separate construction; authenticated
+// worker transport and supervision are additional requirements.
 class AgentRunner {
 public:
+    AgentRunner(AgentRunJournal&,AgentContextJournal&,AgentSettings,AgentRunnerPorts,
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        bool preserve_dynamic_child_planning_policy=false);
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
@@ -110,16 +122,15 @@ public:
 private:
     AgentRunJournal& journal_;
     AgentContextJournal& context_journal_;
-    PersistenceService& persistence_;
     AgentSettings settings_;
     std::shared_ptr<AgentModelGateway> model_gateway_;
     std::shared_ptr<AgentBackendCatalog> backend_catalog_;
     std::shared_ptr<AgentToolHostFactory> tool_hosts_;
+    std::shared_ptr<AgentBackendRuntime> backend_runtime_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<AgentProcessToolHost> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<DynamicPlanExecutor> planning_;
-    std::unique_ptr<A2aRemoteAgentRegistry> a2a_registry_;
 };
 }
