@@ -395,6 +395,20 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
         GraphCoordinator coordinator(plan,root.checkpoint_json,GraphRestoreMode::live);GraphDecision decisions;
         try{decisions=coordinator.inspect();}catch(const std::invalid_argument&){resolution_failed=true;stop.request_stop();continue;}
         if(decisions.halted){stop.request_stop();continue;}
+        // A resumed ancestor retains running invocation claims. Reuse those
+        // admitted graph identities; never create or replay their settled leaves.
+        if(!decisions.running.empty()&&flights.size()<parallel){
+            for(const auto& child:store_.children(id).get()){
+                if(flights.size()>=parallel)break;
+                if(!child.graph_root||child.state!=RunState::running||std::find(decisions.running.begin(),decisions.running.end(),child.node_id)==decisions.running.end()||std::any_of(flights.begin(),flights.end(),[&](const auto& flight){return flight.id==child.id;}))continue;
+                const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& node){return node.id==child.node_id;});
+                if(definition==plan.nodes().end()||definition->kind!=GraphNodeKind::graph||store_.child_admission(child.id).get().root_run_id!=scope->root_id)throw Conflict("Existing invocation differs from its root execution scope");
+                flights.push_back({child.id,{},false,false});
+                try{flights.back().result=std::async(std::launch::async,[this,child_id=child.id,scope,token=stop.get_token()]{return execute_owned(child_id,token,false,scope);});}
+                catch(...){flights.pop_back();throw;}
+            }
+        }
+
         if(decisions.finished && flights.empty()){
             const auto snapshot=Json::parse(root.checkpoint_json);auto outputs=Json::array();for(const auto& node:snapshot.at("nodes"))outputs.push_back(node);
             const auto join=Json{{"content","Completed graph "+root.graph_id+".\n\n```json\n"+outputs.dump(2)+"\n```"},{"source","graph_join"},{"graph_id",root.graph_id},{"nodes",std::move(outputs)}}.dump();
