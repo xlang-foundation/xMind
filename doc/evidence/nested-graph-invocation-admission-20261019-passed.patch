@@ -1,0 +1,192 @@
+diff --git a/Native/include/agentflow/delegation_records.hpp b/Native/include/agentflow/delegation_records.hpp
+index 9cd5cebc..bea6b4eb 100644
+--- a/Native/include/agentflow/delegation_records.hpp
++++ b/Native/include/agentflow/delegation_records.hpp
+@@ -50,7 +50,7 @@ struct DelegationBatchRecord {
+     std::vector<DelegationTaskRecord> tasks;
+     bool created=false;
+ };
+-enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf,dynamic_agent,dynamic_tool};
++enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf,dynamic_agent,dynamic_tool,graph_invocation};
+ struct ChildAdmissionRecord {
+     ChildAdmissionKind kind=ChildAdmissionKind::graph_tool;
+     std::string root_run_id,batch_id,preset_id;
+diff --git a/Native/include/agentflow/graph.hpp b/Native/include/agentflow/graph.hpp
+index 20147e41..6a1687ba 100644
+--- a/Native/include/agentflow/graph.hpp
++++ b/Native/include/agentflow/graph.hpp
+@@ -62,6 +62,9 @@ public:
+     GraphNodeState state(const std::string& id) const;
+     std::string checkpoint() const;
+ private:
++    friend class Repository;
++    GraphPreparedNode start_node(const std::string& id,bool invocation);
++    GraphPreparedNode claim_invocation(const std::string& id);
+     struct Node {GraphNodeState state=GraphNodeState::pending;std::string output;};
+     std::size_t index(const std::string& id) const;
+     bool eligible(std::size_t index,bool& skipped) const;
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 8456d0b1..798354f3 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -131,6 +131,7 @@ public:
+     std::future<Run> complete_graph_context_owner(GraphContextBoundarySpec spec,std::string actual_join_json);
+     std::future<Run> retire_graph_context_owner(std::string root,RunState terminal,std::string reason_json,std::string segment_id={},std::int64_t measured_elapsed_ms=0);
+     std::future<GraphRootRecord> graph_run(std::string id);
++    std::future<GraphRootRecord> start_graph_invocation(std::string id,std::string parent_id,std::string node_id,std::int64_t expected_checkpoint_revision);
+     std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json,std::int64_t expected_checkpoint_revision=0);
+     std::future<GraphRootRecord> settle_graph_child(std::string child_id,std::int64_t expected_checkpoint_revision=0);
+     std::future<GraphRootRecord> start_graph_human(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 4b2b585e..f47ef029 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -143,6 +143,9 @@ public:
+     Run complete_graph_context_owner(const GraphContextBoundarySpec& spec,const std::string& actual_join_json);
+     Run retire_graph_context_owner(const std::string& root,RunState terminal,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_elapsed_ms=0);
+     GraphRootRecord graph_run(const std::string& id);
++    // Backend metadata admission only. Derives the child from the parent's
++    // immutable binding; does not launch execution or create a session root.
++    GraphRootRecord start_graph_invocation(const std::string& id,const std::string& parent_id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
+     GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);
+     GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+diff --git a/Native/src/graph.cpp b/Native/src/graph.cpp
+index 80603cba..2721c2a1 100644
+--- a/Native/src/graph.cpp
++++ b/Native/src/graph.cpp
+@@ -191,10 +191,15 @@ GraphDecision GraphCoordinator::inspect() const {
+     }
+     if(result.halted){result.ready.clear();result.skippable.clear();}return result;
+ }
+-GraphPreparedNode GraphCoordinator::start(const std::string& id){
++GraphPreparedNode GraphCoordinator::start(const std::string& id){return start_node(id,false);}
++GraphPreparedNode GraphCoordinator::claim_invocation(const std::string& id){
++    if(plan_.nodes()[index(id)].kind!=GraphNodeKind::graph)throw Conflict("Invocation admission requires a nested graph node");
++    return start_node(id,true);
++}
++GraphPreparedNode GraphCoordinator::start_node(const std::string& id,bool invocation){
+     const auto decisions=inspect();if(std::find(decisions.ready.begin(),decisions.ready.end(),id)==decisions.ready.end())throw Conflict("Graph node is not ready");
+     const auto i=index(id);auto node=plan_.nodes()[i];auto outputs=Json::object();for(const auto& dependency:node.dependencies)outputs[dependency]=output_value(states_[index(dependency)].output);
+-    if(node.kind==GraphNodeKind::graph)throw Conflict("Nested graph execution ownership is not implemented");
++    if(node.kind==GraphNodeKind::graph&&!invocation)throw Conflict("Nested graph execution ownership is not implemented");
+     if(node.kind==GraphNodeKind::tool){
+         if(node.mcp){node.arguments_json=resolve_mcp(node.arguments_json,outputs);object(node.arguments_json,65536);}
+         else{const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 0df93ffe..090b8760 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -248,6 +248,7 @@ std::future<Run> PersistenceService::complete_graph_context_owner(GraphContextBo
+ std::future<Run> PersistenceService::retire_graph_context_owner(std::string root,RunState terminal,std::string reason,std::string segment,std::int64_t elapsed){return impl_->submit([root=std::move(root),terminal,reason=std::move(reason),segment=std::move(segment),elapsed](Repository& r){return r.retire_graph_context_owner(root,terminal,reason,segment,elapsed);});}
+ std::future<GraphRootRecord> PersistenceService::graph_run(std::string id){return impl_->observe([id=std::move(id)](Repository& repository){return repository.graph_run(id);});}
+ std::future<Run> PersistenceService::start_graph_child(std::string id,std::string parent,std::string node,std::string prompt,std::int64_t expected){return impl_->submit([id=std::move(id),parent=std::move(parent),node=std::move(node),prompt=std::move(prompt),expected](Repository& repository){return repository.start_graph_child(id,parent,node,prompt,expected);});}
++std::future<GraphRootRecord> PersistenceService::start_graph_invocation(std::string id,std::string parent,std::string node,std::int64_t expected){return impl_->submit([id=std::move(id),parent=std::move(parent),node=std::move(node),expected](Repository& repository){return repository.start_graph_invocation(id,parent,node,expected);});}
+ std::future<GraphRootRecord> PersistenceService::settle_graph_child(std::string id,std::int64_t expected){return impl_->submit([id=std::move(id),expected](Repository& repository){return repository.settle_graph_child(id,expected);});}
+ std::future<GraphRootRecord> PersistenceService::start_graph_human(std::string id,std::string node,std::int64_t expected){return impl_->submit([id=std::move(id),node=std::move(node),expected](Repository& repository){return repository.start_graph_human(id,node,expected);});}
+ std::future<GraphRootRecord> PersistenceService::input_graph_human(std::string id,std::string node,std::string input,std::string actor,std::int64_t expected){return impl_->submit([id=std::move(id),node=std::move(node),input=std::move(input),actor=std::move(actor),expected](Repository& repository){return repository.input_graph_human(id,node,input,actor,expected);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index a5cfdf25..c506d805 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -2183,6 +2183,12 @@ ChildAdmissionRecord Repository::child_admission(const std::string& id){
+         const auto graph=Json::parse(graph_run(parent.id).specification_json);for(const auto& node:graph["nodes"])if(node["id"]==child.node_id){
+             if(node["type"]=="agent"){ChildAdmissionRecord result{ChildAdmissionKind::graph_agent,parent.id,{},{},0};if(!impl_->database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent.id}).rows.empty()){const auto capture=graph_context_owner(parent.id);result.backend_identity=graph_context_agent(capture.authority,child.node_id).backend_identity;}return result;}
+             if(node["type"]=="tool")return {ChildAdmissionKind::graph_tool,parent.id,{},{},0};
++            if(node["type"]=="graph"){
++                if(!child.graph_root)throw Conflict("Graph invocation has no owned graph record");
++                const auto owned=graph_run(id);
++                if(owned.graph_id!=node.at("graph_id").get<std::string>()||owned.graph_revision!=node.at("graph_revision").get<std::int64_t>()||owned.specification_json!=node.at("graph_spec").dump())throw Conflict("Graph invocation differs from its parent's immutable snapshot");
++                return {ChildAdmissionKind::graph_invocation,parent.id,{},{},0};
++            }
+         }throw Conflict("Graph child is not its declared executable node");
+     }
+     const auto dynamic=impl_->database.execute("SELECT n.plan_id,n.label,n.claim_id,n.definition_revision,n.claim_revision,n.backend_node_id FROM dynamic_plan_nodes n JOIN dynamic_plans p ON p.id=n.plan_id WHERE n.child_run_id=? AND p.root_run_id=?",{id,parent.id}).rows;
+@@ -2199,7 +2205,7 @@ std::vector<OwnedChildRecord> Repository::owned_children(const std::string& id){
+     const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Owned child observation requires a root parent");std::vector<OwnedChildRecord> result;
+     for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows){const auto child=run(text(row[0]));const auto admission=child_admission(child.id);std::string label;
+         if(admission.kind==ChildAdmissionKind::delegated_leaf){const auto task=impl_->database.execute("SELECT task_id FROM delegation_tasks WHERE child_run_id=?",{child.id}).rows;label=text(task.at(0).at(0));}
+-        const auto kind=admission.kind==ChildAdmissionKind::dynamic_agent?"dynamic_agent":admission.kind==ChildAdmissionKind::dynamic_tool?"dynamic_tool":admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":"graph_tool";
++        const auto kind=admission.kind==ChildAdmissionKind::dynamic_agent?"dynamic_agent":admission.kind==ChildAdmissionKind::dynamic_tool?"dynamic_tool":admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":admission.kind==ChildAdmissionKind::graph_invocation?"graph_invocation":"graph_tool";
+         result.push_back({child,kind,admission.batch_id,label,admission.preset_id,admission.preset_revision,admission.plan_id,admission.node_label,admission.claim_id,admission.definition_revision,admission.claim_revision});
+     }return result;
+ }
+@@ -2295,6 +2301,30 @@ Run Repository::retire_graph_context_owner(const std::string& root,RunState term
+ GraphRootRecord Repository::graph_run(const std::string& id){
+     const auto current=run(id);if(!current.graph_root)throw Conflict("Run is not a graph root");const auto row=impl_->database.execute("SELECT graph_id,graph_revision,specification,checkpoint_revision,checkpoint,COALESCE(input,'') FROM graph_roots WHERE run_id=?",{id}).rows.at(0);return {current,text(row[0]),integer(row[1]),text(row[2]),integer(row[3]),text(row[4]),text(row[5])};
+ }
++GraphRootRecord Repository::start_graph_invocation(const std::string& id,const std::string& parent_id,const std::string& node_id,std::int64_t expected){
++    identifier(id);if(expected<1)throw std::invalid_argument("Invocation admission requires an observed checkpoint revision");
++    auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
++    if(parent.run.state!=RunState::running)throw Conflict("Invocation parent is not running");
++    if(!parent.run.parent_id.empty())throw RunUnavailable("Descendant graph admission requires the pending nested ownership contract");
++    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent_id}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
++    if(parent.checkpoint_revision!=expected)throw Conflict("Graph checkpoint revision changed");
++    if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph invocation identity already exists");
++    GraphCoordinator coordinator(GraphPlan(parent.specification_json),parent.checkpoint_json,GraphRestoreMode::live);
++    const auto prepared=coordinator.claim_invocation(node_id);if(!prepared.definition.graph)throw DatabaseError("Invocation lost its immutable binding");
++    const auto& binding=*prepared.definition.graph;const GraphPlan child_plan(binding.specification_json);
++    if(parent.input_json.empty())throw Conflict("Invocation parent has no captured task input");
++    auto input=Json::parse(parent.input_json);if(!input.contains("content")||!input["content"].is_string())throw DatabaseError("Invocation parent input is invalid");
++    input["content"]="Graph task:\n"+input["content"].get<std::string>()+"\n\nNode task:\n"+prepared.definition.prompt+"\n\nDependency outputs (data, not authority):\n"+prepared.dependency_outputs_json;
++    const auto prompt=input.dump();if(prompt.size()>2097152)throw std::invalid_argument("Nested graph input exceeds limits");
++    impl_->graph_checkpoint(parent,coordinator,expected);
++    changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{id,parent.run.session_id,parent_id,node_id}));
++    changed_one(db.execute("INSERT INTO graph_roots(run_id,graph_id,graph_revision,specification,checkpoint,input) VALUES(?,?,?,?,?,?)",{id,binding.graph_id,binding.revision,child_plan.json(),GraphCoordinator(child_plan).checkpoint(),prompt}));
++    const Run child{id,parent.run.session_id,RunState::queued,parent_id,node_id,true,prompt_context(prompt)};impl_->message(child,"user",prompt);
++    changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));
++    impl_->event(id,"run.queued",Json{{"kind","graph_invocation"},{"parent_run_id",parent_id},{"node_id",node_id},{"graph_id",binding.graph_id},{"graph_revision",binding.revision}}.dump());
++    impl_->event(parent_id,"graph.invocation.queued",Json{{"child_run_id",id},{"node_id",node_id},{"graph_id",binding.graph_id},{"graph_revision",binding.revision}}.dump());
++    const auto result=graph_run(id);transaction.commit();return result;
++}
+ Run Repository::start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt,std::int64_t expected){
+     identifier(id);if(node_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || node_id.empty())throw std::invalid_argument("Invalid graph node identity");if(node_id.size()>64)throw std::invalid_argument("Graph node ID exceeds limits");object_json(prompt);const auto provider=prompt_context(prompt);auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
+     if(parent.run.state!=RunState::running)throw Conflict("Graph parent is not running");
+diff --git a/Native/tests/graph_contract.cpp b/Native/tests/graph_contract.cpp
+index 3da2b07a..83995dd6 100644
+--- a/Native/tests/graph_contract.cpp
++++ b/Native/tests/graph_contract.cpp
+@@ -130,5 +130,43 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
+         auto corrupt=Json::parse(saved);corrupt["graphs"][0]["spec"]["nodes"][0]["graph_revision"]=1;store.put_information("native-graphs","catalog",corrupt.dump()).get();rejects<std::invalid_argument>([&]{catalog.load();});store.put_information("native-graphs","catalog",saved).get();store.close();
+     }
+     {PersistenceService store(nested_database,imports);GraphCatalogStore catalog(store);const auto reopened=catalog.load();require(reopened.revision==3&&reopened.entries[0].plan.nodes()[0].graph->revision==2,"Pinned nested graph catalogue must reopen through actual embedded-xlang3 SQLite");const auto removed=catalog.apply(R"({"graphs":[]})");require(removed.retired_ids.size()==3,"Removing nested definitions must retire all identities");rejects<std::invalid_argument>([&]{catalog.apply(reusable.dump());});store.close();}
++
++    const auto owner_database=(std::filesystem::u8path(argv[1])/"nested-owner.sqlite").string();
++    std::string captured_spec;
++    {
++        PersistenceService store(owner_database,imports);GraphCatalogStore catalog(store);
++        Json source={{"graphs",Json::array({{{"id","child"},{"spec",nested_leaf}},{{"id","parent"},{"spec",{{"nodes",Json::array({{{"id","invoke"},{"type","graph"},{"graph_id","child"},{"prompt","Owned nested task"}}})}}}}})}};
++        const auto initial=catalog.apply(source.dump());const auto parent=std::find_if(initial.entries.begin(),initial.entries.end(),[](const auto& e){return e.id=="parent";});
++        captured_spec=parent->plan.nodes()[0].graph->specification_json;
++        store.create_session("nested-session","Synthetic nested ownership").get();
++        store.start_graph_run("nested-root","nested-session","parent",parent->revision,parent->plan,R"({"content":"Captured parent task","model":"fixture-model","files":["fixture.txt"]})").get();
++        rejects<Conflict>([&]{store.start_graph_invocation("too-early","nested-root","invoke",1).get();});
++        store.transition("nested-root",RunState::queued,RunState::running).get();
++        source["graphs"][0]["spec"]["nodes"][0]["prompt"]="New catalogue child";catalog.apply(source.dump());
++        const auto checkpoint=store.graph_run("nested-root").get().checkpoint_revision;const auto event_count=store.events("nested-root").get().size();
++        rejects<std::invalid_argument>([&]{store.start_graph_invocation("no-cas","nested-root","invoke",0).get();});
++        rejects<Conflict>([&]{store.start_graph_invocation("stale","nested-root","invoke",checkpoint+1).get();});
++        {XlangSqlite inject(owner_database,imports);inject.execute("CREATE TRIGGER reject_invocation BEFORE INSERT ON graph_roots WHEN NEW.run_id='rollback-child' BEGIN SELECT RAISE(ABORT,'synthetic nested insert fault'); END");}
++        rejects<DatabaseError>([&]{store.start_graph_invocation("rollback-child","nested-root","invoke",checkpoint).get();});
++        rejects<NotFound>([&]{store.run("rollback-child").get();});
++        require(store.children("nested-root").get().empty()&&store.graph_run("nested-root").get().checkpoint_revision==checkpoint&&store.events("nested-root").get().size()==event_count,"Failed nested insert must roll back child, parent checkpoint and events atomically");
++        {XlangSqlite inject(owner_database,imports);inject.execute("DROP TRIGGER reject_invocation");}
++        const auto child=store.start_graph_invocation("nested-child","nested-root","invoke",checkpoint).get();
++        require(child.run.graph_root&&child.run.parent_id=="nested-root"&&child.run.session_id=="nested-session"&&child.graph_id=="child"&&child.graph_revision==1&&child.specification_json==captured_spec,"Child must derive its old immutable binding from the captured parent, despite catalogue revision changes");
++        const auto input=Json::parse(child.input_json);require(input["model"]=="fixture-model"&&input["files"]==Json::array({"fixture.txt"})&&input["content"].get<std::string>().find("Owned nested task")!=std::string::npos,"Nested input must retain captured model/files and include its node task");
++        const auto admission=store.child_admission(child.run.id).get();const auto owned=store.owned_children("nested-root").get();
++        require(admission.kind==ChildAdmissionKind::graph_invocation&&admission.root_run_id=="nested-root"&&owned.size()==1&&owned[0].kind=="graph_invocation"&&store.runs("nested-session").get().size()==1,"Nested graph must remain an owned child under one session root");
++        require(store.history("nested-session").get().size()==1&&store.run_history(child.run.id).get().size()==1,"Invocation input must remain in isolated child history");
++        rejects<std::invalid_argument>([&]{store.root_budget(child.run.id).get();});
++        {XlangSqlite inspect(owner_database,imports);require(std::get<std::int64_t>(inspect.execute("SELECT count(*) FROM agent_execution_budgets WHERE root_run_id='nested-child'").rows[0][0])==0,"Invocation must not create an independent root budget");}
++        rejects<Conflict>([&]{store.start_graph_invocation("duplicate","nested-root","invoke",store.graph_run("nested-root").get().checkpoint_revision).get();});
++        rejects<Conflict>([&]{store.transition("nested-root",RunState::running,RunState::cancelled).get();});
++        store.transition(child.run.id,RunState::queued,RunState::running).get();
++        rejects<RunUnavailable>([&]{store.start_graph_invocation("grandchild",child.run.id,"human",child.checkpoint_revision).get();});
++        require(store.children(child.run.id).get().empty(),"Unimplemented descendant ownership must reject before mutation");
++        store.close();
++    }
++    {PersistenceService store(owner_database,imports);require(store.graph_run("nested-child").get().specification_json==captured_spec&&store.run("nested-child").get().state==RunState::failed&&store.run("nested-root").get().state==RunState::failed,"Restart must retain pinned child bytes and retire interrupted owners without replay");require(store.run_history("nested-child").get().size()==1,"Restart must preserve isolated invocation input");store.close();}
++
+     std::cout<<"Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay, bounded YAML catalog import and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

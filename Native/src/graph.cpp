@@ -191,10 +191,15 @@ GraphDecision GraphCoordinator::inspect() const {
     }
     if(result.halted){result.ready.clear();result.skippable.clear();}return result;
 }
-GraphPreparedNode GraphCoordinator::start(const std::string& id){
+GraphPreparedNode GraphCoordinator::start(const std::string& id){return start_node(id,false);}
+GraphPreparedNode GraphCoordinator::claim_invocation(const std::string& id){
+    if(plan_.nodes()[index(id)].kind!=GraphNodeKind::graph)throw Conflict("Invocation admission requires a nested graph node");
+    return start_node(id,true);
+}
+GraphPreparedNode GraphCoordinator::start_node(const std::string& id,bool invocation){
     const auto decisions=inspect();if(std::find(decisions.ready.begin(),decisions.ready.end(),id)==decisions.ready.end())throw Conflict("Graph node is not ready");
     const auto i=index(id);auto node=plan_.nodes()[i];auto outputs=Json::object();for(const auto& dependency:node.dependencies)outputs[dependency]=output_value(states_[index(dependency)].output);
-    if(node.kind==GraphNodeKind::graph)throw Conflict("Nested graph execution ownership is not implemented");
+    if(node.kind==GraphNodeKind::graph&&!invocation)throw Conflict("Nested graph execution ownership is not implemented");
     if(node.kind==GraphNodeKind::tool){
         if(node.mcp){node.arguments_json=resolve_mcp(node.arguments_json,outputs);object(node.arguments_json,65536);}
         else{const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}

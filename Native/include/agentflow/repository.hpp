@@ -143,6 +143,9 @@ public:
     Run complete_graph_context_owner(const GraphContextBoundarySpec& spec,const std::string& actual_join_json);
     Run retire_graph_context_owner(const std::string& root,RunState terminal,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_elapsed_ms=0);
     GraphRootRecord graph_run(const std::string& id);
+    // Backend metadata admission only. Derives the child from the parent's
+    // immutable binding; does not launch execution or create a session root.
+    GraphRootRecord start_graph_invocation(const std::string& id,const std::string& parent_id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
     GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);
     GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);

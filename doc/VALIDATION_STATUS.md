@@ -2,6 +2,15 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Durable nested invocation admission — 2026-10-19
+
+Repository admission now derives a child graph identity, revision, immutable specification and task input from its parent's captured snapshot. The child remains under the same session root with isolated history, explicit graph_invocation observation and checkpoint compare-and-swap. Child insertion, messages, events and parent checkpoint are transactional. Catalogue changes after root capture cannot substitute a newer child. This backend-only primitive rejects descendants and registered context owners pending their budget/context ownership contracts; public coordinator start and GraphRunner preflight remain closed to nested execution.
+
+Complete Release build and11focused contracts pass46.93seconds (CTest6440 terminal0), including actual SQLite pinned-binding, admission rollback and restart quarantine tests. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary file sets and hashes remain unchanged. Candidatef53ec389 is uninstalled; no full suite or live model execution is claimed. The first gate passed10/11 because the new test expected NotFound instead of the existing child-budget invalid_argument boundary. Both failed and corrected evidence are preserved in evidence/nested-graph-invocation-admission-20261019-*.
+
+Installed56 remains unchanged. Nested execution, shared budgets, cancellation and authenticated human/context resume remain incomplete.
+
+
 ## Nested graph catalogue binding — 2026-10-19
 
 Trusted catalogue import now resolves graph_id references independently of definition order and writes backend-owned graph_revision/graph_spec snapshots. A changed child revision propagates through all referring ancestors; an already captured parent remains byte-identical. Imports reject cycles, unknown/retired identities, supplied backend pins and expanded depth/node/byte limits before changing SQLite. Stored catalogue loading checks each nested binding against its catalogue snapshot. A one-MiB resolved storage cap prevents accepted amplification from creating a catalogue that cannot reopen.

@@ -130,5 +130,43 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         auto corrupt=Json::parse(saved);corrupt["graphs"][0]["spec"]["nodes"][0]["graph_revision"]=1;store.put_information("native-graphs","catalog",corrupt.dump()).get();rejects<std::invalid_argument>([&]{catalog.load();});store.put_information("native-graphs","catalog",saved).get();store.close();
     }
     {PersistenceService store(nested_database,imports);GraphCatalogStore catalog(store);const auto reopened=catalog.load();require(reopened.revision==3&&reopened.entries[0].plan.nodes()[0].graph->revision==2,"Pinned nested graph catalogue must reopen through actual embedded-xlang3 SQLite");const auto removed=catalog.apply(R"({"graphs":[]})");require(removed.retired_ids.size()==3,"Removing nested definitions must retire all identities");rejects<std::invalid_argument>([&]{catalog.apply(reusable.dump());});store.close();}
+
+    const auto owner_database=(std::filesystem::u8path(argv[1])/"nested-owner.sqlite").string();
+    std::string captured_spec;
+    {
+        PersistenceService store(owner_database,imports);GraphCatalogStore catalog(store);
+        Json source={{"graphs",Json::array({{{"id","child"},{"spec",nested_leaf}},{{"id","parent"},{"spec",{{"nodes",Json::array({{{"id","invoke"},{"type","graph"},{"graph_id","child"},{"prompt","Owned nested task"}}})}}}}})}};
+        const auto initial=catalog.apply(source.dump());const auto parent=std::find_if(initial.entries.begin(),initial.entries.end(),[](const auto& e){return e.id=="parent";});
+        captured_spec=parent->plan.nodes()[0].graph->specification_json;
+        store.create_session("nested-session","Synthetic nested ownership").get();
+        store.start_graph_run("nested-root","nested-session","parent",parent->revision,parent->plan,R"({"content":"Captured parent task","model":"fixture-model","files":["fixture.txt"]})").get();
+        rejects<Conflict>([&]{store.start_graph_invocation("too-early","nested-root","invoke",1).get();});
+        store.transition("nested-root",RunState::queued,RunState::running).get();
+        source["graphs"][0]["spec"]["nodes"][0]["prompt"]="New catalogue child";catalog.apply(source.dump());
+        const auto checkpoint=store.graph_run("nested-root").get().checkpoint_revision;const auto event_count=store.events("nested-root").get().size();
+        rejects<std::invalid_argument>([&]{store.start_graph_invocation("no-cas","nested-root","invoke",0).get();});
+        rejects<Conflict>([&]{store.start_graph_invocation("stale","nested-root","invoke",checkpoint+1).get();});
+        {XlangSqlite inject(owner_database,imports);inject.execute("CREATE TRIGGER reject_invocation BEFORE INSERT ON graph_roots WHEN NEW.run_id='rollback-child' BEGIN SELECT RAISE(ABORT,'synthetic nested insert fault'); END");}
+        rejects<DatabaseError>([&]{store.start_graph_invocation("rollback-child","nested-root","invoke",checkpoint).get();});
+        rejects<NotFound>([&]{store.run("rollback-child").get();});
+        require(store.children("nested-root").get().empty()&&store.graph_run("nested-root").get().checkpoint_revision==checkpoint&&store.events("nested-root").get().size()==event_count,"Failed nested insert must roll back child, parent checkpoint and events atomically");
+        {XlangSqlite inject(owner_database,imports);inject.execute("DROP TRIGGER reject_invocation");}
+        const auto child=store.start_graph_invocation("nested-child","nested-root","invoke",checkpoint).get();
+        require(child.run.graph_root&&child.run.parent_id=="nested-root"&&child.run.session_id=="nested-session"&&child.graph_id=="child"&&child.graph_revision==1&&child.specification_json==captured_spec,"Child must derive its old immutable binding from the captured parent, despite catalogue revision changes");
+        const auto input=Json::parse(child.input_json);require(input["model"]=="fixture-model"&&input["files"]==Json::array({"fixture.txt"})&&input["content"].get<std::string>().find("Owned nested task")!=std::string::npos,"Nested input must retain captured model/files and include its node task");
+        const auto admission=store.child_admission(child.run.id).get();const auto owned=store.owned_children("nested-root").get();
+        require(admission.kind==ChildAdmissionKind::graph_invocation&&admission.root_run_id=="nested-root"&&owned.size()==1&&owned[0].kind=="graph_invocation"&&store.runs("nested-session").get().size()==1,"Nested graph must remain an owned child under one session root");
+        require(store.history("nested-session").get().size()==1&&store.run_history(child.run.id).get().size()==1,"Invocation input must remain in isolated child history");
+        rejects<std::invalid_argument>([&]{store.root_budget(child.run.id).get();});
+        {XlangSqlite inspect(owner_database,imports);require(std::get<std::int64_t>(inspect.execute("SELECT count(*) FROM agent_execution_budgets WHERE root_run_id='nested-child'").rows[0][0])==0,"Invocation must not create an independent root budget");}
+        rejects<Conflict>([&]{store.start_graph_invocation("duplicate","nested-root","invoke",store.graph_run("nested-root").get().checkpoint_revision).get();});
+        rejects<Conflict>([&]{store.transition("nested-root",RunState::running,RunState::cancelled).get();});
+        store.transition(child.run.id,RunState::queued,RunState::running).get();
+        rejects<RunUnavailable>([&]{store.start_graph_invocation("grandchild",child.run.id,"human",child.checkpoint_revision).get();});
+        require(store.children(child.run.id).get().empty(),"Unimplemented descendant ownership must reject before mutation");
+        store.close();
+    }
+    {PersistenceService store(owner_database,imports);require(store.graph_run("nested-child").get().specification_json==captured_spec&&store.run("nested-child").get().state==RunState::failed&&store.run("nested-root").get().state==RunState::failed,"Restart must retain pinned child bytes and retire interrupted owners without replay");require(store.run_history("nested-child").get().size()==1,"Restart must preserve isolated invocation input");store.close();}
+
     std::cout<<"Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay, bounded YAML catalog import and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

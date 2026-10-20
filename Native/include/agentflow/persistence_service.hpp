@@ -131,6 +131,7 @@ public:
     std::future<Run> complete_graph_context_owner(GraphContextBoundarySpec spec,std::string actual_join_json);
     std::future<Run> retire_graph_context_owner(std::string root,RunState terminal,std::string reason_json,std::string segment_id={},std::int64_t measured_elapsed_ms=0);
     std::future<GraphRootRecord> graph_run(std::string id);
+    std::future<GraphRootRecord> start_graph_invocation(std::string id,std::string parent_id,std::string node_id,std::int64_t expected_checkpoint_revision);
     std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json,std::int64_t expected_checkpoint_revision=0);
     std::future<GraphRootRecord> settle_graph_child(std::string child_id,std::int64_t expected_checkpoint_revision=0);
     std::future<GraphRootRecord> start_graph_human(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);

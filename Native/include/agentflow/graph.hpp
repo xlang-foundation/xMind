@@ -62,6 +62,9 @@ public:
     GraphNodeState state(const std::string& id) const;
     std::string checkpoint() const;
 private:
+    friend class Repository;
+    GraphPreparedNode start_node(const std::string& id,bool invocation);
+    GraphPreparedNode claim_invocation(const std::string& id);
     struct Node {GraphNodeState state=GraphNodeState::pending;std::string output;};
     std::size_t index(const std::string& id) const;
     bool eligible(std::size_t index,bool& skipped) const;

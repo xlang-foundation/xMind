@@ -50,7 +50,7 @@ struct DelegationBatchRecord {
     std::vector<DelegationTaskRecord> tasks;
     bool created=false;
 };
-enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf,dynamic_agent,dynamic_tool};
+enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf,dynamic_agent,dynamic_tool,graph_invocation};
 struct ChildAdmissionRecord {
     ChildAdmissionKind kind=ChildAdmissionKind::graph_tool;
     std::string root_run_id,batch_id,preset_id;
