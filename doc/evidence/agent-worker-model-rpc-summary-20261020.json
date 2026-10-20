@@ -1,0 +1,33 @@
+{
+  "scope": "Actual native child model proxy over authenticated RPC; dedicated fixture, not the product AgentRunner loop",
+  "gate": "agent-worker-model-rpc-focused-20261020-gate.json",
+  "fixtureExecutableSha256": "8ef0b9b948a39108a3a3a442bf8539c860c9d945e42a1220748703cd09dacc9c",
+  "fixtureSeconds": 0.59,
+  "focusedContractsPassed": 37,
+  "focusedContractsSeconds": 124.18,
+  "controlledProviderRequests": {"normal": 1, "cancel": 1, "crash": 1, "delivery": 1},
+  "actualChildIdentities": [
+    {"case": "normal", "pid": 51064, "creationTime": "134369776576776821"},
+    {"case": "cancel", "pid": 14280, "creationTime": "134369776577739019"},
+    {"case": "crash", "pid": 67280, "creationTime": "134369776578589331"},
+    {"case": "delivery", "pid": 58016, "creationTime": "134369776579023805"}
+  ],
+  "nestedSynchronousFixtureCallsDuringStreaming": true,
+  "newAuthenticatedFrameWithReplayedRpcIdRejectedBeforeRedispatch": true,
+  "revokedLiveWorkerRejectedBeforeHttp": true,
+  "providerRoutingAndCredentialsBackendOwned": true,
+  "childUsesNoPersistenceService": true,
+  "cancelledSessionRemainsUsable": true,
+  "streamingCrashRetainsUncertainDispatch": true,
+  "lostDeliveryRetainsExactDurableResponse": true,
+  "chargedAllowanceNeverRefunded": true,
+  "fixtureWorkersAbsentAfterGate": true,
+  "productChildAgentRunnerImplemented": false,
+  "authenticatedJournalOrToolRpcImplemented": false,
+  "contextCountCompactionWorkerRpcImplemented": false,
+  "allProviderWorkerRpcQualified": false,
+  "fullNativeSuiteRun": false,
+  "liveModelKeyUsed": false,
+  "installed": false,
+  "cpythonExecuted": false
+}

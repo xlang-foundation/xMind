@@ -149,6 +149,7 @@ AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::mo
 AgentWorkerChannel::~AgentWorkerChannel()=default;
 const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
 AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
+void AgentWorkerChannel::close()noexcept{impl_->poisoned=true;impl_->pipe=Handle();}
 void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadline,std::stop_token stop){
     std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();try{check(deadline,stop);write_packet(impl_->pipe.value,impl_->codec.encode(message),deadline,stop,&impl_->statistics);}catch(...){impl_->poisoned=true;throw;}
 }

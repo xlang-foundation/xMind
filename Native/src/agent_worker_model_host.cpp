@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_model_host.hpp"
+#include "agentflow/agent_model_values.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/deepseek_provider.hpp"
 #include "agentflow/gemini_history.hpp"
@@ -22,10 +23,7 @@ std::string request_bytes(const ChatProviderConfig& config,const ModelRequest& i
         return serialize_gemini_request(gemini_model_request(request,config.tools));
     }throw std::invalid_argument("Unsupported worker model wire");
 }
-std::string response_bytes(const ModelCompletion& response){
-    Json calls=Json::array();for(const auto& call:response.tool_calls)calls.push_back({{"id",call.id},{"name",call.name},{"arguments_json",call.arguments_json}});
-    return Json{{"content",response.content},{"refusal",response.refusal},{"finish_reason",response.finish_reason},{"usage_json",response.usage_json},{"provider_items_json",response.provider_items_json},{"tool_calls",std::move(calls)}}.dump();
-}
+
 }
 AgentWorkerModelHost::AgentWorkerModelHost(PersistenceService& store,AgentWorkerLeaseSpec lease,ChatProviderConfig provider,
     std::vector<ModelToolDefinition> tools,AgentWorkerModelPolicy policy,std::shared_ptr<AgentModelGateway> gateway,std::chrono::steady_clock::time_point deadline,std::stop_token owner_cancel)
@@ -44,6 +42,6 @@ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const 
     try{check();auto selected=provider_;const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now());if(remaining.count()<1)throw TransportTimeout("Worker model root deadline elapsed");selected.deadline=std::min(selected.deadline,remaining);selected.idle_timeout=std::min(selected.idle_timeout,selected.deadline);
         response=gateway_->complete(selected,request,[&](const ModelEvent& event){check();sink(event);},linked.get_token());
     }catch(...){const auto failure=std::current_exception();try{store_.interrupt_agent_worker_model(claim).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Worker model dispatch outcome could not be recorded");}std::rethrow_exception(failure);}
-    try{store_.record_agent_worker_model_response(claim,response_bytes(response)).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}return response;
+    try{store_.record_agent_worker_model_response(claim,encode_agent_model_completion(response)).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}return response;
 }
 }

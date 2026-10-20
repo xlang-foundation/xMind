@@ -1,0 +1,83 @@
+// Actual private child/channel and native HTTP/SSE, controlled provider data.
+// This exercises the model proxy, not a product child AgentRunner or tool RPC.
+#include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_model_values.hpp"
+#include "agentflow/persistence_service.hpp"
+#include "nlohmann/json.hpp"
+#define NOMINMAX
+#include <windows.h>
+#include <atomic>
+#include <array>
+#include <charconv>
+#include <filesystem>
+#include <future>
+#include <iostream>
+#include <random>
+
+using namespace agentflow;
+using Json=nlohmann::json;
+using namespace std::chrono_literals;
+namespace {
+using Clock=std::chrono::steady_clock;
+void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+template<class Error,class Function> void rejects(Function action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected native RPC rejection did not occur");}
+std::string executable(){std::wstring buffer(32768,L'\0');const auto size=GetModuleFileNameW(nullptr,buffer.data(),static_cast<DWORD>(buffer.size()));require(size&&size<buffer.size(),"Cannot resolve RPC fixture image");buffer.resize(size);const auto path=std::filesystem::path(buffer).u8string();return {reinterpret_cast<const char*>(path.data()),path.size()};}
+void values_contract(){
+    ModelRequest request;request.messages.push_back({MessageRole::assistant,std::string("owned\0text",10),{{"call-one","fixture_tool",R"({"number":1.0000000000000001})"}},"","",R"([{"opaque":"exact","number":1.0000000000000001}])"});request.tools.push_back({"fixture_tool","Owned definition",R"({"type":"object","default":1.0000000000000001})"});request.include_usage=true;request.max_output_tokens=123;
+    const auto bytes=encode_agent_model_request(request);const auto decoded=decode_agent_model_request(bytes);require(encode_agent_model_request(decoded)==bytes&&decoded.messages[0].provider_items_json==request.messages[0].provider_items_json&&decoded.messages[0].tool_calls[0].arguments_json==request.messages[0].tool_calls[0].arguments_json,"Owned model request must retain exact opaque and argument bytes");
+    auto forged=Json::parse(bytes);forged["endpoint"]="must-not-route";rejects<ModelProtocolError>([&]{decode_agent_model_request(forged.dump());});rejects<ModelProtocolError>([&]{decode_agent_model_request(std::string("{\"include_usage\":true,")+bytes.substr(1));});
+    ModelCompletion response{"Owned completion","","stop",R"({"total_tokens":10})",{},R"([{"opaque":"exact","number":1.0000000000000001}])"};require(encode_agent_model_completion(decode_agent_model_completion(encode_agent_model_completion(response)))==encode_agent_model_completion(response),"Model response must round-trip supplied usage/private bytes");
+}
+ModelRequest request(const std::string& mode){ModelRequest value;value.include_usage=true;value.messages.push_back({MessageRole::user,"Native child model RPC "+mode+"."});return value;}
+int child(int argc,char** argv){
+    require(argc==4&&std::string(argv[2])=="--channel-handle","Child receives only its private inherited handle");const std::string argument=argv[3];std::uintptr_t handle=0;const auto number=std::from_chars(argument.data(),argument.data()+argument.size(),handle);require(number.ec==std::errc{}&&number.ptr==argument.data()+argument.size(),"Invalid fixture inherited handle");
+    auto channel=AgentWorkerChannel::accept_inherited(handle,Clock::now()+10s);const auto boot=channel->receive(Clock::now()+10s);require(boot.operation=="fixture.boot","Child requires captured fixture boot");const auto mode=boot.payload;
+    if(mode=="duplicate"){
+        const auto frame=Json{{"version",1},{"id",1},{"method","fixture.ping"},{"payload",""}}.dump();channel->send({"rpc.request",frame},Clock::now()+5s);const auto response=channel->receive(Clock::now()+5s);require(response.operation=="rpc.response","First raw RPC must be admitted");channel->send({"rpc.request",frame},Clock::now()+5s);rejects<AgentWorkerProtocolError>([&]{channel->receive(Clock::now()+5s);});return 0;
+    }
+    AgentWorkerRpcPeer* self=nullptr;
+    AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
+        if(method!="fixture.run"&&method!="fixture.stale")throw AgentWorkerRpcRemoteError("unsupported");const auto attempt=Json::parse(payload).at("attempt_id").get<std::string>();AgentWorkerModelClient client(*self);const auto input=request(mode);
+        if(method=="fixture.stale"){rejects<Conflict>([&]{client.complete(attempt,input,[](const ModelEvent&){});});return "stale-rejected";}
+        std::stop_source cancellation;unsigned observed=0;bool text=false;
+        auto sink=[&](const ModelEvent& event){++observed;if(event.kind=="model.text"){text=true;if(mode=="crash")ExitProcess(73);if(mode=="cancel")cancellation.request_stop();}require(self->call("fixture.observe_event",encode_agent_model_event(event))=="recorded","Stream callback must complete nested RPC without deadlock");};
+        if(mode=="cancel"){rejects<TransportCancelled>([&]{client.complete(attempt,input,sink,cancellation.get_token());});require(text&&self->call("fixture.ping","")=="pong","Cancellation must acknowledge the actual stream and keep the RPC session usable");return Json{{"cancelled",true},{"pid",GetCurrentProcessId()},{"observed_events",observed}}.dump();}
+        const auto result=client.complete(attempt,input,sink);require(text&&observed>=2,"Native child must receive actual streamed model events");
+        if(mode=="normal"){
+            rejects<Conflict>([&]{client.complete(attempt,input,[](const ModelEvent&){});});auto changed=input;changed.include_usage=false;rejects<Conflict>([&]{client.complete(attempt,changed,[](const ModelEvent&){});});rejects<Conflict>([&]{client.complete("unfunded-attempt",input,[](const ModelEvent&){});});
+            const auto forged=Json{{"attempt_id",attempt},{"request",encode_agent_model_request(input)},{"endpoint","must-not-route"}}.dump();rejects<AgentWorkerRpcRemoteError>([&]{self->call("model.complete",forged);});rejects<AgentWorkerRpcRemoteError>([&]{self->call("model.unknown","");});
+        }
+        std::array<wchar_t,2> env{};require(GetEnvironmentVariableW(L"XMIND_AUTH_TOKEN",env.data(),static_cast<DWORD>(env.size()))==0,"Child must not inherit the backend auth environment");return Json{{"pid",GetCurrentProcessId()},{"completion",encode_agent_model_completion(result)},{"observed_events",observed}}.dump();
+    },Clock::now()+20s);self=&peer;peer.start();peer.wait_closed();peer.stop();return 0;
+}
+void duplicate_rpc(const std::shared_ptr<const BoundProcessExecutable>& image){
+    auto worker=AgentWorkerProcess::launch(image,{"rpc-protocol","rpc-protocol","rpc-workspace","rpc-protocol-generation",7},Clock::now()+5s);worker->channel().send({"fixture.boot","duplicate"},Clock::now()+5s);std::atomic<unsigned> accepted=0;AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string&,AgentWorkerRpcSink,std::stop_token){require(method=="fixture.ping","Unexpected replay fixture method");++accepted;return std::string("pong");},Clock::now()+10s);peer.start();peer.wait_closed();peer.stop();require(accepted==1&&worker->wait(Clock::now()+5s)==0,"New authenticated frame with replayed RPC ID must not redispatch its handler");
+}
+void root(PersistenceService& store,const std::string& id,const std::string& identity){store.create_session(id,"Controlled cross-process model RPC").get();RootBudgetSpec budget{"native.direct-agent",1,"rpc-workspace",identity,0,0,8,600000};store.start_prompt_run(id,id,R"({"content":"Controlled native child model fixture"})",budget).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",R"({"workspace_id":"rpc-workspace","revision":7,"snapshot":"backend_fixture"})").get();}
+void model_case(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& base,const std::string& mode){
+    const std::string id="rpc-"+mode,generation="generation-"+mode,attempt="attempt-"+mode,identity=R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})";root(store,id,identity);const auto deadline=Clock::now()+20s;
+    auto worker=AgentWorkerProcess::launch(image,{id,id,"rpc-workspace",generation,7},deadline);require(worker->pid()!=GetCurrentProcessId(),"Model proxy must execute in a distinct actual child PID");std::cout<<"Native RPC case "<<mode<<" child_pid="<<worker->pid()<<" creation_time="<<worker->creation_time()<<std::endl;AgentWorkerLeaseSpec lease{generation,id,id,"rpc-workspace",7,worker->pid(),std::to_string(worker->creation_time()),worker->executable_identity(),identity};lease=store.admit_agent_worker(lease).get().spec;
+    store.reserve_model_call(id,id,attempt,ModelCallRole::parent).get();store.start_model_call(id,id,attempt).get();ChatProviderConfig config{base+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;auto gateway=make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"});AgentWorkerModelHost host(store,lease,config,{},AgentWorkerModelPolicy{true,{}},gateway,deadline);
+    auto foreign=worker->channel().scope();foreign.run_id="foreign-run";rejects<Conflict>([&]{bind_agent_worker_model_rpc(host,foreign);});auto dispatch=bind_agent_worker_model_rpc(host,worker->channel().scope());std::atomic<unsigned> observed=0;std::promise<void> captured,release;auto captured_ready=captured.get_future();auto released=release.get_future().share();
+    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+        if(method=="fixture.observe_event"){const auto event=decode_agent_model_event(payload);require(event.kind.starts_with("model."),"Nested fixture call must carry its actual model event");++observed;return "recorded";}
+        if(method=="fixture.ping")return "pong";auto result=dispatch(method,payload,std::move(sink),cancel);if(mode=="delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;
+    },deadline);worker->channel().send({"fixture.boot",mode},deadline);peer.start();
+    if(mode=="delivery"){
+        auto run=std::async(std::launch::async,[&]{return peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump());});struct Unblock {std::promise<void>& value;~Unblock(){try{value.set_value();}catch(...){}}} unblock{release};require(captured_ready.wait_for(5s)==std::future_status::ready,"Backend must capture the actual provider reply before delivery fault");const auto before=store.agent_worker_model_claim(id,attempt).get();require(before.state=="responded","Actual response must already be durable before the delivery barrier");worker->terminate();release.set_value();rejects<AgentWorkerRpcClosed>([&]{run.get();});peer.stop();require(worker->wait(Clock::now()+5s)==1,"Delivery fault must observe its exact explicitly retired worker");const auto after=store.agent_worker_model_claim(id,attempt).get();require(after.state=="responded"&&after.actual_response_json==before.actual_response_json&&after.response_binding==before.response_binding,"Worker death after acknowledgement must retain the actual supplied response without replay");
+    }else if(mode=="crash"){
+        rejects<AgentWorkerRpcClosed>([&]{peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump());});peer.stop();require(worker->wait(Clock::now()+5s)==73&&store.agent_worker_model_claim(id,attempt).get().state=="uncertain","Actual streaming worker death must cancel backend dispatch and retain uncertainty");
+    }else{
+        const auto result=Json::parse(peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump()));require(result.at("pid")==worker->pid()&&observed==result.at("observed_events").get<unsigned>(),"Actual child must observe every model event through nested RPC");
+        if(mode=="normal"){
+            const auto actual=store.agent_worker_model_claim(id,attempt).get();require(actual.state=="responded"&&result.at("completion")==actual.actual_response_json&&Json::parse(decode_agent_model_completion(actual.actual_response_json).usage_json).at("total_tokens")==10,"Child must receive exact durable supplied response and usage bytes");
+            store.retire_agent_worker(generation,"cancelled").get();require(worker->alive(),"Authority revocation must be tested while the actual child remains alive");store.reserve_model_call(id,id,"stale-attempt",ModelCallRole::parent).get();store.start_model_call(id,id,"stale-attempt").get();require(peer.call("fixture.stale",R"({"attempt_id":"stale-attempt"})")=="stale-rejected","A valid worker channel must lose model authority after lease revocation");rejects<NotFound>([&]{store.agent_worker_model_claim(id,"stale-attempt").get();});
+        }else require(result.at("cancelled")==true&&store.agent_worker_model_claim(id,attempt).get().state=="uncertain","Acknowledged streaming cancellation must retain uncertainty and no invented final response");peer.stop();require(worker->wait(Clock::now()+5s)==0,"Normal RPC owner closure must let the actual worker exit cleanly");
+    }
+    if(store.agent_worker_lease(generation).get().state=="active")store.retire_agent_worker(generation,mode=="normal"?"completed":mode=="cancel"?"cancelled":"worker_exit").get();require(store.root_budget(id).get().model_calls_reserved==(mode=="normal"?2:1),"RPC cancellation/crash/delivery must never refund charged model allowance");
+}
+}
+int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc!=4)return 2;values_contract();auto image=ForegroundProcess::bind_executable(executable());duplicate_rpc(image);std::random_device random;std::filesystem::path folder;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-model-rpc-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create private model RPC fixture");{
+    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();for(const auto* mode:{"normal","cancel","crash","delivery"})model_case(store,image,argv[3],mode);store.close();}
+    std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

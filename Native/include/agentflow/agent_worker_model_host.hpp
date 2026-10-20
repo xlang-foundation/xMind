@@ -18,6 +18,7 @@ public:
         std::vector<ModelToolDefinition> admitted_tools,AgentWorkerModelPolicy,std::shared_ptr<AgentModelGateway>,
         std::chrono::steady_clock::time_point root_deadline,std::stop_token owner_cancel={});
     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+    const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:
     PersistenceService& store_;
     AgentWorkerLeaseSpec lease_;

@@ -1,0 +1,29 @@
+#include "agentflow/agent_model_values.hpp"
+#include "nlohmann/json.hpp"
+#include <set>
+
+namespace agentflow {
+namespace {
+using Json=nlohmann::json;
+[[noreturn]] void invalid(){throw ModelProtocolError("Invalid owned native model values");}
+Json parse(const std::string& bytes,std::size_t limit){
+    if(bytes.empty()||bytes.size()>limit)invalid();std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>16)invalid();if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))invalid();if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});
+}
+void object(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields)invalid();}
+void array(const Json& value,std::size_t limit){if(!value.is_array()||value.size()>limit)invalid();}
+std::string role(MessageRole role){switch(role){case MessageRole::system:return "system";case MessageRole::developer:return "developer";case MessageRole::user:return "user";case MessageRole::assistant:return "assistant";case MessageRole::tool:return "tool";}invalid();}
+MessageRole role(const std::string& role){if(role=="system")return MessageRole::system;if(role=="developer")return MessageRole::developer;if(role=="user")return MessageRole::user;if(role=="assistant")return MessageRole::assistant;if(role=="tool")return MessageRole::tool;invalid();}
+Json calls(const std::vector<ModelToolCall>& input){if(input.size()>4096)invalid();Json result=Json::array();for(const auto& call:input)result.push_back({{"id",call.id},{"name",call.name},{"arguments_json",call.arguments_json}});return result;}
+std::vector<ModelToolCall> calls(const Json& input){array(input,4096);std::vector<ModelToolCall> result;for(const auto& call:input){object(call,3);result.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments_json").get<std::string>()});}return result;}
+std::string bounded(const Json& value,std::size_t limit){auto result=value.dump();if(result.size()>limit)invalid();return result;}
+}
+std::string encode_agent_model_request(const ModelRequest& request){
+    if(request.messages.size()>4096||request.tools.size()>64)invalid();Json messages=Json::array(),tools=Json::array();for(const auto& m:request.messages)messages.push_back({{"role",role(m.role)},{"content",m.content},{"tool_calls",calls(m.tool_calls)},{"tool_call_id",m.tool_call_id},{"refusal",m.refusal},{"provider_items_json",m.provider_items_json}});for(const auto& t:request.tools)tools.push_back({{"name",t.name},{"description",t.description},{"input_schema_json",t.input_schema_json}});
+    return bounded(Json{{"messages",std::move(messages)},{"tools",std::move(tools)},{"include_usage",request.include_usage},{"max_output_tokens",request.max_output_tokens?Json(*request.max_output_tokens):Json(nullptr)},{"canonical_window",request.canonical_window?Json(request.canonical_window->items_json()):Json(nullptr)}},4*1024*1024);
+}
+ModelRequest decode_agent_model_request(const std::string& bytes){try{const auto value=parse(bytes,4*1024*1024);object(value,5);ModelRequest request;array(value.at("messages"),4096);for(const auto& m:value.at("messages")){object(m,6);request.messages.push_back({role(m.at("role").get<std::string>()),m.at("content").get<std::string>(),calls(m.at("tool_calls")),m.at("tool_call_id").get<std::string>(),m.at("refusal").get<std::string>(),m.at("provider_items_json").get<std::string>()});}array(value.at("tools"),64);for(const auto& t:value.at("tools")){object(t,3);request.tools.push_back({t.at("name").get<std::string>(),t.at("description").get<std::string>(),t.at("input_schema_json").get<std::string>()});}request.include_usage=value.at("include_usage").get<bool>();if(!value.at("max_output_tokens").is_null()){if(!value.at("max_output_tokens").is_number_integer())invalid();request.max_output_tokens=value.at("max_output_tokens").get<std::int64_t>();}if(!value.at("canonical_window").is_null())request.canonical_window=parse_responses_canonical_window(value.at("canonical_window").get<std::string>());return request;}catch(const Json::exception&){invalid();}}
+std::string encode_agent_model_completion(const ModelCompletion& response){return bounded(Json{{"content",response.content},{"refusal",response.refusal},{"finish_reason",response.finish_reason},{"usage_json",response.usage_json},{"provider_items_json",response.provider_items_json},{"tool_calls",calls(response.tool_calls)}},8*1024*1024);}
+ModelCompletion decode_agent_model_completion(const std::string& bytes){try{const auto value=parse(bytes,8*1024*1024);object(value,6);return {value.at("content").get<std::string>(),value.at("refusal").get<std::string>(),value.at("finish_reason").get<std::string>(),value.at("usage_json").get<std::string>(),calls(value.at("tool_calls")),value.at("provider_items_json").get<std::string>()};}catch(const Json::exception&){invalid();}}
+std::string encode_agent_model_event(const ModelEvent& event){if(event.kind.empty()||event.kind.size()>64)invalid();return bounded(Json{{"kind",event.kind},{"json",event.json}},4*1024*1024);}
+ModelEvent decode_agent_model_event(const std::string& bytes){try{const auto value=parse(bytes,4*1024*1024);object(value,2);ModelEvent result{value.at("kind").get<std::string>(),value.at("json").get<std::string>()};if(result.kind.empty()||result.kind.size()>64)invalid();return result;}catch(const Json::exception&){invalid();}}
+}

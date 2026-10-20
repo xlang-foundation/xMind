@@ -52,6 +52,9 @@ public:
     static std::unique_ptr<AgentWorkerChannel> accept_inherited(std::uintptr_t,Deadline,std::stop_token={});
     const AgentWorkerScope& scope()const noexcept;
     AgentWorkerChannelStatistics statistics()const noexcept;
+    // Owner shutdown only, after readers have joined and writers are excluded.
+    // Closing this retained handle notifies the peer; it does not kill a PID.
+    void close()noexcept;
     void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
     AgentWorkerMessage receive(Deadline,std::stop_token={});
 private:
