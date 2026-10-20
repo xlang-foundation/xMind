@@ -290,6 +290,23 @@ and observe the exact owned child process terminal before releasing physical
 ownership. A terminal ledger row alone is not proof of physical drain. An
 observation timeout does not authorize restarting the child or replaying a task.
 
+## Captured public model controls checkpoint
+
+The worker model admission RPC now returns a strict version 1 public controls
+record from the captured backend provider and policy. It checks the current
+lease, original deadline and owner/caller cancellation without reserving or
+dispatching a model, preparing context or admitting a read. The record excludes
+provider endpoints, credentials and private deadlines. Unknown fields, duplicate
+keys, unsupported enum values and inconsistent requested controls reject.
+
+Actual plain/read child runners build their proxy model configuration from this
+record and obtain turn/time limits from the scoped root budget. This is a step
+toward captured bootstrap; instructions, complete settings, production process
+entry and service placement remain open. The 53 focused contracts passed in
+156.32 seconds with source, dependencies and 133 native binaries frozen. Evidence:
+`evidence/agent-worker-model-admission-focused-20261020.json`. No installed,
+rendered UI, live-provider or full native suite qualification is claimed.
+
 ## Qualification required before service placement
 
 - Ledger contracts: exact lease rejection (including process identity), stale

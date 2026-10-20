@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/agent_worker_records.hpp"
+#include "agentflow/agent_worker_model_admission.hpp"
 #include <mutex>
 #include <functional>
 
@@ -25,6 +26,7 @@ public:
         std::chrono::steady_clock::time_point root_deadline,std::stop_token owner_cancel={});
     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
     ModelRequest prepare_request(std::stop_token={});
+    AgentWorkerModelAdmission admission(std::stop_token={});
     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:
     PersistenceService& store_;

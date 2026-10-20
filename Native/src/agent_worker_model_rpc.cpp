@@ -22,8 +22,9 @@ ProviderHttpError provider_failure(const std::string& bytes){
 AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
     const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
-        if(method!="model.complete"&&method!="model.prepare_request")throw AgentWorkerRpcRemoteError("unsupported");
+        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto value=request_envelope(payload);
+            if(method=="model.admission"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");return encode_agent_worker_model_admission(host.admission(cancel));}
             if(method=="model.prepare_request"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");const auto bytes=encode_agent_model_request(host.prepare_request(cancel));if(bytes.size()>AgentWorkerFrameCodec::max_frame_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}
             if(!value.is_object()||value.size()!=2||!value.at("attempt_id").is_string()||!value.at("request").is_string())throw AgentWorkerRpcRemoteError("rejected");const auto attempt=value.at("attempt_id").get<std::string>();if(attempt.empty()||attempt.size()>128||attempt.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw AgentWorkerRpcRemoteError("rejected");
             const auto request=decode_agent_model_request(value.at("request").get<std::string>());return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
@@ -41,6 +42,12 @@ AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,con
          catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
          catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
     };
+}
+AgentWorkerModelAdmission AgentWorkerModelClient::admission(std::stop_token cancel){
+    try{return decode_agent_worker_model_admission(peer_.call("model.admission","{}",{},cancel));}
+    catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker model admission RPC cancelled");}
+    catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker model admission RPC deadline elapsed");}
+    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled")throw TransportCancelled("Worker model admission cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker model admission deadline elapsed");if(error.code()=="rejected")throw Conflict("Worker model admission rejected its captured owner");throw ModelProtocolError("Worker model admission capability unavailable");}
 }
 ModelRequest AgentWorkerModelClient::prepare_request(std::stop_token cancel){
     try{return decode_agent_model_request(peer_.call("model.prepare_request","{}",{},cancel));}

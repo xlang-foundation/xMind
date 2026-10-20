@@ -8,6 +8,7 @@ public:
     explicit AgentWorkerModelClient(AgentWorkerRpcPeer& peer):peer_(peer){}
     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
     ModelRequest prepare_request(std::stop_token={});
+    AgentWorkerModelAdmission admission(std::stop_token={});
 private:AgentWorkerRpcPeer& peer_;
 };
 // Bind this one authorized inference host to its exact authenticated channel.

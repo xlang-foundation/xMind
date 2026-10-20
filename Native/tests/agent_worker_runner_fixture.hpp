@@ -113,6 +113,9 @@ struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
 inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();verify_closed_ports(closed);
+    const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Admission metadata must omit backend destinations, credentials and deadlines");
+    for(const auto* payload:{R"({"model_id":"unadmitted"})",R"({"endpoint":"unadmitted"})","[]"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
+    std::stop_source metadata_stop;metadata_stop.request_stop();rejects<TransportCancelled>([&]{AgentWorkerModelClient(peer).admission(metadata_stop.get_token());});
     rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,journal.native);});
     rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
     struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
@@ -127,7 +130,7 @@ inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<TransportCancelled>([&]{stopped_journal->reserve_model_call(peer.scope().run_id,peer.scope().run_id,"stopped-funding",ModelCallRole::parent).get();});
     check(journal.client.run(peer.scope().run_id).state==RunState::queued,"Actual child must receive queued admission");
     rejects<Conflict>([&]{journal.client.reserve_model_call("before-start");});
-    auto gateway=std::make_shared<ChildModel>(journal);AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
+    auto gateway=std::make_shared<ChildModel>(journal);AgentSettings settings;const auto admission=AgentWorkerModelClient(peer).admission();check(!admission.owned_request_window&&admission.include_usage,"Plain worker must observe the captured backend model policy");settings.provider=agent_worker_model_config(admission);settings.max_output_tokens=admission.max_output_tokens;settings.instructions.clear();const auto captured=journal.native->root_budget(peer.scope().root_id).get();settings.max_turns=static_cast<std::size_t>(captured.spec.max_model_calls);settings.run_timeout=std::chrono::milliseconds(captured.spec.wall_limit_ms);settings.a2a_enabled=false;
     AgentRunner runner(journal,*closed.context,std::move(settings),AgentRunnerPorts{gateway,closed.catalogue,closed.tools,closed.runtime});
     Run result;try{result=runner.execute(peer.scope().run_id,cancel);}catch(const AgentTerminalHandoff&){throw;}catch(const std::exception& error){throw std::runtime_error(std::string("Child AgentRunner: ")+error.what()+"; model diagnostic: "+journal.model_diagnostic);}check(result.state==RunState::completed&&gateway->observed==journal.ordinal&&!journal.canonical.empty(),"Actual child AgentRunner must complete through scoped backend ports");
     const auto actual=journal.native->progress();check(actual.current_attempt==journal.current_attempt&&actual.canonical_assistant==journal.canonical&&actual.model_event_ordinal==journal.ordinal,"Production journal progress must contain the exact acknowledged runner facts");

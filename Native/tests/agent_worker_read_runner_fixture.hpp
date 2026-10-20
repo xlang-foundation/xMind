@@ -27,13 +27,15 @@ public:
 };
 inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     Journal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();worker_runner_fixture::verify_closed_ports(closed);auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
+    const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Read admission metadata must omit backend destinations, credentials and deadlines");
+    for(const auto* payload:{R"({"include_usage":false})",R"({"deadline_ms":999999})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
     rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,{});});
     struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,foreign);});
     check(workspace->workspace_id()==peer.scope().workspace_id&&workspace->workspace_revision()==peer.scope().workspace_revision,"Native read workspace must preserve exact captured metadata");
     std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{workspace->prepare_request(stopped.get_token());});
     auto unadmitted=workspace->read_host();AgentWorkspaceInvocation wrong{1,"foreign-root","unadmitted","unadmitted",peer.scope().workspace_id,peer.scope().workspace_revision,peer.scope().workspace_id,"read_file",R"({"path":"nested/same.txt"})"};rejects<Conflict>([&]{unadmitted->invoke(wrong);});
-    AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
+    AgentSettings settings;const auto admission=AgentWorkerModelClient(peer).admission();check(admission.owned_request_window&&admission.include_usage,"Read worker must observe its captured backend request window and controls");settings.provider=agent_worker_model_config(admission);settings.max_output_tokens=admission.max_output_tokens;settings.instructions.clear();const auto captured=journal.native->root_budget(peer.scope().root_id).get();settings.max_turns=static_cast<std::size_t>(captured.spec.max_model_calls);settings.run_timeout=std::chrono::milliseconds(captured.spec.wall_limit_ms);settings.a2a_enabled=false;
     AgentRunnerPorts ports{model,closed.catalogue,closed.tools,closed.runtime,workspace};
     for(const auto* payload:{R"({"attempt_id":"forged","ordinal":0,"phase":"started","json":"forged event"})",R"({"attempt_id":"forged","ordinal":0,"phase":"unknown"})",R"({"attempt_id":"forged","ordinal":0.5,"phase":"started"})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.tool_event",payload);});
     auto invalid=settings;invalid.instructions="worker replacement policy";rejects<std::invalid_argument>([&]{AgentRunner rejected(journal,*closed.context,invalid,ports);});

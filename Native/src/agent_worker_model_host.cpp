@@ -34,6 +34,12 @@ AgentWorkerModelHost::AgentWorkerModelHost(PersistenceService& store,AgentWorker
     if(!policy_.assistant_provider_context_json.empty()&&Json::parse(policy_.assistant_provider_context_json)!=identity)throw Conflict("Worker assistant context differs from captured admission");
     const auto saved=store_.agent_worker_lease(lease_.generation).get();if(saved.state!="active"||saved.spec!=lease_)throw Conflict("Worker model host has no exact captured lease");
 }
+AgentWorkerModelAdmission AgentWorkerModelHost::admission(std::stop_token cancel){
+    std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker model owner is busy");
+    const auto check=[&]{if(owner_cancel_.stop_requested()||cancel.stop_requested())throw TransportCancelled("Worker model admission cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker model admission deadline elapsed");};check();
+    (void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();check();
+    AgentWorkerModelAdmission result;result.model_id=provider_.model;result.wire=provider_.wire;result.tools=provider_.tools;result.stream_usage=provider_.stream_usage;result.output_limit=provider_.output_limit;result.reasoning=provider_.reasoning;result.reasoning_effort=provider_.reasoning_effort;result.chat_dialect=provider_.chat_dialect;result.include_usage=policy_.include_usage;result.max_output_tokens=policy_.max_output_tokens;result.owned_request_window=bool(policy_.request_context);return result;
+}
 ModelRequest AgentWorkerModelHost::prepare_request(std::stop_token cancel){
     std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker model owner is busy");std::stop_source linked;std::stop_callback owner(owner_cancel_,[&]{linked.request_stop();});std::stop_callback caller(cancel,[&]{linked.request_stop();});
     const auto check=[&]{if(linked.stop_requested())throw TransportCancelled("Worker context owner cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker context deadline elapsed");};check();
