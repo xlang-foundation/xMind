@@ -3,15 +3,6 @@
 namespace worker_read_runner_fixture {
 using namespace agentflow;using Json=nlohmann::json;
 using worker_runner_fixture::check;using worker_runner_fixture::rejects;using worker_runner_fixture::ready;
-class Workspace final:public AgentRunnerReadWorkspace {
-public:
-    explicit Workspace(AgentWorkerRpcPeer& peer):peer(peer),model(peer){}
-    std::string workspace_id()const override{return peer.scope().workspace_id;}
-    std::int64_t workspace_revision()const override{return peer.scope().workspace_revision;}
-    ModelRequest prepare_request(std::stop_token cancel)override{return model.prepare_request(cancel);}
-    std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer);}
-    AgentWorkerRpcPeer& peer;AgentWorkerModelClient model;
-};
 class Journal final:public worker_runner_fixture::ChildJournal {
 public:
     using ChildJournal::ChildJournal;
@@ -35,7 +26,13 @@ public:
     Journal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t calls=0;
 };
 inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
-    Journal journal(peer,cancel);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=std::make_shared<Workspace>(peer);
+    Journal journal(peer,cancel);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
+    rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,{});});
+    struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
+    auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,foreign);});
+    check(workspace->workspace_id()==peer.scope().workspace_id&&workspace->workspace_revision()==peer.scope().workspace_revision,"Native read workspace must preserve exact captured metadata");
+    std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{workspace->prepare_request(stopped.get_token());});
+    auto unadmitted=workspace->read_host();AgentWorkspaceInvocation wrong{1,"foreign-root","unadmitted","unadmitted",peer.scope().workspace_id,peer.scope().workspace_revision,peer.scope().workspace_id,"read_file",R"({"path":"nested/same.txt"})"};rejects<Conflict>([&]{unadmitted->invoke(wrong);});
     AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
     AgentRunnerPorts ports{model,std::make_shared<worker_runner_fixture::ClosedCatalog>(),std::make_shared<worker_runner_fixture::ClosedTools>(),std::make_shared<worker_runner_fixture::ClosedRuntime>(),workspace};
     for(const auto* payload:{R"({"attempt_id":"forged","ordinal":0,"phase":"started","json":"forged event"})",R"({"attempt_id":"forged","ordinal":0,"phase":"unknown"})",R"({"attempt_id":"forged","ordinal":0.5,"phase":"started"})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.tool_event",payload);});

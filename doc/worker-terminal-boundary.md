@@ -198,6 +198,24 @@ peer still verifies exactly 27 requests. Worker-specific non-chat wires and
 broader profile compatibility need further qualification. Production read/runtime
 adapters, process entry and AgentService placement remain open.
 
+The [native read-workspace checkpoint](evidence/agent-worker-read-workspace-focused-20261020.json)
+adds `make_agent_worker_read_workspace`. It retains the ordinary journal,
+requires its exact peer binding, rejects workspace-less roots and preserves the
+captured workspace identity/revision. Request preparation forwards owned values
+through the native model client; read hosts use the native read RPC client. No
+native root, local guidance object, policy or grant is opened/created in the
+child by this adapter. Backend request admission, permissions and durable read
+claims remain authoritative; metadata alone grants no execution.
+
+The actual read AgentRunner fixtures now use native workspace, journal and model
+adapters together. Probes reject null/foreign bindings, workspace-less roots,
+cancelled preparation and an unadmitted foreign read invocation. The three-window
+canonical read loop and pending-read-approval cancellation both pass. The focused
+gate passes 53 contracts in 154.88 seconds with frozen inputs and all 133 binaries;
+the independent peer still verifies exactly 27 requests. Runtime/closed-context
+adapters, production process entry, broader profiles and AgentService placement
+remain open; this is not installed or complete product acceptance.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

@@ -1,0 +1,88 @@
+{
+  "representativeReadRunnerChild": {
+    "pid": 16712,
+    "creationTime": "134370007766509977"
+  },
+  "recordedAt": "2026-10-20T20:14:27.258Z",
+  "gate": {
+    "recordedAt": "2026-10-20T20:13:48.844Z",
+    "sourceParent": "1d1ae130cdc89dec58431f39bae5f437c38f79f6",
+    "sourcePatchSha256": "79523c183bbc1f363c593a92fc58e4e6ffe5355670b39ff9a14572ed55261f4f",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 26884,
+      "launchedAt": "2026-10-20T20:09:59.469Z",
+      "completedAt": "2026-10-20T20:11:08.345Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "71451d0cf8634bd738266843817d3bfdf9161acf7babf02769150bb0ada26d33"
+    },
+    "test": {
+      "pid": 71412,
+      "launchedAt": "2026-10-20T20:11:11.268Z",
+      "completedAt": "2026-10-20T20:13:46.184Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cd636e4a8c8096470c3b2471769190f5a8c221a2b6bc2be046e8b2a78fe2208b"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 154.88,
+    "projectFiles": 2676,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "31e5babf0c4701e685bf550634d2c6ec8b98e285de0cacbca265ffce37cbe2d8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-read-workspace-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-build.log": "71451d0cf8634bd738266843817d3bfdf9161acf7babf02769150bb0ada26d33",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-build-terminal.json": "f8f3c7f9f3c08945cda12bc871e3098a346adbc07aad883708369cd6aee4fef8",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-ctest.log": "cd636e4a8c8096470c3b2471769190f5a8c221a2b6bc2be046e8b2a78fe2208b",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-ctest-terminal.json": "062b5873d9463597fc4ccd3a7850696167717a0ec16d0006c73292fa08ceb722",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-LastTest.log": "252256b2cec9d441ac72a1521e3761e514947c9ab31ba6ad46975da43d3214f0",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-test-inventory.json": "480f2d20acba0f4bf594da5bcba5c426fce007df8db59221e840a03f74bcf6d6",
+        "doc/evidence/agent-worker-read-workspace-focused-20261020-gate.json": "ca13e3eec58b332f2d0d64fbb7f463c793be389a6ab6054036b6c2382f5f12e9"
+      },
+      "localManifestHashes": {
+        "source.patch": "79523c183bbc1f363c593a92fc58e4e6ffe5355670b39ff9a14572ed55261f4f",
+        "inputs-before-build.json": "d193d64ac43a9370ce3625a7e4f5900b9b9a678061955d199567c1a198333dae",
+        "binaries-before-test.json": "8b09f70af87f2233bf6095ba9637f9106eab122077bac7df688139e5d6b89080"
+      }
+    }
+  },
+  "fixtureSha256": "f16854650e1cd53b7e09b3c4414e618dd17b7ca78644ec4db0da5ed9a149eb73",
+  "ledgerFixtureSha256": "e9e858928a40c3f70b6a32e9838b158fdcf6601f706460de9f609a5cca883294",
+  "evidenceMethod": "Actual child read fixtures use the native read-workspace factory alongside native journal/model adapters. Parent authenticated success records follow the child checks; child stdout is discarded.",
+  "scope": "Production ordinary-worker read-workspace adapter over owned request and read RPC, without child-local workspace access.",
+  "verified": [
+    "Factory rejects null and reported foreign journal bindings",
+    "Plain workspace-less roots cannot create a read-workspace capability",
+    "Captured workspace identity and revision match the exact peer metadata",
+    "Cancelled request preparation rejects before dispatch",
+    "Read host obtained from the adapter rejects an unadmitted foreign invocation",
+    "Request windows are forwarded unchanged through the existing native model client",
+    "Returned read hosts use the existing native read RPC client; backend policy, guidance and durable read authority remain in force",
+    "Actual child read AgentRunner completes its three-window canonical loop with the native workspace/journal/model adapters",
+    "Actual pending-read-approval cancellation retains canonical history and charges through post-exit retirement",
+    "Independent HTTP peer still verifies exactly 27 requests with no retry"
+  ],
+  "limitations": [
+    "Production runtime/closed-context adapters, process entry and AgentService placement remain open",
+    "Broader profiles, graph and effect worker placement remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native, installed, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}

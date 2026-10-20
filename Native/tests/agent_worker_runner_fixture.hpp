@@ -6,6 +6,7 @@
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_worker_run_journal.hpp"
 #include "agentflow/agent_worker_model_gateway.hpp"
+#include "agentflow/agent_worker_read_workspace.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
 #include <type_traits>
@@ -192,6 +193,7 @@ struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
 inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer,cancel);UnsupportedContextJournal context;
+    rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,journal.native);});
     rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
     struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,foreign);});
