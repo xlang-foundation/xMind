@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Root execution segments separated from private loops — 2026-10-19
+
+AgentService and GraphService now expose their single-root execution segment separately from their physical work-loop claim. All existing ticket acquisition, runner calls, durable terminal/paused rechecks, wake scheduling, cancellation and fault handling remain in that segment. Loop continuation becomes a segment return; the same private loops still invoke it. This prepares actual shared-worker dispatch without changing scheduler ownership yet.
+
+The complete Release rebuild succeeds and eight focused native contracts pass in46.68seconds: context graph engine, planning HTTP, dynamic plan engine, graph service HTTP, graph runner, agent service, agent HTTP and backend handoff. CTest61556 exits0; all2627project/16SDK/1870pure/76runtime/18598dependency/130binary hashes and file sets stay unchanged. New executable5f009826 is uninstalled and has no full-suite qualification. Shared-worker integration remains open; installed55/owner56032 are untouched.
+
+See evidence/shared-root-job-actions-focused-20261019.json, raw log, inventory, source patch and gate script.
+
 ## Shared root callback ownership correction — 2026-10-19
 
 A new lifecycle regression fails against unchanged38a138da production component: retaining a completed ticket also retains its callback captures. Closed staged tickets do likewise. That can retain a service owner or form a callback-owner-ticket cycle. The failed1/1 gate and source patch are retained, not replaced by the later pass.

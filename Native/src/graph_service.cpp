@@ -90,33 +90,25 @@ struct GraphService::Impl {
         for(const auto& [id,job]:active){(void)id;job->dispatch.reset();job->stop.request_stop();}
         changed.notify_all();
     }
-    void work() {
-        for(;;) {
-            std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
-            {
-                std::unique_lock lock(mutex);
-                changed.wait(lock,[&]{return !accepting || !pending.empty();});
-                if(!accepting)return;
-                job=std::move(pending.front());pending.pop_front();dispatch=std::move(job->dispatch);job->phase=Phase::working;
-            }
+    void execute_job(const std::shared_ptr<Job>& job,std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch){
             try {
                 if(!dispatch)throw DatabaseError("Graph root lost its shared dispatch ticket");
                 auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),true);
                 std::lock_guard lock(mutex);
-                if(terminal(observed.state)){active.erase(job->id);continue;}
+                if(terminal(observed.state)){active.erase(job->id);return;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Graph worker returned without a terminal outcome or human pause");
                 // Human input may commit between the runner's pause observation
                 // and worker retirement. Check the durable state under the same
                 // lock used by input scheduling so that wakeup cannot be lost.
                 const auto current=store.run(job->id).get();
-                if(terminal(current.state)){active.erase(job->id);continue;}
+                if(terminal(current.state)){active.erase(job->id);return;}
                 if(current.state==RunState::paused){
                     if(job->cancelled){runner.retire(job->id,RunState::cancelled,job->cancel_reason);active.erase(job->id);}
                     else if(accepting&&!job->stop.stop_requested()&&runner.captured_context(job->id)&&runnable(store.graph_run(job->id).get())){
                         enqueue(job);job->phase=Phase::queued;changed.notify_one();
                     }else job->phase=Phase::waiting;
-                    continue;
+                    return;
                 }
                 if(current.state!=RunState::running)throw DatabaseError("Graph pause ownership changed unexpectedly");
                 if(!accepting || job->stop.stop_requested()) {
@@ -135,6 +127,17 @@ struct GraphService::Impl {
                 // The runner drained its dispatched children. Preserve its
                 // unfinished/uncertain ledger rather than inventing retirement.
             }
+    }
+    void work() {
+        for(;;) {
+            std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
+            {
+                std::unique_lock lock(mutex);
+                changed.wait(lock,[&]{return !accepting || !pending.empty();});
+                if(!accepting)return;
+                job=std::move(pending.front());pending.pop_front();dispatch=std::move(job->dispatch);job->phase=Phase::working;
+            }
+            execute_job(job,std::move(dispatch));
         }
     }
     void close() {

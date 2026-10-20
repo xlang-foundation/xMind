@@ -1,0 +1,21 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  30: native_context_graph_engine_contract
+1/8 Test  #30: native_context_graph_engine_contract ...   Passed    1.61 sec
+    Start  32: native_planning_http_contract
+2/8 Test  #32: native_planning_http_contract ..........   Passed    0.82 sec
+    Start  35: native_dynamic_plan_engine_contract
+3/8 Test  #35: native_dynamic_plan_engine_contract ....   Passed    6.22 sec
+    Start  43: native_graph_service_http_contract
+4/8 Test  #43: native_graph_service_http_contract .....   Passed   10.94 sec
+    Start  46: native_graph_runner_contract
+5/8 Test  #46: native_graph_runner_contract ...........   Passed   10.35 sec
+    Start  81: native_agent_service_contract
+6/8 Test  #81: native_agent_service_contract ..........   Passed    1.60 sec
+    Start 113: native_agent_http_contract
+7/8 Test #113: native_agent_http_contract .............   Passed   10.74 sec
+    Start 146: native_backend_handoff_contract
+8/8 Test #146: native_backend_handoff_contract ........   Passed    4.38 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =  46.68 sec

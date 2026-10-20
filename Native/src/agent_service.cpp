@@ -192,14 +192,7 @@ struct AgentService::Impl {
             }
         }}catch(...){fail();}
     }
-    void work(){
-        for(;;){std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
-            {
-                std::unique_lock lock(mutex);
-                changed.wait(lock,[&]{return !accepting||std::any_of(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});});
-                const auto next=std::find_if(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});
-                if(next==pending.end())return;job=*next;pending.erase(next);dispatch=std::move(job->dispatch);job->phase=Phase::working;
-            }
+    void execute_job(const std::shared_ptr<Job>& job,std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch){
             if(children&&!children->healthy())fail();
             try{
                 // Waiting never holds the service mutex. Cancelled roots still
@@ -207,12 +200,12 @@ struct AgentService::Impl {
                 if(!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
                 auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
-                if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
+                if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
                 // committed between the runner pause and worker retirement.
                 const auto current=persistence.run(job->id).get();
-                if(terminal(current.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
+                if(terminal(current.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
                 const auto plan=persistence.dynamic_plan_for_root(job->id).get();if(!plan||current.state!=RunState::paused)throw DatabaseError("Dynamic pause ownership changed unexpectedly");
                 verify_pause(current,*plan);
                 if(job->user_cancel)retire_waiting(job,RunState::cancelled,R"({"reason":"cancelled_during_human_wait"})");
@@ -237,13 +230,23 @@ struct AgentService::Impl {
             }catch(const Conflict&){
                 // A lost claim never authorizes modifying another owner's run.
                 // A live local owner remains quarantined rather than erased.
-                try{const auto current=persistence.run(job->id).get();if(terminal(current.state)){std::lock_guard lock(mutex);remove_ticket(job);active.erase(job->id);continue;}}catch(...){}
+                try{const auto current=persistence.run(job->id).get();if(terminal(current.state)){std::lock_guard lock(mutex);remove_ticket(job);active.erase(job->id);return;}}catch(...){}
                 {std::lock_guard lock(mutex);job->phase=Phase::faulted;remove_ticket(job);}fail();
             }catch(...){
                 {std::lock_guard lock(mutex);job->phase=Phase::faulted;remove_ticket(job);}fail();
                 // Actual children are drained by Runner/executor. Keep an
                 // unrecorded or uncertain ledger for recovery; invent no result.
             }
+    }
+    void work(){
+        for(;;){std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
+            {
+                std::unique_lock lock(mutex);
+                changed.wait(lock,[&]{return !accepting||std::any_of(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});});
+                const auto next=std::find_if(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});
+                if(next==pending.end())return;job=*next;pending.erase(next);dispatch=std::move(job->dispatch);job->phase=Phase::working;
+            }
+            execute_job(job,std::move(dispatch));
         }
     }
     bool session_busy(const std::string& session){
