@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Qualified 0.1.58 development package — 2026-10-20
+
+Candidate0.1.58 combines client source `62141200126369e8b3bb38810088afe985d0fde7` with complete156-qualified native sourceaf34bfe0/executabledc900cad and pinned SDK58a8aab9/DLL1ff2a8e7. The public runtime is staged from verified installed57 payloads, replacing the qualified executable and provenance; all production SDK payloads match the frozen full native input manifest. Development linker .lib/.exp artifacts remain outside distribution. Runtime manifest SHA256 `71d5c2b5197ad464040ae93630ba0984645695bdabb027e24a6f223adfa10ef1`,2402payload files. Actual Native/CMake sources still match the complete native qualification; the client version metadata is separately staged and checked.
+
+The full staged clients pass462extension and161browser tests with every file/hash unchanged. Actual staged browser/native integration also passes in3.97seconds against the same executable/modules/stdlib/assets, including native graph/human-input/readback/restore controller fixtures. Final inventory verification after all gates and packaging confirms the exact same17441stage files and hashes. These controller checks are separate from rendered IDE/browser and live-provider acceptance.
+
+C:/xMindNativeValidation/xmind-0.1.58-complete-win32-x64.vsix is34521738bytes, SHA256 `678b4ebc8d651af0ddf037f6fb1370deb938ad256276e44a6dbe3a843abce070`. All2448archive entries verify against the qualified stage; only documented README/license case/name aliases occur. Tools/verify-browser-vsix.ps1 separately passes26required renderer/access/license assets and the shared-backend command, excluding private state. See evidence/coding58-*, coding-0.1.58-* and vscode-0.1.58-* receipts. Complete stage and input hashes remain under C:/xMindNativeValidation/coding-0.1.58-current-source-20261020 and coding-0.1.58-current-client-gate-20261020.
+
+The candidate is not installed. Installed57, the adopted backend, old browser hosts/pages/settings/history and completed user tasks are unchanged; no model task was submitted or replayed. Safe adoption and fresh installed/rendered/live-provider acceptance remain, along with other documented OSS requirements. This local development artifact is not a published release or a completion declaration.
+
 ## Complete nested-context native qualification — 2026-10-20
 
 Exact committed source `af34bfe0af3ebaa4bed7c8f55283ca8db9a4649d` passes all156 registered native contracts in1073.26seconds. CTest46208 and wrapper66492 are terminal0. All2630project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets and hashes remain unchanged; source patch is empty. Executable SHA256 `dc900cadbf559ae7fb6de3722d3953d83a127925cb9ce0f40e3b37603b005dbe`, pinned SDK58a8aab9 and runtime DLL `1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3`.

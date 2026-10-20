@@ -1,0 +1,29 @@
+{
+  "recordedAt": "2026-10-20T11:12:49.908Z",
+  "version": "0.1.58",
+  "sourceRevision": "62141200126369e8b3bb38810088afe985d0fde7",
+  "extension": {
+    "exitCode": 0,
+    "tests": 462,
+    "passed": 462,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "460f99cfe61dc35fc5193cebad272cde91f6f595762d364a1899ae1e7d757693"
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 161,
+    "passed": 161,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "9a7896c4b257336e8c4d98ba4380479e7ea2c5a7b58b665a0518453f1fa4a420"
+  },
+  "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+  "stageFiles": 17441,
+  "nativeExecuted": false,
+  "providerRequests": 0,
+  "renderedAcceptance": false,
+  "passed": true
+}
