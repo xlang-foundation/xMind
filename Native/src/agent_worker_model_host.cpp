@@ -56,7 +56,17 @@ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const 
     ModelCompletion response;const auto started=std::chrono::steady_clock::now();std::optional<std::int64_t> first_token;
     try{check();if(policy_.admit_context)policy_.admit_context(attempt,request,linked.get_token());check();auto selected=provider_;const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now());if(remaining.count()<1)throw TransportTimeout("Worker model root deadline elapsed");selected.deadline=std::min(selected.deadline,remaining);selected.idle_timeout=std::min(selected.idle_timeout,selected.deadline);
         response=gateway_->complete(selected,request,[&](const ModelEvent& event){check();if(!first_token&&(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning"))first_token=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count();store_.record_agent_worker_model_event(claim,event.kind,event.json).get();sink(event);},linked.get_token());
-    }catch(...){const auto failure=std::current_exception();try{store_.interrupt_agent_worker_model(claim).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Worker model dispatch outcome could not be recorded");}std::rethrow_exception(failure);}
+    }catch(...){const auto failure=std::current_exception();AgentWorkerModelFailure code=AgentWorkerModelFailure::dispatch_error;
+        try{std::rethrow_exception(failure);}
+        catch(const TransportCancelled&){code=std::chrono::steady_clock::now()>=deadline_?AgentWorkerModelFailure::deadline:AgentWorkerModelFailure::cancelled;}
+        catch(const AgentWorkerAuthorityCancelled&){code=AgentWorkerModelFailure::cancelled;}
+        catch(const TransportTimeout&){code=AgentWorkerModelFailure::deadline;}
+        catch(const AgentWorkerAuthorityExpired&){code=AgentWorkerModelFailure::deadline;}
+        catch(const ProviderHttpError&){code=AgentWorkerModelFailure::provider_failure;}
+        catch(const ModelProtocolError&){code=AgentWorkerModelFailure::provider_failure;}
+        catch(const TransportError&){code=AgentWorkerModelFailure::provider_failure;}
+        catch(...){}
+        try{store_.interrupt_agent_worker_model(claim,code).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Worker model dispatch outcome could not be recorded");}std::rethrow_exception(failure);}
     const auto actual=encode_agent_model_completion(response);std::string assistant;
     try{assistant=format_agent_model_assistant(response,provider_.model,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count(),first_token,policy_.assistant_provider_context_json);}
     catch(...){const auto failure=std::current_exception();try{store_.record_agent_worker_model_response(claim,actual).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}std::rethrow_exception(failure);}

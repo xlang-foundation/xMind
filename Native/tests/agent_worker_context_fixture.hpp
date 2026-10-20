@@ -84,7 +84,15 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     }
     if(mode=="product_read_error"){
         const auto intent=Json::parse(execute_reply());check(intent.size()==2&&intent.at("version")==1&&intent.at("outcome")=="failed","Product failure reply must contain only fixed terminal intent");
-        const auto before=store.events(id).get();check(worker->alive()&&store.run(id).get().state==RunState::running&&store.agent_worker_lease(generation).get().state=="active"&&store.run_history(id).get().size()==1&&store.root_budget(id).get().model_calls_reserved==1&&std::none_of(before.begin(),before.end(),[](const Event& event){return event.kind=="run.failed";}),"Failed product reply cannot fabricate a terminal run or release live process ownership");
+        const auto before=store.events(id).get();
+        const auto uncertain=std::find_if(before.begin(),before.end(),[](const Event& event){return event.kind=="worker.model.uncertain";});
+        check(uncertain!=before.end()&&Json::parse(uncertain->json).at("failure_code")=="provider_failure"&&Json::parse(uncertain->json).size()==3,"Actual backend provider failure must retain only a fixed durable cause before child retirement");
+        const auto attempt=Json::parse(uncertain->json).at("attempt_id").get<std::string>();const auto claim=store.agent_worker_model_claim(id,attempt).get();
+        rejects<std::invalid_argument>([&]{store.interrupt_agent_worker_model(claim.spec,static_cast<AgentWorkerModelFailure>(99)).get();});
+        store.interrupt_agent_worker_model(claim.spec,AgentWorkerModelFailure::cancelled).get();
+        check(store.events(id).get().size()==before.size(),"Repeated interruption must not overwrite or duplicate the first observed failure");
+        std::cout<<"Backend worker failure cause verified: durable fixed provider_failure, no provider text, no repeat rewrite, invalid enum rejected."<<std::endl;
+        check(worker->alive()&&store.run(id).get().state==RunState::running&&store.agent_worker_lease(generation).get().state=="active"&&store.run_history(id).get().size()==1&&store.root_budget(id).get().model_calls_reserved==1&&std::none_of(before.begin(),before.end(),[](const Event& event){return event.kind=="run.failed";}),"Failed product reply cannot fabricate a terminal run or release live process ownership");
         const auto terminal=drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::failed,"provider_failure",Clock::now()+5s);const auto after=store.events(id).get();check(terminal.exit_code==0&&!worker->alive()&&terminal.run.state==RunState::failed&&store.run_history(id).get().size()==1&&store.root_budget(id).get().model_calls_reserved==1&&std::count_if(after.begin(),after.end(),[](const Event& event){return event.kind=="budget.model_call.interrupted";})==1,"Actual failed product exit must preserve history and charge while retiring unfinished model exactly once");
         std::cout<<"Product worker provider failure verified: fixed intent, live ownership until exact exit, one retained charge and interrupted reservation."<<std::endl;return;
     }

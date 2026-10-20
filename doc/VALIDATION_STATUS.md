@@ -1,3 +1,26 @@
+## Backend-observed worker dispatch failure receipt — 2026-10-20
+
+The backend model host now classifies dispatch interruption with a fixed typed
+code: cancellation, deadline, provider failure or dispatch error. The repository
+records that code atomically with the existing uncertain claim/event. Default
+unknown callers retain the previous receipt shape. No child RPC accepts a failure
+code, provider text is not stored in this receipt, and an already uncertain claim
+cannot have its first event rewritten or duplicated by another interruption.
+
+The actual product-child HTTP provider-failure case verifies `provider_failure`
+before child retirement, exact three-field receipt content, invalid-enum rejection
+and unchanged event count after a conflicting repeat interruption. Prior history,
+the model charge, uncertainty and exact post-exit retirement remain retained.
+The independent peer verifies exactly 45 intentional controlled requests.
+
+The original serial Release build completes zero, followed by 53 passing contracts
+in 208.88 seconds. All frozen source, SDK, pure-library, runtime, dependency and
+133 native binary file sets/hashes remain unchanged during validation. No CPython
+or live model is used. This is focused qualification, with a new cause-specific
+actual assertion for provider failure; exhaustive classifier-branch and service
+supervisor integration remain open. Installed59 and user state are untouched.
+See [receipt](evidence/agent-worker-failure-facts-focused-20261020.json).
+
 ## Native worker supervisor control API — 2026-10-20
 
 Backend supervisors now have a native execution/cancellation request helper with

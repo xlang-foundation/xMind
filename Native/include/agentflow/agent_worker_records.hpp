@@ -10,6 +10,9 @@
 namespace agentflow {
 struct AgentWorkerAuthorityCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
 struct AgentWorkerAuthorityExpired:std::runtime_error {using std::runtime_error::runtime_error;};
+// Backend-observed dispatch failure only; no child RPC accepts this value.
+// Unknown retains the existing uncertainty receipt without inventing a cause.
+enum class AgentWorkerModelFailure {unknown,cancelled,deadline,provider_failure,dispatch_error};
 // Backend-created immutable process/admission metadata. No session channel key,
 // provider credential, executable path or worker-selected authority is stored.
 struct AgentWorkerLeaseSpec {

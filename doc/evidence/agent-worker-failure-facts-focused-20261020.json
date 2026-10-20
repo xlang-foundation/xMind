@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-20T23:37:58.863Z",
+  "gate": {
+    "recordedAt": "2026-10-20T23:37:47.276Z",
+    "sourceParent": "fd3332c18d7ed45b1018d8283552d5e464fe8661",
+    "sourcePatchSha256": "1b476916283a762843ffd691f1eb26efb9f56936edc8bdf4116169980b8ce15f",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 10840,
+      "launchedAt": "2026-10-20T23:16:30.713Z",
+      "completedAt": "2026-10-20T23:33:35.363Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "855764868f400406aa0b22c876afe96c52e6bf30309baf11def02ab4dd2541c7"
+    },
+    "test": {
+      "pid": 59244,
+      "launchedAt": "2026-10-20T23:34:14.330Z",
+      "completedAt": "2026-10-20T23:37:43.317Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6fce1318f7c3fc4d4a6bd9084b607fe132c1aa32fe3440b712bbeeb14e8ecfe3"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 208.88,
+    "projectFiles": 2688,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "95fda48405898c1bc1ff09fafacfa467ddef917ef6d7734483879df484a7dfac",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-build.log": "855764868f400406aa0b22c876afe96c52e6bf30309baf11def02ab4dd2541c7",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-build-terminal.json": "dea190e7ad91a1937217c3d976e7a413a69c9583f72caba36fac11f85703781d",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-ctest.log": "6fce1318f7c3fc4d4a6bd9084b607fe132c1aa32fe3440b712bbeeb14e8ecfe3",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-ctest-terminal.json": "ef6c84fd5617872666703e474233546cfb75b70c1d68c89c9879dcb1130b834c",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-LastTest.log": "47041f4a3d45f8549ff61e2b77c48262d891cfda4c4919f3f0e0216eb3e16953",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-test-inventory.json": "713dad0d02046a779c44b15e1be153f6008caa9c7659bdb1c2d083f5061ffaf1",
+    "doc/evidence/agent-worker-failure-facts-focused-20261020-gate.json": "e99153185da945419bcf1546a489475cc13da038e8658d8a8b86f8ac45b5a5d8"
+  },
+  "fixtureSha256": "699fb24f8ec45e00d5f2d93415131b78e92b1c3cf0ee015d4dba89e3d986d4a2",
+  "scope": "Backend model-dispatch interruption retains a fixed backend-observed failure code in its atomic uncertainty event",
+  "verified": [
+    "Backend-only typed codes cover cancelled, deadline, provider_failure and dispatch_error; default unknown preserves the prior uncertainty shape",
+    "Actual product provider HTTP failure records provider_failure before child physical retirement",
+    "Receipt contains only generation, attempt identity and fixed failure_code, without provider exception text",
+    "Invalid enum rejected before mutation; repeat interruption preserves the original cause/event count",
+    "Uncertainty, model charge, prior history and exact post-exit retirement remain retained",
+    "Independent controlled peer verifies exactly 45 intentional requests"
+  ],
+  "limitations": [
+    "New cause-specific actual assertion covers provider_failure; this is not exhaustive validation of every classifier branch",
+    "Failure category is an observed dispatch fact, not proof of a complete provider outcome or authority for child-selected terminal reasons",
+    "AgentService/GraphService supervisor integration and broader worker capabilities remain open",
+    "No new full-native-suite, installation, hosted, live-provider or rendered-client acceptance claim"
+  ],
+  "passed": true
+}

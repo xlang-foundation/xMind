@@ -202,7 +202,7 @@ public:
     // Backend supervisor only, after physical work has drained. No execution authority.
     Run terminate_agent_worker(const AgentWorkerLeaseSpec&,RunState outcome,const std::string& reason);
     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
-    AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);
+    AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);
     AgentWorkerModelClaimRecord record_agent_worker_model_response(const AgentWorkerModelClaimSpec&,const std::string& actual_response_json,const std::string& actual_assistant_json={});
     AgentWorkerReadClaimRecord claim_agent_worker_read(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&);

@@ -177,3 +177,4 @@ doc/evidence/agent-worker-no-tools-*.log -text whitespace=-blank-at-eol,-blank-a
 doc/evidence/agent-worker-read-owner-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/worker-read-owner-current-full-native-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/agent-worker-control-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/agent-worker-failure-facts-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
