@@ -1,0 +1,102 @@
+{
+  "recordedAt": "2026-10-20T17:04:11.745Z",
+  "gate": {
+    "recordedAt": "2026-10-20T17:04:05.762Z",
+    "sourceParent": "6579fb0d2effc592cd7dfed82494da577802b01a",
+    "sourcePatchSha256": "831309da26a48e3e6cca4e700a4129502482bfb87921b4dc0e5c0eaf66ff7142",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 35056,
+      "launchedAt": "2026-10-20T16:59:14.865Z",
+      "completedAt": "2026-10-20T17:01:22.683Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1da18658681b2bd836590eab4c13e8f6fc203e968965e1d8bdc4accaff49f8ff"
+    },
+    "test": {
+      "pid": 53560,
+      "launchedAt": "2026-10-20T17:01:27.563Z",
+      "completedAt": "2026-10-20T17:04:03.529Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0d7f4aa8525991c95c192060147e77b2a595075856dea30ff1dd0e713df64091"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 155.91,
+    "projectFiles": 2661,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "c19cb80b808d7ee1d442c2702018a8e8377842e1676cc5028a0d7aacd0685ece",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-read-rpc-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-rpc-focused-20261020-build.log": "5fadb4abb07306ff32dc38049bd466eba3b6af28185d9b25b3d0a7e229c28f92",
+        "doc/evidence/agent-worker-read-rpc-focused-20261020-build-terminal.json": "36a894b996fe783ee335a15293e62af944595358f1d855b4ee8c3315ce8cf40d"
+      },
+      "localManifestHashes": {
+        "source.patch": "65333fcffa328d04da0f2d500bdfce4801cdfd98d7e84a310d16ba462dce5df2",
+        "inputs-before-build.json": "9ec61997388a0103142bedfeb553dad265ef7a0e8dbddb7828ba83e97ff9d083"
+      }
+    },
+    "agent-worker-read-rpc-observed-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-build.log": "1da18658681b2bd836590eab4c13e8f6fc203e968965e1d8bdc4accaff49f8ff",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-build-terminal.json": "9392dffcf30bc6af1b4bb37861f0b35cc9a1c52ab4ca85415ae7cc1e9bb16f92",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-ctest.log": "0d7f4aa8525991c95c192060147e77b2a595075856dea30ff1dd0e713df64091",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-ctest-terminal.json": "e933404fd5152381f4f1a904d8144d9329702e1f7353fa536d5fd6a423c4dbad",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-LastTest.log": "9462cff23fdff6858d5f5ec118c0563be3e057152a8faee032a9e9548a86ee9f",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-test-inventory.json": "003af88feea3dd6f57d9e64500802c9ff8e19fcc72287747e5ffd3dfd0203a9c",
+        "doc/evidence/agent-worker-read-rpc-observed-20261020-gate.json": "2d1b1fb57faf5afcebbbd5afe9544216f7474279c6fff1916a0f36546c6ff4ea"
+      },
+      "localManifestHashes": {
+        "source.patch": "831309da26a48e3e6cca4e700a4129502482bfb87921b4dc0e5c0eaf66ff7142",
+        "inputs-before-build.json": "428e38efa710b81c6fe88e970a6f212ff5d72331ad61a5e76b66ccaf988d5dd2",
+        "binaries-before-test.json": "2cdee7105a3c337cc9159b65d92d3538392ea643e369548fd693192bbf97ce9e"
+      }
+    }
+  },
+  "children": [
+    {
+      "mode": "read",
+      "pid": 70100,
+      "creationTime": "134369893934105264"
+    },
+    {
+      "mode": "read_delivery",
+      "pid": 25296,
+      "creationTime": "134369893935158215"
+    },
+    {
+      "mode": "read_denied",
+      "pid": 17636,
+      "creationTime": "134369893935914492"
+    },
+    {
+      "mode": "read_cancel",
+      "pid": 31496,
+      "creationTime": "134369893936726403"
+    }
+  ],
+  "fixtureSha256": "5acaac0afb22a210a0c04d9351daa3b47460f038437eb74af14a74018bbe9194",
+  "ledgerFixtureSha256": "189b1d6ebe008802415c73341040e9d071395b54ebebf95330befd784cc1e210",
+  "behavior": "Backend-owned read host and authenticated read.invoke RPC reuse the native read owner, real workspace handles, guidance contexts, captured layered permissions and original deadline. Child requests contain only the existing strict versioned invocation; no roots, grants, approval IDs, policy or credentials. The backend binds the exact run/workspace/revision/folder/name/argument bytes/provider call ID to the latest actual responded and fully finished model attempt, then atomically claims a private durable once-only read key. The native pre-dispatch authority callback rechecks the full active lease/current generation/model receipt on the serialized persistence queue and marks executing before I/O.",
+  "outcomes": "Actual native output and its binding are durable before delivery, immutable on acknowledgement and never a source of redispatch authority. Full lease and cancellation/deadline are checked again before handing result bytes to the child. Pending/executing reads become uncertain in lease retirement/recovery transactions. Generic information APIs reject the private category; active reads block idle quiescence/session deletion and unresolved reads block worker final completion. Late actual outputs may be retained under the original immutable owner without authorizing a retry.",
+  "actualChildCases": "Four distinct actual child cases use the independent native HTTP provider and real read_file catalogue. Positive read returns an unseen random marker from an isolated native workspace; reconstruction changes the file and resets the native host but durable replay rejects. A lost-delivery barrier proves result persistence before explicit owned child termination. Native denial yields zero dispatch and no approval; caller cancellation while a real native approval is pending yields zero dispatch and a cancelled operation. Forged calls/arguments/folders/revision/run/tool/approval metadata and calls before model retirement reject. A still-live authenticated child loses authority after lease retirement.",
+  "ledgerCases": "Synthetic process metadata and model receipt fixtures separately verify concurrent duplicate claims, changed process metadata, exact model-call/argument/folder binding, deadline/cancellation, one start, immutable opaque result bytes, known pre-dispatch rejection, retirement uncertainty, replacement non-adoption and late result capture without model allowance refund. A real native guidance/read owner with a recording query capability cancels its owner after dispatch and proves actual output retention without delivery.",
+  "failure": "The first serial build failed in workspace_tools_contract linking because the unchanged invocation codec had moved to the shared values library without the workspace target declaring that dependency. Its raw build and terminal receipt are retained. The final build declares the dependency and the focused gate explicitly includes workspace_tools_contract. All subsequent stage logs are retained too.",
+  "limits": "This proves actual child model-to-native-read proxy behavior, not an actual child coding AgentRunner loop or product AgentService/GraphService worker placement. Backend canonical tool-turn commit, child workspace/guidance construction adapters, writes/process/remote tools, context/graph/failure lifecycle, shared clocks and Local/Nexus protocol integration remain open. No full native suite, hosted, installed, rendered, actual live-provider task or CPython qualification."
+}

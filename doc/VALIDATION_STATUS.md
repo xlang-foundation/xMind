@@ -1,3 +1,11 @@
+## Backend-owned worker read RPC — 2026-10-20
+
+An actual child can now submit the existing owned read invocation through authenticated RPC. The backend matches it to its latest fully retired actual model tool response and captures a durable once-only claim. Native workspace handles, guidance and permission/approval logic remain at the backend. Dispatch rechecks the full active lease on the persistence queue; actual output is stored before delivery. Reconstruction/replay reject, lease retirement retains uncertainty, and late actual output remains a fact without retry authority. A final live-owner/cancellation/deadline check withholds late result delivery.
+
+Four actual child cases cover a random-marker filesystem read, reconstruction with changed file bytes, death after durable result/before delivery, native denial and cancellation during a real pending approval. Fourteen independent controlled model requests are observed once each, including the existing plain AgentRunner child. Synthetic ledger/recording-owner cases verify exact bindings, concurrency, uncertainty, replacement and cancellation after dispatch. The serial build and 52 focused contracts pass in 155.91s with complete frozen source/SDK/library/runtime/dependency/native-binary file sets/hashes unchanged. The initial missing codec-library dependency link failure is retained; workspace codec coverage is now explicit.
+
+This is read proxy qualification. Actual child coding AgentRunner, canonical tool-turn commit and product worker placement remain open, along with the broader context/graph/effect/Local-Nexus adapters. Installed clients/backend are unchanged; no full-suite/hosted/rendered/live-provider acceptance is claimed. [Evidence and limits](evidence/agent-worker-read-rpc-observed-20261020.json).
+
 ## Read dispatch authority boundary — 2026-10-20
 
 The native read host now supports a trusted backend authority check immediately before actual workspace/language-server dispatch, after policy, guidance and any controller approval. It rechecks cancellation and the original deadline on both sides of that check. The native contract proves admitted dispatch, direct revocation, revocation during approval with a failed receipt and no dispatch, cancellation during the check and deadline expiry during the check.

@@ -1,5 +1,6 @@
 // Actual private child/channel and native HTTP/SSE, controlled provider data.
-// This exercises the model proxy, not a product child AgentRunner or tool RPC.
+// Model and native read proxies plus a plain AgentRunner fixture; product
+// worker placement and an actual child coding AgentRunner remain open.
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_model_values.hpp"
@@ -17,6 +18,7 @@
 #include <future>
 #include <iostream>
 #include <random>
+#include "agent_worker_read_fixture.hpp"
 
 using namespace agentflow;
 using Json=nlohmann::json;
@@ -47,6 +49,7 @@ int child(int argc,char** argv){
     AgentWorkerRpcPeer* self=nullptr;
     AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
         if(method!="fixture.run"&&method!="fixture.stale")throw AgentWorkerRpcRemoteError("unsupported");
+        if(mode=="read"||mode=="read_delivery"||mode=="read_denied"||mode=="read_cancel")return worker_read_fixture::child(*self,mode,method);
         if(mode=="runner"){try{const auto result=worker_runner_fixture::execute(*self);return Json{{"pid",GetCurrentProcessId()},{"attempt_id",result.attempt},{"actual_assistant_json",result.assistant},{"observed_events",result.events},{"actual_runner",result.run.state==RunState::completed}}.dump();}catch(const std::exception& error){return Json{{"runner_failure",error.what()}}.dump();}}
         const auto attempt=Json::parse(payload).at("attempt_id").get<std::string>();AgentWorkerModelClient client(*self);const auto input=request(mode);
         AgentWorkerJournalClient journal(*self);const auto id="rpc-"+mode;
@@ -158,6 +161,6 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
 int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc!=4)return 2;values_contract();auto image=ForegroundProcess::bind_executable(executable());duplicate_rpc(image);std::random_device random;std::filesystem::path folder;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-model-rpc-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create private model RPC fixture");{
     {PersistenceService initialize((folder/"state.sqlite").string(),{argv[1],argv[2]});initialize.close();}
     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","runner"})model_case(store,image,argv[3],mode);store.close();}
+    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","runner"})model_case(store,image,argv[3],mode);for(const auto* mode:{"read","read_delivery","read_denied","read_cancel"})worker_read_fixture::parent(store,image,argv[3],folder,mode);store.close();}
     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

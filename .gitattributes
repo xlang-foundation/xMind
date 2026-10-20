@@ -131,3 +131,5 @@ doc/evidence/agent-worker-completion-*.log -text whitespace=-blank-at-eol,-blank
 doc/evidence/agent-worker-runner-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/agent-read-dispatch-authority-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/agent-worker-read-rpc-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

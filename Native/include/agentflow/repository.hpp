@@ -203,6 +203,10 @@ public:
     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);
     AgentWorkerModelClaimRecord record_agent_worker_model_response(const AgentWorkerModelClaimSpec&,const std::string& actual_response_json,const std::string& actual_assistant_json={});
+    AgentWorkerReadClaimRecord claim_agent_worker_read(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&);
+    AgentWorkerReadClaimRecord start_agent_worker_read(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&);
+    AgentWorkerReadClaimRecord record_agent_worker_read_result(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&,bool success,const std::string& actual_output_json);
+    AgentWorkerReadClaimRecord agent_worker_read_claim(const std::string& root,const std::string& attempt,const std::string& call);
     // Exact durable compare-and-swap; null expected means create only if absent.
     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
     std::string information(const std::string& category,const std::string& id);
