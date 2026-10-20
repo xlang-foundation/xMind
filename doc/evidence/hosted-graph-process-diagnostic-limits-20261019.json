@@ -1,0 +1,69 @@
+{
+  "observedAt": "2026-10-20T03:55:04.841Z",
+  "sourceRun": 39360428093,
+  "sourceRevision": "3bfecb580313c2b9b22b1a4e41b053d12a2e0ab1",
+  "rawObservationSha256": "fa714670df527b3b82cf4526b22e441561fa6f201b6d4f6f6ee668c519663b50",
+  "originalObserverSha256": "82d6e0c92bed711e9d720b7b42f5d0708cf849b954d4815f259f62e2cb414ce7",
+  "scope": {
+    "readOnly": true,
+    "kind": "scope",
+    "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_graph_runner_contract.exe",
+    "ownerPid": 1480,
+    "commandLinesIncluded": false,
+    "environmentIncluded": false
+  },
+  "sampleCount": 3,
+  "observations": [
+    {
+      "pid": 6952,
+      "parentPid": 1480,
+      "createdUtc": "2026-10-20T03:31:46.0121870Z",
+      "observerElapsedMs": 7356,
+      "cpuMs": 609.375,
+      "capturedModules": 64,
+      "utilityInCapturedPrefix": false,
+      "stateRepositoryInCapturedPrefix": true
+    },
+    {
+      "pid": 6952,
+      "parentPid": 1480,
+      "createdUtc": "2026-10-20T03:31:46.0121870Z",
+      "observerElapsedMs": 17964,
+      "cpuMs": 10140.625,
+      "capturedModules": 64,
+      "utilityInCapturedPrefix": false,
+      "stateRepositoryInCapturedPrefix": true
+    },
+    {
+      "pid": 6952,
+      "parentPid": 1480,
+      "createdUtc": "2026-10-20T03:31:46.0121870Z",
+      "observerElapsedMs": 28596,
+      "cpuMs": 20531.25,
+      "capturedModules": 64,
+      "utilityInCapturedPrefix": false,
+      "stateRepositoryInCapturedPrefix": true
+    }
+  ],
+  "limits": {
+    "moduleNamesCappedAt": 64,
+    "threadsCappedAt": 128,
+    "elapsedMsMeans": "Observer stopwatch, not target process age",
+    "sampledUtcAndModuleCountAvailable": false,
+    "missingFromPrefixDoesNotProveUnloaded": true
+  },
+  "identityFlagMeaning": "windows_default_owner_matches_user compares the current token Owner SID with User SID. It does not compare profile directories.",
+  "findings": [
+    "All three module samples hit the 64-name cap; actual Utility assembly presence is unknown.",
+    "Target CPU total increased from609.375ms to20531.25ms while observer elapsed time increased from7356ms to28596ms.",
+    "Module/command resolution remains a hypothesis, not a proven timeout cause.",
+    "Native environment omits ambient PSModulePath; configured trusted process profiles may bind explicit paths. No production environment policy change is justified by these samples."
+  ],
+  "reference": {
+    "title": "Microsoft about_PSModulePath: Windows PowerShell startup and intermediate-process behavior",
+    "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath"
+  },
+  "runtimeChanged": false,
+  "failedCommandRetried": false,
+  "deadlineChanged": false
+}

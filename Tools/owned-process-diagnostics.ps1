@@ -8,6 +8,7 @@ param(
     [ValidateRange(1,70)][int]$DurationSeconds=65
 )
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'process-module-observation.ps1')
 $encoding=[Text.UTF8Encoding]::new($false)
 $timer=[Diagnostics.Stopwatch]::StartNew()
 $samples=0
@@ -19,7 +20,7 @@ function Record($value){
 }
 $stream=[IO.File]::Open($OutputFile,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
 $stream.Dispose()
-Record @{kind='scope';ownerPid=$OwnerProcessId;ownerImage=$OwnerExecutable;readOnly=$true;commandLinesIncluded=$false;environmentIncluded=$false}
+Record @{kind='scope';ownerPid=$OwnerProcessId;ownerImage=$OwnerExecutable;readOnly=$true;commandLinesIncluded=$false;environmentIncluded=$false;elapsedMsScope='observer';moduleNameLimit=64;threadLimit=128}
 try {
     while($timer.Elapsed.TotalSeconds -lt $DurationSeconds -and -not(Test-Path -LiteralPath $StopFile)){
         # Retrieve only identity/ancestry fields, never command lines or environment.
@@ -58,8 +59,10 @@ try {
                     $thread=$_
                     try {$state=[string]$thread.ThreadState;$reason=if($state -eq 'Wait'){[string]$thread.WaitReason}else{$null};@{id=$thread.Id;state=$state;waitReason=$reason;cpuMs=$thread.TotalProcessorTime.TotalMilliseconds}}catch{@{id=$thread.Id;unavailable=$true}}
                 })
-                $modules=@($process.Modules|Select-Object -First 64|ForEach-Object ModuleName)
-                Record @{kind='process';pid=$id;parentPid=[int]$candidate.ParentProcessId;createdUtc=$candidate.CreationDate.ToUniversalTime().ToString('o');image=$candidate.ExecutablePath;elapsedMs=[int64]$timer.ElapsedMilliseconds;cpuMs=$process.TotalProcessorTime.TotalMilliseconds;threads=$threads;modules=$modules}
+                $moduleNames=@($process.Modules|ForEach-Object ModuleName)
+                $moduleObservation=Get-ProcessModuleObservation $moduleNames
+                $sampledUtc=[DateTime]::UtcNow
+                Record @{kind='process';pid=$id;parentPid=[int]$candidate.ParentProcessId;createdUtc=$candidate.CreationDate.ToUniversalTime().ToString('o');sampledUtc=$sampledUtc.ToString('o');processAgeMs=[int64]($sampledUtc-$candidate.CreationDate.ToUniversalTime()).TotalMilliseconds;image=$candidate.ExecutablePath;elapsedMs=[int64]$timer.ElapsedMilliseconds;cpuMs=$process.TotalProcessorTime.TotalMilliseconds;threads=$threads;modules=$moduleObservation.modules;moduleCount=$moduleObservation.moduleCount;modulesTruncated=$moduleObservation.modulesTruncated;modulePresence=$moduleObservation.modulePresence}
                 $samples++;$priorCount=if($seen.ContainsKey($key)){$seen[$key].count}else{0}
                 $seen[$key]=@{count=1+$priorCount;nextAt=$timer.ElapsedMilliseconds+10000}
             }catch{Record @{kind='unavailable';pid=$id;errorType=$_.Exception.GetType().Name}}finally{if($null -ne $process){$process.Dispose()}}

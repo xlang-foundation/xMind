@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-20T03:54:29.945Z",
+  "scope": "Actual Windows owned-process observer and module prefix/presence tests; no native rebuild, user profile access, model execution or hosted failure retry.",
+  "pid": 27068,
+  "exitCode": 0,
+  "tests": 4,
+  "passed": 4,
+  "failed": 0,
+  "inputsUnchanged": true,
+  "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+  "logSha256": "0cb20ef4f56f9d875e41048a8feff176df152fd6a0cf3bfd134b64bc18034ff7",
+  "cpythonExecuted": false
+}

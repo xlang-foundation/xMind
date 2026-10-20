@@ -1,0 +1,36 @@
+TAP version 13
+# Actual owner diagnostics retained at C:\\xMindNativeValidation\\process-diagnostics-module-bounds-20261019\\temp\\xmind-process-observer-tQEUb6\\actual-owner-e05920b4-e4d3-4269-a716-3879a892923b\\observations.jsonl
+# Subtest: read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+ok 1 - read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+  ---
+  duration_ms: 8388.1819
+  type: 'test'
+  ...
+# Subtest: module presence includes an assembly beyond the bounded name list
+ok 2 - module presence includes an assembly beyond the bounded name list
+  ---
+  duration_ms: 269.5616
+  type: 'test'
+  ...
+# Identity-rejection diagnostics retained at C:\\xMindNativeValidation\\process-diagnostics-module-bounds-20261019\\temp\\xmind-process-observer-pwVxUX\\mismatched-owner-106ed8ac-176f-44d3-8103-be7309bce621\\observations.jsonl
+# Subtest: identity mismatch stops observation without terminating the actual root
+ok 3 - identity mismatch stops observation without terminating the actual root
+  ---
+  duration_ms: 4078.0636
+  type: 'test'
+  ...
+# Subtest: optional diagnostics preserve the actual fast nonzero execution error
+ok 4 - optional diagnostics preserve the actual fast nonzero execution error
+  ---
+  duration_ms: 273.2397
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13074.9875

@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Hosted process diagnostic precision — 2026-10-19
+
+Analysis of the preserved39360428093 graph-process trace finds three samples, each with exactly64 module names. The old observer selected only the first64; Utility missing from that prefix does not establish it was unloaded. The child CPU total grows609.375ms to20,531.25ms, while the observer stopwatch grows7356ms to28,596ms. That stopwatch does not measure child age. The provenance default-owner flag compares token SIDs, not user profile directories. Command/module resolution remains an unproven hypothesis.
+
+The read-only observer now records total module count, an explicit truncation flag, targeted assembly presence over the full snapshot, sample UTC and process age. Four focused tests pass in13.07seconds with source and Node hashes unchanged, including an assembly beyond the64-name prefix, actual owned/unrelated process separation, identity rejection and preserved nonzero failure. No native runtime, graph command, deadline or failed operation was changed/retried. This is observer qualification only; native155 qualification remains on54a46c9a. Microsoft documents default module-path reconstruction when PSModulePath is absent; forwarding parent PowerShell7 paths can cause incompatible imports, so no ambient path policy change was made.
+
+See evidence/hosted-graph-process-diagnostic-limits-20261019.json and process-diagnostics-module-bounds-20261019.json/.log, input hashes and gate script.
+
 ## Complete shared physical root qualification — 2026-10-19
 
 Exact committed source54a46c9a completes all155 local native contracts in1,058.37seconds. CTest40196 and wrapper session58325 exit0. Native3854a562 includes the integrated shared root workers. Every hash and file set remains unchanged:2627project inputs,16SDK headers,1870pure libraries,76SDK runtime files,18598Node dependencies and130native binaries. Managed profile lifecycle passes472.38seconds within its unchanged600-second deadline; native view/provider configuration pass136.35/58.07seconds. No invocation was restarted or deadline increased. This remains uninstalled local qualification. Hosted39364831617 is live on the same exact source; follow it without dispatching another run.

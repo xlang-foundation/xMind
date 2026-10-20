@@ -51,6 +51,10 @@ test('read-only diagnostic captures its actual PowerShell descendant and exclude
     assert.ok(samples.length>0,'Capture at least one actual live owned PowerShell process');
     assert.ok(samples.every(row=>row.pid===ownedPid&&row.pid!==unrelated.child.pid));
     assert.ok(samples.every(row=>Array.isArray(row.threads)&&row.threads.length>0&&row.threads.length<=128&&row.modules.length<=64));
+    assert.ok(samples.every(row=>Number.isSafeInteger(row.moduleCount)&&row.moduleCount>=row.modules.length&&row.modulesTruncated===(row.moduleCount>64)));
+    assert.ok(samples.every(row=>Object.values(row.modulePresence).every(value=>typeof value==='boolean')));
+    assert.ok(samples.every(row=>Number.isSafeInteger(row.processAgeMs)&&row.processAgeMs>=0&&Number.isFinite(Date.parse(row.sampledUtc))));
+    assert.equal(rows[0].elapsedMsScope,'observer');assert.equal(rows[0].moduleNameLimit,64);
     assert.equal(rows[0].commandLinesIncluded,false);assert.equal(rows[0].environmentIncluded,false);
     const raw=await readFile(diagnostic.output,'utf8');assert.ok(!raw.includes(secret));assert.ok(!raw.includes(command));assert.ok(!raw.includes('OBSERVER_SYNTHETIC_PRIVATE'));
     assert.equal(await readFile(marker,'utf8'),'once');assert.equal(rows.at(-1).kind,'end');
@@ -58,6 +62,16 @@ test('read-only diagnostic captures its actual PowerShell descendant and exclude
     // root's zero exit and exact descendant samples remain checked above.
     assert.ok(['observer_stopped','owner_exited','owner_identity_changed','owner_identity_mismatch'].includes(rows.at(-1).reason));
   }finally{await fixture.done;await unrelated.done;await diagnostic?.stop();}
+});
+
+test('module presence includes an assembly beyond the bounded name list',{skip:!windows,timeout:15000},async()=>{
+  const helper=fileURLToPath(new URL('../process-module-observation.ps1',import.meta.url));
+  const script=". '"+helper.replaceAll("'","''")+"'; $names=@(1..64|ForEach-Object {\"fixture-$_.dll\"})+@('MICROSOFT.POWERSHELL.COMMANDS.UTILITY.NI.DLL','System.Management.Automation.dll'); Get-ProcessModuleObservation $names|ConvertTo-Json -Depth 4 -Compress";
+  const result=await run(shell,['-NoLogo','-NoProfile','-NonInteractive','-Command',script]).done;
+  assert.equal(result.code,0,result.stderr);const summary=JSON.parse(result.stdout);
+  assert.equal(summary.modules.length,64);assert.equal(summary.moduleCount,66);assert.equal(summary.modulesTruncated,true);
+  assert.equal(summary.modulePresence.utility,true);assert.equal(summary.modulePresence.automation,true);assert.equal(summary.modulePresence.management,false);
+  assert.ok(!summary.modules.some(name=>/Utility/i.test(name)),'The positive presence flag must come from outside the captured prefix');
 });
 test('identity mismatch stops observation without terminating the actual root',{skip:!windows,timeout:15000},async()=>{
   const directory=await mkdtemp(join(root,'xmind-process-observer-'));

@@ -1,0 +1,9 @@
+{
+  "before": {
+    "Tools/owned-process-diagnostics.ps1": "cfe8db4ac997ecfd240aac0c9a482120685cffd7ba23e4b25defbf8f58450c05",
+    "Tools/process-module-observation.ps1": "06fd6b681442a72734377cbae7e4159001927eb09247790618e3aae1f2b4d191",
+    "Tools/owned-process-diagnostics.mjs": "93985f70753f5efcf21fdeffaeb848345ac287b25c9f05576962046ebe1358c4",
+    "Tools/tests/owned-process-diagnostics.test.mjs": "c3023286d7824190775c856e94c1d9b796e431b32777c77c0b7b28904f8f000f"
+  },
+  "nodeSha": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362"
+}
