@@ -1,0 +1,84 @@
+{
+  "observedAt": "2026-10-20T03:07:56.008Z",
+  "url": "http://127.0.0.1:55684/ui/",
+  "requests": [
+    {
+      "route": "/v1/workspace",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b49f242b063af1ab6ca13db94c5165a8/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b49f242b063af1ab6ca13db94c5165a8/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/9d170d81910b61a45c21ecd8557936c0/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/9d170d81910b61a45c21ecd8557936c0/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b6b46ac843ad6b08658f4c568a2e5ea4/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b6b46ac843ad6b08658f4c568a2e5ea4/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/58ef35476048503c598b5629019379da/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/58ef35476048503c598b5629019379da/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/cb160a995f28f81865b47f95f294999d/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/cb160a995f28f81865b47f95f294999d/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/2591d25a7123d6fa9d4cbd41b077b38d/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/2591d25a7123d6fa9d4cbd41b077b38d/runs",
+      "status": 200
+    },
+    {
+      "route": "/ui/workspaces",
+      "status": 200
+    },
+    {
+      "route": "/v1/provider/profiles",
+      "status": 200
+    }
+  ],
+  "taskSubmissions": 0,
+  "pageStatus": 200,
+  "sessionStatus": 200,
+  "workspaceIdentityPreserved": true,
+  "authorityChanged": true,
+  "exactSessionsHistoryAndRunsPreserved": true,
+  "workspaceCount": 7,
+  "providerIds": [
+    "claude",
+    "gemini",
+    "deepseek",
+    "openai"
+  ],
+  "passed": true
+}

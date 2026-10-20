@@ -2,6 +2,12 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.55 and preserved native adoption — 2026-10-19
+
+Client source39565fbb packages qualified native3bfecb58/cc854ad0. All154 native,445 extension and158 browser contracts pass;2448 archive entries and2445 installed payloads verify. The prior installation backup and settings remain verified. Explicit native upgrade retires owner36040 and starts56032 born2026-10-20T03:07:41.9202850Z in the same SQLite profile and origin57779. All six sessions,150 messages,eleven runs and provider/process/MCP/membership data compare exactly before/after using byte-safe UTF-8 capture. Existing page55684 serves the preserved state through its API. No model task or effect was replayed; this checkpoint adds no new rendered-client or coding-task claim. Hosted39360428093 remains in progress independently.
+
+See evidence/coding55-primary-adoption-20261019.json, coding55-client-gate-20261019.json, coding55-package-20261019.json, coding55-installed-20261019.json, coding55-preservation-20261019.json and coding55-view-after-adoption-20261019.json.
+
 ## Complete shared-backlog native qualification — 2026-10-19
 
 Source3bfecb58 completes the full Release build and all154 registered native

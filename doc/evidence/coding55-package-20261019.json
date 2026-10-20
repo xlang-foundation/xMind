@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-10-20T03:05:08.356Z",
+  "version": "0.1.55",
+  "sourceRevision": "39565fbbc29b7c1774715dd07eb0bd27a632d2b4",
+  "archive": "C:/xMindNativeValidation/xmind-0.1.55-complete-win32-x64.vsix",
+  "archiveBytes": 34442701,
+  "archiveSha256": "4b8b74d90f49a807dc91476edb41b4103b86b6ae7e04b0a4ac6e7e629a02dfc4",
+  "archiveEntries": 2448,
+  "allExtensionPayloadsMatchQualifiedStage": true,
+  "archivePathCaseAliases": [
+    {
+      "archive": "extensions/vscode/readme.md",
+      "stage": "extensions/vscode/README.md"
+    },
+    {
+      "archive": "extensions/vscode/LICENSE.txt",
+      "stage": "extensions/vscode/LICENSE"
+    }
+  ],
+  "stageFilesUnchanged": 17439,
+  "terminal": {
+    "startedAt": "2026-10-20T03:04:43.333Z",
+    "completedAt": "2026-10-20T03:05:05.828Z",
+    "pid": 62064,
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "e1ad91096ff22962ab21da179c6456b32b9a731496459ac619fc314df043aad8"
+  },
+  "installed": false,
+  "editorOpened": false,
+  "releaseAccepted": false
+}
