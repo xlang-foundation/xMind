@@ -1,0 +1,48 @@
+{
+  "observedAt": "2026-10-20T22:26:07.461Z",
+  "scope": "Actual installed59 direct pseudoterminal interactive chat restoration, /runs and /exit, followed by independent CLI history/owner/fixture checks",
+  "version": "0.1.59",
+  "ptySessionId": 19521,
+  "toolChunks": [
+    "5e08e9",
+    "5df995",
+    "29bee7"
+  ],
+  "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+  "root": "0c35d911e7417e3c4982726fbb2fb201",
+  "commands": [
+    "/runs",
+    "/exit"
+  ],
+  "observedHumanReadablePromptAndAssistantHistory": true,
+  "observedFinalMetrics": {
+    "uncachedInput": 9752,
+    "output": 312,
+    "cached": 0,
+    "cacheWrite": 0
+  },
+  "observedRunState": "completed",
+  "observedRunProvider": {
+    "model": "claude-sonnet-4-6",
+    "profile": "claude",
+    "revision": 2,
+    "route": "anthropic.messages",
+    "wire": "anthropic-messages"
+  },
+  "chatExitCode": 0,
+  "historyMessages": 9,
+  "historyExact": true,
+  "fixtureHashesUnchanged": true,
+  "backend": {
+    "pid": 68928,
+    "birth": "2026-10-20T22:06:08.0468140Z",
+    "image": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40\\runtime-7a629f1a8e3a2971b472c69562b74f9b8c40d1a840fa3d268eee246d814c6fbb\\xmind.exe"
+  },
+  "existingBackendReused": true,
+  "newTaskSubmissions": 0,
+  "limitations": [
+    "A restored completed task is not a new console-originated task",
+    "Pseudoterminal evidence does not establish visible desktop terminal, resize, VS Code or external-browser acceptance"
+  ],
+  "passed": true
+}

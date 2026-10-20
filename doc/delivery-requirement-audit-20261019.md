@@ -9,8 +9,14 @@ baseline 2/4 becomes 4/4, tests unchanged, nine messages persist and the process
 tree retires. Original primary owner/history/settings remain unchanged. The
 completed task is pinned against replay in AGENTS.md and [current CLI evidence](evidence/coding59-cli-live-coding-20261020.json).
 This closes the current installed command-mode CLI evidence gap for this bounded
-workflow; interactive-console and rendered editor/external-browser scopes remain
-separate, alongside the other product requirements below.
+workflow. Actual installed59 pseudoterminal chat now restores the completed task,
+lists the same completed root with `/runs` and exits zero; independent history and
+fixture hashes remain exact. See the [interactive receipt](evidence/coding59-interactive-cli-20261020.json).
+Hidden in-app browser reload also restores the nine messages, source preview,
+command receipt and footer at 1280×720; see the
+[rendering receipt](evidence/coding59-browser-restoration-20261020.json).
+These restoration checks submit no new task. Rendered editor/external-browser
+scopes remain separate, alongside the other product requirements below.
 
 Installed 0.1.59 now supersedes 0.1.58 as the extension installation, with 2,445
 payloads verified. Seven checked owners, three browser pages and exact nine-session
@@ -22,12 +28,13 @@ Current candidate qualification now extends beyond the installed58 baseline:
 the exact `959f1d95` native source passes the complete 160-contract inventory,
 and unchanged current client code passes 462 extension/161 browser contracts plus
 actual browser-controller/native integration. A verified 2,402-payload runtime
-candidate is staged for the next package, with no installation or user-task
-replay. These checks do not close rendered editor/external-browser acceptance,
+candidate was staged for packaging without user-task replay. These checks do not
+close rendered editor/external-browser acceptance,
 worker service placement or the remaining Local/Nexus/product requirements.
 The 0.1.59 VSIX candidate is now built: all 2,448 archive entries match the
 qualified 17,441-file stage, with a fresh 462/161 staged-client pass and actual
-packaged-runtime/browser contract. It remains uninstalled; see the
+packaged-runtime/browser contract. It was subsequently installed and verified as
+recorded above; see the
 [package candidate receipt](evidence/coding59-package-candidate-20261020.json).
 See [current client/native evidence](evidence/worker-current-client-native-20261020.json)
 and [complete native evidence](evidence/agent-worker-current-full-native-20261020.json).
@@ -52,7 +59,7 @@ One new isolated task on installed55 completes native reads, reviewed CLI file a
 
 ## Requirements that remain open
 
-1. Current installed VS Code rendered coding/restore and external-browser acceptance remain unverified. The installed58 IAB task proves that browser surface, not the editor or a separate external browser. Current58 CLI-originated coding/interactive acceptance is also separate from earlier55 live coding and current native CLI fixture passes. Visible editor/browser windows remain prohibited unless requested; do not repeat known desktop-control failures or replay completed tasks. Continue independent implementation work while these surface checks remain constrained.
+1. Current installed VS Code rendered coding/restore and external-browser acceptance remain unverified. Installed58 IAB coding and installed59 IAB restoration prove those named browser scopes, not the editor or a separate external browser. Installed59 now has fresh CLI-originated coding and actual interactive restoration evidence, as recorded above. Visible editor/browser windows remain prohibited unless requested; do not repeat known desktop-control failures or replay completed tasks. Continue independent implementation work while these surface checks remain constrained.
 2. Agent-level process placement and authenticated worker transport: AgentDefinition has no placement field; AgentService::execute_job directly calls runner.execute; AgentRunner now accepts explicit journal/model/catalogue/tool/runtime ports; default backend adapters still construct native workspace/process/MCP/A2A capabilities. A fixture now executes the actual ordinary read-only AgentRunner in a child through backend-owned windows, native reads, factual activity and canonical turns; product AgentService/GraphService dispatch and write/process/context/graph ports remain unplaced. Existing run_agent_worker executes one trusted xlang3 callable. Tool-worker passes do not prove agent-worker delivery.
 3. Shared physical root scheduling is implemented in ExecutionPlatform/RootWorkExecutor and included in the current complete156 qualification. Prior mixed-service fixtures prove shared FIFO/admission, queued cancellation without launch, concurrent agent/graph execution and independent service shutdown. Nested context controllers now share one ultimate live budget/deadline and physical leaf pool. These are backend-process/thread scheduling results; they do not implement agent-level child-process placement. Historical hosted timeout failures remain separate evidence and are not relabelled current hosted acceptance.
 4. Reusable nested execution is now implemented and installed58-qualified, rather than catalogue-only. Schema35, immutable invocation pins, bounded parsing, native agent/tool execution, shared context/model/time accounting, typed root+owner human input, ancestry-only resume, quiescent recovery and postorder retirement are covered by the current complete156 inventory. The new runtime fixture uses two configured models, actual transports/file reads, service restart, authenticated HTTP input and cancellation with controlled provider replies; it is not live-provider or rendered nested-graph acceptance. Existing parser bounds/other controlled scenarios retain their own test scopes. Preserve those distinctions when checking maximum-depth/mixed-feature and installed UI coverage. [Runtime evidence](evidence/nested-context-runtime-corrected-20261020-gate.json).

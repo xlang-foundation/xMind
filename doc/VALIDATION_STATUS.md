@@ -1,3 +1,17 @@
+## Installed 0.1.59 interactive console restoration — 2026-10-20
+
+Actual direct pseudoterminal `chat` restores the completed CLI59 session, its
+human-readable prompt/final assistant text and recorded usage (9,752 uncached
+input, 312 output, zero cache read/write). `/runs` reports the same completed root
+and captured Claude profile revision 2. `/exit` returns zero. No new prompt or
+model/tool task is submitted. Independent command-mode reads then confirm all
+nine history messages remain exact, backend 68928 has the same birth/image and
+both fixture file hashes remain unchanged.
+
+This proves interactive restoration of the existing task; visible desktop/resize,
+VS Code and external-browser acceptance remain separate. See the
+[interactive receipt](evidence/coding59-interactive-cli-20261020.json).
+
 ## Installed 0.1.59 browser restoration and footer — 2026-10-20
 
 The hidden in-app browser restores the completed CLI59 session and root across
