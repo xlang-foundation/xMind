@@ -1,0 +1,138 @@
+{
+  "scope": "Production HTML/CSS with synthetic expanded-control/history fixtures in sandboxed headless Edge. No backend, credentials, model, installed editor or external-browser acceptance.",
+  "passed": true,
+  "results": [
+    {
+      "mode": "editor",
+      "height": 480,
+      "version": "baseline",
+      "history": 167,
+      "footer": 216,
+      "footerScroll": 493,
+      "container": 480,
+      "bodyScroll": 480,
+      "viewport": 480
+    },
+    {
+      "mode": "editor",
+      "height": 480,
+      "version": "fixed",
+      "history": 167,
+      "footer": 216,
+      "footerScroll": 493,
+      "container": 480,
+      "bodyScroll": 480,
+      "viewport": 480
+    },
+    {
+      "mode": "editor",
+      "height": 720,
+      "version": "baseline",
+      "history": 16,
+      "footer": 715,
+      "footerScroll": 715,
+      "container": 720,
+      "bodyScroll": 842,
+      "viewport": 720
+    },
+    {
+      "mode": "editor",
+      "height": 720,
+      "version": "fixed",
+      "history": 285,
+      "footer": 324,
+      "footerScroll": 715,
+      "container": 720,
+      "bodyScroll": 720,
+      "viewport": 720
+    },
+    {
+      "mode": "editor",
+      "height": 1000,
+      "version": "baseline",
+      "history": 174,
+      "footer": 715,
+      "footerScroll": 715,
+      "container": 1000,
+      "bodyScroll": 1000,
+      "viewport": 1000
+    },
+    {
+      "mode": "editor",
+      "height": 1000,
+      "version": "fixed",
+      "history": 439,
+      "footer": 450,
+      "footerScroll": 715,
+      "container": 1000,
+      "bodyScroll": 1000,
+      "viewport": 1000
+    },
+    {
+      "mode": "browser",
+      "height": 480,
+      "version": "baseline",
+      "history": 139,
+      "footer": 197,
+      "footerScroll": 502,
+      "container": 440,
+      "bodyScroll": 480,
+      "viewport": 480
+    },
+    {
+      "mode": "browser",
+      "height": 480,
+      "version": "fixed",
+      "history": 139,
+      "footer": 197,
+      "footerScroll": 502,
+      "container": 440,
+      "bodyScroll": 480,
+      "viewport": 480
+    },
+    {
+      "mode": "browser",
+      "height": 720,
+      "version": "baseline",
+      "history": 16,
+      "footer": 724,
+      "footerScroll": 724,
+      "container": 668,
+      "bodyScroll": 910,
+      "viewport": 720
+    },
+    {
+      "mode": "browser",
+      "height": 720,
+      "version": "fixed",
+      "history": 250,
+      "footer": 300,
+      "footerScroll": 724,
+      "container": 668,
+      "bodyScroll": 720,
+      "viewport": 720
+    },
+    {
+      "mode": "browser",
+      "height": 1000,
+      "version": "baseline",
+      "history": 106,
+      "footer": 724,
+      "footerScroll": 724,
+      "container": 948,
+      "bodyScroll": 1000,
+      "viewport": 1000
+    },
+    {
+      "mode": "browser",
+      "height": 1000,
+      "version": "fixed",
+      "history": 404,
+      "footer": 426,
+      "footerScroll": 724,
+      "container": 948,
+      "bodyScroll": 1000,
+      "viewport": 1000
+    }
+  ]
+}

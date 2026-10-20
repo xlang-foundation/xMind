@@ -2,6 +2,25 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Conversation space with expanded controls — 2026-10-19
+
+The shared chat stylesheet now bounds the footer at every panel height, keeping
+expanded skills/context controls and long drafts in a scrollable footer. Previously
+the bound applied only below 560 pixels. Production HTML/CSS with synthetic
+expanded controls in sandboxed headless Edge reproduces a 16-pixel conversation
+viewport at 720 pixels before the change. Afterward the editor viewport is 285
+pixels and the browser viewport is 250 pixels. Both layouts pass at heights
+480, 720 and 1000, without page overflow; keyboard focus reveals Send inside the
+footer. The two existing responsive-layout contracts also pass. The initial
+comparison harness failed because its baseline removal did not handle CRLF;
+the corrected harness asserts baseline and candidate differ before comparison.
+
+This is rendered fixture evidence, not installed-editor, provider or external
+browser coding acceptance. Installed 0.1.52 and existing owners remain untouched.
+See [measurements](evidence/footer-layout-20261019.json),
+[reproduction script](evidence/footer-layout-20261019.cjs) and
+[browser fixture](evidence/footer-layout-browser-720-20261019.png).
+
 ## Installed 0.1.52 connection fixes — 2026-10-19
 
 Installed 0.1.52 includes native library lifetime protection and explicit-only
