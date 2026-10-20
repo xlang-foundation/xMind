@@ -2,6 +2,13 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Full nested native gate: schema assertion correction — 2026-10-19
+
+Complete source1d12fe4d native155 gate is terminal failure154/155 in1076.69seconds (CTest12156, wrapper39157 exit1). The sole failure is native_skill_state_contract: its final check still required version!=33 to be false even though schema34 had valid empty foreign_key_check results. All actual nested execution, graph, MCP, process, profile/view lifecycle, persistence, owner and remaining contracts pass at that source, but this is not a full-suite qualification. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets/hashes remain frozen. Original failed logs and full inventory are retained in evidence/nested-graph-full-native-failed-20261019.*.
+
+The skill contract now expects schema34 while retaining its foreign-key check and every activation/rollback/history/workspace assertion. Complete Release rebuild and that actual contract pass0.50seconds, CTest66216 terminal0, with frozen inputs. Native executable remainsaf166abb; only the contract executable changes. See evidence/nested-graph-schema34-skill-focused-20261019.*. An initial generated observer script had a JavaScript parse error before any build/test launched; its replacement uses literal selector replacement. The corrected focused result is not combined with the earlier154passes into an invented full pass. A fresh complete155 gate is still required. Installed56 remains untouched.
+
+
 ## Nested graph native execution and shared leaf capacity — 2026-10-19
 
 GraphRunner now executes admitted nested agent/tool graphs using the parent's immutable invocation record. Every recursive controller carries the same private ultimate-root scope, absolute deadline and atomic leaf permits; graph controllers consume no leaf permit. Native tools and agent workers share the root's configured physical leaf limit across sibling graphs. Root cancellation flows through child controllers, joins their workers, settles actual child outcomes and retires approval waits before returning. External direct execution of a child graph without its root scope rejects.
