@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-10-20T03:08:56.493Z",
+  "scope": "Existing preserved hidden IAB browser view restoring adopted native55 backend; existing host/view retained, not proof of newly installed55 client assets or external-browser/VS Code rendering.",
+  "url": "http://127.0.0.1:55684/ui/",
+  "backendPid": 56032,
+  "session": "2591d25a7123d6fa9d4cbd41b077b38d",
+  "root": "659d79470e216b25f431aa0c7e6bad1b",
+  "state": "completed",
+  "messageCount": 4,
+  "model": "claude-sonnet-4-6",
+  "restoredAnswer": "XMIND_NATIVE54_ef1efc6f960745169e2adebb17a58638",
+  "restoredFinalUsage": {
+    "input": 8715,
+    "output": 29,
+    "firstTokenSeconds": 2.41,
+    "elapsedSeconds": 2.62
+  },
+  "sendEnabled": true,
+  "taskSubmissions": 0,
+  "screenshot": "doc/evidence/coding55-iab-restore-20261019.png",
+  "screenshotSha256": "417ec49ce806e4b942f3c5f353ea96ba6fcb824ad4330b582fa2f38e3019db75",
+  "passed": true
+}
