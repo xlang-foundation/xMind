@@ -104,6 +104,24 @@ an actual child fixture, not a production worker journal or AgentService
 placement. Actual child AgentRunner cancellation, read-worker failure, broader
 terminal causes and graph/effect placement still need their own qualification.
 
+The [actual runner cancellation checkpoint](evidence/agent-worker-runner-cancel-focused-20261020.json)
+now covers controller cancellation of that plain, no-tool child runner during a
+real controlled model stream. The backend waits for streaming, records its own
+explicit stop request and sends an authenticated fixture stop to the captured
+child. The child links handler cancellation to the same stop source, passes its
+token into the actual `AgentRunner::execute`, and preserves cancelled intent
+when unfinished model accounting hands off. Before drain the test requires a
+live child, running root, active lease, user-only history and an uncertain charged
+model. After exact exit it requires one cancelled event, one interrupted
+reservation and the original charge. The independent HTTP peer verifies stream
+abort and exactly 25 requests, including the separate provider-failure case.
+All 53 focused contracts pass in 154.52 seconds with frozen inputs and binaries.
+
+The stop command and journal adapters here remain fixture-only. This qualifies
+the existing native handoff/drain components with an actual child AgentRunner;
+public controller-to-worker integration in AgentService, read-worker approval
+cancellation, production adapters and graph/effect placement remain open.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

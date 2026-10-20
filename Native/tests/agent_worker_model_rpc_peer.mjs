@@ -1,10 +1,10 @@
-// Independent controlled native provider; twenty-four intentional requests, no live key.
+// Independent controlled native provider; twenty-five intentional requests, no live key.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 const [executable,modules,stdlib]=process.argv.slice(2);
-const expected={normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,runner:1,runner_error:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3};
+const expected={normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3};
 const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
 let failure;const aborted=new Set();
 function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
@@ -38,13 +38,13 @@ const server=createServer((request,response)=>{
    response.writeHead(400,{'content-type':'application/json'});response.end(JSON.stringify({error:{code:mode==='overflow'?'context_length_exceeded':'rate_limit_exceeded',type:'invalid_request_error',param:'messages',message:'private-provider-message must not cross the worker boundary'}}));return;
   }
   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,{role:'assistant',content:`Actual native RPC ${mode}.`});
-  if(mode==='cancel'||mode==='crash'){response.on('close',()=>aborted.add(mode));return;}
+  if(mode==='cancel'||mode==='crash'||mode==='runner_cancel'){response.on('close',()=>aborted.add(mode));return;}
   chunk(response,mode,{},'stop',usage);response.end('data: [DONE]\n\n');
  }catch(error){failure=error;response.writeHead(500);response.end();}});
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
- if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash'));
- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly twenty-four requests: one actual AgentRunner provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel'));
+ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly twenty-five requests: one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
 }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
