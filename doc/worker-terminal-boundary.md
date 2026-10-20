@@ -432,6 +432,21 @@ provider, not every provider wire or profile-management flow. Service placement,
 general settings and graph/context/effect capabilities remain open. Installed
 clients and their preserved user tasks are unchanged.
 
+## Complete native regression checkpoint
+
+The exact `959f1d95` native source and binary set now also pass the complete,
+unfiltered 160-contract inventory in 1,088.25 seconds. This includes service,
+graph, coding-effect, profile, CLI, ownership and both independent MCP SDK peer
+contracts beyond the earlier 53-contract focused gates. Source, dependencies,
+SDK/runtime and all 133 native binaries remain frozen throughout the one serial
+build and one complete test invocation. Evidence:
+`evidence/agent-worker-current-full-native-20261020.json`.
+
+This establishes regression coverage for implemented components. It does not
+implement or qualify service worker placement, missing worker capabilities,
+new installation, rendered clients or live-provider coding. Their ownership and
+capability requirements below remain open.
+
 ## Qualification required before service placement
 
 - Ledger contracts: exact lease rejection (including process identity), stale

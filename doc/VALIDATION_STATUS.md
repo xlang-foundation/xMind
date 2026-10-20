@@ -1,3 +1,28 @@
+## Complete current-source native suite — 2026-10-20
+
+Source `959f1d956a95cdaa036fb0e51bc02ebe2c004639` passes the complete,
+unfiltered **160/160 native contracts in 1,088.25 seconds**, including both MCP
+SDK peers. One serial build and one complete CTest invocation qualify the exact
+native binary `2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f`.
+The gate freezes 2,684 project files, 16 consumed SDK source files, 1,870 allowed
+pure-library files, 76 SDK/runtime files, 18,598 Node dependency files and all
+133 native binaries, including file sets. Embedded xlang3 owns SQLite; no
+CPython interpreter or live provider key is used. [Complete inventory, raw logs
+and gate evidence](evidence/agent-worker-current-full-native-20261020.json).
+
+Coverage includes single/graph services, planning/delegation, coding effects,
+worker boundaries, provider protocols/profiles, CLI and local profile/view,
+MCP/A2A, workspace storage, ownership/handoff and encrypted credentials. This
+replaces the earlier focused-only qualification of this exact native source;
+it does not establish unimplemented capabilities, new client-suite results,
+installation, rendered-client or live-provider acceptance. Installed 0.1.58 and
+its successful user tasks remain unchanged. The earlier intermittent normal-pipe
+CLI failure was not reproduced here; its cause remains unexplained.
+
+Worker process placement in AgentService/GraphService, general captured settings,
+broader graph/context/effect worker capabilities, large-history and Local/Nexus
+end-to-end qualification remain open. The broader delivery goal is incomplete.
+
 ## Current native worker checkpoint — 2026-10-20
 
 The actual unified `xmind.exe` private authenticated entry now executes the native
