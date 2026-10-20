@@ -1,3 +1,25 @@
+## Current agent-worker gap map — 2026-10-20
+
+Installed58/nativeaf34bfe0 is fully qualified for156 native contracts, including nested contextual execution; it still runs agent loops in the backend process. The trusted xlang3 callable worker is a tool implementation, not a placed AgentRun. This gap map is based on the current dispatch and dependency code, not on the older implementation notes below.
+
+| Boundary | Current evidence | Remaining worker work |
+| --- | --- | --- |
+| Dispatch | AgentService::execute_job calls runner.execute directly; GraphRunner launches native futures | Place the actual agent loop in a supervised child PID while retaining root admission and graph controllers at the backend |
+| Durable state | AgentRunJournal and AgentContextJournal expose owned values/futures | Authenticated run-scoped adapters; backend-only persistence, scope/attempt validation, durable duplicate/reconciliation semantics |
+| Models | AgentModelGateway separates credential resolution from AgentRunner | A worker proxy must bind requests to the backend-captured model/route/authority; never accept worker-selected endpoints or forward provider keys |
+| Effects and reads | Owned file/process/read/remote/guidance/callable tool hosts exist | Construct trusted owners at the backend and invoke them through scoped worker envelopes; no worker-provided roots, grants or approval authority |
+| Backend dependencies | AgentRunner constructors still require PersistenceService; its process/MCP/A2A/discovery/authority factories use that concrete store | Remove this requirement from the worker construction path, including non-tool discovery/instruction/callable services; a second SQLite writer is not a substitute |
+| Existing IPC | Trusted callable workers have native LRPC, inherited-pipe key transfer and sequence/HMAC checks | Per-AgentRun generation/capability, authorized journal/model/tool operations, supervisor lifecycle and durable failure boundaries |
+| Runtime budgets | RootExecutionBudget and shared physical scheduling now cover nested contextual trees | Keep one authoritative backend root clock/ledger across actual worker processes, pause/resume, cancellation and crashes |
+
+Implementation must produce a genuine native AgentRunner worker, rather than a child that merely asks the parent to execute the entire agent loop. Preserve backend-owned model credentials, SQLite and effect policy. Keep compatibility constructors/adapters for ordinary backend execution while introducing worker-capable ports; do not advertise process placement until an actual process executes the loop through those ports. No silent backend fallback is permitted for an explicitly requested unsupported placement.
+
+Required integrated acceptance includes distinct parent/agent PIDs and current verified runtime identity; a real provider/tool loop through an independent controlled peer; native reads and approved writes/processes through backend owners; concurrent agent/graph roots sharing physical and durable limits; stale/foreign run, attempt, workspace, generation and replay rejection before dispatch; cancellation while streaming, awaiting approval and executing effects; worker death before/after dispatch with retained uncertain receipts and no retry; and restart/paused adoption without replay or allowance reset. Keys must not appear in arguments, environment, worker requests or public/model data. Process placement is a crash/lifecycle boundary, not an OS sandbox guarantee.
+
+The generic Local/Nexus connection/worker protocol must subsequently use explicit authenticated identities, negotiated capabilities and scoped commands/events/enrollment. Saved HTTPS address metadata and current not_connected status do not establish that protocol. Nexus team scheduling, PostgreSQL and private server implementation stay outside OSS. Existing installed58 owners/history/settings/pages must remain intact during this work.
+
+Inspected sources: [agent dispatch](../Native/src/agent_service.cpp), [graph dispatch](../Native/src/graph_runner.cpp), [runner dependencies](../Native/src/agent_runner.cpp), [runner construction](../Native/include/agentflow/agent_runner.hpp), [journal](../Native/include/agentflow/agent_run_journal.hpp), [context journal](../Native/include/agentflow/agent_context_journal.hpp), [model gateway](../Native/include/agentflow/agent_model_gateway.hpp), [trusted callable worker](../Native/src/agent_worker.cpp). See the [current delivery audit](delivery-requirement-audit-20261019.md).
+
 ## Run-journal workspace snapshots — 2026-10-19
 
 Saved root/inherited workspace membership and snapshot deduplication now use
