@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-20T14:28:27.867Z",
+  "sourceParent": "fd1ddd3940c4fd3d0e665251e31c0ed764213e2a",
+  "sourcePatchSha256": "8f078e7079abfce91f8756ac8c707bb449dafa6c45adab0d6161159aeda382f6",
+  "gate": {
+    "recordedAt": "2026-10-20T14:28:21.494Z",
+    "sourceParent": "fd1ddd3940c4fd3d0e665251e31c0ed764213e2a",
+    "sourcePatchSha256": "8f078e7079abfce91f8756ac8c707bb449dafa6c45adab0d6161159aeda382f6",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 48640,
+      "launchedAt": "2026-10-20T14:11:19.483Z",
+      "completedAt": "2026-10-20T14:26:11.290Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4100adcf92537cbd8f0a083b5d46e675cb08f76d1717f7d833922dd12cb7bc69"
+    },
+    "test": {
+      "pid": 55588,
+      "launchedAt": "2026-10-20T14:26:14.898Z",
+      "completedAt": "2026-10-20T14:28:18.728Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "13505efcaa21db18a3ae99b12b915f3631d9d8cf95a07551aad19d0fb74a7afe"
+    },
+    "total": 37,
+    "failed": 0,
+    "passed": 37,
+    "seconds": 123.78,
+    "projectFiles": 2654,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "14950c6cc79e3ab6de935bb4b05edd389fa71d0575be58015f479816bebfbb5c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-journal-read-focused-20261020-gate.json": "a689669efedfad2f3863e2fa1ed364a102710c97a8be08c176ccf22d84c66e4c",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-ctest.log": "13505efcaa21db18a3ae99b12b915f3631d9d8cf95a07551aad19d0fb74a7afe",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-build.log": "4100adcf92537cbd8f0a083b5d46e675cb08f76d1717f7d833922dd12cb7bc69",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-LastTest.log": "3e95bd08802ff65250b54345ddeb8d5924d3870d1181abd7a1730cede8ec17a5",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-test-inventory.json": "de0052cf711d6f91c2091f832aee99660d1c45f100ce636f39dccc7c0f54c3c4",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-build-terminal.json": "73780af492678a1f8801ce79d4593987ef311238f622511b9ca6f37198caeb77",
+    "doc/evidence/agent-worker-journal-read-focused-20261020-ctest-terminal.json": "fb0cd73fad0cffbb1257cf5a1df81fff47ab53609b373f8faad51cd167cb9590"
+  },
+  "children": [
+    {
+      "mode": "normal",
+      "pid": 53456,
+      "creationTime": "134369800678199558"
+    },
+    {
+      "mode": "cancel",
+      "pid": 35776,
+      "creationTime": "134369800679250562"
+    },
+    {
+      "mode": "crash",
+      "pid": 21968,
+      "creationTime": "134369800680051737"
+    },
+    {
+      "mode": "delivery",
+      "pid": 30232,
+      "creationTime": "134369800680664259"
+    },
+    {
+      "mode": "overflow",
+      "pid": 5020,
+      "creationTime": "134369800681175573"
+    },
+    {
+      "mode": "other_error",
+      "pid": 65120,
+      "creationTime": "134369800681958738"
+    }
+  ],
+  "fixtureSha256": "75af4bdd63d8bb870253c9edbea243f830f513c964d730e7c42a7c2fada7a70a",
+  "behavior": "Explicit owned run/session/history/events/root-budget read RPC. Exact active captured lease, current generation, running root/owner, admitted workspace/provider and requested target are checked in the same xlang3/SQLite transaction as each read. Only owner history/events/session, owner or ultimate-root run metadata and ultimate-root budget are accessible. There is no generic SQL, information or mutating journal dispatch.",
+  "actualFixture": "The actual ordinary root child reads exact run/session/history/root-budget values and opaque event bytes. Its model stream callback performs nested real journal RPC and observes the backend-recorded actual event. Foreign existing targets, malformed/duplicate/extra requests, negative/fractional/overflow cursor, unsupported mutation and revoked active child reads reject. Parent fixtures check captured PID/birth/image/provider/workspace changes, owner cancellation and the original deadline. Exactly the same six independent controlled HTTP requests; no completed user task replay.",
+  "limits": "Read boundary only, not a full AgentRunJournal adapter or product AgentRunner process placement. Journal mutations/context/graph/tool RPC and backend-shared clocks remain open. Cross-process read fixture uses ordinary root owners; descendant read routing is constrained in code but is not newly qualified here. Responses over 4096 rows or 2 MiB minus 1024 bytes fail capacity without truncation; large-window paging remains open. No full native suite, live provider, hosted qualification or installed upgrade.",
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "cpythonExecuted": false
+}

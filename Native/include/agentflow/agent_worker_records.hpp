@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include "agentflow/delegation_records.hpp"
+#include <variant>
 
 namespace agentflow {
 // Backend-created immutable process/admission metadata. No session channel key,
@@ -24,4 +26,13 @@ struct AgentWorkerModelClaimRecord {
     AgentWorkerModelClaimSpec spec;
     std::string state,actual_response_json,response_binding;
 };
+// An explicit read vocabulary, never arbitrary repository reflection. The
+// backend validates the exact captured lease in the same transaction as a read.
+enum class AgentWorkerJournalReadKind {run,session,history,events,root_budget};
+struct AgentWorkerJournalRead {
+    AgentWorkerJournalReadKind kind;
+    std::string target;
+    std::int64_t after=0;
+};
+using AgentWorkerJournalValue=std::variant<Run,Session,std::vector<Message>,std::vector<Event>,RootBudgetRecord>;
 }

@@ -1,3 +1,9 @@
+## Scoped worker journal reads — 2026-10-20
+
+An explicit native journal read bridge now serves owned run/session/history/events/root-budget DTOs to the authenticated child. Every read validates the exact active captured lease, current generation, running/admitted root and owner, workspace/provider identity and target in the same backend xlang3/SQLite transaction. Owner history/events/session and owner/ultimate-root metadata remain separate; no SQL, generic information or writes are exposed. Exact opaque event/history strings survive serialization.
+
+The actual child reads its native values, performs nested journal reads during model streaming, and rejects existing foreign targets, malformed cursors/envelopes, unsupported mutation and reads after live revocation. Parent fixtures reject changed process/admission metadata and honor captured deadline/owner cancellation. The complete serial build and37focused contracts pass in 123.78s with all source/SDK/library/runtime/dependency/native binary file sets and hashes unchanged. This is ordinary-root controlled IPC proof only: full journal/context/tool adapters, actual child AgentRunner, shared root clocks, descendant routing qualification and large-window paging remain open. No full-suite/hosted/live-provider/installed claim. [Evidence and limits](evidence/agent-worker-journal-read-focused-20261020.json).
+
 ## Worker model error semantics — 2026-10-20
 
 The authenticated child model proxy now preserves only HTTP 400 `context_length_exceeded`, which the existing AgentRunner context-rebuild branch consumes. Other provider codes, type, parameter and message remain filtered; duplicate/extra fields, fractional/out-of-range status and unregistered or mismatched codes fail as protocol errors. The actual child fixture checks eight malformed authenticated envelopes plus independent provider overflow/filtering responses, each charged once with no duplicate HTTP or invented completion.

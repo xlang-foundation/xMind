@@ -3146,6 +3146,30 @@ AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec
     changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{std::string(worker_current_category),spec.owner_run_id,Json{{"generation",spec.generation}}.dump()}));impl_->event(spec.owner_run_id,"worker.lease.admitted",Json{{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"pid",spec.pid}}.dump());tx.commit();return record;
 }
 AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
+AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
+    if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
+    auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,expected.generation);
+    if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker journal has no exact active captured lease");
+    worker_running_scope(*this,db,lease.spec);
+    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
+    if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker journal generation is stale");
+    const auto owner=run(expected.owner_run_id);
+    AgentWorkerJournalValue result;
+    switch(query.kind){
+    case AgentWorkerJournalReadKind::run:
+        if(query.target!=expected.owner_run_id&&query.target!=expected.root_run_id)throw Conflict("Worker cannot read a foreign run");result=run(query.target);break;
+    case AgentWorkerJournalReadKind::session:
+        if(query.target!=owner.session_id)throw Conflict("Worker cannot read a foreign session");result=session(query.target);break;
+    case AgentWorkerJournalReadKind::history:
+        if(query.target!=owner.id)throw Conflict("Worker cannot read another run history");result=run_history(owner.id);break;
+    case AgentWorkerJournalReadKind::events:
+        if(query.target!=owner.id)throw Conflict("Worker cannot read another run events");result=events(owner.id,query.after);break;
+    case AgentWorkerJournalReadKind::root_budget:
+        if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=root_budget(query.target);break;
+    default:throw std::invalid_argument("Unsupported worker journal read");
+    }
+    tx.commit();return result;
+}
 AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
 AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);

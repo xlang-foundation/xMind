@@ -199,6 +199,7 @@ std::future<RootBudgetRecord> PersistenceService::root_budget(std::string id){re
 
 std::future<AgentWorkerLeaseRecord> PersistenceService::admit_agent_worker(AgentWorkerLeaseSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.admit_agent_worker(spec);});}
 std::future<AgentWorkerLeaseRecord> PersistenceService::agent_worker_lease(std::string generation){return impl_->observe([generation=std::move(generation)](Repository& r){return r.agent_worker_lease(generation);});}
+std::future<AgentWorkerJournalValue> PersistenceService::read_agent_worker_journal(AgentWorkerLeaseSpec lease,AgentWorkerJournalRead read){return impl_->observe([lease=std::move(lease),read=std::move(read)](Repository& r){return r.read_agent_worker_journal(lease,read);});}
 std::future<AgentWorkerLeaseRecord> PersistenceService::retire_agent_worker(std::string generation,std::string reason){return impl_->submit([generation=std::move(generation),reason=std::move(reason)](Repository& r){return r.retire_agent_worker(generation,reason);});}
 std::future<AgentWorkerModelClaimRecord> PersistenceService::claim_agent_worker_model(AgentWorkerModelClaimSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.claim_agent_worker_model(spec);});}
 std::future<AgentWorkerModelClaimRecord> PersistenceService::agent_worker_model_claim(std::string root,std::string attempt){return impl_->observe([root=std::move(root),attempt=std::move(attempt)](Repository& r){return r.agent_worker_model_claim(root,attempt);});}

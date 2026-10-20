@@ -17,6 +17,7 @@ public:
     // journal or a generic RPC method selected by the child.
     std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
     std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
+    std::future<AgentWorkerJournalValue> read_agent_worker_journal(AgentWorkerLeaseSpec,AgentWorkerJournalRead);
     std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec);

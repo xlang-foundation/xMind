@@ -1,3 +1,7 @@
+## Scoped worker journal read boundary — 2026-10-20
+
+Authenticated native read RPC now returns run/session/history/events/root-budget values after exact captured lease/current-generation/admission/target checks in one backend transaction. The actual ordinary-root child performs nested journal RPC during native model streaming and loses read authority on revocation.37 focused contracts pass; opaque bytes are retained, malformed inputs fail closed, and responses above the explicit row/byte bound fail capacity without truncation. This is not a full AgentRunJournal implementation: authorized mutation/context/tool adapters, actual child AgentRunner placement, shared budgets/clocks, descendant read qualification and large-window paging remain required. [Exact proof and limits](evidence/agent-worker-journal-read-focused-20261020.json).
+
 ## Worker provider error signal — 2026-10-20
 
 Scoped model RPC retains the registered HTTP 400 context overflow code across an actual child; malformed error DTOs reject and other provider details stay filtered.37 focused contracts pass after the retained new-regression failure. This fixes a prerequisite for the existing AgentRunner context branch; it does not supply backend-authoritative pre-output overflow evidence or a context-journal adapter, and does not authorize retry of the charged worker claim. Those remain part of actual worker/context integration. [Exact evidence](evidence/agent-worker-model-rpc-errors-20261020.json).

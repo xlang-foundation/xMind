@@ -1,0 +1,76 @@
+#include "agentflow/agent_worker_journal_rpc.hpp"
+#include "agentflow/persistence_service.hpp"
+#include "nlohmann/json.hpp"
+#include <limits>
+#include <set>
+#include <type_traits>
+
+namespace agentflow {
+namespace {
+using Json=nlohmann::json;
+// Leave room for the enclosing RPC string and its escaping. Never truncate an
+// admitted history or event list to make it fit; larger windows need paging.
+constexpr std::size_t max_value_bytes=AgentWorkerFrameCodec::max_frame_bytes/2-1024,max_rows=4096;
+[[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid owned worker journal values");}
+Json parse(const std::string& bytes){
+    if(bytes.empty()||bytes.size()>max_value_bytes)invalid();std::vector<std::set<std::string>> keys;
+    return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)invalid();if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))invalid();if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});
+}
+void object(const Json& v,std::size_t n){if(!v.is_object()||v.size()!=n)invalid();}
+std::int64_t integer(const Json& v){if(!v.is_number_integer()||(v.is_number_unsigned()&&v.get<std::uint64_t>()>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())))invalid();return v.get<std::int64_t>();}
+std::string text(const Json& v){return v.get<std::string>();}
+void rows(const Json& v){if(!v.is_array()||v.size()>max_rows)invalid();}
+RunState state(const std::string& v){for(const auto s:{RunState::queued,RunState::running,RunState::paused,RunState::completed,RunState::failed,RunState::cancelled})if(v==to_string(s))return s;invalid();}
+AgentWorkerJournalReadKind kind(const std::string& method){
+    if(method=="journal.run")return AgentWorkerJournalReadKind::run;if(method=="journal.session")return AgentWorkerJournalReadKind::session;
+    if(method=="journal.history")return AgentWorkerJournalReadKind::history;if(method=="journal.events")return AgentWorkerJournalReadKind::events;
+    if(method=="journal.root_budget")return AgentWorkerJournalReadKind::root_budget;throw AgentWorkerRpcRemoteError("unsupported");
+}
+std::string encode(const AgentWorkerJournalValue& input){
+    Json v;std::visit([&](const auto& value){using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,Run>)v={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},{"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root},{"provider_context_json",value.provider_context_json}};
+        else if constexpr(std::is_same_v<T,Session>)v={{"id",value.id},{"title",value.title},{"parent_id",value.parent_id},{"fork_boundary_sequence",value.fork_boundary_sequence?Json(*value.fork_boundary_sequence):Json(nullptr)},{"fork_boundary_type",value.fork_boundary_type}};
+        else if constexpr(std::is_same_v<T,std::vector<Message>>||std::is_same_v<T,std::vector<Event>>){
+            if(value.size()>max_rows)throw AgentWorkerRpcRemoteError("capacity");v=Json::array();for(const auto& item:value){
+                if constexpr(std::is_same_v<T,std::vector<Message>>)v.push_back({{"sequence",item.sequence},{"role",item.role},{"json",item.json}});
+                else v.push_back({{"sequence",item.sequence},{"run_id",item.run_id},{"kind",item.kind},{"json",item.json}});
+            }
+        }else if constexpr(std::is_same_v<T,RootBudgetRecord>){const auto& s=value.spec;
+            v={{"root_run_id",value.root_run_id},{"spec",{{"policy_id",s.policy_id},{"policy_revision",s.policy_revision},{"workspace_identity",s.workspace_identity},{"provider_identity_json",s.provider_identity_json},{"max_children",s.max_children},{"max_parallel",s.max_parallel},{"max_model_calls",s.max_model_calls},{"wall_limit_ms",s.wall_limit_ms}}},
+                {"children_admitted",value.children_admitted},{"model_calls_reserved",value.model_calls_reserved},{"parent_calls_held",value.parent_calls_held},{"revision",value.revision},{"planned_children_reserved",value.planned_children_reserved},{"parent_model_calls_reserved",value.parent_model_calls_reserved}};
+        }
+    },input);auto bytes=v.dump();if(bytes.size()>max_value_bytes)throw AgentWorkerRpcRemoteError("capacity");return bytes;
+}
+AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& bytes){
+    try{const auto v=parse(bytes);
+        switch(k){
+        case AgentWorkerJournalReadKind::run:object(v,7);return Run{text(v.at("id")),text(v.at("session_id")),state(text(v.at("state"))),text(v.at("parent_id")),text(v.at("node_id")),v.at("graph_root").get<bool>(),text(v.at("provider_context_json"))};
+        case AgentWorkerJournalReadKind::session:{object(v,5);Session s{text(v.at("id")),text(v.at("title")),text(v.at("parent_id")),{},text(v.at("fork_boundary_type"))};if(!v.at("fork_boundary_sequence").is_null())s.fork_boundary_sequence=integer(v.at("fork_boundary_sequence"));return s;}
+        case AgentWorkerJournalReadKind::history:{rows(v);std::vector<Message> result;for(const auto& m:v){object(m,3);const auto seq=integer(m.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(m.at("role")),text(m.at("json"))});}return result;}
+        case AgentWorkerJournalReadKind::events:{rows(v);std::vector<Event> result;for(const auto& e:v){object(e,4);const auto seq=integer(e.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(e.at("run_id")),text(e.at("kind")),text(e.at("json"))});}return result;}
+        case AgentWorkerJournalReadKind::root_budget:{object(v,8);const auto& s=v.at("spec");object(s,8);return RootBudgetRecord{text(v.at("root_run_id")),{text(s.at("policy_id")),integer(s.at("policy_revision")),text(s.at("workspace_identity")),text(s.at("provider_identity_json")),integer(s.at("max_children")),integer(s.at("max_parallel")),integer(s.at("max_model_calls")),integer(s.at("wall_limit_ms"))},integer(v.at("children_admitted")),integer(v.at("model_calls_reserved")),integer(v.at("parent_calls_held")),integer(v.at("revision")),integer(v.at("planned_children_reserved")),integer(v.at("parent_model_calls_reserved"))};}
+        }invalid();
+    }catch(const Json::exception&){invalid();}
+}
+AgentWorkerJournalValue call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& target,std::int64_t after=0){
+    try{return decode(kind(method),peer.call(method,Json{{"target",target},{"after",after}}.dump()));}
+    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker journal read rejected");if(error.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker journal owner cancelled");if(error.code()=="timeout")throw AgentWorkerRpcTimeout("Worker journal deadline elapsed");throw;}
+}
+}
+Run AgentWorkerJournalClient::run(const std::string& id){return std::get<Run>(call(peer_,"journal.run",id));}
+Session AgentWorkerJournalClient::session(const std::string& id){return std::get<Session>(call(peer_,"journal.session",id));}
+std::vector<Message> AgentWorkerJournalClient::run_history(const std::string& id){return std::get<std::vector<Message>>(call(peer_,"journal.history",id));}
+std::vector<Event> AgentWorkerJournalClient::events(const std::string& id,std::int64_t after){return std::get<std::vector<Event>>(call(peer_,"journal.events",id,after));}
+RootBudgetRecord AgentWorkerJournalClient::root_budget(const std::string& id){return std::get<RootBudgetRecord>(call(peer_,"journal.root_budget",id));}
+AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token owner_cancel){
+    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Journal channel differs from captured lease");
+    (void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
+    return [&store,lease=std::move(lease),deadline,owner_cancel](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+        const auto k=kind(method);auto check=[&]{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");};
+        try{check();const auto v=parse(payload);object(v,2);AgentWorkerJournalRead query{k,text(v.at("target")),integer(v.at("after"))};const auto result=store.read_agent_worker_journal(lease,std::move(query)).get();check();return encode(result);}
+        catch(const AgentWorkerRpcRemoteError&){throw;}
+        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+        catch(const AgentWorkerProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+    };
+}
+}
