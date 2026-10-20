@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: VS Code leaves queued-prompt dispatch to the backend and can cancel pending entries
+ok 1 - VS Code leaves queued-prompt dispatch to the backend and can cancel pending entries
+  ---
+  duration_ms: 33.769
+  type: 'test'
+  ...
+# Subtest: sidebar queued claim follows an already-known active run after terminal drain
+ok 2 - sidebar queued claim follows an already-known active run after terminal drain
+  ---
+  duration_ms: 7.7849
+  type: 'test'
+  ...
+# Subtest: sidebar queued claim preserves explicit inspection
+ok 3 - sidebar queued claim preserves explicit inspection
+  ---
+  duration_ms: 5.0545
+  type: 'test'
+  ...
+# Subtest: sidebar follows successive queued claims across automatic selection epochs without replay
+ok 4 - sidebar follows successive queued claims across automatic selection epochs without replay
+  ---
+  duration_ms: 7.756
+  type: 'test'
+  ...
+# Subtest: browser attaches to a run claimed by the backend after the active run settles
+ok 5 - browser attaches to a run claimed by the backend after the active run settles
+  ---
+  duration_ms: 617.639
+  type: 'test'
+  ...
+# Subtest: browser queued claim follows an already-known active run
+ok 6 - browser queued claim follows an already-known active run
+  ---
+  duration_ms: 361.084
+  type: 'test'
+  ...
+# Subtest: browser queued claim preserves explicit inspection
+ok 7 - browser queued claim preserves explicit inspection
+  ---
+  duration_ms: 357.8167
+  type: 'test'
+  ...
+# Subtest: browser waits for committed terminal stream acknowledgement before following a queued claim
+ok 8 - browser waits for committed terminal stream acknowledgement before following a queued claim
+  ---
+  duration_ms: 671.6177
+  type: 'test'
+  ...
+# Subtest: browser reports a queued-selection persistence failure after advancing its observation epoch
+ok 9 - browser reports a queued-selection persistence failure after advancing its observation epoch
+  ---
+  duration_ms: 364.4231
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2462.5574

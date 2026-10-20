@@ -2,6 +2,54 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed queued-turn selection fix — 2026-10-19
+
+Installed 0.1.51 now follows a queued prompt when the backend claims it, even
+if that active run already appears in the session catalogue. The shared view
+helper retains selection intent across automatic handoffs; explicit inspection
+of another run prevents automatic switching. Both clients wait for the previous
+selected stream to drain before following the queue. Observation does not
+re-admit a prompt or invoke a tool.
+
+Source `ada85996` passes the complete frozen local and
+[hosted](https://github.com/xlang-foundation/xMind/actions/runs/39344911199)
+445-extension/158-browser suites. The VSIX verifies 2,448 entries, all 2,445
+installed payloads match it, and 17,439 staged files remain unchanged through
+validation and packaging. The qualified native runtime `d30c6025`/`3ed464a2`,
+SDK58a8aab and DLL1ff2a8e7 are reused byte-for-byte; the earlier complete native
+154-contract gate is retained, not rerun or presented as a new native gate.
+
+Actual installed editor testing submits one live review and queues a second.
+The sidebar automatically selects the second while it streams, without a
+run-selection or Refresh click. Both finish; reload restores the queued root,
+model and metrics (37,338 uncached input, 281 output, 1.45s first token, 6.75s
+response; total unavailable). The first turn makes three reads. The queued
+turn uses existing context without a new read despite the requested reread;
+all prompt constraints are therefore not claimed. Neither turn edits files or
+executes a process. The previous file-coding checkpoint remains separate.
+
+The corrected webpage service is <http://127.0.0.1:53242/ui/>. Its 13 served
+assets match installed51, local connection requires no token entry, all four
+saved provider profiles are available, and TestProj's five runs/52 messages
+match the native history exactly. It shares isolated editor backend13676.
+Rendered external-browser coding remains unverified. The prior page64405
+continues to serve installed49 on the original backend32704.
+
+All 42 earlier owners and 15 pages survive; the new page adds one host and one
+native view, for 44 tracked owners/16 pages. No backend is replaced. Settings
+are restored exactly, window/sidebar layout is restored and Code is closed.
+The installed50 backup verifies 2,447 files. Broader UI process-execution and
+complete rendered-browser coding acceptance remain open.
+
+The first full local and hosted runs on `f15e147d` fail 33 connection fixtures
+because their partial client API omits the new real helper. Production classic
+scripts pass. Adding that actual dependency restores all 33 checks without
+changing their behavior assertions or deadlines; the failed runs and earlier
+focused diagnostics remain recorded. [Failures](evidence/queued-turn-selection-failures-20261019.json),
+[installed checkpoint](evidence/coding-installed-0.1.51-checkpoint-20261019.json),
+[automatic handoff](evidence/queued-turn-selection-automatic-running-20261019.png),
+[restored editor](evidence/queued-turn-selection-restored-20261019.png).
+
 ## Actual installed editor coding and queued-turn defect — 2026-10-19
 
 One installed 0.1.50 VS Code window submits a real Model Zoo task, uses its

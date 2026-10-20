@@ -1,0 +1,119 @@
+{
+  "recordedAt": "2026-10-20T00:00:11.578Z",
+  "baseline": {
+    "tests": 4,
+    "passed": 2,
+    "failed": 2,
+    "scope": "Both clients remain on the old run when a queued claim is already present in the run catalogue; explicit inspection controls pass"
+  },
+  "intermediateFocusedFailuresRetained": true,
+  "finalFocused": {
+    "tests": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "completeLocalFailure": {
+    "sourceRevision": "f15e147ddba06326aa7b5bb0f107608a3845f983",
+    "extension": {
+      "exitCode": 0,
+      "tests": 445,
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "03abfe63a1822408836d895896113c80bb0d57d2cda24a861cf18c32f44b4f89"
+    },
+    "browser": {
+      "exitCode": 1,
+      "tests": 158,
+      "passed": 125,
+      "failed": 33,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "e2e9eff5e8ec975e7521332e12b69b5bf1f8c39afbea0d0c6c5d613956ac3292"
+    }
+  },
+  "completeHostedFailure": {
+    "run": 39344551989,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/39344551989",
+    "artifact": 12230566581,
+    "artifactBytes": 312818,
+    "artifactSha256": "d920f6d8943217fac4f6c632f07879df23722fd2acf77918cbabdecbe9ad06b9",
+    "artifactDigestVerified": true,
+    "gate": {
+      "sourceRevision": "f15e147ddba06326aa7b5bb0f107608a3845f983",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 70,
+      "trackedSourceFiles": 65,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 445,
+        "browser": 158
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 445,
+        "passed": 445,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 1,
+        "tests": 158,
+        "passed": 125,
+        "failed": 33,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": false
+    }
+  },
+  "cause": "Connection fixture supplies a partial XMindBackend API without the new real QueuedRunSelection dependency; production classic-script tests pass. Extension fixture required the same dependency update. An undefined stream-pin guard was fixed during focused validation.",
+  "correction": {
+    "revision": "ada85996d277a126f83b696d079efe4cc51d6c90",
+    "file": "views/browser/tests/connection.test.cjs",
+    "focusedConnectionTests": 33,
+    "passed": 33,
+    "failed": 0,
+    "realHelperImported": true,
+    "deadlinesAndBehaviorAssertionsUnchanged": true
+  },
+  "logs": {
+    "queued-selection-baseline-20261019.log": {
+      "sha256": "0369b271c0d7a08cea441898f59feb435a9a014984795db2b65a1b5713dd70e6",
+      "bytes": 2054
+    },
+    "queued-selection-focused-20261019.log": {
+      "sha256": "40de0a964384511debf9f74183b14615fe1717731c74b9bd50a083a082206fc3",
+      "bytes": 4554
+    },
+    "queued-selection-focused-second-20261019.log": {
+      "sha256": "fc296d7f644418a853b156a364a4d8a15da93e82e7600c42953b53b629c9a8f2",
+      "bytes": 2053
+    },
+    "queued-selection-focused-third-20261019.log": {
+      "sha256": "5eb52a587fdea7781d49783cea375106d276f05653b6b8c6f7b9e6648ce210eb",
+      "bytes": 2053
+    },
+    "queued-selection-focused-fourth-20261019.log": {
+      "sha256": "66547143e2d6229f26fe105525eff144bd534729f7955c7b9d89a21bcc8fc9a2",
+      "bytes": 2054
+    },
+    "queued-selection-focused-complete-20261019.log": {
+      "sha256": "90e3262cb9775e94999518c4c576b1968891af3d7b86a0f96b674bc30c7643ea",
+      "bytes": 2140
+    },
+    "queued-selection-connection-fixture-corrected-20261019.log": {
+      "sha256": "0e983852823c9215ff21057596f35311fa67fa6daccbb2d7cbb31536c5959aa1",
+      "bytes": 8110
+    }
+  },
+  "cpythonExecuted": false,
+  "renderedUiAcceptance": false
+}

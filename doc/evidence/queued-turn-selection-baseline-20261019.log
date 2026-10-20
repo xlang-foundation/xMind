@@ -1,0 +1,61 @@
+TAP version 13
+# Subtest: sidebar queued claim follows an already-known active run after terminal drain
+not ok 1 - sidebar queued claim follows an already-known active run after terminal drain
+  ---
+  duration_ms: 29.5067
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\extension-host.test.js:428:35'
+  failureType: 'testCodeFailure'
+  error: 'Observe a claimed queued input even when its run is already known and active'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:438:86)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: sidebar queued claim preserves explicit inspection
+ok 2 - sidebar queued claim preserves explicit inspection
+  ---
+  duration_ms: 6.4208
+  type: 'test'
+  ...
+# Subtest: browser queued claim follows an already-known active run
+not ok 3 - browser queued claim follows an already-known active run
+  ---
+  duration_ms: 357.4815
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\views\\browser\\tests\\controller.test.cjs:41:35'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'old' !== 'next'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'next'
+  actual: 'old'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\controller.test.cjs:45:237)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: browser queued claim preserves explicit inspection
+ok 4 - browser queued claim preserves explicit inspection
+  ---
+  duration_ms: 359.0082
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 2
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 802.5149
