@@ -242,6 +242,24 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         require(store.children("left").get().empty()&&store.history("pause-session").get().size()==1,"Human input must not dispatch effects or fabricate assistant history");store.close();
     }
 
+
+    const auto cancel_pause_database=(std::filesystem::u8path(argv[1])/"nested-paused-retirement.sqlite").string();
+    {
+        PersistenceService store(cancel_pause_database,imports);auto deep=nested_leaf;for(int i=0;i<3;++i)deep=wrap_graph(deep,"pause-depth"+std::to_string(i));
+        store.create_session("paused-cancel-session","Synthetic paused tree retirement").get();store.start_graph_run("paused-cancel-root","paused-cancel-session","deep",1,GraphPlan(deep.dump()),R"({"content":"Captured cancellation task"})").get();store.transition("paused-cancel-root",RunState::queued,RunState::running).get();
+        std::vector<std::string> ids{"paused-cancel-root"};for(int level=1;level<=3;++level){const auto id="paused-cancel-level"+std::to_string(level),parent=ids.back();store.start_graph_invocation(id,parent,"call",store.graph_run(parent).get().checkpoint_revision).get();store.transition(id,RunState::queued,RunState::running).get();ids.push_back(id);}
+        store.start_graph_human(ids.back(),"answer",store.graph_run(ids.back()).get().checkpoint_revision).get();
+        const auto before=store.graph_events(ids.front()).get().size();std::vector<std::string> checkpoints;for(const auto& id:ids){const auto graph=store.graph_run(id).get();require(graph.run.state==RunState::paused,"Deep human wait must pause its entire ancestry");checkpoints.push_back(graph.checkpoint_json);}
+        rejects<Conflict>([&]{store.retire_graph_run(ids.back(),RunState::cancelled,"{}").get();});
+        {XlangSqlite db(cancel_pause_database,imports);db.execute("CREATE TRIGGER reject_tree_retirement BEFORE INSERT ON events WHEN NEW.run_id='paused-cancel-root' AND NEW.kind='run.cancelled' BEGIN SELECT RAISE(ABORT,'synthetic root retirement fault'); END");}
+        rejects<DatabaseError>([&]{store.retire_graph_run(ids.front(),RunState::cancelled,"{}").get();});
+        for(std::size_t i=0;i<ids.size();++i)require(store.run(ids[i]).get().state==RunState::paused&&store.graph_run(ids[i]).get().checkpoint_json==checkpoints[i],"Late root retirement failure must roll back every descendant state and checkpoint");require(store.graph_events(ids.front()).get().size()==before,"Failed retirement must preserve the exact event frontier");
+        {XlangSqlite db(cancel_pause_database,imports);db.execute("DROP TRIGGER reject_tree_retirement");}
+        store.retire_graph_run(ids.front(),RunState::cancelled,R"({"reason":"synthetic_controller_cancel"})").get();for(const auto& id:ids){const auto graph=store.graph_run(id).get();require(graph.run.state==RunState::cancelled&&GraphCoordinator(GraphPlan(graph.specification_json),graph.checkpoint_json,GraphRestoreMode::live).inspect().running.empty(),"Root cancellation must retire all paused graph owners and settle their invocation claims");}
+        require(store.history("paused-cancel-session").get().size()==1,"Paused cancellation must not fabricate assistant output");store.close();
+    }
+    {PersistenceService store(cancel_pause_database,imports);require(store.run("paused-cancel-root").get().state==RunState::cancelled&&store.run("paused-cancel-level3").get().state==RunState::cancelled&&store.history("paused-cancel-session").get().size()==1,"Cancelled paused tree must reopen without replay");store.close();}
+
     const auto migration_database=(std::filesystem::u8path(argv[1])/"nested-migration.sqlite").string();
     {PersistenceService store(migration_database,imports);store.create_session("migration-session","Synthetic v33 invocation metadata").get();store.start_graph_run("migration-root","migration-session","fixture",1,nested,R"({"content":"Migration fixture"})").get();store.transition("migration-root",RunState::queued,RunState::running).get();store.start_graph_invocation("migration-child","migration-root","call",store.graph_run("migration-root").get().checkpoint_revision).get();store.close();}
     {
