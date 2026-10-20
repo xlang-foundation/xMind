@@ -1,3 +1,23 @@
+## Worker explicit empty tool catalogue — 2026-10-20
+
+The backend worker request context now accepts an explicitly empty tool catalogue,
+preserving named agents' `tools: []` behavior instead of rejecting it. The request
+retains the exact backend guidance, history and usage controls while offering no
+tools. Regression checks reject a forged replacement catalogue and an unadmitted
+read without adding events, funding a model or dispatching an effect.
+
+The serial Release build and 53 focused contracts pass in 160.25 seconds with all
+source, SDK, pure-library, runtime, dependency and binary file sets/hashes unchanged
+across validation. Existing actual child read, canonical-turn, provider identity,
+cancellation and physical-drain cases pass; the independent controlled peer still
+observes exactly 44 intentional requests. No CPython or live model is used.
+
+This qualifies backend context admission, not a new child no-tools model workflow,
+full native suite, installation or rendered-client acceptance. AgentService and
+GraphService placement and broader worker capabilities remain open. Installed59
+and user owners/history/settings are untouched. See the
+[receipt](evidence/agent-worker-empty-catalogue-focused-20261020.json).
+
 ## Installed 0.1.59 interactive console restoration — 2026-10-20
 
 Actual direct pseudoterminal `chat` restores the completed CLI59 session, its

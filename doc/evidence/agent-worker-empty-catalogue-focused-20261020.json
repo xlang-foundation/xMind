@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-20T22:31:47.279Z",
+  "gate": {
+    "recordedAt": "2026-10-20T22:31:38.102Z",
+    "sourceParent": "edee17c0c31a2a5b5a7ab7c155f7e2d1709dfeb2",
+    "sourcePatchSha256": "cee12fc0d5275d9bc07bb29da7922ccc5f2c8230192ffadd3dc7389e3203666d",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 31060,
+      "launchedAt": "2026-10-20T22:27:25.626Z",
+      "completedAt": "2026-10-20T22:28:52.069Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cfb5999d0253d88b72042c7f68e67f66dcbb7df9924239d8e519a3972e1a7907"
+    },
+    "test": {
+      "pid": 71448,
+      "launchedAt": "2026-10-20T22:28:55.224Z",
+      "completedAt": "2026-10-20T22:31:35.526Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9eb2dbf5c7b57236ab6dd14b527a0be7931ff4539470dadadab23a5a78305d8f"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 160.25,
+    "projectFiles": 2684,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "fd24126b6a63d015fc15b1a2e780d7652f94b05ce3690d774e3128230b354f2f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-build.log": "cfb5999d0253d88b72042c7f68e67f66dcbb7df9924239d8e519a3972e1a7907",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-build-terminal.json": "d749aa0010cdd046ce264e71d3d65f974efa84e0827c8d3fde8daf9ea7041377",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-ctest.log": "9eb2dbf5c7b57236ab6dd14b527a0be7931ff4539470dadadab23a5a78305d8f",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-ctest-terminal.json": "5cb1dabe499ded8cc53ef75df44d177f561f5cbbfe887c907efe9708380c4988",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-LastTest.log": "c6093bdcf40560590aa61b44a897dddacb069bcce0940ac466b7f1fe4c163f23",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+    "doc/evidence/agent-worker-empty-catalogue-focused-20261020-gate.json": "4e5f332d21fce90a6d1152c752cc4f453b94e987b1f64d2d344ebc82176654b8"
+  },
+  "fixtureSha256": "b06d05965ac69aa53378cda7f3ee9b7db3612ae0a8074a1082303f0720b093d0",
+  "scope": "Backend-owned worker request context accepts an explicitly empty tool catalogue without restoring default capabilities",
+  "verified": [
+    "Empty catalogue retains the exact backend instruction/history/usage request after removing only offered tools",
+    "Forged replacement catalogue rejected before a model claim",
+    "Unadmitted read rejected with no added event, model funding or native dispatch",
+    "Existing real child composition, canonical read turns, profiled identity, cancellation and physical drain cases pass",
+    "Independent controlled peer still observes exactly 44 intentional requests"
+  ],
+  "limitations": [
+    "AgentService/GraphService placement and broader settings/effect/context/graph worker integration remain open",
+    "The empty-catalogue regression checks backend context admission; it is not a new full child no-tools model workflow",
+    "No installed, full-native-suite, hosted, live-provider or rendered-client acceptance claim"
+  ],
+  "passed": true
+}

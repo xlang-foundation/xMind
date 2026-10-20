@@ -6,6 +6,8 @@ namespace agentflow {
 class RepositoryInstructionContext;
 struct AgentWorkerReadRequestPolicy {
     std::string instructions;
+    // An empty catalogue captures an agent's explicit tools: [] policy. It
+    // must remain empty; it never selects the backend's default capabilities.
     std::vector<ModelToolDefinition> tools;
     bool include_usage=false;
     std::optional<std::int64_t> max_output_tokens;

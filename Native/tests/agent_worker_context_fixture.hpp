@@ -35,6 +35,20 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     if(approval_cancel)owner.permission_rules={{"read_file","**","ask"}};
     AgentWorkerReadRequestPolicy context_policy;context_policy.instructions="Native context owner policy.";context_policy.include_usage=true;for(const auto& tool:workspace.definitions())if(tool.name=="read_file")context_policy.tools.push_back(tool);
     AgentWorkerReadContext context(store,store,lease,owner,context_policy);auto read_dispatch=bind_agent_worker_read_rpc(context,lease,worker->channel().scope());
+    if(!runner){
+        auto no_tools_policy=context_policy;no_tools_policy.tools.clear();
+        AgentWorkerReadContext no_tools(store,store,lease,owner,no_tools_policy);
+        const auto restricted=no_tools.prepare();auto normal=context.prepare();normal.tools.clear();
+        check(restricted.tools.empty()&&encode_agent_model_request(restricted)==encode_agent_model_request(normal),
+            "Explicit empty worker catalogue must retain captured instructions/history without restoring default tools");
+        auto forged=restricted;forged.tools=context_policy.tools;
+        rejects<Conflict>([&]{no_tools.admit("unclaimed-empty-tools-model",forged);});
+        const auto events_before=store.events(id).get().size();
+        rejects<Conflict>([&]{no_tools.invoke({1,id,"unclaimed-empty-tools-model","forged-read",lease.workspace_id,lease.workspace_revision,lease.workspace_id,"read_file",R"({"path":"nested/same.txt"})"});});
+        check(store.events(id).get().size()==events_before&&store.root_budget(id).get().model_calls_reserved==0,
+            "Empty catalogue preview and rejected read must not fund a model or dispatch a native effect");
+        std::cout<<"Worker explicit empty tool catalogue verified: backend guidance/history retained, no default tools, forged catalogue/read rejected without funding."<<std::endl;
+    }
     if(!runner){const auto initial=context.prepare();rejects<NotFound>([&]{context.admit("unclaimed-model",initial);});std::stop_source stopped;stopped.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{context.prepare(stopped.get_token());});auto expired_owner=owner;expired_owner.deadline=Clock::now()-1ms;AgentWorkerReadContext expired(store,store,lease,expired_owner,context_policy);rejects<AgentWorkerAuthorityExpired>([&]{expired.prepare();});}
     AgentWorkerModelPolicy policy{true,{},profiled?identity:std::string{}};policy.request_context=[&](std::stop_token cancel){return context.prepare(cancel);};policy.admit_context=[&](const std::string& attempt,const ModelRequest& request,std::stop_token cancel){context.admit(attempt,request,cancel);};
     ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;AgentWorkerModelHost model(store,lease,config,context_policy.tools,std::move(policy),make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);
