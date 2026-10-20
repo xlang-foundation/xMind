@@ -1,0 +1,672 @@
+{
+  "startedAt": "2026-10-20T11:18:29.440Z",
+  "scope": "Explicit native profile-preserving upgrade of the verified idle TestProj owner; no prompts, tools or user run replay.",
+  "phase": "complete",
+  "receipts": [
+    {
+      "name": "profile-before",
+      "args": [
+        "profile-info"
+      ],
+      "pid": 26656,
+      "startedAt": "2026-10-20T11:18:29.441Z",
+      "completedAt": "2026-10-20T11:18:29.668Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "7b0b9d8842f5d82f43b22b3d6ef2112bc6f6ce7b6fcaad5893aad90e796c2e39",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-sessions",
+      "args": [
+        "sessions"
+      ],
+      "pid": 61848,
+      "startedAt": "2026-10-20T11:18:30.373Z",
+      "completedAt": "2026-10-20T11:18:30.565Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "3fccf53feec8da9bdb5ea5a7e822a724fc37bdccddce9ce8bc5daaf0c684cb9a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-providers",
+      "args": [
+        "provider-profiles"
+      ],
+      "pid": 65644,
+      "startedAt": "2026-10-20T11:18:30.566Z",
+      "completedAt": "2026-10-20T11:18:30.740Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4a78e8730d64ed72d7567868bf1565738ebfee8aa83b20877c02ebbba5a67a45",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-processes",
+      "args": [
+        "process-profiles"
+      ],
+      "pid": 57216,
+      "startedAt": "2026-10-20T11:18:30.740Z",
+      "completedAt": "2026-10-20T11:18:30.895Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4f092308a8f9d1093f66815713b2f21d17f244f62f433d05e4282f53ac0f5c23",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-mcp",
+      "args": [
+        "mcp-servers"
+      ],
+      "pid": 38656,
+      "startedAt": "2026-10-20T11:18:30.895Z",
+      "completedAt": "2026-10-20T11:18:31.123Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "facfdb5d4d955c0acd8f54f58f96d1dec7e9c94d7ceef6f7a4afa6bc0b67cef8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-membership",
+      "args": [
+        "workspace",
+        "info"
+      ],
+      "pid": 31752,
+      "startedAt": "2026-10-20T11:18:31.124Z",
+      "completedAt": "2026-10-20T11:18:31.337Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "8e75918ea2e63ccd091616169d279460f13dba663d580cea2230c8c373230d4c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "history",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "pid": 57564,
+      "startedAt": "2026-10-20T11:18:31.338Z",
+      "completedAt": "2026-10-20T11:18:31.560Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "9940993b7de0c7f81ca531a8cdde6ff223ee9f6e1e0930a8c1239b73e2bd000b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "runs",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "pid": 38856,
+      "startedAt": "2026-10-20T11:18:31.561Z",
+      "completedAt": "2026-10-20T11:18:31.722Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "762e2a05dc960ba85988df7e207632e94269ed8ce6de11b387f2a9e30f1928b9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "history",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "pid": 64208,
+      "startedAt": "2026-10-20T11:18:31.723Z",
+      "completedAt": "2026-10-20T11:18:31.950Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "9694525521a210e4ff2a94616479085767b1792f4ac239b40b11dd900b2379e3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "runs",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "pid": 41440,
+      "startedAt": "2026-10-20T11:18:31.951Z",
+      "completedAt": "2026-10-20T11:18:32.149Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "a6969787a7b287a6a23b257cef8d8a9fff7f2d8a299e21903bd1b0199b4551ff",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "history",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "pid": 19620,
+      "startedAt": "2026-10-20T11:18:32.150Z",
+      "completedAt": "2026-10-20T11:18:32.338Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "543da9ae2720b41bbd4d2037f3be29cdbde15487215284b9d87d0dec55ddf78d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "runs",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "pid": 16204,
+      "startedAt": "2026-10-20T11:18:32.339Z",
+      "completedAt": "2026-10-20T11:18:32.530Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "f28106a90f8051094eed65d75eb88816c9fb0303d0e21d344ca5c3c286641768",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-58ef35476048503c598b5629019379da",
+      "args": [
+        "history",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "pid": 58956,
+      "startedAt": "2026-10-20T11:18:32.530Z",
+      "completedAt": "2026-10-20T11:18:32.707Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "b1e268dca97f2c8598c32696cf1284297514f851f25647d46e177a57d093ff0a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-58ef35476048503c598b5629019379da",
+      "args": [
+        "runs",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "pid": 33924,
+      "startedAt": "2026-10-20T11:18:32.708Z",
+      "completedAt": "2026-10-20T11:18:32.898Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "78fddbe7b0bef5b10daa308b9152d3bf3c8967bb93b175a846eb882a3ccabfa5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "history",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 36216,
+      "startedAt": "2026-10-20T11:18:32.899Z",
+      "completedAt": "2026-10-20T11:18:33.090Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "5667aed5df5f2920aa4c5b1e506606ca622bf12ab76a3ea981f66c33605e7f11",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "runs",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 21896,
+      "startedAt": "2026-10-20T11:18:33.091Z",
+      "completedAt": "2026-10-20T11:18:33.256Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "c459e4ef5094280c5ce928a20422d03fd567363e7dc9c227fcbd39f1bf6da4c4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-2591d25a7123d6fa9d4cbd41b077b38d",
+      "args": [
+        "history",
+        "2591d25a7123d6fa9d4cbd41b077b38d"
+      ],
+      "pid": 13660,
+      "startedAt": "2026-10-20T11:18:33.257Z",
+      "completedAt": "2026-10-20T11:18:33.449Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "2ba40f8d5ad1e69e861c67bae1928f3a80b0f95ef8d80a1a1191625916624254",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-2591d25a7123d6fa9d4cbd41b077b38d",
+      "args": [
+        "runs",
+        "2591d25a7123d6fa9d4cbd41b077b38d"
+      ],
+      "pid": 56900,
+      "startedAt": "2026-10-20T11:18:33.450Z",
+      "completedAt": "2026-10-20T11:18:33.612Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4d3e2b5861da950804e7e71daf8def0eb23e90b1457c0d78346650563eaf016f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-f5eebd145890d132cfc59b0589491803",
+      "args": [
+        "history",
+        "f5eebd145890d132cfc59b0589491803"
+      ],
+      "pid": 18920,
+      "startedAt": "2026-10-20T11:18:33.613Z",
+      "completedAt": "2026-10-20T11:18:33.789Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "f9535c0ec52586724a41a40c4969565e2122c0e845f8bdf38d708064448c3f98",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-f5eebd145890d132cfc59b0589491803",
+      "args": [
+        "runs",
+        "f5eebd145890d132cfc59b0589491803"
+      ],
+      "pid": 21720,
+      "startedAt": "2026-10-20T11:18:33.791Z",
+      "completedAt": "2026-10-20T11:18:34.014Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4f4cc540a03cab65ef31b2c03b24fcc443e9fb0ef97096d60a4ec37dacf015fb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-history-94456c781056c58ca46abeacb7591138",
+      "args": [
+        "history",
+        "94456c781056c58ca46abeacb7591138"
+      ],
+      "pid": 25392,
+      "startedAt": "2026-10-20T11:18:34.015Z",
+      "completedAt": "2026-10-20T11:18:34.283Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "49d79b60c53f513a218abd55eb29267a45f46713c31a7a4e3697acbd4b05c3a5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-runs-94456c781056c58ca46abeacb7591138",
+      "args": [
+        "runs",
+        "94456c781056c58ca46abeacb7591138"
+      ],
+      "pid": 42652,
+      "startedAt": "2026-10-20T11:18:34.283Z",
+      "completedAt": "2026-10-20T11:18:34.549Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "8a059402b4a8fc5aa0a41e1ff029c46b2751429cafa04696f00193c614d057a1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "upgrade",
+      "args": [
+        "--upgrade-backend",
+        "profile-info"
+      ],
+      "pid": 64472,
+      "startedAt": "2026-10-20T11:18:34.566Z",
+      "completedAt": "2026-10-20T11:19:39.296Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "a3e92e287afe43a08cd344b2d72e76473e2fe68dfd6e6b1147466c3328bbc72a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "profile-after",
+      "args": [
+        "profile-info"
+      ],
+      "pid": 12860,
+      "startedAt": "2026-10-20T11:19:40.284Z",
+      "completedAt": "2026-10-20T11:19:40.451Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "14167bc258407d35eab34010dc5d50db2f2a3d925d963ac564942457ff0919e6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-sessions",
+      "args": [
+        "sessions"
+      ],
+      "pid": 56616,
+      "startedAt": "2026-10-20T11:19:40.451Z",
+      "completedAt": "2026-10-20T11:19:40.630Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "3fccf53feec8da9bdb5ea5a7e822a724fc37bdccddce9ce8bc5daaf0c684cb9a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-providers",
+      "args": [
+        "provider-profiles"
+      ],
+      "pid": 39920,
+      "startedAt": "2026-10-20T11:19:40.630Z",
+      "completedAt": "2026-10-20T11:19:40.825Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4a78e8730d64ed72d7567868bf1565738ebfee8aa83b20877c02ebbba5a67a45",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-processes",
+      "args": [
+        "process-profiles"
+      ],
+      "pid": 62156,
+      "startedAt": "2026-10-20T11:19:40.825Z",
+      "completedAt": "2026-10-20T11:19:40.988Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4f092308a8f9d1093f66815713b2f21d17f244f62f433d05e4282f53ac0f5c23",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-mcp",
+      "args": [
+        "mcp-servers"
+      ],
+      "pid": 12024,
+      "startedAt": "2026-10-20T11:19:40.989Z",
+      "completedAt": "2026-10-20T11:19:41.149Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "facfdb5d4d955c0acd8f54f58f96d1dec7e9c94d7ceef6f7a4afa6bc0b67cef8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-membership",
+      "args": [
+        "workspace",
+        "info"
+      ],
+      "pid": 30900,
+      "startedAt": "2026-10-20T11:19:41.150Z",
+      "completedAt": "2026-10-20T11:19:41.344Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "8e75918ea2e63ccd091616169d279460f13dba663d580cea2230c8c373230d4c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "history",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "pid": 24224,
+      "startedAt": "2026-10-20T11:19:41.345Z",
+      "completedAt": "2026-10-20T11:19:41.568Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "9940993b7de0c7f81ca531a8cdde6ff223ee9f6e1e0930a8c1239b73e2bd000b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "runs",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "pid": 21192,
+      "startedAt": "2026-10-20T11:19:41.569Z",
+      "completedAt": "2026-10-20T11:19:41.758Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "762e2a05dc960ba85988df7e207632e94269ed8ce6de11b387f2a9e30f1928b9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "history",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "pid": 66764,
+      "startedAt": "2026-10-20T11:19:41.759Z",
+      "completedAt": "2026-10-20T11:19:41.989Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "9694525521a210e4ff2a94616479085767b1792f4ac239b40b11dd900b2379e3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "runs",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "pid": 54076,
+      "startedAt": "2026-10-20T11:19:41.990Z",
+      "completedAt": "2026-10-20T11:19:42.201Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "a6969787a7b287a6a23b257cef8d8a9fff7f2d8a299e21903bd1b0199b4551ff",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "history",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "pid": 20612,
+      "startedAt": "2026-10-20T11:19:42.202Z",
+      "completedAt": "2026-10-20T11:19:42.430Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "543da9ae2720b41bbd4d2037f3be29cdbde15487215284b9d87d0dec55ddf78d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "runs",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "pid": 33584,
+      "startedAt": "2026-10-20T11:19:42.431Z",
+      "completedAt": "2026-10-20T11:19:42.633Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "f28106a90f8051094eed65d75eb88816c9fb0303d0e21d344ca5c3c286641768",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-58ef35476048503c598b5629019379da",
+      "args": [
+        "history",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "pid": 20644,
+      "startedAt": "2026-10-20T11:19:42.634Z",
+      "completedAt": "2026-10-20T11:19:42.826Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "b1e268dca97f2c8598c32696cf1284297514f851f25647d46e177a57d093ff0a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-58ef35476048503c598b5629019379da",
+      "args": [
+        "runs",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "pid": 9288,
+      "startedAt": "2026-10-20T11:19:42.827Z",
+      "completedAt": "2026-10-20T11:19:43.005Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "78fddbe7b0bef5b10daa308b9152d3bf3c8967bb93b175a846eb882a3ccabfa5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "history",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 53772,
+      "startedAt": "2026-10-20T11:19:43.006Z",
+      "completedAt": "2026-10-20T11:19:43.192Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "5667aed5df5f2920aa4c5b1e506606ca622bf12ab76a3ea981f66c33605e7f11",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "runs",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 51676,
+      "startedAt": "2026-10-20T11:19:43.192Z",
+      "completedAt": "2026-10-20T11:19:43.383Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "c459e4ef5094280c5ce928a20422d03fd567363e7dc9c227fcbd39f1bf6da4c4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-2591d25a7123d6fa9d4cbd41b077b38d",
+      "args": [
+        "history",
+        "2591d25a7123d6fa9d4cbd41b077b38d"
+      ],
+      "pid": 58728,
+      "startedAt": "2026-10-20T11:19:43.383Z",
+      "completedAt": "2026-10-20T11:19:43.593Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "2ba40f8d5ad1e69e861c67bae1928f3a80b0f95ef8d80a1a1191625916624254",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-2591d25a7123d6fa9d4cbd41b077b38d",
+      "args": [
+        "runs",
+        "2591d25a7123d6fa9d4cbd41b077b38d"
+      ],
+      "pid": 34724,
+      "startedAt": "2026-10-20T11:19:43.593Z",
+      "completedAt": "2026-10-20T11:19:43.798Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4d3e2b5861da950804e7e71daf8def0eb23e90b1457c0d78346650563eaf016f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-f5eebd145890d132cfc59b0589491803",
+      "args": [
+        "history",
+        "f5eebd145890d132cfc59b0589491803"
+      ],
+      "pid": 45612,
+      "startedAt": "2026-10-20T11:19:43.799Z",
+      "completedAt": "2026-10-20T11:19:43.974Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "f9535c0ec52586724a41a40c4969565e2122c0e845f8bdf38d708064448c3f98",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-f5eebd145890d132cfc59b0589491803",
+      "args": [
+        "runs",
+        "f5eebd145890d132cfc59b0589491803"
+      ],
+      "pid": 31232,
+      "startedAt": "2026-10-20T11:19:43.975Z",
+      "completedAt": "2026-10-20T11:19:44.178Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "4f4cc540a03cab65ef31b2c03b24fcc443e9fb0ef97096d60a4ec37dacf015fb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-history-94456c781056c58ca46abeacb7591138",
+      "args": [
+        "history",
+        "94456c781056c58ca46abeacb7591138"
+      ],
+      "pid": 11880,
+      "startedAt": "2026-10-20T11:19:44.178Z",
+      "completedAt": "2026-10-20T11:19:44.356Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "49d79b60c53f513a218abd55eb29267a45f46713c31a7a4e3697acbd4b05c3a5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "after-runs-94456c781056c58ca46abeacb7591138",
+      "args": [
+        "runs",
+        "94456c781056c58ca46abeacb7591138"
+      ],
+      "pid": 54516,
+      "startedAt": "2026-10-20T11:19:44.356Z",
+      "completedAt": "2026-10-20T11:19:44.539Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "8a059402b4a8fc5aa0a41e1ff029c46b2751429cafa04696f00193c614d057a1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "taskSubmissions": 0,
+  "beforeProfile": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 69196,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "beforeProcess": {
+    "pid": 69196,
+    "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-cba060157576812b176ae1d677b801a31cd8855a1b3c80a924394b16bfe363fe\\xmind.exe",
+    "birth": "2026-10-20T09:46:30.9386120Z"
+  },
+  "upgradeProfile": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 32396,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "afterProcess": {
+    "pid": 32396,
+    "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-9f80d1a8c7ce1fadfef8d80cccf27dccdcbbed5b59a4dcef996f852c98b82aeb\\xmind.exe",
+    "birth": "2026-10-20T11:19:37.8496800Z"
+  },
+  "afterProfile": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 32396,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "sessionCount": 8,
+  "historyMessages": 167,
+  "runCount": 13,
+  "exactStatePreserved": true,
+  "sameSqliteProfile": true,
+  "stableBackendOrigin": true,
+  "nativeSha256": "dc900cadbf559ae7fb6de3722d3953d83a127925cb9ce0f40e3b37603b005dbe",
+  "oldOwnerRetiredByNativeProtocol": true,
+  "passed": true,
+  "completedAt": "2026-10-20T11:19:44.545Z"
+}

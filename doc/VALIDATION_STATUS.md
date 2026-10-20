@@ -2,6 +2,18 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.58 with profile-preserving adoption — 2026-10-20
+
+Actual VS Code CLI installs/lists0.1.58 without opening an editor. All2445installed payloads and the2402file native manifest match the qualified2448entry archive/stage: client62141200, complete156-qualified nativeaf34bfe0/dc900cad, SDK58a8aab9/DLL1ff2a8e7, manifest71d5c2b5. Installed57 is copied and2447files byte-verified under C:/xMindNativeValidation/preserved-vscode-0.1.57-before-0.1.58. Settings SHA2565ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b is unchanged, and all seven prior profile directories remain.
+
+Independent browser/API and byte-safe native CLI snapshots establish8sessions/167root messages/13terminal roots plus2owned children/11child messages. The single explicit native --upgrade-backend operation retires only verified old69196 (birth2026-10-20T09:46:30.9386120Z, imagefc94ced1) and starts32396 born2026-10-20T11:19:37.8496800Z with qualified imagedc900cad. Same TestProj SQLite profile/origin57779 and provider/process/MCP/workspace configuration are retained. CLI before/after snapshots are exact; browser comparisons also prove exact owned-child histories and immutable admission observations. No task, model inference or tool work was submitted or replayed.
+
+Existing page55684 host54928/view56652 and page60938 host67436/view61600 retain their exact process births/images. Both existing gateways independently return all8sessions/167messages/13roots/2children with exact prior history/provider metadata through the adopted58backend. Settings/profile preservation and absence of Code.exe are checked again after adoption. Raw user history/configuration snapshots stay private under C:/xMindNativeValidation/primary58-* and installed58-primary-adoption-20261020; public receipts include only safe metadata/hashes/counts. An optional old-page observer extension initially failed because of shell quoting before making an HTTP request; correcting the observer reran only read-only checks.
+
+See [installed payload verification](evidence/vscode-0.1.58-installed-final-evidence-20261020.json), [adoption](evidence/coding58-primary-adoption-20261020.json), [history/owner/settings preservation](evidence/coding58-adoption-preservation-20261020.json) and install terminal/preservation receipts. Installed extension: C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.58. Adopted image: p-current/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-9f80d1a8c7ce1fadfef8d80cccf27dccdcbbed5b59a4dcef996f852c98b82aeb/xmind.exe.
+
+Fresh installed58 rendered/live-provider coding, current VS Code/external-browser acceptance and remaining documented OSS requirements remain open. Existing57 browser rendering is not relabelled58 rendering merely because its backend upgraded. No released-product or full-goal completion is claimed.
+
 ## Qualified 0.1.58 development package — 2026-10-20
 
 Candidate0.1.58 combines client source `62141200126369e8b3bb38810088afe985d0fde7` with complete156-qualified native sourceaf34bfe0/executabledc900cad and pinned SDK58a8aab9/DLL1ff2a8e7. The public runtime is staged from verified installed57 payloads, replacing the qualified executable and provenance; all production SDK payloads match the frozen full native input manifest. Development linker .lib/.exp artifacts remain outside distribution. Runtime manifest SHA256 `71d5c2b5197ad464040ae93630ba0984645695bdabb027e24a6f223adfa10ef1`,2402payload files. Actual Native/CMake sources still match the complete native qualification; the client version metadata is separately staged and checked.

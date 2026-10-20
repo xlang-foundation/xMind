@@ -6,11 +6,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed57 client6dbab29f/native971ad1e1/fc94ced1:155native,462/161clients;2448archive/2445installed verify. Owner69196 born2026-10-20T09:46:30.9386120Z/profile57779. Page60938 hosts67436/61600. Fresh IAB session94456c781056c58ca46abeacb7591138/rootc601c804008ce5bab6f8b9bd50c06876 completes2delegatedreads/approvededit/Node4of4/reload; NEVER replay. Prior7sessions/159messages/12runs exact; old55684 owners54928/56652 retained. See doc/VALIDATION_STATUS.md.
+- Installed58 client62141200/nativeaf34bfe0/dc900cad:156native,462/161clients;2448archive/2445installed verify. Backend32396 born2026-10-20T11:19:37.8496800Z/profile57779;8sessions/167messages/13roots/2children exact. Old55684/60938 hosts54928,56652,67436,61600 retained. Browser57 session94456c781056c58ca46abeacb7591138/rootc601c804008ce5bab6f8b9bd50c06876 completed2reads/edit/Node4/reload; NEVER replay. See doc/VALIDATION_STATUS.md.
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Observer failure and byte-safe preservation proof remain in coding54 adoption receipts. External Edge/current VS Code acceptance remain open.
 
-- Candidate58 client62141200/nativeaf34bfe0/dc900cad: full156,462/161clients,2448archive verify;17441stage files unchanged. Not installed. Qualified pair C:/xMindNativeValidation/qualified-nested-context-binaries-20261020; see doc/VALIDATION_STATUS.md.
+- Qualified58 stage17441files/VSIX2448entries unchanged; now installed. Pair preserved C:/xMindNativeValidation/qualified-nested-context-binaries-20261020. See doc/VALIDATION_STATUS.md.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 
