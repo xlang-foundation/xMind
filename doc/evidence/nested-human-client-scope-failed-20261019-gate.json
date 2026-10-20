@@ -1,0 +1,33 @@
+{
+  "sourceRevision": "bd06e27503aa44c9965c72bc15d1eba00c894cef",
+  "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+  "sourceFiles": 71,
+  "trackedSourceFiles": 66,
+  "vendorFiles": 5,
+  "browserAssets": 18,
+  "sourceAndAssetBytesUnchanged": true,
+  "expectedTests": {
+    "extension": 460,
+    "browser": 160
+  },
+  "extension": {
+    "exitCode": 0,
+    "tests": 460,
+    "passed": 460,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "exitCode": 1,
+    "tests": 160,
+    "passed": 159,
+    "failed": 1,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "cpythonExecuted": false,
+  "passed": false
+}

@@ -728,7 +728,7 @@ async function activate(context) {
           selectedGraph=message.id||undefined;post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
           await context.workspaceState.update(graphStateKey,{...connectionState(),id:selectedGraph});
         }else if(message.type==='graph-input'){
-          if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
+          if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || message.owner!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
           if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
           if(typeof message.input_json!=='string' || message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
           await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
