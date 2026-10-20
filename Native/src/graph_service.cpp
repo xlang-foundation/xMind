@@ -5,6 +5,7 @@
 #include <deque>
 #include <map>
 #include <mutex>
+#include <set>
 #include <thread>
 
 namespace agentflow {
@@ -39,6 +40,26 @@ struct GraphService::Impl {
     std::vector<std::thread> workers;
     bool accepting=true,faulted=false;
 
+
+    // Adoption is metadata-only: a paused tree contains no active leaf worker.
+    void validate_paused_tree(const GraphRootRecord& root){
+        std::size_t count=0;bool waiting=false;std::set<std::string> seen;
+        const auto visit=[&](auto&& self,const GraphRootRecord& graph,std::size_t depth,bool closed)->void{
+            if(depth>3||!seen.insert(graph.run.id).second||graph.run.session_id!=root.run.session_id)throw DatabaseError("Paused graph tree has invalid ownership");
+            if(closed&&graph.run.state!=RunState::paused)throw DatabaseError("Paused graph tree has an executable invocation");
+            const GraphPlan plan(graph.specification_json);const GraphCoordinator coordinator(plan,graph.checkpoint_json,GraphRestoreMode::live);const auto decision=coordinator.inspect();
+            if(closed){if(decision.halted||decision.finished||!decision.ready.empty()||!decision.skippable.empty())throw DatabaseError("Paused graph tree has runnable or inconsistent work");waiting=waiting||!decision.waiting_human.empty();}
+            const auto children=store.children(graph.run.id).get();
+            for(const auto& node:decision.running)if(closed){const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& n){return n.id==node;});std::size_t matches=0;for(const auto& child:children)if(child.node_id==node&&child.graph_root&&child.state==RunState::paused)++matches;if(definition==plan.nodes().end()||definition->kind!=GraphNodeKind::graph||matches!=1)throw DatabaseError("Paused invocation claim has no closed child");}
+            for(const auto& child:children){if(++count>256||child.parent_id!=graph.run.id||child.session_id!=root.run.session_id)throw DatabaseError("Paused graph child ownership exceeds its root");
+                const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& n){return n.id==child.node_id;});if(definition==plan.nodes().end()||(definition->kind==GraphNodeKind::graph)!=child.graph_root||store.child_admission(child.id).get().root_run_id!=root.run.id)throw DatabaseError("Paused graph child node or admitted role differs from its root");
+                if(!terminal(child.state)&&(!closed||!child.graph_root||child.state!=RunState::paused||coordinator.state(child.node_id)!=GraphNodeState::running))throw DatabaseError("Paused graph has an active executable child");
+                if(child.graph_root){const auto nested=store.graph_run(child.id).get();if(definition->kind!=GraphNodeKind::graph||nested.graph_id!=definition->graph->graph_id||nested.graph_revision!=definition->graph->revision||nested.specification_json!=definition->graph->specification_json||store.child_admission(child.id).get().root_run_id!=root.run.id)throw DatabaseError("Paused graph invocation differs from its immutable root binding");self(self,nested,depth+1,!terminal(child.state));}
+            }
+        };
+        if(!root.run.parent_id.empty())throw DatabaseError("Paused adoption requires its ultimate graph root");visit(visit,root,0,true);if(!waiting)throw DatabaseError("Paused graph tree has no human wait");
+    }
+
     Impl(PersistenceService& persistence,AgentSettings settings,std::size_t count,
         std::size_t limit,std::size_t parallel,std::shared_ptr<RootAdmissionPool> budget)
         :store(persistence),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(limit)),work_pool(root_admission->executor()),runner(store,std::move(settings),parallel),
@@ -62,7 +83,7 @@ struct GraphService::Impl {
                 // human pause. A changed connector cannot resume or rebind it;
                 // human_input checks the immutable plan before any mutation.
             }
-            catch(const RunUnavailable&) {if(!context)throw;}
+            catch(const RunUnavailable&) {if(!context&&std::none_of(plan.nodes().begin(),plan.nodes().end(),[](const auto& node){return node.kind==GraphNodeKind::graph;}))throw;}
             catch(const std::invalid_argument&) {if(!context)throw;}
             if(context){
                 if(!context->segment||context->segment->state!="closed"||context->segment->remaining_active_ms<1)throw DatabaseError("Paused graph has no clean closed context clock");
@@ -70,9 +91,8 @@ struct GraphService::Impl {
             }
             const auto decision=GraphCoordinator(plan,root.checkpoint_json,GraphRestoreMode::live).inspect();
             if(context){if(decision.halted||!decision.running.empty()||(!runnable(root)&&decision.waiting_human.empty()))throw DatabaseError("Paused context graph has inconsistent work");}
-            else if(decision.halted || decision.waiting_human.empty() || !decision.ready.empty() ||
-                !decision.running.empty() || !decision.skippable.empty())throw DatabaseError("Paused graph has executable or inconsistent work");
-            for(const auto& child:store.children(run.id).get())if(!terminal(child.state))throw DatabaseError("Paused graph has an unfinished child");
+            else validate_paused_tree(root);
+            if(context)for(const auto& child:store.children(run.id).get())if(!terminal(child.state))throw DatabaseError("Paused graph has an unfinished child");
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
             active.emplace(run.id,std::move(job));

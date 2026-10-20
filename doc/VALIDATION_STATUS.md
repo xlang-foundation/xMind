@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested paused-tree recovery and service adoption — 2026-10-19
+
+The service now validates a whole paused invocation tree before metadata-only adoption: immutable graph bindings and ultimate-root admission, immediate parents/session/roles, three invocation levels and256children, a human wait somewhere in the tree, and no runnable or active executable child. Unavailable nested answer execution keeps its closed ownership available for inspection/cancellation; input preflight still rejects it without mutation. Service close preserves the paused tree, and a new service can cancel it atomically after restart.
+
+This work exposed a recovery defect: generic checkpoint recovery relabeled even durably paused invocation claims as uncertain. Recovery now proves clean paused noncontext invocation trees before mutating any run/effect/transport records and retains only those graph checkpoints in live form. Interrupted running descendants still fail recovery and their ancestors remain uncertain; the service refuses inconsistent adoption rather than replaying them. Actual embedded-xlang3/SQLite fixtures cover a three-level wait, service handoff, persistence restart, unavailable input rejection, cancellation/released ownership and an intentionally interrupted descendant copied into an isolated fault database. Initial fixture alias reuse failed parsing; the corrected fixture then exposed the recovery bug. Both original17/18 failures remain in evidence and complete raw source/input snapshots remain under C:/xMindNativeValidation/nested-graph-paused-adoption-*.
+
+Complete Release build and final18focused native contracts pass65.44seconds with2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets and hashes unchanged. Candidate executable SHA2561bbfbb9e2998bcedd64d258f9ba154bbd95a2fcbcdb0918a6e55017d9580d680. See evidence/nested-graph-paused-adoption-final-20261019-*. This is not a new full155 pass: complete qualification remains bd06e275/bf189ca7, preserved separately. Installed56 is unchanged. Nested runner paused-flight release, actual authenticated descendant answer routing/client controls and shared durable context/active-time/model-call budgets remain open; nested human execution remains rejected.
+
+
+
 ## Nested pause/controller qualification and client scope merge — 2026-10-19
 
 Complete native source bd06e275 passes all155 contracts in1062.88seconds, CTest36652 and wrapper11518 terminal0. All2629project,16SDK,1870pure-library,76SDK-runtime,18598dependency and130binary file sets/hashes remain unchanged. This qualifies the durable nested human barrier/observed answer boundary, atomic paused-tree retirement and existing invocation-controller reattachment as their documented scopes. It does not enable nested human execution. See evidence/nested-graph-pause-controller-full-native-20261019-*.

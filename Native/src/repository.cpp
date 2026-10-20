@@ -596,6 +596,17 @@ struct Repository::Impl {
         GraphDecision decisions;try{decisions=coordinator.inspect();}catch(const std::invalid_argument&){return false;}
         return !decisions.halted && !decisions.waiting_human.empty() && decisions.ready.empty() && decisions.skippable.empty() && decisions.running.empty();
     }
+
+    std::set<std::string> closed_paused_graph_tree(const std::string& root_id){
+        auto& db=database;const auto roots=db.execute("SELECT state FROM runs WHERE id=? AND parent_run_id IS NULL",{root_id}).rows;if(roots.empty()||text(roots[0][0])!="paused"||!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())return {};
+        const auto rows=db.execute("WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) SELECT r.id,r.session_id,r.state,COALESCE(r.parent_run_id,''),COALESCE(r.node_id,''),g.run_id,g.graph_id,g.graph_revision,g.specification,g.checkpoint_revision,g.checkpoint,COALESCE(g.input,'') FROM tree t JOIN runs r ON r.id=t.id LEFT JOIN graph_roots g ON g.run_id=r.id ORDER BY t.depth DESC,r.id",{root_id}).rows;
+        if(rows.size()>257)return {};std::map<std::string,Run> runs;std::vector<std::pair<GraphRootRecord,GraphCoordinator>> owners;bool waiting=false;
+        for(const auto& row:rows){const bool graph=!std::holds_alternative<std::nullptr_t>(row[5]);Run current{text(row[0]),text(row[1]),state_value(text(row[2])),text(row[3]),text(row[4]),graph};runs.emplace(current.id,current);if(has_operations(current.id,"'proposed','awaiting_approval','approved','executing','uncertain'"))return {};if(terminal(current.state))continue;if(!graph||current.state!=RunState::paused||graph_lineage(current.id).first!=root_id)return {};GraphRootRecord record{current,text(row[6]),integer(row[7]),text(row[8]),integer(row[9]),text(row[10]),text(row[11])};owners.emplace_back(record,GraphCoordinator(GraphPlan(record.specification_json),record.checkpoint_json,GraphRestoreMode::live));}
+        if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root_id}).rows.empty())return {};
+        std::set<std::string> closed;
+        for(const auto& [record,coordinator]:owners){const auto decision=coordinator.inspect();if(decision.halted||decision.finished||!decision.ready.empty()||!decision.skippable.empty())return {};waiting=waiting||!decision.waiting_human.empty();for(const auto& node:decision.running){bool observed=false;for(const auto& [id,child]:runs)if(child.parent_id==record.run.id&&child.node_id==node&&child.graph_root&&closed.contains(id))observed=true;if(!observed)return {};}closed.insert(record.run.id);}
+        if(!waiting||!closed.contains(root_id))return {};return closed;
+    }
     bool pause_graph_tree(const std::string& root_id){
         auto& db=database;
         if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())return false;
@@ -3276,6 +3287,9 @@ Operation Repository::reconcile_interrupted_process(const std::string& id,const 
 std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     if(!owner.covers(impl_->path)) throw Conflict("Recovery requires this database's owner lease");
     auto& db=impl_->database; Transaction transaction(db);
+    // Prove clean pauses before recovery changes any owner, effect or transport state.
+    std::set<std::string> preserved_pauses;
+    for(const auto& row:db.execute("SELECT r.id FROM runs r WHERE r.parent_run_id IS NULL AND r.state='paused' AND EXISTS(SELECT 1 FROM graph_invocations gi WHERE gi.root_run_id=r.id)").rows){const auto closed=impl_->closed_paused_graph_tree(text(row[0]));preserved_pauses.insert(closed.begin(),closed.end());}
     auto roots=db.execute("SELECT id FROM runs WHERE state IN ('queued','running')").rows;
     // Only a fully closed, typed human pause survives. A paused run without
     // this complete proof is interrupted rather than silently adopted.
@@ -3339,7 +3353,7 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
         db.execute("UPDATE dynamic_plan_nodes SET state='cancelled',protected_definition=1 WHERE plan_id=? AND state IN ('pending','blocked')",{plan});changed_one(db.execute("UPDATE dynamic_plans SET state=?,state_sequence=state_sequence+1,planned_children_reserved=0,planned_humans_reserved=0 WHERE id=?",{uncertain?"uncertain":"interrupted",plan}));
         const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='interrupted' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root});changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root});db.execute("UPDATE dynamic_owner_pause_waits SET state='retired' WHERE root_run_id=?",{root});impl_->event(root,"plan.interrupted",Json{{"plan_id",plan},{"reason","server_restart"},{"replayed",false}}.dump());
     }
-    for(const auto& row:db.execute("SELECT run_id FROM graph_roots").rows){auto root=graph_run(text(row[0]));const GraphCoordinator recovered(GraphPlan(root.specification_json),root.checkpoint_json);if(recovered.checkpoint()!=root.checkpoint_json){impl_->graph_checkpoint(root,recovered);impl_->event(root.run.id,"graph.recovered",Json{{"checkpoint_revision",root.checkpoint_revision},{"reason","interrupted_nodes_not_replayed"}}.dump());}}
+    for(const auto& row:db.execute("SELECT run_id FROM graph_roots").rows){if(preserved_pauses.contains(text(row[0])))continue;auto root=graph_run(text(row[0]));const GraphCoordinator recovered(GraphPlan(root.specification_json),root.checkpoint_json);if(recovered.checkpoint()!=root.checkpoint_json){impl_->graph_checkpoint(root,recovered);impl_->event(root.run.id,"graph.recovered",Json{{"checkpoint_revision",root.checkpoint_revision},{"reason","interrupted_nodes_not_replayed"}}.dump());}}
     transaction.commit(); return roots.size();
 }
 }
