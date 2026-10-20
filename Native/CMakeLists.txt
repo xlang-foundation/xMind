@@ -509,6 +509,10 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/context_graph_engine_peer.mjs" "$<TARGET_FILE:agentflow_context_graph_engine_contract>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_context_graph_engine_contract PROPERTIES TIMEOUT 150)
+    add_test(NAME native_nested_context_graph_engine_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/nested_context_graph_engine_peer.mjs" "$<TARGET_FILE:agentflow_context_graph_engine_contract>"
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_nested_context_graph_engine_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_provider_yaml_config_contract tests/provider_yaml_config_contract.cpp)
     target_include_directories(agentflow_provider_yaml_config_contract PRIVATE third_party)
     target_link_libraries(agentflow_provider_yaml_config_contract PRIVATE agentflow_runtime)

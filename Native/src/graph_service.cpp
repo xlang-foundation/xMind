@@ -14,10 +14,6 @@ using Json=nlohmann::json;
 bool terminal(RunState state) {
     return state==RunState::completed || state==RunState::failed || state==RunState::cancelled;
 }
-bool runnable(const GraphRootRecord& root){
-    const auto decision=GraphCoordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live).inspect();
-    return !decision.halted&&decision.running.empty()&&(!decision.ready.empty()||!decision.skippable.empty()||decision.finished);
-}
 void controller(const std::string& actor) {
     if(actor.empty() || actor.size()>128 || actor.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid graph controller identity");
 }
@@ -42,13 +38,13 @@ struct GraphService::Impl {
 
 
     // Adoption is metadata-only: a paused tree contains no active leaf worker.
-    void validate_paused_tree(const GraphRootRecord& root){
-        std::size_t count=0;bool waiting=false;std::set<std::string> seen;
+    bool validate_paused_tree(const GraphRootRecord& root,bool allow_ready=false){
+        std::size_t count=0;bool waiting=false,ready=false;std::set<std::string> seen;
         const auto visit=[&](auto&& self,const GraphRootRecord& graph,std::size_t depth,bool closed)->void{
             if(depth>3||!seen.insert(graph.run.id).second||graph.run.session_id!=root.run.session_id)throw DatabaseError("Paused graph tree has invalid ownership");
             if(closed&&graph.run.state!=RunState::paused)throw DatabaseError("Paused graph tree has an executable invocation");
             const GraphPlan plan(graph.specification_json);const GraphCoordinator coordinator(plan,graph.checkpoint_json,GraphRestoreMode::live);const auto decision=coordinator.inspect();
-            if(closed){if(decision.halted||decision.finished||!decision.ready.empty()||!decision.skippable.empty())throw DatabaseError("Paused graph tree has runnable or inconsistent work");waiting=waiting||!decision.waiting_human.empty();}
+            if(closed){const bool local_ready=decision.finished||!decision.ready.empty()||!decision.skippable.empty();if(decision.halted||(!allow_ready&&local_ready))throw DatabaseError("Paused graph tree has runnable or inconsistent work");ready=ready||local_ready;waiting=waiting||!decision.waiting_human.empty();}
             const auto children=store.children(graph.run.id).get();
             for(const auto& node:decision.running)if(closed){const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& n){return n.id==node;});std::size_t matches=0;for(const auto& child:children)if(child.node_id==node&&child.graph_root&&child.state==RunState::paused)++matches;if(definition==plan.nodes().end()||definition->kind!=GraphNodeKind::graph||matches!=1)throw DatabaseError("Paused invocation claim has no closed child");}
             for(const auto& child:children){if(++count>256||child.parent_id!=graph.run.id||child.session_id!=root.run.session_id)throw DatabaseError("Paused graph child ownership exceeds its root");
@@ -57,7 +53,7 @@ struct GraphService::Impl {
                 if(child.graph_root){const auto nested=store.graph_run(child.id).get();if(definition->kind!=GraphNodeKind::graph||nested.graph_id!=definition->graph->graph_id||nested.graph_revision!=definition->graph->revision||nested.specification_json!=definition->graph->specification_json||store.child_admission(child.id).get().root_run_id!=root.run.id)throw DatabaseError("Paused graph invocation differs from its immutable root binding");self(self,nested,depth+1,!terminal(child.state));}
             }
         };
-        if(!root.run.parent_id.empty())throw DatabaseError("Paused adoption requires its ultimate graph root");visit(visit,root,0,true);if(!waiting)throw DatabaseError("Paused graph tree has no human wait");
+        if(!root.run.parent_id.empty())throw DatabaseError("Paused adoption requires its ultimate graph root");visit(visit,root,0,true);if(!waiting&&!(allow_ready&&ready))throw DatabaseError("Paused graph tree has no human wait or ready continuation");return ready;
     }
 
     Impl(PersistenceService& persistence,AgentSettings settings,std::size_t count,
@@ -90,9 +86,9 @@ struct GraphService::Impl {
                 try{runner.validate_context_owner(run.id);}catch(const GraphContextUnavailable&){}
             }
             const auto decision=GraphCoordinator(plan,root.checkpoint_json,GraphRestoreMode::live).inspect();
-            if(context){if(decision.halted||!decision.running.empty()||(!runnable(root)&&decision.waiting_human.empty()))throw DatabaseError("Paused context graph has inconsistent work");}
+            if(context)validate_paused_tree(root,true);
             else validate_paused_tree(root);
-            if(context)for(const auto& child:store.children(run.id).get())if(!terminal(child.state))throw DatabaseError("Paused graph has an unfinished child");
+
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
             active.emplace(run.id,std::move(job));
@@ -149,7 +145,7 @@ struct GraphService::Impl {
                 if(terminal(current.state)){active.erase(job->id);return;}
                 if(current.state==RunState::paused){
                     if(job->cancelled){runner.retire(job->id,RunState::cancelled,job->cancel_reason);active.erase(job->id);}
-                    else if(accepting&&!job->stop.stop_requested()&&runner.captured_context(job->id)&&runnable(store.graph_run(job->id).get())){
+                    else if(accepting&&!job->stop.stop_requested()&&runner.captured_context(job->id)&&validate_paused_tree(store.graph_run(job->id).get(),true)){
                         enqueue(job);job->phase=Phase::queued;publish_locked();changed.notify_one();
                     }else job->phase=Phase::waiting;
                     return;
@@ -298,7 +294,7 @@ GraphRootRecord GraphService::human_input(const std::string& id,const std::strin
     try {result=impl_->store.input_graph_human(id,node,input,actor,revision).get();}
     catch(...){if(waiting)impl_->drop_pending_back();throw;}
     try{if(waiting) {
-        if(result.run.state==RunState::running||(result.run.state==RunState::paused&&context&&runnable(result)))job->phase=Impl::Phase::queued;
+        if(result.run.state==RunState::running||(result.run.state==RunState::paused&&context&&impl_->validate_paused_tree(result,true)))job->phase=Impl::Phase::queued;
         else impl_->drop_pending_back();
     }}catch(...){job->phase=Impl::Phase::faulted;impl_->fail_locked();throw;}
     impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
@@ -307,7 +303,7 @@ GraphRootRecord GraphService::tree_human_input(const std::string& id,const std::
     controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();const auto owned=impl_->active.find(id);if(owned==impl_->active.end())throw NotFound("Graph is not owned by this service");const auto job=owned->second;const bool waiting=job->phase==Impl::Phase::waiting;if(job->cancelled)throw Conflict("Graph cancellation is pending");const auto root=impl_->store.graph_run(id).get();const auto task=Json::parse(root.input_json);impl_->runner.validate(GraphPlan(root.specification_json),task.value("model_id",std::string{}));impl_->runner.validate_context_owner(id);
     if(waiting)impl_->enqueue(job);GraphRootRecord result;
     try{result=impl_->store.input_graph_tree_human(id,owner,node,input,actor,revision,owner_revision).get();}catch(...){if(waiting)impl_->drop_pending_back();throw;}
-    if(waiting){if(result.run.state==RunState::running)job->phase=Impl::Phase::queued;else impl_->drop_pending_back();}
+    if(waiting){if(result.run.state==RunState::running||(result.run.state==RunState::paused&&impl_->runner.captured_context(id)&&impl_->validate_paused_tree(result,true)))job->phase=Impl::Phase::queued;else impl_->drop_pending_back();}
     impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
 }
 Run GraphService::resume_graph(const std::string& id,const std::string& actor,std::int64_t revision){
@@ -317,7 +313,7 @@ Run GraphService::resume_graph(const std::string& id,const std::string& actor,st
     if(job->cancelled)throw Conflict("Graph cancellation is pending");const auto root=impl_->store.graph_run(id).get();
     if(root.run.state!=RunState::paused||root.checkpoint_revision!=revision)throw Conflict("Graph resume observation changed");
     const auto context=impl_->runner.captured_context(id);
-    if(!context||!context->segment||context->segment->state!="closed"||!runnable(root))throw Conflict("Graph has no ready closed context owner");
+    if(!context||!context->segment||context->segment->state!="closed"||!impl_->validate_paused_tree(root,true))throw Conflict("Graph has no ready closed context owner");
     impl_->runner.validate_context_owner(id);
     if(job->phase==Impl::Phase::waiting){
         impl_->enqueue(job);
@@ -333,7 +329,7 @@ GraphContextMetadata GraphService::graph_context(const std::string& id)const{
     result.enabled=true;if(context->segment&&context->segment->state=="closed")result.remaining_active_ms=context->segment->remaining_active_ms;
     const auto owned=impl_->active.find(id);if(!impl_->accepting||impl_->faulted||owned==impl_->active.end()||owned->second->cancelled)return result;
     const auto root=impl_->store.graph_run(id).get();
-    if(root.run.state!=RunState::paused||!context->segment||context->segment->state!="closed"||!runnable(root))return result;
+    if(root.run.state!=RunState::paused||!context->segment||context->segment->state!="closed"||!impl_->validate_paused_tree(root,true))return result;
     try{impl_->runner.validate_context_owner(id);result.resumable=true;}catch(const GraphContextUnavailable&){}
     return result;
 }

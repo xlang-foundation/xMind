@@ -64,6 +64,10 @@ std::optional<WorkspaceMembershipSnapshot> saved_graph_workspace_membership(Pers
 struct GraphRunner::ExecutionScope {
     std::string root_id;
     std::chrono::steady_clock::time_point deadline;
+    std::shared_ptr<RootExecutionBudget> budget;
+    std::mutex waiting_mutex;std::set<std::string> waiting;
+    bool quiescent(const std::string& id){std::lock_guard lock(waiting_mutex);return waiting.contains(id);}
+    void relinquish(const std::string& id){std::lock_guard lock(waiting_mutex);waiting.insert(id);}
     const std::size_t capacity;
     std::atomic<std::size_t> active=0;
     ExecutionScope(std::string root,std::chrono::steady_clock::time_point limit,std::size_t count):root_id(std::move(root)),deadline(limit),capacity(count){}
@@ -99,7 +103,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
     const std::vector<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions"};
     std::size_t agent_count=0;
     const auto visit=[&](auto&& self,const GraphPlan& current,bool nested)->void {for(const auto& node:current.nodes()){
-        if(node.kind==GraphNodeKind::graph){if(settings_.context)throw GraphContextUnavailable("Nested graph context ownership is not implemented");self(self,GraphPlan(node.graph->specification_json),true);continue;}
+        if(node.kind==GraphNodeKind::graph){self(self,GraphPlan(node.graph->specification_json),true);continue;}
 
         if(node.kind==GraphNodeKind::agent){if(!agents_)throw RunUnavailable("Graph agent execution requires a configured model");if(!node.model_id.empty() && std::find(configured.begin(),configured.end(),node.model_id)==configured.end())throw std::invalid_argument("Graph node model is not configured");}
         if(node.kind==GraphNodeKind::agent)++agent_count;
@@ -115,7 +119,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
     if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
 }
 std::optional<RootBudgetSpec> GraphRunner::execution_budget(const GraphPlan& plan,const std::string& model)const{
-    validate(plan,model);if(!settings_.context||std::none_of(plan.nodes().begin(),plan.nodes().end(),[](const auto& n){return n.kind==GraphNodeKind::agent;}))return {};
+    validate(plan,model);if(!settings_.context||graph_agent_paths(plan).empty())return {};
     return RootBudgetSpec{"native.graph-context",1,workspace_?workspace_->identity():"workspace:none",public_identity(settings_,model),8,
         static_cast<std::int64_t>(std::min<std::size_t>(limit_,2)),32,settings_.run_timeout.count()};
 }
@@ -348,12 +352,12 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
             return store_.retire_graph_context_owner(id,RunState::cancelled,R"({"reason":"graph_cancelled_before_owner_activation"})").get();
         }
     }else{
-        if(execution_budget(plan,model))throw GraphContextUnavailable("Graph has no captured context admission");
+        if(!scope->budget&&execution_budget(plan,model))throw GraphContextUnavailable("Graph has no captured context admission");
         if(root.run.state==RunState::paused&&!root.run.parent_id.empty())return root.run;
         if(root.run.state==RunState::queued)root.run=store_.transition(id,RunState::queued,RunState::running).get();else if(root.run.state!=RunState::running)throw Conflict("Graph is not eligible for execution");
     }
     std::stop_source stop;std::stop_callback cancelled(external,[&]{stop.request_stop();});
-    std::shared_ptr<RootExecutionBudget> budget;auto deadline=scope->deadline;
+    auto budget=scope->budget;auto deadline=scope->deadline;
     if(context){
         std::optional<GraphContextOpenRecord> opened;std::chrono::steady_clock::time_point active_started;
         // Authenticated input may advance the checkpoint before a queued wake
@@ -373,17 +377,18 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
         root=opened->graph;deadline=active_started+std::chrono::milliseconds(opened->segment.remaining_active_ms);
         try{budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(id).get(),deadline,stop.get_token(),opened->segment,context->authority.backend_identity);}
         catch(...){throw ContextOutcomeUnrecorded("Opened graph segment has no live native clock owner; recovery is required");}
+        scope->budget=budget;scope->deadline=deadline;
     }
     auto boundary=[&]{return GraphContextBoundarySpec{id,budget->segment_id(),context->authority.backend_identity,root.checkpoint_revision,budget->snapshot().revision,budget->active_elapsed_ms()};};
     auto retire_owner=[&](RunState state,const Json& reason){return context?store_.retire_graph_context_owner(id,state,reason.dump(),budget->segment_id(),budget->active_elapsed_ms()).get():store_.retire_graph_run(id,state,reason.dump()).get();};
     std::atomic<bool> timed_out=false;
     std::jthread timer([&](std::stop_token ending){std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);changed.wait_until(lock,ending,deadline,[]{return false;});if(!ending.stop_requested()){timed_out=true;stop.request_stop();}});
-    const auto parallel=context?std::min<std::size_t>(limit_,2):limit_;
+    const auto parallel=budget?std::min<std::size_t>(limit_,2):limit_;
     struct Flight {std::string id;std::future<Run> result;bool slot=false;bool physical=false;};std::vector<Flight> flights;flights.reserve(parallel);std::exception_ptr fault;bool resolution_failed=false;
     try {for(;;){
         if(std::chrono::steady_clock::now()>=deadline){timed_out=true;stop.request_stop();}
         for(auto it=flights.begin();it!=flights.end();){if(it->result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready){++it;continue;}
-            try{const auto child=it->result.get();if(!terminal(child.state)){if(!child.graph_root||it->slot||it->physical||store_.child_admission(child.id).get().root_run_id!=scope->root_id)throw DatabaseError("Graph child returned without retirement or closed invocation ownership");if(child.state!=RunState::paused){resolution_failed=true;stop.request_stop();}}else{store_.settle_graph_child(child.id).get();if(child.state!=RunState::completed)stop.request_stop();}}
+            try{const auto child=it->result.get();if(!terminal(child.state)){if(!child.graph_root||it->slot||it->physical||store_.child_admission(child.id).get().root_run_id!=scope->root_id)throw DatabaseError("Graph child returned without retirement or closed invocation ownership");if(child.state!=RunState::paused&&!(budget&&scope->quiescent(child.id))){resolution_failed=true;stop.request_stop();}}else{store_.settle_graph_child(child.id).get();if(child.state!=RunState::completed)stop.request_stop();}}
             catch(...){if(!fault)fault=std::current_exception();stop.request_stop();}if(it->slot)budget->release_leaf();if(it->physical)scope->release();it=flights.erase(it);
         }
         if(fault){if(flights.empty())std::rethrow_exception(fault);std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
@@ -404,7 +409,7 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
         if(!decisions.running.empty()&&flights.size()<parallel){
             for(const auto& child:store_.children(id).get()){
                 if(flights.size()>=parallel)break;
-                if(!child.graph_root||child.state!=RunState::running||std::find(decisions.running.begin(),decisions.running.end(),child.node_id)==decisions.running.end()||std::any_of(flights.begin(),flights.end(),[&](const auto& flight){return flight.id==child.id;}))continue;
+                if(!child.graph_root||child.state!=RunState::running||(budget&&scope->quiescent(child.id))||std::find(decisions.running.begin(),decisions.running.end(),child.node_id)==decisions.running.end()||std::any_of(flights.begin(),flights.end(),[&](const auto& flight){return flight.id==child.id;}))continue;
                 const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& node){return node.id==child.node_id;});
                 if(definition==plan.nodes().end()||definition->kind!=GraphNodeKind::graph||store_.child_admission(child.id).get().root_run_id!=scope->root_id)throw Conflict("Existing invocation differs from its root execution scope");
                 flights.push_back({child.id,{},false,false});
@@ -421,7 +426,10 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
             return store_.complete_run(id,join).get();
         }
         if(root.run.state==RunState::paused && flights.empty())return root.run;
-        if(context&&flights.empty()&&!decisions.waiting_human.empty()&&decisions.ready.empty()&&decisions.running.empty()&&decisions.skippable.empty()){
+        bool quiescent=flights.empty()&&decisions.ready.empty()&&decisions.skippable.empty()&&(!decisions.waiting_human.empty()||!decisions.running.empty());
+        if(budget&&quiescent){const auto children=store_.children(id).get();for(const auto& node:decisions.running){bool found=false;for(const auto& child:children)if(child.node_id==node&&child.graph_root&&(child.state==RunState::paused||scope->quiescent(child.id))&&store_.child_admission(child.id).get().root_run_id==scope->root_id)found=true;if(!found)quiescent=false;}}
+        if(budget&&!context&&quiescent){scope->relinquish(id);return root.run;}
+        if(context&&quiescent){
             try{return store_.suspend_graph_context_owner(boundary()).get().run;}
             catch(const ContextSourceChanged&){continue;}catch(const ContextBudgetChanged&){continue;}
             catch(const RootBudgetExhausted&){timed_out=true;stop.request_stop();continue;}

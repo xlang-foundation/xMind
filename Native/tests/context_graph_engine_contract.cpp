@@ -10,6 +10,7 @@
 #include <thread>
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 #include <algorithm>
 
 using namespace agentflow;
@@ -147,6 +148,40 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
         require(scalar(sql,"SELECT sum(active_elapsed_ms)+min(remaining_active_ms) FROM agent_budget_segments WHERE root_run_id=?",{"main-root"})==20000,"Segment arithmetic must conserve the exact admitted wall allowance");reopened.close();
     }
 }
+void nested(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base)try{
+    stage="nested_context_initial_execution";const auto database=(root/"nested.sqlite").string();const auto frozen=settings(root.string(),base+"/nested/responses");
+    const auto branch=[](const std::string& side){return Json{{"id",side},{"spec",{{"nodes",Json::array({Json{{"id","worker"},{"type","agent"},{"prompt","Investigate graph-context-"+side+" using its actual native file."},{"model_id","graph-context-"+side}},Json{{"id","review"},{"type","human"},{"prompt","Review this exact branch."},{"depends_on",Json::array({"worker"})}}})}}}};};
+    const auto invoke=[](const std::string& side){return Json{{"id",side},{"type","graph"},{"graph_id",side},{"prompt","Run this exact captured branch."}};};
+    const auto top=Json{{"id","nested"},{"spec",{{"nodes",Json::array({invoke("left"),invoke("right"),Json{{"id","review"},{"type","human"},{"prompt","Review the ultimate root."}}})}}}};
+    std::string left_id,right_id;std::int64_t remaining=0;
+    {
+        PersistenceService store(database,imports);credential(store);GraphCatalogStore(store).apply(Json{{"graphs",Json::array({branch("left"),branch("right"),top})}}.dump());store.create_session("nested-session","Actual native nested contextual execution").get();
+        GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));owner.submit_graph("nested-root","nested-session","nested",1,"Synthetic nested coordination.");
+        eventually([&]{return store.run("nested-root").get().state==RunState::paused;},"Nested contextual agents did not reach one global human pause");
+        for(const auto& child:store.children("nested-root").get()){require(child.graph_root&&child.state==RunState::paused,"Each nested controller must relinquish its worker at the global pause");if(child.node_id=="left")left_id=child.id;else if(child.node_id=="right")right_id=child.id;}
+        require(!left_id.empty()&&!right_id.empty()&&store.root_budget("nested-root").get().children_admitted==2&&store.root_budget("nested-root").get().model_calls_reserved==4,"Controllers consume no independent admissions or model calls");
+        for(const auto& id:{left_id,right_id}){const auto leaves=store.children(id).get();require(leaves.size()==1&&leaves[0].state==RunState::completed&&store.child_admission(leaves[0].id).get().graph_node_path==(id==left_id?"left/worker":"right/worker"),"Actual descendant inference retains exact root-relative authority");}
+        remaining=store.graph_context_owner("nested-root").get().segment->remaining_active_ms;owner.close();store.close();
+    }
+    stage="nested_context_reopen_and_input";
+    {
+        PersistenceService store(database,imports);GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Nested context HTTP listener did not bind");Serving serving(server);Http http(port);
+        require(store.run("nested-root").get().state==RunState::paused&&store.graph_context_owner("nested-root").get().segment->remaining_active_ms==remaining,"Service adoption must retain the same closed clock and invocations");
+        auto observed=store.graph_run("nested-root").get();const auto left=store.graph_run(left_id).get();const auto route="/v1/graph-runs/nested-root/invocations/"+left_id+"/human/review";
+        http.post(route,{{"input",{{"answer","Synthetic exact left review"}}},{"expected_checkpoint_revision",observed.checkpoint_revision+1},{"expected_owner_checkpoint_revision",left.checkpoint_revision}},409);
+        http.post(route,{{"input",{{"answer","Synthetic exact left review"}}},{"expected_checkpoint_revision",observed.checkpoint_revision},{"expected_owner_checkpoint_revision",left.checkpoint_revision}},200);
+        eventually([&]{return store.run("nested-root").get().state==RunState::paused&&store.run(left_id).get().state==RunState::completed;},"Exact nested input did not resume and settle its existing left controller");
+        require(store.run(right_id).get().state==RunState::paused&&store.root_budget("nested-root").get().model_calls_reserved==4,"Resuming left must not replay leaves or wake right");
+        observed=store.graph_run("nested-root").get();owner.human_input("nested-root","review",R"({"answer":"Synthetic ultimate review"})","fixture-controller",observed.checkpoint_revision);
+        observed=store.graph_run("nested-root").get();const auto right=store.graph_run(right_id).get();http.post("/v1/graph-runs/nested-root/invocations/"+right_id+"/human/review",{{"input",{{"answer","Synthetic exact right review"}}},{"expected_checkpoint_revision",observed.checkpoint_revision},{"expected_owner_checkpoint_revision",right.checkpoint_revision}},200);
+        eventually([&]{return store.run("nested-root").get().state==RunState::completed;},"Final nested contextual input did not complete the same ultimate join");
+        require(store.root_budget("nested-root").get().model_calls_reserved==4&&store.root_budget("nested-root").get().children_admitted==2&&store.history("nested-session").get().size()==2,"Human continuation cannot create another inference, child or root response");
+        {XlangSqlite sql(database,imports);require(scalar(sql,"SELECT count(*) FROM agent_execution_budgets",{})==1&&scalar(sql,"SELECT count(*) FROM graph_context_owners",{})==1&&scalar(sql,"SELECT count(*) FROM agent_budget_segments WHERE root_run_id=?",{"nested-root"})==3&&scalar(sql,"SELECT sum(active_elapsed_ms)+min(remaining_active_ms) FROM agent_budget_segments WHERE root_run_id=?",{"nested-root"})==20000,"One live root clock must conserve the exact admitted allowance across three segments");}
+        stage="nested_context_live_cancel";store.create_session("nested-cancel-session","Actual nested transport cancellation").get();owner.submit_graph("nested-cancel-root","nested-cancel-session","nested",1,"Synthetic nested-cancel held transport.");marker(root,"nested-cancel-started");owner.cancel("nested-cancel-root","fixture-controller");
+        eventually([&]{return store.run("nested-cancel-root").get().state==RunState::cancelled;},"Cancellation did not drain actual nested native provider requests");
+        for(const auto& child:store.children("nested-cancel-root").get())require(child.state==RunState::cancelled,"Cancelled ultimate owner must retire its admitted controllers");require(store.root_budget("nested-cancel-root").get().model_calls_reserved==2&&store.graph_context_owner("nested-cancel-root").get().segment->state=="closed","Cancelled nested transports retain spent calls and measured closure");owner.close();store.close();
+    }
+}catch(const std::exception& error){std::ofstream(root/"private-nested-error.log")<<stage<<'\n'<<error.what()<<'\n';throw;}
 void crash(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
     PersistenceService store((root/"recovery.sqlite").string(),imports);credential(store);catalog(store);store.create_session("recover","Actual interrupted graph owner").get();
     GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));owner.submit_graph("recover-root","recover","inspect",1,"Synthetic recovery transport.");marker(root,"recover-started");
@@ -162,7 +197,7 @@ void reopen(const std::filesystem::path& root,const std::vector<std::string>& im
 }
 int main(int argc,char** argv)try{
     if(argc!=6)throw std::invalid_argument("Expected owned fixture, modules, stdlib, loopback endpoint and mode");const std::filesystem::path root=std::filesystem::u8path(argv[1]);const std::vector<std::string> imports{argv[2],argv[3]};const std::string mode=argv[5];
-    if(mode=="exercise")exercise(root,imports,argv[4]);else if(mode=="crash")crash(root,imports,argv[4]);else if(mode=="reopen")reopen(root,imports,argv[4]);else throw std::invalid_argument("Unknown fixture mode");
+    if(mode=="exercise")exercise(root,imports,argv[4]);else if(mode=="nested")nested(root,imports,argv[4]);else if(mode=="crash")crash(root,imports,argv[4]);else if(mode=="reopen")reopen(root,imports,argv[4]);else throw std::invalid_argument("Unknown fixture mode");
     std::cout<<"Native contextual registered graph boundary passed; synthetic Responses/count/compact replies and credential only, actual native transports/files/xlang3 SQLite.\n";return 0;
 }catch(const DatabaseError&){std::cerr<<"context_graph_engine_contract_failed stage="<<stage<<" class=database\n";return 1;}
  catch(const std::exception&){std::cerr<<"context_graph_engine_contract_failed stage="<<stage<<" class=contract\n";return 1;}
