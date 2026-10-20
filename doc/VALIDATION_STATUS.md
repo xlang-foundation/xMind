@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete native qualification after managed-runtime fix — 2026-10-20
+
+Exact committed source971ad1e146ba96b3fd9faa5ad44a729c81ebde7e passes all155 registered native contracts in1061.76seconds. CTest57348 and wrapper70708 are terminal0. All2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets/hashes remain unchanged, with no source patch and no CPython execution. Executable SHA256fc94ced163e648552f6335b38b57771097809ad7d181bd4f3fda0999a476a1a8; pinned SDK DLL1ff2a8e7. Complete inventory/logs/receipts: evidence/managed-runtime-current-full-native-20261020-*; raw input and binary manifests remain in C:/xMindNativeValidation/managed-runtime-current-full-native-20261020.
+
+This full run includes the corrected MCP/path and CLI/browser/sidebar fixtures, actual nested noncontext human execution and interactive CLI review, context/model budgets, all provider/MCP/A2A and process/native service contracts, the formerly failing profile-upgrade sequence, runtime mutation protection, browser/sidebar profile/controller integration and owner handoff. These are controlled native/Node fixtures with synthetic provider responses, separate from actual rendered IDE/external browser and live-provider acceptance. The earlier151/155 failure and hosted91123bbc failure remain retained; they are not rewritten as successes.
+
+The exact executable/DLL pair is byte-verified and preserved at C:/xMindNativeValidation/qualified-managed-runtime-binaries-20261020 with qualification.json; this is not a complete distribution. Installed56/user owners/settings/history remain unchanged. The separate schema35 nested-context admission patch in the isolated checkout is untested and is not included in this qualification. Shared nested-context execution/pause/recovery, agent worker transport, generic Local/Nexus protocol and final package/rendered/live-provider acceptance remain open.
+
 ## Managed runtime verification retains immutable payload handles — 2026-10-20
 
 The failed profile-upgrade run prompted a read-only verification measurement against its retained2353-file generation: a full actual Windows verification succeeds in40526.47milliseconds without changing the manifest. Reopening/hashing managed payloads at every owner boundary can contribute to the existing60-second owner-control read limit; this measurement is diagnostic evidence, not a timing guarantee or a substitute for the failed log.

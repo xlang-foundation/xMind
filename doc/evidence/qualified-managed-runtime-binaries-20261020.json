@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-10-20T09:30:21.886Z",
+  "source": "971ad1e146ba96b3fd9faa5ad44a729c81ebde7e",
+  "qualification": "C:/xMindNativeValidation/managed-runtime-current-full-native-20261020/gate.json",
+  "completeNativeContracts": 155,
+  "seconds": 1061.76,
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "nativeSha256": "fc94ced163e648552f6335b38b57771097809ad7d181bd4f3fda0999a476a1a8",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "preservedDirectory": "C:/xMindNativeValidation/qualified-managed-runtime-binaries-20261020",
+  "completeDistribution": false,
+  "installed": false,
+  "scope": "Verified executable/DLL pair only; all other qualified binaries and input closure remain in the validation directory."
+}
