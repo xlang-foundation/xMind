@@ -238,6 +238,6 @@ passes its focused actual-thread lifecycle contract. Its staged FIFO tickets
 reserve rank before durable admission and commit after acceptance; rollback
 withdraws undispatched work, while owner/pool closure stop-requests and drains
 committed retirement actions. Services must observe action futures and retain
-their own fault/paused-root policy. This component is not yet wired into the
-agent/graph services; its pass does not qualify production pool integration.
+their own fault/paused-root policy. This earlier component-only pass did not qualify integration. The subsequent
+shared-physical-root integration receipt records the current focused service scope.
 See [focused component evidence](evidence/shared-root-worker-component-20261019.json).

@@ -39,7 +39,7 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
     const bool has_agent_executor=!settings.provider.model.empty()||settings.provider_identity.has_value();
     const auto graph_workers=std::min<std::size_t>(workers,8);
     root_admission_=std::make_shared<RootAdmissionPool>(capacity+(has_agent_executor?workers:0)+graph_workers,
-        has_agent_executor?workers:graph_workers);
+        has_agent_executor?workers:graph_workers,true);
     if(has_agent_executor)agents_=std::make_unique<AgentService>(store,settings,workers,capacity,root_admission_);
     graphs_=std::make_unique<GraphService>(store,std::move(settings),graph_workers,capacity,2,root_admission_);
 }

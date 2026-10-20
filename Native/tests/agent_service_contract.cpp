@@ -88,7 +88,7 @@ int main(int argc,char** argv) {
             repeated.close();require(!repeated.healthy(),"Repeated notifier service must join both worker and expiry waiters");
         }
         {
-            const auto budget=std::make_shared<RootAdmissionPool>(1);
+            const auto budget=std::make_shared<RootAdmissionPool>(1,1,true);
             const auto graphs=GraphCatalogStore(store).apply(R"({"graphs":[{"id":"shared.wait","spec":{"nodes":[{"id":"human","type":"human","prompt":"Wait for a controller answer"}]}}]})");
             store.create_session("shared-agent","Agent sharing the root budget").get();
             store.create_session("shared-graph","Graph sharing the root budget").get();
@@ -167,7 +167,7 @@ int main(int argc,char** argv) {
             require(store.run("lane-shutdown-agent").get().state==RunState::cancelled&&lanes->running()==0&&lanes->occupied()==0,"Closing the active service must drain and release all shared capacity");
         }
         {
-            const auto lanes=std::make_shared<RootAdmissionPool>(8,1);
+            const auto lanes=std::make_shared<RootAdmissionPool>(8,1,true);
             AgentService agents(store,settings,1,8,lanes);
             GraphService graphs(store,settings,1,8,2,lanes);
             const auto catalog=graphs.graphs();const auto graph=std::find_if(catalog.begin(),catalog.end(),[](const auto& e){return e.id=="dispatch.agent";});
@@ -177,7 +177,7 @@ int main(int argc,char** argv) {
             agents.submit("backlog-b","backlog-b","hold-stream");
             require(store.run("backlog-b").get().state==RunState::queued,"Older agent must actually wait in the single worker's local backlog");
             graphs.submit_graph("backlog-g","backlog-g","dispatch.agent",graph->revision,"hold-stream");
-            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->dispatch_blocked()==1;},"Shared dispatch must rank both backlog roots while only the graph worker can reach its slot wait");
+            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->running()==1;},"Physical shared queue must rank both waiting roots while the first stream occupies its worker");
             agents.cancel("backlog-a");cancelled(store,"backlog-a");
             eventually([&]{return store.run("backlog-b").get().state==RunState::running||store.run("backlog-g").get().state==RunState::running;},"One of the waiting roots must actually dispatch");
             require(store.run("backlog-b").get().state==RunState::running&&store.run("backlog-g").get().state==RunState::queued,"Older locally queued agent must dispatch before a later graph from another service");
@@ -185,6 +185,29 @@ int main(int argc,char** argv) {
             eventually([&]{return !store.children("backlog-g").get().empty();},"Later graph must dispatch after the older agent retires");streaming(store,store.children("backlog-g").get().front().id);
             graphs.cancel("backlog-g","fixture-controller");cancelled(store,"backlog-g");
             graphs.close();agents.close();require(lanes->running()==0&&lanes->dispatch_waiting()==0&&lanes->occupied()==0,"Backlog ordering test must drain all execution and admission ownership");
+        }
+        {
+            const auto shared=std::make_shared<RootAdmissionPool>(8,3,true);
+            AgentService agents(store,settings,1,8,shared);
+            GraphService graphs(store,settings,1,8,2,shared);
+            const auto catalog=graphs.graphs();const auto graph=std::find_if(catalog.begin(),catalog.end(),[](const auto& e){return e.id=="dispatch.agent";});
+            require(graph!=catalog.end(),"Physical shared worker fixture requires its registered graph");
+            for(const auto* id:{"physical-a","physical-g1","physical-g2","physical-cancel"})store.create_session(id,id).get();
+            agents.submit("physical-a","physical-a","hold-stream");streaming(store,"physical-a");
+            for(const auto* id:{"physical-g1","physical-g2"}){
+                graphs.submit_graph(id,id,"dispatch.agent",graph->revision,"hold-stream");
+                eventually([&]{return !store.children(id).get().empty();},"Both graph roots must dispatch while the agent occupies a shared worker");
+                streaming(store,store.children(id).get().front().id);
+            }
+            require(store.run("physical-g1").get().state==RunState::running&&store.run("physical-g2").get().state==RunState::running,"One graph service must use two idle shared workers despite its legacy one-worker setting");
+            require(shared->running()==3,"Shared root metrics must count all three actual occupied workers");
+            graphs.submit_graph("physical-cancel","physical-cancel","dispatch.agent",graph->revision,"hold-stream");
+            graphs.cancel("physical-cancel","fixture-controller");cancelled(store,"physical-cancel");
+            require(store.children("physical-cancel").get().empty(),"Cancelling queued shared work must not launch a child or provider request");
+            graphs.close();
+            require(store.run("physical-a").get().state==RunState::running,"Closing graphs must not stop another service's shared worker");
+            require(store.run("physical-g1").get().state==RunState::cancelled&&store.run("physical-g2").get().state==RunState::cancelled,"Graph close must drain both real shared executions");
+            agents.close();require(shared->occupied()==0,"Shared service shutdown must drain all root reservations");
         }
         store.close();
         std::cout<<"Native agent service contract passed: parallel native streams, cross-service agent/graph capacity isolation across queued, active and paused roots, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";

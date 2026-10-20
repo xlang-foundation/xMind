@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/root_work_executor.hpp"
 #include <cstddef>
 #include <algorithm>
 #include <memory>
@@ -65,9 +66,10 @@ public:
         std::shared_ptr<State> state_;
     };
 
-    explicit RootAdmissionPool(std::size_t capacity,std::size_t execution_capacity=0)
+    explicit RootAdmissionPool(std::size_t capacity,std::size_t execution_capacity=0,bool shared_workers=false)
         :state_(std::make_shared<State>(capacity,execution_capacity?execution_capacity:capacity)){
         if(capacity==0||state_->execution_capacity>capacity)throw std::invalid_argument("Invalid root admission or execution capacity");
+        if(shared_workers)executor_=std::make_shared<RootWorkExecutor>(state_->execution_capacity,capacity);
     }
     std::unique_ptr<Lease> try_reserve(){
         {
@@ -79,6 +81,7 @@ public:
         catch(...){std::lock_guard lock(state_->mutex);--state_->occupied;throw;}
     }
     std::size_t capacity()const noexcept{return state_->capacity;}
+    std::shared_ptr<RootWorkExecutor> executor()const{return executor_;}
     std::size_t occupied()const{std::lock_guard lock(state_->mutex);return state_->occupied;}
     std::unique_ptr<DispatchTicket> queue_execution(){
         auto ticket=std::unique_ptr<DispatchTicket>(new DispatchTicket(state_));
@@ -107,10 +110,11 @@ public:
     std::unique_ptr<Execution> acquire_execution(std::stop_token cancel={}){
         auto ticket=queue_execution();return acquire_execution(*ticket,cancel);
     }
-    std::size_t running()const{std::lock_guard lock(state_->mutex);return state_->running;}
-    std::size_t dispatch_waiting()const{std::lock_guard lock(state_->mutex);return state_->waiting.size();}
+    std::size_t running()const{if(executor_)return executor_->running();std::lock_guard lock(state_->mutex);return state_->running;}
+    std::size_t dispatch_waiting()const{if(executor_)return executor_->waiting();std::lock_guard lock(state_->mutex);return state_->waiting.size();}
     std::size_t dispatch_blocked()const{std::lock_guard lock(state_->mutex);return state_->blocked;}
 private:
     std::shared_ptr<State> state_;
+    std::shared_ptr<RootWorkExecutor> executor_;
 };
 }

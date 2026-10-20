@@ -71,7 +71,7 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
     GraphRootRecord paused;GraphContextOwnerRecord closed;RootBudgetRecord budget;
     stage="parallel_and_compaction";
     {
-        GraphService owner(store,frozen,1,8,2);
+        GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
         HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual graph HTTP listener did not bind");Serving serving(server);Http http(port);
         rejects<GraphContextUnavailable>([&]{owner.submit_graph("excess-root","excess","excessive",1,"Reject excess contextual Agents.");},"Nine agent nodes cannot acquire another root allowance");
         rejects<NotFound>([&]{store.run("excess-root").get();},"Rejected admission must not create a root");require(store.history("excess").get().empty(),"Rejected graph admission must not append a user");
@@ -101,18 +101,18 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
         owner.close();require(store.run("main-root").get().state==RunState::paused,"Owner shutdown must preserve the clean contextual pause");
     }
     stage="stale_authority_and_cas";
-    {auto changed=frozen;changed.instructions+=" Synthetic changed backend instructions.";GraphService stale(store,changed,1,8,2);
+    {auto changed=frozen;changed.instructions+=" Synthetic changed backend instructions.";GraphService stale(store,changed,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
         require(stale.graph_context("main-root").enabled&&!stale.graph_context("main-root").resumable,"Changed native authority remains inspectable without granting resume");
         rejects<GraphContextUnavailable>([&]{stale.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision);},"A changed owner cannot commit human input before rebinding its captured authority");
         require(store.graph_run("main-root").get().checkpoint_revision==paused.checkpoint_revision&&store.root_budget("main-root").get().model_calls_reserved==12,"Stale metadata must not alter answer, budget or provider dispatch");stale.close();}
-    {auto changed=frozen;changed.selectable_models.clear();GraphService stale(store,changed,1,8,2);
+    {auto changed=frozen;changed.selectable_models.clear();GraphService stale(store,changed,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
         require(!stale.idle(),"A paused graph with a removed model override remains owned for inspection and cancellation");
         rejects<std::invalid_argument>([&]{stale.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision);},"Removed model configuration cannot commit human input");
         require(store.graph_run("main-root").get().checkpoint_revision==paused.checkpoint_revision&&store.root_budget("main-root").get().model_calls_reserved==12,"Model drift adoption must not replay or change captured metadata");stale.close();}
     std::this_thread::sleep_for(150ms);require(store.graph_context_owner("main-root").get().segment->remaining_active_ms==closed.segment->remaining_active_ms,"Paused wall time must not consume or recreate active allowance");
     stage="answered_pause_and_cancel";
     {
-        GraphService owner(store,frozen,1,8,2);HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual held graph HTTP listener did not bind");Serving serving(server);Http http(port);
+        GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual held graph HTTP listener did not bind");Serving serving(server);Http http(port);
         store.create_session("cancel","Actual held graph cancellation").get();owner.submit_graph("cancel-root","cancel","inspect",1,"Synthetic cancel-root held transport.");marker(root,"cancel-started");
         public_graph_context(http.get("/v1/graph-runs/cancel-root"),"cancel-root","cancel","running",false);const auto actual_children=http.get("/v1/graph-runs/cancel-root/children");require(actual_children.is_array()&&actual_children.size()==2,"Actual executing HTTP graph must expose both admitted concurrent children");for(const auto& child:actual_children)require(child["parent_id"]=="cancel-root"&&child["state"]=="running","Held native child transports must remain actually running");
         rejects<Conflict>([&]{owner.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision+1);},"Input CAS must reject a stale displayed checkpoint");
@@ -123,7 +123,7 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
     }
     stage="reopen_and_explicit_join";store.close();
     {
-        PersistenceService reopened(database,imports);GraphService owner(reopened,frozen,1,8,2);const auto answered=reopened.graph_run("main-root").get();
+        PersistenceService reopened(database,imports);GraphService owner(reopened,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));const auto answered=reopened.graph_run("main-root").get();
         require(answered.run.state==RunState::paused&&!owner.idle(),"A ready clean pause is adopted without automatic replay");
         require(owner.graph_context("main-root").resumable,"Final human-only frontier advertises resume from actual backend eligibility");
         {
@@ -149,11 +149,11 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>& 
 }
 void crash(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
     PersistenceService store((root/"recovery.sqlite").string(),imports);credential(store);catalog(store);store.create_session("recover","Actual interrupted graph owner").get();
-    GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2);owner.submit_graph("recover-root","recover","inspect",1,"Synthetic recovery transport.");marker(root,"recover-started");
+    GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));owner.submit_graph("recover-root","recover","inspect",1,"Synthetic recovery transport.");marker(root,"recover-started");
     require(store.root_budget("recover-root").get().model_calls_reserved==2&&store.children("recover-root").get().size()==2,"Crash boundary requires two actual admitted started requests");std::_Exit(0);
 }
 void reopen(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
-    PersistenceService store((root/"recovery.sqlite").string(),imports);GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2);
+    PersistenceService store((root/"recovery.sqlite").string(),imports);GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
     require(store.run("recover-root").get().state==RunState::failed&&owner.idle()&&store.root_budget("recover-root").get().model_calls_reserved==2,"Recovery must interrupt physical ownership without replay/reset");
     for(const auto& child:store.children("recover-root").get())require(child.state==RunState::failed&&store.run_history(child.id).get().size()==1,"Interrupted child keeps its original objective without a fabricated response");
     rejects<NotFound>([&]{owner.resume_graph("recover-root","fixture-controller",store.graph_run("recover-root").get().checkpoint_revision);},"Interrupted roots cannot acquire a new wake");

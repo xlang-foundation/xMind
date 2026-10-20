@@ -27,5 +27,5 @@ const peer=createServer((request,response)=>{
 try {
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,`http://127.0.0.1:${peer.address().port}/chat`],{windowsHide:true,timeout:15000});
-  if(failure) throw failure;assert.equal(requests,16,'Eight original, five mixed-service and three local-backlog ordering streams');assert.equal(graphRequests,2,'Only the two dispatched graphs may infer; cancelled and shutdown waiters must not create a model request');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,19,'Original and mixed-service streams plus three shared physical worker streams');assert.equal(graphRequests,4,'Only dispatched graphs may infer; cancelled and shutdown waiters must not create a model request');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
 } finally {peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

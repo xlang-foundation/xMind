@@ -67,5 +67,15 @@ void releases_ticket_owner_cycle(){
     owner->ticket->commit();owner.reset();
     require(released.get_future().wait_for(5s)==std::future_status::ready,"Physical retirement must break a callback-owner-ticket cycle without self-waiting");
 }
+void detached_service_ownership(){
+    RootWorkExecutor pool(1,3);std::mutex owner;std::unique_lock held(owner);std::promise<void> entered;
+    auto work=pool.stage([&](std::stop_token stop){entered.set_value();std::lock_guard lock(owner);require(!stop.stop_requested(),"Detached handle release must not cancel an already claimed action");});
+    auto result=work->result();work->commit();work->detach();
+    require(entered.get_future().wait_for(5s)==std::future_status::ready,"Detached fixture must physically reach its service lock");
+    work.reset();held.unlock();ready(result);
+    auto staged=pool.stage([](std::stop_token){});std::atomic<int> calls=0;
+    auto queued=pool.stage([&](std::stop_token){++calls;});auto withdrawn=queued->result();queued->commit();queued->detach();queued.reset();
+    rejects([&]{withdrawn.get();});staged.reset();require(calls==0,"A retired service's detached ready ticket must withdraw before any action");
 }
-int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+}
+int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();detached_service_ownership();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

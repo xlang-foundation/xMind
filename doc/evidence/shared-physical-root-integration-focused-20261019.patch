@@ -1,0 +1,654 @@
+diff --git a/Native/include/agentflow/root_admission_pool.hpp b/Native/include/agentflow/root_admission_pool.hpp
+index 4c1358da..bd2308ab 100644
+--- a/Native/include/agentflow/root_admission_pool.hpp
++++ b/Native/include/agentflow/root_admission_pool.hpp
+@@ -1,4 +1,5 @@
+ #pragma once
++#include "agentflow/root_work_executor.hpp"
+ #include <cstddef>
+ #include <algorithm>
+ #include <memory>
+@@ -65,9 +66,10 @@ public:
+         std::shared_ptr<State> state_;
+     };
+ 
+-    explicit RootAdmissionPool(std::size_t capacity,std::size_t execution_capacity=0)
++    explicit RootAdmissionPool(std::size_t capacity,std::size_t execution_capacity=0,bool shared_workers=false)
+         :state_(std::make_shared<State>(capacity,execution_capacity?execution_capacity:capacity)){
+         if(capacity==0||state_->execution_capacity>capacity)throw std::invalid_argument("Invalid root admission or execution capacity");
++        if(shared_workers)executor_=std::make_shared<RootWorkExecutor>(state_->execution_capacity,capacity);
+     }
+     std::unique_ptr<Lease> try_reserve(){
+         {
+@@ -79,6 +81,7 @@ public:
+         catch(...){std::lock_guard lock(state_->mutex);--state_->occupied;throw;}
+     }
+     std::size_t capacity()const noexcept{return state_->capacity;}
++    std::shared_ptr<RootWorkExecutor> executor()const{return executor_;}
+     std::size_t occupied()const{std::lock_guard lock(state_->mutex);return state_->occupied;}
+     std::unique_ptr<DispatchTicket> queue_execution(){
+         auto ticket=std::unique_ptr<DispatchTicket>(new DispatchTicket(state_));
+@@ -107,10 +110,11 @@ public:
+     std::unique_ptr<Execution> acquire_execution(std::stop_token cancel={}){
+         auto ticket=queue_execution();return acquire_execution(*ticket,cancel);
+     }
+-    std::size_t running()const{std::lock_guard lock(state_->mutex);return state_->running;}
+-    std::size_t dispatch_waiting()const{std::lock_guard lock(state_->mutex);return state_->waiting.size();}
++    std::size_t running()const{if(executor_)return executor_->running();std::lock_guard lock(state_->mutex);return state_->running;}
++    std::size_t dispatch_waiting()const{if(executor_)return executor_->waiting();std::lock_guard lock(state_->mutex);return state_->waiting.size();}
+     std::size_t dispatch_blocked()const{std::lock_guard lock(state_->mutex);return state_->blocked;}
+ private:
+     std::shared_ptr<State> state_;
++    std::shared_ptr<RootWorkExecutor> executor_;
+ };
+ }
+diff --git a/Native/include/agentflow/root_work_executor.hpp b/Native/include/agentflow/root_work_executor.hpp
+index 956582b3..33c0036e 100644
+--- a/Native/include/agentflow/root_work_executor.hpp
++++ b/Native/include/agentflow/root_work_executor.hpp
+@@ -38,12 +38,12 @@ public:
+         Ticket(const Ticket&)=delete;
+         Ticket& operator=(const Ticket&)=delete;
+         ~Ticket(){
+-            request_stop();
++            if(drain_)request_stop();
+             bool dispatched=false;
+             std::function<void(std::stop_token)> withdrawn;
+             {
+                 std::lock_guard lock(state_->mutex);
+-                if(job_->phase==Job::Phase::staged){
++                if(job_->phase==Job::Phase::staged||(!drain_&&job_->phase==Job::Phase::ready)){
+                     state_->queue.remove(job_);job_->phase=Job::Phase::retired;
+                     withdrawn=std::move(job_->action);
+                     job_->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root admission withdrawn before dispatch")));
+@@ -52,7 +52,7 @@ public:
+             state_->changed.notify_all();
+             // Owner destruction cannot abandon a committed physical action.
+             // Never destroy a ticket from within its own action.
+-            if(dispatched)job_->result.wait();
++            if(dispatched&&drain_)job_->result.wait();
+         }
+         void commit(){
+             std::lock_guard lock(state_->mutex);
+@@ -61,15 +61,25 @@ public:
+             job_->phase=Job::Phase::ready;state_->changed.notify_all();
+         }
+         void request_stop(){job_->stop.request_stop();}
++        // Service owners retain the result and drain it outside their mutex.
++        // Releasing their queued ticket must neither wait under that mutex nor
++        // stop an already claimed retirement action. Destroying a detached
++        // ready ticket withdraws it; the service must first retire durable work.
++        void detach(){
++            std::lock_guard lock(state_->mutex);
++            if(job_->phase==Job::Phase::staged)throw std::logic_error("Cannot detach uncommitted root admission");
++            drain_=false;
++        }
+         const std::shared_future<void>& result()const{return job_->result;}
+     private:
+         friend class RootWorkExecutor;
+         Ticket(std::shared_ptr<State> state,std::shared_ptr<Job> job):state_(std::move(state)),job_(std::move(job)){}
+         std::shared_ptr<State> state_;
+         std::shared_ptr<Job> job_;
++        bool drain_=true;
+     };
+     explicit RootWorkExecutor(std::size_t workers,std::size_t capacity):state_(std::make_shared<State>(capacity)){
+-        if(workers<1||workers>16||capacity<1||capacity>4096)throw std::invalid_argument("Invalid shared root worker capacity");
++        if(workers<1||workers>16||capacity<1||capacity>8192)throw std::invalid_argument("Invalid shared root worker capacity");
+         try{for(std::size_t i=0;i<workers;++i)workers_.emplace_back([state=state_]{work(state);});}
+         catch(...){close();throw;}
+     }
+@@ -85,6 +95,8 @@ public:
+         if(state_->queue.size()>=state_->capacity)throw std::runtime_error("Shared root queue is full");
+         state_->queue.push_back(job);return ticket;
+     }
++    std::size_t running()const{std::lock_guard lock(state_->mutex);return state_->running.size();}
++    std::size_t waiting()const{std::lock_guard lock(state_->mutex);return state_->queue.size();}
+     void close(){
+         std::lock_guard serial(closing_);
+         std::vector<std::shared_ptr<Job>> stopped;
+diff --git a/Native/src/agent_service.cpp b/Native/src/agent_service.cpp
+index c08fc997..5077b121 100644
+--- a/Native/src/agent_service.cpp
++++ b/Native/src/agent_service.cpp
+@@ -49,11 +49,13 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
+ }
+ struct AgentService::Impl {
+     enum class Phase {queued,working,waiting,faulted};
+-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;};
++    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
+     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
+     struct Prepared {};
+     PersistenceService& persistence;
+     std::shared_ptr<RootAdmissionPool> root_admission;
++    std::shared_ptr<RootWorkExecutor> work_pool;
++    std::vector<std::shared_future<void>> work_results;
+     std::string provider_context;
+     bool planning_enabled;
+     std::optional<ContextPolicy> context_policy;
+@@ -94,7 +96,7 @@ struct AgentService::Impl {
+     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget)
+         :Impl(store,ordinary_settings(std::move(settings)),count,capacity,std::move(budget),Prepared{}){}
+     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,Prepared)
+-        :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
++        :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),work_pool(root_admission->executor()),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
+          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
+          children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
+          delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
+@@ -117,7 +119,7 @@ struct AgentService::Impl {
+             // Even an already-answered clean pause waits for an authenticated
+             // duplicate answer or explicit resume; startup never replays it.
+         }
+-        try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});
++        try{for(std::size_t i=0;i<(work_pool?0:count);++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});
+             if(context_policy)context_worker=std::thread([this]{work_context();});}
+         catch(...){close();throw;}
+     }
+@@ -161,12 +163,34 @@ struct AgentService::Impl {
+     void stop_jobs(const std::vector<std::shared_ptr<Job>>& jobs){for(const auto& job:jobs)job->stop.request_stop();
+         if(context_shutdown.load())context_stop.request_stop();changed.notify_all();expiry_changed.notify_all();context_changed.notify_all();}
+     void fail(){std::vector<std::shared_ptr<Job>> jobs;{std::lock_guard lock(mutex);jobs=fault_locked();}stop_jobs(jobs);if(children)children->fail();}
++    std::unique_ptr<RootWorkExecutor::Ticket> stage_work(const std::shared_ptr<Job>& job){
++        work_results.erase(std::remove_if(work_results.begin(),work_results.end(),[](const auto& value){return value.wait_for(std::chrono::seconds(0))==std::future_status::ready;}),work_results.end());
++        auto work=work_pool->stage([this,job](std::stop_token stop){
++            std::stop_callback stopped(stop,[job]{job->stop.request_stop();});
++            {
++                std::lock_guard lock(mutex);
++                if(!accepting||!active.contains(job->id)||active.at(job->id)!=job||job->phase!=Phase::queued)return;
++                pending.remove(job);job->phase=Phase::working;
++            }
++            execute_job(job,{});
++        });
++        work_results.push_back(work->result());job->work_committed=false;return work;
++    }
++    void publish_locked(){
++        if(!work_pool)return;
++        for(const auto& job:pending)if(job->phase==Phase::queued&&job->work&&!job->work_committed){
++            // A committed handle is detached immediately; result ownership is
++            // retained in work_results until service close drains it.
++            job->work->commit();job->work->detach();job->work_committed=true;
++        }
++    }
+     auto ticket(const std::shared_ptr<Job>& job){return std::find(pending.begin(),pending.end(),job);}
+     bool reserve_wake(const std::shared_ptr<Job>& job){
+         if(ticket(job)!=pending.end())return false;if(pending.size()>=limit)throw RunBusy("Agent wake queue is full");
+-        auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);return true;
++        if(work_pool){auto work=stage_work(job);pending.push_back(job);job->work=std::move(work);}
++        else{auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);}return true;
+     }
+-    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);job->dispatch.reset();}
++    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);job->dispatch.reset();job->work.reset();}
+     std::size_t waiting_count()const{std::size_t count=0;for(const auto& [id,job]:active){(void)id;if(job->phase==Phase::waiting)++count;}return count;}
+     void require_admission()const{
+         require_available();if(active.size()>=owned_limit||pending.size()+waiting_count()>=limit)throw RunBusy("Agent ownership queue is full");
+@@ -197,8 +221,8 @@ struct AgentService::Impl {
+             try{
+                 // Waiting never holds the service mutex. Cancelled roots still
+                 // enter the runner with their stopped token for durable retirement.
+-                if(!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
+-                auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
++                if(!work_pool&&!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
++                auto execution=work_pool?std::unique_ptr<RootAdmissionPool::Execution>{}:root_admission->acquire_execution(*dispatch,job->stop.get_token());
+                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
+                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
+                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
+@@ -214,7 +238,7 @@ struct AgentService::Impl {
+                 // shutdown stop request arrived after its commit. Explicit
+                 // controller cancellation has a separate owner-lock flag.
+                 else if(!accepting||job->stop.stop_requested()){remove_ticket(job);job->phase=Phase::waiting;}
+-                else if(runnable(*plan)){reserve_wake(job);job->phase=Phase::queued;changed.notify_one();}
++                else if(runnable(*plan)){reserve_wake(job);job->phase=Phase::queued;publish_locked();changed.notify_one();}
+                 else{remove_ticket(job);job->phase=Phase::waiting;changed.notify_all();}
+             }catch(const DynamicPlanUnavailable&){
+                 // Metadata may drift after an answer commits but before this
+@@ -329,7 +353,7 @@ struct AgentService::Impl {
+         }
+     }
+     void close(){
+-        std::lock_guard serial(close_mutex);std::vector<std::shared_ptr<Job>> stopping;
++        std::lock_guard serial(close_mutex);std::vector<std::shared_ptr<Job>> stopping,queued;
+         {
+             std::lock_guard lock(mutex);accepting=false;context_shutdown=true;
+             for(const auto& [id,job]:active){(void)id;
+@@ -345,6 +369,7 @@ struct AgentService::Impl {
+                     }catch(...){faulted=true;stopping.push_back(job);}
+                 }
+                 else if(job->phase==Phase::queued){
++                    if(work_pool)queued.push_back(job);
+                     try{const auto current=persistence.run(job->id).get();
+                         if(current.state==RunState::paused){remove_ticket(job);job->phase=Phase::waiting;}
+                         else stopping.push_back(job);
+@@ -352,9 +377,13 @@ struct AgentService::Impl {
+                 }
+             }
+         }
++        if(work_pool){std::lock_guard lock(mutex);for(const auto& job:queued)if(active.contains(job->id)){
++            try{const auto current=persistence.run(job->id).get();if(current.state==RunState::queued)persistence.transition(job->id,RunState::queued,RunState::cancelled,R"({"reason":"agent_service_shutdown_before_dispatch"})").get();remove_ticket(job);active.erase(job->id);}catch(...){faulted=true;}
++        }}
+         stop_jobs(stopping);changed.notify_all();
+         for(auto& worker:workers)if(worker.joinable())worker.join();if(expiry_worker.joinable())expiry_worker.join();
+         if(context_worker.joinable())context_worker.join();
++        for(const auto& result:work_results)result.wait();
+         // Undispatched idle tickets have no model/effect to replay on shutdown.
+         // A request already claimed by an actual root keeps that owner's ledger.
+         {std::lock_guard lock(mutex);
+@@ -452,7 +481,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
+     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
+     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
+     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
+     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(profile)throw RunUnavailable("Provider authority must be checked by the execution platform");if(!files.empty()&&(!workspace||workspace->revision<1))throw ToolAccessDenied("Queued attachments require workspace membership admission");
+@@ -464,7 +493,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
+     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
+     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
+     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
+     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
+@@ -475,7 +504,7 @@ Run AgentService::submit_message(std::string id,std::string context,std::string
+     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}
+     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
+     if(result.id!=id){impl_->remove_ticket(job);impl_->active.erase(id);return result;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ Run AgentService::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input,std::string human_request_id){
+     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;impl_->require_available();
+@@ -484,7 +513,7 @@ Run AgentService::continue_a2a_task(std::string task,std::string message,std::st
+     const auto binding=impl_->persistence.dynamic_owner_pause(task).get();std::vector<std::pair<DynamicPlanRecord,DynamicHumanRequest>> waiting;for(const auto& entry:binding.waits){const auto plan=impl_->persistence.dynamic_plan(entry.plan_id).get();for(const auto& request:impl_->persistence.dynamic_human_requests(plan.id).get())if(request.state=="waiting")waiting.emplace_back(plan,request);}if(waiting.empty())throw Conflict("A2A continuation has no pending human question");if(human_request_id.empty()&&waiting.size()!=1)throw Conflict("A2A continuation must identify a human question when multiple questions are pending");const auto selected=human_request_id.empty()?waiting.begin():std::find_if(waiting.begin(),waiting.end(),[&](const auto& entry){return entry.second.id==human_request_id;});if(selected==waiting.end())throw Conflict("A2A human request is not pending on this task");const auto waiting_plan=selected->first;const auto waiting_request=selected->second;
+     const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=waiting_plan.id;answer.request_id=waiting_request.id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=waiting_plan.capabilities.backend_identity;answer.expected_revision=waiting_plan.revision;answer.expected_state_sequence=waiting_plan.state_sequence;
+     try{impl_->persistence.continue_a2a_message(std::move(answer),task,message,current.session_id,identity,content,payload).get();}catch(...){if(reserved)impl_->remove_ticket(job);throw;}
+-    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan.id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();lock.unlock();impl_->changed.notify_all();return result;}
++    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan.id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();impl_->publish_locked();lock.unlock();impl_->changed.notify_all();return result;}
+     catch(...){const auto stopping=impl_->fault_locked();lock.unlock();impl_->stop_jobs(stopping);if(impl_->children)impl_->children->fail();throw DynamicOutcomeUnrecorded("Committed A2A answer could not be observed by its native owner");}
+ }
+ Run AgentService::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){
+@@ -511,7 +540,7 @@ Run AgentService::plan_input(const std::string& root,const std::string& request,
+         if(job->phase==Impl::Phase::waiting){if(runnable(current))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}
+         // A working owner keeps its preallocated wake until pause re-read. A
+         // queued owner already has exactly one scheduler entry.
+-        const auto result=impl_->persistence.run(root).get();lock.unlock();impl_->changed.notify_all();return result;
++        const auto result=impl_->persistence.run(root).get();impl_->publish_locked();lock.unlock();impl_->changed.notify_all();return result;
+     }catch(...){
+         // Input already committed. An unavailable scheduling observation cannot
+         // be reported as a rejected answer or authorize an unobserved wake.
+@@ -528,7 +557,7 @@ Run AgentService::resume_plan(const std::string& root,const std::string& actor,s
+     if(plan->revision!=revision||plan->state_sequence!=sequence)throw DynamicPlanChanged("Dynamic plan observation changed");
+     impl_->verify_pause(current,*plan);const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const bool can_resume=std::any_of(binding.waits.begin(),binding.waits.end(),[&](const auto& entry){return runnable(impl_->persistence.dynamic_plan(entry.plan_id).get());});
+     if(!can_resume)throw Conflict("Dynamic owner has no ready frontier or report");
+-    impl_->reserve_wake(job);job->phase=Impl::Phase::queued;lock.unlock();impl_->changed.notify_one();return current;
++    impl_->reserve_wake(job);job->phase=Impl::Phase::queued;impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return current;
+ }
+ void AgentService::cancel(const std::string& id){
+     std::shared_ptr<Impl::Job> job;
+diff --git a/Native/src/execution_platform.cpp b/Native/src/execution_platform.cpp
+index cb055431..1c387647 100644
+--- a/Native/src/execution_platform.cpp
++++ b/Native/src/execution_platform.cpp
+@@ -39,7 +39,7 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
+     const bool has_agent_executor=!settings.provider.model.empty()||settings.provider_identity.has_value();
+     const auto graph_workers=std::min<std::size_t>(workers,8);
+     root_admission_=std::make_shared<RootAdmissionPool>(capacity+(has_agent_executor?workers:0)+graph_workers,
+-        has_agent_executor?workers:graph_workers);
++        has_agent_executor?workers:graph_workers,true);
+     if(has_agent_executor)agents_=std::make_unique<AgentService>(store,settings,workers,capacity,root_admission_);
+     graphs_=std::make_unique<GraphService>(store,std::move(settings),graph_workers,capacity,2,root_admission_);
+ }
+diff --git a/Native/src/graph_service.cpp b/Native/src/graph_service.cpp
+index 2a943dcd..6a9affd2 100644
+--- a/Native/src/graph_service.cpp
++++ b/Native/src/graph_service.cpp
+@@ -23,9 +23,11 @@ void controller(const std::string& actor) {
+ }
+ struct GraphService::Impl {
+     enum class Phase {queued,working,waiting,faulted};
+-    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;};
++    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
+     PersistenceService& store;
+     std::shared_ptr<RootAdmissionPool> root_admission;
++    std::shared_ptr<RootWorkExecutor> work_pool;
++    std::vector<std::shared_future<void>> work_results;
+     GraphRunner runner;
+     GraphCatalog catalog;
+     std::size_t capacity;
+@@ -39,7 +41,7 @@ struct GraphService::Impl {
+ 
+     Impl(PersistenceService& persistence,AgentSettings settings,std::size_t count,
+         std::size_t limit,std::size_t parallel,std::shared_ptr<RootAdmissionPool> budget)
+-        :store(persistence),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(limit)),runner(store,std::move(settings),parallel),
++        :store(persistence),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(limit)),work_pool(root_admission->executor()),runner(store,std::move(settings),parallel),
+          catalog(GraphCatalogStore(store).load()),capacity(limit) {
+         if(count<1 || count>8 || limit<1 || limit>4096)
+             throw std::invalid_argument("Invalid graph service capacity");
+@@ -75,25 +77,47 @@ struct GraphService::Impl {
+             job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
+             active.emplace(run.id,std::move(job));
+         }
+-        try {for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});}
++        try {for(std::size_t i=0;i<(work_pool?0:count);++i)workers.emplace_back([this]{work();});}
+         catch(...) {close();throw;}
+     }
+     void require_available() const {
+         if(!accepting || faulted)throw RunUnavailable("Graph execution service is unavailable");
+     }
++    std::unique_ptr<RootWorkExecutor::Ticket> stage_work(const std::shared_ptr<Job>& job){
++        work_results.erase(std::remove_if(work_results.begin(),work_results.end(),[](const auto& value){return value.wait_for(std::chrono::seconds(0))==std::future_status::ready;}),work_results.end());
++        auto work=work_pool->stage([this,job](std::stop_token stop){
++            std::stop_callback stopped(stop,[job]{job->stop.request_stop();});
++            {
++                std::lock_guard lock(mutex);
++                if(!accepting||!active.contains(job->id)||active.at(job->id)!=job||job->phase!=Phase::queued)return;
++                pending.erase(std::find(pending.begin(),pending.end(),job));job->phase=Phase::working;
++            }
++            execute_job(job,{});
++        });
++        work_results.push_back(work->result());job->work_committed=false;return work;
++    }
++    void publish_locked(){
++        if(!work_pool)return;
++        for(const auto& job:pending)if(job->phase==Phase::queued&&job->work&&!job->work_committed){
++            // A committed handle is detached immediately; result ownership is
++            // retained in work_results until service close drains it.
++            job->work->commit();job->work->detach();job->work_committed=true;
++        }
++    }
+     void enqueue(const std::shared_ptr<Job>& job){
+-        auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);
++        if(work_pool){auto work=stage_work(job);pending.push_back(job);job->work=std::move(work);}
++        else{auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);}
+     }
+-    void drop_pending_back(){pending.back()->dispatch.reset();pending.pop_back();}
++    void drop_pending_back(){pending.back()->dispatch.reset();pending.back()->work.reset();pending.pop_back();}
+     void fail_locked() {
+         faulted=true;accepting=false;
+-        for(const auto& [id,job]:active){(void)id;job->dispatch.reset();job->stop.request_stop();}
++        for(const auto& [id,job]:active){(void)id;job->dispatch.reset();job->work.reset();job->stop.request_stop();}
+         changed.notify_all();
+     }
+     void execute_job(const std::shared_ptr<Job>& job,std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch){
+             try {
+-                if(!dispatch)throw DatabaseError("Graph root lost its shared dispatch ticket");
+-                auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
++                if(!work_pool&&!dispatch)throw DatabaseError("Graph root lost its shared dispatch ticket");
++                auto execution=work_pool?std::unique_ptr<RootAdmissionPool::Execution>{}:root_admission->acquire_execution(*dispatch,job->stop.get_token());
+                 const auto observed=runner.execute(job->id,job->stop.get_token(),true);
+                 std::lock_guard lock(mutex);
+                 if(terminal(observed.state)){active.erase(job->id);return;}
+@@ -106,7 +130,7 @@ struct GraphService::Impl {
+                 if(current.state==RunState::paused){
+                     if(job->cancelled){runner.retire(job->id,RunState::cancelled,job->cancel_reason);active.erase(job->id);}
+                     else if(accepting&&!job->stop.stop_requested()&&runner.captured_context(job->id)&&runnable(store.graph_run(job->id).get())){
+-                        enqueue(job);job->phase=Phase::queued;changed.notify_one();
++                        enqueue(job);job->phase=Phase::queued;publish_locked();changed.notify_one();
+                     }else job->phase=Phase::waiting;
+                     return;
+                 }
+@@ -114,7 +138,7 @@ struct GraphService::Impl {
+                 if(!accepting || job->stop.stop_requested()) {
+                     runner.retire(job->id,RunState::cancelled,R"({"reason":"graph_service_shutdown"})");
+                     active.erase(job->id);
+-                } else {enqueue(job);job->phase=Phase::queued;changed.notify_one();}
++                } else {enqueue(job);job->phase=Phase::queued;publish_locked();changed.notify_one();}
+             } catch(const GraphContextUnavailable&) {
+                 std::lock_guard lock(mutex);
+                 try{
+@@ -148,7 +172,7 @@ struct GraphService::Impl {
+             // Accepted but not dispatched roots can be retired without effects.
+             // Already-paused roots are retained for the next backend owner.
+             for(const auto& job:pending) {
+-                job->dispatch.reset();
++                job->dispatch.reset();job->work.reset();
+                 try {
+                     if(store.run(job->id).get().state==RunState::paused&&runner.captured_context(job->id)){job->phase=Phase::waiting;continue;}
+                     runner.retire(job->id,RunState::cancelled,R"({"reason":"graph_service_shutdown_before_dispatch"})");active.erase(job->id);
+@@ -158,6 +182,7 @@ struct GraphService::Impl {
+             pending.clear();changed.notify_all();
+         }
+         for(auto& worker:workers)if(worker.joinable())worker.join();
++        for(const auto& result:work_results)result.wait();
+     }
+ };
+ GraphService::GraphService(PersistenceService& store,AgentSettings settings,std::size_t workers,
+@@ -207,7 +232,7 @@ Run GraphService::submit_graph_with_attachments(std::string id,std::string sessi
+     Run result;
+     try {result=impl_->store.start_graph_run(id,session,graph,revision,entry->plan,input,budget,context_authority,membership).get();}
+     catch(...){impl_->drop_pending_back();impl_->active.erase(owned);throw;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ Run GraphService::restore_operation(std::string id,std::string session,std::string operation_id) {
+     if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||
+@@ -233,7 +258,7 @@ Run GraphService::restore_operation(std::string id,std::string session,std::stri
+     Run result;
+     try{result=impl_->store.start_graph_run(id,session,"native-restore-operation",1,plan,input,{}, {},membership).get();}
+     catch(...){impl_->drop_pending_back();impl_->active.erase(owned);throw;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ GraphRootRecord GraphService::human_input(const std::string& id,const std::string& node,
+     const std::string& input,const std::string& actor,std::int64_t revision) {
+@@ -256,7 +281,7 @@ GraphRootRecord GraphService::human_input(const std::string& id,const std::strin
+         if(result.run.state==RunState::running||(result.run.state==RunState::paused&&context&&runnable(result)))job->phase=Impl::Phase::queued;
+         else impl_->drop_pending_back();
+     }}catch(...){job->phase=Impl::Phase::faulted;impl_->fail_locked();throw;}
+-    lock.unlock();impl_->changed.notify_one();return result;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+ }
+ Run GraphService::resume_graph(const std::string& id,const std::string& actor,std::int64_t revision){
+     controller(actor);if(revision<1)throw std::invalid_argument("Graph resume requires its observed checkpoint revision");
+@@ -273,7 +298,7 @@ Run GraphService::resume_graph(const std::string& id,const std::string& actor,st
+         catch(...){impl_->drop_pending_back();throw;}
+         job->phase=Impl::Phase::queued;
+     }else if(job->phase!=Impl::Phase::queued&&job->phase!=Impl::Phase::working)throw RunUnavailable("Graph owner cannot resume");
+-    lock.unlock();impl_->changed.notify_one();return root.run;
++    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return root.run;
+ }
+ GraphContextMetadata GraphService::graph_context(const std::string& id)const{
+     std::lock_guard lock(impl_->mutex);GraphContextMetadata result;
+@@ -296,7 +321,7 @@ void GraphService::cancel(const std::string& id,const std::string& actor) {
+         impl_->store.append_event(id,"graph.cancel.requested",reason).get();job->cancelled=true;job->stop.request_stop();
+     } else {
+         impl_->runner.retire(id,RunState::cancelled,reason);
+-        job->dispatch.reset();
++        job->dispatch.reset();job->work.reset();
+         const auto queued=std::find(impl_->pending.begin(),impl_->pending.end(),job);if(queued!=impl_->pending.end())impl_->pending.erase(queued);
+         impl_->active.erase(owned);
+     }
+diff --git a/Native/tests/agent_service_contract.cpp b/Native/tests/agent_service_contract.cpp
+index ccaf6bab..266fda37 100644
+--- a/Native/tests/agent_service_contract.cpp
++++ b/Native/tests/agent_service_contract.cpp
+@@ -88,7 +88,7 @@ int main(int argc,char** argv) {
+             repeated.close();require(!repeated.healthy(),"Repeated notifier service must join both worker and expiry waiters");
+         }
+         {
+-            const auto budget=std::make_shared<RootAdmissionPool>(1);
++            const auto budget=std::make_shared<RootAdmissionPool>(1,1,true);
+             const auto graphs=GraphCatalogStore(store).apply(R"({"graphs":[{"id":"shared.wait","spec":{"nodes":[{"id":"human","type":"human","prompt":"Wait for a controller answer"}]}}]})");
+             store.create_session("shared-agent","Agent sharing the root budget").get();
+             store.create_session("shared-graph","Graph sharing the root budget").get();
+@@ -167,7 +167,7 @@ int main(int argc,char** argv) {
+             require(store.run("lane-shutdown-agent").get().state==RunState::cancelled&&lanes->running()==0&&lanes->occupied()==0,"Closing the active service must drain and release all shared capacity");
+         }
+         {
+-            const auto lanes=std::make_shared<RootAdmissionPool>(8,1);
++            const auto lanes=std::make_shared<RootAdmissionPool>(8,1,true);
+             AgentService agents(store,settings,1,8,lanes);
+             GraphService graphs(store,settings,1,8,2,lanes);
+             const auto catalog=graphs.graphs();const auto graph=std::find_if(catalog.begin(),catalog.end(),[](const auto& e){return e.id=="dispatch.agent";});
+@@ -177,7 +177,7 @@ int main(int argc,char** argv) {
+             agents.submit("backlog-b","backlog-b","hold-stream");
+             require(store.run("backlog-b").get().state==RunState::queued,"Older agent must actually wait in the single worker's local backlog");
+             graphs.submit_graph("backlog-g","backlog-g","dispatch.agent",graph->revision,"hold-stream");
+-            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->dispatch_blocked()==1;},"Shared dispatch must rank both backlog roots while only the graph worker can reach its slot wait");
++            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->running()==1;},"Physical shared queue must rank both waiting roots while the first stream occupies its worker");
+             agents.cancel("backlog-a");cancelled(store,"backlog-a");
+             eventually([&]{return store.run("backlog-b").get().state==RunState::running||store.run("backlog-g").get().state==RunState::running;},"One of the waiting roots must actually dispatch");
+             require(store.run("backlog-b").get().state==RunState::running&&store.run("backlog-g").get().state==RunState::queued,"Older locally queued agent must dispatch before a later graph from another service");
+@@ -186,6 +186,29 @@ int main(int argc,char** argv) {
+             graphs.cancel("backlog-g","fixture-controller");cancelled(store,"backlog-g");
+             graphs.close();agents.close();require(lanes->running()==0&&lanes->dispatch_waiting()==0&&lanes->occupied()==0,"Backlog ordering test must drain all execution and admission ownership");
+         }
++        {
++            const auto shared=std::make_shared<RootAdmissionPool>(8,3,true);
++            AgentService agents(store,settings,1,8,shared);
++            GraphService graphs(store,settings,1,8,2,shared);
++            const auto catalog=graphs.graphs();const auto graph=std::find_if(catalog.begin(),catalog.end(),[](const auto& e){return e.id=="dispatch.agent";});
++            require(graph!=catalog.end(),"Physical shared worker fixture requires its registered graph");
++            for(const auto* id:{"physical-a","physical-g1","physical-g2","physical-cancel"})store.create_session(id,id).get();
++            agents.submit("physical-a","physical-a","hold-stream");streaming(store,"physical-a");
++            for(const auto* id:{"physical-g1","physical-g2"}){
++                graphs.submit_graph(id,id,"dispatch.agent",graph->revision,"hold-stream");
++                eventually([&]{return !store.children(id).get().empty();},"Both graph roots must dispatch while the agent occupies a shared worker");
++                streaming(store,store.children(id).get().front().id);
++            }
++            require(store.run("physical-g1").get().state==RunState::running&&store.run("physical-g2").get().state==RunState::running,"One graph service must use two idle shared workers despite its legacy one-worker setting");
++            require(shared->running()==3,"Shared root metrics must count all three actual occupied workers");
++            graphs.submit_graph("physical-cancel","physical-cancel","dispatch.agent",graph->revision,"hold-stream");
++            graphs.cancel("physical-cancel","fixture-controller");cancelled(store,"physical-cancel");
++            require(store.children("physical-cancel").get().empty(),"Cancelling queued shared work must not launch a child or provider request");
++            graphs.close();
++            require(store.run("physical-a").get().state==RunState::running,"Closing graphs must not stop another service's shared worker");
++            require(store.run("physical-g1").get().state==RunState::cancelled&&store.run("physical-g2").get().state==RunState::cancelled,"Graph close must drain both real shared executions");
++            agents.close();require(shared->occupied()==0,"Shared service shutdown must drain all root reservations");
++        }
+         store.close();
+         std::cout<<"Native agent service contract passed: parallel native streams, cross-service agent/graph capacity isolation across queued, active and paused roots, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";
+         return 0;
+diff --git a/Native/tests/agent_service_peer.mjs b/Native/tests/agent_service_peer.mjs
+index 170eb079..8384cc8a 100644
+--- a/Native/tests/agent_service_peer.mjs
++++ b/Native/tests/agent_service_peer.mjs
+@@ -27,5 +27,5 @@ const peer=createServer((request,response)=>{
+ try {
+   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
+   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,`http://127.0.0.1:${peer.address().port}/chat`],{windowsHide:true,timeout:15000});
+-  if(failure) throw failure;assert.equal(requests,16,'Eight original, five mixed-service and three local-backlog ordering streams');assert.equal(graphRequests,2,'Only the two dispatched graphs may infer; cancelled and shutdown waiters must not create a model request');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
++  if(failure) throw failure;assert.equal(requests,19,'Original and mixed-service streams plus three shared physical worker streams');assert.equal(graphRequests,4,'Only dispatched graphs may infer; cancelled and shutdown waiters must not create a model request');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
+ } finally {peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}
+diff --git a/Native/tests/context_graph_engine_contract.cpp b/Native/tests/context_graph_engine_contract.cpp
+index b6e14983..11a8d6f4 100644
+--- a/Native/tests/context_graph_engine_contract.cpp
++++ b/Native/tests/context_graph_engine_contract.cpp
+@@ -71,7 +71,7 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>&
+     GraphRootRecord paused;GraphContextOwnerRecord closed;RootBudgetRecord budget;
+     stage="parallel_and_compaction";
+     {
+-        GraphService owner(store,frozen,1,8,2);
++        GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
+         HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual graph HTTP listener did not bind");Serving serving(server);Http http(port);
+         rejects<GraphContextUnavailable>([&]{owner.submit_graph("excess-root","excess","excessive",1,"Reject excess contextual Agents.");},"Nine agent nodes cannot acquire another root allowance");
+         rejects<NotFound>([&]{store.run("excess-root").get();},"Rejected admission must not create a root");require(store.history("excess").get().empty(),"Rejected graph admission must not append a user");
+@@ -101,18 +101,18 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>&
+         owner.close();require(store.run("main-root").get().state==RunState::paused,"Owner shutdown must preserve the clean contextual pause");
+     }
+     stage="stale_authority_and_cas";
+-    {auto changed=frozen;changed.instructions+=" Synthetic changed backend instructions.";GraphService stale(store,changed,1,8,2);
++    {auto changed=frozen;changed.instructions+=" Synthetic changed backend instructions.";GraphService stale(store,changed,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
+         require(stale.graph_context("main-root").enabled&&!stale.graph_context("main-root").resumable,"Changed native authority remains inspectable without granting resume");
+         rejects<GraphContextUnavailable>([&]{stale.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision);},"A changed owner cannot commit human input before rebinding its captured authority");
+         require(store.graph_run("main-root").get().checkpoint_revision==paused.checkpoint_revision&&store.root_budget("main-root").get().model_calls_reserved==12,"Stale metadata must not alter answer, budget or provider dispatch");stale.close();}
+-    {auto changed=frozen;changed.selectable_models.clear();GraphService stale(store,changed,1,8,2);
++    {auto changed=frozen;changed.selectable_models.clear();GraphService stale(store,changed,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
+         require(!stale.idle(),"A paused graph with a removed model override remains owned for inspection and cancellation");
+         rejects<std::invalid_argument>([&]{stale.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision);},"Removed model configuration cannot commit human input");
+         require(store.graph_run("main-root").get().checkpoint_revision==paused.checkpoint_revision&&store.root_budget("main-root").get().model_calls_reserved==12,"Model drift adoption must not replay or change captured metadata");stale.close();}
+     std::this_thread::sleep_for(150ms);require(store.graph_context_owner("main-root").get().segment->remaining_active_ms==closed.segment->remaining_active_ms,"Paused wall time must not consume or recreate active allowance");
+     stage="answered_pause_and_cancel";
+     {
+-        GraphService owner(store,frozen,1,8,2);HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual held graph HTTP listener did not bind");Serving serving(server);Http http(port);
++        GraphService owner(store,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));HttpServer server(store,access_token,nullptr,nullptr,{},{},{},nullptr,&owner);const auto port=server.bind(0);require(port>0,"Actual held graph HTTP listener did not bind");Serving serving(server);Http http(port);
+         store.create_session("cancel","Actual held graph cancellation").get();owner.submit_graph("cancel-root","cancel","inspect",1,"Synthetic cancel-root held transport.");marker(root,"cancel-started");
+         public_graph_context(http.get("/v1/graph-runs/cancel-root"),"cancel-root","cancel","running",false);const auto actual_children=http.get("/v1/graph-runs/cancel-root/children");require(actual_children.is_array()&&actual_children.size()==2,"Actual executing HTTP graph must expose both admitted concurrent children");for(const auto& child:actual_children)require(child["parent_id"]=="cancel-root"&&child["state"]=="running","Held native child transports must remain actually running");
+         rejects<Conflict>([&]{owner.human_input("main-root","review",R"({"answer":"Continue"})","fixture-controller",paused.checkpoint_revision+1);},"Input CAS must reject a stale displayed checkpoint");
+@@ -123,7 +123,7 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>&
+     }
+     stage="reopen_and_explicit_join";store.close();
+     {
+-        PersistenceService reopened(database,imports);GraphService owner(reopened,frozen,1,8,2);const auto answered=reopened.graph_run("main-root").get();
++        PersistenceService reopened(database,imports);GraphService owner(reopened,frozen,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));const auto answered=reopened.graph_run("main-root").get();
+         require(answered.run.state==RunState::paused&&!owner.idle(),"A ready clean pause is adopted without automatic replay");
+         require(owner.graph_context("main-root").resumable,"Final human-only frontier advertises resume from actual backend eligibility");
+         {
+@@ -149,11 +149,11 @@ void exercise(const std::filesystem::path& root,const std::vector<std::string>&
+ }
+ void crash(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
+     PersistenceService store((root/"recovery.sqlite").string(),imports);credential(store);catalog(store);store.create_session("recover","Actual interrupted graph owner").get();
+-    GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2);owner.submit_graph("recover-root","recover","inspect",1,"Synthetic recovery transport.");marker(root,"recover-started");
++    GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));owner.submit_graph("recover-root","recover","inspect",1,"Synthetic recovery transport.");marker(root,"recover-started");
+     require(store.root_budget("recover-root").get().model_calls_reserved==2&&store.children("recover-root").get().size()==2,"Crash boundary requires two actual admitted started requests");std::_Exit(0);
+ }
+ void reopen(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
+-    PersistenceService store((root/"recovery.sqlite").string(),imports);GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2);
++    PersistenceService store((root/"recovery.sqlite").string(),imports);GraphService owner(store,settings(root.string(),base+"/recover/responses"),1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));
+     require(store.run("recover-root").get().state==RunState::failed&&owner.idle()&&store.root_budget("recover-root").get().model_calls_reserved==2,"Recovery must interrupt physical ownership without replay/reset");
+     for(const auto& child:store.children("recover-root").get())require(child.state==RunState::failed&&store.run_history(child.id).get().size()==1,"Interrupted child keeps its original objective without a fabricated response");
+     rejects<NotFound>([&]{owner.resume_graph("recover-root","fixture-controller",store.graph_run("recover-root").get().checkpoint_revision);},"Interrupted roots cannot acquire a new wake");
+diff --git a/Native/tests/dynamic_plan_engine_contract.cpp b/Native/tests/dynamic_plan_engine_contract.cpp
+index 1ed35ec0..52742633 100644
+--- a/Native/tests/dynamic_plan_engine_contract.cpp
++++ b/Native/tests/dynamic_plan_engine_contract.cpp
+@@ -165,7 +165,7 @@ int main(int argc,char** argv){
+             write(workspace/"nested-deep.txt","Actual dynamic depth-two file bytes\n");
+             auto ordinary=frozen;ordinary.planning.reset();AgentService ordinary_service(store,ordinary,1,4);
+             require(!ordinary_service.supports_dynamic_planning(),"Ordinary coding Agent must not silently switch into planning mode");
+-            store.create_session("main-session","Actual same-plan revision and independently approved coding").get();AgentService service(store,frozen,2,8);
++            store.create_session("main-session","Actual same-plan revision and independently approved coding").get();AgentService service(store,frozen,2,8,std::make_shared<RootAdmissionPool>(10,2,true));
+             require(service.supports_dynamic_planning()&&!service.supports_delegation(),"Eligible ordinary Agent offers planning without silently enabling legacy delegation");
+             store.create_session("empty-inspect-session","Closed Claude no-argument tool with a zero-byte delta").get();
+             service.submit("empty-inspect-root","empty-inspect-session","fixture-empty-inspect-parent: Inspect the current native plan without creating a plan, child or effect, then report the actual result.");
+@@ -187,7 +187,7 @@ int main(int argc,char** argv){
+             service.close();require(store.run("main-root").get().state==RunState::paused,"Clean shutdown preserves the typed human owner");store.close();
+         }
+         {
+-            PersistenceService store(database,imports);AgentService service(store,frozen,2,8);
++            PersistenceService store(database,imports);AgentService service(store,frozen,2,8,std::make_shared<RootAdmissionPool>(10,2,true));
+             require(store.run_history("main-root").get().size()==paused_history.size(),"Paused adoption preserves actual signed history without replay");
+             const auto current=store.dynamic_plan_for_root("main-root").get();require(current&&current->id==before.id&&current->revision==before.revision,"Reopen adopts the same durable plan identity");
+             const auto request=question(store,*current);const std::string answer=R"({"decision":"review coding","quantity":1.00000000000000000001})";
+@@ -293,17 +293,17 @@ int main(int argc,char** argv){
+             service.close();store.close();
+         }
+         {
+-            PersistenceService store(database,imports);AgentService service(store,frozen,1,8);const auto plan=store.dynamic_plan_for_root("restart-human-root").get();require(plan&&plan->state=="waiting_human"&&store.run("restart-human-root").get().state==RunState::paused,"Backend reopen must recover the same clean A2A human pause");question(store,*plan);
++            PersistenceService store(database,imports);AgentService service(store,frozen,1,8,std::make_shared<RootAdmissionPool>(9,1,true));const auto plan=store.dynamic_plan_for_root("restart-human-root").get();require(plan&&plan->state=="waiting_human"&&store.run("restart-human-root").get().state==RunState::paused,"Backend reopen must recover the same clean A2A human pause");question(store,*plan);
+             const Json message={{"kind","message"},{"role","user"},{"messageId","a2a-answer-after-restart"},{"taskId","restart-human-root"},{"contextId","restart-human-session"},{"parts",Json::array({{{"kind","text"},{"text","review after restart"}}})}};const auto payload=message.dump();const auto continued=service.continue_a2a_task("restart-human-root","a2a-answer-after-restart","restart-human-session",payload,"review after restart",payload,R"({"answer":"review after restart"})");require(continued.id=="restart-human-root"&&continued.state==RunState::paused,"Recovered A2A owner must accept its own pending question");
+             eventually([&]{return store.run("restart-human-root").get().state==RunState::running&&count(store.events("restart-human-root").get(),"budget.model_call.started")==2;},"Reopened native owner did not dispatch the held A2A continuation");const auto replay=service.continue_a2a_task("restart-human-root","a2a-answer-after-restart","restart-human-session",payload,"review after restart",payload,R"({"answer":"review after restart"})");require(replay.id=="restart-human-root"&&count(store.events("restart-human-root").get(),"plan.human.answered")==1&&count(store.events("restart-human-root").get(),"a2a.message.continued")==1,"Retry after backend reopen must not consume a second human answer");auto changed=message;changed["parts"][0]["text"]="different after restart";const auto altered=changed.dump();rejects<Conflict>([&]{service.continue_a2a_task("restart-human-root","a2a-answer-after-restart","restart-human-session",altered,"different after restart",altered,R"({"answer":"different after restart"})");},"Persisted A2A retry identity must conflict on changed content after backend reopen");
+             write(workspace/"release-restart-human","release");eventually([&]{return store.run("restart-human-root").get().state==RunState::completed;},"Reopened owner did not complete the accepted A2A continuation");const auto history=store.task_history("restart-human-root").get();require(history&&history->size()==5&&store.incoming_message_payload("restart-human-root","a2a-answer-after-restart").get()==std::optional<std::string>(payload)&&store.owned_children("restart-human-root").get().empty(),"Restarted A2A continuation must retain one exact task message without children");
+             store.create_session("nested-restart-session","Nested human continuation survives service restart").get();service.submit("nested-restart-root","nested-restart-session","fixture-nested-restart-parent: Create an outer agent that asks one nested human question and resumes after restart.");const auto nested_root_plan=paused(store,"nested-restart-root");const auto binding=store.dynamic_owner_pause("nested-restart-root").get();require(nested_root_plan.state=="active"&&binding.owner_runs.size()==1,"Nested restart fixture reaches a durable root-to-child human pause");const auto waiting=store.dynamic_plan(binding.plan_id).get();require(waiting.owner_run_id==binding.owner_runs.front()&&waiting.depth==1,"Nested restart binding targets its exact deepest owner");question(store,waiting);service.close();store.close();
+         }
+         {
+-            PersistenceService store(database,imports);AgentService service(store,frozen,1,8);const auto root_plan=store.dynamic_plan_for_root("nested-restart-root").get();const auto binding=store.dynamic_owner_pause("nested-restart-root").get();const auto waiting=store.dynamic_plan(binding.plan_id).get();require(root_plan&&root_plan->state=="active"&&store.run("nested-restart-root").get().state==RunState::paused&&binding.owner_runs.size()==1&&waiting.state=="waiting_human"&&store.run(binding.owner_runs.front()).get().state==RunState::paused,"Backend restart preserves the exact nested human wait and its paused owner chain");const auto request=question(store,waiting);service.plan_input("nested-restart-root",request.id,R"({"approved_after_restart":true})","fixture-controller",waiting.revision,waiting.state_sequence);eventually([&]{return store.run("nested-restart-root").get().state==RunState::completed||store.run("nested-restart-root").get().state==RunState::failed;},"Recovered nested owner did not finish its exact accepted continuation");require(store.run("nested-restart-root").get().state==RunState::completed&&store.run(binding.owner_runs.front()).get().state==RunState::completed,"Nested owner and ordinary root complete after the authenticated post-restart answer");const auto outer_history=store.owned_child_history("nested-restart-root",binding.owner_runs.front()).get();require(outer_history.size()==4&&count(store.events("nested-restart-root").get(),"plan.call.accepted")==1&&count(store.events(binding.owner_runs.front()).get(),"plan.call.accepted")==1,"Restart resumes each originally accepted plan call once without reaccepting or replaying it");service.close();store.close();
++            PersistenceService store(database,imports);AgentService service(store,frozen,1,8,std::make_shared<RootAdmissionPool>(9,1,true));const auto root_plan=store.dynamic_plan_for_root("nested-restart-root").get();const auto binding=store.dynamic_owner_pause("nested-restart-root").get();const auto waiting=store.dynamic_plan(binding.plan_id).get();require(root_plan&&root_plan->state=="active"&&store.run("nested-restart-root").get().state==RunState::paused&&binding.owner_runs.size()==1&&waiting.state=="waiting_human"&&store.run(binding.owner_runs.front()).get().state==RunState::paused,"Backend restart preserves the exact nested human wait and its paused owner chain");const auto request=question(store,waiting);service.plan_input("nested-restart-root",request.id,R"({"approved_after_restart":true})","fixture-controller",waiting.revision,waiting.state_sequence);eventually([&]{return store.run("nested-restart-root").get().state==RunState::completed||store.run("nested-restart-root").get().state==RunState::failed;},"Recovered nested owner did not finish its exact accepted continuation");require(store.run("nested-restart-root").get().state==RunState::completed&&store.run(binding.owner_runs.front()).get().state==RunState::completed,"Nested owner and ordinary root complete after the authenticated post-restart answer");const auto outer_history=store.owned_child_history("nested-restart-root",binding.owner_runs.front()).get();require(outer_history.size()==4&&count(store.events("nested-restart-root").get(),"plan.call.accepted")==1&&count(store.events(binding.owner_runs.front()).get(),"plan.call.accepted")==1,"Restart resumes each originally accepted plan call once without reaccepting or replaying it");service.close();store.close();
+         }
+         {
+-            PersistenceService store(database,imports);auto expiry=frozen;expiry.planning=DynamicPlanningPolicy{};expiry.planning->human_expiry_ms=500;AgentService service(store,expiry,1,8);
++            PersistenceService store(database,imports);auto expiry=frozen;expiry.planning=DynamicPlanningPolicy{};expiry.planning->human_expiry_ms=500;AgentService service(store,expiry,1,8,std::make_shared<RootAdmissionPool>(9,1,true));
+             store.create_session("expiry-session","Actual native human expiry").get();service.submit("expiry-root","expiry-session","fixture-expiry-parent: Publish a question and let native policy expire it without another provider request.");
+             const auto plan=paused(store,"expiry-root");const auto request=question(store,plan);
+             eventually([&]{return store.run("expiry-root").get().state==RunState::failed;},"Native waiting owner expiry did not wake and retire");
+diff --git a/Native/tests/root_work_executor_contract.cpp b/Native/tests/root_work_executor_contract.cpp
+index ac32596b..98f85c70 100644
+--- a/Native/tests/root_work_executor_contract.cpp
++++ b/Native/tests/root_work_executor_contract.cpp
+@@ -67,5 +67,15 @@ void releases_ticket_owner_cycle(){
+     owner->ticket->commit();owner.reset();
+     require(released.get_future().wait_for(5s)==std::future_status::ready,"Physical retirement must break a callback-owner-ticket cycle without self-waiting");
+ }
++void detached_service_ownership(){
++    RootWorkExecutor pool(1,3);std::mutex owner;std::unique_lock held(owner);std::promise<void> entered;
++    auto work=pool.stage([&](std::stop_token stop){entered.set_value();std::lock_guard lock(owner);require(!stop.stop_requested(),"Detached handle release must not cancel an already claimed action");});
++    auto result=work->result();work->commit();work->detach();
++    require(entered.get_future().wait_for(5s)==std::future_status::ready,"Detached fixture must physically reach its service lock");
++    work.reset();held.unlock();ready(result);
++    auto staged=pool.stage([](std::stop_token){});std::atomic<int> calls=0;
++    auto queued=pool.stage([&](std::stop_token){++calls;});auto withdrawn=queued->result();queued->commit();queued->detach();queued.reset();
++    rejects([&]{withdrawn.get();});staged.reset();require(calls==0,"A retired service's detached ready ticket must withdraw before any action");
+ }
+-int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
++}
++int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();detached_service_ownership();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

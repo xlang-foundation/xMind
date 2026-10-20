@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared physical root worker integration — 2026-10-19
+
+ExecutionPlatform now selects one RootWorkExecutor for ordinary and graph roots through their shared RootAdmissionPool. Both services stage rank before durable admission, publish only runnable committed work, and invoke their execution segments on those shared workers. They retain root reservations, paused ownership, journals and independent fault policy. Standalone services retain the existing executor option. Detached service tickets withdraw unclaimed work without waiting under owner locks; claimed actions retain their futures and are drained outside those locks on service close.
+
+The actual service regression runs one agent plus two concurrent graph streams despite the graph service legacy worker count being one. It checks all three actual occupied workers, queued cancellation with no child/provider launch, and graph shutdown draining its roots while the agent remains running. Shared-pool FIFO/admission and human pause also pass. Dynamic-plan and graph-context fixtures now exercise shared-pool paused-owner restart, authenticated resume, nested owner continuation, expiry and instruction/model drift without increasing peer requests.
+
+Full Release build and final9focused contracts pass45.40seconds. CTest19372 exits0; all source/SDK/libraries/dependencies/binaries and file sets are unchanged during the gate. Earlier9focused pass46.54seconds is retained separately. Native3854a562 is uninstalled and still needs the full155-contract local gate and independent hosted acceptance. Installed55/owner56032 remain untouched; agent process placement remains separate unfinished work.
+
+See evidence/shared-physical-root-integration-focused-20261019.json/.log/.patch, the inventory and gate script; initial scope has its own receipts.
+
 ## Root execution segments separated from private loops — 2026-10-19
 
 AgentService and GraphService now expose their single-root execution segment separately from their physical work-loop claim. All existing ticket acquisition, runner calls, durable terminal/paused rechecks, wake scheduling, cancellation and fault handling remain in that segment. Loop continuation becomes a segment return; the same private loops still invoke it. This prepares actual shared-worker dispatch without changing scheduler ownership yet.

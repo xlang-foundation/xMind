@@ -38,12 +38,12 @@ public:
         Ticket(const Ticket&)=delete;
         Ticket& operator=(const Ticket&)=delete;
         ~Ticket(){
-            request_stop();
+            if(drain_)request_stop();
             bool dispatched=false;
             std::function<void(std::stop_token)> withdrawn;
             {
                 std::lock_guard lock(state_->mutex);
-                if(job_->phase==Job::Phase::staged){
+                if(job_->phase==Job::Phase::staged||(!drain_&&job_->phase==Job::Phase::ready)){
                     state_->queue.remove(job_);job_->phase=Job::Phase::retired;
                     withdrawn=std::move(job_->action);
                     job_->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root admission withdrawn before dispatch")));
@@ -52,7 +52,7 @@ public:
             state_->changed.notify_all();
             // Owner destruction cannot abandon a committed physical action.
             // Never destroy a ticket from within its own action.
-            if(dispatched)job_->result.wait();
+            if(dispatched&&drain_)job_->result.wait();
         }
         void commit(){
             std::lock_guard lock(state_->mutex);
@@ -61,15 +61,25 @@ public:
             job_->phase=Job::Phase::ready;state_->changed.notify_all();
         }
         void request_stop(){job_->stop.request_stop();}
+        // Service owners retain the result and drain it outside their mutex.
+        // Releasing their queued ticket must neither wait under that mutex nor
+        // stop an already claimed retirement action. Destroying a detached
+        // ready ticket withdraws it; the service must first retire durable work.
+        void detach(){
+            std::lock_guard lock(state_->mutex);
+            if(job_->phase==Job::Phase::staged)throw std::logic_error("Cannot detach uncommitted root admission");
+            drain_=false;
+        }
         const std::shared_future<void>& result()const{return job_->result;}
     private:
         friend class RootWorkExecutor;
         Ticket(std::shared_ptr<State> state,std::shared_ptr<Job> job):state_(std::move(state)),job_(std::move(job)){}
         std::shared_ptr<State> state_;
         std::shared_ptr<Job> job_;
+        bool drain_=true;
     };
     explicit RootWorkExecutor(std::size_t workers,std::size_t capacity):state_(std::make_shared<State>(capacity)){
-        if(workers<1||workers>16||capacity<1||capacity>4096)throw std::invalid_argument("Invalid shared root worker capacity");
+        if(workers<1||workers>16||capacity<1||capacity>8192)throw std::invalid_argument("Invalid shared root worker capacity");
         try{for(std::size_t i=0;i<workers;++i)workers_.emplace_back([state=state_]{work(state);});}
         catch(...){close();throw;}
     }
@@ -85,6 +95,8 @@ public:
         if(state_->queue.size()>=state_->capacity)throw std::runtime_error("Shared root queue is full");
         state_->queue.push_back(job);return ticket;
     }
+    std::size_t running()const{std::lock_guard lock(state_->mutex);return state_->running.size();}
+    std::size_t waiting()const{std::lock_guard lock(state_->mutex);return state_->queue.size();}
     void close(){
         std::lock_guard serial(closing_);
         std::vector<std::shared_ptr<Job>> stopped;

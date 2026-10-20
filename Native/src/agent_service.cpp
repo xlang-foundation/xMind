@@ -49,11 +49,13 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
     std::shared_ptr<RootAdmissionPool> root_admission;
+    std::shared_ptr<RootWorkExecutor> work_pool;
+    std::vector<std::shared_future<void>> work_results;
     std::string provider_context;
     bool planning_enabled;
     std::optional<ContextPolicy> context_policy;
@@ -94,7 +96,7 @@ struct AgentService::Impl {
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget)
         :Impl(store,ordinary_settings(std::move(settings)),count,capacity,std::move(budget),Prepared{}){}
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,Prepared)
-        :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
+        :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),work_pool(root_admission->executor()),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
          children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
          delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
@@ -117,7 +119,7 @@ struct AgentService::Impl {
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
         }
-        try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});
+        try{for(std::size_t i=0;i<(work_pool?0:count);++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});
             if(context_policy)context_worker=std::thread([this]{work_context();});}
         catch(...){close();throw;}
     }
@@ -161,12 +163,34 @@ struct AgentService::Impl {
     void stop_jobs(const std::vector<std::shared_ptr<Job>>& jobs){for(const auto& job:jobs)job->stop.request_stop();
         if(context_shutdown.load())context_stop.request_stop();changed.notify_all();expiry_changed.notify_all();context_changed.notify_all();}
     void fail(){std::vector<std::shared_ptr<Job>> jobs;{std::lock_guard lock(mutex);jobs=fault_locked();}stop_jobs(jobs);if(children)children->fail();}
+    std::unique_ptr<RootWorkExecutor::Ticket> stage_work(const std::shared_ptr<Job>& job){
+        work_results.erase(std::remove_if(work_results.begin(),work_results.end(),[](const auto& value){return value.wait_for(std::chrono::seconds(0))==std::future_status::ready;}),work_results.end());
+        auto work=work_pool->stage([this,job](std::stop_token stop){
+            std::stop_callback stopped(stop,[job]{job->stop.request_stop();});
+            {
+                std::lock_guard lock(mutex);
+                if(!accepting||!active.contains(job->id)||active.at(job->id)!=job||job->phase!=Phase::queued)return;
+                pending.remove(job);job->phase=Phase::working;
+            }
+            execute_job(job,{});
+        });
+        work_results.push_back(work->result());job->work_committed=false;return work;
+    }
+    void publish_locked(){
+        if(!work_pool)return;
+        for(const auto& job:pending)if(job->phase==Phase::queued&&job->work&&!job->work_committed){
+            // A committed handle is detached immediately; result ownership is
+            // retained in work_results until service close drains it.
+            job->work->commit();job->work->detach();job->work_committed=true;
+        }
+    }
     auto ticket(const std::shared_ptr<Job>& job){return std::find(pending.begin(),pending.end(),job);}
     bool reserve_wake(const std::shared_ptr<Job>& job){
         if(ticket(job)!=pending.end())return false;if(pending.size()>=limit)throw RunBusy("Agent wake queue is full");
-        auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);return true;
+        if(work_pool){auto work=stage_work(job);pending.push_back(job);job->work=std::move(work);}
+        else{auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);}return true;
     }
-    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);job->dispatch.reset();}
+    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);job->dispatch.reset();job->work.reset();}
     std::size_t waiting_count()const{std::size_t count=0;for(const auto& [id,job]:active){(void)id;if(job->phase==Phase::waiting)++count;}return count;}
     void require_admission()const{
         require_available();if(active.size()>=owned_limit||pending.size()+waiting_count()>=limit)throw RunBusy("Agent ownership queue is full");
@@ -197,8 +221,8 @@ struct AgentService::Impl {
             try{
                 // Waiting never holds the service mutex. Cancelled roots still
                 // enter the runner with their stopped token for durable retirement.
-                if(!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
-                auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
+                if(!work_pool&&!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
+                auto execution=work_pool?std::unique_ptr<RootAdmissionPool::Execution>{}:root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
@@ -214,7 +238,7 @@ struct AgentService::Impl {
                 // shutdown stop request arrived after its commit. Explicit
                 // controller cancellation has a separate owner-lock flag.
                 else if(!accepting||job->stop.stop_requested()){remove_ticket(job);job->phase=Phase::waiting;}
-                else if(runnable(*plan)){reserve_wake(job);job->phase=Phase::queued;changed.notify_one();}
+                else if(runnable(*plan)){reserve_wake(job);job->phase=Phase::queued;publish_locked();changed.notify_one();}
                 else{remove_ticket(job);job->phase=Phase::waiting;changed.notify_all();}
             }catch(const DynamicPlanUnavailable&){
                 // Metadata may drift after an answer commits but before this
@@ -329,7 +353,7 @@ struct AgentService::Impl {
         }
     }
     void close(){
-        std::lock_guard serial(close_mutex);std::vector<std::shared_ptr<Job>> stopping;
+        std::lock_guard serial(close_mutex);std::vector<std::shared_ptr<Job>> stopping,queued;
         {
             std::lock_guard lock(mutex);accepting=false;context_shutdown=true;
             for(const auto& [id,job]:active){(void)id;
@@ -345,6 +369,7 @@ struct AgentService::Impl {
                     }catch(...){faulted=true;stopping.push_back(job);}
                 }
                 else if(job->phase==Phase::queued){
+                    if(work_pool)queued.push_back(job);
                     try{const auto current=persistence.run(job->id).get();
                         if(current.state==RunState::paused){remove_ticket(job);job->phase=Phase::waiting;}
                         else stopping.push_back(job);
@@ -352,9 +377,13 @@ struct AgentService::Impl {
                 }
             }
         }
+        if(work_pool){std::lock_guard lock(mutex);for(const auto& job:queued)if(active.contains(job->id)){
+            try{const auto current=persistence.run(job->id).get();if(current.state==RunState::queued)persistence.transition(job->id,RunState::queued,RunState::cancelled,R"({"reason":"agent_service_shutdown_before_dispatch"})").get();remove_ticket(job);active.erase(job->id);}catch(...){faulted=true;}
+        }}
         stop_jobs(stopping);changed.notify_all();
         for(auto& worker:workers)if(worker.joinable())worker.join();if(expiry_worker.joinable())expiry_worker.join();
         if(context_worker.joinable())context_worker.join();
+        for(const auto& result:work_results)result.wait();
         // Undispatched idle tickets have no model/effect to replay on shutdown.
         // A request already claimed by an actual root keeps that owner's ledger.
         {std::lock_guard lock(mutex);
@@ -452,7 +481,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
-    lock.unlock();impl_->changed.notify_one();return result;
+    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
 }
 Run AgentService::submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox_id,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> profile,std::vector<PromptFileAttachment> files){
     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(profile)throw RunUnavailable("Provider authority must be checked by the execution platform");if(!files.empty()&&(!workspace||workspace->revision<1))throw ToolAccessDenied("Queued attachments require workspace membership admission");
@@ -464,7 +493,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
-    lock.unlock();impl_->changed.notify_one();return result;
+    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
 }
 Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
@@ -475,7 +504,7 @@ Run AgentService::submit_message(std::string id,std::string context,std::string 
     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     if(result.id!=id){impl_->remove_ticket(job);impl_->active.erase(id);return result;}
-    lock.unlock();impl_->changed.notify_one();return result;
+    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
 }
 Run AgentService::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input,std::string human_request_id){
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;impl_->require_available();
@@ -484,7 +513,7 @@ Run AgentService::continue_a2a_task(std::string task,std::string message,std::st
     const auto binding=impl_->persistence.dynamic_owner_pause(task).get();std::vector<std::pair<DynamicPlanRecord,DynamicHumanRequest>> waiting;for(const auto& entry:binding.waits){const auto plan=impl_->persistence.dynamic_plan(entry.plan_id).get();for(const auto& request:impl_->persistence.dynamic_human_requests(plan.id).get())if(request.state=="waiting")waiting.emplace_back(plan,request);}if(waiting.empty())throw Conflict("A2A continuation has no pending human question");if(human_request_id.empty()&&waiting.size()!=1)throw Conflict("A2A continuation must identify a human question when multiple questions are pending");const auto selected=human_request_id.empty()?waiting.begin():std::find_if(waiting.begin(),waiting.end(),[&](const auto& entry){return entry.second.id==human_request_id;});if(selected==waiting.end())throw Conflict("A2A human request is not pending on this task");const auto waiting_plan=selected->first;const auto waiting_request=selected->second;
     const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=waiting_plan.id;answer.request_id=waiting_request.id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=waiting_plan.capabilities.backend_identity;answer.expected_revision=waiting_plan.revision;answer.expected_state_sequence=waiting_plan.state_sequence;
     try{impl_->persistence.continue_a2a_message(std::move(answer),task,message,current.session_id,identity,content,payload).get();}catch(...){if(reserved)impl_->remove_ticket(job);throw;}
-    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan.id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();lock.unlock();impl_->changed.notify_all();return result;}
+    try{const auto updated=impl_->persistence.dynamic_plan(waiting_plan.id).get();if(job->phase==Impl::Phase::waiting){if(runnable(updated))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}const auto result=impl_->persistence.run(task).get();impl_->publish_locked();lock.unlock();impl_->changed.notify_all();return result;}
     catch(...){const auto stopping=impl_->fault_locked();lock.unlock();impl_->stop_jobs(stopping);if(impl_->children)impl_->children->fail();throw DynamicOutcomeUnrecorded("Committed A2A answer could not be observed by its native owner");}
 }
 Run AgentService::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){
@@ -511,7 +540,7 @@ Run AgentService::plan_input(const std::string& root,const std::string& request,
         if(job->phase==Impl::Phase::waiting){if(runnable(current))job->phase=Impl::Phase::queued;else impl_->remove_ticket(job);}
         // A working owner keeps its preallocated wake until pause re-read. A
         // queued owner already has exactly one scheduler entry.
-        const auto result=impl_->persistence.run(root).get();lock.unlock();impl_->changed.notify_all();return result;
+        const auto result=impl_->persistence.run(root).get();impl_->publish_locked();lock.unlock();impl_->changed.notify_all();return result;
     }catch(...){
         // Input already committed. An unavailable scheduling observation cannot
         // be reported as a rejected answer or authorize an unobserved wake.
@@ -528,7 +557,7 @@ Run AgentService::resume_plan(const std::string& root,const std::string& actor,s
     if(plan->revision!=revision||plan->state_sequence!=sequence)throw DynamicPlanChanged("Dynamic plan observation changed");
     impl_->verify_pause(current,*plan);const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const bool can_resume=std::any_of(binding.waits.begin(),binding.waits.end(),[&](const auto& entry){return runnable(impl_->persistence.dynamic_plan(entry.plan_id).get());});
     if(!can_resume)throw Conflict("Dynamic owner has no ready frontier or report");
-    impl_->reserve_wake(job);job->phase=Impl::Phase::queued;lock.unlock();impl_->changed.notify_one();return current;
+    impl_->reserve_wake(job);job->phase=Impl::Phase::queued;impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return current;
 }
 void AgentService::cancel(const std::string& id){
     std::shared_ptr<Impl::Job> job;
