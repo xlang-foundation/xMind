@@ -24,11 +24,13 @@ public:
     // not only before the RPC handler enters the persistence queue.
     std::future<ModelCallReservation> reserve_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<ModelCallReservation> start_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<ModelCallReservation> finish_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<Run> complete_agent_worker_run(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> agent_worker_model_claim(std::string root,std::string attempt);
-    std::future<AgentWorkerModelClaimRecord> record_agent_worker_model_response(AgentWorkerModelClaimSpec,std::string actual_response_json);
+    std::future<AgentWorkerModelClaimRecord> record_agent_worker_model_response(AgentWorkerModelClaimSpec,std::string actual_response_json,std::string actual_assistant_json={});
     PersistenceService(std::string database,std::vector<std::string> import_roots,
         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
         std::optional<LegacyOwnerBootstrap> legacy={});

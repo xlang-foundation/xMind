@@ -1,5 +1,6 @@
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/agent_model_values.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
 #include "agentflow/agent_process_tool_host.hpp"
 #include "agentflow/agent_read_tool_host.hpp"
@@ -89,16 +90,7 @@ ModelMessage message(const Message& stored) {
     return result;
 }
 Json assistant(const ModelCompletion& result,const std::string& model,std::int64_t elapsed_ms,std::optional<std::int64_t> first_token_ms) {
-    Json value={{"content",result.content},{"model",model},{"elapsed_ms",elapsed_ms}};
-    if(result.usage_json!="null") value["usage"]=Json::parse(result.usage_json);
-    if(first_token_ms) value["first_token_ms"]=*first_token_ms;
-    if(!result.refusal.empty()) value["refusal"]=result.refusal;
-    if(result.provider_items_json!="[]")value["provider_items"]=Json::parse(result.provider_items_json);
-    if(!result.tool_calls.empty()) {
-        value["tool_calls"]=Json::array();
-        for(const auto& call:result.tool_calls) value["tool_calls"].push_back({{"id",call.id},{"name",call.name},{"arguments",call.arguments_json}});
-    }
-    return value;
+    return Json::parse(format_agent_model_assistant(result,model,elapsed_ms,first_token_ms));
 }
 std::string execution_identity(const AgentSettings& settings,const std::string& model){
     auto context=provider_context_json(settings,model);if(!context.empty())return context;
@@ -903,7 +895,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             reply=assistant(response,provider.model,elapsed,first_token_ms);
             const auto context=provider_context_json(settings_,provider.model);if(!context.empty())reply["provider_context"]=Json::parse(context);
             if(prepared_context)finish_context_attempt(InferenceAttemptOutcome::completed,reply.dump());
-            else if(reservation)budget->finish(*reservation,reply.dump());
+            else if(reservation){const auto actual=budget->finish(*reservation,reply.dump());if(!actual.empty())reply=Json::parse(actual);}
             break;
             }}catch(const BudgetOutcomeUnrecorded&){throw;}
              catch(const ContextOutcomeUnrecorded&){throw;}

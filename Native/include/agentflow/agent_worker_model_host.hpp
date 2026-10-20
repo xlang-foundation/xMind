@@ -8,6 +8,7 @@ struct AgentWorkerModelOutcomeUnrecorded:std::runtime_error {using std::runtime_
 struct AgentWorkerModelPolicy {
     bool include_usage=false;
     std::optional<std::int64_t> max_output_tokens;
+    std::string assistant_provider_context_json;
 };
 // Backend-only model authority. The child can supply an owned request and exact
 // funded attempt, never provider configuration, credentials or a replacement

@@ -26,4 +26,11 @@ std::string encode_agent_model_completion(const ModelCompletion& response){retur
 ModelCompletion decode_agent_model_completion(const std::string& bytes){try{const auto value=parse(bytes,8*1024*1024);object(value,6);return {value.at("content").get<std::string>(),value.at("refusal").get<std::string>(),value.at("finish_reason").get<std::string>(),value.at("usage_json").get<std::string>(),calls(value.at("tool_calls")),value.at("provider_items_json").get<std::string>()};}catch(const Json::exception&){invalid();}}
 std::string encode_agent_model_event(const ModelEvent& event){if(event.kind.empty()||event.kind.size()>64)invalid();return bounded(Json{{"kind",event.kind},{"json",event.json}},4*1024*1024);}
 ModelEvent decode_agent_model_event(const std::string& bytes){try{const auto value=parse(bytes,4*1024*1024);object(value,2);ModelEvent result{value.at("kind").get<std::string>(),value.at("json").get<std::string>()};if(result.kind.empty()||result.kind.size()>64)invalid();return result;}catch(const Json::exception&){invalid();}}
+std::string format_agent_model_assistant(const ModelCompletion& result,const std::string& model,std::int64_t elapsed,std::optional<std::int64_t> first,const std::string& context){
+    if(elapsed<0||(first&&(*first<0||*first>elapsed)))invalid();Json value={{"content",result.content},{"model",model},{"elapsed_ms",elapsed}};
+    if(result.usage_json!="null")value["usage"]=Json::parse(result.usage_json);if(first)value["first_token_ms"]=*first;if(!result.refusal.empty())value["refusal"]=result.refusal;
+    if(result.provider_items_json!="[]")value["provider_items"]=Json::parse(result.provider_items_json);
+    if(!result.tool_calls.empty()){value["tool_calls"]=Json::array();for(const auto& call:result.tool_calls)value["tool_calls"].push_back({{"id",call.id},{"name",call.name},{"arguments",call.arguments_json}});}
+    if(!context.empty())value["provider_context"]=Json::parse(context);return bounded(value,8*1024*1024);
+}
 }

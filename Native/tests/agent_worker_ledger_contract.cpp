@@ -1,6 +1,7 @@
 // Native xlang3/SQLite and controlled HTTP peer. Process identities in this
 // ledger fixture are synthetic; actual child/channel lifecycles are separate.
 #include "agentflow/agent_worker_model_host.hpp"
+#include "agentflow/agent_model_values.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
@@ -45,11 +46,26 @@ void funding(PersistenceService& store){
     require(store.root_budget("funding-root").get().model_calls_reserved==3,"Cancellation, expiry, retirement and replacement must preserve charged allowance");
     store.reserve_agent_worker_model(replacement,"fresh-funding",deadline).get();store.start_agent_worker_model(replacement,"fresh-funding",deadline).get();require(store.root_budget("funding-root").get().model_calls_reserved==4,"Replacement may fund only a new attempt without resetting allowance");store.retire_agent_worker(replacement.generation,"cancelled").get();
 }
+void completion_receipts(PersistenceService& store){
+    root(store,"receipt-root");const auto admitted=store.admit_agent_worker(lease("receipt-root","receipt-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+    auto capture=[&](const std::string& attempt,const ModelCompletion& actual){
+        store.reserve_agent_worker_model(admitted,attempt,deadline).get();store.start_agent_worker_model(admitted,attempt,deadline).get();const auto binding=claim(admitted,attempt);store.claim_agent_worker_model(binding).get();
+        const auto encoded=encode_agent_model_completion(actual),assistant=format_agent_model_assistant(actual,"worker-fixture-model",23,5);
+        auto forged=Json::parse(assistant);forged["content"]="forged worker output";rejects<Conflict>([&]{store.record_agent_worker_model_response(binding,encoded,forged.dump()).get();});require(store.agent_worker_model_claim("receipt-root",attempt).get().state=="dispatching","Inconsistent assistant receipt must not acknowledge a model result");
+        const auto saved=store.record_agent_worker_model_response(binding,encoded,assistant).get();require(saved.actual_assistant_json==assistant&&saved.assistant_binding==context_digest(assistant),"Backend receipt must retain its exact acknowledgement binding");
+        require(store.finish_agent_worker_model(admitted,attempt,deadline).get().actual_assistant_json==assistant,"Scoped finish must use the backend actual assistant");return assistant;
+    };
+    const ModelCompletion final{"Actual receipt fixture","","stop",R"({"total_tokens":17})",{},"[]"};capture("receipt-final",final);
+    ModelCompletion tool=final;tool.finish_reason="tool_calls";tool.tool_calls.push_back({"actual-tool","read_file",R"({"path":"actual.txt"})"});capture("receipt-tool",tool);
+    rejects<Conflict>([&]{store.complete_agent_worker_run(admitted,"receipt-final",deadline).get();});rejects<Conflict>([&]{store.complete_agent_worker_run(admitted,"receipt-tool",deadline).get();});require(store.run("receipt-root").get().state==RunState::running&&store.run_history("receipt-root").get().size()==1,"Older final and non-final tool turns must not invent run completion");
+    store.reserve_agent_worker_model(admitted,"receipt-legacy",deadline).get();store.start_agent_worker_model(admitted,"receipt-legacy",deadline).get();const auto legacy=claim(admitted,"receipt-legacy");store.claim_agent_worker_model(legacy).get();const auto encoded=encode_agent_model_completion(final);store.record_agent_worker_model_response(legacy,encoded).get();rejects<Conflict>([&]{store.finish_agent_worker_model(admitted,"receipt-legacy",deadline).get();});rejects<Conflict>([&]{store.record_agent_worker_model_response(legacy,encoded,format_agent_model_assistant(final,"worker-fixture-model",23,5)).get();});
+    store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.finish_agent_worker_model(admitted,"receipt-final",deadline).get();});
+}
 
 void ledger(const std::string& path,const std::vector<std::string>& imports){
     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
     {
-        PersistenceService store(path,imports);funding(store);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+        PersistenceService store(path,imports);funding(store);completion_receipts(store);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

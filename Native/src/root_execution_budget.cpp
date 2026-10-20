@@ -52,10 +52,10 @@ void RootExecutionBudget::start(const ModelCallReservation& reservation,std::sto
     if(reservation.root_run_id!=root_)throw Conflict("Model call belongs to another execution budget");
     journal_.start_model_call(root_,reservation.owner_run_id,reservation.attempt_id).get();
 }
-void RootExecutionBudget::finish(const ModelCallReservation& reservation,const std::string& actual_assistant_json){
+std::string RootExecutionBudget::finish(const ModelCallReservation& reservation,const std::string& actual_assistant_json){
     if(reservation.root_run_id!=root_)throw Conflict("Model call belongs to another execution budget");
-    try{journal_.finish_model_call(root_,reservation.owner_run_id,reservation.attempt_id,
-        actual_assistant_json.empty()?std::nullopt:std::optional<std::string>(actual_assistant_json)).get();}
+    try{return journal_.finish_model_call(root_,reservation.owner_run_id,reservation.attempt_id,
+        actual_assistant_json.empty()?std::nullopt:std::optional<std::string>(actual_assistant_json)).get().actual_assistant_json;}
     catch(...){throw BudgetOutcomeUnrecorded("Model call retirement could not be recorded; stop execution and recover ownership");}
 }
 ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string& call,std::stop_token cancel){

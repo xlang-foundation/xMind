@@ -1,0 +1,165 @@
+{
+  "recordedAt": "2026-10-20T15:22:58.739Z",
+  "sourceParent": "a137f4cd5f3aecf4bea1016477a9d28e11874615",
+  "sourcePatchSha256": "1c228e8b83a7bd34cfe6ed15fe9a896b9cbcaa0a8baedc9f35ecb27d7b7908bb",
+  "gate": {
+    "recordedAt": "2026-10-20T15:22:44.556Z",
+    "sourceParent": "a137f4cd5f3aecf4bea1016477a9d28e11874615",
+    "sourcePatchSha256": "1c228e8b83a7bd34cfe6ed15fe9a896b9cbcaa0a8baedc9f35ecb27d7b7908bb",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 52660,
+      "launchedAt": "2026-10-20T15:19:15.746Z",
+      "completedAt": "2026-10-20T15:20:05.596Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9"
+    },
+    "test": {
+      "pid": 45064,
+      "launchedAt": "2026-10-20T15:20:09.895Z",
+      "completedAt": "2026-10-20T15:22:41.827Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "792e8474c93b15225b179a3c2fd53d7e1d32af60014aff8bffed4293498b8624"
+    },
+    "total": 51,
+    "failed": 0,
+    "passed": 51,
+    "seconds": 151.9,
+    "projectFiles": 2654,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "8a9ffa35296be637a6a821aa2fa3071fbbfb4a7e4453cb3c02802b141df98737",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-completion-focused-20261020": {
+      "gate": null,
+      "files": {
+        "doc/evidence/agent-worker-completion-focused-20261020-build.log": "adc2d92cf41c6e41d778a1248e4921636aaec9ed40d11797acfe9cc75f4bb501",
+        "doc/evidence/agent-worker-completion-focused-20261020-build-terminal.json": "14dbfed9686acd5cdad7819d132709a58c81afddc76f4680d87e35cacc9293cd"
+      }
+    },
+    "agent-worker-completion-observed-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T15:22:44.556Z",
+        "sourceParent": "a137f4cd5f3aecf4bea1016477a9d28e11874615",
+        "sourcePatchSha256": "1c228e8b83a7bd34cfe6ed15fe9a896b9cbcaa0a8baedc9f35ecb27d7b7908bb",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 52660,
+          "launchedAt": "2026-10-20T15:19:15.746Z",
+          "completedAt": "2026-10-20T15:20:05.596Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9"
+        },
+        "test": {
+          "pid": 45064,
+          "launchedAt": "2026-10-20T15:20:09.895Z",
+          "completedAt": "2026-10-20T15:22:41.827Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "792e8474c93b15225b179a3c2fd53d7e1d32af60014aff8bffed4293498b8624"
+        },
+        "total": 51,
+        "failed": 0,
+        "passed": 51,
+        "seconds": 151.9,
+        "projectFiles": 2654,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "8a9ffa35296be637a6a821aa2fa3071fbbfb4a7e4453cb3c02802b141df98737",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": {
+        "doc/evidence/agent-worker-completion-observed-20261020-gate.json": "1fdd0d0a072446b3927b6a237d2b4436f9f5397ba000eccabd63eea363f29834",
+        "doc/evidence/agent-worker-completion-observed-20261020-ctest.log": "792e8474c93b15225b179a3c2fd53d7e1d32af60014aff8bffed4293498b8624",
+        "doc/evidence/agent-worker-completion-observed-20261020-build.log": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9",
+        "doc/evidence/agent-worker-completion-observed-20261020-LastTest.log": "150104bcd2116002558c33df4978c2f351954ed38bd2e7926a04c012d8b265be",
+        "doc/evidence/agent-worker-completion-observed-20261020-test-inventory.json": "abf2d529f3e9cabe1f6316f2f6b41b638d0033a3a0d91be586c8422224a6b4fc",
+        "doc/evidence/agent-worker-completion-observed-20261020-build-terminal.json": "19f20262d4a2f176a803e90762ba4792fb3e06ac8de3d67833f95216c21b4a9f",
+        "doc/evidence/agent-worker-completion-observed-20261020-ctest-terminal.json": "f6252a7b9dc2e01472c3dbdce244baa035679c6dfe6eff1b41582e718e6ac2ad"
+      }
+    }
+  },
+  "children": [
+    {
+      "mode": "normal",
+      "pid": 65132,
+      "creationTime": "134369833150893019"
+    },
+    {
+      "mode": "cancel",
+      "pid": 44724,
+      "creationTime": "134369833152371058"
+    },
+    {
+      "mode": "crash",
+      "pid": 52836,
+      "creationTime": "134369833153272477"
+    },
+    {
+      "mode": "delivery",
+      "pid": 53328,
+      "creationTime": "134369833154049613"
+    },
+    {
+      "mode": "overflow",
+      "pid": 21912,
+      "creationTime": "134369833154681486"
+    },
+    {
+      "mode": "other_error",
+      "pid": 60556,
+      "creationTime": "134369833155649130"
+    },
+    {
+      "mode": "completion",
+      "pid": 42176,
+      "creationTime": "134369833156426003"
+    },
+    {
+      "mode": "completion_delivery",
+      "pid": 68536,
+      "creationTime": "134369833157425123"
+    },
+    {
+      "mode": "completion_rollback",
+      "pid": 37832,
+      "creationTime": "134369833158064671"
+    }
+  ],
+  "fixtureSha256": "ec4e27f37e60df49cb5bed2c97ac11fa244ac1e1d2087de5d124e0bfd1bec051",
+  "ledgerFixtureSha256": "510d65e9fd9ee9f64be751e59b2f3c47ce313ff20b3379973b1a023827d3d356",
+  "behavior": "Backend model host constructs the assistant receipt from actual supplied model completion, public captured model/context and backend-observed elapsed/first-token timing. Exact raw response and canonical assistant receive separate durable bindings. Record validation rejects an assistant inconsistent with actual model output. Legacy acknowledgements without an assistant remain readable but cannot finish a worker attempt or be retroactively upgraded.",
+  "completion": "Explicit finish/complete RPC accepts only an attempt ID, not assistant content, usage, context, timing or owner data. Same-transaction captured lease/generation/direct-root validation selects the actual receipt. Finish is idempotent and returns it. Final completion requires the latest fully finished stop response, no tool calls or unfinished attempts, normal backend boundary/effect checks, then persists one assistant/run completion and retires the lease atomically.",
+  "runner": "Shared native formatting is used by ordinary AgentRunner and the backend host. ModelCallReservation returns the stored assistant; RootExecutionBudget.finish returns it and AgentRunner consumes it. This prepares actual worker journal adaptation; no child AgentRunner loop is placed by this checkpoint.",
+  "actualFixture": "Nine independent controlled HTTP requests, one per actual child case. Actual worker finish/closure preserves supplied usage and captured provider context; forged payload fields, premature/old/non-final/receipt-less completion reject. Repeated finish creates no event. Worker death after provider acknowledgement retains exact response and assistant. Worker death after committed run/lease closure but before RPC reply retains exactly two history messages with no replay. A fixture-local SQLite trigger aborts retirement after tentative run/message/event writes; the backend observes the exact injected DatabaseError and the actual child verifies rollback of run/history/events while the parent verifies active lease and retained charged acknowledgement.",
+  "fixtureStrengthening": "The original build failed with fixture comparison error C7692 and did not run tests; its raw build log is retained. Before the corrected run, the rollback check was strengthened to identify the exact failure. The final fixture requires the fixed remote failure and backend observation of fixture_worker_completion_abort before qualifying the rollback claim.",
+  "limits": "Ordinary direct-agent completion primitive only. The child fixture invokes explicit methods; it does not execute AgentRunner. Full journal/context/tool/effect adapters, failed-attempt closure, queued admission/transition, actual process placement, graph/context completion and shared clocks, large-window negotiation and Local/Nexus protocol remain open. Synthetic ledger identities are not replacement-process proof. No full native suite, live paid model, hosted qualification or installed upgrade.",
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "cpythonExecuted": false
+}

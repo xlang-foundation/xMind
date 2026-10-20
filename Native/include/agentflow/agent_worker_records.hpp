@@ -28,6 +28,7 @@ struct AgentWorkerModelClaimSpec {
 struct AgentWorkerModelClaimRecord {
     AgentWorkerModelClaimSpec spec;
     std::string state,actual_response_json,response_binding;
+    std::string actual_assistant_json,assistant_binding;
 };
 // An explicit read vocabulary, never arbitrary repository reflection. The
 // backend validates the exact captured lease in the same transaction as a read.

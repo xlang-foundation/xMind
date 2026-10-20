@@ -30,6 +30,7 @@ AgentWorkerModelHost::AgentWorkerModelHost(PersistenceService& store,AgentWorker
     :store_(store),lease_(std::move(lease)),provider_(std::move(provider)),tools_(std::move(tools)),policy_(std::move(policy)),gateway_(std::move(gateway)),deadline_(deadline),owner_cancel_(owner_cancel){
     if(!gateway_)throw std::invalid_argument("Worker model host requires its captured backend gateway");const auto identity=Json::parse(lease_.provider_identity_json);
     if(identity.at("model_id")!=provider_.model||identity.at("wire")!=wire_name(provider_.wire))throw Conflict("Worker provider differs from captured admission");
+    if(!policy_.assistant_provider_context_json.empty()&&Json::parse(policy_.assistant_provider_context_json)!=identity)throw Conflict("Worker assistant context differs from captured admission");
     const auto saved=store_.agent_worker_lease(lease_.generation).get();if(saved.state!="active"||saved.spec!=lease_)throw Conflict("Worker model host has no exact captured lease");
 }
 ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel){
@@ -38,10 +39,13 @@ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const 
     if(request.include_usage!=policy_.include_usage||request.max_output_tokens!=policy_.max_output_tokens)throw Conflict("Worker changed its admitted model controls");
     if(request.tools.size()!=tools_.size())throw Conflict("Worker changed its admitted model tool catalogue");for(std::size_t i=0;i<tools_.size();++i)if(request.tools[i].name!=tools_[i].name||request.tools[i].description!=tools_[i].description||request.tools[i].input_schema_json!=tools_[i].input_schema_json)throw Conflict("Worker changed its admitted model tool catalogue");
     const auto bytes=request_bytes(provider_,request);AgentWorkerModelClaimSpec claim{lease_.generation,lease_.root_run_id,lease_.owner_run_id,attempt,context_digest(bytes)};check();store_.claim_agent_worker_model(claim).get();
-    ModelCompletion response;
+    ModelCompletion response;const auto started=std::chrono::steady_clock::now();std::optional<std::int64_t> first_token;
     try{check();auto selected=provider_;const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now());if(remaining.count()<1)throw TransportTimeout("Worker model root deadline elapsed");selected.deadline=std::min(selected.deadline,remaining);selected.idle_timeout=std::min(selected.idle_timeout,selected.deadline);
-        response=gateway_->complete(selected,request,[&](const ModelEvent& event){check();sink(event);},linked.get_token());
+        response=gateway_->complete(selected,request,[&](const ModelEvent& event){check();if(!first_token&&(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning"))first_token=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count();sink(event);},linked.get_token());
     }catch(...){const auto failure=std::current_exception();try{store_.interrupt_agent_worker_model(claim).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Worker model dispatch outcome could not be recorded");}std::rethrow_exception(failure);}
-    try{store_.record_agent_worker_model_response(claim,encode_agent_model_completion(response)).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}return response;
+    const auto actual=encode_agent_model_completion(response);std::string assistant;
+    try{assistant=format_agent_model_assistant(response,provider_.model,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count(),first_token,policy_.assistant_provider_context_json);}
+    catch(...){const auto failure=std::current_exception();try{store_.record_agent_worker_model_response(claim,actual).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}std::rethrow_exception(failure);}
+    try{store_.record_agent_worker_model_response(claim,actual,assistant).get();}catch(...){throw AgentWorkerModelOutcomeUnrecorded("Actual worker model response could not be recorded");}return response;
 }
 }

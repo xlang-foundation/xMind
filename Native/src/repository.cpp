@@ -8,6 +8,7 @@
 #include "agentflow/responses_context.hpp"
 #include "agentflow/legacy_owner.hpp"
 #include "agentflow/agent_definition_records.hpp"
+#include "agentflow/agent_model_values.hpp"
 #include <algorithm>
 #include <limits>
 #include <chrono>
@@ -21,6 +22,7 @@ namespace {
 using Json=nlohmann::json;
 void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&);
 std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
+std::string worker_assistant_receipt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string& attempt,bool final);
 BackendOwnerState decode_owner(const std::string&);
 std::optional<std::string> owner_record(XlangSqlite&);
 void require_bootstrap(XlangSqlite&,const BackendLease&,const BackendOwnerState&,const BackendOwnerBootstrap&);
@@ -2205,16 +2207,17 @@ ModelCallReservation Repository::start_model_call(const std::string& root,const 
     }
     impl_->event(owner,"budget.model_call.started",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",call_role(role)}}.dump());transaction.commit();return {root,attempt,owner,role,"started",ModelCallPurpose::inference,std::holds_alternative<std::nullptr_t>(rows[0][3])?std::string{}:text(rows[0][3])};
 }
-ModelCallReservation Repository::finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json){
+ModelCallReservation Repository::finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json,const AgentWorkerLeaseSpec* worker){
     if(actual_assistant_json)(void)object_json(*actual_assistant_json,8*1024*1024);
     auto& db=impl_->database;Transaction transaction(db);const auto rows=db.execute("SELECT role,state,purpose,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
+    if(worker){if(root!=worker->root_run_id||owner!=worker->owner_run_id||actual_assistant_json)throw Conflict("Worker cannot supply a completed assistant response");actual_assistant_json=worker_assistant_receipt(*this,db,*worker,attempt,false);}
     if(rows.empty())throw NotFound("Owned model attempt not found");const auto role=text(rows[0][0])=="parent"?ModelCallRole::parent:ModelCallRole::leaf;const auto state=text(rows[0][1]);
     if(text(rows[0][2])!="inference")throw Conflict("Maintenance requires its dedicated receipt ledger");
-    if(state=="finished"){const auto previous=db.execute("SELECT COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows;if(actual_assistant_json&&text(previous[0][0])!=*actual_assistant_json)throw Conflict("Actual completed model response differs");transaction.commit();return {root,attempt,owner,role,state,ModelCallPurpose::inference,text(rows[0][3])};}
+    if(state=="finished"){const auto previous=db.execute("SELECT COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows;if(actual_assistant_json&&text(previous[0][0])!=*actual_assistant_json)throw Conflict("Actual completed model response differs");transaction.commit();return {root,attempt,owner,role,state,ModelCallPurpose::inference,text(rows[0][3]),text(previous[0][0])};}
     if(state!="reserved"&&state!="started")throw Conflict("Interrupted attempt cannot be adopted");
     if(actual_assistant_json){if(state!="started")throw Conflict("Undispatched reservation cannot acquire a response");changed_one(db.execute("UPDATE agent_model_call_reservations SET state='finished',actual_assistant_json=? WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state='started'",{*actual_assistant_json,root,attempt,owner}));}
     else changed_one(db.execute("UPDATE agent_model_call_reservations SET state='finished' WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state=?",{root,attempt,owner,state}));
-    impl_->event(owner,"budget.model_call.finished",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",call_role(role)},{"was_started",state=="started"}}.dump());transaction.commit();return {root,attempt,owner,role,"finished",ModelCallPurpose::inference,text(rows[0][3])};
+    impl_->event(owner,"budget.model_call.finished",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",call_role(role)},{"was_started",state=="started"}}.dump());transaction.commit();return {root,attempt,owner,role,"finished",ModelCallPurpose::inference,text(rows[0][3]),actual_assistant_json.value_or("")};
 }
 DelegationBatchRecord Repository::delegation_batch(const std::string& id){
     const auto rows=impl_->database.execute("SELECT parent_run_id,root_run_id,provider_tool_call_id,arguments_json,parent_assistant_json,preset_id,preset_revision,state,COALESCE(result_json,'') FROM delegation_batches WHERE id=?",{id}).rows;
@@ -2723,8 +2726,10 @@ void Repository::record_tool_turn(const std::string& id,const std::string& assis
     for(const auto& json:tool_json) impl_->message(current,"tool",json);
     impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
 }
-Run Repository::complete_run(const std::string& id,const std::string& assistant_json) {
+Run Repository::complete_run(const std::string& id,const std::string& supplied_assistant,const AgentWorkerLeaseSpec* worker,const std::string& worker_attempt) {
     auto& db=impl_->database;Transaction transaction(db);auto current=run(id);
+    std::string assistant_json=supplied_assistant;
+    if(worker){if(id!=worker->owner_run_id||!supplied_assistant.empty())throw Conflict("Worker cannot supply a final assistant response");assistant_json=worker_assistant_receipt(*this,db,*worker,worker_attempt,true);}
     std::optional<DynamicPlanRecord> child_plan;
     if(current.state!=RunState::running) throw Conflict("Run is not running");
     if(current.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context completion requires measured typed closure");
@@ -2740,7 +2745,7 @@ Run Repository::complete_run(const std::string& id,const std::string& assistant_
     impl_->message(current,"assistant",assistant_json);
     changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{id}));
     if(child_plan)changed_one(db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE id=? AND state='active' AND EXISTS(SELECT 1 FROM dynamic_plan_owners WHERE plan_id=dynamic_plans.id AND owner_run_id=?)",{child_plan->id,id}));
-    impl_->event(id,"conversation.assistant",assistant_json);impl_->event(id,"run.completed","{}");transaction.commit();current.state=RunState::completed;return current;
+    impl_->event(id,"conversation.assistant",assistant_json);impl_->event(id,"run.completed","{}");if(worker)impl_->retire_worker(worker->generation,"completed");transaction.commit();current.state=RunState::completed;return current;
 }
 std::vector<Run> Repository::runs(const std::string& session_id) {
     session(session_id);std::vector<Run> result;
@@ -3126,11 +3131,13 @@ AgentWorkerLeaseRecord read_worker_lease(XlangSqlite& db,const std::string& gene
 }
 Json worker_claim_spec_json(const AgentWorkerModelClaimSpec& spec){bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.attempt_id);worker_digest(spec.request_binding);return {{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"owner_run_id",spec.owner_run_id},{"attempt_id",spec.attempt_id},{"request_binding",spec.request_binding}};}
 std::string worker_claim_key(const std::string& root,const std::string& attempt){bounded_identity(root);bounded_identity(attempt);return context_digest(Json::array({root,attempt}).dump());}
-Json worker_claim_json(const AgentWorkerModelClaimRecord& record){return {{"version",1},{"spec",worker_claim_spec_json(record.spec)},{"state",record.state},{"actual_response_json",record.actual_response_json},{"response_binding",record.response_binding}};}
+Json worker_claim_json(const AgentWorkerModelClaimRecord& record){Json value={{"version",1},{"spec",worker_claim_spec_json(record.spec)},{"state",record.state},{"actual_response_json",record.actual_response_json},{"response_binding",record.response_binding}};if(!record.actual_assistant_json.empty()){value["actual_assistant_json"]=record.actual_assistant_json;value["assistant_binding"]=record.assistant_binding;}return value;}
 AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string& root,const std::string& attempt){
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_claim_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker model dispatch not found");
     try{const auto value=Json::parse(text(rows[0][0]));const auto& s=value.at("spec");AgentWorkerModelClaimRecord record{{s.at("generation").get<std::string>(),s.at("root_run_id").get<std::string>(),s.at("owner_run_id").get<std::string>(),s.at("attempt_id").get<std::string>(),s.at("request_binding").get<std::string>()},value.at("state").get<std::string>(),value.at("actual_response_json").get<std::string>(),value.at("response_binding").get<std::string>()};
+        record.actual_assistant_json=value.value("actual_assistant_json",std::string{});record.assistant_binding=value.value("assistant_binding",std::string{});
         if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
+        if(!record.actual_assistant_json.empty()){if(record.state!="responded"||record.assistant_binding!=context_digest(record.actual_assistant_json))throw DatabaseError("Stored worker assistant binding differs");(void)object_json(record.actual_assistant_json,8*1024*1024);}else if(!record.assistant_binding.empty())throw DatabaseError("Worker assistant binding has no receipt");
         if(record.state=="responded"){(void)object_json(record.actual_response_json,8*1024*1024);if(record.response_binding!=context_digest(record.actual_response_json))throw DatabaseError("Stored worker response binding differs");}
         else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker dispatch");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker dispatch");}
@@ -3152,6 +3159,17 @@ std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::
     const auto rows=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? AND json_extract(payload,'$.attempt_id')=?",{owner,root,attempt}).rows;
     if(rows.empty())return {};if(rows.size()!=1)throw DatabaseError("Model reservation has ambiguous funding provenance");const auto saved=Json::parse(text(rows[0][0]));
     if(!saved.contains("worker_generation"))return {};if(!saved.at("worker_generation").is_string()||saved.at("worker_generation").get_ref<const std::string&>().empty())throw DatabaseError("Invalid model funding generation");return saved.at("worker_generation").get<std::string>();
+}
+std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool final){
+    worker_current_scope(repository,db,lease);if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent")throw Conflict("Worker completion requires ordinary direct-agent admission");
+    const auto claim=read_worker_claim(db,lease.root_run_id,attempt);
+    if(claim.spec.generation!=lease.generation||claim.spec.owner_run_id!=lease.owner_run_id||claim.state!="responded"||claim.actual_assistant_json.empty())throw Conflict("Worker completion has no captured actual assistant receipt");
+    if(final){const auto response=decode_agent_model_completion(claim.actual_response_json);if(response.finish_reason!="stop"||!response.tool_calls.empty())throw Conflict("Worker cannot complete a non-final model response");
+        const auto call=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,attempt}).rows;
+        const auto latest=db.execute("SELECT json_extract(payload,'$.attempt_id') FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? ORDER BY seq DESC LIMIT 1",{lease.owner_run_id,lease.root_run_id}).rows;
+        if(call.size()!=1||text(call[0][0])!="finished"||text(call[0][1])!=claim.actual_assistant_json||latest.size()!=1||text(latest[0][0])!=attempt||!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND state!='finished' LIMIT 1",{lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker final response is not its latest fully retired attempt");
+    }
+    return claim.actual_assistant_json;
 }
 }
 AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec& spec){
@@ -3207,11 +3225,21 @@ AgentWorkerModelClaimRecord Repository::interrupt_agent_worker_model(const Agent
     if(record.state=="responded")throw Conflict("Acknowledged worker response cannot become uncertain");if(record.state=="uncertain"){tx.commit();return record;}record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));impl_->event(spec.owner_run_id,"worker.model.uncertain",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id}}.dump());tx.commit();return record;
 }
 
-AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const AgentWorkerModelClaimSpec& spec,const std::string& actual){
+AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const AgentWorkerModelClaimSpec& spec,const std::string& actual,const std::string& assistant){
     (void)worker_claim_spec_json(spec);(void)object_json(actual,8*1024*1024);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(record.spec)!=worker_claim_spec_json(spec))throw Conflict("Worker response has a foreign attempt binding");
     const auto lease=read_worker_lease(db,spec.generation);if(lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker response owner differs");
-    if(record.state=="responded"){if(record.actual_response_json!=actual)throw Conflict("Acknowledged worker response changed");tx.commit();return record;}
-    record.state="responded";record.actual_response_json=actual;record.response_binding=context_digest(actual);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
+    if(!assistant.empty()){
+        const auto receipt=Json::parse(object_json(assistant,8*1024*1024));const auto& elapsed=receipt.at("elapsed_ms");
+        if(!elapsed.is_number_integer()||elapsed<0||elapsed>9007199254740991LL)throw std::invalid_argument("Invalid backend model timing");std::optional<std::int64_t> first;
+        if(receipt.contains("first_token_ms")){const auto& token=receipt.at("first_token_ms");if(!token.is_number_integer()||token<0||token>elapsed)throw std::invalid_argument("Invalid backend first-token timing");first=token.get<std::int64_t>();}
+        const auto identity=Json::parse(lease.spec.provider_identity_json);std::string context;
+        if(receipt.contains("provider_context")){if(receipt.at("provider_context")!=identity)throw Conflict("Backend assistant provider context differs");context=receipt.at("provider_context").dump();}
+        if(format_agent_model_assistant(decode_agent_model_completion(actual),identity.at("model_id").get<std::string>(),elapsed.get<std::int64_t>(),first,context)!=assistant)throw Conflict("Backend assistant differs from actual model response");
+    }
+    if(record.state=="responded"){if(record.actual_response_json!=actual||(!assistant.empty()&&record.actual_assistant_json!=assistant))throw Conflict("Acknowledged worker response changed");tx.commit();return record;}
+    record.state="responded";record.actual_response_json=actual;record.response_binding=context_digest(actual);
+    if(!assistant.empty()){record.actual_assistant_json=assistant;record.assistant_binding=context_digest(assistant);}
+    changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
     impl_->event(spec.owner_run_id,"worker.model.responded",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"response_binding",record.response_binding}}.dump());tx.commit();return record;
 }
 AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& generation,const std::string& reason){

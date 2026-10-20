@@ -27,6 +27,7 @@ struct ModelCallReservation {
     std::string state;
     ModelCallPurpose purpose=ModelCallPurpose::inference;
     std::string inference_step_id;
+    std::string actual_assistant_json;
 };
 struct DelegationTaskSpec {
     std::string task_id,node_id,child_run_id,prompt_json,objective;

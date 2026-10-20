@@ -98,7 +98,7 @@ public:
     RootBudgetRecord root_budget(const std::string& id);
     ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role,const AgentWorkerLeaseSpec* worker=nullptr);
     ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker=nullptr);
-    ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json={});
+    ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json={},const AgentWorkerLeaseSpec* worker=nullptr);
     ContextSnapshot context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
     ContextStatusObservation context_status_observation(const ContextScope& scope,const ContextBinding& binding);
     std::vector<ContextGroupPayload> context_group_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
@@ -168,7 +168,7 @@ public:
     SessionModelState session_model(const std::string& session_id);
     SessionModelState replace_session_model(const std::string& session_id,std::optional<SessionModelSelection> selected,std::int64_t expected_revision);
     void record_tool_turn(const std::string& run_id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills={});
-    Run complete_run(const std::string& run_id,const std::string& assistant_json);
+    Run complete_run(const std::string& run_id,const std::string& assistant_json,const AgentWorkerLeaseSpec* worker=nullptr,const std::string& worker_attempt={});
     Run run(const std::string& id);
     std::vector<Run> runs(const std::string& session_id);
     RootRunPage list_root_runs(const std::string& context,const std::string& state,std::optional<std::int64_t> since,std::size_t count,
@@ -200,7 +200,7 @@ public:
     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);
-    AgentWorkerModelClaimRecord record_agent_worker_model_response(const AgentWorkerModelClaimSpec&,const std::string& actual_response_json);
+    AgentWorkerModelClaimRecord record_agent_worker_model_response(const AgentWorkerModelClaimSpec&,const std::string& actual_response_json,const std::string& actual_assistant_json={});
     // Exact durable compare-and-swap; null expected means create only if absent.
     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
     std::string information(const std::string& category,const std::string& id);
