@@ -1,0 +1,180 @@
+{
+  "recordedAt": "2026-10-20T02:27:00.649Z",
+  "version": "0.1.54",
+  "native": {
+    "recordedAt": "2026-10-20T02:22:26.661Z",
+    "sourceParent": "8b46214034e5ca8b23bee387a036357d9d0a98d5",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 23332,
+      "launchedAt": "2026-10-20T02:04:15.055Z",
+      "completedAt": "2026-10-20T02:04:38.831Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "95ff0e34be77bde14170df2c3c044e07f451a0be60aadf1983b8c83080ebc594"
+    },
+    "test": {
+      "pid": 39404,
+      "launchedAt": "2026-10-20T02:04:42.321Z",
+      "completedAt": "2026-10-20T02:22:24.156Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "bac4a903227fbbe3f960b00daba073913b8b7d520a4fd0891856931e8ffe8335"
+    },
+    "total": 154,
+    "failed": 0,
+    "passed": 154,
+    "seconds": 1061.8,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "db694de1335448d5a272e88648b65557ecd50616908cf1caf172cbb936d482c4",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "recordedAt": "2026-10-20T02:25:07.659Z",
+    "version": "0.1.54",
+    "sourceRevision": "3e8ef953b90d0807a1c8096ab10f5adfec2ed5fe",
+    "extension": {
+      "exitCode": 0,
+      "tests": 445,
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "b9d654bfcf3d324543e275b15728d3d4623dce243c983ec315346874a58982e2"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 158,
+      "passed": 158,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "889a6b36fb81e7a31c32362f66e79466166da57e78afb41950dd3f445df7407c"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "package": {
+    "recordedAt": "2026-10-20T02:25:43.265Z",
+    "version": "0.1.54",
+    "sourceRevision": "3e8ef953b90d0807a1c8096ab10f5adfec2ed5fe",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.54-complete-win32-x64.vsix",
+    "archiveBytes": 34441934,
+    "archiveSha256": "a428fafc10c6145ecfe54393b8646eb8154ba34b8b08073c05fb31036fb85944",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-20T02:25:17.961Z",
+      "completedAt": "2026-10-20T02:25:40.831Z",
+      "pid": 25988,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "78340416d9a0001b3a9b90bbb4e75f312ad80761af7eae19bdaca6069c5f2e3a"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.54",
+    "version": "0.1.54",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "8b46214034e5ca8b23bee387a036357d9d0a98d5",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "db694de1335448d5a272e88648b65557ecd50616908cf1caf172cbb936d482c4",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "e2cfcc529cba648c13b3f5695af7d1843f393e54c6895e3f5632bcfdb9f720c7",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "backup": {
+    "recordedAt": "2026-10-20T02:24:01.353Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.53",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.53-before-0.1.54",
+    "checkedFiles": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "owners": {
+    "observedAt": "2026-10-20T02:25:57.333Z",
+    "identities": [
+      {
+        "pid": 54928,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "2026-10-20T01:31:22.5893370Z"
+      },
+      {
+        "pid": 56652,
+        "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe",
+        "birth": "2026-10-20T01:31:23.3699400Z"
+      },
+      {
+        "pid": 55848,
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-55c5b5dca7b4bd478c80560c42fcee79e7a00b88d840cd049b48c48899408009\\xmind.exe",
+        "birth": "2026-10-20T01:31:24.2246670Z"
+      }
+    ],
+    "url": "http://127.0.0.1:55684/ui/",
+    "pageStatus": 200,
+    "scope": "Existing installed53 host/view/backend identity and HTML availability only; saved history is checked separately.",
+    "passed": true
+  },
+  "existingPage": "http://127.0.0.1:55684/ui/",
+  "servedAssetsMatchInstalled54": true,
+  "existingSessions": 5,
+  "existingMessages": 146,
+  "existingRuns": 10,
+  "exactWorkspaceSessionsMessagesRunsAndAuthorityPreserved": true,
+  "beforeSnapshotSha256": "ec1152093c9ddc06edaf28622fde7831004448bac8ba4af41086ee9d64a0dd39",
+  "afterSnapshotSha256": "ec1152093c9ddc06edaf28622fde7831004448bac8ba4af41086ee9d64a0dd39",
+  "installedCliReadsExistingBrowserSession": true,
+  "cliHistoryMessages": 11,
+  "backendPid": 55848,
+  "backendReplaced": false,
+  "backendSchedulerUpgradeApplied": false,
+  "actualRendered54EditorAcceptance": false,
+  "actualRendered54BrowserAcceptance": false,
+  "providerTaskSubmissions": 0,
+  "releaseAccepted": false
+}

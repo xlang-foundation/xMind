@@ -2,6 +2,34 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.54 shared scheduling preview — 2026-10-19
+
+Client source3e8ef953 with native source8b462140/executable db694de1 is installed.
+The complete native gate passes154/154; the isolated client stage passes445/158
+with all17,439files unchanged through validation and packaging. The34,441,934-byte
+VSIX SHA256 a428fafc10c6145ecfe54393b8646eb8154ba34b8b08073c05fb31036fb85944
+verifies2,448entries; all2,445installed payloads match. SDK58a8aab/DLL1ff2a8e7
+remain unchanged. Runtime manifest e2cfcc52 binds the qualified executable and
+full-gate provenance. Installed53 backup verifies2,447files; settings and seven
+profile directories remain unchanged. VS Code stays closed.
+
+Existing page <http://127.0.0.1:55684/ui/> and host54928/view56652/backend55848
+retain exact creation/image identities. Five sessions,146messages and10runs,
+workspace metadata and authority match the pre-installation snapshot exactly.
+All13served assets match installed54. The actual installed54 console attaches to
+the same backend and reads the browser coding run's exact11messages and two
+operations, without starting a replacement or submitting a task.
+
+Installation does not upgrade the healthy backend. The existing TestProj owner
+still runs its earlier a26bed3f generation; the new shared scheduler is packaged
+for new owners but not yet adopted by that owner. Controlled explicit adoption,
+current installed rendered acceptance and remaining scheduling/process-placement
+requirements remain open. No full product/release acceptance is claimed.
+See [checkpoint](evidence/coding54-installed-checkpoint-20261019.json),
+[installed CLI](evidence/coding54-shared-cli-20261019.json),
+[extension suite](evidence/coding54-extension-20261019.log) and
+[browser suite](evidence/coding54-browser-20261019.log).
+
 ## Complete shared-dispatch native gate — 2026-10-19
 
 Source8b462140 completes the full Release build and all154 registered native

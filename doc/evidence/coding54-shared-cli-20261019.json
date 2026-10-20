@@ -1,0 +1,147 @@
+{
+  "recordedAt": "2026-10-20T02:26:33.241Z",
+  "scope": "Actual installed54 unified console managed-profile discovery, same saved browser run, history and operation restore; no new prompt, model call or effect.",
+  "executable": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.54/native-runtime/xmind.exe",
+  "executableSha256": "db694de1335448d5a272e88648b65557ecd50616908cf1caf172cbb936d482c4",
+  "profile": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 55848,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "session": "cb160a995f28f81865b47f95f294999d",
+  "run": "5fdd5b9dfea15f7eeb110fa00d3e0af7",
+  "historyMessages": 11,
+  "exactBrowserHistoryMatch": true,
+  "sameExistingBackend": true,
+  "operations": [
+    {
+      "arguments_json": "{\"after_content\":\"// Integer cents avoid floating-point currency rounding.\\nexport function totalCents(lines) {\\n  return lines.reduce((total, line) => total + line.unitCents * line.quantity, 0);\\n}\\n\",\"after_sha256\":\"5c8d78fd77f6a1273c6b8c706d739d90a97dada2215242810fc0a44f72baa4b4\",\"before_content\":\"// Integer cents avoid floating-point currency rounding.\\nexport function totalCents(lines) {\\n  return lines.reduce((total, line) => total + line.unitCents + line.quantity, 0);\\n}\\n\",\"before_sha256\":\"5f000b7e97d33cfd4647e2788a6af2a52b173ea46e87c87e2dce3aec36cf9517\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:02000000000000001da9090000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"path\":\"xmind-browser-acceptance-20261019/cart.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\"xmind-browser-acceptance-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+      "decision_actor": "local-owner",
+      "expires_unix_ms": 1792460560298,
+      "id": "ab077a0d502ddb54d1de40a8f93cef11",
+      "resources": [],
+      "result_json": "{\"after_sha256\":\"5c8d78fd77f6a1273c6b8c706d739d90a97dada2215242810fc0a44f72baa4b4\",\"before_sha256\":\"5f000b7e97d33cfd4647e2788a6af2a52b173ea46e87c87e2dce3aec36cf9517\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:02000000000000001da9090000000000\",\"path\":\"xmind-browser-acceptance-20261019/cart.mjs\",\"size\":178,\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\"}",
+      "run_id": "5fdd5b9dfea15f7eeb110fa00d3e0af7",
+      "state": "succeeded",
+      "tool": "replace_file",
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+    },
+    {
+      "arguments_json": "{\"arguments\":[\"-NoLogo\",\"-NoProfile\",\"-NonInteractive\",\"-Command\",\"node --test cart.test.mjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001da9090000000000\",\"environment\":[],\"executable\":\"C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"powershell\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\"xmind-browser-acceptance-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"timeout_ms\":30000,\"workdir\":\"xmind-browser-acceptance-20261019\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+      "decision_actor": "trusted-process-profile:powershell",
+      "expires_unix_ms": 1792460577425,
+      "id": "a38d32a313871061f300149b87cfc9c6",
+      "resources": [
+        "process-profile:powershell"
+      ],
+      "result_json": "{\"elapsed_ms\":348,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"a38d32a313871061f300149b87cfc9c6\",\"operation_id\":\"a38d32a313871061f300149b87cfc9c6\",\"output_artifact\":{\"operation_id\":\"a38d32a313871061f300149b87cfc9c6\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":620},\"pid\":66824,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":620,\"data\":\"TAP version 13\\n# Subtest: empty cart totals zero\\nok 1 - empty cart totals zero\\n  ---\\n  duration_ms: 0.5611\\n  type: 'test'\\n  ...\\n# Subtest: quantity multiplies the unit price\\nok 2 - quantity multiplies the unit price\\n  ---\\n  duration_ms: 0.1068\\n  type: 'test'\\n  ...\\n# Subtest: multiple lines accumulate\\nok 3 - multiple lines accumulate\\n  ---\\n  duration_ms: 0.0705\\n  type: 'test'\\n  ...\\n# Subtest: zero quantity contributes nothing\\nok 4 - zero quantity contributes nothing\\n  ---\\n  duration_ms: 0.5996\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 65.2715\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":620},\"termination\":\"exited\",\"truncated\":false}",
+      "run_id": "5fdd5b9dfea15f7eeb110fa00d3e0af7",
+      "state": "succeeded",
+      "tool": "run_process",
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+    }
+  ],
+  "processOperation": {
+    "arguments_json": "{\"arguments\":[\"-NoLogo\",\"-NoProfile\",\"-NonInteractive\",\"-Command\",\"node --test cart.test.mjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001da9090000000000\",\"environment\":[],\"executable\":\"C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"powershell\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\"xmind-browser-acceptance-20261019\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"timeout_ms\":30000,\"workdir\":\"xmind-browser-acceptance-20261019\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+    "decision_actor": "trusted-process-profile:powershell",
+    "expires_unix_ms": 1792460577425,
+    "id": "a38d32a313871061f300149b87cfc9c6",
+    "resources": [
+      "process-profile:powershell"
+    ],
+    "result_json": "{\"elapsed_ms\":348,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"a38d32a313871061f300149b87cfc9c6\",\"operation_id\":\"a38d32a313871061f300149b87cfc9c6\",\"output_artifact\":{\"operation_id\":\"a38d32a313871061f300149b87cfc9c6\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":620},\"pid\":66824,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":620,\"data\":\"TAP version 13\\n# Subtest: empty cart totals zero\\nok 1 - empty cart totals zero\\n  ---\\n  duration_ms: 0.5611\\n  type: 'test'\\n  ...\\n# Subtest: quantity multiplies the unit price\\nok 2 - quantity multiplies the unit price\\n  ---\\n  duration_ms: 0.1068\\n  type: 'test'\\n  ...\\n# Subtest: multiple lines accumulate\\nok 3 - multiple lines accumulate\\n  ---\\n  duration_ms: 0.0705\\n  type: 'test'\\n  ...\\n# Subtest: zero quantity contributes nothing\\nok 4 - zero quantity contributes nothing\\n  ---\\n  duration_ms: 0.5996\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 65.2715\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":620},\"termination\":\"exited\",\"truncated\":false}",
+    "run_id": "5fdd5b9dfea15f7eeb110fa00d3e0af7",
+    "state": "succeeded",
+    "tool": "run_process",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  },
+  "receipts": [
+    {
+      "name": "profile-before",
+      "args": [
+        "profile-info"
+      ],
+      "pid": 34616,
+      "startedAt": "2026-10-20T02:26:31.994Z",
+      "completedAt": "2026-10-20T02:26:32.284Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "0c7e703b847f67a9daad9553fb7fc19fbd8743649944427de9592b1790379021",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "history",
+      "args": [
+        "history",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 19680,
+      "startedAt": "2026-10-20T02:26:32.285Z",
+      "completedAt": "2026-10-20T02:26:32.484Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "5667aed5df5f2920aa4c5b1e506606ca622bf12ab76a3ea981f66c33605e7f11",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runs",
+      "args": [
+        "runs",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "pid": 51600,
+      "startedAt": "2026-10-20T02:26:32.485Z",
+      "completedAt": "2026-10-20T02:26:32.687Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "c459e4ef5094280c5ce928a20422d03fd567363e7dc9c227fcbd39f1bf6da4c4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "operations",
+      "args": [
+        "operations",
+        "5fdd5b9dfea15f7eeb110fa00d3e0af7"
+      ],
+      "pid": 53900,
+      "startedAt": "2026-10-20T02:26:32.687Z",
+      "completedAt": "2026-10-20T02:26:32.873Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "015b8dad03f5885faca7bab235d91e7cc14446a96e9153591425054725d535a4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "process-operation",
+      "args": [
+        "operation",
+        "a38d32a313871061f300149b87cfc9c6"
+      ],
+      "pid": 13064,
+      "startedAt": "2026-10-20T02:26:32.873Z",
+      "completedAt": "2026-10-20T02:26:33.078Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "d3a1fe6b46603a5c8f14bff950717e3e86c5e01916ec492d142ee71180651a62",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "profile-after",
+      "args": [
+        "profile-info"
+      ],
+      "pid": 45508,
+      "startedAt": "2026-10-20T02:26:33.078Z",
+      "completedAt": "2026-10-20T02:26:33.241Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "0c7e703b847f67a9daad9553fb7fc19fbd8743649944427de9592b1790379021",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "taskSubmissions": 0,
+  "passed": true
+}
