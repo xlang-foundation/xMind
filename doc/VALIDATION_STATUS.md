@@ -1,3 +1,25 @@
+## Native supervisor concurrent cancellation — 2026-10-20
+
+An actual product child executes a held provider stream through the native
+supervisor. The test waits for a persisted actual model-text event and a still-live
+execute future, then verifies both completed and terminal drains reject while the
+caller is active. Child, lease and running root remain owned; duplicate execution
+is rejected. Concurrent cancellation aborts the actual HTTP stream and records the
+backend's fixed `cancelled` uncertainty cause. The child remains alive and root
+running with one charged model and prompt-only history until joined-caller drain
+observes exit zero and commits cancellation. No refund, replay or fabricated final
+assistant is introduced. The independent peer verifies 47 intentional requests and
+explicitly observes the supervised HTTP abort.
+
+Serial Release build and 53 contracts pass in 164.65 seconds with all frozen inputs,
+file sets and binaries unchanged during validation. Production executable SHA256
+`d91265e66bb1d41a58427c928619b24b288a25a204ec4088bdf7a18784c40755`
+matches the preceding supervisor checkpoint. This qualifies one controlled ordering,
+not exhaustive races, shutdown or observation timeout handling. Supervisor timeout
+and later startup-failure phases, service placement and broader worker capabilities
+remain open. Installed59 and user state remain untouched. See
+[receipt](evidence/agent-worker-supervisor-cancel-focused-20261020.json).
+
 ## Native product worker supervisor — 2026-10-20
 
 `AgentWorkerSupervisor` owns one launched product child, its captured lease,
