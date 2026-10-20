@@ -307,6 +307,30 @@ entry and service placement remain open. The 53 focused contracts passed in
 `evidence/agent-worker-model-admission-focused-20261020.json`. No installed,
 rendered UI, live-provider or full native suite qualification is claimed.
 
+## Native worker assembly checkpoint
+
+`execute_agent_worker_read_root` now composes the production ordinary journal,
+model gateway, read workspace and explicit closed ports around the shared native
+`AgentRunner`. It requires backend-owned request windows and captured ordinary
+root limits; it supplies no child-selected instructions, destination or local
+execution owner. Exceptions and terminal handoff propagate without fabricated
+run records. Its caller retains the peer and physical child ownership through
+supervisor drain.
+
+Fresh child cases call this production function for completion and cancellation
+during native read approval. Parent records verify seven canonical history
+messages, three charged models, two tool turns, six tool activity facts and one
+fresh native read on completion. Cancellation retains the earlier canonical
+turn and two charges, performs no read dispatch, and records terminal state only
+after the exact child exits. Existing instrumented cases remain in place.
+The independent peer verifies exactly 32 intentional requests. All 53 focused
+contracts pass in 154.01 seconds, with 2,682 project files and 133 native binaries
+frozen. Evidence: `evidence/agent-worker-native-assembly-focused-20261020.json`.
+
+Production process entry, service placement, general settings bootstrap, broad
+provider profiles and graph/context/effect placement remain open. This library
+composition checkpoint is not installed-runtime or full-suite qualification.
+
 ## Qualification required before service placement
 
 - Ledger contracts: exact lease rejection (including process identity), stale

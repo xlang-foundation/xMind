@@ -157,3 +157,5 @@ doc/evidence/agent-worker-read-workspace-*.log -text whitespace=-blank-at-eol,-b
 doc/evidence/agent-worker-closed-ports-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/agent-worker-model-admission-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/agent-worker-native-assembly-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

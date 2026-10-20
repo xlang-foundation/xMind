@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-20T20:46:49.618Z",
+  "gate": {
+    "recordedAt": "2026-10-20T20:46:30.129Z",
+    "sourceParent": "130865348b10ee517680fdb307b960f6f8584bda",
+    "sourcePatchSha256": "886c5201d331c5d46a694e4e10c4032fdf1717a1b65a2583dbefba1e593ec7ce",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 35528,
+      "launchedAt": "2026-10-20T20:42:40.492Z",
+      "completedAt": "2026-10-20T20:43:50.509Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c1ee7f36baef5ea910ec1664d110261b704b4225d795d643b7e0de59c18eea21"
+    },
+    "test": {
+      "pid": 56800,
+      "launchedAt": "2026-10-20T20:43:53.351Z",
+      "completedAt": "2026-10-20T20:46:27.412Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b7e73a7a5303858dc527ba42bab88648720aecd8583877e0103ecd0b510a00b3"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 154.01,
+    "projectFiles": 2682,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "2bc7be21341df0927411aecd5a1d497d20807fef8798c6d7b0fa5fa47cf834ff",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-native-assembly-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-build.log": "c1ee7f36baef5ea910ec1664d110261b704b4225d795d643b7e0de59c18eea21",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-build-terminal.json": "cb1ef798a3f91a92cb9500f8311a772642601fb2d0fe0b80ccf52105c3ef303b",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-ctest.log": "b7e73a7a5303858dc527ba42bab88648720aecd8583877e0103ecd0b510a00b3",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-ctest-terminal.json": "7e859757446f8ea746a0935201ef922885a60edc0be5dc0ab5e7270e561a0381",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-LastTest.log": "1a54f48a19f1d3a12bfa128864b14cc6da5ac5b140b3b8916f88c03eaf860f99",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-test-inventory.json": "926d33e80af475b6c5ed2e8c9b1f1740f9e3c47260bd70cb2f80cbc864972a09",
+        "doc/evidence/agent-worker-native-assembly-focused-20261020-gate.json": "c54e7e4ec65ef70ce5665a38c98816d3164c37fd6a3a853db83f281af3df5bb9"
+      },
+      "localManifestHashes": {
+        "source.patch": "886c5201d331c5d46a694e4e10c4032fdf1717a1b65a2583dbefba1e593ec7ce",
+        "inputs-before-build.json": "f475855422c9f5f6e8b649df02b9522158c0f918e9dbc422deb44ecd07d7fa44",
+        "binaries-before-test.json": "3b7128cac8cd9357dd97fab2b18dc26fdcdb9ae907f44881c5b593e6837b0c8d"
+      }
+    }
+  },
+  "fixtureSha256": "6dd9c03884056c4d3516fea4c8df90585dc7d102c1910370099d79b341a1dfe9",
+  "ledgerFixtureSha256": "d7de151592474d74c1b851e9233208a97fbf281d536173503f7cd82659ec491e",
+  "representativeReadRunnerChild": {
+    "pid": 28844,
+    "creationTime": "134370027391942059"
+  },
+  "nativeCancellationChild": {
+    "pid": 26496,
+    "creationTime": "134370027394321598"
+  },
+  "scope": "Native composition function executes the captured ordinary read root with production journal, model gateway, read workspace, closed ports and shared AgentRunner. Fresh synthetic child cases exercise completion and approval cancellation.",
+  "verified": [
+    "Model controls and ordinary root limits come from scoped backend records",
+    "Backend-owned request windows are required; plain unowned windows reject before model dispatch",
+    "Pre-cancelled execution rejects before admission",
+    "Native completion retains seven canonical history messages, three charged model windows, two tool turns and six activity facts",
+    "One fresh filesystem read follows actual guidance delivery; earlier reads remain withheld",
+    "Native approval cancellation retains prior canonical history and two charges, records no read dispatch and retires only after exact child exit",
+    "Independent peer observes exactly 32 intentional requests with no replay"
+  ],
+  "limitations": [
+    "Production process entry and AgentService placement remain open",
+    "Broad provider profile identity, graph, context maintenance, delegation and effect placement remain open",
+    "This composition function requires an admitted native read workspace and does not implement general settings bootstrap",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native suite, installed runtime, rendered UI, hosted or live-provider acceptance claim"
+  ]
+}

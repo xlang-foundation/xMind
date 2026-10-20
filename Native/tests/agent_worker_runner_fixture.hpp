@@ -9,6 +9,7 @@
 #include "agentflow/agent_worker_read_workspace.hpp"
 #include "agentflow/agent_worker_closed_ports.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_runner.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
 #include <type_traits>
 #include <iostream>
@@ -113,6 +114,8 @@ struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
 inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();verify_closed_ports(closed);
+    std::stop_source assembly_stop;assembly_stop.request_stop();rejects<TransportCancelled>([&]{execute_agent_worker_read_root(peer,assembly_stop.get_token());});
+    rejects<Conflict>([&]{execute_agent_worker_read_root(peer);});
     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Admission metadata must omit backend destinations, credentials and deadlines");
     for(const auto* payload:{R"({"model_id":"unadmitted"})",R"({"endpoint":"unadmitted"})","[]"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
     std::stop_source metadata_stop;metadata_stop.request_stop();rejects<TransportCancelled>([&]{AgentWorkerModelClient(peer).admission(metadata_stop.get_token());});
