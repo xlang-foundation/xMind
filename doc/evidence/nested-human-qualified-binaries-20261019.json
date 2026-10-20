@@ -1,0 +1,20 @@
+{
+  "recordedAt": "2026-10-20T06:38:43.361Z",
+  "sourceRevision": "bd06e27503aa44c9965c72bc15d1eba00c894cef",
+  "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "directory": "C:/xMindNativeValidation/qualified-nested-human-boundary-binaries-20261019",
+  "files": {
+    "xmind.exe": {
+      "bytes": 10885632,
+      "sha256": "bf189ca799a82bde95cd609d2fca01eb820371e3121f1d751bc4b24f5b7b00f7"
+    },
+    "xlang3_runtime.dll": {
+      "bytes": 20122624,
+      "sha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+    }
+  },
+  "fullNativeTests": 155,
+  "qualification": "nested-graph-pause-controller-full-native-20261019",
+  "completeRuntimeDistribution": false,
+  "installed": false
+}

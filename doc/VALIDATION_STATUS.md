@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested pause/controller qualification and client scope merge — 2026-10-19
+
+Complete native source bd06e275 passes all155 contracts in1062.88seconds, CTest36652 and wrapper11518 terminal0. All2629project,16SDK,1870pure-library,76SDK-runtime,18598dependency and130binary file sets/hashes remain unchanged. This qualifies the durable nested human barrier/observed answer boundary, atomic paused-tree retirement and existing invocation-controller reattachment as their documented scopes. It does not enable nested human execution. See evidence/nested-graph-pause-controller-full-native-20261019-*.
+
+After that terminal result, isolated client f8602352 fast-forwards into main. Fresh main-checkout client460extension/160browser gates pass with71source/vendor and18asset bytes unchanged. Against the identical fully qualified bf189ca7 binary (all130 native binary hashes matched), actual browser/native integration again passes reviewed nested file creation, actual readback, completed restore without replay, profile/session/cookie checks and a real short-path temporary root. No user profile, model/provider task or installed app is exercised. See evidence/nested-human-main-client-full-20261019-* and nested-human-main-client-native-20261019-*.
+
+Qualified xmind.exe bf189ca799a82bde95cd609d2fca01eb820371e3121f1d751bc4b24f5b7b00f7 and paired xlang3 DLL1ff2a8e7 are byte-verified and preserved at C:/xMindNativeValidation/qualified-nested-human-boundary-binaries-20261019; this is not a complete runtime distribution. Installed56 and user owners/settings/history remain untouched. Nested human runner paused-flight handling, service adoption/authenticated input, shared durable context/active-time/model-call budgets, worker placement/authenticated transport, generic Local/Nexus protocol and remaining rendered/package acceptance are still open. Nested waits are currently observational in clients; they cannot submit to a same-named root step.
+
+
+
 ## Nested client merge verified in main — 2026-10-19
 
 Fast-forwarded isolated client06183b6b and integration/final-native-evidencef6532e4d into main only after the original d2865a32 full155 native gate reached terminal0. In the actual main checkout, freshly built assets and complete460extension/159browser suites pass with71source/vendor and18asset bytes unchanged. The native/browser contract passes again against the same qualified af166abb binary, using a real short-path temporary root and a fresh session. All source,SDK,pure-library,Node-dependency,binary and asset sets remain unchanged during that integration gate; it starts no live provider task and touches no user profile. See evidence/nested-graph-main-client-20261019-* and evidence/nested-graph-main-native-20261019-*.

@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-20T06:38:21.373Z",
+  "sourceParent": "f860235242c12c28036b275e2e38b3a375c1c51e",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "test": {
+    "pid": 68676,
+    "launchedAt": "2026-10-20T06:38:16.560Z",
+    "completedAt": "2026-10-20T06:38:18.796Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+  },
+  "nativeSha256": "bf189ca799a82bde95cd609d2fca01eb820371e3121f1d751bc4b24f5b7b00f7",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "shortTemporaryDirectory": "C:/XMINDN~1",
+  "allInputsAndFileSetsUnchanged": true,
+  "scope": "Actual browser adapter/native backend integration, disposable graph/file task, no model inference",
+  "passed": true
+}
