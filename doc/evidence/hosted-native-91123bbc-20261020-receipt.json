@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-20T08:23:36.156Z",
+  "run": 39386011506,
+  "revision": "91123bbcf798e54612fa1f6d10b0124f6ebe497f",
+  "conclusion": "failure",
+  "artifact": 12249192678,
+  "bytes": 22661,
+  "sha256": "47d2a99545f3ec863e01cd36a35aa8b04f50cd4dbfa0e3c2772e07ba3eda90b7",
+  "digestVerified": true,
+  "failedEarlyContract": "native_local_view_contract",
+  "failure": "Timed out: actual graph tool completion",
+  "seconds": 48.31,
+  "fullNativeSuiteReached": false,
+  "sourceFinding": "The local_view_contract graph-input message omits explicit owner required by BrowserController. Correction is pending current local full-suite terminal; this is not a hosted runtime pass.",
+  "provenance": {
+    "xmind": "91123bbcf798e54612fa1f6d10b0124f6ebe497f",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "build_parallelism": 4,
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain": "Visual Studio 18 2026",
+    "windows_default_owner_matches_user": false,
+    "toolchain_version": "18.10.12224.181",
+    "processors": 4
+  }
+}

@@ -1,0 +1,22 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+    Start 131: native_local_view_contract
+1/1 Test #131: native_local_view_contract .......***Failed   48.31 sec
+{"retainedFixture":"C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-local-view-rkXShG"}
+file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:37
+async function waitFor(read,label){const deadline=Date.now()+15000;while(Date.now()<deadline){const value=await read();if(value)return value;await new Promise(resolve=>setTimeout(resolve,40));}throw new Error('Timed out: '+label);}
+                                                                                                                                                                                                       ^
+
+Error: Timed out: actual graph tool completion
+    at waitFor (file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:37:200)
+    at async file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:127:18
+
+Node.js v22.23.3
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  48.33 sec
+
+The following tests FAILED:
+	131 - native_local_view_contract (Failed)
+Errors while running CTest

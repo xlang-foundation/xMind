@@ -1,0 +1,12 @@
+{
+  "xmind": "91123bbcf798e54612fa1f6d10b0124f6ebe497f",
+  "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+  "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "runtime": "Native xlang3; no CPython execution or bridge",
+  "build_parallelism": 4,
+  "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "toolchain": "Visual Studio 18 2026",
+  "windows_default_owner_matches_user": false,
+  "toolchain_version": "18.10.12224.181",
+  "processors": 4
+}

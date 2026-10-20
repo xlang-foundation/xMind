@@ -6,7 +6,7 @@ import {promisify} from 'node:util';
 import fs from 'node:fs';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join,dirname,basename} from 'node:path';
+import {join,dirname,basename,resolve} from 'node:path';
 import {McpServer,createMcpHandler} from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 const [executable,...nativeArgs]=process.argv.slice(2),execute=promisify(execFile);
@@ -100,4 +100,4 @@ try{
   assert.equal(counts.get('normal-json').promptList,5,'Each fresh official HTTP registry must discover actual SDK prompts');
   for(const mode of modes.slice(1))assert.equal(counts.get(mode).resourceRead+counts.get(mode).promptGet,0,'Other HTTP SDK modes must have no unapproved read side effects');
   process.stdout.write(result.stdout);process.stdout.write('Official modern HTTP SDK independently verified approved JSON/SSE effects, denied zero dispatch and one lost-reply effect without replay. No model/UI acceptance claimed.\n');
-}finally{host.closeAllConnections();await new Promise(resolve=>host.close(resolve));assert.equal(dirname(root),tmpdir());assert.ok(basename(root).startsWith('xmind-official-http-effects-'));await rm(root,{recursive:true,force:true});}
+}finally{host.closeAllConnections();await new Promise(resolve=>host.close(resolve));assert.equal(resolve(dirname(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-official-http-effects-'));await rm(root,{recursive:true,force:true});}

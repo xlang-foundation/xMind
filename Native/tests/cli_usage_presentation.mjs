@@ -13,7 +13,12 @@ export async function verifyCliUsagePresentation(binary) {
     const url=new URL(request.url,'http://127.0.0.1');let result;
     if(url.pathname==='/v1/runs/root')result={id:'root',session_id:'session',parent_id:'',state:fixture.state,graph_root:!!fixture.children};
     else if(url.pathname==='/v1/health')result={owned_child_observation:false};
-    else if(url.pathname==='/v1/graph-runs/root/children')result=fixture.children.map(id=>({id,session_id:'session',parent_id:'root'}));
+    else if(url.pathname==='/v1/graph-runs/root'||url.pathname==='/v1/graph-runs/invocation'){
+      const nested=url.pathname.endsWith('/invocation'),leaves={nodes:fixture.children.map(id=>({id,type:'agent',prompt:'Synthetic usage owner'}))},spec=fixture.nested&&!nested?{nodes:[{id:'call',type:'graph',prompt:'Synthetic nested usage',graph_id:'fixture.inner',graph_revision:7,graph_spec:leaves}]}:leaves;
+      result={run:{id:nested?'invocation':'root',session_id:'session',parent_id:nested?(fixture.corrupt==='parent'?'foreign':'root'):'',node_id:nested?'call':'',state:fixture.state,graph_root:true},graph_id:nested?'fixture.inner':'fixture.root',graph_revision:nested?(fixture.corrupt==='revision'?8:7):1,checkpoint_revision:1,spec,checkpoint:{nodes:spec.nodes.map(node=>({id:node.id,state:'completed',output:{}}))}};
+    }
+    else if(url.pathname==='/v1/graph-runs/root/children')result=fixture.nested?[{id:'invocation',session_id:'session',parent_id:'root',node_id:'call',graph_root:true}]:fixture.children.map(id=>({id,session_id:'session',parent_id:'root',node_id:id,graph_root:false}));
+    else if(url.pathname==='/v1/graph-runs/invocation/children')result=fixture.children.map(id=>({id,session_id:'session',parent_id:'invocation',node_id:id,graph_root:fixture.corrupt==='role'&&id==='child-a'}));
     else if(url.pathname==='/v1/runs/root/events'||url.pathname==='/v1/graph-runs/root/events')result=fixture.events.filter(e=>e.seq>Number(url.searchParams.get('after')));
     else {response.writeHead(404);response.end('{}');return;}
     response.writeHead(200,{'Content-Type':'application/json'});response.end(JSON.stringify(result));
@@ -47,6 +52,11 @@ export async function verifyCliUsagePresentation(binary) {
       ['model.done',{},'child-b'],['model.done',{},'child-a'],['run.completed']
     ],'completed',['child-a','child-b']);
     result=await invoke();assert.equal(result.code,0,result.stderr);assert.deepEqual(lines(result),['Input 30 · Output 4 tokens','Input 12 · Output 3 tokens']);
+
+    fixture.nested=true;result=await invoke();assert.equal(result.code,0,result.stderr);assert.deepEqual(lines(result),['Input 30 · Output 4 tokens','Input 12 · Output 3 tokens'],'Nested leaf usage must remain scoped to its actual admitted owner');
+    const nestedRaw=await invoke('json');assert.equal(nestedRaw.code,0,nestedRaw.stderr);assert.deepEqual(nestedRaw.stdout.trim().split(/\r?\n/).map(JSON.parse),fixture.events,'Recursive graph observation preserves each descendant event');
+
+    for(const corrupt of ['revision','parent','role']){fixture.corrupt=corrupt;const rejected=await invoke('json');assert.equal(rejected.code,1,rejected.stderr);assert.equal(rejected.stdout,'','Invalid nested ownership must reject the batch before emitting events');assert.match(rejected.stderr,/Graph invocation immutable snapshot changed|Invalid graph child role/);}delete fixture.corrupt;
 
     set([['model.usage',{input_tokens:5}],['budget.model_call.finished',{was_started:true}],['run.failed',{reason:'Fixture provider stopped'}]],'failed');
     result=await invoke();assert.equal(result.code,1);assert.deepEqual(lines(result),['Input 5 tokens']);assert.match(result.stderr,/Fixture provider stopped/);
