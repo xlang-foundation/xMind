@@ -2,6 +2,27 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Native view library lifetime fix — 2026-10-19
+
+The original browser on port 64405 still has a live native view, but its old
+0.1.49 extension runtime directory has been removed. Its workspace catalogue
+returns HTTP 503 while backend health and the selected workspace return 200.
+No UI refresh or backend replacement occurred during this diagnosis.
+
+The native view previously released its verified runtime handles immediately
+after startup. It now retains them until the view exits, protecting the libraries
+used by later embedded-xlang3 workspace registry requests. A new actual-native
+regression attempts library retirement after readiness: the old executable fails
+and the corrected executable passes. Three focused native contracts pass in
+150.73 seconds, with source, SDK, pure libraries, dependencies and binaries
+unchanged throughout validation. This is not a new full-suite, installed-extension
+or rendered external-browser acceptance claim. Existing owners and histories
+remain untouched; the already-broken old view still needs a repaired connection.
+
+See [focused evidence](evidence/live-view-runtime-pin-focused-20261019.json),
+[original failure](evidence/live-view-runtime-pin-baseline-20261019.log) and
+[focused test log](evidence/live-view-runtime-pin-focused-20261019.log).
+
 ## Installed queued-turn selection fix — 2026-10-19
 
 Installed 0.1.51 now follows a queued prompt when the backend claims it, even

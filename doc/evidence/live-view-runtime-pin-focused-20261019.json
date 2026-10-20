@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-20T00:25:10.089Z",
+  "sourceParent": "fd1b6c340bf6c09d3b1ec97daa9fde8466949fd1",
+  "sourcePatchSha256": "976a69287907249b65d3b8876b5c5a42a4a07377ac6be11d7398127184a1d5d4",
+  "uncommittedSource": true,
+  "build": {
+    "pid": 66420,
+    "launchedAt": "2026-10-20T00:22:09.949Z",
+    "completedAt": "2026-10-20T00:22:33.332Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "794c58e4747b742ab1d7c30824d023ed80e84b2543ff0faab509e63353885945"
+  },
+  "test": {
+    "pid": 59316,
+    "launchedAt": "2026-10-20T00:22:36.494Z",
+    "completedAt": "2026-10-20T00:25:07.272Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "8e27172c4108a3605e36c33d6b880c26ec08a4c3cd1f4aa4c5ca768106c7d1de"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 150.73,
+  "projectFiles": 2625,
+  "sdkSourceFiles": 16,
+  "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 76,
+  "nativeBinaries": 129,
+  "nodeDependencyFiles": 18598,
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "nativeSha256": "a26bed3f39ea16795d838f46e8e56dd56e191d91cd9516eeaf59837c0ac80c7a",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic fixtures only; no live model key used",
+  "installed": false,
+  "cpythonExecuted": false,
+  "scopePassed": true,
+  "scope": "Native view library lifetime, provider imports and runtime verification only",
+  "baseline": {
+    "exitCode": 1,
+    "nativeSha256": "3ed464a27c96bf820e51cf78887b444576ccb79d53a668b2564919c638507496",
+    "failure": "A live native view must prevent removal of its verified pure libraries"
+  },
+  "primary": {
+    "page": "http://127.0.0.1:64405/ui/",
+    "workspaceCatalogueStatus": 503,
+    "healthStatus": 200,
+    "workspaceStatus": 200,
+    "oldViewRuntimeDirectoryExists": false,
+    "backendReplaced": false,
+    "assetsRefreshed": false
+  }
+}

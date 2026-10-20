@@ -136,7 +136,7 @@ std::optional<std::string> choose_workspace_folder() {
     if (failure) std::rethrow_exception(failure);
     return selected;
 }
-std::string verify_client_image() {
+agentflow::VerifiedRuntimeGeneration verify_client_image() {
     std::wstring image(32768, L'\0');
     const auto used = GetModuleFileNameW(nullptr, image.data(), static_cast<DWORD>(image.size()));
     require(used && used < image.size(), "Cannot qualify native view image");
@@ -153,7 +153,7 @@ std::string verify_client_image() {
     // The retained backend and this client must each qualify their own image.
     agentflow::VerifiedRuntimeGeneration generation(directory, agentflow::context_digest(manifest));
     generation.require_loaded_server_image();
-    return directory;
+    return generation;
 }
 } // namespace
 
@@ -232,7 +232,11 @@ int run_local_view(int argc, char **argv) {
         // Provider YAML is imported by the adapter through a host-authenticated
         // API call. It is not part of the backend's profile launch identity.
         options.provider_config.clear();
-        const auto client_package_root = verify_client_image();
+        // Workspace operations create fresh embedded runtimes after startup.
+        // Keep their verified library inventory pinned until this view exits;
+        // an extension update must not remove it underneath a running view.
+        const auto client_generation = verify_client_image();
+        const auto client_package_root = client_generation.binding().root;
         auto connection = std::make_shared<agentflow::LocalProfileConnection>(
             agentflow::connect_local_profile(options));
         const auto profile_root =
