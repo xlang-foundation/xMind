@@ -2,6 +2,30 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete shared-backlog native qualification — 2026-10-19
+
+Source3bfecb58 completes the full Release build and all154 registered native
+contracts in1,061.07seconds. Native executable cc854ad0 contains the runnable-queue
+rank correction. CTest61496 exits0; post-test verification preserves every set/hash:
+2,625project inputs,16SDK files,1,870pure libraries,76SDK runtime files,
+18,598dependencies and129native binaries. The mixed service regression passes;
+local profile startup/upgrade/pause/restart passes in468.58seconds within the
+unchanged600-second budget. Native view/provider configuration pass140.55/59.20
+seconds. No invocation was restarted and no timeout was increased.
+
+The candidate is qualified locally but uninstalled. Installed54/owner36040 and
+existing user pages/history remain unchanged. Hosted run
+[39360428093](https://github.com/xlang-foundation/xMind/actions/runs/39360428093)
+is separately observed in progress on exact source3bfecb58; no hosted success or
+artifact verification is claimed yet. Continue that run rather than dispatching
+another. Per-service worker ceilings, work-conserving pool integration and agent
+placement retain their separate remaining scope.
+
+See [terminal gate](evidence/shared-backlog-order-full-20261019.json),
+[raw log](evidence/shared-backlog-order-full-20261019.log),
+[inventory](evidence/shared-backlog-order-full-inventory-20261019.json) and
+[gate script](evidence/shared-backlog-order-full-gate-20261019.mjs).
+
 ## Shared runnable-queue rank fixes cross-service overtaking — 2026-10-19
 
 An actual regression reproduces a queue-order bug against unchanged installed54

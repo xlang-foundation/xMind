@@ -109,11 +109,13 @@ later root from the other service. Queue tickets are one-shot, withdrawn on fail
 admission/cancellation/shutdown, and renewed on a runnable wake. A human pause
 retains durable admission but releases execution. The actual mixed-service
 ordering regression fails against installed54 production bytes and passes with
-the correction, alongside seven related contracts. Complete candidate qualification
-and installation remain pending. Worker loops/ceilings remain separate; a strict
+the correction, alongside seven related contracts. The complete154-contract local
+gate now passes in1,061.07seconds; installation and hosted acceptance remain pending.
+Worker loops/ceilings remain separate; a strict
 FIFO head can wait for its service worker rather than use another service's idle
 worker. This does not implement a unified work-conserving pool or process placement.
 [Focused red/green scope](evidence/shared-backlog-order-focused-20261019.json).
+[Complete local gate](evidence/shared-backlog-order-full-20261019.json).
 
 The coding default is a single-agent model/tool loop. Explicit planning is
 optional; predefined graphs do not require a planning LLM call. A planner can

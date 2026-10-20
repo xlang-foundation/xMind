@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Uninstalled cc854ad0 fixes local-backlog overtaking with shared one-shot queue tickets. Baseline db694de1 fails actual ordering7/8; candidate passes8/8 in45.63s with frozen closure unchanged. Complete candidate gate pending. Keep installed54/owner36040 unchanged. See shared-backlog-order evidence in doc/VALIDATION_STATUS.md.
+- Uninstalled cc854ad0/source3bfecb58 fixes local-backlog overtaking. Baseline db694de1 fails7/8; candidate passes8focused and full154 in1061.07s with complete frozen closure unchanged. Local CTest61496 exited0. Hosted39360428093 remains live; follow it, do not duplicate. Keep installed54/owner36040 unchanged. See shared-backlog-order evidence.
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Initial observer UTF-8 split failure retained; byte-safe reread and earlier HTTP snapshot prove no history change. See coding54-primary-adoption and adopted-live-read receipts. External Edge/current VS Code acceptance remain open.
 
