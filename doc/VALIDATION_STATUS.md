@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Agent backend catalogue port — 2026-10-20
+
+AgentRunner now obtains credential-version metadata and agent definitions through an injectable AgentBackendCatalog. The default adapter preserves backend PersistenceService behavior. A two-store regression uses independent metadata and run journals, checks missing credential references and version metadata, filters discoverable agents, and executes an actual native file read through the model/tool loop. Credential material is not part of the port.
+
+The complete native build and nine focused authority/runner/context/graph/delegation/provider contracts pass in44.82seconds. All2632project/16SDK/1870pure-library/76runtime/18598dependency/130binary file sets and hashes remain unchanged during the gate. Candidate executable SHA256 dbbe8d598e77b91a66501b33991c909e8af7832a767cecc60e51cccf90660585. [Gate receipt](evidence/agent-backend-catalog-focused-20261020-gate.json), [CTest output](evidence/agent-backend-catalog-focused-20261020-ctest.log) and [inventory](evidence/agent-backend-catalog-focused-20261020-test-inventory.json). Full input manifests and source patch remain under C:/xMindNativeValidation/agent-backend-catalog-focused-20261020.
+
+This is synthetic model-fixture validation with real native file and embedded-xlang3/SQLite execution. It is not a complete-suite result, authenticated worker transport or process placement. Concrete process/MCP/A2A/effect/read construction dependencies remain. The candidate is uninstalled; installed58 and its completed tasks remain the preserved baseline. The delivery goal stays active.
+
 ## Installed58 rendered two-file coding acceptance — 2026-10-20
 
 Fresh installed58 page http://127.0.0.1:59185/ui/ uses Node host65940 born2026-10-20T11:22:59.2981170Z and installed58 native view58988 born2026-10-20T11:23:00.1180120Z/origin59180, reusing the adopted backend32396/origin57779. All13served shell assets match installed58 bytes, and the native view image matches qualifieddc900cad. The hidden IAB first restores the completed browser57 task without submitting it again, then submits exactly one new task in session `ad86de667793281272e4ea9c4f9cd89c`, root `dae9c437883303078971bf053b83fb51`.

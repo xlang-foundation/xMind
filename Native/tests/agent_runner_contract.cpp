@@ -1,5 +1,7 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/agent_permission_grants.hpp"
+#include "agentflow/agent_definitions.hpp"
+#include "agentflow/delegation_executor.hpp"
 #include "agentflow/xlang_authoring_program.hpp"
 #include "agentflow/xlang_python_config.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -63,6 +65,35 @@ public:
     unsigned calls=0;
 private:std::string folder_;
 };
+class RecordingBackendCatalog final:public AgentBackendCatalog {
+public:
+    explicit RecordingBackendCatalog(std::shared_ptr<AgentBackendCatalog> value):inner(std::move(value)){}
+    std::vector<AgentAuthorityCredentialVersion> credential_versions(const AgentSettings& settings)override{++credential_queries;return inner->credential_versions(settings);}
+    AgentDefinitionCatalog agent_definitions()override{++definition_queries;return inner->agent_definitions();}
+    unsigned credential_queries=0,definition_queries=0;
+private:std::shared_ptr<AgentBackendCatalog> inner;
+};
+class CatalogPortModel final:public AgentModelGateway {
+public:
+    ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
+        ++calls;bool listed=false;for(const auto& message:request.messages){listed=listed||message.content.find("catalog-inspector")!=std::string::npos;require(message.content.find("catalog-hidden")==std::string::npos&&message.content.find("catalog-primary")==std::string::npos&&message.content.find("catalog-fixture-secret-not-live")==std::string::npos,"Injected discovery must retain visibility and never expose credential material");}
+        require(listed,"Actual agent instructions must use the supplied backend catalogue");ModelCompletion reply;
+        if(calls==1){reply.finish_reason="tool_calls";reply.tool_calls.push_back({"catalog-read","read_file",R"({"path":"catalog-port.txt"})"});}
+        else{require(calls==2&&request.messages.back().role==MessageRole::tool&&Json::parse(request.messages.back().content).at("content")=="Actual injected catalogue read\n","Injected catalogue loop must consume the actual native read result once");reply.content="Observed the actual catalogue-port file.";reply.finish_reason="stop";}return reply;
+    }
+    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected catalogue fixture count");}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected catalogue fixture compaction");}
+    unsigned calls=0;
+};
+void backend_catalog_port(PersistenceService& journal,const std::vector<std::string>& imports,const std::filesystem::path& root){
+    PersistenceService metadata((root.parent_path()/"catalog-metadata.sqlite").string(),imports);const std::string key="catalog-fixture-secret-not-live";
+    metadata.put_credential("provider","catalog-only","model-api","Synthetic catalogue credential",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(key.data()),key.size())),0).get();
+    AgentDefinitionStore(metadata).apply(R"({"agents":[{"id":"catalog-inspector","mode":"subagent","instructions":"Synthetic registered inspection."},{"id":"catalog-hidden","mode":"subagent","hidden":true,"instructions":"Synthetic hidden entry."},{"id":"catalog-primary","mode":"primary","instructions":"Synthetic primary entry."}]})");
+    auto catalog=std::make_shared<RecordingBackendCatalog>(make_persistence_agent_backend_catalog(metadata));AgentSettings settings;settings.workspace=root.string();settings.a2a_enabled=false;settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-catalog-port",Capability::supported,Capability::supported};settings.credential=CredentialReference{"provider","catalog-only","model-api"};settings.delegation=AgentDelegationPolicy{};
+    rejects<Conflict>([&]{agent_authority_credentials(journal,settings);});const auto versions=catalog->credential_versions(settings);require(versions.size()==1&&versions[0].scope=="provider"&&versions[0].id=="catalog-only"&&versions[0].purpose=="model-api"&&versions[0].revision==1,"Catalogue adapter must resolve only configured metadata from its own backend");auto missing=settings;missing.credential->id="not-registered";rejects<Conflict>([&]{catalog->credential_versions(missing);});
+    std::ofstream(root/"catalog-port.txt",std::ios::binary)<<"Actual injected catalogue read\n";const auto model=std::make_shared<CatalogPortModel>();auto delegation=std::make_shared<DelegationExecutor>(journal,1,8);AgentRunner runner(journal,settings,delegation,{},false,model,catalog);
+    journal.create_session("catalog-port-session","Actual injected backend catalogue loop").get();runner.start("catalog-port-run","catalog-port-session","Read the scoped fixture once.");require(runner.execute("catalog-port-run").state==RunState::completed&&model->calls==2&&catalog->definition_queries==1,"Actual agent loop must use injected definitions and native file continuation");require(catalog->credential_queries==2,"Metadata lookup and rejection must use the injected configured owner");rejects<NotFound>([&]{metadata.run("catalog-port-run").get();});require(journal.root_budget("catalog-port-run").get().children_admitted==0,"Discovery must not launch a named subagent or grant another admission");delegation->close();metadata.close();
+}
 class CallableAskModel final:public AgentModelGateway {
 public:
     CallableAskModel(std::string marker,bool denied):marker_(std::move(marker)),denied_(denied){}
@@ -162,6 +193,7 @@ int main(int argc,char** argv) {
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
         split_journal_membership(store,roots,std::filesystem::path(argv[4]));
+        backend_catalog_port(store,roots,std::filesystem::path(argv[4]));
         callable_ask_contract(store,roots,std::filesystem::path(argv[4]));
         const std::string base=argv[5],synthetic="engine-protocol-test-not-a-real-key";
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});

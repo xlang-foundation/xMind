@@ -1,5 +1,7 @@
 ## Current agent-worker gap map — 2026-10-20
 
+The subsequent AgentBackendCatalog checkpoint extracts credential-version and agent-definition lookup into an injectable owner-side port. Its default adapter remains backend-local; nine focused contracts pass, including a two-store actual AgentRunner discovery/read regression. This removes those direct lookup dependencies only. The port accepts trusted owner settings and has no authenticated worker adapter yet; it must not be exposed to an untrusted worker without captured admission scope. Process/MCP/A2A and effect/read factories still require concrete backend services. See [validation scope](VALIDATION_STATUS.md#agent-backend-catalogue-port--2026-10-20).
+
 Installed58/nativeaf34bfe0 is fully qualified for156 native contracts, including nested contextual execution; it still runs agent loops in the backend process. The trusted xlang3 callable worker is a tool implementation, not a placed AgentRun. This gap map is based on the current dispatch and dependency code, not on the older implementation notes below.
 
 | Boundary | Current evidence | Remaining worker work |
