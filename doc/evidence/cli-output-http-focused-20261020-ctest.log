@@ -1,0 +1,7 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 125: native_http_cli_contract
+1/1 Test #125: native_http_cli_contract .........   Passed    5.79 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   5.80 sec

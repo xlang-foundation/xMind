@@ -1726,7 +1726,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(session_export){
             const auto output=std::filesystem::u8path(transfer_file);if(std::filesystem::exists(output))throw std::invalid_argument("Export target already exists; choose a new file path");
             std::ofstream file(output,std::ios::binary|std::ios::out|std::ios::trunc);if(!file)throw std::runtime_error("Cannot create session archive file");const auto serialized=result.dump(2);file.write(serialized.data(),static_cast<std::streamsize>(serialized.size()));file.put('\n');file.close();if(!file)throw std::runtime_error("Cannot write complete session archive");
-            std::cout<<Json{{"exported",true},{"file",transfer_file}}.dump(2)<<'\n';return 0;
+            std::cout<<Json{{"exported",true},{"file",transfer_file}}.dump(2)<<'\n'<<std::flush;
+            if(!std::cout)throw std::runtime_error("CLI JSON output is unavailable; inspect the command result before retrying");return 0;
         }
         if(vcs_status){
             if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git status response");
@@ -1757,7 +1758,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(command=="session-skills")skill_snapshot(result,id(argv[3]));
         if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);
         if(command=="reconcile-process")process_reconciliation_acknowledgement(result,id(argv[3]),body["note"].get<std::string>());
-        std::cout<<result.dump(2)<<'\n';return 0;
+        std::cout<<result.dump(2)<<'\n'<<std::flush;
+        if(!std::cout)throw std::runtime_error("CLI JSON output is unavailable; inspect the command result before retrying");return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
 #if !defined(XMIND_UNIFIED_EXECUTABLE)

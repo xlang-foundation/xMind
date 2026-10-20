@@ -1,0 +1,48 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test"
+    ],
+    "files": [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1253,
+        "parent": 0
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 1,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/cli_output_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe"
+      ],
+      "config": "Release",
+      "name": "native_cli_output_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

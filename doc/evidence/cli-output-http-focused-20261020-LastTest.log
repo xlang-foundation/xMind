@@ -1,0 +1,20 @@
+Start testing: Oct 20 12:16 Pacific Daylight Time
+----------------------------------------------------------
+125/160 Testing: native_http_cli_contract
+125/160 Test: native_http_cli_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/http_cli_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_http_cli_contract" start time: Oct 20 12:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native console usage presentation passed: synthetic snapshots, response/owner boundaries, failure/cancellation, missing/invalid counts, unchanged NDJSON.
+Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; unconfigured execution rejects admission without creating a run
+<end of output>
+Test time =   5.79 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_cli_contract" end time: Oct 20 12:16 Pacific Daylight Time
+"native_http_cli_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 20 12:16 Pacific Daylight Time

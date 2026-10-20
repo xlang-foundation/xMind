@@ -1250,6 +1250,9 @@ if(BUILD_TESTING)
         set_tests_properties(native_mcp_sdk_${mcp_sdk_era}_contract PROPERTIES TIMEOUT 90)
       endforeach()
     endif()
+    add_test(NAME native_cli_output_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_output_contract.mjs" "$<TARGET_FILE:xmind_cli>")
+    set_tests_properties(native_cli_output_contract PROPERTIES TIMEOUT 30)
     add_test(NAME native_http_cli_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/http_cli_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")

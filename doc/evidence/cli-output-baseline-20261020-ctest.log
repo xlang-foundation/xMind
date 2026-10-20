@@ -1,0 +1,31 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 124: native_cli_output_contract
+1/1 Test #124: native_cli_output_contract .......***Failed    0.19 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: CLI must report failure when its inherited stdout handle denies writing
+
+0 !== 1
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/cli_output_contract.mjs:24:42
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 1,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.20 sec
+
+The following tests FAILED:
+	124 - native_cli_output_contract (Failed)
+Errors while running CTest

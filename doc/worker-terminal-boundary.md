@@ -71,6 +71,20 @@ native binaries frozen. This passing observation does not establish the cause
 or a production fix for the intermittent empty CLI output. That issue remains
 open alongside actual AgentRunner failure/cancellation and service placement.
 
+A [CLI output follow-up](evidence/cli-output-focused-20261020.json) establishes
+and fixes one concrete output failure: an ordinary JSON command returned status
+zero when its inherited stdout handle was read-only. The unchanged new contract
+fails against the baseline CLI, then passes after ordinary JSON results and
+session-export acknowledgements explicitly flush and check stdout before
+returning success. A write failure now returns status one with a fixed diagnostic
+to inspect the result before retrying; the CLI does not resubmit the command.
+The focused gate passes 53 contracts in 154.16 seconds, and a separate existing
+HTTP/CLI integration gate passes, including successful session export/import and
+persisted history, on identical source and all 133 binary hashes. The baseline
+failure and both passing gates are retained. This reproduces the unwritable
+handle false-success defect, not the earlier unexplained empty output on a
+normal pipe; the latter remains unproven as a root-cause match or resolved issue.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

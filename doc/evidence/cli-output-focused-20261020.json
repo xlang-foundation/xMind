@@ -1,0 +1,193 @@
+{
+  "recordedAt": "2026-10-20T19:16:42.967Z",
+  "gate": {
+    "recordedAt": "2026-10-20T19:15:13.804Z",
+    "sourceParent": "3e4076a22beff313a7392cd90a9b4a0f9c13a1e8",
+    "sourcePatchSha256": "87c4dcb3f9d0c548c3ff0c4434312a4d9eb33a27c2c999843d81de2615e43219",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 54796,
+      "launchedAt": "2026-10-20T19:11:14.085Z",
+      "completedAt": "2026-10-20T19:12:33.907Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "25b2b186ad372dd35c4aee7b7210653c859f797c9755aad1f2c18404fded628f"
+    },
+    "test": {
+      "pid": 59448,
+      "launchedAt": "2026-10-20T19:12:36.627Z",
+      "completedAt": "2026-10-20T19:15:10.840Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3293bf4fd5ffd9bdfbce81b9d77f5357f65961ef0fcc604f25d3d8a5690524d4"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 154.16,
+    "projectFiles": 2669,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e4aedf20663dc8d7ce338f26598a5443dc0ff9a78dbc738810845d791f7adb8c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "cli-output-baseline-20261020": {
+      "files": {
+        "doc/evidence/cli-output-baseline-20261020-build.log": "24be92f5bca3053575c0ccbc6576f38ebac30b095e77594d05fd028eee26a2e5",
+        "doc/evidence/cli-output-baseline-20261020-build-terminal.json": "1f8979a3a51f2d72dc8299032094652860274cd85bf5180e992477903fc78a63",
+        "doc/evidence/cli-output-baseline-20261020-ctest.log": "a9eee4ca7dd32f2f52f72d9b5ddaa48be30b040451d8108ded0265597e0946ee",
+        "doc/evidence/cli-output-baseline-20261020-ctest-terminal.json": "118170bc259e69e45f6800beb0a15289c3f7ab9d4b9c55916d863234b660d821",
+        "doc/evidence/cli-output-baseline-20261020-LastTest.log": "b457471e13f5f727199b84a5f293dbb8ad6af74f33c4bb38d07fbee578875c0e",
+        "doc/evidence/cli-output-baseline-20261020-test-inventory.json": "5316f3d3e77e3384c1fff34e7ceb08e03e0aa5e4986805490edf85a639c7daea",
+        "doc/evidence/cli-output-baseline-20261020-gate.json": "9d7513de85e7a9afa9d0ef829bab08b81aa6fa6cead5881dab7e7d974db53b9c"
+      },
+      "localManifestHashes": {
+        "source.patch": "45d08bf549765732d5b02287e2fb705101fbdaecbecf7d04ce1dc8b0c82fc6b8",
+        "inputs-before-build.json": "82c2299a5aabe7d6f0ed3a19982aa8f20a27c22a66d43f40111bd20eb4084a38",
+        "binaries-before-test.json": "073cd962877a2ba2928e3d5d44f97c491529e64e4b801e8292cc62e071adcea5"
+      }
+    },
+    "cli-output-focused-20261020": {
+      "files": {
+        "doc/evidence/cli-output-focused-20261020-build.log": "25b2b186ad372dd35c4aee7b7210653c859f797c9755aad1f2c18404fded628f",
+        "doc/evidence/cli-output-focused-20261020-build-terminal.json": "e239c6fcc81b485f58348e29cfc6077a7a01eda98e8e88e13e41a159375dd1f7",
+        "doc/evidence/cli-output-focused-20261020-ctest.log": "3293bf4fd5ffd9bdfbce81b9d77f5357f65961ef0fcc604f25d3d8a5690524d4",
+        "doc/evidence/cli-output-focused-20261020-ctest-terminal.json": "2c1a1443b9096811c601ebc2b2b06aa408464ea649038073843b8c82ca4f2d03",
+        "doc/evidence/cli-output-focused-20261020-LastTest.log": "5a95357a8a337337469cc2f7e854fcd2641260039821d32f1f1a674fb7772386",
+        "doc/evidence/cli-output-focused-20261020-test-inventory.json": "a602b13f1fd6ac86ad70a5322b77c8d62ef13a1749053140135a7e7c6807e176",
+        "doc/evidence/cli-output-focused-20261020-gate.json": "83fae13862e4a7e58abbd5b53c79bc9ec03e3b316e8e394d92b08d41c0c244fd"
+      },
+      "localManifestHashes": {
+        "source.patch": "87c4dcb3f9d0c548c3ff0c4434312a4d9eb33a27c2c999843d81de2615e43219",
+        "inputs-before-build.json": "e929c09403daab3e33d8a5b1c4c4a44685bef6de21aad44e1aa426c4f0d279b7",
+        "binaries-before-test.json": "0875152ae2b3f5ef6061474d3deb3356e7daa39d8c827e98536d4d0c213608f9"
+      }
+    },
+    "cli-output-http-focused-20261020": {
+      "files": {
+        "doc/evidence/cli-output-http-focused-20261020-build.log": "cc08b674132a2dd7d48c185df8e4c354d10eff025307b9c58332a45b645b6fa3",
+        "doc/evidence/cli-output-http-focused-20261020-build-terminal.json": "4e332462fa4edad11b801d5f514d64270c5f62ed9122f6b199b87d2dcd0a5244",
+        "doc/evidence/cli-output-http-focused-20261020-ctest.log": "060526ec655eecb7a96440cf397ee442401c4e1342b402fa48d491866cb2434a",
+        "doc/evidence/cli-output-http-focused-20261020-ctest-terminal.json": "207987e36a53c3875942193bd8c4befae0710df2410f9d9cfb2b2ec78d9fe147",
+        "doc/evidence/cli-output-http-focused-20261020-LastTest.log": "bda9e5fd69bfdc3dfc20540d2383e848c1b03657ce47e0ad1335a8e5f9e54811",
+        "doc/evidence/cli-output-http-focused-20261020-test-inventory.json": "43a9692cc04912470c61f081b3635127ffb0d9b490b1324b3e56195f2335d170",
+        "doc/evidence/cli-output-http-focused-20261020-gate.json": "531107104af56da1e19835e11ab72885beadda3ea0714c6ee259dcbf1da5c31d"
+      },
+      "localManifestHashes": {
+        "source.patch": "87c4dcb3f9d0c548c3ff0c4434312a4d9eb33a27c2c999843d81de2615e43219",
+        "inputs-before-build.json": "0cb85809d6a7fbd3c595228463d2174ac5ab18c1842cdddb4a95863bc3609b08",
+        "binaries-before-test.json": "b275b03c2243b18f89271da5d4cd29a68ca9178f35ca2f6dced8f3167ffd40e5"
+      }
+    }
+  },
+  "fixtureSha256": "e8e5ca6ae00094dd06abce4eb2f392531181e9e3fe94b63b6da4eed951dc9c1d",
+  "ledgerFixtureSha256": "7bbc4163a6c839b0dd82a717e6f4171987b60a94649c8ac656ed8f52e50d5272",
+  "scope": "Native CLI ordinary JSON result and export acknowledgement output delivery. Confirmed baseline false success on an unwritable inherited stdout handle; successful JSON write and flush are now required before status zero.",
+  "baselineGate": {
+    "recordedAt": "2026-10-20T19:10:56.501Z",
+    "sourceParent": "3e4076a22beff313a7392cd90a9b4a0f9c13a1e8",
+    "sourcePatchSha256": "45d08bf549765732d5b02287e2fb705101fbdaecbecf7d04ce1dc8b0c82fc6b8",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 41284,
+      "launchedAt": "2026-10-20T19:09:48.770Z",
+      "completedAt": "2026-10-20T19:10:50.712Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "24be92f5bca3053575c0ccbc6576f38ebac30b095e77594d05fd028eee26a2e5"
+    },
+    "test": {
+      "pid": 50968,
+      "launchedAt": "2026-10-20T19:10:53.616Z",
+      "completedAt": "2026-10-20T19:10:53.871Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "a9eee4ca7dd32f2f52f72d9b5ddaa48be30b040451d8108ded0265597e0946ee"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 0.2,
+    "projectFiles": 2669,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "438af630e3965f1e092d2523bb8b22fc6963efe21b73e57c65fb60e3497e569f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "httpCliGate": {
+    "recordedAt": "2026-10-20T19:16:25.087Z",
+    "sourceParent": "3e4076a22beff313a7392cd90a9b4a0f9c13a1e8",
+    "sourcePatchSha256": "87c4dcb3f9d0c548c3ff0c4434312a4d9eb33a27c2c999843d81de2615e43219",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 42744,
+      "launchedAt": "2026-10-20T19:15:27.387Z",
+      "completedAt": "2026-10-20T19:16:13.498Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cc08b674132a2dd7d48c185df8e4c354d10eff025307b9c58332a45b645b6fa3"
+    },
+    "test": {
+      "pid": 17824,
+      "launchedAt": "2026-10-20T19:16:16.425Z",
+      "completedAt": "2026-10-20T19:16:22.275Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "060526ec655eecb7a96440cf397ee442401c4e1342b402fa48d491866cb2434a"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 5.8,
+    "projectFiles": 2669,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e4aedf20663dc8d7ce338f26598a5443dc0ff9a78dbc738810845d791f7adb8c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "cliSha256": "1ed37a9ab7a3f39f065b0fd76c62356859e46c3dcfc218ffbb0ddb6ad3154643",
+  "verified": [
+    "Unchanged output contract fails baseline because unwritable stdout returns status zero",
+    "Valid captured pipe returns parseable sessions JSON",
+    "Read-only inherited stdout now returns status one and a fixed diagnostic",
+    "Exactly two explicitly requested read-only commands issue exactly two HTTP requests; no retry",
+    "Existing HTTP/CLI integration qualifies successful session export/import, shared clients, authentication and persisted history",
+    "53-contract focused gate passes with frozen source and dependencies; separate HTTP/CLI gate uses the same source patch and all 133 binary hashes"
+  ],
+  "limitations": [
+    "Earlier intermittent empty piped stdout is not proven reproduced or cured by this change",
+    "No installed, rendered UI, hosted or full native acceptance claim",
+    "Worker placement and actual child AgentRunner failure/cancellation remain open"
+  ]
+}

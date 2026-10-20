@@ -1,0 +1,37 @@
+Start testing: Oct 20 12:10 Pacific Daylight Time
+----------------------------------------------------------
+124/160 Testing: native_cli_output_contract
+124/160 Test: native_cli_output_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/cli_output_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_cli_output_contract" start time: Oct 20 12:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: CLI must report failure when its inherited stdout handle denies writing
+
+0 !== 1
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/cli_output_contract.mjs:24:42
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 1,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =   0.19 sec
+----------------------------------------------------------
+Test Failed.
+"native_cli_output_contract" end time: Oct 20 12:10 Pacific Daylight Time
+"native_cli_output_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 20 12:10 Pacific Daylight Time
