@@ -2,6 +2,37 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Actual in-app browser coding and reload — 2026-10-19
+
+The actual Codex in-app browser opens installed53 page55684 in a hidden tab and
+automatically restores the primary saved conversation/model/metrics. Expanded
+Skills leaves 202 pixels of history at 720-pixel height. This is actual IAB
+rendering, distinct from headless fixture rendering and external Edge acceptance.
+
+One new browser conversation cb160a995f28f81865b47f95f294999d admits root
+5fdd5b9dfea15f7eeb110fa00d3e0af7 exactly once. In a dedicated TestProj acceptance
+folder, the model reads the cart source and tests, proposes the one-line addition
+to multiplication correction, and the controller reviews and approves the native
+file proposal ab077a0d502ddb54d1de40a8f93cef11 through the rendered UI. Native
+process operation a38d32a313871061f300149b87cfc9c6 runs `node --test cart.test.mjs`
+through configured PowerShell: four pass, zero fail, exit0, 620 stdout bytes,
+no stderr; its process-tree receipt is retired. Baseline was one pass/three fail.
+The test file hash stays 871686994aaef972ad5a64cec2173f23f0252d2c982aafb86305a0d8cfbf34f7.
+No Python, helpers, delegation or completed-task replay is involved. The test
+folder is an explicit acceptance fixture, not an existing application fix.
+
+Actual browser reload restores the same terminal root, all 11 messages, Claude
+model and supplied final metrics (10,371 uncached input, 232 output, 0.82-second
+first token, 4.20-second response). The native API receipt independently confirms
+the terminal root and captured process output. No new complete native suite,
+rendered VS Code task or external-browser acceptance is claimed. Broader delivery
+remains open. Do not replay this root or submit its prompt again.
+
+See [native history receipt](evidence/coding53-iab-coding-api-20261019.json),
+[restored coding screenshot](evidence/coding53-iab-coding-restored-20261019.png),
+[expanded footer screenshot](evidence/coding53-iab-restored-20261019.png) and
+[baseline](evidence/coding53-cart-baseline-20261019.log).
+
 ## Installed 0.1.53 conversation layout — 2026-10-19
 
 Source f8eb874e passes the complete 445-extension/158-browser suites with all
