@@ -60,6 +60,27 @@ void language_owner_contract(const std::filesystem::path& primary,const std::fil
     }
     {PersistenceService reopened(database,{modules,pure});need(reopened.operation(approved).get().state==OperationState::succeeded&&reopened.operation(withheld).get().state==OperationState::failed&&reopened.operations("run").get().size()==4,"Language approval receipts must survive xlang3 SQLite reopen without dispatch replay");const auto grants=AgentPermissionGrantStore(reopened).list("session");need(grants.grants.size()==1&&grants.grants.front().workspace_id==attached_id,"Only actual attached language grant may persist");}
 }
+void dispatch_authority_contract(const std::filesystem::path& parent,const char* modules,const char* pure){
+    WorkspaceTools workspace(parent.string());
+    RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));guidance.prepare();
+    PersistenceService store((parent/"dispatch.sqlite").string(),{modules,pure});
+    store.create_session("dispatch-session","Dispatch authority").get();store.start_prompt_run("run","dispatch-session",R"({"content":"dispatch authority"})").get();store.transition("run",RunState::queued,RunState::running).get();
+    std::atomic_bool admitted{true};std::size_t checks=0,dispatched=0;std::stop_source stopped;
+    AgentReadToolOwnerContext owner;owner.run_id="run";owner.primary_workspace=&workspace;owner.repository_context=[&](std::size_t){return &guidance;};owner.offered_tool=is_agent_read_tool;owner.deadline=std::chrono::steady_clock::now()+30s;
+    owner.language_server_query=[&](const AgentWorkspaceInvocation&,std::stop_token){++dispatched;return R"({"recording_owner_dispatch":true})";};
+    owner.authorize_dispatch=[&](const AgentWorkspaceInvocation& call){++checks;need(call.run_id=="run"&&call.workspace_id==workspace.identity()&&call.tool_name=="language_server","Dispatch authority lost the owned envelope");if(!admitted.load())throw ToolAccessDenied("Fixture lease revoked");if(call.call_id=="cancel-in-check")stopped.request_stop();};
+    const auto call=[&](const std::string& id){AgentWorkspaceInvocation c;c.run_id="run";c.attempt_id="dispatch-attempt";c.call_id=id;c.workspace_id=workspace.identity();c.workspace_revision=1;c.folder_id=c.workspace_id;c.tool_name="language_server";c.arguments_json=R"({"server_id":"fixture","method":"hover","path":"same.txt"})";return c;};
+    auto direct=make_agent_read_tool_host(store,store,owner);
+    need(direct->invoke(call("allowed")).success&&checks==1&&dispatched==1,"Admitted dispatch must check authority exactly once");
+    admitted=false;rejects<ToolAccessDenied>([&]{direct->invoke(call("revoked-direct"));});need(checks==2&&dispatched==1,"Revoked authority must precede unasked dispatch");
+    admitted=true;owner.permission_rules={{"language_server","**","ask"}};auto asked=make_agent_read_tool_host(store,store,owner);
+    {Task task(*asked,call("revoked-during-approval"));const auto op=pending(store,&task,"dispatch revocation");need(checks==2&&dispatched==1,"Authority must be checked at dispatch rather than while awaiting approval");admitted=false;store.decide_operation(op.id,OperationDecision::allow,"fixture-controller").get();rejects<ToolAccessDenied>([&]{task.result.get();});need(checks==3&&dispatched==1&&store.operation(op.id).get().state==OperationState::failed,"Approved call must fail without dispatch after authority revocation");}
+    admitted=true;rejects<ToolCancelled>([&]{direct->invoke(call("cancel-in-check"),stopped.get_token());});need(checks==4&&dispatched==1,"Cancellation during authority check must prevent dispatch");
+    auto expired_owner=owner;expired_owner.permission_rules.clear();expired_owner.deadline=std::chrono::steady_clock::now()+100ms;
+    expired_owner.authorize_dispatch=[&](const AgentWorkspaceInvocation&){++checks;std::this_thread::sleep_until(expired_owner.deadline+1ms);};
+    auto expires=make_agent_read_tool_host(store,store,expired_owner);rejects<ToolCancelled>([&]{expires->invoke(call("expires-in-check"));});need(checks==5&&dispatched==1,"Deadline elapsed during authority check must prevent dispatch");
+    store.transition("run",RunState::running,RunState::completed).get();
+}
 void guidance_owner_contract(const std::filesystem::path& parent,const char* modules,const char* pure){
     const auto first=parent/"guidance-primary",second=parent/"guidance-attached";
     std::filesystem::create_directories(first/".agents"/"skills"/"inspect");std::filesystem::create_directories(second/"guide");
@@ -116,6 +137,7 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
     }
     {PersistenceService reopened(database,{argv[1],argv[2]});need(reopened.operation(approved_id).get().state==OperationState::succeeded&&reopened.operation(withheld_id).get().state==OperationState::failed&&reopened.operations("run").get().size()==4,"Read receipts must survive actual xlang3 SQLite reopen without replay");const auto grants=AgentPermissionGrantStore(reopened).list("session");need(grants.grants.size()==1&&grants.grants.front().workspace_id==attached_id,"Only the selected attached-folder grant may persist");}
     language_owner_contract(primary,secondary,argv[1],argv[2]);
+    dispatch_authority_contract(primary,argv[1],argv[2]);
     guidance_owner_contract(directory.path,argv[1],argv[2]);
     std::cout<<"workspace read and owned language-query authority contracts passed\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

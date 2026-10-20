@@ -29,6 +29,10 @@ struct AgentReadToolOwnerContext {
     // Trusted owner dispatch only. Registry, executable bindings and admitted
     // roots remain in the backend; callers supply the same owned envelope.
     std::function<std::string(const AgentWorkspaceInvocation&,std::stop_token)> language_server_query;
+    // Backend-only authority check at actual dispatch, after any approval wait
+    // and guidance checks. Throw to withhold the read if ownership was revoked.
+    // This capability is never supplied by a workspace invocation.
+    std::function<void(const AgentWorkspaceInvocation&)> authorize_dispatch;
     std::vector<std::vector<AgentPermissionRule>> inherited_permission_layers;
     std::vector<AgentPermissionRule> permission_rules;
     std::chrono::steady_clock::time_point deadline;

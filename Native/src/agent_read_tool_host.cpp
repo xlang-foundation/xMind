@@ -77,6 +77,10 @@ public:
         };
         if(!ready())return {false,guidance_required()};
         const auto read=[&](){
+            const auto check_live=[&](){if(cancel.stop_requested()||std::chrono::steady_clock::now()>=owner_.deadline)throw ToolCancelled("Workspace read owner cancelled or expired before dispatch");};
+            check_live();
+            if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
+            check_live();
             if(call.tool_name=="language_server")return owner_.language_server_query(call,cancel);
             return owner_.workspace_members?owner_.workspace_members->invoke(call,cancel):owner_.primary_workspace->invoke(call,cancel);
         };

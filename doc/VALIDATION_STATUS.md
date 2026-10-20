@@ -1,3 +1,9 @@
+## Read dispatch authority boundary — 2026-10-20
+
+The native read host now supports a trusted backend authority check immediately before actual workspace/language-server dispatch, after policy, guidance and any controller approval. It rechecks cancellation and the original deadline on both sides of that check. The native contract proves admitted dispatch, direct revocation, revocation during approval with a failed receipt and no dispatch, cancellation during the check and deadline expiry during the check.
+
+The serial build and 51 focused contracts pass in 150.55s; all source/SDK/libraries/runtime/dependencies/native binaries and file sets remained unchanged across the gate. The initial 50/51 failure is preserved: the new fixture omitted its required workspace revision and failed envelope validation. Only that fixture metadata changed for the passing rerun. This is groundwork for worker read authority; durable read claims, RPC, child coding/tool-turn adapters and product worker placement remain open. Installed clients/backend are unchanged. [Evidence and limits](evidence/agent-read-dispatch-authority-corrected-20261020.json).
+
 ## Actual ordinary AgentRunner child — 2026-10-20
 
 A supervised native child now executes the actual AgentRunner loop in a controlled fixture through explicit authenticated journal/model ports. Its ordinary workspace-free root starts queued, compare-and-swaps to running once, funds/starts its own attempt, consumes actual streamed provider data, takes the backend canonical assistant through RootExecutionBudget.finish and commits completion/lease retirement. The parent verifies one start, exact supplied final history and model allowance, actual distinct child identity and no duplicated model events.
