@@ -1,0 +1,105 @@
+diff --git a/Native/include/agentflow/root_work_executor.hpp b/Native/include/agentflow/root_work_executor.hpp
+index 4e63eb6b..956582b3 100644
+--- a/Native/include/agentflow/root_work_executor.hpp
++++ b/Native/include/agentflow/root_work_executor.hpp
+@@ -40,10 +40,12 @@ public:
+         ~Ticket(){
+             request_stop();
+             bool dispatched=false;
++            std::function<void(std::stop_token)> withdrawn;
+             {
+                 std::lock_guard lock(state_->mutex);
+                 if(job_->phase==Job::Phase::staged){
+                     state_->queue.remove(job_);job_->phase=Job::Phase::retired;
++                    withdrawn=std::move(job_->action);
+                     job_->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root admission withdrawn before dispatch")));
+                 }else dispatched=job_->phase!=Job::Phase::retired;
+             }
+@@ -86,19 +88,23 @@ public:
+     void close(){
+         std::lock_guard serial(closing_);
+         std::vector<std::shared_ptr<Job>> stopped;
++        std::vector<std::function<void(std::stop_token)>> withdrawn;
+         {
+             std::lock_guard lock(state_->mutex);state_->accepting=false;
+             stopped.assign(state_->queue.begin(),state_->queue.end());
+             stopped.insert(stopped.end(),state_->running.begin(),state_->running.end());
++            withdrawn.reserve(state_->queue.size());
+             for(auto item=state_->queue.begin();item!=state_->queue.end();){
+                 if((*item)->phase==Job::Phase::staged){
+                     auto job=*item;item=state_->queue.erase(item);job->phase=Job::Phase::retired;
++                    withdrawn.push_back(std::move(job->action));
+                     job->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root dispatch closed before admission committed")));
+                 }else ++item;
+             }
+         }
+         // Stop callbacks can call back into owners; invoke outside queue lock.
+         for(const auto& job:stopped)job->stop.request_stop();
++        withdrawn.clear(); // Captured owners may reenter queue APIs.
+         state_->changed.notify_all();
+         for(auto& worker:workers_)if(worker.joinable())worker.join();
+     }
+@@ -106,19 +112,25 @@ private:
+     static void work(const std::shared_ptr<State>& state){
+         for(;;){
+             std::shared_ptr<Job> job;
++            std::function<void(std::stop_token)> action;
+             {
+                 std::unique_lock lock(state->mutex);
+                 state->changed.wait(lock,[&]{return (!state->queue.empty()&&state->queue.front()->phase==Job::Phase::ready)||(!state->accepting&&state->queue.empty());});
+                 if(state->queue.empty())return;
+                 auto item=state->queue.begin();job=*item;job->phase=Job::Phase::running;
+                 state->running.splice(state->running.end(),state->queue,item);
++                action=std::move(job->action);
+             }
+             std::exception_ptr failure;
+-            try{job->action(job->stop.get_token());}catch(...){failure=std::current_exception();}
++            try{action(job->stop.get_token());}catch(...){failure=std::current_exception();}
+             {
+                 std::lock_guard lock(state->mutex);state->running.remove(job);job->phase=Job::Phase::retired;
+                 if(failure)job->promise.set_exception(failure);else job->promise.set_value();
+             }
++            // Settle before releasing captures: an owner may destroy its own
++            // ticket here, which must observe physical retirement rather than
++            // wait on the worker currently releasing it. Never hold queue lock.
++            action={};
+             state->changed.notify_all();
+         }
+     }
+diff --git a/Native/tests/root_work_executor_contract.cpp b/Native/tests/root_work_executor_contract.cpp
+index efac539b..ac32596b 100644
+--- a/Native/tests/root_work_executor_contract.cpp
++++ b/Native/tests/root_work_executor_contract.cpp
+@@ -41,5 +41,31 @@ void capacity_and_failure(){
+     require(failed->result().wait_for(5s)==std::future_status::ready,"Failed root action must settle");rejects([&]{failed->result().get();});
+     auto cancelled=pool.stage([](std::stop_token stop){require(stop.stop_requested(),"Explicit root cancellation must reach actual action");});cancelled->request_stop();cancelled->commit();ready(cancelled->result());
+ }
++void releases_retired_action(){
++    RootWorkExecutor pool(1,2);
++    auto owner=std::make_shared<int>(42);std::weak_ptr<int> observed=owner;
++    auto ticket=pool.stage([owner](std::stop_token){});owner.reset();ticket->commit();ready(ticket->result());
++    // A service retains its ticket/future for inspection after execution. That
++    // must not retain the action's captured owner or a ticket-owner cycle.
++    const auto deadline=std::chrono::steady_clock::now()+200ms;
++    while(!observed.expired()&&std::chrono::steady_clock::now()<deadline)std::this_thread::yield();
++    require(observed.expired(),"Settled root ticket must release its callback's captured owner");
++    auto staged_owner=std::make_shared<int>(43);std::weak_ptr<int> staged_observed=staged_owner;
++    auto staged=pool.stage([staged_owner](std::stop_token){});staged_owner.reset();pool.close();
++    require(staged_observed.expired(),"Closed staged ticket must release its callback without ticket destruction");
+ }
+-int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
++void releases_ticket_owner_cycle(){
++    RootWorkExecutor pool(1,2);std::promise<void> released;
++    struct Owner {
++        std::unique_ptr<RootWorkExecutor::Ticket> ticket;
++        std::promise<void>& released;
++        explicit Owner(std::promise<void>& signal):released(signal){}
++        ~Owner(){ticket.reset();released.set_value();}
++    };
++    auto owner=std::make_shared<Owner>(released);
++    owner->ticket=pool.stage([owner](std::stop_token){});
++    owner->ticket->commit();owner.reset();
++    require(released.get_future().wait_for(5s)==std::future_status::ready,"Physical retirement must break a callback-owner-ticket cycle without self-waiting");
++}
++}
++int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

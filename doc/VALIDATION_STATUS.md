@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared root callback ownership correction — 2026-10-19
+
+A new lifecycle regression fails against unchanged38a138da production component: retaining a completed ticket also retains its callback captures. Closed staged tickets do likewise. That can retain a service owner or form a callback-owner-ticket cycle. The failed1/1 gate and source patch are retained, not replaced by the later pass.
+
+Workers now move the action out of the queued job, settle its actual result, then release the action outside the queue mutex. Withdrawn/closed staged callbacks are also released outside that mutex. The corrected contract adds actual owner destruction, including a callback capturing an owner that owns its ticket; retirement breaks this cycle without waiting on the same worker. Final focused1/1 passes in0.16seconds, CTest16712 exits0, full frozen closure remains unchanged. This remains an uninstalled component, not agent/graph service integration or a complete-suite claim.
+
+See evidence/shared-root-worker-capture-baseline-20261019.json and .log, shared-root-worker-capture-fixed-20261019.json and .log, both source patches and the final gate script.
+
 ## Shared physical root executor component — 2026-10-19
 
 RootWorkExecutor adds a bounded native pool for root retirement actions across service types. Staging reserves global FIFO rank before durable admission; one-shot commit enables dispatch after acceptance. Withdrawn staged work never executes. Ticket destruction stop-requests and drains committed physical work; pool close withdraws staged admission, stops queued/running work outside its mutex, drains retirement closures and joins all workers. Exceptions settle the actual action future for its owning service to observe.

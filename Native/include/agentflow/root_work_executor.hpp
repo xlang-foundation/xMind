@@ -40,10 +40,12 @@ public:
         ~Ticket(){
             request_stop();
             bool dispatched=false;
+            std::function<void(std::stop_token)> withdrawn;
             {
                 std::lock_guard lock(state_->mutex);
                 if(job_->phase==Job::Phase::staged){
                     state_->queue.remove(job_);job_->phase=Job::Phase::retired;
+                    withdrawn=std::move(job_->action);
                     job_->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root admission withdrawn before dispatch")));
                 }else dispatched=job_->phase!=Job::Phase::retired;
             }
@@ -86,19 +88,23 @@ public:
     void close(){
         std::lock_guard serial(closing_);
         std::vector<std::shared_ptr<Job>> stopped;
+        std::vector<std::function<void(std::stop_token)>> withdrawn;
         {
             std::lock_guard lock(state_->mutex);state_->accepting=false;
             stopped.assign(state_->queue.begin(),state_->queue.end());
             stopped.insert(stopped.end(),state_->running.begin(),state_->running.end());
+            withdrawn.reserve(state_->queue.size());
             for(auto item=state_->queue.begin();item!=state_->queue.end();){
                 if((*item)->phase==Job::Phase::staged){
                     auto job=*item;item=state_->queue.erase(item);job->phase=Job::Phase::retired;
+                    withdrawn.push_back(std::move(job->action));
                     job->promise.set_exception(std::make_exception_ptr(std::runtime_error("Root dispatch closed before admission committed")));
                 }else ++item;
             }
         }
         // Stop callbacks can call back into owners; invoke outside queue lock.
         for(const auto& job:stopped)job->stop.request_stop();
+        withdrawn.clear(); // Captured owners may reenter queue APIs.
         state_->changed.notify_all();
         for(auto& worker:workers_)if(worker.joinable())worker.join();
     }
@@ -106,19 +112,25 @@ private:
     static void work(const std::shared_ptr<State>& state){
         for(;;){
             std::shared_ptr<Job> job;
+            std::function<void(std::stop_token)> action;
             {
                 std::unique_lock lock(state->mutex);
                 state->changed.wait(lock,[&]{return (!state->queue.empty()&&state->queue.front()->phase==Job::Phase::ready)||(!state->accepting&&state->queue.empty());});
                 if(state->queue.empty())return;
                 auto item=state->queue.begin();job=*item;job->phase=Job::Phase::running;
                 state->running.splice(state->running.end(),state->queue,item);
+                action=std::move(job->action);
             }
             std::exception_ptr failure;
-            try{job->action(job->stop.get_token());}catch(...){failure=std::current_exception();}
+            try{action(job->stop.get_token());}catch(...){failure=std::current_exception();}
             {
                 std::lock_guard lock(state->mutex);state->running.remove(job);job->phase=Job::Phase::retired;
                 if(failure)job->promise.set_exception(failure);else job->promise.set_value();
             }
+            // Settle before releasing captures: an owner may destroy its own
+            // ticket here, which must observe physical retirement rather than
+            // wait on the worker currently releasing it. Never hold queue lock.
+            action={};
             state->changed.notify_all();
         }
     }

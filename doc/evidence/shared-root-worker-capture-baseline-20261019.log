@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 1: native_root_work_executor_contract
+1/1 Test #1: native_root_work_executor_contract ...***Failed    0.31 sec
+Settled root ticket must release its callback's captured owner
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.34 sec
+
+The following tests FAILED:
+	  1 - native_root_work_executor_contract (Failed)
+Errors while running CTest

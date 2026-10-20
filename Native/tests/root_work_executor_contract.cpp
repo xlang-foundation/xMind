@@ -41,5 +41,31 @@ void capacity_and_failure(){
     require(failed->result().wait_for(5s)==std::future_status::ready,"Failed root action must settle");rejects([&]{failed->result().get();});
     auto cancelled=pool.stage([](std::stop_token stop){require(stop.stop_requested(),"Explicit root cancellation must reach actual action");});cancelled->request_stop();cancelled->commit();ready(cancelled->result());
 }
+void releases_retired_action(){
+    RootWorkExecutor pool(1,2);
+    auto owner=std::make_shared<int>(42);std::weak_ptr<int> observed=owner;
+    auto ticket=pool.stage([owner](std::stop_token){});owner.reset();ticket->commit();ready(ticket->result());
+    // A service retains its ticket/future for inspection after execution. That
+    // must not retain the action's captured owner or a ticket-owner cycle.
+    const auto deadline=std::chrono::steady_clock::now()+200ms;
+    while(!observed.expired()&&std::chrono::steady_clock::now()<deadline)std::this_thread::yield();
+    require(observed.expired(),"Settled root ticket must release its callback's captured owner");
+    auto staged_owner=std::make_shared<int>(43);std::weak_ptr<int> staged_observed=staged_owner;
+    auto staged=pool.stage([staged_owner](std::stop_token){});staged_owner.reset();pool.close();
+    require(staged_observed.expired(),"Closed staged ticket must release its callback without ticket destruction");
 }
-int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+void releases_ticket_owner_cycle(){
+    RootWorkExecutor pool(1,2);std::promise<void> released;
+    struct Owner {
+        std::unique_ptr<RootWorkExecutor::Ticket> ticket;
+        std::promise<void>& released;
+        explicit Owner(std::promise<void>& signal):released(signal){}
+        ~Owner(){ticket.reset();released.set_value();}
+    };
+    auto owner=std::make_shared<Owner>(released);
+    owner->ticket=pool.stage([owner](std::stop_token){});
+    owner->ticket->commit();owner.reset();
+    require(released.get_future().wait_for(5s)==std::future_status::ready,"Physical retirement must break a callback-owner-ticket cycle without self-waiting");
+}
+}
+int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
