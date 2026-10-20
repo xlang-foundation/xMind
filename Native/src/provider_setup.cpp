@@ -107,6 +107,8 @@ bool ProviderRuntime::available() const{std::lock_guard lock(impl_->mutex);retur
 std::vector<GraphExecutionMetadata> ProviderRuntime::graphs() const{std::lock_guard lock(impl_->mutex);return impl_->service->graphs();}
 Run ProviderRuntime::restore_operation(std::string id,std::string session,std::string operation_id){std::lock_guard lock(impl_->mutex);if(!impl_->service)throw RunUnavailable("Provider is not configured");return impl_->service->restore_operation(std::move(id),std::move(session),std::move(operation_id));}
 Run ProviderRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
+bool ProviderRuntime::supports_graph_tree_human_input()const{std::lock_guard lock(impl_->mutex);return impl_->service&&impl_->service->supports_graph_tree_human_input();}
+GraphRootRecord ProviderRuntime::tree_human_input(const std::string& root,const std::string& owner,const std::string& node,const std::string& input,const std::string& actor,std::int64_t root_revision,std::int64_t owner_revision){std::lock_guard lock(impl_->mutex);if(!impl_->service)throw RunUnavailable("Nested graph human input is unavailable");return impl_->service->tree_human_input(root,owner,node,input,actor,root_revision,owner_revision);}
 GraphRootRecord ProviderRuntime::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->human_input(root,node,input,actor,revision);}
 
 }

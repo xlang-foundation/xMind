@@ -46,6 +46,9 @@ public:
     Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
         std::string prompt,std::string model={}) override;
+    bool supports_graph_tree_human_input()const override;
+    GraphRootRecord tree_human_input(const std::string& root,const std::string& owner,const std::string& node,
+        const std::string& input,const std::string& actor,std::int64_t root_revision,std::int64_t owner_revision) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;
 private:

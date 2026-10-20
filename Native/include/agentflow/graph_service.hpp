@@ -37,6 +37,8 @@ public:
     virtual Run restore_operation(std::string,std::string,std::string){throw RunUnavailable("Direct file restore is unavailable");}
     virtual GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision)=0;
+    virtual bool supports_graph_tree_human_input()const{return false;}
+    virtual GraphRootRecord tree_human_input(const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,std::int64_t,std::int64_t){throw RunUnavailable("Nested graph human input is unavailable");}
     virtual Run resume_graph(const std::string&,const std::string&,std::int64_t){throw RunUnavailable("Graph resume is unavailable");}
     virtual GraphContextMetadata graph_context(const std::string&)const{return {};}
 };
@@ -56,8 +58,9 @@ public:
     Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;
+    bool supports_graph_tree_human_input()const override{return true;}
     GraphRootRecord tree_human_input(const std::string& root,const std::string& owner,const std::string& node,
-        const std::string& input,const std::string& actor,std::int64_t root_revision,std::int64_t owner_revision);
+        const std::string& input,const std::string& actor,std::int64_t root_revision,std::int64_t owner_revision) override;
     Run resume_graph(const std::string& root,const std::string& authenticated_actor,
         std::int64_t expected_checkpoint_revision) override;
     GraphContextMetadata graph_context(const std::string& root)const override;

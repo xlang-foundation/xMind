@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-20T07:21:36.769Z",
+  "testedSourceParent": "f5d14c4f64f3a989a12635e6e028dd3336ac8058",
+  "testedSourcePatchSha256": "ef39b59a8f1cf931fe566a2c1a6456d4cf5495403988f01234cc08b4c6a18c7b",
+  "directory": "C:/xMindNativeValidation/validated-nested-human-input-binaries-20261020",
+  "files": {
+    "xmind.exe": {
+      "bytes": 10921984,
+      "sha256": "000ef237083410d8b142149cfc743cf8b0cd261bf61eaeaa7e9acde0aa96eb3f"
+    },
+    "xlang3_runtime.dll": {
+      "bytes": 20122624,
+      "sha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3"
+    }
+  },
+  "focusedNativeTests": 21,
+  "fullNativeSuiteRun": false,
+  "browserNativeIntegration": true,
+  "completeRuntimeDistribution": false,
+  "installed": false
+}
