@@ -1,0 +1,33 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start   8: native_permission_grants_contract
+ 1/14 Test   #8: native_permission_grants_contract .............   Passed    0.15 sec
+      Start  24: native_agent_authority_contract
+ 2/14 Test  #24: native_agent_authority_contract ...............   Passed    0.05 sec
+      Start  29: native_context_engine_contract
+ 3/14 Test  #29: native_context_engine_contract ................   Passed    5.45 sec
+      Start  30: native_context_graph_engine_contract
+ 4/14 Test  #30: native_context_graph_engine_contract ..........   Passed    1.54 sec
+      Start  31: native_nested_context_graph_engine_contract
+ 5/14 Test  #31: native_nested_context_graph_engine_contract ...   Passed    0.74 sec
+      Start  36: native_dynamic_plan_engine_contract
+ 6/14 Test  #36: native_dynamic_plan_engine_contract ...........   Passed    6.49 sec
+      Start  47: native_graph_runner_contract
+ 7/14 Test  #47: native_graph_runner_contract ..................   Passed   12.37 sec
+      Start  51: native_delegation_contract
+ 8/14 Test  #51: native_delegation_contract ....................   Passed    2.91 sec
+      Start  83: native_agent_runner_contract
+ 9/14 Test  #83: native_agent_runner_contract ..................   Passed    9.36 sec
+      Start  95: native_agent_remote_tool_host_contract
+10/14 Test  #95: native_agent_remote_tool_host_contract ........   Passed    0.57 sec
+      Start  96: native_agent_file_tool_host_contract
+11/14 Test  #96: native_agent_file_tool_host_contract ..........   Passed    1.01 sec
+      Start  97: native_agent_process_tool_host_contract
+12/14 Test  #97: native_agent_process_tool_host_contract .......   Passed    0.50 sec
+      Start  98: native_agent_read_tool_host_contract
+13/14 Test  #98: native_agent_read_tool_host_contract ..........   Passed    1.18 sec
+      Start 152: native_provider_profile_runtime_contract
+14/14 Test #152: native_provider_profile_runtime_contract ......   Passed    5.75 sec
+
+100% tests passed, 0 tests failed out of 14
+
+Total Test time (real) =  48.10 sec

@@ -73,6 +73,30 @@ public:
     unsigned credential_queries=0,definition_queries=0;
 private:std::shared_ptr<AgentBackendCatalog> inner;
 };
+class RecordingReadHost final:public AgentReadToolHost {
+public:
+    RecordingReadHost(std::unique_ptr<AgentReadToolHost> host,unsigned& calls,std::string run):inner(std::move(host)),calls_(calls),run_(std::move(run)){}
+    AgentReadToolResult invoke(const AgentWorkspaceInvocation& call,std::stop_token stop)override{
+        require(call.run_id==run_&&call.tool_name=="read_file"&&!call.call_id.empty()&&!call.attempt_id.empty(),"Injected read host must receive the actual owned invocation");
+        ++calls_;return inner->invoke(call,stop);
+    }
+private:std::unique_ptr<AgentReadToolHost> inner;unsigned& calls_;std::string run_;
+};
+class RecordingToolHostFactory final:public AgentToolHostFactory {
+public:
+    explicit RecordingToolHostFactory(std::shared_ptr<AgentToolHostFactory> factory):inner(std::move(factory)){}
+    std::unique_ptr<AgentFileToolHost> file(AgentFileToolOwnerContext owner)override{++files;return inner->file(std::move(owner));}
+    std::unique_ptr<AgentProcessOwnerHost> process(AgentProcessToolOwnerContext owner)override{++processes;return inner->process(std::move(owner));}
+    std::unique_ptr<AgentReadToolHost> read(AgentReadToolOwnerContext owner)override{
+        ++reads;require(owner.primary_workspace&&owner.offered_tool&&owner.offered_tool("read_file"),"Injected owner factory must retain admitted workspace and offered catalogue");
+        if(unavailable)return {};const auto run=owner.run_id;return std::make_unique<RecordingReadHost>(inner->read(std::move(owner)),read_calls,run);
+    }
+    std::unique_ptr<AgentRemoteToolHost> remote(AgentRemoteToolOwnerContext owner)override{++remotes;return inner->remote(std::move(owner));}
+    std::unique_ptr<AgentGuidanceToolHost> guidance(AgentGuidanceToolOwnerContext owner)override{++guides;return inner->guidance(std::move(owner));}
+    std::unique_ptr<AgentCallableToolHost> callable(AgentCallableToolOwnerContext owner)override{++callables;return inner->callable(std::move(owner));}
+    unsigned files=0,processes=0,reads=0,read_calls=0,remotes=0,guides=0,callables=0;bool unavailable=false;
+private:std::shared_ptr<AgentToolHostFactory> inner;
+};
 class CatalogPortModel final:public AgentModelGateway {
 public:
     ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token)override{
@@ -91,8 +115,10 @@ void backend_catalog_port(PersistenceService& journal,const std::vector<std::str
     AgentDefinitionStore(metadata).apply(R"({"agents":[{"id":"catalog-inspector","mode":"subagent","instructions":"Synthetic registered inspection."},{"id":"catalog-hidden","mode":"subagent","hidden":true,"instructions":"Synthetic hidden entry."},{"id":"catalog-primary","mode":"primary","instructions":"Synthetic primary entry."}]})");
     auto catalog=std::make_shared<RecordingBackendCatalog>(make_persistence_agent_backend_catalog(metadata));AgentSettings settings;settings.workspace=root.string();settings.a2a_enabled=false;settings.provider={"http://127.0.0.1:1/v1/chat/completions","explicit-catalog-port",Capability::supported,Capability::supported};settings.credential=CredentialReference{"provider","catalog-only","model-api"};settings.delegation=AgentDelegationPolicy{};
     rejects<Conflict>([&]{agent_authority_credentials(journal,settings);});const auto versions=catalog->credential_versions(settings);require(versions.size()==1&&versions[0].scope=="provider"&&versions[0].id=="catalog-only"&&versions[0].purpose=="model-api"&&versions[0].revision==1,"Catalogue adapter must resolve only configured metadata from its own backend");auto missing=settings;missing.credential->id="not-registered";rejects<Conflict>([&]{catalog->credential_versions(missing);});
-    std::ofstream(root/"catalog-port.txt",std::ios::binary)<<"Actual injected catalogue read\n";const auto model=std::make_shared<CatalogPortModel>();auto delegation=std::make_shared<DelegationExecutor>(journal,1,8);AgentRunner runner(journal,settings,delegation,{},false,model,catalog);
-    journal.create_session("catalog-port-session","Actual injected backend catalogue loop").get();runner.start("catalog-port-run","catalog-port-session","Read the scoped fixture once.");require(runner.execute("catalog-port-run").state==RunState::completed&&model->calls==2&&catalog->definition_queries==1,"Actual agent loop must use injected definitions and native file continuation");require(catalog->credential_queries==2,"Metadata lookup and rejection must use the injected configured owner");rejects<NotFound>([&]{metadata.run("catalog-port-run").get();});require(journal.root_budget("catalog-port-run").get().children_admitted==0,"Discovery must not launch a named subagent or grant another admission");delegation->close();metadata.close();
+    std::ofstream(root/"catalog-port.txt",std::ios::binary)<<"Actual injected catalogue read\n";const auto model=std::make_shared<CatalogPortModel>();auto delegation=std::make_shared<DelegationExecutor>(journal,1,8);auto hosts=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));AgentRunner runner(journal,settings,delegation,{},false,model,catalog,hosts);
+    journal.create_session("catalog-port-session","Actual injected backend catalogue loop").get();runner.start("catalog-port-run","catalog-port-session","Read the scoped fixture once.");require(runner.execute("catalog-port-run").state==RunState::completed&&model->calls==2&&catalog->definition_queries==1,"Actual agent loop must use injected definitions and native file continuation");require(catalog->credential_queries==2,"Metadata lookup and rejection must use the injected configured owner");rejects<NotFound>([&]{metadata.run("catalog-port-run").get();});require(journal.root_budget("catalog-port-run").get().children_admitted==0,"Discovery must not launch a named subagent or grant another admission");require(hosts->reads==1&&hosts->read_calls==1&&hosts->guides==1&&hosts->remotes==1&&hosts->files==0&&hosts->processes==0&&hosts->callables==0,"Actual loop must construct and invoke supplied tool owners without local fallback");
+    auto unavailable=std::make_shared<RecordingToolHostFactory>(make_persistence_agent_tool_host_factory(journal,journal));unavailable->unavailable=true;const auto blocked_model=std::make_shared<CatalogPortModel>();AgentRunner blocked(journal,settings,delegation,{},false,blocked_model,catalog,unavailable);journal.create_session("missing-tool-owner-session","Unavailable injected tool owner").get();blocked.start("missing-tool-owner-run","missing-tool-owner-session","Do not fall back to a local owner.");require(blocked.execute("missing-tool-owner-run").state==RunState::failed&&blocked_model->calls==0&&unavailable->reads==1&&unavailable->read_calls==0,"Unavailable injected owner must fail before model or tool dispatch");
+    delegation->close();metadata.close();
 }
 class CallableAskModel final:public AgentModelGateway {
 public:

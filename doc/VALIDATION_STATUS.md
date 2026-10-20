@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Agent tool-owner construction port — 2026-10-20
+
+AgentRunner constructs its file, process, read, remote, guidance and callable owners through an injectable AgentToolHostFactory. The default backend adapter retains the supplied run journal and PersistenceService, with the existing owner policy and invocation contracts. These trusted construction contexts contain workspace capabilities and callbacks; they are not wire messages or worker-provided authority. A missing injected owner fails closed rather than silently constructing a local replacement.
+
+The actual AgentRunner regression injects a recording factory, verifies the admitted workspace/offered catalogue and run/attempt/call envelope, and consumes the real native file result through the injected read host exactly once. A second isolated run supplies an unavailable read owner and verifies failure before any model or tool dispatch. The complete native build and fourteen focused runner/authority/context/graph/delegation/tool-owner/permission/provider contracts pass in48.10seconds. All2634project/16SDK/1870pure-library/76runtime/18598dependency/130binary file sets and hashes remain unchanged during validation. Candidate executable SHA256 6eb37cfee4dea2e2e13be084e79506dfb085575e0a0bcbbfcb5ebb4b6d26f850. [Gate](evidence/agent-tool-factory-focused-20261020-gate.json), [CTest output](evidence/agent-tool-factory-focused-20261020-ctest.log) and [inventory](evidence/agent-tool-factory-focused-20261020-test-inventory.json). Full manifests and source patch remain under C:/xMindNativeValidation/agent-tool-factory-focused-20261020.
+
+This is a focused synthetic-model qualification with actual native tools and embedded-xlang3/SQLite, not a complete-suite or worker-process result. Process runtime setup, MCP/A2A discovery and constructor persistence dependencies remain; authenticated scoped proxies, actual child execution, supervision and durable crash reconciliation remain unfinished. The candidate is uninstalled and installed58 remains the preserved baseline. No completed user task was replayed.
+
 ## Agent backend catalogue port — 2026-10-20
 
 AgentRunner now obtains credential-version metadata and agent definitions through an injectable AgentBackendCatalog. The default adapter preserves backend PersistenceService behavior. A two-store regression uses independent metadata and run journals, checks missing credential references and version metadata, filters discoverable agents, and executes an actual native file read through the model/tool loop. Credential material is not part of the port.

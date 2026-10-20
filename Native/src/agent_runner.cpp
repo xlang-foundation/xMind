@@ -42,6 +42,10 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+template<class Host> std::unique_ptr<Host> checked_tool_host(std::unique_ptr<Host> host){
+    if(!host)throw std::runtime_error("Configured agent tool owner is unavailable");
+    return host;
+}
 constexpr std::string_view instruction_prefix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n";
 std::string operation_id() {std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();return value.str();}
 std::string public_context_usage(const std::string& raw){
@@ -160,18 +164,19 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
     std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy,
-    std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog)
-    :AgentRunner(persistence,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog)){}
+    std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
+    :AgentRunner(persistence,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
-    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog)
-    :AgentRunner(journal,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog)){}
+    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
+    :AgentRunner(journal,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& persistence,AgentSettings settings,
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
-    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog)
+    bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
     :journal_(journal),context_journal_(context_journal),persistence_(persistence),settings_(std::move(settings)),
      model_gateway_(model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings_.credential)),
      backend_catalog_(backend_catalog?std::move(backend_catalog):make_persistence_agent_backend_catalog(persistence)),
+     tool_hosts_(tool_hosts?std::move(tool_hosts):make_persistence_agent_tool_host_factory(journal,persistence)),
      delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
@@ -726,7 +731,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.repository_context=repository_context_for_folder;owner.approval_timeout=settings_.run_timeout;
             owner.permission_layers=inherited_permission_layers;if(!agent_permission_rules.empty())owner.permission_layers.push_back(agent_permission_rules);
             for(const auto& tool:request.tools)if(is_agent_file_tool(tool.name))owner.allowed_tools.push_back(tool.name);
-            file_tool_host=make_agent_file_tool_host(persistence_,std::move(owner));
+            file_tool_host=checked_tool_host(tool_hosts_->file(std::move(owner)));
         }
         std::unique_ptr<AgentRemoteToolHost> remote_tool_host;
         if(workspace_&&repository_context){
@@ -736,7 +741,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.offered_tool=[&](const std::string& alias){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==alias;});};
             owner.mcp_registry=[&](const std::string& alias){const auto found=mcp_tools.find(alias);return found==mcp_tools.end()?nullptr:found->second;};
             owner.a2a_registry=[&](const std::string& alias)->A2aAgentToolRegistry*{if(!a2a_tools||!alias.starts_with("a2a_delegate_"))return nullptr;const auto definitions=a2a_tools->definitions();return std::any_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==alias;})?a2a_tools.get():nullptr;};
-            remote_tool_host=make_agent_remote_tool_host(persistence_,journal_,std::move(owner));
+            remote_tool_host=checked_tool_host(tool_hosts_->remote(std::move(owner)));
         }
         std::unique_ptr<AgentProcessOwnerHost> process_tool_host;
         if(process_&&workspace_&&repository_context){
@@ -744,7 +749,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.repository_context=repository_context_for_folder;owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
             owner.permission_layers=inherited_permission_layers;if(!agent_permission_rules.empty())owner.permission_layers.push_back(agent_permission_rules);
             owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==name;});};
-            process_tool_host=make_agent_process_tool_host(persistence_,std::move(owner));
+            process_tool_host=checked_tool_host(tool_hosts_->process(std::move(owner)));
         }
         std::unique_ptr<AgentReadToolHost> read_tool_host;
         if(workspace_){
@@ -756,7 +761,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 const auto* folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
                 return language_servers_->invoke(call.arguments_json,stop,folders,settings_.language_server_dispatch);
             };
-            read_tool_host=make_agent_read_tool_host(journal_,persistence_,std::move(owner));
+            read_tool_host=checked_tool_host(tool_hosts_->read(std::move(owner)));
         }
         std::unique_ptr<AgentGuidanceToolHost> guidance_tool_host;
         if(workspace_&&repository_context){
@@ -765,7 +770,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.inherited_permission_layers=inherited_permission_layers;owner.permission_rules=agent_permission_rules;
             owner.base_instruction_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());
             owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==name;});};
-            guidance_tool_host=make_agent_guidance_tool_host(journal_,std::move(owner));
+            guidance_tool_host=checked_tool_host(tool_hosts_->guidance(std::move(owner)));
         }
         std::string planning_continuation;
         std::unique_ptr<AgentCallableToolHost> callable_tool_host;
@@ -775,7 +780,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.permission_layers=inherited_permission_layers;if(!agent_permission_rules.empty())owner.permission_layers.push_back(agent_permission_rules);
             owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& definition){return definition.name==name;});};
             for(const auto& [name,tool]:xlang_tools)owner.bindings.push_back({tool->definition,[tool](const std::string& arguments,std::stop_token stop){return tool->execution==XlangPythonExecution::worker?tool->callable.invoke_json_worker(arguments,stop):tool->callable.invoke_json(arguments,stop);}});
-            callable_tool_host=make_agent_callable_tool_host(journal_,std::move(owner));
+            callable_tool_host=checked_tool_host(tool_hosts_->callable(std::move(owner)));
         }
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
             if(actual.paused||actual.root.id!=id||actual.call_id.empty()||actual.result_json.empty())throw DynamicOutcomeUnrecorded("Dynamic report does not match its actual running owner");

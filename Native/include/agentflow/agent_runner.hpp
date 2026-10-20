@@ -3,6 +3,7 @@
 #include "agentflow/agent_context_journal.hpp"
 #include "agentflow/agent_model_gateway.hpp"
 #include "agentflow/agent_backend_catalog.hpp"
+#include "agentflow/agent_tool_host_factory.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
@@ -78,13 +79,13 @@ class AgentRunner {
 public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
-        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={});
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
-        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={});
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& backend_services,AgentSettings settings,
         std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
-        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={});
+        bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={},const std::string& inbox_id={},
@@ -113,6 +114,7 @@ private:
     AgentSettings settings_;
     std::shared_ptr<AgentModelGateway> model_gateway_;
     std::shared_ptr<AgentBackendCatalog> backend_catalog_;
+    std::shared_ptr<AgentToolHostFactory> tool_hosts_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<AgentProcessToolHost> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
