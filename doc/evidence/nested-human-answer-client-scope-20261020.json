@@ -1,0 +1,15 @@
+{
+  "scope": "Isolated complete Node client suites, synthetic browser/VS Code host/DOM fixtures",
+  "extensionTests": 462,
+  "browserTests": 161,
+  "sourceVendorFiles": 71,
+  "assetFiles": 18,
+  "unchangedDuringTests": true,
+  "nativeBrowserFixturePrepared": true,
+  "nativeBrowserFixtureExecuted": false,
+  "nativeGatePendingSeparately": true,
+  "installed": false,
+  "cpythonExecuted": false,
+  "originalFailure": "New host fixture omitted its graph child operations response; original logs/patch preserved in C:/xMindNativeValidation/nested-human-answer-client-full-20261020",
+  "remaining": "Native view-session allowlist, real browser/native integration and main merge verification; shared durable context/clock budgets remain open"
+}

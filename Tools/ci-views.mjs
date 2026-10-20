@@ -38,7 +38,7 @@ const unchanged=JSON.stringify(before)===JSON.stringify(after)&&JSON.stringify(a
 // One further extension contract covers UTF-8 reconciliation-note admission.
 // Queue-following contracts include terminal drain, explicit inspection and
 // successive claims; browser coverage also checks selection-save failures.
-const expectedTests={extension:460,browser:160};
+const expectedTests={extension:462,browser:161};
 const passed=unchanged&&Object.entries({extension,browser}).every(([name,r])=>r.exitCode===0&&r.tests===expectedTests[name]&&r.passed===expectedTests[name]&&r.failed===0&&r.skipped===0&&r.cancelled===0);
 const report={sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),scope:'Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance',sourceFiles:files.length,trackedSourceFiles:tracked.length+launcherSources.length,vendorFiles:vendorSources.length,browserAssets:assetNames.length,sourceAndAssetBytesUnchanged:unchanged,expectedTests,extension,browser,providerRequests:0,nativeExecuted:false,cpythonExecuted:false,passed};
 await writeFile(join(out,'gate.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));

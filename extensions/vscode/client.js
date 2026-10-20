@@ -191,6 +191,7 @@ class BackendClient {
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
   graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
   graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
+  graphTreeInput(root,owner,node,input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/invocations/${encodeURIComponent(owner)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
   async importProviderConfiguration(path,expected_revision) {
     if(typeof path!=='string'||!path||path.length>32768||/[\x00-\x1f]/.test(path)||!(/^[A-Za-z]:[\\/]/.test(path)||/^\\\\[^\\/]+[\\/][^\\/]+/.test(path)))throw new Error('Provider configuration must be an absolute local path');

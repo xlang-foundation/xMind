@@ -71,7 +71,7 @@ async function activate(context) {
   let profileController;
   let mcpController;
   let graphCatalogue=[],selectedGraph,graphSnapshot;
-  let graphChildren=new Map(),childHistory=new Map(),graphPaths=new Map();
+  let graphChildren=new Map(),childHistory=new Map(),graphPaths=new Map(),graphOwners=new Map();
   let ownedObservation=false;
   let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
   let contextObservation=false,contextController;
@@ -141,7 +141,7 @@ async function activate(context) {
   }
   async function refreshSessionPermissions(target=client,session=sessionId,version=generation){if(!target||!session)return;const observed=await target.sessionPermissions(session);if(target!==client||session!==sessionId||version!==generation||!panel)return;if(!observed||observed.session_id!==session||!Array.isArray(observed.requests)||observed.requests.length>256||observed.requests.some(operation=>!operation||typeof operation.id!=='string'||typeof operation.run_id!=='string'||operation.state!=='awaiting_approval'||!Number.isSafeInteger(operation.expires_unix_ms)))throw new Error('Invalid session permission request list.');sessionPermissionRequests=new Map(observed.requests.map(operation=>[operation.id,operation]));sessionPermissionsLoaded=true;publishOperations();}
   function schedulePermissionRefresh(version=generation){clearTimeout(permissionTimer);if(!panel||!client||!sessionId)return;permissionTimer=setTimeout(async()=>{permissionTimer=undefined;if(!panel||version!==generation)return;try{await refreshSessionPermissions(client,sessionId,version);}catch(error){if(panel&&version===generation)post({type:'error',text:error.message});}if(panel&&version===generation)schedulePermissionRefresh(version);},2500);}
-  const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();graphPaths.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
+  const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphOwners.clear();graphChildren.clear();childHistory.clear();graphPaths.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   let inboxDispatching=false;
   const inboxSelection=new QueuedRunSelection();
   async function refreshInbox(target=client,session=sessionId,version=generation){
@@ -245,8 +245,8 @@ async function activate(context) {
     for(const event of events)if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
     for(const child of children){if(snapshot.definitions.get(child.id)?.type!=='agent')continue;const history=await client.graphChildHistory(child.parent_id,child.id);if(version!==generation||!panel)return;childHistory.set(child.id,{state:child.state,history});}
     const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation||!panel)return;}
-    graphSnapshot=root;graphChildren=owned;graphPaths=snapshot.paths;
-    post({type:'graph',record:root,children,graphs:snapshot.graphs,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
+    graphSnapshot=root;graphChildren=owned;graphPaths=snapshot.paths;graphOwners=new Map([[root.run.id,root],...snapshot.graphs.map(value=>[value.record.run.id,value.record])]);
+    post({type:'graph',record:root,children,graphs:snapshot.graphs,treeInput:health?.graph_tree_human_input===true,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
     for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:snapshot.paths.get(event.run_id)?.join('/')});cursor=event.seq;}
     publishOperations(operations);post({type:'status',text:root.run.state});await readMcpInputs(id,version);if(version!==generation||!panel)return;
     sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
@@ -728,10 +728,11 @@ async function activate(context) {
           selectedGraph=message.id||undefined;post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
           await context.workspaceState.update(graphStateKey,{...connectionState(),id:selectedGraph});
         }else if(message.type==='graph-input'){
-          if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || message.owner!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
-          if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
-          if(typeof message.input_json!=='string' || message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
-          await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
+          if(!vscode.workspace.isTrusted||!graphSnapshot||graphSnapshot.run.id!==runId||message.root!==runId||!['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
+          const nested=message.owner!==runId,owner=nested?graphOwners.get(message.owner):graphSnapshot;
+          if(message.revision!==graphSnapshot.checkpoint_revision||!owner||nested&&(health?.graph_tree_human_input!==true||owner.run.state!=='paused'||!Number.isSafeInteger(message.owner_revision)||message.owner_revision!==owner.checkpoint_revision)||!owner.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
+          if(typeof message.input_json!=='string'||message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
+          if(nested)await client.graphTreeInput(runId,message.owner,message.node,message.input_json,message.revision,message.owner_revision);else await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
         }
         else if(message.type==='graph-resume'){
           const root=runId,session=sessionId,observed=graphSnapshot,target=client,version=generation;

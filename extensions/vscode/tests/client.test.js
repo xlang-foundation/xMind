@@ -486,3 +486,7 @@ test('graph stream validates pinned invocation ancestry before delivering a deep
  const client=new BackendClient('http://localhost:8765',()=>token,async url=>{const path=new URL(url).pathname;if(path.endsWith('/events/stream'))return streamResponse(streamWire(events,{scope:'graph',run:streamRoot({graph_root:true})}));return new Response(JSON.stringify(path.endsWith('/root/children')?[child]:path.endsWith('/graph-child/children')?[leaf]:path.endsWith('/root')?root:nested));});
  const result=await client.eventStream('root',{scope:'graph',session_id:'session',onEvent:event=>observed.push(event)});assert.deepEqual(observed,events);assert.equal(result.cursor,1);
 });
+
+test('nested graph input keeps owner identity both revisions and raw JSON on its versioned route',async()=>{
+ const calls=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({})};});await client.graphTreeInput('root','child','answer','{"x":1,"x":2}',4,99);assert.equal(new URL(calls[0].url).pathname,'/v1/graph-runs/root/invocations/child/human/answer');assert.deepEqual(JSON.parse(calls[0].options.body),{input_json:'{"x":1,"x":2}',expected_checkpoint_revision:4,expected_owner_checkpoint_revision:99});
+});
