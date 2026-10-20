@@ -1,0 +1,20 @@
+{
+  "recordedAt": "2026-10-20T07:39:02.869Z",
+  "revision": "91123bbcf798e54612fa1f6d10b0124f6ebe497f",
+  "run": "39386011446",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39386011446",
+  "conclusion": "success",
+  "artifact": "12246889621",
+  "name": "view-contracts-evidence-91123bbcf798e54612fa1f6d10b0124f6ebe497f.zip",
+  "bytes": 313915,
+  "digest": "sha256:1757c897324c3d1281d8aa0f22aa409461f867e9756c744be471746ffc9d1412",
+  "digestVerified": true,
+  "receiptVerified": true,
+  "extensionTests": 462,
+  "browserTests": 161,
+  "sourceVendorFiles": 71,
+  "assetFiles": 18,
+  "sourceAndAssetBytesUnchanged": true,
+  "scope": "Hosted synthetic Node adapter/controller suites; no native, live-provider or rendered IDE acceptance",
+  "archive": "C:/xMindNativeValidation/hosted-views-91123bbc-20261020/view-contracts-evidence-91123bbcf798e54612fa1f6d10b0124f6ebe497f.zip"
+}

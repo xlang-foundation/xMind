@@ -164,6 +164,13 @@ GraphPlan::GraphPlan(const std::string& source,std::size_t depth,const std::shar
     while(order_.size()<nodes_.size()){bool progress=false;for(std::size_t i=0;i<nodes_.size();++i){const auto& node=nodes_[i];if(visited.contains(node.id))continue;if(std::all_of(node.dependencies.begin(),node.dependencies.end(),[&](const auto& id){return visited.contains(id);})){visited.insert(node.id);order_.push_back(i);progress=true;}}if(!progress)throw std::invalid_argument("Graph cycles require a future bounded-loop execution contract");}
     json_=spec.dump();
 }
+std::vector<GraphAgentPath> graph_agent_paths(const GraphPlan& plan){
+    std::vector<GraphAgentPath> result;
+    const auto visit=[&](auto&& self,const GraphPlan& current,const std::string& prefix,std::size_t depth)->void{
+        if(depth>3)throw std::invalid_argument("Graph agent path exceeds invocation limits");
+        for(const auto& node:current.nodes()){const auto path=prefix.empty()?node.id:prefix+"/"+node.id;if(node.kind==GraphNodeKind::agent)result.push_back({path,node.model_id});else if(node.kind==GraphNodeKind::graph)self(self,GraphPlan(node.graph->specification_json),path,depth+1);}
+    };visit(visit,plan,"",0);return result;
+}
 std::size_t GraphCoordinator::index(const std::string& id) const {for(std::size_t i=0;i<plan_.nodes().size();++i)if(plan_.nodes()[i].id==id)return i;throw NotFound("Graph node not found");}
 bool GraphCoordinator::eligible(std::size_t i,bool& skipped) const {
     skipped=false;const auto& node=plan_.nodes()[i];auto outputs=Json::object();

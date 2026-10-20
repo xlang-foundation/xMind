@@ -125,9 +125,9 @@ std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& 
     child.max_turns=std::min(child.max_turns,max_registered_graph_agent_turns);
     const auto credentials=agent_authority_credentials(store_,child);const auto workspace=workspace_?workspace_->identity():"workspace:none";
     GraphContextSpec result;auto bindings=Json::array();
-    for(const auto& node:plan.nodes())if(node.kind==GraphNodeKind::agent){
+    for(const auto& node:graph_agent_paths(plan)){
         const auto selected=node.model_id.empty()?(model.empty()?settings_.provider.model:model):node.model_id;
-        GraphContextAgent captured{node.id,selected,public_identity(child,selected),context_authority_identity(child,selected,workspace,credentials),static_cast<std::int64_t>(child.max_turns)};
+        GraphContextAgent captured{node.node_path,selected,public_identity(child,selected),context_authority_identity(child,selected,workspace,credentials),static_cast<std::int64_t>(child.max_turns)};
         bindings.push_back({{"node",captured.node_id},{"model",captured.model_id},{"provider",captured.provider_identity_json},{"authority",captured.backend_identity},{"turn_limit",captured.turn_limit}});
         result.agents.push_back(std::move(captured));
     }

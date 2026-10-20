@@ -41,6 +41,9 @@ private:
     std::vector<std::size_t> order_;
     std::string json_;
 };
+// Logical node paths use invocation IDs as opaque components, never filesystem paths.
+struct GraphAgentPath {std::string node_path,model_id;};
+std::vector<GraphAgentPath> graph_agent_paths(const GraphPlan& plan);
 struct GraphDecision {
     std::vector<std::string> ready,skippable,waiting_human,running;
     bool finished=false,halted=false;

@@ -7,6 +7,7 @@ struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision
 // Backend-private configured authority. No provider credential or receipt is
 // returned to views. Each registered agent keeps its own selected model.
 struct GraphContextAgent {
+    // node_id is the immutable root-relative logical path for nested agents.
     std::string node_id,model_id,provider_identity_json,backend_identity;
     std::int64_t turn_limit=16;
 };
