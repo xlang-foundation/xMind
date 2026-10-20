@@ -1,0 +1,181 @@
+{
+  "observedAt": "2026-10-20T10:01:58.948Z",
+  "url": "http://127.0.0.1:60938/ui/",
+  "session": "94456c781056c58ca46abeacb7591138",
+  "root": "c601c804008ce5bab6f8b9bd50c06876",
+  "taskSubmissions": 1,
+  "state": "completed",
+  "historyMessages": 8,
+  "childCount": 1,
+  "editOperation": "c80253ff328550a83996185b0bc5616c",
+  "processOperation": "a6a0e394f07f785aa8a41a14dbb05c3a",
+  "baseline": {
+    "exitCode": 1,
+    "tests": 4,
+    "pass": 2,
+    "fail": 2
+  },
+  "after": {
+    "exitCode": 0,
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "processTreeRetired": true
+  },
+  "sourceBeforeSha256": "6c48c44ff05697ac7ec24285f25289fc517b181768478791b3c03a7875f236ac",
+  "sourceAfterSha256": "57ad7ead25f36c66159aa86ba1f0b0cb3654c6103bbdeeecf395813fbbf9141f",
+  "testsSha256": "6d8dcd19a961b438a3a1451b947b0e2ea0de6b6243aba3485071bc3d09595f5e",
+  "testsUnchanged": true,
+  "previousSevenSessions159Messages12RunsExact": true,
+  "requests": [
+    {
+      "route": "/v1/sessions/94456c781056c58ca46abeacb7591138/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/94456c781056c58ca46abeacb7591138/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/runs/c601c804008ce5bab6f8b9bd50c06876/operations",
+      "status": 200
+    },
+    {
+      "route": "/v1/runs/c601c804008ce5bab6f8b9bd50c06876/children",
+      "status": 200
+    },
+    {
+      "route": "/v1/runs/c601c804008ce5bab6f8b9bd50c06876/children/4938b448ff54504386af8b3bf0eb0a66/history",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b49f242b063af1ab6ca13db94c5165a8/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b49f242b063af1ab6ca13db94c5165a8/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/9d170d81910b61a45c21ecd8557936c0/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/9d170d81910b61a45c21ecd8557936c0/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b6b46ac843ad6b08658f4c568a2e5ea4/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/b6b46ac843ad6b08658f4c568a2e5ea4/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/58ef35476048503c598b5629019379da/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/58ef35476048503c598b5629019379da/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/cb160a995f28f81865b47f95f294999d/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/cb160a995f28f81865b47f95f294999d/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/2591d25a7123d6fa9d4cbd41b077b38d/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/2591d25a7123d6fa9d4cbd41b077b38d/runs",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/f5eebd145890d132cfc59b0589491803/messages?limit=1000",
+      "status": 200
+    },
+    {
+      "route": "/v1/sessions/f5eebd145890d132cfc59b0589491803/runs",
+      "status": 200
+    }
+  ],
+  "rawUsageAndTimings": [
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 125,
+        "input_tokens": 8560,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 125,
+        "prompt_tokens": 8560,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3053,
+      "first_token_ms": 1516
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 188,
+        "input_tokens": 9210,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 188,
+        "prompt_tokens": 9210,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 4212,
+      "first_token_ms": 1512
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 150,
+        "input_tokens": 9561,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 150,
+        "prompt_tokens": 9561,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 7159,
+      "first_token_ms": 4997
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 197,
+        "input_tokens": 10205,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 197,
+        "prompt_tokens": 10205,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 4705,
+      "first_token_ms": 1129
+    }
+  ],
+  "scope": "Actual installed57 hidden IAB task, native read delegation, reviewed edit and registered PowerShell Node tests. Rendered VS Code and external browser acceptance remain separate.",
+  "modelExplanationLimitation": "The final prose describes indices 1,3,5 and 0,2,4 without qualifying stride=2; the actual implementation and stride=3 test are correct.",
+  "passed": true
+}

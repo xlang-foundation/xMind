@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed57 fresh browser coding — 2026-10-20
+
+One new hidden-IAB task in session `94456c781056c58ca46abeacb7591138`, root `c601c804008ce5bab6f8b9bd50c06876`, completes through installed57 and the existing adopted native backend. The model delegates two fixture reads to native owned task `4938b448ff54504386af8b3bf0eb0a66`, proposes exactly `index % stride === 1` to `=== 0` in `xmind-browser57-coding-20261020/take-every.mjs`, and applies it after the rendered Allow edit review. Registered PowerShell then executes the Node test command: actual exit0, four tests/four pass/zero fail and process tree retired. Baseline was exit1/two pass/two fail; test bytes remain SHA256 `6d8dcd19a961b438a3a1451b947b0e2ea0de6b6243aba3485071bc3d09595f5e`.
+
+Reload restores the same completed root, eight root messages and its five-message completed read child, saved Claude/claude-sonnet-4-6 selection and enabled Send. The rendered result/counts and footer are captured in [the screenshot](evidence/coding57-browser-coding-result-20261020.png). Independent API comparison confirms all seven prior sessions,159 messages and12 runs remain exact; old page55684 host54928/view56652 and adopted backend69196 retain their exact identities. No previous task was replayed. The model's final index sequence explanation implicitly assumes stride2; the implementation and stride3 test are correct.
+
+The first acceptance observer treated the messages response envelope as an array and failed after verifying effect receipts, disk hashes and prior histories. Correcting the observer to read `.messages` completes the checks without resubmitting any model/tool work. Raw new/prior histories remain private under C:/xMindNativeValidation; public receipts contain only fixture hashes, counts and supplied usage/timings. See [acceptance](evidence/coding57-browser-coding-20261020.json), [rendered observation](evidence/coding57-browser-coding-rendered-20261020.json) and [actual process output](evidence/coding57-browser-coding-process-20261020.log). This proves one fresh installed57 rendered IAB coding task, including native delegated reading, approval/edit/process and restore. Current rendered VS Code, external-browser acceptance, shared nested context/clock execution and other documented OSS requirements remain open; the goal remains active.
+
 ## Installed57 hidden-browser restoration and footer — 2026-10-20
 
 A separate installed57 browser host now serves http://127.0.0.1:60938/ui/ through native view52415 and the same adopted backend57779/owner69196. Exact new identities are Node67436 born2026-10-20T09:50:06.0265650Z and installed57 native view61600 born2026-10-20T09:50:06.8679030Z. Both native images match qualifiedfc94ced1. All13served shell assets match installed57 bytes; old page55684/host54928/view56652 remain unchanged.

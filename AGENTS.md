@@ -6,11 +6,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed57 client6dbab29f/native971ad1e1/fc94ced1:155native,462/161clients;2448archive/2445installed verify. TestProj owner69196 born2026-10-20T09:46:30.9386120Z, same profile/57779; all7sessions/159messages/12runs/config exact. Page60938 host67436/view61600 serves57; IAB restores CLI55 9messages/model/reload and expanded footer without replay. Old page55684/hosts54928,56652 retained. See doc/VALIDATION_STATUS.md and coding57 evidence.
+- Installed57 client6dbab29f/native971ad1e1/fc94ced1:155native,462/161clients;2448archive/2445installed verify. Owner69196 born2026-10-20T09:46:30.9386120Z/profile57779. Page60938 hosts67436/61600. Fresh IAB session94456c781056c58ca46abeacb7591138/rootc601c804008ce5bab6f8b9bd50c06876 completes2delegatedreads/approvededit/Node4of4/reload; NEVER replay. Prior7sessions/159messages/12runs exact; old55684 owners54928/56652 retained. See doc/VALIDATION_STATUS.md.
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Observer failure and byte-safe preservation proof remain in coding54 adoption receipts. External Edge/current VS Code acceptance remain open.
 
-- Candidate bd06e275/bf189ca7 full155 and f8602352 clients460/160/nested review-restore pass. Uninstalled; see doc/VALIDATION_STATUS.md.
+- Historical candidate bd06e275/bf189ca7 and f8602352 evidence: doc/VALIDATION_STATUS.md.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 

@@ -1,0 +1,18 @@
+{
+  "completedResultPresent": true,
+  "model": "claude-sonnet-4-6",
+  "observedAt": "2026-10-20T10:02:23.995Z",
+  "provider": "claude",
+  "root": "c601c804008ce5bab6f8b9bd50c06876",
+  "sendEnabled": true,
+  "session": "94456c781056c58ca46abeacb7591138",
+  "url": "http://127.0.0.1:60938/ui/",
+  "viewport": {
+    "height": 720,
+    "width": 1280
+  },
+  "reloadRestored": true,
+  "taskSubmissions": 1,
+  "child": "4938b448ff54504386af8b3bf0eb0a66",
+  "observerCorrection": "Initial acceptance observer incorrectly treated the HTTP messages envelope as an array; corrected to .messages. No task or tool was resubmitted."
+}
