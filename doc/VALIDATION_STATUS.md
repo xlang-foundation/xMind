@@ -2,6 +2,15 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested client merge verified in main — 2026-10-19
+
+Fast-forwarded isolated client06183b6b and integration/final-native-evidencef6532e4d into main only after the original d2865a32 full155 native gate reached terminal0. In the actual main checkout, freshly built assets and complete460extension/159browser suites pass with71source/vendor and18asset bytes unchanged. The native/browser contract passes again against the same qualified af166abb binary, using a real short-path temporary root and a fresh session. All source,SDK,pure-library,Node-dependency,binary and asset sets remain unchanged during that integration gate; it starts no live provider task and touches no user profile. See evidence/nested-graph-main-client-20261019-* and evidence/nested-graph-main-native-20261019-*.
+
+The af166abb executable and paired1ff2a8e7 DLL are byte-verified and preserved at C:/xMindNativeValidation/qualified-nested-graph-binaries-20261019 before further native builds. This preserves exact accepted artifacts; it is not a complete runtime distribution or an installed upgrade. No broader full-native result is inferred for client-only changes: backend qualification remains d2865a32/155, followed by exact main-checkout client and browser/native integration validation atf6532e4d.
+
+Installed0.1.56 and its user owners/settings/history remain untouched by these disposable tests. The goal is still incomplete: nested human/context pause/resume and shared context/model-call budgets, authenticated worker transport/placement and generic connection protocol work, qualified package adoption and actual rendered/editor acceptance remain open.
+
+
 ## Native155 and nested browser proposal integration — 2026-10-19
 
 Fresh complete source d2865a32 native155 gate passes1051.94seconds (CTest69272 and wrapper54711 terminal0). All2628project/16SDK/1870pure/76runtime/18598dependency/130binary file sets/hashes remain unchanged, including the shared read-only dependencies used by the isolated client work. Native executable SHA256af166abbd22dc9f2303e8874a189d3f3912f0e40af65c1d13827e0fa5c3760bf; SDK DLL1ff2a8e7. This is actual full qualification of that backend source, separate from the earlier failed154/155 gate. See evidence/nested-graph-full-native-passed-20261019-*.
