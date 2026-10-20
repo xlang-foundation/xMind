@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-20T04:00:57.512Z",
+  "scope": "Actual preserved hidden IAB rendering after installed56 native adoption, with all13 client assets byte-identical to installed56. Restores the existing CLI55 coding task; no fresh model task or effect replay.",
+  "session": "f5eebd145890d132cfc59b0589491803",
+  "run": "cc3d14ff5b4c570cebf41a92c85c6d52",
+  "messageHeadings": [
+    "You",
+    "xMind",
+    "tool",
+    "tool",
+    "xMind",
+    "tool",
+    "xMind",
+    "tool",
+    "xMind"
+  ],
+  "resultTable": "Metric\tCount\ntests\t4\npass\t4\nfail\t0\ncancelled / skipped / todo\t0",
+  "sendEnabled": true,
+  "taskSubmissions": 0,
+  "reloadPreservedSelection": true,
+  "observerNote": "Initial heading assertion used AX uppercase labels; DOM text retains You/xMind/tool casing. Normalized DOM comparison fixes the observer; no user state was changed.",
+  "screenshot": "doc/evidence/coding56-iab-cli-restore-20261019.png",
+  "screenshotSha256": "b6c04f72d1018b92428a23b9f6c7832da484406c5a4adb4941de644637aebf0e",
+  "passed": true
+}

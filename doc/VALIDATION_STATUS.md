@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed0.1.56 shared-worker adoption — 2026-10-19
+
+Client source4b0407f7 packages qualified native54a46c9a/3854a562. Full155 native and445/158 client gates pass;17440stage files remain unchanged. VSIX2448entries match the qualified stage; all2445installed payloads verify. Archive SHA256330473673b32772c418f93f0ce8132b671e09681318d7ab0b00e1e5f016a4f11; runtime manifesteb2d15a0a312052767e5c0d1081d46251ba014dd391eaf3b3f52df0048a97665. Installed55 backup2447files verifies; settings and seven profile directories remain unchanged.
+
+Explicit native upgrade retires only verified owner56032 and starts7768 born2026-10-20T03:59:50.9506960Z, using the same p-current TestProj SQLite profile and native origin57779. Byte-safe before/after CLI snapshots and independent HTTP snapshot retain all7sessions/159messages/12runs/provider/process/MCP/membership exactly. Existing host54928/native view56652 remain identity-bound and page55684 restores the adopted state. All13served browser assets match installed56 byte for byte.
+
+Actual hidden IAB selects the completed CLI55 chunking task, restores its9messages, saved Claude model/usage, two successful operations and4/4test result, then preserves that selection on reload with Send enabled. No prompt, model call or effect is replayed. Initial DOM assertion used AX uppercase headings; normalizing DOM casing corrected that observer and is recorded. This is rendered restoration, not a new native56 coding/inference task, current VS Code rendering or external-browser acceptance. Hosted39364831617 remains independently live; prior hosted39360428093 graph process30s failure remains unaccepted.
+
+See coding56 client-gate/package/installed/preservation/primary-adoption/adopted-owners/view-after-adoption/served-asset-identity/IAB-CLI-restore receipts under evidence, plus coding56-iab-cli-restore-20261019.png.
+
 ## Hosted process diagnostic precision — 2026-10-19
 
 Analysis of the preserved39360428093 graph-process trace finds three samples, each with exactly64 module names. The old observer selected only the first64; Utility missing from that prefix does not establish it was unloaded. The child CPU total grows609.375ms to20,531.25ms, while the observer stopwatch grows7356ms to28,596ms. That stopwatch does not measure child age. The provenance default-owner flag compares token SIDs, not user profile directories. Command/module resolution remains an unproven hypothesis.

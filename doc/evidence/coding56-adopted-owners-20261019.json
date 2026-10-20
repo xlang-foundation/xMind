@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-20T04:01:39.006Z",
+  "identities": [
+    {
+      "pid": 54928,
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "birth": "2026-10-20T01:31:22.5893370Z"
+    },
+    {
+      "pid": 56652,
+      "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe",
+      "birth": "2026-10-20T01:31:23.3699400Z"
+    },
+    {
+      "pid": 7768,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-288a4f22bf0089c1f3b3e1824ddb4fbf47cb289f243d1e0474ccb36c500a9721\\xmind.exe",
+      "birth": "2026-10-20T03:59:50.9506960Z"
+    }
+  ],
+  "url": "http://127.0.0.1:55684/ui/",
+  "pageStatus": 200,
+  "scope": "Existing adopted56 host/view/backend identity and HTML availability only; saved history is checked separately.",
+  "passed": true
+}

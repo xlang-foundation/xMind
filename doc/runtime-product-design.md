@@ -111,11 +111,11 @@ retains durable admission but releases execution. The actual mixed-service
 ordering regression fails against installed54 production bytes and passes with
 the correction, alongside seven related contracts. The complete154-contract local
 gate passes in1,061.07seconds; installed55 adoption passes while hosted acceptance remains pending.
-Candidate54a46c9a integrates a shared physical root pool in ExecutionPlatform.
+Installed56 native54a46c9a integrates a shared physical root pool in ExecutionPlatform.
 Both services stage FIFO rank before durable admission and publish runnable
 committed work to the same workers. Actual mixed roots, pause/restart, FIFO and
 shutdown contracts pass; the complete155 local gate passes in1058.37seconds.
-Hosted acceptance and installation remain pending; agent process placement is separate.
+Installed56 adoption and IAB restore pass; hosted acceptance remains pending. Agent process placement is separate.
 [Focused red/green scope](evidence/shared-backlog-order-focused-20261019.json).
 [Complete local gate](evidence/shared-backlog-order-full-20261019.json).
 

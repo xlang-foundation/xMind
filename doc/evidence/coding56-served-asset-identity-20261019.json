@@ -1,0 +1,125 @@
+{
+  "observedAt": "2026-10-20T04:00:07.714Z",
+  "scope": "Read-only byte comparison of every registered browser shell asset served by preserved host55684 against installed56 assets. No API mutation or model/task replay; does not prove current VS Code rendering.",
+  "installedVersion": "0.1.56",
+  "assets": [
+    {
+      "name": "index.html",
+      "url": "http://127.0.0.1:55684/ui/",
+      "status": 200,
+      "bytes": 20053,
+      "servedSha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a",
+      "installedSha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a",
+      "matches": true
+    },
+    {
+      "name": "patch-review.js",
+      "url": "http://127.0.0.1:55684/ui/patch-review.js",
+      "status": 200,
+      "bytes": 6467,
+      "servedSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "installedSha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "matches": true
+    },
+    {
+      "name": "browser.js",
+      "url": "http://127.0.0.1:55684/ui/browser.js",
+      "status": 200,
+      "bytes": 129936,
+      "servedSha256": "d12970c6621cb4266ad620397a3b432eac60683884a8e0e9c62dd4e3a3000c52",
+      "installedSha256": "d12970c6621cb4266ad620397a3b432eac60683884a8e0e9c62dd4e3a3000c52",
+      "matches": true
+    },
+    {
+      "name": "terminal.js",
+      "url": "http://127.0.0.1:55684/ui/terminal.js",
+      "status": 200,
+      "bytes": 5749,
+      "servedSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+      "installedSha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+      "matches": true
+    },
+    {
+      "name": "browser.css",
+      "url": "http://127.0.0.1:55684/ui/browser.css",
+      "status": 200,
+      "bytes": 14348,
+      "servedSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+      "installedSha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+      "matches": true
+    },
+    {
+      "name": "xterm.css",
+      "url": "http://127.0.0.1:55684/ui/xterm.css",
+      "status": 200,
+      "bytes": 7112,
+      "servedSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "installedSha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "matches": true
+    },
+    {
+      "name": "xterm.js",
+      "url": "http://127.0.0.1:55684/ui/xterm.js",
+      "status": 200,
+      "bytes": 488663,
+      "servedSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+      "installedSha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+      "matches": true
+    },
+    {
+      "name": "xterm-fit.js",
+      "url": "http://127.0.0.1:55684/ui/xterm-fit.js",
+      "status": 200,
+      "bytes": 1521,
+      "servedSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+      "installedSha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+      "matches": true
+    },
+    {
+      "name": "chat.js",
+      "url": "http://127.0.0.1:55684/ui/chat.js",
+      "status": 200,
+      "bytes": 129513,
+      "servedSha256": "9979333cb8f064094d314d11f1ef5126b394067194b2993d1920034f08e9264a",
+      "installedSha256": "9979333cb8f064094d314d11f1ef5126b394067194b2993d1920034f08e9264a",
+      "matches": true
+    },
+    {
+      "name": "chat.css",
+      "url": "http://127.0.0.1:55684/ui/chat.css",
+      "status": 200,
+      "bytes": 17385,
+      "servedSha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f",
+      "installedSha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f",
+      "matches": true
+    },
+    {
+      "name": "client.js",
+      "url": "http://127.0.0.1:55684/ui/client.js",
+      "status": 200,
+      "bytes": 151789,
+      "servedSha256": "5b8f6ca97f0d00dacdd68d43c87d107faa0fbb1ad2521199aecaefd7f56b3994",
+      "installedSha256": "5b8f6ca97f0d00dacdd68d43c87d107faa0fbb1ad2521199aecaefd7f56b3994",
+      "matches": true
+    },
+    {
+      "name": "marked.js",
+      "url": "http://127.0.0.1:55684/ui/marked.js",
+      "status": 200,
+      "bytes": 47225,
+      "servedSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "installedSha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "matches": true
+    },
+    {
+      "name": "purify.js",
+      "url": "http://127.0.0.1:55684/ui/purify.js",
+      "status": 200,
+      "bytes": 28885,
+      "servedSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "installedSha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "matches": true
+    }
+  ],
+  "passed": true
+}
