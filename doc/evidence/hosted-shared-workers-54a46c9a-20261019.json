@@ -1,0 +1,36 @@
+{
+  "run": "39364831617",
+  "revision": "54a46c9ad32d53b6491c5650984a4d446b81d113",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39364831617",
+  "status": "completed",
+  "conclusion": "failure",
+  "artifact": {
+    "id": 12239783981,
+    "bytes": 75034,
+    "sha256": "acd5ca3644fb04c21e00e8c769d148b210d23e2dfbbb644d66d381d15158b464",
+    "digestVerified": true
+  },
+  "native": {
+    "passed": 156,
+    "failed": 0,
+    "seconds": 606.29
+  },
+  "sdk": {
+    "passed": 2,
+    "failed": 0,
+    "seconds": 8.17
+  },
+  "browserController": {
+    "passed": 158,
+    "failed": 0
+  },
+  "failedStep": "Verify browser view and native runtime separation",
+  "error": {
+    "file": "views/browser/tests/native-contract.mjs:30",
+    "assertion": "Selected workspace string equality",
+    "actual": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-browser-contract-1GDu0Z\\workspace",
+    "expected": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\xmind-browser-contract-1GDu0Z\\workspace"
+  },
+  "limitation": "Workflow failed. Native and SDK pass are separate scopes. Subsequent staging and installation were not reached.",
+  "localCorrection": "browser-canonical-workspace-20261019.json"
+}

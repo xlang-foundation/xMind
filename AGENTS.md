@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed56 client4b0407f7/native54a46c9a/3854a562 passes155native and445/158clients;2448archive/2445installed verify. Native adoption retires56032, starts7768 born2026-10-20T03:59:50.9506960Z; same TestProj profile/origin57779. All7sessions/159messages/12runs/config exact. Page55684 host54928/view56652 retained; all13assets match56. IAB restores CLI55 coding9messages/reload without replay. Hosted39364831617 live; prior39360428093 fails graph30s. See coding56 evidence.
+- Installed56 client4b0407f7/native54a46c9a/3854a562 passes155native and445/158clients;2448archive/2445installed verify. Native adoption retires56032, starts7768 born2026-10-20T03:59:50.9506960Z; same TestProj profile/origin57779. All7sessions/159messages/12runs/config exact. Page55684 host54928/view56652 retained; all13assets match56. IAB restores CLI55 coding9messages/reload without replay. Hosted39364831617 native156 passes; browser short-path assertion fails. See coding56 evidence.
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Observer failure and byte-safe preservation proof remain in coding54 adoption receipts. External Edge/current VS Code acceptance remain open.
 

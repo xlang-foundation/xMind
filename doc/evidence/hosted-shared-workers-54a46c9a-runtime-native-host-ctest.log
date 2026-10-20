@@ -1,0 +1,9 @@
+Test project D:/a/xMind/xMind/xlang3/build
+    Start  3: xlang3_ipc_native_host_tests
+1/2 Test  #3: xlang3_ipc_native_host_tests ......   Passed    0.05 sec
+    Start 46: xlang3_cli_unicode_library_path
+2/2 Test #46: xlang3_cli_unicode_library_path ...   Passed    8.05 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   8.17 sec

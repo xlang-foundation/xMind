@@ -2,6 +2,13 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Hosted shared-worker result and Windows path assertion — 2026-10-19
+
+Run39364831617/source54a46c9a is terminal failure. Official artifact12239783981 (75034bytes, SHA256acd5ca3644fb04c21e00e8c769d148b210d23e2dfbbb644d66d381d15158b464) verifies. All156 native contracts pass606.29seconds, both SDK contracts pass8.17seconds and158 browser-controller tests pass. The later browser/native command fails at its selected-workspace assertion: Windows expands RUNNER~1 to runneradmin. Packaging was not reached; this is not a successful workflow.
+
+The integration assertion now compares realpath results for both existing directories. It retains strict directory identity, including symlink resolution, rather than relaxing to a basename or case-only comparison. The actual native/browser integration passes with TEMP/TMP deliberately set to a real8.3 alias (C:/XMINDN~1/BR553C~1), using candidatef53ec389 and frozen source,SDK,library,dependency,binary and asset file sets. It exercises disposable graph/human/file/reconnect contracts without a model or existing user session. This corrects the observer; no production path behavior changes. Hosted evidence and the local correction are saved under evidence/hosted-shared-workers-54a46c9a-* and evidence/browser-canonical-workspace-20261019.*. Installed56 remains unchanged; full goal verification remains open.
+
+
 ## Durable nested invocation admission — 2026-10-19
 
 Repository admission now derives a child graph identity, revision, immutable specification and task input from its parent's captured snapshot. The child remains under the same session root with isolated history, explicit graph_invocation observation and checkpoint compare-and-swap. Child insertion, messages, events and parent checkpoint are transactional. Catalogue changes after root capture cannot substitute a newer child. This backend-only primitive rejects descendants and registered context owners pending their budget/context ownership contracts; public coordinator start and GraphRunner preflight remain closed to nested execution.
