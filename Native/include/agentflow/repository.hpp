@@ -199,6 +199,8 @@ public:
     Event record_agent_worker_model_event(const AgentWorkerModelClaimSpec&,const std::string& kind,const std::string& json);
     Event agent_worker_model_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);
     AgentWorkerLeaseRecord retire_agent_worker(const std::string& generation,const std::string& reason);
+    // Backend supervisor only, after physical work has drained. No execution authority.
+    Run terminate_agent_worker(const AgentWorkerLeaseSpec&,RunState outcome,const std::string& reason);
     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);

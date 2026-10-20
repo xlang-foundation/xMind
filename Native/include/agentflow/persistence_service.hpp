@@ -30,6 +30,9 @@ public:
     std::future<ModelCallReservation> finish_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<Run> complete_agent_worker_run(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
+    // Terminal observations remain recordable after the execution token/deadline stops.
+    // The supervisor must drain physical work before calling; never expose as generic RPC.
+    std::future<Run> terminate_agent_worker(AgentWorkerLeaseSpec,RunState outcome,std::string reason);
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> agent_worker_model_claim(std::string root,std::string attempt);

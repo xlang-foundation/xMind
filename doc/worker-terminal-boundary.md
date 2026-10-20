@@ -3,6 +3,30 @@
 Source audit against `ff463d0c` (2026-10-20). This is an implementation
 requirement, not evidence that service placement or failure retirement works.
 
+An initial backend persistence operation is now implemented as
+`Repository::terminate_agent_worker`, queued through `PersistenceService`. It
+accepts failed outcomes with fixed `deadline`, `provider_failure`, `worker_exit`
+or `dispatch_error` reasons, or cancellation with `cancelled`. It requires the
+exact active current lease and an ordinary queued/running direct root, rejects
+dynamic roots and executing operations, and preserves the native root boundary.
+Run termination, waiting-operation cancellation, unfinished reservation
+interruption and generation retirement share one transaction. Failed
+observations map to the existing lease `worker_exit`/`dispatch_error` reasons;
+the terminal run event retains the specific fixed reason. Duplicate calls reject
+without adding events. No terminal RPC, child drain or service placement is
+implemented by this persistence API.
+
+The [focused gate](evidence/agent-worker-terminal-focused-20261020.json) passed
+52 contracts in 182.36 seconds. Its new synthetic ledger case verifies exact
+process-identity rejection, invalid outcome/reason rejection, full rollback at
+an injected lease-retirement failure, interruption of reserved/started calls
+while retaining finished reservations and charges, queued cancellation without
+model startup, and rejection of duplicate termination/late continuation. Source
+and dependency closures and all 133 native binaries were frozen across tests.
+This does not qualify actual child failure/cancellation, pending-approval drain,
+effect retirement or product placement. The remaining qualification below stays
+open; the source observations describe the pre-operation baseline.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

@@ -139,3 +139,5 @@ doc/evidence/agent-worker-tool-turn-*.log -text whitespace=-blank-at-eol,-blank-
 doc/evidence/agent-worker-read-context-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/agent-worker-read-runner-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/agent-worker-terminal-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

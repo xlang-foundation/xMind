@@ -3381,6 +3381,31 @@ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& genera
 
 AgentWorkerLeaseRecord Repository::retire_agent_worker(const std::string& generation,const std::string& reason){Transaction tx(impl_->database);auto record=impl_->retire_worker(generation,reason);tx.commit();return record;}
 
+Run Repository::terminate_agent_worker(const AgentWorkerLeaseSpec& lease,RunState outcome,const std::string& reason){
+    const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};
+    if(!((outcome==RunState::cancelled&&reason=="cancelled")||(outcome==RunState::failed&&failures.contains(reason))))
+        throw std::invalid_argument("Invalid worker terminal observation");
+    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease,true);
+    auto current=run(lease.owner_run_id);
+    if(lease.owner_run_id!=lease.root_run_id||!current.parent_id.empty()||current.graph_root||root_budget(current.id).spec.policy_id!="native.direct-agent"||
+       !db.execute("SELECT root_run_id FROM dynamic_capabilities WHERE root_run_id=?",{current.id}).rows.empty())
+        throw Conflict("Worker termination requires an ordinary direct root");
+    impl_->root_boundary(current,outcome);
+    // This initial read-worker boundary cannot release executing effects, even
+    // background processes. Uncertain effects remain facts under their owners.
+    if(impl_->has_operations(current.id,"'executing'"))throw Conflict("Worker termination still owns executing effects");
+    changed_one(db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(outcome),current.id,state_name(current.state)}));
+    impl_->cancel_waiting(current.id);
+    const auto attempts=db.execute("SELECT attempt_id,role,state FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND state IN ('reserved','started') ORDER BY attempt_id",{lease.root_run_id,lease.owner_run_id}).rows;
+    for(const auto& row:attempts){
+        changed_one(db.execute("UPDATE agent_model_call_reservations SET state='interrupted' WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state=?",{lease.root_run_id,text(row[0]),lease.owner_run_id,text(row[2])}));
+        impl_->event(current.id,"budget.model_call.interrupted",Json{{"root_run_id",lease.root_run_id},{"attempt_id",text(row[0])},{"role",text(row[1])},{"was_started",text(row[2])=="started"},{"generation",lease.generation},{"reason",reason}}.dump());
+    }
+    impl_->retire_worker(lease.generation,outcome==RunState::cancelled?"cancelled":reason=="worker_exit"?"worker_exit":"dispatch_error");
+    impl_->event(current.id,"run."+state_name(outcome),Json{{"reason",reason},{"generation",lease.generation}}.dump());
+    tx.commit();current.state=outcome;return current;
+}
+
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);
     if(category==backend_owner_category||category==legacy_owner_category||category==refresh_category)throw std::invalid_argument("Use typed native owner control");

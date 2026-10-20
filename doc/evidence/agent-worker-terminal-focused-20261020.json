@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-10-20T18:50:20.664Z",
+  "gate": {
+    "recordedAt": "2026-10-20T18:50:09.280Z",
+    "sourceParent": "3b3f4881dc96226b09f181f1d2a19dbd81be4519",
+    "sourcePatchSha256": "eaf0bf5ef839fd727ef4468b0e78ad7af6affe63f0edd074f2c4fd6071525027",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 72652,
+      "launchedAt": "2026-10-20T18:30:25.394Z",
+      "completedAt": "2026-10-20T18:46:56.808Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f035d043d527b401e7ed9e3445e026fb03624e3eb7b4e58a20d13cc4f70499d0"
+    },
+    "test": {
+      "pid": 6432,
+      "launchedAt": "2026-10-20T18:47:02.172Z",
+      "completedAt": "2026-10-20T18:50:04.618Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d63d5b45af60d7f0ccd70d0152f0e86244333d2192b14308e8c588fdb8af1e6b"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 182.36,
+    "projectFiles": 2666,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "438af630e3965f1e092d2523bb8b22fc6963efe21b73e57c65fb60e3497e569f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-terminal-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-terminal-focused-20261020-build.log": "f035d043d527b401e7ed9e3445e026fb03624e3eb7b4e58a20d13cc4f70499d0",
+        "doc/evidence/agent-worker-terminal-focused-20261020-build-terminal.json": "c3ecec1ca3c542413f67176673c2a0cb8c5996da9bac167cecfc5dbcde371d5c",
+        "doc/evidence/agent-worker-terminal-focused-20261020-ctest.log": "d63d5b45af60d7f0ccd70d0152f0e86244333d2192b14308e8c588fdb8af1e6b",
+        "doc/evidence/agent-worker-terminal-focused-20261020-ctest-terminal.json": "ef2951399233d357af0087dab2b35785a3cc4b41e785980c86b1f8aa092f440a",
+        "doc/evidence/agent-worker-terminal-focused-20261020-LastTest.log": "2348922a33797371abeedd655ca3397c47daed06b403b0c67322a4af5323a3f2",
+        "doc/evidence/agent-worker-terminal-focused-20261020-test-inventory.json": "00c892fee6e1ff6dd048d1fae0c66f85c0049c9e0a26ae20c952dd6e2138e854",
+        "doc/evidence/agent-worker-terminal-focused-20261020-gate.json": "f5e1d2e9ef5dd5f43ca2a8db9b368a211f9f138081944e068a0c8477c489bca4"
+      },
+      "localManifestHashes": {
+        "source.patch": "eaf0bf5ef839fd727ef4468b0e78ad7af6affe63f0edd074f2c4fd6071525027",
+        "inputs-before-build.json": "1621469b0fb3a408a6fa1d7f26e83d8eb9505ef35e19e436d56c07b0f64dcc77",
+        "binaries-before-test.json": "7f509f0c6d3dc853deeffba0919be8dd3d505812540c7042bdd9d93b8b907fbf"
+      }
+    }
+  },
+  "fixtureSha256": "6dd04e90a7a92c2bc66622c15c6331e2ee0868349ddaf4601eb791ba248a2e0d",
+  "ledgerFixtureSha256": "7bbc4163a6c839b0dd82a717e6f4171987b60a94649c8ac656ed8f52e50d5272",
+  "scope": "Backend-only ordinary direct-root terminal persistence operation. Synthetic process metadata in the new ledger contract; actual child runner success remains separately covered by the unchanged RPC contract.",
+  "verified": [
+    "Exact captured process identity rejects mismatches",
+    "Illegal outcome/reason rejected",
+    "Injected lease-retirement SQL failure rolls back runs, reservations, worker information, budgets, history and events",
+    "Drained-worker-exit observation atomically fails root, retires generation and marks dispatched model uncertain",
+    "Reserved and started model reservations interrupted; finished reservations and all consumed allowance retained",
+    "Queued cancellation does not start or fund a model",
+    "Repeated terminal call rejects without appending events; retired continuation rejected"
+  ],
+  "limitations": [
+    "No AgentService placement or supervisor drain implementation",
+    "No new actual-child failure/cancellation qualification",
+    "No automatic retry, worker restart, execution authority or deadline extension",
+    "Pending approvals, executing-effect rejection, late actual results and broad profiles require further targeted qualification",
+    "No full native, hosted, installed, rendered UI or live-provider acceptance claim"
+  ]
+}
