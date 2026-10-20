@@ -1,3 +1,27 @@
+## Verified 0.1.59 package candidate — 2026-10-20
+
+`C:/xMindNativeValidation/xmind-0.1.59-complete-win32-x64.vsix` is built and
+verified: 34,649,178 bytes, SHA
+`1cd46efd0eaaf32d959272dc9da0a49bc56303cb9837ac4045891e5ebc9b4d93`.
+All 2,448 archive entries verify; extension payloads match the exact qualified
+stage, including recorded README/LICENSE path-case aliases. The complete
+17,441-file staging tree remains unchanged after client tests, actual native
+browser integration and packaging. Fresh staged-client suites pass 462/462
+extension and 161/161 browser tests with no failures, skips or cancellations.
+
+Client source is `225d7c497613782472ba9b83bcb3a18fb88fb1c8`; native source is
+the complete-160-qualified `959f1d956a95cdaa036fb0e51bc02ebe2c004639`, binary
+`2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f`.
+The staged executable and its bundled modules/stdlib pass the native browser
+contract in 3.913 seconds. Runtime manifest and all 2,402 declared payloads
+verify. [Package receipt, exact hashes and raw evidence](evidence/coding59-package-candidate-20261020.json).
+
+This candidate is not installed or release accepted. Installed 0.1.58, existing
+owners/pages, configuration, history and successful user tasks remain preserved.
+No visible editor/browser was opened, provider inference requested or completed
+user task replayed. Rendered-client, installation and remaining product/worker
+requirements remain open.
+
 ## Current client/native integration and runtime stage — 2026-10-20
 
 The current source also passes **462/462 extension and 161/161 browser Node

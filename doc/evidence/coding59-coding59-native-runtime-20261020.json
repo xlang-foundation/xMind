@@ -1,0 +1,11 @@
+{
+  "runtimeRoot": "C:/xMindNativeValidation/coding59-native-runtime-20261020",
+  "manifestSha256": "624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a",
+  "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f",
+  "nativeRevision": "959f1d956a95cdaa036fb0e51bc02ebe2c004639",
+  "files": 2402,
+  "completeNativeContracts": 160,
+  "sdkReusedByteForByte": true,
+  "releaseAccepted": false,
+  "scopePassed": true
+}

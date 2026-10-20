@@ -1,0 +1,161 @@
+{
+  "recordedAt": "2026-10-20T21:54:33.760Z",
+  "version": "0.1.59",
+  "package": {
+    "recordedAt": "2026-10-20T21:53:32.654Z",
+    "version": "0.1.59",
+    "sourceRevision": "225d7c497613782472ba9b83bcb3a18fb88fb1c8",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.59-complete-win32-x64.vsix",
+    "archiveBytes": 34649178,
+    "archiveSha256": "1cd46efd0eaaf32d959272dc9da0a49bc56303cb9837ac4045891e5ebc9b4d93",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17441,
+    "terminal": {
+      "startedAt": "2026-10-20T21:52:58.062Z",
+      "completedAt": "2026-10-20T21:53:30.201Z",
+      "pid": 48072,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cd2f62aa00ddf3845de7e89e2aa7b2ac60fbf97398918dcd7f9fae52a16ac31b"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "client": {
+    "recordedAt": "2026-10-20T21:50:51.654Z",
+    "version": "0.1.59",
+    "sourceRevision": "225d7c497613782472ba9b83bcb3a18fb88fb1c8",
+    "extension": {
+      "exitCode": 0,
+      "tests": 462,
+      "passed": 462,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "403b6c57497a361d1c872e08dec92b046730789261177056a2c58fe2865a6cb8"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 161,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "6550579d0c05a50048872998f9c117d07c30158f6942db40c7718266fdaa3205"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17441,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "nativeBrowser": {
+    "recordedAt": "2026-10-20T21:51:12.870Z",
+    "version": "0.1.59",
+    "clientSource": "225d7c497613782472ba9b83bcb3a18fb88fb1c8",
+    "nativeSource": "959f1d956a95cdaa036fb0e51bc02ebe2c004639",
+    "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "allStageFilesUnchanged": 17441,
+    "terminal": {
+      "pid": 24612,
+      "startedAt": "2026-10-20T21:51:07.338Z",
+      "completedAt": "2026-10-20T21:51:11.251Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+    },
+    "installed": false,
+    "renderedIde": false,
+    "providerRequests": 0,
+    "passed": true
+  },
+  "runtime": {
+    "runtimeRoot": "C:/xMindNativeValidation/coding59-native-runtime-20261020",
+    "manifestSha256": "624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a",
+    "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f",
+    "nativeRevision": "959f1d956a95cdaa036fb0e51bc02ebe2c004639",
+    "files": 2402,
+    "completeNativeContracts": 160,
+    "sdkReusedByteForByte": true,
+    "releaseAccepted": false,
+    "scopePassed": true
+  },
+  "finalStage": {
+    "observedAt": "2026-10-20T21:53:57.986Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.59-current-source-20261020",
+    "files": 17441,
+    "allFileSetsAndHashesUnchangedAfterClientNativeAndPackagingGates": true,
+    "passed": true
+  },
+  "evidence": {
+    "doc/evidence/coding59-coding-0.1.59-current-client-gate-20261020-extension.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-current-client-gate-20261020/extension.log",
+      "sha256": "403b6c57497a361d1c872e08dec92b046730789261177056a2c58fe2865a6cb8"
+    },
+    "doc/evidence/coding59-coding-0.1.59-current-client-gate-20261020-browser.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-current-client-gate-20261020/browser.log",
+      "sha256": "6550579d0c05a50048872998f9c117d07c30158f6942db40c7718266fdaa3205"
+    },
+    "doc/evidence/coding59-coding-0.1.59-current-client-gate-20261020-results.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-current-client-gate-20261020/results.json",
+      "sha256": "99e588388dc528ac8e01d6373b362a548580c23bf96531ccac34e44c3b6c01cc"
+    },
+    "doc/evidence/coding59-coding-0.1.59-current-client-gate-20261020-gate.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-current-client-gate-20261020/gate.json",
+      "sha256": "2da33b5f19dc022b213935c438a395b91edf0bb0e8b02a22e8efe9a52a1849bb"
+    },
+    "doc/evidence/coding59-coding-0.1.59-browser-native-20261020-browser-native.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-browser-native-20261020/browser-native.log",
+      "sha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+    },
+    "doc/evidence/coding59-coding-0.1.59-browser-native-20261020-gate.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-browser-native-20261020/gate.json",
+      "sha256": "f7479561b014b9b0ff322e0a2ba7d5c991c0a550ce213b6d602bba25f8460b8d"
+    },
+    "doc/evidence/coding59-vscode-0.1.59-package-20261020.log": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.59-package-20261020.log",
+      "sha256": "cd2f62aa00ddf3845de7e89e2aa7b2ac60fbf97398918dcd7f9fae52a16ac31b"
+    },
+    "doc/evidence/coding59-vscode-0.1.59-package-terminal-20261020.json": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.59-package-terminal-20261020.json",
+      "sha256": "dff6b1774c6fb0600640ba2054addf90250f7e1ce5e5352420d110c7a7238527"
+    },
+    "doc/evidence/coding59-vscode-0.1.59-archive-hashes-20261020.json": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.59-archive-hashes-20261020.json",
+      "sha256": "91cd9e6d3cf32fb951a66a67722ddb73d44f467ceb22de90790f72f9f2f4daf5"
+    },
+    "doc/evidence/coding59-coding-0.1.59-final-stage-20261020.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.59-final-stage-20261020.json",
+      "sha256": "50098981171f1d719b8b0e6aa303e1448469ad97b567434e8d424faf79f84305"
+    },
+    "doc/evidence/coding59-coding59-native-runtime-20261020.json": {
+      "localSource": "C:/xMindNativeValidation/coding59-native-runtime-20261020.json",
+      "sha256": "1e12e7669b4ca9d87fcf1d18daf9b8ec38fc8b88adeae188ba0b898c052dd088"
+    }
+  },
+  "localStageManifest": {
+    "path": "C:/xMindNativeValidation/coding-0.1.59-current-client-gate-20261020/inputs-before.json",
+    "sha256": "7e2c295ed0928aa9004f41e2274913487dfa10a3eab781d8fbcb2a2427bee9f0"
+  },
+  "scope": "Verified Windows x64 VSIX candidate containing the complete-160-qualified native binary and freshly qualified 462/161 clients. All archive payloads match the frozen 17441-file stage.",
+  "limitations": [
+    "Candidate is not installed or release accepted",
+    "No current rendered VS Code/external-browser coding or live-provider acceptance is added",
+    "Existing installed 0.1.58, owners, user configuration/history and successful tasks are preserved",
+    "Worker process service placement, remaining capability adapters and Local/Nexus qualification remain open"
+  ]
+}

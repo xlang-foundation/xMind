@@ -1,0 +1,37 @@
+Executing prepublish script 'npm run vscode:prepublish'...
+
+> agentflow@0.1.59 vscode:prepublish
+> node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs && node scripts/package-native-runtime.mjs --verify
+
+Browser view assets built at C:\xMindNativeValidation\coding-0.1.59-current-source-20261020\extensions\vscode\browser-runtime\assets
+Browser access adapter bundled at C:\xMindNativeValidation\coding-0.1.59-current-source-20261020\extensions\vscode\browser-runtime\server.mjs
+{"nativeRuntimeVerified":true,"files":2402,"manifestSha256":"624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a","nativeExecuted":false,"installed":false}
+ INFO  Files included in the VSIX:
+xmind-0.1.59-complete-win32-x64.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.29 KB]
+   ├─ browser-view.js [2.11 KB]
+   ├─ client.js [151.7 KB]
+   ├─ coding-preview-provenance.json [11.4 KB]
+   ├─ edit-review.js [2.1 KB]
+   ├─ editor-selection.js [4.31 KB]
+   ├─ extension.js [116.63 KB]
+   ├─ git-changes-tree.js [2.83 KB]
+   ├─ language-server-editor.js [13.15 KB]
+   ├─ native-runtime.js [14.11 KB]
+   ├─ package.json [7.28 KB]
+   ├─ patch-review.js [6.32 KB]
+   ├─ readme.md [10.55 KB]
+   ├─ terminal.js [5.47 KB]
+   ├─ webview.js [10.69 KB]
+   ├─ workspace-backend.js [23.48 KB]
+   ├─ browser-runtime/ (19 files) [1.07 MB]
+   ├─ media/ (3 files) [145.21 KB]
+   ├─ native-runtime/ (2403 files) [99.96 MB]
+   └─ node_modules/ (5 files) [104.63 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: C:/xMindNativeValidation/xmind-0.1.59-complete-win32-x64.vsix (2448 files, 33.04 MB)

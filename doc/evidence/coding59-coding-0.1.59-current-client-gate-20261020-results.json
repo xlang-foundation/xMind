@@ -1,0 +1,20 @@
+{
+  "extension": {
+    "exitCode": 0,
+    "tests": 462,
+    "passed": 462,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "403b6c57497a361d1c872e08dec92b046730789261177056a2c58fe2865a6cb8"
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 161,
+    "passed": 161,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "logSha256": "6550579d0c05a50048872998f9c117d07c30158f6942db40c7718266fdaa3205"
+  }
+}

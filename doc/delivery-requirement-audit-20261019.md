@@ -10,6 +10,10 @@ actual browser-controller/native integration. A verified 2,402-payload runtime
 candidate is staged for the next package, with no installation or user-task
 replay. These checks do not close rendered editor/external-browser acceptance,
 worker service placement or the remaining Local/Nexus/product requirements.
+The 0.1.59 VSIX candidate is now built: all 2,448 archive entries match the
+qualified 17,441-file stage, with a fresh 462/161 staged-client pass and actual
+packaged-runtime/browser contract. It remains uninstalled; see the
+[package candidate receipt](evidence/coding59-package-candidate-20261020.json).
 See [current client/native evidence](evidence/worker-current-client-native-20261020.json)
 and [complete native evidence](evidence/agent-worker-current-full-native-20261020.json).
 
