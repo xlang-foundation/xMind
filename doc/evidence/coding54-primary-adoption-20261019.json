@@ -1,0 +1,198 @@
+{
+  "recordedAt": "2026-10-20T02:30:12.975Z",
+  "passed": true,
+  "scope": "Actual profile-preserving installed54 upgrade followed by byte-safe strict UTF-8 read-only console checks and comparison to the earlier independently fetched HTTP snapshot.",
+  "profile": {
+    "origin": "http://127.0.0.1:57779",
+    "process_id": 36040,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "process": {
+    "pid": 36040,
+    "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-14c0a45707310f6c631cf8c14f3eccb570dddeb2ba726c4e5251304552ec3fa1\\xmind.exe",
+    "birth": "2026-10-20T02:29:09.7891420Z"
+  },
+  "nativeSha256": "db694de1335448d5a272e88648b65557ecd50616908cf1caf172cbb936d482c4",
+  "sessionCount": 5,
+  "historyMessages": 146,
+  "runCount": 10,
+  "exactSessionsHistoryRunsProviderProcessMcpAndMembershipPreserved": true,
+  "independentEarlierHttpHistoryMatch": true,
+  "sameSqliteProfile": true,
+  "stableBackendOrigin": true,
+  "schedulerGenerationAdopted": true,
+  "originalObserverFailureRetained": true,
+  "observerFailureCause": "Per-chunk Buffer-to-string conversion split one UTF-8 arrow; raw native output reread is valid UTF-8 and matches both independent pre-upgrade snapshots exactly.",
+  "oldBackendPid": 55848,
+  "newBackendPid": 36040,
+  "taskSubmissions": 0,
+  "receipts": [
+    {
+      "name": "profile",
+      "args": [
+        "profile-info"
+      ],
+      "stdoutBytes": 266,
+      "stdoutSha256": "da000f9ea7b321befd770d895cf5c41ce566278d783235e64b33a7f021605c51",
+      "strictUtf8": true
+    },
+    {
+      "name": "sessions",
+      "args": [
+        "sessions"
+      ],
+      "stdoutBytes": 539,
+      "stdoutSha256": "d09e253873146035dbe4d93656e25029749ae3d18b55b0eceea95358e5767e56",
+      "strictUtf8": true
+    },
+    {
+      "name": "providers",
+      "args": [
+        "provider-profiles"
+      ],
+      "stdoutBytes": 1797,
+      "stdoutSha256": "4a78e8730d64ed72d7567868bf1565738ebfee8aa83b20877c02ebbba5a67a45",
+      "strictUtf8": true
+    },
+    {
+      "name": "processes",
+      "args": [
+        "process-profiles"
+      ],
+      "stdoutBytes": 252,
+      "stdoutSha256": "4f092308a8f9d1093f66815713b2f21d17f244f62f433d05e4282f53ac0f5c23",
+      "strictUtf8": true
+    },
+    {
+      "name": "mcp",
+      "args": [
+        "mcp-servers"
+      ],
+      "stdoutBytes": 54,
+      "stdoutSha256": "facfdb5d4d955c0acd8f54f58f96d1dec7e9c94d7ceef6f7a4afa6bc0b67cef8",
+      "strictUtf8": true
+    },
+    {
+      "name": "membership",
+      "args": [
+        "workspace",
+        "info"
+      ],
+      "stdoutBytes": 383,
+      "stdoutSha256": "8e75918ea2e63ccd091616169d279460f13dba663d580cea2230c8c373230d4c",
+      "strictUtf8": true
+    },
+    {
+      "name": "history-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "history",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "stdoutBytes": 3187,
+      "stdoutSha256": "9940993b7de0c7f81ca531a8cdde6ff223ee9f6e1e0930a8c1239b73e2bd000b",
+      "strictUtf8": true
+    },
+    {
+      "name": "runs-b49f242b063af1ab6ca13db94c5165a8",
+      "args": [
+        "runs",
+        "b49f242b063af1ab6ca13db94c5165a8"
+      ],
+      "stdoutBytes": 909,
+      "stdoutSha256": "762e2a05dc960ba85988df7e207632e94269ed8ce6de11b387f2a9e30f1928b9",
+      "strictUtf8": true
+    },
+    {
+      "name": "history-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "history",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "stdoutBytes": 280516,
+      "stdoutSha256": "9694525521a210e4ff2a94616479085767b1792f4ac239b40b11dd900b2379e3",
+      "strictUtf8": true
+    },
+    {
+      "name": "runs-9d170d81910b61a45c21ecd8557936c0",
+      "args": [
+        "runs",
+        "9d170d81910b61a45c21ecd8557936c0"
+      ],
+      "stdoutBytes": 903,
+      "stdoutSha256": "a6969787a7b287a6a23b257cef8d8a9fff7f2d8a299e21903bd1b0199b4551ff",
+      "strictUtf8": true
+    },
+    {
+      "name": "history-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "history",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "stdoutBytes": 79283,
+      "stdoutSha256": "543da9ae2720b41bbd4d2037f3be29cdbde15487215284b9d87d0dec55ddf78d",
+      "strictUtf8": true
+    },
+    {
+      "name": "runs-b6b46ac843ad6b08658f4c568a2e5ea4",
+      "args": [
+        "runs",
+        "b6b46ac843ad6b08658f4c568a2e5ea4"
+      ],
+      "stdoutBytes": 457,
+      "stdoutSha256": "f28106a90f8051094eed65d75eb88816c9fb0303d0e21d344ca5c3c286641768",
+      "strictUtf8": true
+    },
+    {
+      "name": "history-58ef35476048503c598b5629019379da",
+      "args": [
+        "history",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "stdoutBytes": 111298,
+      "stdoutSha256": "b1e268dca97f2c8598c32696cf1284297514f851f25647d46e177a57d093ff0a",
+      "strictUtf8": true
+    },
+    {
+      "name": "runs-58ef35476048503c598b5629019379da",
+      "args": [
+        "runs",
+        "58ef35476048503c598b5629019379da"
+      ],
+      "stdoutBytes": 1807,
+      "stdoutSha256": "78fddbe7b0bef5b10daa308b9152d3bf3c8967bb93b175a846eb882a3ccabfa5",
+      "strictUtf8": true
+    },
+    {
+      "name": "history-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "history",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "stdoutBytes": 14596,
+      "stdoutSha256": "5667aed5df5f2920aa4c5b1e506606ca622bf12ab76a3ea981f66c33605e7f11",
+      "strictUtf8": true
+    },
+    {
+      "name": "runs-cb160a995f28f81865b47f95f294999d",
+      "args": [
+        "runs",
+        "cb160a995f28f81865b47f95f294999d"
+      ],
+      "stdoutBytes": 457,
+      "stdoutSha256": "c459e4ef5094280c5ce928a20422d03fd567363e7dc9c227fcbd39f1bf6da4c4",
+      "strictUtf8": true
+    },
+    {
+      "name": "health",
+      "args": [
+        "health"
+      ],
+      "stdoutBytes": 667,
+      "stdoutSha256": "05e3b420f6f1681b963548a698285e5cfc45e20c88c6c4dc3488eee40bd4dcf2",
+      "strictUtf8": true
+    }
+  ]
+}

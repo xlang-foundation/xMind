@@ -1,0 +1,28 @@
+{
+  "scope": "Retained observer failure; native state reread later proves exact preservation.",
+  "originalResultSha256": "be7d2f0ad881f6c1fcc6aec825c2e6ea2e1bd40147502aad66108c610a439478",
+  "originalResultPath": "C:/xMindNativeValidation/installed54-primary-adoption-20261019/result.json",
+  "phase": "verifying",
+  "passed": false,
+  "upgradeCommandExitCode": 0,
+  "newBackendPid": 36040,
+  "differences": {
+    "diffs": [
+      {
+        "path": "/histories/b6b46ac843ad6b08658f4c568a2e5ea4/messages/19/data/content",
+        "beforeType": "string",
+        "afterType": "string",
+        "beforeLength": 12054,
+        "afterLength": 12055,
+        "beforeSha256": "1ac0d38b36e94b032e29928effb195374c5da3f66f41e57472a12a2785e806e4",
+        "afterSha256": "31678742dbeb7af591f95942f4e61a6e201dfde38470ceb4bb92d966dc4f2205",
+        "firstDifference": 9796,
+        "beforeSnippet": "\\n      type: 'test'\\n      ...\\n    # Subtest: C18. negative integer → string integer\\n    ok 4 - C18. negative integer → string integer\\n      ---\\n      duration_ms: 0.0303\\n      type: 'test'\\n      ...\\n  ",
+        "afterSnippet": "\\n      type: 'test'\\n      ...\\n    # Subtest: C18. negative integer �� string integer\\n    ok 4 - C18. negative integer → string integer\\n      ---\\n      duration_ms: 0.0303\\n      type: 'test'\\n      ...\\n ",
+        "parsedJsonEquivalent": false
+      }
+    ]
+  },
+  "verifiedCause": "Per-chunk Buffer decoding split a UTF-8 arrow. Byte-safe strict UTF-8 read matches both CLI and HTTP pre-upgrade snapshots.",
+  "verification": "coding54-primary-adoption-20261019.json"
+}

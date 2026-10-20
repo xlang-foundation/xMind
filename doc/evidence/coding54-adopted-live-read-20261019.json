@@ -1,0 +1,164 @@
+{
+  "recordedAt": "2026-10-20T02:31:58.310Z",
+  "scope": "One fresh rendered IAB native file read through the adopted installed54 backend and persisted Claude credentials, followed by actual browser reload and byte-safe console checks.",
+  "backendPid": 36040,
+  "nativeSha256": "db694de1335448d5a272e88648b65557ecd50616908cf1caf172cbb936d482c4",
+  "session": "2591d25a7123d6fa9d4cbd41b077b38d",
+  "run": "659d79470e216b25f431aa0c7e6bad1b",
+  "taskSubmissions": 1,
+  "historyMessages": 4,
+  "model": "claude-sonnet-4-6",
+  "actualFinalUsage": {
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "completion_tokens": 29,
+    "input_tokens": 8715,
+    "input_tokens_scope": "uncached",
+    "output_tokens": 29,
+    "prompt_tokens": 8715,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "actualFirstTokenMs": 2406,
+  "actualElapsedMs": 2618,
+  "markerAbsentFromPrompt": true,
+  "exactFileContentReturned": true,
+  "toolNames": [
+    "read_file"
+  ],
+  "oldFiveSessionHistoriesAndRunsUnchanged": true,
+  "actualIabReloadRestoresRunModelMetrics": true,
+  "processOrEditOperations": 0,
+  "history": [
+    {
+      "data": {
+        "content": "Read xmind-browser-acceptance-20261019/adoption-check.txt with the native file tool and reply with exactly its single line of text. Do not edit files, run a process, delegate, or inspect other project files.",
+        "provider_context": {
+          "model_id": "claude-sonnet-4-6",
+          "profile_id": "claude",
+          "profile_revision": 2,
+          "provider": "anthropic",
+          "route_id": "anthropic.messages",
+          "wire": "anthropic-messages"
+        }
+      },
+      "id": "msg_153",
+      "role": "user",
+      "seq": 153
+    },
+    {
+      "data": {
+        "content": "",
+        "elapsed_ms": 1886,
+        "first_token_ms": 1494,
+        "model": "claude-sonnet-4-6",
+        "provider_context": {
+          "model_id": "claude-sonnet-4-6",
+          "profile_id": "claude",
+          "profile_revision": 2,
+          "provider": "anthropic",
+          "route_id": "anthropic.messages",
+          "wire": "anthropic-messages"
+        },
+        "provider_items": [
+          {
+            "content_json": "[{\"type\":\"tool_use\",\"id\":\"toolu_01MxHvGcXyaBYU2gegxYFnT8\",\"name\":\"read_file\",\"input\":{\"path\": \"xmind-browser-acceptance-20261019/adoption-check.txt\"},\"caller\":{\"type\":\"direct\"}}]",
+            "finish_reason": "tool_calls",
+            "provider_finish_reason": "tool_use",
+            "type": "anthropic_content"
+          }
+        ],
+        "tool_calls": [
+          {
+            "arguments": "{\"path\": \"xmind-browser-acceptance-20261019/adoption-check.txt\"}",
+            "id": "toolu_01MxHvGcXyaBYU2gegxYFnT8",
+            "name": "read_file"
+          }
+        ],
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 70,
+          "input_tokens": 8500,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 70,
+          "prompt_tokens": 8500,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "id": "msg_154",
+      "role": "assistant",
+      "seq": 154
+    },
+    {
+      "data": {
+        "content": "{\"content\":\"XMIND_NATIVE54_ef1efc6f960745169e2adebb17a58638\\n\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"path\":\"xmind-browser-acceptance-20261019/adoption-check.txt\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000\",\"workspace_revision\":1}",
+        "tool_call_id": "toolu_01MxHvGcXyaBYU2gegxYFnT8"
+      },
+      "id": "msg_155",
+      "role": "tool",
+      "seq": 155
+    },
+    {
+      "data": {
+        "content": "XMIND_NATIVE54_ef1efc6f960745169e2adebb17a58638",
+        "elapsed_ms": 2618,
+        "first_token_ms": 2406,
+        "model": "claude-sonnet-4-6",
+        "provider_context": {
+          "model_id": "claude-sonnet-4-6",
+          "profile_id": "claude",
+          "profile_revision": 2,
+          "provider": "anthropic",
+          "route_id": "anthropic.messages",
+          "wire": "anthropic-messages"
+        },
+        "provider_items": [
+          {
+            "content_json": "[{\"text\":\"XMIND_NATIVE54_ef1efc6f960745169e2adebb17a58638\",\"type\":\"text\"}]",
+            "finish_reason": "stop",
+            "provider_finish_reason": "end_turn",
+            "type": "anthropic_content"
+          }
+        ],
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 29,
+          "input_tokens": 8715,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 29,
+          "prompt_tokens": 8715,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      "id": "msg_156",
+      "role": "assistant",
+      "seq": 156
+    }
+  ],
+  "runs": [
+    {
+      "graph_root": false,
+      "id": "659d79470e216b25f431aa0c7e6bad1b",
+      "node_id": "",
+      "parent_id": "",
+      "provider_context": {
+        "model_id": "claude-sonnet-4-6",
+        "profile_id": "claude",
+        "profile_revision": 2,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "session_id": "2591d25a7123d6fa9d4cbd41b077b38d",
+      "state": "completed"
+    }
+  ],
+  "passed": true
+}

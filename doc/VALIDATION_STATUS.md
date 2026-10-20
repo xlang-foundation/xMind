@@ -2,6 +2,41 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Explicit installed54 adoption and actual provider reopen — 2026-10-19
+
+The verified old TestProj owner55848 (birth01:31:24.2246670Z, a26bed3f) was idle
+with all10runs terminal. The installed54 console's explicit `--upgrade-backend`
+uses native quiescence/retirement/replacement rather than a process kill. New
+owner36040 born2026-10-20T02:29:09.7891420Z runs db694de1 in the same p-current
+profile and origin57779. Old process retirement is observed. Five sessions,
+146messages,10runs, provider/process/MCP settings and folder membership match
+the pre-upgrade state exactly. Workspace identity stays fixed; process authority
+changes. No old task is replayed. Existing host54928/view56652/page55684 survive,
+all checked APIs return200, and seven workspaces/four providers remain available.
+
+The first observer comparison failed on one arrow in an old tool-result string.
+Its Node pipe handler converted each Buffer chunk to a string separately, splitting
+a UTF-8 sequence. That observer failure is retained. A strict UTF-8 byte-safe
+console reread matches both the original CLI snapshot and the independently
+fetched pre-upgrade HTTP snapshot exactly. This was observer corruption, not a
+native history rewrite; no data repair or runtime patch was needed.
+
+Actual hidden IAB reload restores the earlier coding run's11messages/model/metrics.
+One NEW read-only task, session2591d25a7123d6fa9d4cbd41b077b38d/root
+659d79470e216b25f431aa0c7e6bad1b, uses persisted Claude credentials and exactly
+one native read_file call to return a random marker absent from the prompt.
+It completes with4messages and no edit/process/delegation. Reload restores its
+terminal root, model and supplied metrics. All five older histories/runs remain
+exact after this fresh task. This proves actual provider/key reopen and read/restore
+on the adopted scheduler generation, not fresh rendered edit/process execution,
+external Edge or installed VS Code acceptance. Never replay this root.
+
+See [adoption verification](evidence/coding54-primary-adoption-20261019.json),
+[retained observer failure](evidence/coding54-adoption-observer-failure-20261019.json),
+[existing page APIs](evidence/coding54-existing-view-after-adoption-20261019.json),
+[new live task](evidence/coding54-adopted-live-read-20261019.json) and
+[actual reload screenshot](evidence/coding54-adopted-live-read-20261019.png).
+
 ## Installed 0.1.54 shared scheduling preview — 2026-10-19
 
 Client source3e8ef953 with native source8b462140/executable db694de1 is installed.
