@@ -28,11 +28,11 @@ public:
 };
 class Model final:public AgentModelGateway {
 public:
-    explicit Model(Journal& journal):journal(journal),client(journal.peer){}
-    ModelCompletion complete(const ChatProviderConfig& config,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel)override{try{check(config.endpoint=="worker://captured"&&config.model=="worker-rpc-fixture","Read-runner model must use captured proxy routing");auto result=client.complete(journal.current_attempt,request,std::move(sink),cancel);journal.calls=result.tool_calls;++calls;return result;}catch(const std::exception& error){journal.model_diagnostic=error.what();throw;}}
-    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unsupported read-runner count");}
-    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unsupported read-runner compaction");}
-    Journal& journal;AgentWorkerModelClient client;std::int64_t calls=0;
+    explicit Model(Journal& journal):journal(journal),native(make_agent_worker_model_gateway(journal.peer,journal.native)){}
+    ModelCompletion complete(const ChatProviderConfig& config,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel)override{try{check(config.endpoint=="worker://captured"&&config.model=="worker-rpc-fixture","Read-runner model must use captured proxy routing");auto result=native->complete(config,request,std::move(sink),cancel);journal.calls=result.tool_calls;++calls;return result;}catch(const std::exception& error){journal.model_diagnostic=error.what();throw;}}
+    ResponsesTokenCount count_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->count_context(config,request,cancel);}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->compact_context(config,request,cancel);}
+    Journal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t calls=0;
 };
 inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     Journal journal(peer,cancel);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=std::make_shared<Workspace>(peer);

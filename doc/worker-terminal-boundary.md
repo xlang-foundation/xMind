@@ -177,6 +177,27 @@ launch and is not used as evidence.
 This supplies the native journal component; production process entry, remaining
 runtime/model adapters, broad profiles and AgentService placement remain open.
 
+The [native model-gateway checkpoint](evidence/agent-worker-model-gateway-focused-20261020.json)
+adds `make_agent_worker_model_gateway`. It retains the ordinary journal and
+requires that journal's exact peer binding. It captures the public model ID and
+wire from the scoped root budget, accepts only `worker://captured` local routing,
+and reads the current attempt from acknowledged journal progress. Its typed RPC
+sends only attempt/request values and streams events with cancellation. Private
+provider configuration, credentials and original deadlines remain backend-owned.
+A per-instance dispatch guard rejects re-entry. Count and compaction reject
+explicitly until their own backend capabilities exist.
+
+Actual plain/read AgentRunner fixtures now forward model calls to this native
+gateway as well as journal calls to the native adapter. Factory probes reject a
+null journal and a reported foreign binding. Model probes reject changed
+endpoint/model/wire, pre-cancelled dispatch, re-entry and closed context methods.
+Completion, provider failure, streaming cancellation and read-approval
+cancellation pass with both adapters. The focused gate passes 53 contracts in
+154.03 seconds with frozen inputs and all 133 binaries; the independent HTTP
+peer still verifies exactly 27 requests. Worker-specific non-chat wires and
+broader profile compatibility need further qualification. Production read/runtime
+adapters, process entry and AgentService placement remain open.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

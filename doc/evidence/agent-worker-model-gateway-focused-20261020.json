@@ -1,0 +1,88 @@
+{
+  "representativeReadRunnerChild": {
+    "pid": 20284,
+    "creationTime": "134370002940372402"
+  },
+  "recordedAt": "2026-10-20T20:06:22.679Z",
+  "gate": {
+    "recordedAt": "2026-10-20T20:05:45.586Z",
+    "sourceParent": "1941171b66318ddfc52116246c896e1658bd5f8d",
+    "sourcePatchSha256": "595c4fb4bb41b4d78a60d16db422b138b4b83f9598aa34f9ae384b4734cf83b9",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 65388,
+      "launchedAt": "2026-10-20T20:01:50.723Z",
+      "completedAt": "2026-10-20T20:03:06.067Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a78958db9d1055dfd6eea3c2ad68af0965dfe905f63caa6ad28d351da7422147"
+    },
+    "test": {
+      "pid": 71744,
+      "launchedAt": "2026-10-20T20:03:08.970Z",
+      "completedAt": "2026-10-20T20:05:43.040Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "01ac9c2f7564310d877852b1bb2db53a420fad9690ebb93a6f7f4e16ec19ffdf"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 154.03,
+    "projectFiles": 2674,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "31e5babf0c4701e685bf550634d2c6ec8b98e285de0cacbca265ffce37cbe2d8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-model-gateway-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-build.log": "a78958db9d1055dfd6eea3c2ad68af0965dfe905f63caa6ad28d351da7422147",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-build-terminal.json": "e20a12e2bb4980d86c531ee93de9d2e5a47e0bff18edfdbf5b233941e5f1551a",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-ctest.log": "01ac9c2f7564310d877852b1bb2db53a420fad9690ebb93a6f7f4e16ec19ffdf",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-ctest-terminal.json": "22a3e5974ab54aa713bc589bb8394472b059c98e34927af48b97b91d6327d879",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-LastTest.log": "0f4f39220086f5b5168eb3e1622037171655b2f25cf2873493f30e6fff0cad6b",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-test-inventory.json": "73f5eaa70a2bbd9686497cb935ec3d21d44c90bf6bf46cc1f4f6971726f41f07",
+        "doc/evidence/agent-worker-model-gateway-focused-20261020-gate.json": "8599592f525dfbb8a46748e3f127cdbf65523d56cca59118a70181dc31495aac"
+      },
+      "localManifestHashes": {
+        "source.patch": "595c4fb4bb41b4d78a60d16db422b138b4b83f9598aa34f9ae384b4734cf83b9",
+        "inputs-before-build.json": "864516964333cd2f0d5a91fb0ea925ecc94b30b46f4ada18d0608c95ff8a3c59",
+        "binaries-before-test.json": "afc04bfad151413b670a30984bc1ad012dee6578d57e1a02ce867318965ba171"
+      }
+    }
+  },
+  "fixtureSha256": "844579de1763697d5dcff7bcb26f0f3e53b20cae2f6d45735655110565c3027c",
+  "ledgerFixtureSha256": "e9e858928a40c3f70b6a32e9838b158fdcf6601f706460de9f609a5cca883294",
+  "evidenceMethod": "Actual child fixtures forward to the native model gateway; parent authenticated replies and success records follow the child checks. Child stdout is discarded.",
+  "scope": "Production ordinary-worker model gateway paired with the native journal; actual child plain/read AgentRunner fixtures use both adapters.",
+  "verified": [
+    "Factory rejects a null journal and a reported foreign peer binding; native journal exposes immutable peer pairing",
+    "Gateway captures public model/wire from the scoped root budget and requires worker://captured routing",
+    "Endpoint, model and wire changes reject before dispatch",
+    "Pre-cancelled dispatch and nested re-entry reject without another model request",
+    "Count and compaction explicitly reject rather than return fake values",
+    "Current attempt comes from acknowledged native journal progress",
+    "Typed model RPC carries only attempt/request values and cancellation/stream events; private provider configuration and original deadlines stay backend-owned",
+    "Actual plain/read completion, provider failure, streaming cancellation and read-approval cancellation execute both native adapters",
+    "Independent peer still verifies exactly 27 requests with no added retry"
+  ],
+  "limitations": [
+    "Worker-specific non-chat wires and broader profile compatibility require further qualification",
+    "Count/compaction need separate backend-owned capabilities",
+    "Production read-workspace/runtime adapters, process entry and AgentService placement remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native, installed, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}

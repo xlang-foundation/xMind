@@ -14,6 +14,7 @@ struct AgentWorkerJournalProgress {
 // not live execution authority. The peer must outlive this serialized adapter.
 class AgentWorkerOrdinaryJournal:public AgentRunJournal {
 public:
+    virtual bool bound_to(const AgentWorkerRpcPeer&)const noexcept=0;
     virtual AgentWorkerJournalProgress progress()const=0;
 };
 std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(

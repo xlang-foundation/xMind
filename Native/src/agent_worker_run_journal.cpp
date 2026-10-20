@@ -22,13 +22,14 @@ template<class T,class F> std::future<T> owned(F action){
 }
 class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
 public:
-    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel):client_(peer),scope_(peer.scope()),cancel_(cancel){
+    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel){
         if(scope_.root_id!=scope_.run_id)throw Conflict("Ordinary worker journal requires its captured root");
         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.run_id);
         if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.direct-agent"||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
     }
+    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return peer_==&peer;}
     AgentWorkerJournalProgress progress()const override{std::lock_guard lock(mutex_);return progress_;}
     std::future<Run> run(std::string id)override{return owned<Run>([&]{std::lock_guard lock(mutex_);own(id);return client_.run(id);});}
     std::future<Session> session(std::string id)override{return owned<Session>([&]{std::lock_guard lock(mutex_);if(id!=session_)throw Conflict("Worker session differs from captured admission");return client_.session(id);});}
@@ -109,7 +110,7 @@ public:
 private:
     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
-    AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;
+    AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;
     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
 };
 }

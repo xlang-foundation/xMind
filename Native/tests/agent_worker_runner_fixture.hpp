@@ -5,6 +5,7 @@
 #include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_worker_run_journal.hpp"
+#include "agentflow/agent_worker_model_gateway.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
 #include <type_traits>
@@ -87,9 +88,11 @@ class UnsupportedContextJournal:public AgentContextJournal {public:
 
 // Instrumentation bridge only: all admitted journal operations below execute
 // the production adapter. The direct client remains for adversarial RPC probes.
-class ChildJournal:public AgentRunJournal {
+class ChildJournal:public AgentWorkerOrdinaryJournal {
 public:
     explicit ChildJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
+    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return native->bound_to(peer);}
+    AgentWorkerJournalProgress progress()const override{return native->progress();}
     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}
     void refresh(){const auto actual=native->progress();current_attempt=actual.current_attempt;canonical=actual.canonical_assistant;ordinal=actual.model_event_ordinal;}
     std::future<Run> run(std::string id)override{return native->run(std::move(id));}
@@ -138,25 +141,31 @@ public:
     std::future<Operation> cancel_operation(std::string id,OperationSpec actual)override{return native->cancel_operation(std::move(id),std::move(actual));}
     std::future<Operation> expire_operation(std::string id)override{return native->expire_operation(std::move(id));}
     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={})override{return native->start_prompt_run(std::move(id),std::move(session_id),std::move(prompt_json),std::move(budget),std::move(dynamic),std::move(inbox_id));}
-    AgentWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::unique_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
+    AgentWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::shared_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
 };
 class ChildModel final:public AgentModelGateway {
 public:
-    explicit ChildModel(ChildJournal& journal):journal(journal),client(journal.peer){}
+    explicit ChildModel(ChildJournal& journal):journal(journal),native(make_agent_worker_model_gateway(journal.peer,journal.native)){}
     ModelCompletion complete(const ChatProviderConfig& config,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel)override{
         try{
         check(config.endpoint=="worker://captured"&&config.model=="worker-rpc-fixture"&&!journal.current_attempt.empty(),"Child gateway must use captured proxy routing");
         rejects<Conflict>([&]{journal.client.begin_run();});
-        return client.complete(journal.current_attempt,request,[&](const ModelEvent& event){
+        if(!observed){
+            auto changed=config;changed.endpoint="https://unadmitted.invalid/model";rejects<Conflict>([&]{native->complete(changed,request,{},{});});changed=config;changed.model="unadmitted-model";rejects<Conflict>([&]{native->complete(changed,request,{},{});});changed=config;changed.wire=ProviderWire::responses;rejects<Conflict>([&]{native->complete(changed,request,{},{});});
+            std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{native->complete(config,request,{},stopped.get_token());});
+            rejects<std::logic_error>([&]{native->count_context(config,request,{});});rejects<std::logic_error>([&]{native->compact_context(config,request,{});});
+        }
+        return native->complete(config,request,[&](const ModelEvent& event){
+            if(!observed)rejects<Conflict>([&]{native->complete(config,request,{},{});});
             if(!observed){const auto first=journal.client.acknowledge_model_event(journal.current_attempt,0,event.kind,event.json);const auto duplicate=journal.client.acknowledge_model_event(journal.current_attempt,0,event.kind,event.json);const auto saved=journal.client.events(journal.peer.scope().run_id);check(first.sequence==duplicate.sequence&&std::count_if(saved.begin(),saved.end(),[&](const Event& value){return value.sequence==first.sequence&&value.kind==event.kind&&value.json==event.json;})==1,"Acknowledgement replay must retain the same captured event");
                 rejects<Conflict>([&]{journal.client.acknowledge_model_event(journal.current_attempt,0,event.kind,R"({"forged":true})");});rejects<Conflict>([&]{journal.client.acknowledge_model_event(journal.current_attempt,8192,event.kind,event.json);});rejects<Conflict>([&]{journal.client.acknowledge_model_event(journal.current_attempt,0,"tool.started",event.json);});}
             ++observed;sink(event);
         },cancel);
         }catch(const std::exception& error){journal.model_diagnostic=error.what();throw;}
     }
-    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unsupported child count");}
-    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unsupported child compaction");}
-    ChildJournal& journal;AgentWorkerModelClient client;std::int64_t observed=0;
+    ResponsesTokenCount count_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->count_context(config,request,cancel);}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->compact_context(config,request,cancel);}
+    ChildJournal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t observed=0;
 };
 class ClosedCatalog final:public AgentBackendCatalog {
 public:
@@ -183,6 +192,9 @@ struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
 inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer,cancel);UnsupportedContextJournal context;
+    rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
+    struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
+    auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,foreign);});
     rejects<Conflict>([&]{journal.native->run("foreign-root").get();});
     rejects<Conflict>([&]{journal.native->session("foreign-session").get();});
     rejects<Conflict>([&]{journal.native->complete_run(peer.scope().run_id,R"({"content":"forged"})").get();});
