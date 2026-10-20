@@ -1,0 +1,56 @@
+{
+  "bodyClientWidth": 1280,
+  "bodyScrollWidth": 1280,
+  "finalText": "XMIND\n\nAll 4 tests pass. Here's the summary:\n\nChange made (wrap-index.mjs):\n\n// Before\nreturn index % length;\n\n// After\nreturn ((index % length) + length) % length;\n\nCopy code\n\nWhy it works: JavaScript's % operator returns a negative result when the dividend is negative (e.g., -1 % 5 === -1). Adding length before the second % length shifts any negative remainder into the positive range, then the outer modulo keeps values already in [0, length) unchanged.\n\nTest results (exit code 0):\n\n#\tTest\tResult\n1\tpositive overflow wraps (wrapIndex(7, 5) === 2)\t✅ pass\n2\tzero stays at zero (wrapIndex(0, 5) === 0)\t✅ pass\n3\tnegative one wraps to last (wrapIndex(-1, 5) === 4)\t✅ pass\n4\tmultiple negative cycles wrap (wrapIndex(-9, 4) === 3)\t✅ pass\n\n4 pass, 0 fail. wrap-index.test.mjs was not modified.\n\nInput (uncached) 9,752\nOutput 312\nTotal —\nCache write 0\nCached 0\nclaude-sonnet-4-6\nClaude · Messages\nFirst token 1.32s\n6.36s\nFork before this message",
+  "messages": 9,
+  "model": "claude-sonnet-4-6",
+  "modelBounds": {
+    "bottom": 673.921875,
+    "height": 25,
+    "right": 1114.0625,
+    "width": 81.53125,
+    "x": 1032.53125,
+    "y": 648.921875
+  },
+  "prompt": "",
+  "provider": "claude",
+  "providerBounds": {
+    "bottom": 673.921875,
+    "height": 25,
+    "right": 1026.53125,
+    "width": 81.515625,
+    "x": 945.015625,
+    "y": 648.921875
+  },
+  "run": "0c35d911e7417e3c4982726fbb2fb201",
+  "send": {
+    "bottom": 677.5,
+    "height": 32.140625,
+    "right": 1258,
+    "width": 58.421875,
+    "x": 1199.578125,
+    "y": 645.359375
+  },
+  "sendEnabled": true,
+  "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+  "sidebar": {
+    "bottom": 720,
+    "height": 668,
+    "right": 1280,
+    "width": 420,
+    "x": 860,
+    "y": 52
+  },
+  "skills": {
+    "bottom": 514.359375,
+    "height": 20.140625,
+    "right": 1268,
+    "width": 395,
+    "x": 873,
+    "y": 494.21875
+  },
+  "viewport": {
+    "height": 720,
+    "width": 1280
+  }
+}

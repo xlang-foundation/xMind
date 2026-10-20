@@ -1,0 +1,261 @@
+{
+  "observedAt": "2026-10-20T22:23:59.782Z",
+  "version": "0.1.59",
+  "scope": "Hidden in-app browser restoration of the completed CLI-originated coding task, including reload and expanded command receipt/Skills footer at 1280x720",
+  "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+  "root": "0c35d911e7417e3c4982726fbb2fb201",
+  "url": "http://127.0.0.1:60299/ui/",
+  "nativeViewOrigin": "http://127.0.0.1:60290",
+  "backendOrigin": "http://127.0.0.1:62378",
+  "owners": [
+    {
+      "pid": 54928,
+      "birth": "2026-10-20T01:31:22.5893370Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 56652,
+      "birth": "2026-10-20T01:31:23.3699400Z",
+      "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe"
+    },
+    {
+      "pid": 67436,
+      "birth": "2026-10-20T09:50:06.0265650Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 61600,
+      "birth": "2026-10-20T09:50:06.8679030Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.57\\native-runtime\\xmind.exe"
+    },
+    {
+      "pid": 32396,
+      "birth": "2026-10-20T11:19:37.8496800Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-9f80d1a8c7ce1fadfef8d80cccf27dccdcbbed5b59a4dcef996f852c98b82aeb\\xmind.exe"
+    },
+    {
+      "pid": 65940,
+      "birth": "2026-10-20T11:22:59.2981170Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 58988,
+      "birth": "2026-10-20T11:23:00.1180120Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.58\\native-runtime\\xmind.exe"
+    },
+    {
+      "pid": 68928,
+      "birth": "2026-10-20T22:06:08.0468140Z",
+      "image": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40\\runtime-7a629f1a8e3a2971b472c69562b74f9b8c40d1a840fa3d268eee246d814c6fbb\\xmind.exe"
+    },
+    {
+      "pid": 15804,
+      "birth": "2026-10-20T22:17:33.5017130Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 71796,
+      "birth": "2026-10-20T22:17:34.3385740Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.59\\native-runtime\\xmind.exe"
+    }
+  ],
+  "assets": [
+    {
+      "name": "index.html",
+      "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a"
+    },
+    {
+      "name": "patch-review.js",
+      "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+    },
+    {
+      "name": "browser.js",
+      "sha256": "974e58538a434630306c8a680b98b8a83f5b2b4b60b70e520ab12bab18f8f4f7"
+    },
+    {
+      "name": "terminal.js",
+      "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+    },
+    {
+      "name": "browser.css",
+      "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+    },
+    {
+      "name": "xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+    },
+    {
+      "name": "xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+    },
+    {
+      "name": "xterm-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+    },
+    {
+      "name": "chat.js",
+      "sha256": "ccc4eede88220b05a6d7b36ffef47bee2df647742ceb5fcf4d43ec82d633b860"
+    },
+    {
+      "name": "chat.css",
+      "sha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f"
+    },
+    {
+      "name": "client.js",
+      "sha256": "93bbc071e3304e835b38f205887209e2e8048448e410bde7247c2e1d5a41163e"
+    },
+    {
+      "name": "marked.js",
+      "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+    },
+    {
+      "name": "purify.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    }
+  ],
+  "before": {
+    "bodyClientWidth": 1280,
+    "bodyScrollWidth": 1280,
+    "finalText": "XMIND\n\nAll 4 tests pass. Here's the summary:\n\nChange made (wrap-index.mjs):\n\n// Before\nreturn index % length;\n\n// After\nreturn ((index % length) + length) % length;\n\nCopy code\n\nWhy it works: JavaScript's % operator returns a negative result when the dividend is negative (e.g., -1 % 5 === -1). Adding length before the second % length shifts any negative remainder into the positive range, then the outer modulo keeps values already in [0, length) unchanged.\n\nTest results (exit code 0):\n\n#\tTest\tResult\n1\tpositive overflow wraps (wrapIndex(7, 5) === 2)\t✅ pass\n2\tzero stays at zero (wrapIndex(0, 5) === 0)\t✅ pass\n3\tnegative one wraps to last (wrapIndex(-1, 5) === 4)\t✅ pass\n4\tmultiple negative cycles wrap (wrapIndex(-9, 4) === 3)\t✅ pass\n\n4 pass, 0 fail. wrap-index.test.mjs was not modified.\n\nInput (uncached) 9,752\nOutput 312\nTotal —\nCache write 0\nCached 0\nclaude-sonnet-4-6\nClaude · Messages\nFirst token 1.32s\n6.36s\nFork before this message",
+    "messages": 9,
+    "model": "claude-sonnet-4-6",
+    "modelBounds": {
+      "bottom": 673.921875,
+      "height": 25,
+      "right": 1114.0625,
+      "width": 81.53125,
+      "x": 1032.53125,
+      "y": 648.921875
+    },
+    "prompt": "",
+    "provider": "claude",
+    "providerBounds": {
+      "bottom": 673.921875,
+      "height": 25,
+      "right": 1026.53125,
+      "width": 81.515625,
+      "x": 945.015625,
+      "y": 648.921875
+    },
+    "run": "0c35d911e7417e3c4982726fbb2fb201",
+    "send": {
+      "bottom": 677.5,
+      "height": 32.140625,
+      "right": 1258,
+      "width": 58.421875,
+      "x": 1199.578125,
+      "y": 645.359375
+    },
+    "sendEnabled": true,
+    "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+    "sidebar": {
+      "bottom": 720,
+      "height": 668,
+      "right": 1280,
+      "width": 420,
+      "x": 860,
+      "y": 52
+    },
+    "skills": {
+      "bottom": 514.359375,
+      "height": 20.140625,
+      "right": 1268,
+      "width": 395,
+      "x": 873,
+      "y": 494.21875
+    },
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    }
+  },
+  "after": {
+    "bodyClientWidth": 1280,
+    "bodyScrollWidth": 1280,
+    "commandExpanded": true,
+    "commandText": "Command result · powershell\nExited · exit 0\nProfile powershell\nPID 23924\n0.34s\nstdout · 584 bytes · 584 retained\nTAP version 13\n# Subtest: positive overflow wraps\nok 1 - positive overflow wraps\n  ---\n  duration_ms: 0.7255\n  type: 'test'\n  ...\n# Subtest: zero stays at zero\nok 2 - zero stays at zero\n  ---\n  duration_ms: 0.0914\n  type: 'test'\n  ...\n# Subtest: negative one wraps to last\nok 3 - negative one wraps to last\n  ---\n  duration_ms: 0.0634\n  type: 'test'\n  ...\n# Subtest: multiple negative cycles wrap\nok 4 - multiple negative cycles wrap\n  ---\n  duration_ms: 0.5132\n  type: 'test'\n  ...\n1..4\n# tests 4\n# suites 0\n# pass 4\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 61.1086\n\nstderr · 0 bytes · 0 retained\n\nExit status and output are observed process results. File or remote effects have not been independently verified.\n\nRaw result",
+    "finalText": "XMIND\n\nAll 4 tests pass. Here's the summary:\n\nChange made (wrap-index.mjs):\n\n// Before\nreturn index % length;\n\n// After\nreturn ((index % length) + length) % length;\n\nCopy code\n\nWhy it works: JavaScript's % operator returns a negative result when the dividend is negative (e.g., -1 % 5 === -1). Adding length before the second % length shifts any negative remainder into the positive range, then the outer modulo keeps values already in [0, length) unchanged.\n\nTest results (exit code 0):\n\n#\tTest\tResult\n1\tpositive overflow wraps (wrapIndex(7, 5) === 2)\t✅ pass\n2\tzero stays at zero (wrapIndex(0, 5) === 0)\t✅ pass\n3\tnegative one wraps to last (wrapIndex(-1, 5) === 4)\t✅ pass\n4\tmultiple negative cycles wrap (wrapIndex(-9, 4) === 3)\t✅ pass\n\n4 pass, 0 fail. wrap-index.test.mjs was not modified.\n\nInput (uncached) 9,752\nOutput 312\nTotal —\nCache write 0\nCached 0\nclaude-sonnet-4-6\nClaude · Messages\nFirst token 1.32s\n6.36s\nFork before this message",
+    "messages": 9,
+    "model": "claude-sonnet-4-6",
+    "modelBounds": {
+      "bottom": 673.921875,
+      "height": 25,
+      "right": 1114.0625,
+      "width": 81.53125,
+      "x": 1032.53125,
+      "y": 648.921875
+    },
+    "prompt": "",
+    "provider": "claude",
+    "providerBounds": {
+      "bottom": 673.921875,
+      "height": 25,
+      "right": 1026.53125,
+      "width": 81.515625,
+      "x": 945.015625,
+      "y": 648.921875
+    },
+    "run": "0c35d911e7417e3c4982726fbb2fb201",
+    "send": {
+      "bottom": 677.5,
+      "height": 32.140625,
+      "right": 1258,
+      "width": 58.421875,
+      "x": 1199.578125,
+      "y": 645.359375
+    },
+    "sendEnabled": true,
+    "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+    "sidebar": {
+      "bottom": 720,
+      "height": 668,
+      "right": 1280,
+      "width": 420,
+      "x": 860,
+      "y": 52
+    },
+    "skills": {
+      "bottom": 455.71875,
+      "height": 20.140625,
+      "right": 1268,
+      "width": 395,
+      "x": 873,
+      "y": 435.578125
+    },
+    "skillsExpanded": true,
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    }
+  },
+  "historyExact": true,
+  "fixtureHashesUnchanged": true,
+  "settingsUnchanged": true,
+  "sevenPriorOwnersPreserved": true,
+  "taskSubmissions": 1,
+  "newTaskSubmitted": false,
+  "limitations": [
+    "This restores an existing CLI task; it does not establish browser-originated coding or VS Code rendered acceptance",
+    "Rendering is verified only at the captured 1280x720 viewport",
+    "An initial host launch used the wrong built-server path and was rejected by the runtime guard before view startup; corrected launch succeeded"
+  ],
+  "passed": true,
+  "artifacts": [
+    {
+      "path": "doc/evidence/coding59-browser-before-reload-20261020.json",
+      "bytes": 2063,
+      "sha256": "578acf4250116ac3a3db88d384a1d837dc4d0af66a69335ecd014c460e1a4719"
+    },
+    {
+      "path": "doc/evidence/coding59-browser-after-reload-expanded-20261020.json",
+      "bytes": 3042,
+      "sha256": "8f46090007502df9d5a3d707ba469f575a08076e6bdbd323707ecca6fcd5ed65"
+    },
+    {
+      "path": "doc/evidence/coding59-browser-shared-cli-result-20261020.png",
+      "bytes": 85875,
+      "sha256": "bfe532c9d3d65b8fac27b0e8133f0b8a12b1b14ea91217005e97c6dbedfcc76b"
+    }
+  ],
+  "browserTabLifecycle": "The original hidden verification tab was no longer present in the next turn; saved DOM and screenshot evidence remains. HTTP host and native backend were confirmed live by this verification."
+}

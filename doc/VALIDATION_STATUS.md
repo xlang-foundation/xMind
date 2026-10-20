@@ -1,3 +1,25 @@
+## Installed 0.1.59 browser restoration and footer — 2026-10-20
+
+The hidden in-app browser restores the completed CLI59 session and root across
+reload with all nine messages, the admitted Claude profile/model and recorded
+usage/timing badges. The source preview shows the actual corrected modulo expression.
+The expanded PowerShell receipt shows exit zero, 584 stdout bytes and four passing
+tests. At 1280×720, the 420-pixel conversation sidebar, expanded Skills, provider,
+model and Send controls fit without horizontal body overflow or control overlap.
+
+Fresh CLI reads confirm the history is byte-equivalent as parsed JSON, the original
+backend 68928 is reused, the two fixture file hashes and user settings are unchanged,
+and seven prior owners retain their exact birth/image identities. Thirteen served
+assets from the prior browser inventory match installed59 bytes. No new model task
+was submitted. The initial host launch had an incorrect built-server path and was
+rejected by its runtime guard; the corrected native executable path succeeded.
+
+This is rendered restoration of a CLI-originated task, not new browser-originated
+coding, rendered VS Code acceptance or a new full-suite run. The original hidden tab
+is no longer present; its saved screenshot/DOM and the live HTTP host are separate
+evidence. See [receipt](evidence/coding59-browser-restoration-20261020.json) and
+[screenshot](evidence/coding59-browser-shared-cli-result-20261020.png).
+
 ## Installed 0.1.59 isolated CLI coding — 2026-10-20
 
 One fresh CLI-originated task on the installed 0.1.59 native runtime completes
