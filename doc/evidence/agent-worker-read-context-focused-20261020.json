@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-20T17:49:16.194Z",
+  "gate": {
+    "recordedAt": "2026-10-20T17:49:09.032Z",
+    "sourceParent": "81d0e367365ca76deb9c52fd34047c4941e98820",
+    "sourcePatchSha256": "24704e84bfc1d578fcad78c321e9064122dacabb80204305a79567be0a8fa1e0",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 68360,
+      "launchedAt": "2026-10-20T17:42:08.255Z",
+      "completedAt": "2026-10-20T17:46:20.553Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f799f21c101acc62800661084f27a4fac4400387463526055d1c72e10517ba69"
+    },
+    "test": {
+      "pid": 33780,
+      "launchedAt": "2026-10-20T17:46:25.186Z",
+      "completedAt": "2026-10-20T17:49:06.376Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f147e49614a039302735071c7c5ba1405e8bb6531e5e8297a4ae224207312e8f"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 161.14,
+    "projectFiles": 2664,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "b05cbc17d02d282993eb43daae29537220426a9ededfe7f7e324e9aebf292ae0",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-read-context-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-context-focused-20261020-build.log": "f799f21c101acc62800661084f27a4fac4400387463526055d1c72e10517ba69",
+        "doc/evidence/agent-worker-read-context-focused-20261020-build-terminal.json": "4d0cb87e3c4921f617630d361f9c257b7b42d7c95bdaae8b0628c1773c747dab",
+        "doc/evidence/agent-worker-read-context-focused-20261020-ctest.log": "f147e49614a039302735071c7c5ba1405e8bb6531e5e8297a4ae224207312e8f",
+        "doc/evidence/agent-worker-read-context-focused-20261020-ctest-terminal.json": "c7c473b57e0c40a224216110c1231287c60f0f855c83e8caf72becd594dad3a2",
+        "doc/evidence/agent-worker-read-context-focused-20261020-LastTest.log": "3f356fed4db600280f16d8d6ea610590a518aa48659dd7280a1649c2ad413a7f",
+        "doc/evidence/agent-worker-read-context-focused-20261020-test-inventory.json": "00c892fee6e1ff6dd048d1fae0c66f85c0049c9e0a26ae20c952dd6e2138e854",
+        "doc/evidence/agent-worker-read-context-focused-20261020-gate.json": "7d1590136c6187da1bf814ca8498271e6e0bfde3e493c269a78074964c19b4d0"
+      },
+      "localManifestHashes": {
+        "source.patch": "24704e84bfc1d578fcad78c321e9064122dacabb80204305a79567be0a8fa1e0",
+        "inputs-before-build.json": "3d3349c5ed4c4972a8be305e05cc2f79d3c171eda31bae36d5343c246463b193",
+        "binaries-before-test.json": "5308d5fd10f6b4ab1291c67fc1436670ddd2188010e608d6a18706bc93d2b23a"
+      }
+    }
+  },
+  "contextChild": {
+    "pid": 11052,
+    "creationTime": "134369920962150556"
+  },
+  "fixtureSha256": "74cf5b6bb49f553f680f474bec38f3e9e715fafa3c8582f6062d474f88d95256",
+  "behavior": "The opt-in native read context owns copies of actual RepositoryInstructionContext/SkillContext objects tied to native workspace handles and the captured lease. A strict model.prepare_request RPC returns the backend-derived ordinary full-history ModelRequest, captured controls/catalogue and actual root/attached guidance. Preview prepares copies only. Model completion validates exact owned request bytes before claiming an attempt; a paired backend admission callback recomputes the exact window after the durable dispatch claim and before actual gateway I/O, then records real guidance metadata and installs the delivered native context. Read RPC uses that admitted context and attempt. No worker roots, instructions, history replacements, policy or credentials are accepted.",
+  "nativeHistory": "The existing native AgentRunner stored-message projection was moved unchanged into model_message_from_history and is shared by backend context preparation. Original attachment guards, tool identities, refusals and stored provider items follow the same projection instead of a separate worker-only history converter.",
+  "actualCase": "A distinct authenticated child receives an actual root AGENTS.md and real skill catalogue in its prepared model window. The independent native HTTP peer returns two reads of a nested file. Both native reads are withheld for undelivered nested AGENTS.md, including the second after a preview of that new guidance. Only the next actual admitted model window delivers nested guidance and permits one fresh native read of an unseen random marker. The third actual model receives both canonical tool turns and completes from its backend receipt. Parent verifies seven history messages, three model charges, three actual guidance-admission events, two non-dispatched false read facts and one actual successful dispatch. Twenty-four changed instruction/history/provider-item/catalogue/control requests reject before HTTP. Direct unclaimed admission, cancelled/expired preview and preparation after completion also reject.",
+  "retainedCases": "The independent RPC peer observes twenty controlled requests across the prior plain AgentRunner/read/continuation/lost-delivery/cancellation/rollback modes and the new three-window case. All source/SDK/libraries/runtime/dependencies/native binaries and file sets remain frozen. All gate-stage logs are retained.",
+  "limits": "This qualifies an opt-in ordinary read full-history owner and actual child proxy context flow. Existing legacy hosts without paired context capabilities retain their previous test scope. It does not execute the coding AgentRunner in the child or place product AgentService/GraphService work. Workspace/activity/failure/effect/graph ports, ContextManager projection/compaction transactions, shared clocks, large-history paging and Local/Nexus integration remain open. Native guidance admission state is in-memory and a reconstructed owner fails closed until an actual new dispatch; no crash-resume/replay claim. Installed clients/backend unchanged. No full suite, hosted, rendered, live-provider task or CPython qualification."
+}

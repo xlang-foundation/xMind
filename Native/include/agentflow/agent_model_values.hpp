@@ -1,6 +1,9 @@
 #pragma once
 #include "agentflow/model_provider.hpp"
 namespace agentflow {
+struct Message;
+// One shared history projection for the native loop and backend-owned windows.
+ModelMessage model_message_from_history(const Message&);
 // Owned native DTOs, not provider configuration or credential envelopes.
 // Opaque provider strings/canonical windows retain exact supplied bytes.
 std::string encode_agent_model_request(const ModelRequest&);

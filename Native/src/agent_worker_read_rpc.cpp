@@ -7,7 +7,10 @@
 namespace agentflow {
 using Json=nlohmann::json;
 AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost& host,const AgentWorkerScope& scope){
-    const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Read RPC channel differs from captured lease");
+    return bind_agent_worker_read_rpc(host,host.lease(),scope);
+}
+AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Read RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
         if(method!="read.invoke")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto call=AgentWorkspaceInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}

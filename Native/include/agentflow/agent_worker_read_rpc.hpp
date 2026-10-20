@@ -9,4 +9,5 @@ public:
 private:AgentWorkerRpcPeer& peer_;
 };
 AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
+AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
 }
