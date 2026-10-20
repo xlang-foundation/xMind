@@ -1,3 +1,26 @@
+## Current native worker checkpoint — 2026-10-20
+
+The actual unified `xmind.exe` private authenticated entry now executes the native
+ordinary read-root composition. Focused contracts cover completion, controller
+cancellation, provider failure, typed journal cancellation/timeouts, exact child
+drain and preservation of a completed root after lost reply/nonzero exit. The
+shared physical executor retains an occupied slot across observation timeout
+until the same child exits. Captured six-field provider identity now survives
+budget checking, prompt history and canonical assistants; worker profile/model
+replacement remains closed. The latest gate passes 53 contracts in 157.58s with
+source/dependencies and 133 binaries frozen; its independent peer verifies 44
+intentional synthetic HTTP requests. See [entry evidence](evidence/agent-worker-product-entry-cancel-focused-20261020.json),
+[physical drain evidence](evidence/agent-worker-completed-drain-focused-20261020.json)
+and [profile identity evidence](evidence/agent-worker-profile-identity-focused-20261020.json).
+
+This candidate is uninstalled. AgentService/GraphService worker placement,
+general captured settings, broader provider wires, graph/context/effect adapters,
+large-history paging and Local/Nexus qualification remain open. These focused
+results do not establish a full native suite or new hosted/rendered/live-provider
+acceptance. Installed 0.1.58 and its successful user coding tasks remain preserved.
+Earlier sections below retain their historical checkpoint scope. The current
+ownership audit is [worker-terminal-boundary.md](worker-terminal-boundary.md).
+
 ## Actual read AgentRunner child — 2026-10-20
 
 The actual shared C++ AgentRunner now accepts an owned ordinary read-workspace port and executes a real read loop in the supervised child fixture. The port supplies backend-prepared model windows and the authenticated read capability. The backend retains native filesystem/guidance/skill objects and SQLite. The loop uses captured workspace identity/revision for budget/read calls, checks stable controls/catalogue and refreshes the authoritative window before each model. Conflicting native workspace/policy/effect settings and child-selected run creation reject.

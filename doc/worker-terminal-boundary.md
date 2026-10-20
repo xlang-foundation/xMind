@@ -405,6 +405,33 @@ settings, failure-cause selection, retained ownership on observation timeout and
 broader capability placement remain open. No installed or full-suite claim is
 made by this focused checkpoint.
 
+## Captured provider profile identity checkpoint
+
+The native read-workspace port now retains the exact public provider identity
+from its immutable backend root budget. The shared runner uses those complete
+bytes for budget matching instead of reconstructing a two-field model/wire
+identity. Local model and wire must still match; direct non-profile identities
+retain their exact shape. This carries profile ID, revision, route and provider
+without granting the worker destination, credential or profile-selection rights.
+Worker-selected `ProviderExecutionIdentity` settings remain forbidden.
+
+Two fresh actual `xmind.exe` children cover a six-field profiled read root's
+completion and approval cancellation. Completion retains the exact budget and
+prompt identity plus all three canonical assistant provider contexts. Cancellation
+retains the prior canonical history, captured identity and two model charges with
+no read dispatch. Foreign model budget selection and replacement profile settings
+reject before dispatch. Existing direct-identity cases remain in the gate.
+
+All 53 focused contracts pass in 157.58 seconds after the serial rebuild, with
+2,684 project files and 133 native binaries frozen. The independent peer verifies
+exactly 44 intentional requests. Evidence and exact profiled child identities:
+`evidence/agent-worker-profile-identity-focused-20261020.json`.
+
+This newly qualifies identity propagation under a controlled OpenAI-compatible
+provider, not every provider wire or profile-management flow. Service placement,
+general settings and graph/context/effect capabilities remain open. Installed
+clients and their preserved user tasks are unchanged.
+
 ## Qualification required before service placement
 
 - Ledger contracts: exact lease rejection (including process identity), stale

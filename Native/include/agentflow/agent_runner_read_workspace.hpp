@@ -9,6 +9,9 @@ public:
     virtual ~AgentRunnerReadWorkspace()=default;
     virtual std::string workspace_id()const=0;
     virtual std::int64_t workspace_revision()const=0;
+    // Exact public identity from the immutable backend root budget. No route
+    // destination or credential is carried or selected by the worker.
+    virtual std::string provider_identity_json()const=0;
     virtual ModelRequest prepare_request(std::stop_token)=0;
     virtual std::unique_ptr<AgentReadToolHost> read_host()=0;
 };

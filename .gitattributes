@@ -163,3 +163,5 @@ doc/evidence/agent-worker-native-assembly-*.log -text whitespace=-blank-at-eol,-
 doc/evidence/agent-worker-product-entry-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/agent-worker-completed-drain-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/agent-worker-profile-identity-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

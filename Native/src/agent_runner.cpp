@@ -217,6 +217,17 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
     return nlohmann::json{{"profile_id",identity.profile_id},{"profile_revision",identity.profile_revision},{"route_id",identity.route_id},{"provider",identity.provider},{"wire",wire},{"model_id",model_id.empty()?settings.provider.model:model_id}}.dump();
 }
 std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& model_id)const{
+    if(read_workspace_){
+        const auto captured=read_workspace_->provider_identity_json();
+        const auto identity=Json::parse(captured),selected=Json::parse(execution_identity(settings_,model_id));
+        // The native backend has already validated this public identity. Keep
+        // its complete bytes, including profile revision/route, while checking
+        // that local model controls still select the captured model and wire.
+        if(identity.at("model_id")!=selected.at("model_id")||identity.at("wire")!=selected.at("wire")||
+           (identity.size()!=6&&identity!=selected))throw Conflict("Read worker model differs from captured provider identity");
+        return RootBudgetSpec{"native.direct-agent",1,read_workspace_->workspace_id(),captured,0,0,
+            static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{32})),settings_.run_timeout.count()};
+    }
     if((!settings_.delegation||!delegation_)&&(!settings_.planning||!planning_)){
         if(!settings_.context)return RootBudgetSpec{"native.direct-agent",1,read_workspace_?read_workspace_->workspace_id():(workspace_?workspace_->identity():"workspace:none"),
             execution_identity(settings_,model_id),0,0,static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{32})),settings_.run_timeout.count()};
