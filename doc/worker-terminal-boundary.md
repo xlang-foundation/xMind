@@ -143,6 +143,40 @@ This remains qualification through fixture adapters. Production worker entry,
 public AgentService placement, broader profiles and graph/effect placement are
 still required; no installed or complete product acceptance follows from it.
 
+The [native run-journal checkpoint](evidence/agent-worker-run-journal-corrected-20261020.json)
+adds `make_agent_worker_ordinary_journal` to the production worker journal
+library. It admits a captured ordinary, non-delegating root and exposes scoped
+reads and typed backend startup, funding, model receipt, activity, read-turn and
+completion operations. Graph, context, effect and skill mutation capabilities
+throw explicit errors; they do not return empty state or acknowledge writes.
+Stopped funding rejects locally, while backend RPC continues to enforce its
+captured lease and original authority boundaries. Terminal requests retain the
+existing typed handoff for post-drain retirement.
+
+The adapter derives tool-call bindings from the backend canonical assistant
+receipt through the native history projection. Model finish sends only its
+attempt identity and replaces the local assistant with the backend canonical
+receipt. Read-turn and completion bytes are comparisons, never authority for
+backend writes. Read-turn receipt/history
+comparisons happen after the backend commits its actual facts; a comparison
+failure does not roll those facts back or authorize replay. Progress snapshots
+contain acknowledged facts and counters, not live execution authority.
+
+Actual child AgentRunner fixtures now forward journal operations through this
+production adapter, retaining adversarial replay probes and independent model
+proxies. Plain/read completion, provider failure, model cancellation and pending
+read-approval cancellation pass with it. Direct adapter probes reject foreign
+scope, forged completion, stopped funding and closed capabilities. The focused
+corrected gate passes 53 contracts in 155.39 seconds with frozen source/dependencies and
+all 133 binaries, and the independent peer still verifies exactly 27 requests.
+The initial 53-contract pass is retained too. Review then corrected journal
+authority cancellation/expiry to the shared loop's transport exception types,
+and the stopped-funding probe now requires `TransportCancelled`. Parent success
+records follow the actual child checks; child stdout is discarded by the owned
+launch and is not used as evidence.
+This supplies the native journal component; production process entry, remaining
+runtime/model adapters, broad profiles and AgentService placement remain open.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

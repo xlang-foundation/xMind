@@ -1,0 +1,88 @@
+{
+  "representativeReadRunnerChild": {
+    "pid": 55824,
+    "creationTime": "134369993745544585"
+  },
+  "recordedAt": "2026-10-20T19:51:55.065Z",
+  "gate": {
+    "recordedAt": "2026-10-20T19:50:25.850Z",
+    "sourceParent": "8f3b2f68003985e73219794395f6f5d6bbf318e6",
+    "sourcePatchSha256": "33a5893362634a30740df76074cfc433ed2d1eb05ada9a28858904f2f7420334",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 40832,
+      "launchedAt": "2026-10-20T19:46:32.198Z",
+      "completedAt": "2026-10-20T19:47:46.444Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "96de549b6f4e31853465b475ac9577a48702527e5b6d7f1c8e537d7df43cdfbc"
+    },
+    "test": {
+      "pid": 33992,
+      "launchedAt": "2026-10-20T19:47:49.415Z",
+      "completedAt": "2026-10-20T19:50:23.244Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "778ea3ab894bbafb730bc930376791e8873b48ba910f40fc7d173763178c5bfa"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 153.78,
+    "projectFiles": 2672,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "31e5babf0c4701e685bf550634d2c6ec8b98e285de0cacbca265ffce37cbe2d8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-run-journal-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-run-journal-focused-20261020-build.log": "96de549b6f4e31853465b475ac9577a48702527e5b6d7f1c8e537d7df43cdfbc",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-build-terminal.json": "1516e1c7689bd9881644c2c1cc1445bcc5d8024617d302461b3355536a378d4c",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-ctest.log": "778ea3ab894bbafb730bc930376791e8873b48ba910f40fc7d173763178c5bfa",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-ctest-terminal.json": "98b3c4f035c2e229e7ce31bf1c493d06d8758a296a8a316bd017b657a8391078",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-LastTest.log": "1527dd051f508d9d904c04ff6f09d1568b19b1c1488b2a474070a94f0a04d5ab",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-test-inventory.json": "53916fcf465c9d01851dd5ff88009cdbb3e2ff9e495cfb319ec9afd4085cd78d",
+        "doc/evidence/agent-worker-run-journal-focused-20261020-gate.json": "5a684ae54e0bc60dcc89134045aba21c0b57a8aab5232af5e1ffa504b67348d2"
+      },
+      "localManifestHashes": {
+        "source.patch": "33a5893362634a30740df76074cfc433ed2d1eb05ada9a28858904f2f7420334",
+        "inputs-before-build.json": "0d40b5894beffb1443af6d5e38c0ba187014aa9e29647bae2881fe1296d31f83",
+        "binaries-before-test.json": "33f586e3e0ea14ea6baf9ed0e8485636c87e0c1bf8ed969f2335de027086db65"
+      }
+    }
+  },
+  "fixtureSha256": "2a44d72e46268df0b054bd5fcab00acd2cf4330103cf67f8af8ceeb4c314187d",
+  "ledgerFixtureSha256": "e9e858928a40c3f70b6a32e9838b158fdcf6601f706460de9f609a5cca883294",
+  "evidenceMethod": "Parent authenticated success replies and log records follow the actual child adapter checks. Owned worker stdout is discarded; no child stdout marker is claimed.",
+  "scope": "Production native ordinary-root journal adapter, compiled in the worker journal library and exercised through instrumented actual child AgentRunner fixtures. Process entry and service placement remain open.",
+  "verified": [
+    "Factory validates captured ordinary root, workspace and non-delegating budget",
+    "Scoped reads reject foreign run/session and completion rejects a forged assistant",
+    "Stopped funding and unadmitted dynamic/operation/skill capabilities reject without fake acknowledgement",
+    "Model start/finish/events/completion use typed backend RPC and canonical supplied model receipts",
+    "Read activities derive call bindings from backend canonical assistant projection, independent of fixture model state",
+    "Read turns commit backend facts and compare exact canonical history and receipt sequences; acknowledgement replay does not append history",
+    "Actual plain/read AgentRunner completion, provider failure, model cancellation and pending-read-approval cancellation execute the production adapter",
+    "Acknowledged progress matches actual events, tool turns and canonical assistant",
+    "Independent HTTP peer still verifies exactly 27 requests; no retry added"
+  ],
+  "limitations": [
+    "Ordinary non-delegating model/read journal only; context, graph, effects and skill mutation are explicitly closed",
+    "Production model/runtime adapters, process entry and AgentService placement remain open",
+    "Bounded history/event RPC windows still require paging for larger histories",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native, installed, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}
