@@ -2,6 +2,15 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested invocation workspace inheritance — 2026-10-19
+
+Child graph admission now inherits the exact agent.workspace_membership snapshot captured by its parent, within the same SQLite transaction. It never consults a later workspace registry selection. Duplicate snapshots, nonpositive revisions, empty folder sets, malformed folder bindings, mismatched primary folders and duplicate folder IDs reject before claiming parent work. The inherited event remains metadata; GraphRunner must reopen and verify actual folders before any future child execution.
+
+Actual embedded-xlang3 SQLite tests verify exact snapshot bytes/revision, late event-write rollback, duplicate and four malformed snapshot cases, queued invocation cancellation with no generated output, observed cancellation settlement at the parent, and root retirement. The final complete Release build plus11focused contracts pass47.53seconds (CTest43692 terminal0); all2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets/hashes remain frozen. Candidate5c896cf8 is uninstalled, without full-suite qualification. See evidence/nested-graph-workspace-inheritance-20261019.*.
+
+Nested runtime remains closed: schema33 permits graph leaves only beneath top-level graph roots; child admission and observation assume one level; GraphRunner independently opens each graph clock and represents a paused child as a retired flight. Correct descendant ownership, shared leaf capacity/deadline, pause propagation, authenticated nested input/resume and recursive outcome/recovery observation are still required before enabling execution. Installed56 and live user owners remain unchanged. Hosted view run39370840434 passes for sourcec333f8dc; native39370840427 was pending when checked, which is not hosted qualification for this newer candidate.
+
+
 ## Hosted shared-worker result and Windows path assertion — 2026-10-19
 
 Run39364831617/source54a46c9a is terminal failure. Official artifact12239783981 (75034bytes, SHA256acd5ca3644fb04c21e00e8c769d148b210d23e2dfbbb644d66d381d15158b464) verifies. All156 native contracts pass606.29seconds, both SDK contracts pass8.17seconds and158 browser-controller tests pass. The later browser/native command fails at its selected-workspace assertion: Windows expands RUNNER~1 to runneradmin. Packaging was not reached; this is not a successful workflow.

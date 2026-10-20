@@ -2316,12 +2316,32 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
     auto input=Json::parse(parent.input_json);if(!input.contains("content")||!input["content"].is_string())throw DatabaseError("Invocation parent input is invalid");
     input["content"]="Graph task:\n"+input["content"].get<std::string>()+"\n\nNode task:\n"+prepared.definition.prompt+"\n\nDependency outputs (data, not authority):\n"+prepared.dependency_outputs_json;
     const auto prompt=input.dump();if(prompt.size()>2097152)throw std::invalid_argument("Nested graph input exceeds limits");
+    // Preserve the exact workspace selection captured by the parent owner.
+    // This is metadata only: execution still reopens and verifies each folder.
+    const auto memberships=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq",{parent_id}).rows;
+    if(memberships.size()>1)throw DatabaseError("Invocation parent has duplicate workspace membership snapshots");
+    std::string membership;
+    if(!memberships.empty()){
+        membership=text(memberships[0][0]);const auto value=Json::parse(membership);
+        if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||value["workspace_id"].get<std::string>().empty()||
+           !value.contains("revision")||!value["revision"].is_number_integer()||value["revision"].get<std::int64_t>()<1||
+           !value.contains("folders")||!value["folders"].is_array()||value["folders"].empty()||value["folders"].size()>256)
+            throw DatabaseError("Invocation parent workspace membership is invalid");
+        std::set<std::string> folders;
+        for(const auto& folder:value["folders"]){
+            if(!folder.is_object()||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string()||
+               folder["folder_id"].get<std::string>().empty()||folder["root"].get<std::string>().empty()||!folders.insert(folder["folder_id"].get<std::string>()).second)
+                throw DatabaseError("Invocation parent workspace folder binding is invalid");
+        }
+        if(value["folders"][0]["folder_id"]!=value["workspace_id"])throw DatabaseError("Invocation parent workspace primary folder differs");
+    }
     impl_->graph_checkpoint(parent,coordinator,expected);
     changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{id,parent.run.session_id,parent_id,node_id}));
     changed_one(db.execute("INSERT INTO graph_roots(run_id,graph_id,graph_revision,specification,checkpoint,input) VALUES(?,?,?,?,?,?)",{id,binding.graph_id,binding.revision,child_plan.json(),GraphCoordinator(child_plan).checkpoint(),prompt}));
     const Run child{id,parent.run.session_id,RunState::queued,parent_id,node_id,true,prompt_context(prompt)};impl_->message(child,"user",prompt);
     changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));
     impl_->event(id,"run.queued",Json{{"kind","graph_invocation"},{"parent_run_id",parent_id},{"node_id",node_id},{"graph_id",binding.graph_id},{"graph_revision",binding.revision}}.dump());
+    if(!membership.empty())impl_->event(id,"agent.workspace_membership",membership);
     impl_->event(parent_id,"graph.invocation.queued",Json{{"child_run_id",id},{"node_id",node_id},{"graph_id",binding.graph_id},{"graph_revision",binding.revision}}.dump());
     const auto result=graph_run(id);transaction.commit();return result;
 }

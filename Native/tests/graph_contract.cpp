@@ -138,8 +138,9 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         Json source={{"graphs",Json::array({{{"id","child"},{"spec",nested_leaf}},{{"id","parent"},{"spec",{{"nodes",Json::array({{{"id","invoke"},{"type","graph"},{"graph_id","child"},{"prompt","Owned nested task"}}})}}}}})}};
         const auto initial=catalog.apply(source.dump());const auto parent=std::find_if(initial.entries.begin(),initial.entries.end(),[](const auto& e){return e.id=="parent";});
         captured_spec=parent->plan.nodes()[0].graph->specification_json;
+        const WorkspaceMembershipSnapshot membership{"fixture-workspace",7,{{"fixture-workspace",argv[1]}}};
         store.create_session("nested-session","Synthetic nested ownership").get();
-        store.start_graph_run("nested-root","nested-session","parent",parent->revision,parent->plan,R"({"content":"Captured parent task","model":"fixture-model","files":["fixture.txt"]})").get();
+        store.start_graph_run("nested-root","nested-session","parent",parent->revision,parent->plan,R"({"content":"Captured parent task","model":"fixture-model","files":["fixture.txt"]})",{},{},membership).get();
         rejects<Conflict>([&]{store.start_graph_invocation("too-early","nested-root","invoke",1).get();});
         store.transition("nested-root",RunState::queued,RunState::running).get();
         source["graphs"][0]["spec"]["nodes"][0]["prompt"]="New catalogue child";catalog.apply(source.dump());
@@ -151,9 +152,22 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         rejects<NotFound>([&]{store.run("rollback-child").get();});
         require(store.children("nested-root").get().empty()&&store.graph_run("nested-root").get().checkpoint_revision==checkpoint&&store.events("nested-root").get().size()==event_count,"Failed nested insert must roll back child, parent checkpoint and events atomically");
         {XlangSqlite inject(owner_database,imports);inject.execute("DROP TRIGGER reject_invocation");}
+        const auto original_membership=store.events("nested-root").get().front().json;
+        {XlangSqlite inject(owner_database,imports);inject.execute("CREATE TRIGGER reject_inherited_membership BEFORE INSERT ON events WHEN NEW.run_id='membership-fault' AND NEW.kind='agent.workspace_membership' BEGIN SELECT RAISE(ABORT,'synthetic inherited membership event fault'); END");}
+        rejects<DatabaseError>([&]{store.start_graph_invocation("membership-fault","nested-root","invoke",checkpoint).get();});
+        rejects<NotFound>([&]{store.run("membership-fault").get();});require(store.graph_run("nested-root").get().checkpoint_revision==checkpoint&&store.events("nested-root").get().size()==event_count,"Late inherited snapshot failure must roll back child history, events and parent claim");
+        {XlangSqlite inject(owner_database,imports);inject.execute("DROP TRIGGER reject_inherited_membership");inject.execute("INSERT INTO events(run_id,kind,payload) SELECT run_id,kind,payload FROM events WHERE run_id='nested-root' AND kind='agent.workspace_membership'");}
+        rejects<DatabaseError>([&]{store.start_graph_invocation("duplicate-membership","nested-root","invoke",checkpoint).get();});rejects<NotFound>([&]{store.run("duplicate-membership").get();});
+        {XlangSqlite inject(owner_database,imports);inject.execute("DELETE FROM events WHERE seq=(SELECT max(seq) FROM events WHERE run_id='nested-root' AND kind='agent.workspace_membership')");}
+        for(int bad=0;bad<4;++bad){auto malformed=Json::parse(original_membership);if(bad==0)malformed["revision"]=0;else if(bad==1)malformed["folders"]=Json::array();else if(bad==2)malformed["folders"][0]["folder_id"]="wrong-primary";else malformed["folders"].push_back(malformed["folders"][0]);
+            {XlangSqlite inject(owner_database,imports);inject.execute("UPDATE events SET payload=? WHERE run_id='nested-root' AND kind='agent.workspace_membership'",{malformed.dump()});}
+            rejects<DatabaseError>([&]{store.start_graph_invocation("malformed-membership","nested-root","invoke",checkpoint).get();});rejects<NotFound>([&]{store.run("malformed-membership").get();});require(store.graph_run("nested-root").get().checkpoint_revision==checkpoint,"Malformed inherited membership must not claim parent work");
+            {XlangSqlite inject(owner_database,imports);inject.execute("UPDATE events SET payload=? WHERE run_id='nested-root' AND kind='agent.workspace_membership'",{original_membership});}
+        }
         const auto child=store.start_graph_invocation("nested-child","nested-root","invoke",checkpoint).get();
         require(child.run.graph_root&&child.run.parent_id=="nested-root"&&child.run.session_id=="nested-session"&&child.graph_id=="child"&&child.graph_revision==1&&child.specification_json==captured_spec,"Child must derive its old immutable binding from the captured parent, despite catalogue revision changes");
         const auto input=Json::parse(child.input_json);require(input["model"]=="fixture-model"&&input["files"]==Json::array({"fixture.txt"})&&input["content"].get<std::string>().find("Owned nested task")!=std::string::npos,"Nested input must retain captured model/files and include its node task");
+        std::size_t inherited_count=0;for(const auto& event:store.events(child.run.id).get())if(event.kind=="agent.workspace_membership"){++inherited_count;require(event.json==original_membership,"Child must inherit exact captured workspace bytes and revision");}require(inherited_count==1,"Child must have exactly one inherited workspace binding");
         const auto admission=store.child_admission(child.run.id).get();const auto owned=store.owned_children("nested-root").get();
         require(admission.kind==ChildAdmissionKind::graph_invocation&&admission.root_run_id=="nested-root"&&owned.size()==1&&owned[0].kind=="graph_invocation"&&store.runs("nested-session").get().size()==1,"Nested graph must remain an owned child under one session root");
         require(store.history("nested-session").get().size()==1&&store.run_history(child.run.id).get().size()==1,"Invocation input must remain in isolated child history");
@@ -164,6 +178,12 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         store.transition(child.run.id,RunState::queued,RunState::running).get();
         rejects<RunUnavailable>([&]{store.start_graph_invocation("grandchild",child.run.id,"human",child.checkpoint_revision).get();});
         require(store.children(child.run.id).get().empty(),"Unimplemented descendant ownership must reject before mutation");
+        store.create_session("nested-cancel-session","Synthetic nested cancellation").get();
+        store.start_graph_run("cancel-root","nested-cancel-session","parent",parent->revision,parent->plan,R"({"content":"Cancellation fixture"})",{},{},membership).get();store.transition("cancel-root",RunState::queued,RunState::running).get();
+        const auto cancelling=store.start_graph_invocation("cancel-child","cancel-root","invoke",store.graph_run("cancel-root").get().checkpoint_revision).get();
+        require(store.retire_graph_run(cancelling.run.id,RunState::cancelled,R"({"reason":"synthetic_cancel_before_execution"})").get().state==RunState::cancelled,"Queued invocation must retire without executing its child plan");
+        const auto settled=store.settle_graph_child(cancelling.run.id).get();GraphCoordinator cancelled_parent(parent->plan,settled.checkpoint_json,GraphRestoreMode::live);require(cancelled_parent.state("invoke")==GraphNodeState::failed,"Parent invocation must settle from observed cancellation");
+        require(store.retire_graph_run("cancel-root",RunState::cancelled,R"({"reason":"synthetic_parent_cancelled"})").get().state==RunState::cancelled&&store.run_history("cancel-child").get().size()==1,"Parent retirement must preserve child input without fabricated output");
         store.close();
     }
     {PersistenceService store(owner_database,imports);require(store.graph_run("nested-child").get().specification_json==captured_spec&&store.run("nested-child").get().state==RunState::failed&&store.run("nested-root").get().state==RunState::failed,"Restart must retain pinned child bytes and retire interrupted owners without replay");require(store.run_history("nested-child").get().size()==1,"Restart must preserve isolated invocation input");store.close();}
