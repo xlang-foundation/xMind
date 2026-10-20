@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Qualified 0.1.57 development package — 2026-10-20
+
+Candidate0.1.57 combines client source6dbab29f1c03fe4f019176ed48166a8172e0be9a with complete155-qualified native source971ad1e/fc94ced1 and pinned SDK58a8aab9/DLL1ff2a8e7. The staged runtime reuses the verified installed56 public payload, replaces only the qualified xmind executable and provenance, and verifies every production SDK payload against the full native input manifest. SDK linker .lib/.exp artifacts remain outside distribution. Runtime manifest SHA2568e563f8eb7f5107af695c7429d8a5cbf8d8603aae7c4230b85e6b71044be592f;2402payload files. Actual Native/CMake sources still match the full native qualification; client version changes are separately qualified.
+
+The complete staged client gate passes462extension/161browser tests with all17441source/dependency/asset/runtime files and file sets unchanged. Browser/native integration against that exact staged executable/modules/stdlib/assets also passes in3.93seconds, including reviewed nested graph execution/readback/restore and nested human answer ownership, with all17441stage files unchanged. These are actual native/controller fixtures, not rendered IDE or live-provider acceptance.
+
+C:/xMindNativeValidation/xmind-0.1.57-complete-win32-x64.vsix is34513072bytes, SHA256de95e229b55ea7b1e804123095fde47095710106b432d3f3c3164dbd7ec32996. All2448archive entries verify against the qualified stage; only the documented README/license case/name aliases occur. Tools/verify-browser-vsix.ps1 separately verifies26required access/renderer/license assets and shared-backend command, with no private state. Packaging leaves all17441stage bytes unchanged. Receipts and production archive hashes: evidence/coding57-*, evidence/coding-0.1.57-*, evidence/vscode-0.1.57-*. Complete stage and input manifests remain under C:/xMindNativeValidation/coding-0.1.57-current-source-20261020 and coding-0.1.57-current-client-gate-20261020.
+
+The candidate is not installed and no user task was replayed. Installed56/user owners/history/settings remain unchanged. Safe profile-preserving adoption and actual installed acceptance remain, along with the separate untested schema35 budget work and other remaining OSS requirements. This is a local development artifact, not a published release or completion declaration.
+
 ## Complete native qualification after managed-runtime fix — 2026-10-20
 
 Exact committed source971ad1e146ba96b3fd9faa5ad44a729c81ebde7e passes all155 registered native contracts in1061.76seconds. CTest57348 and wrapper70708 are terminal0. All2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets/hashes remain unchanged, with no source patch and no CPython execution. Executable SHA256fc94ced163e648552f6335b38b57771097809ad7d181bd4f3fda0999a476a1a8; pinned SDK DLL1ff2a8e7. Complete inventory/logs/receipts: evidence/managed-runtime-current-full-native-20261020-*; raw input and binary manifests remain in C:/xMindNativeValidation/managed-runtime-current-full-native-20261020.

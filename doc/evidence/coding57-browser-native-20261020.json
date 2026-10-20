@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-20T09:36:55.111Z",
+  "version": "0.1.57",
+  "clientSource": "6dbab29f1c03fe4f019176ed48166a8172e0be9a",
+  "nativeSource": "971ad1e146ba96b3fd9faa5ad44a729c81ebde7e",
+  "nativeSha256": "fc94ced163e648552f6335b38b57771097809ad7d181bd4f3fda0999a476a1a8",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "allStageFilesUnchanged": 17441,
+  "terminal": {
+    "pid": 19268,
+    "startedAt": "2026-10-20T09:36:49.550Z",
+    "completedAt": "2026-10-20T09:36:53.479Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+  },
+  "installed": false,
+  "renderedIde": false,
+  "providerRequests": 0,
+  "passed": true
+}
