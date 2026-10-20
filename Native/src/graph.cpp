@@ -93,9 +93,13 @@ Json output_value(const std::string& source){
     const auto wrapped=object("{\"value\":"+source+"}",65548);fields(wrapped,{"value"});return wrapped.at("value");
 }
 }
-GraphPlan::GraphPlan(const std::string& source){
+GraphPlan::GraphPlan(const std::string& source):GraphPlan(source,0,std::make_shared<ParseBudget>()){}
+GraphPlan::GraphPlan(const std::string& source,std::size_t depth,const std::shared_ptr<ParseBudget>& budget){
+    if(depth>3)throw std::invalid_argument("Nested graph snapshot depth exceeds three invocation levels");
     const auto spec=object(source);fields(spec,{"nodes"});
     if(!spec.contains("nodes") || !spec["nodes"].is_array() || spec["nodes"].empty() || spec["nodes"].size()>100)throw std::invalid_argument("A graph requires 1-100 nodes");
+    if(spec["nodes"].size()>256-budget->nodes)throw std::invalid_argument("Nested graph snapshot exceeds 256 total nodes");
+    budget->nodes+=spec["nodes"].size();
     std::map<std::string,std::size_t> ids;
     for(const auto& value:spec["nodes"]){
         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
@@ -135,6 +139,19 @@ GraphPlan::GraphPlan(const std::string& source){
                 if(node.tool.starts_with("mcp_"))throw std::invalid_argument("Invalid MCP graph tool alias");
                 if(!value.contains("arguments") || !value["arguments"].is_object())throw std::invalid_argument("Graph tool arguments must be an object");node.arguments_json=value["arguments"].dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Graph tool arguments exceed limits");
             }
+        }
+        else if(kind=="graph"){
+            fields(value,{"id","type","depends_on","prompt","graph_id","graph_revision","graph_spec","when"});
+            node.kind=GraphNodeKind::graph;node.prompt=text(value,"prompt",32768);
+            const auto graph_id=text(value,"graph_id",64);
+            if(!identifier(graph_id)||!value.contains("graph_revision")||!value["graph_revision"].is_number_integer()||value["graph_revision"]<1||value["graph_revision"]>9007199254740991LL||!value.contains("graph_spec")||!value["graph_spec"].is_object())
+                throw std::invalid_argument("Nested graph requires a pinned identity, revision and specification snapshot");
+            const GraphPlan nested(value["graph_spec"].dump(),depth+1,budget);
+            node.graph=GraphInvocationBinding{graph_id,value["graph_revision"].get<std::int64_t>(),nested.json()};
+            const auto pinned=std::find_if(budget->bindings.begin(),budget->bindings.end(),[&](const auto& binding){return binding.graph_id==graph_id&&binding.revision==node.graph->revision;});
+            if(pinned!=budget->bindings.end()){
+                if(pinned->specification_json!=node.graph->specification_json)throw std::invalid_argument("Nested graph identity/revision has conflicting snapshots");
+            }else budget->bindings.push_back(*node.graph);
         }
         else if(kind=="human"){node.kind=GraphNodeKind::human;fields(value,{"id","type","depends_on","prompt","when"});node.prompt=text(value,"prompt",32768);}
         else throw std::invalid_argument("Unsupported graph node type");
@@ -177,6 +194,7 @@ GraphDecision GraphCoordinator::inspect() const {
 GraphPreparedNode GraphCoordinator::start(const std::string& id){
     const auto decisions=inspect();if(std::find(decisions.ready.begin(),decisions.ready.end(),id)==decisions.ready.end())throw Conflict("Graph node is not ready");
     const auto i=index(id);auto node=plan_.nodes()[i];auto outputs=Json::object();for(const auto& dependency:node.dependencies)outputs[dependency]=output_value(states_[index(dependency)].output);
+    if(node.kind==GraphNodeKind::graph)throw Conflict("Nested graph execution ownership is not implemented");
     if(node.kind==GraphNodeKind::tool){
         if(node.mcp){node.arguments_json=resolve_mcp(node.arguments_json,outputs);object(node.arguments_json,65536);}
         else{const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}

@@ -2,13 +2,17 @@
 #include "agentflow/agent_definition_records.hpp"
 #include "agentflow/persistence_service.hpp"
 #include <optional>
+#include <memory>
 namespace agentflow {
-enum class GraphNodeKind {agent,tool,human};
+enum class GraphNodeKind {agent,tool,human,graph};
 enum class GraphNodeState {pending,running,waiting_human,completed,skipped,failed,uncertain,cancelled};
 enum class GraphRestoreMode {recover,live};
 // Trusted catalogue pins a registry alias to one immutable server revision.
 // It carries no executable, environment, credential value or approval authority.
 struct GraphMcpBinding {std::string server_id;std::int64_t config_revision=0;};
+// Backend-owned immutable invocation snapshot. Catalogue resolution and nested
+// execution are separate boundaries; accepting a snapshot is not run admission.
+struct GraphInvocationBinding {std::string graph_id;std::int64_t revision=0;std::string specification_json;};
 struct GraphNodeDefinition {
     std::string id;
     GraphNodeKind kind;
@@ -21,6 +25,7 @@ struct GraphNodeDefinition {
     std::int64_t agent_revision=0;
     std::string condition_json;
     std::optional<GraphMcpBinding> mcp;
+    std::optional<GraphInvocationBinding> graph;
 };
 // Immutable validated specification, independent of model/provider/runtime values.
 class GraphPlan {
@@ -30,6 +35,8 @@ public:
     const std::vector<std::size_t>& order() const{return order_;}
     const std::string& json() const{return json_;}
 private:
+    struct ParseBudget {std::size_t nodes=0;std::vector<GraphInvocationBinding> bindings;};
+    GraphPlan(const std::string& json,std::size_t depth,const std::shared_ptr<ParseBudget>& budget);
     std::vector<GraphNodeDefinition> nodes_;
     std::vector<std::size_t> order_;
     std::string json_;

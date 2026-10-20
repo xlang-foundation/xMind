@@ -27,6 +27,8 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
     for(auto& entry:value["graphs"]){
         if(!entry.is_object()||!entry.contains("spec")||!entry["spec"].is_object()||!entry["spec"].contains("nodes")||!entry["spec"]["nodes"].is_array())continue;
         for(auto& node:entry["spec"]["nodes"]){
+            if(node.is_object()&&node.contains("type")&&node["type"].is_string()&&node["type"]=="graph")
+                throw std::invalid_argument("Nested graph catalogue resolution is not implemented; invocation snapshots are backend-owned");
             if(!node.is_object()||!node.contains("agent_id"))continue;
             if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id")||node.contains("tools")||node.contains("permissions"))
                 throw std::invalid_argument("Named graph agents cannot override or supply backend-pinned definition fields");

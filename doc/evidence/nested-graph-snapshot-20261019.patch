@@ -1,0 +1,155 @@
+diff --git a/Native/include/agentflow/graph.hpp b/Native/include/agentflow/graph.hpp
+index 57d2449c..20147e41 100644
+--- a/Native/include/agentflow/graph.hpp
++++ b/Native/include/agentflow/graph.hpp
+@@ -2,13 +2,17 @@
+ #include "agentflow/agent_definition_records.hpp"
+ #include "agentflow/persistence_service.hpp"
+ #include <optional>
++#include <memory>
+ namespace agentflow {
+-enum class GraphNodeKind {agent,tool,human};
++enum class GraphNodeKind {agent,tool,human,graph};
+ enum class GraphNodeState {pending,running,waiting_human,completed,skipped,failed,uncertain,cancelled};
+ enum class GraphRestoreMode {recover,live};
+ // Trusted catalogue pins a registry alias to one immutable server revision.
+ // It carries no executable, environment, credential value or approval authority.
+ struct GraphMcpBinding {std::string server_id;std::int64_t config_revision=0;};
++// Backend-owned immutable invocation snapshot. Catalogue resolution and nested
++// execution are separate boundaries; accepting a snapshot is not run admission.
++struct GraphInvocationBinding {std::string graph_id;std::int64_t revision=0;std::string specification_json;};
+ struct GraphNodeDefinition {
+     std::string id;
+     GraphNodeKind kind;
+@@ -21,6 +25,7 @@ struct GraphNodeDefinition {
+     std::int64_t agent_revision=0;
+     std::string condition_json;
+     std::optional<GraphMcpBinding> mcp;
++    std::optional<GraphInvocationBinding> graph;
+ };
+ // Immutable validated specification, independent of model/provider/runtime values.
+ class GraphPlan {
+@@ -30,6 +35,8 @@ public:
+     const std::vector<std::size_t>& order() const{return order_;}
+     const std::string& json() const{return json_;}
+ private:
++    struct ParseBudget {std::size_t nodes=0;std::vector<GraphInvocationBinding> bindings;};
++    GraphPlan(const std::string& json,std::size_t depth,const std::shared_ptr<ParseBudget>& budget);
+     std::vector<GraphNodeDefinition> nodes_;
+     std::vector<std::size_t> order_;
+     std::string json_;
+diff --git a/Native/src/graph.cpp b/Native/src/graph.cpp
+index 97919868..80603cba 100644
+--- a/Native/src/graph.cpp
++++ b/Native/src/graph.cpp
+@@ -93,9 +93,13 @@ Json output_value(const std::string& source){
+     const auto wrapped=object("{\"value\":"+source+"}",65548);fields(wrapped,{"value"});return wrapped.at("value");
+ }
+ }
+-GraphPlan::GraphPlan(const std::string& source){
++GraphPlan::GraphPlan(const std::string& source):GraphPlan(source,0,std::make_shared<ParseBudget>()){}
++GraphPlan::GraphPlan(const std::string& source,std::size_t depth,const std::shared_ptr<ParseBudget>& budget){
++    if(depth>3)throw std::invalid_argument("Nested graph snapshot depth exceeds three invocation levels");
+     const auto spec=object(source);fields(spec,{"nodes"});
+     if(!spec.contains("nodes") || !spec["nodes"].is_array() || spec["nodes"].empty() || spec["nodes"].size()>100)throw std::invalid_argument("A graph requires 1-100 nodes");
++    if(spec["nodes"].size()>256-budget->nodes)throw std::invalid_argument("Nested graph snapshot exceeds 256 total nodes");
++    budget->nodes+=spec["nodes"].size();
+     std::map<std::string,std::size_t> ids;
+     for(const auto& value:spec["nodes"]){
+         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
+@@ -136,6 +140,19 @@ GraphPlan::GraphPlan(const std::string& source){
+                 if(!value.contains("arguments") || !value["arguments"].is_object())throw std::invalid_argument("Graph tool arguments must be an object");node.arguments_json=value["arguments"].dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Graph tool arguments exceed limits");
+             }
+         }
++        else if(kind=="graph"){
++            fields(value,{"id","type","depends_on","prompt","graph_id","graph_revision","graph_spec","when"});
++            node.kind=GraphNodeKind::graph;node.prompt=text(value,"prompt",32768);
++            const auto graph_id=text(value,"graph_id",64);
++            if(!identifier(graph_id)||!value.contains("graph_revision")||!value["graph_revision"].is_number_integer()||value["graph_revision"]<1||value["graph_revision"]>9007199254740991LL||!value.contains("graph_spec")||!value["graph_spec"].is_object())
++                throw std::invalid_argument("Nested graph requires a pinned identity, revision and specification snapshot");
++            const GraphPlan nested(value["graph_spec"].dump(),depth+1,budget);
++            node.graph=GraphInvocationBinding{graph_id,value["graph_revision"].get<std::int64_t>(),nested.json()};
++            const auto pinned=std::find_if(budget->bindings.begin(),budget->bindings.end(),[&](const auto& binding){return binding.graph_id==graph_id&&binding.revision==node.graph->revision;});
++            if(pinned!=budget->bindings.end()){
++                if(pinned->specification_json!=node.graph->specification_json)throw std::invalid_argument("Nested graph identity/revision has conflicting snapshots");
++            }else budget->bindings.push_back(*node.graph);
++        }
+         else if(kind=="human"){node.kind=GraphNodeKind::human;fields(value,{"id","type","depends_on","prompt","when"});node.prompt=text(value,"prompt",32768);}
+         else throw std::invalid_argument("Unsupported graph node type");
+         if(value.contains("depends_on")){const auto& dependencies=value["depends_on"];if(!dependencies.is_array() || dependencies.size()>100)throw std::invalid_argument("Invalid graph dependencies");std::set<std::string> unique;for(const auto& dependency:dependencies){if(!dependency.is_string())throw std::invalid_argument("Graph dependency must be an ID");auto id=dependency.get<std::string>();if(!identifier(id) || id==node.id || !unique.insert(id).second)throw std::invalid_argument("Invalid graph dependency");node.dependencies.push_back(std::move(id));}}
+@@ -177,6 +194,7 @@ GraphDecision GraphCoordinator::inspect() const {
+ GraphPreparedNode GraphCoordinator::start(const std::string& id){
+     const auto decisions=inspect();if(std::find(decisions.ready.begin(),decisions.ready.end(),id)==decisions.ready.end())throw Conflict("Graph node is not ready");
+     const auto i=index(id);auto node=plan_.nodes()[i];auto outputs=Json::object();for(const auto& dependency:node.dependencies)outputs[dependency]=output_value(states_[index(dependency)].output);
++    if(node.kind==GraphNodeKind::graph)throw Conflict("Nested graph execution ownership is not implemented");
+     if(node.kind==GraphNodeKind::tool){
+         if(node.mcp){node.arguments_json=resolve_mcp(node.arguments_json,outputs);object(node.arguments_json,65536);}
+         else{const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}
+diff --git a/Native/src/graph_catalog.cpp b/Native/src/graph_catalog.cpp
+index 82faa03d..278f2bff 100644
+--- a/Native/src/graph_catalog.cpp
++++ b/Native/src/graph_catalog.cpp
+@@ -27,6 +27,8 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
+     for(auto& entry:value["graphs"]){
+         if(!entry.is_object()||!entry.contains("spec")||!entry["spec"].is_object()||!entry["spec"].contains("nodes")||!entry["spec"]["nodes"].is_array())continue;
+         for(auto& node:entry["spec"]["nodes"]){
++            if(node.is_object()&&node.contains("type")&&node["type"].is_string()&&node["type"]=="graph")
++                throw std::invalid_argument("Nested graph catalogue resolution is not implemented; invocation snapshots are backend-owned");
+             if(!node.is_object()||!node.contains("agent_id"))continue;
+             if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id")||node.contains("tools")||node.contains("permissions"))
+                 throw std::invalid_argument("Named graph agents cannot override or supply backend-pinned definition fields");
+diff --git a/Native/src/graph_runner.cpp b/Native/src/graph_runner.cpp
+index aac2b64c..3cde9b91 100644
+--- a/Native/src/graph_runner.cpp
++++ b/Native/src/graph_runner.cpp
+@@ -90,6 +90,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
+     const std::vector<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions"};
+     std::size_t agent_count=0;
+     for(const auto& node:plan.nodes()){
++        if(node.kind==GraphNodeKind::graph)throw RunUnavailable("Nested graph execution ownership is not implemented");
+         if(node.kind==GraphNodeKind::agent){if(!agents_)throw RunUnavailable("Graph agent execution requires a configured model");if(!node.model_id.empty() && std::find(configured.begin(),configured.end(),node.model_id)==configured.end())throw std::invalid_argument("Graph node model is not configured");}
+         if(node.kind==GraphNodeKind::agent)++agent_count;
+         if(node.kind==GraphNodeKind::tool){
+diff --git a/Native/tests/graph_contract.cpp b/Native/tests/graph_contract.cpp
+index f4fa861e..b7a87190 100644
+--- a/Native/tests/graph_contract.cpp
++++ b/Native/tests/graph_contract.cpp
+@@ -23,6 +23,18 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
+     })}};
+     const GraphPlan plan(spec.dump());require(plan.nodes().size()==6 && plan.order().size()==6,"Native plan must include all nodes");
+     for(const auto source:{R"({"nodes":[]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["missing"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["b"]},{"id":"b","type":"agent","prompt":"x","depends_on":["a"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","permissions":"allow"}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","prompt":"spoof"}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","tools":["read_file","read_file"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","tools":["../read_file"]}]})",R"({"nodes":[{"id":"a","type":"tool","tool":"read_file","arguments":{"path":{"$ref":{"node":"undeclared"}}}}]})"})rejects<std::invalid_argument>([&]{GraphPlan invalid(source);});
++    const auto wrap_graph=[](Json child,const std::string& id="nested"){return Json{{"nodes",Json::array({{{"id","call"},{"type","graph"},{"prompt","Synthetic nested invocation"},{"graph_id",id},{"graph_revision",7},{"graph_spec",std::move(child)}}})}};};
++    const Json nested_leaf={{"nodes",Json::array({{{"id","answer"},{"type","human"},{"prompt","Synthetic nested answer"}}})}};
++    const auto nested_spec=wrap_graph(nested_leaf);const GraphPlan nested(nested_spec.dump());
++    require(nested.nodes()[0].kind==GraphNodeKind::graph&&nested.nodes()[0].graph&&nested.nodes()[0].graph->graph_id=="nested"&&nested.nodes()[0].graph->revision==7&&nested.nodes()[0].graph->specification_json==nested_leaf.dump(),"Nested snapshot must retain its immutable identity, revision and validated child specification");
++    require(GraphPlan(nested.json()).json()==nested.json(),"Nested snapshot must round-trip canonically");
++    GraphCoordinator nested_owner(nested);rejects<Conflict>([&]{nested_owner.start("call");});require(nested_owner.state("call")==GraphNodeState::pending,"Snapshot acceptance must not enable unsupported nested executable ownership");
++    auto changed_nested=nested_spec;changed_nested["nodes"][0]["graph_revision"]=8;rejects<std::invalid_argument>([&]{GraphCoordinator changed(GraphPlan(changed_nested.dump()),nested_owner.checkpoint());});
++    for(int bad=0;bad<10;++bad){auto invalid=nested_spec;auto& node=invalid["nodes"][0];switch(bad){case 0:node.erase("graph_revision");break;case 1:node["graph_revision"]=0;break;case 2:node["graph_revision"]=9007199254740992LL;break;case 3:node["graph_id"]="../unregistered";break;case 4:node["graph_spec"]=Json::array();break;case 5:node["credential"]="forbidden";break;case 6:node["graph_spec"]["nodes"][0]["type"]="unknown";break;case 7:node.erase("prompt");break;case 8:node["graph_spec"]["nodes"].push_back(node["graph_spec"]["nodes"][0]);break;case 9:node["graph_revision"]="7";break;}rejects<std::invalid_argument>([&]{GraphPlan denied(invalid.dump());});}
++    auto depth=nested_leaf;for(int i=0;i<3;++i)depth=wrap_graph(depth,"level"+std::to_string(i));GraphPlan allowed_depth(depth.dump());depth=wrap_graph(depth,"too-deep");rejects<std::invalid_argument>([&]{GraphPlan denied(depth.dump());});
++    auto humans=[](int count){Json nodes=Json::array();for(int i=0;i<count;++i)nodes.push_back({{"id","human"+std::to_string(i)},{"type","human"},{"prompt","Synthetic width"}});return Json{{"nodes",nodes}};};
++    Json width={{"nodes",Json::array()}};for(const auto& part:std::vector<std::pair<std::string,int>>{{"one",100},{"two",100},{"three",53}}){auto node=wrap_graph(humans(part.second),part.first)["nodes"][0];node["id"]=part.first;width["nodes"].push_back(node);}GraphPlan allowed_width(width.dump());width["nodes"][2]["graph_spec"]=humans(54);rejects<std::invalid_argument>([&]{GraphPlan denied(width.dump());});
++    auto conflicting=nested_spec;auto other=conflicting["nodes"][0];other["id"]="second";other["graph_spec"]["nodes"][0]["prompt"]="Conflicting snapshot";conflicting["nodes"].push_back(other);rejects<std::invalid_argument>([&]{GraphPlan denied(conflicting.dump());});
+     const std::string alias="mcp_"+std::string(48,'a');
+     const std::string raw_arguments=R"({ "dec\u0069mal":1.00000000000000000001,"large":18446744073709551616,"path":{"$ref":{"node":"input","path":["path"]}},"safe":[{"$ref":{"node":"input","path":["safe"]}}] })";
+     const Json mcp_spec={{"nodes",Json::array({{{"id","input"},{"type","human"},{"prompt","Synthetic typed dependency"}},{{"id","remote"},{"type","tool"},{"tool",alias},{"arguments_json",raw_arguments},{"mcp",{{"server_id","fixture-peer"},{"config_revision",7}}},{"depends_on",{"input"}}}})}};
+@@ -46,6 +58,7 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
+     const auto database=(std::filesystem::u8path(argv[1])/"graphs.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
+     const auto input=Json{{"graphs",Json::array({{{"id","workflow"},{"spec",spec}}})}}.dump();
+     {PersistenceService store(database,imports);GraphCatalogStore catalog(store);require(catalog.load().revision==0,"Fresh storage must not invent a graph");const auto first=catalog.apply(input);require(first.revision==1 && first.entries[0].revision==1,"Graph catalog must assign backend revisions");require(catalog.apply(input).revision==1,"Canonical unchanged graph must preserve revisions");const auto saved=store.information("native-graphs","catalog").get();
++        rejects<std::invalid_argument>([&]{catalog.apply(Json{{"graphs",Json::array({{{"id","nested-import"},{"spec",nested_spec}}})}}.dump());});require(store.information("native-graphs","catalog").get()==saved,"Unresolved nested import must fail closed without changing stored catalogue");
+         for(const auto source:{R"({"graphs":[],"revision":99})",R"({"graphs":[],"graphs":[]})",R"({"graphs":[{"id":"x","revision":9,"spec":{"nodes":[]}}]})"}){rejects<std::invalid_argument>([&]{catalog.apply(source);});require(store.information("native-graphs","catalog").get()==saved,"Rejected imports must preserve saved graph definitions");}
+         auto changed=spec;changed["nodes"][0]["prompt"]="Changed synthetic branch";const auto update=Json{{"graphs",Json::array({{{"id","workflow"},{"spec",changed}}})}}.dump();
+         {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_graph_update BEFORE UPDATE ON information WHEN NEW.category='native-graphs' BEGIN SELECT RAISE(ABORT,'actual graph storage fixture failure'); END");}
+diff --git a/Native/tests/graph_runner_contract.cpp b/Native/tests/graph_runner_contract.cpp
+index b1704397..d6359649 100644
+--- a/Native/tests/graph_runner_contract.cpp
++++ b/Native/tests/graph_runner_contract.cpp
+@@ -64,6 +64,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
+  ]})");
+  const auto registered=GraphCatalogStore(store).apply(Json{{"graphs",Json::array({{{"id","fixture"},{"spec",spec}}})}}.dump());
+  const GraphPlan plan=registered.entries.at(0).plan;GraphRunner runner(store,settings,2);
++ {const GraphPlan nested(R"({"nodes":[{"id":"invoke","type":"graph","prompt":"Synthetic unresolved runtime","graph_id":"child","graph_revision":1,"graph_spec":{"nodes":[{"id":"human","type":"human","prompt":"Synthetic child wait"}]}}]})");bool rejected=false;try{runner.validate(nested);}catch(const RunUnavailable&){rejected=true;}require(rejected,"Nested snapshot validation must not enable runtime admission before owned execution is implemented");}
+  runner.validate(plan);require(plan.nodes()[1].agent_revision==1&&plan.nodes()[1].model_id=="fixture-model","Graph runner input must contain native-resolved named-agent snapshots");store.create_session("main","Real graph execution with synthetic inference").get();store.start_graph_run("root","main","fixture",registered.entries.at(0).revision,plan,R"({"content":"root actual graph task","model_id":"fixture-model"})").get();
+  require(runner.execute("root").state==RunState::paused,"Human step must pause after observed agent joins");auto root=store.graph_run("root").get();require(!root.input_json.empty(),"Immutable graph input must be retained");auto checkpoint=Json::parse(root.checkpoint_json);require(checkpoint["nodes"][0]["output"]["content"]=="Actual left file\n","Direct graph tool must use actual workspace content");require(store.children("root").get().size()==3,"Human node must not masquerade as executable child");
+  store.input_graph_human("root","review",R"({"path":"right.txt"})","local-owner",root.checkpoint_revision).get();require(runner.execute("root").state==RunState::completed,"Resumed graph must run the typed-reference tool and finish");root=store.graph_run("root").get();checkpoint=Json::parse(root.checkpoint_json);require(checkpoint["nodes"][4]["output"]["content"]=="Actual right file\n" && checkpoint["nodes"][5]["state"]=="skipped","Actual human data must resolve tool argument and condition");require(store.children("root").get().size()==4,"Skipped tool must never be admitted");const auto history=store.history("main").get();require(history.size()==2 && Json::parse(history.back().json)["source"]=="graph_join","Root history must retain its own observed join only");require(!Json::parse(history.back().json).contains("usage"),"Graph must not fabricate aggregate token metrics");

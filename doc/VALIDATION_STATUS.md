@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested graph snapshot boundary — 2026-10-19
+
+GraphPlan now validates a backend-owned nested invocation snapshot: graph identity/revision, task prompt and a complete child specification. Validation shares a256-node expansion budget across the invocation tree, permits at most three invocation levels, preserves the existing100-node per-plan limit, rejects inconsistent identity/revision snapshots and retains canonical checkpoint identity. It contains owned native strings rather than live catalogue aliases or runtime values.
+
+This is an uninstalled foundation. Catalogue import explicitly refuses unresolved or caller-supplied nested snapshots, GraphRunner preflight rejects nested execution, and GraphCoordinator refuses to claim that node. The feature is not advertised executable and cannot become an accidental empty-tool call. Next work must implement backend catalogue pinning, durable child graph ownership, bounded budgets, cancellation, authenticated human/context resume and recovery without replay; none is established by parser acceptance.
+
+Complete Release build and10focused contracts pass45.23seconds, CTest52204 exits0. Tests cover exact depth/node boundaries, malformed snapshots, pin conflicts, canonical/checkpoint mismatch, unchanged stored catalogue on rejected import and runtime preflight rejection, alongside existing shared-worker, graph, agent, context, planning and handoff contracts. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets and hashes remain unchanged during the gate. Candidate744c3288 has no full-suite qualification and is not installed; installed56/owner7768 remain untouched.
+
+See evidence/nested-graph-snapshot-focused-20261019.json/.log, source patch, inventory and gate script.
+
 ## Installed0.1.56 shared-worker adoption — 2026-10-19
 
 Client source4b0407f7 packages qualified native54a46c9a/3854a562. Full155 native and445/158 client gates pass;17440stage files remain unchanged. VSIX2448entries match the qualified stage; all2445installed payloads verify. Archive SHA256330473673b32772c418f93f0ce8132b671e09681318d7ab0b00e1e5f016a4f11; runtime manifesteb2d15a0a312052767e5c0d1081d46251ba014dd391eaf3b3f52df0048a97665. Installed55 backup2447files verifies; settings and seven profile directories remain unchanged.
