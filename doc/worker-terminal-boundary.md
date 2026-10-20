@@ -373,6 +373,38 @@ capacity through drain, and preserve a completed root when its reply is lost.
 General settings, broad provider profiles, graph/context/effect placement and
 installed/rendered/full-suite qualification remain open.
 
+## Completed drain and physical capacity checkpoint
+
+`drain_completed_agent_worker` supplies the completed-root counterpart to failed
+and cancelled retirement. It checks the exact process identity, full captured
+lease, retired/completed lease reason and ordinary completed root before drain,
+then rereads the same completion after physical process/job exit. It performs no
+terminal write. A lost reply or nonzero child exit cannot replace the canonical
+completed run with failure. Reobservation returns the same facts without adding
+events, history or model requests. Queued roots and altered retired leases reject
+before shutdown. External call threads must already have joined.
+
+Actual product read-worker and native context completion cases now use this
+helper. A fresh controlled completed child holds its exit on a private release
+event after transport closure. A one-slot `RootWorkExecutor` action observes an
+expired drain deadline, retains the exact live child and occupied slot, and
+leaves its successor queued. Only explicit release and the same child's actual
+exit allow the successor to run. Canonical history/events and one charged model
+call remain unchanged. The lost-completion-reply case also uses the helper and
+preserves completion across the explicitly induced nonzero exit and repeated
+observation.
+
+All 53 focused contracts pass in 155.45 seconds, with 2,684 project files and
+133 native binaries frozen. The independent HTTP peer verifies exactly 39
+intentional requests. Evidence and held child identity:
+`evidence/agent-worker-completed-drain-focused-20261020.json`.
+
+This verifies the shared physical executor boundary needed for service placement;
+it does not wire AgentService/GraphService to worker processes. Their captured
+settings, failure-cause selection, retained ownership on observation timeout and
+broader capability placement remain open. No installed or full-suite claim is
+made by this focused checkpoint.
+
 ## Qualification required before service placement
 
 - Ledger contracts: exact lease rejection (including process identity), stale

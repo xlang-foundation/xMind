@@ -14,4 +14,11 @@ AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
     PersistenceService&,AgentWorkerProcess&,AgentWorkerRpcPeer&,
     const AgentWorkerLeaseSpec&,RunState,const std::string& reason,
     AgentWorkerChannel::Deadline observation_deadline);
+// Completion already committed atomically with lease retirement. Observe and
+// drain that exact child without another terminal write, even if its reply was
+// lost or it exited nonzero. Reobservation is read-only; timeout retains the
+// same process/peer ownership. External call threads must already have joined.
+AgentWorkerTerminalObservation drain_completed_agent_worker(
+    PersistenceService&,AgentWorkerProcess&,AgentWorkerRpcPeer&,
+    const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline observation_deadline);
 }

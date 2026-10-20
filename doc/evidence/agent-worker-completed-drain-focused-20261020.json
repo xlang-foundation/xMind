@@ -1,0 +1,88 @@
+{
+  "recordedAt": "2026-10-20T21:05:33.869Z",
+  "gate": {
+    "recordedAt": "2026-10-20T21:05:09.597Z",
+    "sourceParent": "bba567b1f3e9ad11b29ca4a3c2b27c94f9b27b39",
+    "sourcePatchSha256": "e2ce7e27b576be56d5083ee9c793b8ac76d4ed3a2996ea50a198bc652b553cd2",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 65148,
+      "launchedAt": "2026-10-20T21:01:32.136Z",
+      "completedAt": "2026-10-20T21:02:28.554Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "20da5697ee57ad3b644bd455b6963f6c0753f4535ad527e806cdfd7621143ce2"
+    },
+    "test": {
+      "pid": 65396,
+      "launchedAt": "2026-10-20T21:02:31.359Z",
+      "completedAt": "2026-10-20T21:05:06.863Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1c91369bd1695ab1e4175643e2c697b644d28b58d192628171ef05a29f2fca3b"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 155.45,
+    "projectFiles": 2684,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "47c27e6e26886408187348798d765ab3eef169c502ce9deeda5e44620a2ce01a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-completed-drain-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-build.log": "20da5697ee57ad3b644bd455b6963f6c0753f4535ad527e806cdfd7621143ce2",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-build-terminal.json": "e9cc4d4f499d292d8cb39a7f11c84b9dacc14a7c02725a8026afac184459e2fe",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-ctest.log": "1c91369bd1695ab1e4175643e2c697b644d28b58d192628171ef05a29f2fca3b",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-ctest-terminal.json": "e8d1ea04fb0ccaaa0b0b5c50735c9e49ac2d0dd69d39a509c655e14ee81480bb",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-LastTest.log": "074f946dc23d65f3d6f9713647bc50820ef72b5bf7c053028a4122f3ed36b995",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+        "doc/evidence/agent-worker-completed-drain-focused-20261020-gate.json": "6e958d6e750903434a9d4d826669b9c2f680959564d2468e8b72f643e7ff0fe3"
+      },
+      "localManifestHashes": {
+        "source.patch": "e2ce7e27b576be56d5083ee9c793b8ac76d4ed3a2996ea50a198bc652b553cd2",
+        "inputs-before-build.json": "83c04848176eec6137032ab5f413988b49d25aeca250a7ca00d33ca9ce598842",
+        "binaries-before-test.json": "61c7f8566629e91f7f506ccb663c9fe9361d891efdd8d6534420b891fed28277"
+      }
+    }
+  },
+  "fixtureSha256": "a4a0ea70bccf3f8eb025e7444ac13a59c72955ae41c265de1b40f21d55f28e20",
+  "ledgerFixtureSha256": "d7de151592474d74c1b851e9233208a97fbf281d536173503f7cd82659ec491e",
+  "heldCompletedChild": {
+    "pid": 46768,
+    "creationTime": "134370038553159262"
+  },
+  "scope": "Native completed-worker drain validates exact captured process and fully retired lease, observes process/job exit and rereads durable completion without another terminal write. Actual one-slot RootWorkExecutor case proves physical capacity remains occupied across observation timeout.",
+  "verified": [
+    "Queued roots and full retired-lease identity mismatch reject without stopping process or RPC",
+    "Exact retired completed root is checked before and after physical drain",
+    "Actual product read-worker and native context completions use this helper",
+    "Lost completion reply and explicit nonzero child exit preserve canonical completed root, supplied assistant and charge",
+    "Repeated observation appends no events or messages and does not replay a model",
+    "A completed child waits on a fresh owned release event after transport closure; expired observation deadline leaves that same PID/birth alive",
+    "One-slot RootWorkExecutor retains the physical action and its queued successor until explicit release and exact child exit",
+    "Canonical history/events and one model charge remain unchanged across timeout and reobservation",
+    "Independent HTTP peer verifies exactly 39 intentional requests"
+  ],
+  "limitations": [
+    "This qualifies a shared physical executor component, not AgentService or GraphService worker placement",
+    "Caller retains process/peer objects after observation timeout and joins external call threads before drain",
+    "Completed helper performs no new terminal persistence and cannot replace backend failure-cause selection",
+    "General settings, broad provider profiles and graph/context/effect placement remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native suite, installed runtime, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}
