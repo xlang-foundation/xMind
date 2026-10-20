@@ -1,3 +1,27 @@
+## Complete native qualification of worker read owner — 2026-10-20
+
+Exact committed source `27a5d9ec27197c0f2476cde4780e5d20cc98ec10` passes all
+160 registered native contracts in one unfiltered CTest run, 1,091.85 seconds.
+The serial build, CTest 72572 and wrapper 67596 are terminal zero. All 2,686 project,
+16 SDK, 1,870 pure-library, 76 SDK runtime, 18,598 dependency and 133 native binary
+file sets/hashes remain unchanged across validation. Native executable SHA256 is
+`89dbf9c4fa48a081f8b422ecd1fb5cf9c54f9725bed271306d3ec70cbfa51798`;
+the pinned SDK DLL remains `1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3`.
+
+This includes the actual product child/no-tools/read-owner cases, single/graph
+services, embedded xlang3/SQLite, coding effects, native CLI, all provider contracts,
+both independent MCP SDK peers, local profile/view, owner handoff and encrypted
+credentials. Local profile takes 484.65 seconds and local view 136.86 seconds;
+both complete normally without deadline changes or restarts. The independent worker
+peer verifies exactly 45 intentional synthetic requests. No CPython or live model
+is executed, and no completed user task is replayed.
+
+This qualifies the complete native inventory for this source, not completion of
+unimplemented service process placement, broader worker capabilities, history paging,
+generic Local/Nexus integration or rendered VS Code/external-browser acceptance.
+Installed59 and user owners/history/settings remain unchanged. See
+[full receipt and raw evidence](evidence/worker-read-owner-current-full-native-20261020.json).
+
 ## Native backend worker read owner — 2026-10-20
 
 `AgentWorkerReadOwner` now owns the backend request context, model authority and

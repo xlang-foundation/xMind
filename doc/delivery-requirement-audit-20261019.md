@@ -25,8 +25,11 @@ This adds installation evidence, not new backend adoption or rendered coding.
 See the [installed59 checkpoint](evidence/coding59-installed-checkpoint-20261020.json).
 
 Current candidate qualification now extends beyond the installed58 baseline:
-the exact `959f1d95` native source passes the complete 160-contract inventory,
-and unchanged current client code passes 462 extension/161 browser contracts plus
+the exact `27a5d9ec` native source passes the complete 160-contract inventory,
+including the native worker read owner and actual product no-tools child. This
+latest candidate is uninstalled; installed59 retains native `959f1d95`. See the
+[latest full native evidence](evidence/worker-read-owner-current-full-native-20261020.json).
+The earlier unchanged client code passes 462 extension/161 browser contracts plus
 actual browser-controller/native integration. A verified 2,402-payload runtime
 candidate was staged for packaging without user-task replay. These checks do not
 close rendered editor/external-browser acceptance,

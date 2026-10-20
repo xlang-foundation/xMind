@@ -175,3 +175,4 @@ doc/evidence/coding59-browser-*.json -text
 doc/evidence/agent-worker-empty-catalogue-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/agent-worker-no-tools-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/agent-worker-read-owner-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/worker-read-owner-current-full-native-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
