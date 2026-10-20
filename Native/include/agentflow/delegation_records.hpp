@@ -58,6 +58,7 @@ struct ChildAdmissionRecord {
     std::string plan_id,node_label,claim_id;
     std::int64_t definition_revision=0,claim_revision=0;
     std::string backend_identity; // Private; never a public observation DTO field.
+    std::string graph_node_path; // Derived from immutable graph ownership, never caller input.
 };
 struct OwnedChildRecord {
     Run run;

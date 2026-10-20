@@ -424,10 +424,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     AgentWorkspaceToolHost* workspace_tool_host=run_workspace_tools?
         static_cast<AgentWorkspaceToolHost*>(run_workspace_tools.get()):
         static_cast<AgentWorkspaceToolHost*>(workspace_.get());
-    bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
+    std::string graph_node_path;bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
         const auto admission=journal_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
-        graph_agent=admission.kind==ChildAdmissionKind::graph_agent;
+        graph_agent=admission.kind==ChildAdmissionKind::graph_agent;graph_node_path=admission.graph_node_path;
         leaf=admission.kind==ChildAdmissionKind::delegated_leaf||dynamic_child;
         if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
         if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||(!dynamic_child&&settings_.planning)||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
@@ -468,7 +468,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(!budget)throw std::invalid_argument("Context graph agent requires its owning shared budget");
         const auto captured=journal_.graph_context_owner(budget->root_id()).get();
         const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),
-            [&](const auto& value){return value.node_id==admitted.node_id;});
+            [&](const auto& value){return value.node_id==graph_node_path;});
         bool compatible=node!=captured.authority.agents.end()&&node->model_id==provider.model&&
             node->provider_identity_json==execution_identity(settings_,provider.model)&&
             node->turn_limit==static_cast<std::int64_t>(settings_.max_turns);

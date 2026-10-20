@@ -2,6 +2,12 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Persisted graph owner paths at execution — 2026-10-20
+
+Child admission now derives a root-relative logical node path from the validated immutable parent chain for graph invocations, agents and tools. Context history authority, logical turn limits, durable model-call reservations and agent-runner model binding use this backend-derived path. Callers cannot supply it. Existing flat paths remain identical; nested context execution remains rejected pending shared admission/model-call budgets and measured active-time pause/resume across the full tree.
+
+Actual embedded-xlang3/SQLite contracts check all three invocation levels, the deepest tool path after reopen, and a nested agent executed through the native runner with synthetic inference. Existing flat context execution and HTTP/service/recovery contracts remain passing. Complete serial Release build and21focused contracts pass86.65seconds; all2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets/hashes remain unchanged. Native SHA2560c3609fb3b2dc35401f8aa6e2783ff2d0a4f3d292f32a1420440a95cbfabd9cf. Receipts: evidence/nested-graph-context-owner-paths-focused-20261020-*. Full155 qualification, live-provider, installed and rendered acceptance are separate and are not claimed. Installed56/user history/settings remain unchanged. Raw source patch and frozen inputs remain under C:/xMindNativeValidation/nested-graph-context-owner-paths-focused-20261020.
+
 ## Root-relative graph context authority paths — 2026-10-20
 
 Graph agent introspection now retains a logical root-relative invocation path and each leaf's immutable model override. Context capture/admission uses those paths rather than flattening repeated leaf IDs. A root worker, left/worker and right/worker can carry distinct captured model authority without collision. Path components are opaque graph node IDs, never filesystem paths: at most four components of64bytes and259bytes total, with exact model binding and no normalization or user-supplied authority. Existing flat graph captures keep their original IDs/order/digests.
