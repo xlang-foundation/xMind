@@ -1,0 +1,150 @@
+{
+  "recordedAt": "2026-10-20T14:06:47.988Z",
+  "sourceParent": "a7da9597581f5d885231f51a295622e592084b55",
+  "sourcePatchSha256": "66c560025cda19bbcba4bddf904ccb596f513cd0d64e9925f30b05a9b97373a2",
+  "children": [
+    {
+      "mode": "normal",
+      "pid": 34716,
+      "creationTime": "134369787701369318"
+    },
+    {
+      "mode": "cancel",
+      "pid": 22944,
+      "creationTime": "134369787702474168"
+    },
+    {
+      "mode": "crash",
+      "pid": 47528,
+      "creationTime": "134369787703294585"
+    },
+    {
+      "mode": "delivery",
+      "pid": 68936,
+      "creationTime": "134369787703734177"
+    },
+    {
+      "mode": "overflow",
+      "pid": 49464,
+      "creationTime": "134369787704147496"
+    },
+    {
+      "mode": "other_error",
+      "pid": 23776,
+      "creationTime": "134369787704860348"
+    }
+  ],
+  "evidence": {
+    "agent-worker-model-rpc-error-regression-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T14:02:54.019Z",
+        "sourceParent": "a7da9597581f5d885231f51a295622e592084b55",
+        "sourcePatchSha256": "df61fb17327946510529610b123271bb2c6a81cfc14264e0ebec59609dcc9c7f",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 71576,
+          "launchedAt": "2026-10-20T13:59:57.471Z",
+          "completedAt": "2026-10-20T14:00:47.172Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "7d4cdf5e9f96339c640bee1eefc7c1f037f98910ce638b68e980c09c706cc0d7"
+        },
+        "test": {
+          "pid": 40472,
+          "launchedAt": "2026-10-20T14:00:49.955Z",
+          "completedAt": "2026-10-20T14:02:51.403Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "7599ffd7495dbd05d54882182838f634cab8b561ddcd4fc79ab8d070bb091578"
+        },
+        "total": 37,
+        "failed": 1,
+        "passed": 36,
+        "seconds": 121.39,
+        "projectFiles": 2652,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "854127884c8090e7148ce3c78c948a5e8368d97c88b3401a13f993c84ba78d30",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": {
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-gate.json": "957964e954c98c007a2943a59f76010303b35d7c02972232be802151a1fc7a76",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-ctest.log": "7599ffd7495dbd05d54882182838f634cab8b561ddcd4fc79ab8d070bb091578",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-build.log": "7d4cdf5e9f96339c640bee1eefc7c1f037f98910ce638b68e980c09c706cc0d7",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-LastTest.log": "0a54181e46b2bc40bac6cc6af43e1c3f28118dfeebb24d2c656d6f06cebbd55a",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-test-inventory.json": "d7334b9d27230c5524ae85caed6985e1f58a1b1ee4ce5bccce8e84c7fab4c00c",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-build-terminal.json": "6eb175b7c4c10e3a444cc286235d0e0d4695f24bb98dc0c16559763fed056085",
+        "doc/evidence/agent-worker-model-rpc-error-regression-20261020-ctest-terminal.json": "7f85b21b6e4b5932fcaef6ce72dd0eb28e9fccfed637d6f6ed597ec19563a78e"
+      }
+    },
+    "agent-worker-model-rpc-errors-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T14:06:42.625Z",
+        "sourceParent": "a7da9597581f5d885231f51a295622e592084b55",
+        "sourcePatchSha256": "66c560025cda19bbcba4bddf904ccb596f513cd0d64e9925f30b05a9b97373a2",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 57036,
+          "launchedAt": "2026-10-20T14:03:42.838Z",
+          "completedAt": "2026-10-20T14:04:34.851Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "bba6a4cd54e8942c1fa960f856fcebafb4d137904a682d5de10ecb6efea65007"
+        },
+        "test": {
+          "pid": 56684,
+          "launchedAt": "2026-10-20T14:04:37.554Z",
+          "completedAt": "2026-10-20T14:06:39.939Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "73fdccfe9f512af456a94ed5795ba54c9ac393981cf3b89484c70ac0555f5c4f"
+        },
+        "total": 37,
+        "failed": 0,
+        "passed": 37,
+        "seconds": 122.34,
+        "projectFiles": 2652,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "854127884c8090e7148ce3c78c948a5e8368d97c88b3401a13f993c84ba78d30",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": {
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-gate.json": "1118c3e70b3cecc78c90ebc4498201e13fa9778a26b84f552f8fe03e5cd74638",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-ctest.log": "73fdccfe9f512af456a94ed5795ba54c9ac393981cf3b89484c70ac0555f5c4f",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-build.log": "bba6a4cd54e8942c1fa960f856fcebafb4d137904a682d5de10ecb6efea65007",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-LastTest.log": "559776a0bfc6e35ba7eb9caeecb2cc78362a743bb26bcfca3110625f3e36a58c",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-test-inventory.json": "d7334b9d27230c5524ae85caed6985e1f58a1b1ee4ce5bccce8e84c7fab4c00c",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-build-terminal.json": "fe01dc82ebfcc272c8aa1f99063dc8c0155e4574283a5dc464b7fd3685bcb479",
+        "doc/evidence/agent-worker-model-rpc-errors-20261020-ctest-terminal.json": "18f799ebb76ca84a09e95f76146a4495313f953f8eab9038512f159fbc5c1a22"
+      }
+    }
+  },
+  "behavior": "Model RPC preserves HTTP 400 context_length_exceeded for the existing AgentRunner rebuild branch; all other provider codes/type/param/messages are withheld. Strict owned error DTO rejects eight malformed authenticated envelopes before exposure as a provider error.",
+  "regression": "Unchanged production source passes 36/37 but fails the new child overflow case. Corrected production source passes all 37 with the same overflow assertion plus eight malformed-envelope rejection cases.",
+  "scope": "Actual native child model RPC and controlled native HTTP provider only. Exactly six HTTP requests: normal, cancel, crash, lost delivery, context overflow, filtered other error. Failed dispatches retain uncertain charged claims, empty actual response and no duplicate retry.",
+  "limits": "No child AgentRunner placement or context rebuild/journal adapter is qualified. Backend-authoritative overflow evidence and context journal integration remain required; forwarding the fixed code does not authorize a retry. No full native suite, live paid model, hosted qualification or installed upgrade.",
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "cpythonExecuted": false
+}

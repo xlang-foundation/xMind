@@ -1,3 +1,9 @@
+## Worker model error semantics — 2026-10-20
+
+The authenticated child model proxy now preserves only HTTP 400 `context_length_exceeded`, which the existing AgentRunner context-rebuild branch consumes. Other provider codes, type, parameter and message remain filtered; duplicate/extra fields, fractional/out-of-range status and unregistered or mismatched codes fail as protocol errors. The actual child fixture checks eight malformed authenticated envelopes plus independent provider overflow/filtering responses, each charged once with no duplicate HTTP or invented completion.
+
+The unchanged production bridge fails the new overflow case (36/37); corrected source passes37/37 focused contracts in 122.34s. Source/SDK/library/runtime/dependency/native binary file sets and hashes remain unchanged throughout each gate. Failed evidence is retained. This qualifies model error delivery only: backend-owned overflow evidence, actual context journal/rebuild integration, child AgentRunner/tool placement and shared root clocks remain open. No full-suite/hosted/installed or live-provider claim. [Evidence and limits](evidence/agent-worker-model-rpc-errors-20261020.json).
+
 # Current native validation
 
 Newest checkpoints appear first; older sections retain their original verification scope.

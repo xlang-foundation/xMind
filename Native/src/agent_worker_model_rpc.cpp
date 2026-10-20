@@ -8,6 +8,16 @@ namespace agentflow {
 using Json=nlohmann::json;
 namespace {
 Json request_envelope(const std::string& bytes){if(bytes.empty()||bytes.size()>AgentWorkerFrameCodec::max_frame_bytes)throw AgentWorkerRpcRemoteError("rejected");std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});}
+ProviderHttpError provider_failure(const std::string& bytes){
+    try{
+        const auto value=request_envelope(bytes);
+        if(!value.is_object()||value.size()!=2||!value.at("status").is_number_integer()||!value.at("code").is_string()||value.at("status")<100||value.at("status")>599)throw ModelProtocolError("Invalid worker provider failure");
+        ProviderHttpError result(value.at("status").get<int>());result.code=value.at("code").get<std::string>();
+        if(!result.code.empty()&&(result.status!=400||result.code!="context_length_exceeded"))throw ModelProtocolError("Invalid worker provider failure");
+        return result;
+    }catch(const Json::exception&){throw ModelProtocolError("Invalid worker provider failure");}
+     catch(const AgentWorkerRpcRemoteError&){throw ModelProtocolError("Invalid worker provider failure");}
+}
 }
 AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
     const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
@@ -20,7 +30,7 @@ AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,con
          catch(const AgentWorkerRpcCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
          catch(const TransportCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
          catch(const TransportTimeout&){throw AgentWorkerRpcRemoteError("timeout");}
-         catch(const ProviderHttpError& error){throw AgentWorkerRpcRemoteError("provider_http",Json{{"status",error.status}}.dump());}
+         catch(const ProviderHttpError& error){throw AgentWorkerRpcRemoteError("provider_http",Json{{"status",error.status},{"code",error.status==400&&error.code=="context_length_exceeded"?error.code:std::string{}}}.dump());}
          catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
          catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
          catch(const ModelProtocolError&){throw AgentWorkerRpcRemoteError("model_protocol");}
@@ -33,6 +43,6 @@ ModelCompletion AgentWorkerModelClient::complete(const std::string& attempt,cons
     try{return decode_agent_model_completion(peer_.call("model.complete",Json{{"attempt_id",attempt},{"request",encode_agent_model_request(request)}}.dump(),[&](const std::string& event){sink(decode_agent_model_event(event));},cancel));}
     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker model RPC cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker model RPC deadline elapsed");}
-    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled")throw TransportCancelled("Worker model RPC cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker model RPC deadline elapsed");if(error.code()=="rejected")throw Conflict("Worker model RPC rejected its captured scope");if(error.code()=="outcome_unrecorded")throw AgentWorkerModelOutcomeUnrecorded("Worker model acknowledgement is unrecorded");if(error.code()=="provider_http"){try{const auto value=Json::parse(error.detail());const auto status=value.at("status").get<int>();if(value.size()!=1||status<100||status>599)throw ModelProtocolError("Invalid worker provider failure");throw ProviderHttpError(status);}catch(const Json::exception&){throw ModelProtocolError("Invalid worker provider failure");}}throw ModelProtocolError("Worker model RPC failed");}
+    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled")throw TransportCancelled("Worker model RPC cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker model RPC deadline elapsed");if(error.code()=="rejected")throw Conflict("Worker model RPC rejected its captured scope");if(error.code()=="outcome_unrecorded")throw AgentWorkerModelOutcomeUnrecorded("Worker model acknowledgement is unrecorded");if(error.code()=="provider_http")throw provider_failure(error.detail());throw ModelProtocolError("Worker model RPC failed");}
 }
 }
