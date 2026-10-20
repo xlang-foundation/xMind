@@ -6,11 +6,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed55 client39565fbb/native3bfecb58/cc854ad0 passes154native and445/158clients;2448archive/2445installed verify. Native upgrade retires36040 and starts56032 born2026-10-20T03:07:41.9202850Z, same TestProj profile/origin57779. 6sessions/150messages/11runs exact; page55684 API passes. No replay. Hosted39360428093 live; no duplicate. See coding55 evidence.
+- Installed55 client39565fbb/native3bfecb58/cc854ad0 passes154native and445/158clients;2448archive/2445installed verify. Native upgrade retires36040 and starts56032 born2026-10-20T03:07:41.9202850Z, same TestProj profile/origin57779. 6sessions/150messages/11runs exact; page55684 API passes. No replay. Hosted39360428093 fails graph process30s. See coding55 evidence.
 
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Observer failure and byte-safe preservation proof remain in coding54 adoption receipts. External Edge/current VS Code acceptance remain open.
 
-- Candidate3854a562 integrates actual shared root workers;9focused pass45.40s including mixed streams, FIFO, cancellation, human/context pause, nested restart and handoff. Full155 gate pending; uninstalled. See shared-physical-root-integration evidence.
+- Candidate3854a562/source54a46c9a shared root workers passes full155/1058.37s; frozen closure unchanged, CTest40196 exits0. Hosted39364831617 live; follow without duplicate. Uninstalled. See shared-physical-root full evidence.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 

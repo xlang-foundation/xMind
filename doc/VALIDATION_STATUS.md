@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete shared physical root qualification — 2026-10-19
+
+Exact committed source54a46c9a completes all155 local native contracts in1,058.37seconds. CTest40196 and wrapper session58325 exit0. Native3854a562 includes the integrated shared root workers. Every hash and file set remains unchanged:2627project inputs,16SDK headers,1870pure libraries,76SDK runtime files,18598Node dependencies and130native binaries. Managed profile lifecycle passes472.38seconds within its unchanged600-second deadline; native view/provider configuration pass136.35/58.07seconds. No invocation was restarted or deadline increased. This remains uninstalled local qualification. Hosted39364831617 is live on the same exact source; follow it without dispatching another run.
+
+The prior hosted39360428093 on installed55 native source3bfecb58 is terminal failure154/155 in756.38seconds; SDK2/2 passes. Official artifact12239366605 is69521bytes, SHA256597390967ad8fd127921efa1f1fe65499688acd0b13d115c47b5c59176016a62 verified. Graph runner PowerShell times out30,050ms after script_entered, with the process tree retired and operation uncertain. Diagnostics show module loading, not a proven cause. This failed cold command is retained and not qualified by local passes.
+
+Separately, all13 browser assets served at the preserved page55684 match installed55 byte for byte. Combined with actual IAB restoration, this establishes current installed browser-client asset identity without claiming a new host generation, new model task or VS Code rendering.
+
+See evidence/shared-physical-root-integration-full-20261019.json, raw log, inventory and gate script; hosted-backlog-order-graph-process-failure-20261019.json with raw CTest/observations/inventory; coding55-served-asset-identity-20261019.json.
+
 ## Shared physical root worker integration — 2026-10-19
 
 ExecutionPlatform now selects one RootWorkExecutor for ordinary and graph roots through their shared RootAdmissionPool. Both services stage rank before durable admission, publish only runnable committed work, and invoke their execution segments on those shared workers. They retain root reservations, paused ownership, journals and independent fault policy. Standalone services retain the existing executor option. Detached service tickets withdraw unclaimed work without waiting under owner locks; claimed actions retain their futures and are drained outside those locks on service close.

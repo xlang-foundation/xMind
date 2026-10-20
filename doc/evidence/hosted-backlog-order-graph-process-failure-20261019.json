@@ -1,0 +1,153 @@
+{
+  "observedAt": "2026-10-20T03:51:32.743Z",
+  "run": 39360428093,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/39360428093",
+  "source": "3bfecb580313c2b9b22b1a4e41b053d12a2e0ab1",
+  "conclusion": "failure",
+  "artifact": {
+    "id": 12239366605,
+    "bytes": 69521,
+    "sha256": "597390967ad8fd127921efa1f1fe65499688acd0b13d115c47b5c59176016a62",
+    "digestVerified": true
+  },
+  "provenance": {
+    "xmind": "3bfecb580313c2b9b22b1a4e41b053d12a2e0ab1",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "windows_default_owner_matches_user": false,
+    "toolchain_version": "18.10.12224.181",
+    "build_parallelism": 4,
+    "xlang3": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "processors": 4,
+    "toolchain": "Visual Studio 18 2026",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied"
+  },
+  "inventoryTotal": 155,
+  "passed": 154,
+  "failed": 1,
+  "seconds": 756.38,
+  "failedContract": "native_graph_runner_contract",
+  "sdkContracts": {
+    "total": 2,
+    "passed": 2,
+    "seconds": 6.35
+  },
+  "operation": {
+    "elapsed_ms": 30050,
+    "exit_code": 1,
+    "id": "71e5d17e411eaeae919fd79c61ed4f3e",
+    "output_artifact": {
+      "operation_id": "71e5d17e411eaeae919fd79c61ed4f3e",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "failure": {
+    "checkpoint": "{\"nodes\":[{\"id\":\"process\",\"state\":\"uncertain\"}],\"spec\":{\"nodes\":[{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:1d860f0000007c000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"id\":\"process\",\"tool\":\"run_process\",\"type\":\"tool\"}]},\"version\":1}",
+    "children": [
+      {
+        "events": [
+          {
+            "json": "{\"node_id\":\"process\",\"parent_run_id\":\"multi-process-root\"}",
+            "kind": "run.queued"
+          },
+          {
+            "json": "{}",
+            "kind": "run.running"
+          },
+          {
+            "json": "{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:1d860f0000007c000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"name\":\"run_process\",\"source\":\"graph\"}",
+            "kind": "tool.started"
+          },
+          {
+            "json": "{\"operation_id\":\"71e5d17e411eaeae919fd79c61ed4f3e\",\"tool\":\"run_process\"}",
+            "kind": "operation.awaiting_approval"
+          },
+          {
+            "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"71e5d17e411eaeae919fd79c61ed4f3e\",\"tool\":\"run_process\"}",
+            "kind": "operation.ready"
+          },
+          {
+            "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"71e5d17e411eaeae919fd79c61ed4f3e\",\"tool\":\"run_process\"}",
+            "kind": "operation.executing"
+          },
+          {
+            "json": "{\"channel\":\"stdout\",\"data\":\"786d696e642d67726170682d70686173653a7363726970745f656e74657265640d0a\",\"encoding\":\"hex\",\"offset\":0,\"operation_id\":\"71e5d17e411eaeae919fd79c61ed4f3e\",\"profile_id\":\"powershell\",\"retained_bytes\":34}",
+            "kind": "process.output"
+          },
+          {
+            "json": "{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"71e5d17e411eaeae919fd79c61ed4f3e\",\"tool\":\"run_process\"}",
+            "kind": "operation.uncertain"
+          },
+          {
+            "json": "{\"reason\":\"graph_process_effect_uncertain\"}",
+            "kind": "run.failed"
+          }
+        ],
+        "id": "27e1f6c1e0d2c38c73ed1dc2c181766a",
+        "operations": [
+          {
+            "elapsed_ms": 30050,
+            "exit_code": 1,
+            "id": "71e5d17e411eaeae919fd79c61ed4f3e",
+            "output_artifact": {
+              "operation_id": "71e5d17e411eaeae919fd79c61ed4f3e",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 34
+            },
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "startup_phases": [
+              "script_entered"
+            ],
+            "state": "uncertain",
+            "termination": "timed_out",
+            "timeout_ms": 30000,
+            "tool": "run_process"
+          }
+        ],
+        "state": "failed"
+      }
+    ],
+    "events": [
+      {
+        "json": "{\"folders\":[{\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000066000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-73s3T6\"},{\"folder_id\":\"windows-local-file-v1:f42c40802c403fba:1d860f0000007c000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-73s3T6\\\\attached\"}],\"primary_folder_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000066000000000000000000\",\"revision\":2,\"snapshot\":\"graph_admission\",\"workspace_id\":\"windows-local-file-v1:f42c40802c403fba:fb000000000066000000000000000000\"}",
+        "kind": "agent.workspace_membership"
+      },
+      {
+        "json": "{\"graph_id\":\"secondary-process\",\"graph_revision\":1,\"kind\":\"graph\"}",
+        "kind": "run.queued"
+      },
+      {
+        "json": "{}",
+        "kind": "run.running"
+      },
+      {
+        "json": "{\"child_run_id\":\"27e1f6c1e0d2c38c73ed1dc2c181766a\",\"node_id\":\"process\"}",
+        "kind": "graph.child.queued"
+      },
+      {
+        "json": "{\"checkpoint_revision\":3,\"child_run_id\":\"27e1f6c1e0d2c38c73ed1dc2c181766a\",\"child_state\":\"failed\",\"node_id\":\"process\"}",
+        "kind": "graph.child.settled"
+      },
+      {
+        "json": "{\"reason\":\"graph_child_failed\"}",
+        "kind": "run.failed"
+      }
+    ],
+    "state": "failed"
+  },
+  "diagnosticInterpretation": "Process observations show PowerShell module loading; cause unproven. The timed-out command was not rerun or relabeled successful. This source is installed55 native; new shared-worker source54a46c9a is separately tested.",
+  "accepted": false
+}
