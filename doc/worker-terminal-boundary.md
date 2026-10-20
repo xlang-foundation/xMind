@@ -85,6 +85,25 @@ failure and both passing gates are retained. This reproduces the unwritable
 handle false-success defect, not the earlier unexplained empty output on a
 normal pipe; the latter remains unproven as a root-cause match or resolved issue.
 
+The [terminal-handoff checkpoint](evidence/agent-worker-terminal-handoff-focused-20261020.json)
+now qualifies one actual plain, no-tool child AgentRunner provider failure.
+`AgentTerminalHandoff` carries only failed/cancelled intent and is preserved by
+budget retirement and the runner failure boundary. A worker journal can unwind
+without returning a fabricated terminal `Run` or reservation. The controlled
+child fixture uses this path when a failed model attempt still requires owner
+drain. Its backend independently captures the real provider HTTP failure before
+accepting intent; it checks that the child is still alive, root running, lease
+active, history user-only and model claim uncertain. Exact child drain then
+precedes atomic failure, one interrupted reservation and one terminal event,
+with the single charged model retained and no assistant invented.
+
+The focused gate passes 53 contracts in 155.65 seconds with frozen inputs and
+all 133 binaries; the independent HTTP peer verifies exactly 24 requests,
+including the new actual runner failure. This is a native unwind mechanism and
+an actual child fixture, not a production worker journal or AgentService
+placement. Actual child AgentRunner cancellation, read-worker failure, broader
+terminal causes and graph/effect placement still need their own qualification.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

@@ -1,4 +1,5 @@
 #include "agentflow/root_execution_budget.hpp"
+#include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/context_selection.hpp"
 #include <algorithm>
@@ -56,6 +57,7 @@ std::string RootExecutionBudget::finish(const ModelCallReservation& reservation,
     if(reservation.root_run_id!=root_)throw Conflict("Model call belongs to another execution budget");
     try{return journal_.finish_model_call(root_,reservation.owner_run_id,reservation.attempt_id,
         actual_assistant_json.empty()?std::nullopt:std::optional<std::string>(actual_assistant_json)).get().actual_assistant_json;}
+    catch(const AgentTerminalHandoff&){throw;}
     catch(...){throw BudgetOutcomeUnrecorded("Model call retirement could not be recorded; stop execution and recover ownership");}
 }
 ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string& call,std::stop_token cancel){

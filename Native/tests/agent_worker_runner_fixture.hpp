@@ -2,6 +2,7 @@
 // Actual AgentRunner child proof only. Unsupported context/tools/catalogue
 // operations fail explicitly; these fixtures are not product worker adapters.
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
@@ -90,10 +91,10 @@ public:
     std::future<std::vector<Message>> run_history(std::string id)override{return ready<std::vector<Message>>([&]{own(id);return client.run_history(id);});}
     std::future<std::vector<Event>> events(std::string id,std::int64_t after)override{return ready<std::vector<Event>>([&]{own(id);return client.events(id,after);});}
     std::future<RootBudgetRecord> root_budget(std::string id)override{return ready<RootBudgetRecord>([&]{own(id);return client.root_budget(id);});}
-    std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json)override{return ready<Run>([&]{own(id);if(expected!=RunState::queued||next!=RunState::running||json!="{}")throw std::logic_error("Unsupported fixture retirement: "+json);return client.begin_run();});}
+    std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json)override{return ready<Run>([&]{own(id);if((expected==RunState::queued||expected==RunState::running)&&(next==RunState::failed||next==RunState::cancelled))throw AgentTerminalHandoff(next);if(expected!=RunState::queued||next!=RunState::running||json!="{}")throw std::logic_error("Unsupported fixture retirement: "+json);return client.begin_run();});}
     std::future<ModelCallReservation> reserve_model_call(std::string root,std::string owner,std::string attempt,ModelCallRole role)override{return ready<ModelCallReservation>([&]{own(root);own(owner);if(role!=ModelCallRole::parent)throw Conflict("Child fixture role differs");return client.reserve_model_call(attempt);});}
     std::future<ModelCallReservation> start_model_call(std::string root,std::string owner,std::string attempt)override{return ready<ModelCallReservation>([&]{own(root);own(owner);auto result=client.start_model_call(attempt);current_attempt=attempt;ordinal=0;return result;});}
-    std::future<ModelCallReservation> finish_model_call(std::string root,std::string owner,std::string attempt,std::optional<std::string> assistant)override{return ready<ModelCallReservation>([&]{own(root);own(owner);if(attempt!=current_attempt||!assistant)throw std::logic_error("Unsupported fixture failed-attempt closure");auto result=client.finish_model_call(attempt);canonical=result.actual_assistant_json;return result;});}
+    std::future<ModelCallReservation> finish_model_call(std::string root,std::string owner,std::string attempt,std::optional<std::string> assistant)override{return ready<ModelCallReservation>([&]{own(root);own(owner);if(attempt!=current_attempt)throw Conflict("Worker attempt changed before retirement");if(!assistant)throw AgentTerminalHandoff(RunState::failed);auto result=client.finish_model_call(attempt);canonical=result.actual_assistant_json;return result;});}
     std::future<Event> append_event(std::string id,std::string kind,std::string json)override{return ready<Event>([&]{own(id);if(!kind.starts_with("model.")||current_attempt.empty())throw std::logic_error("Unsupported child event write");auto result=client.acknowledge_model_event(current_attempt,ordinal,kind,json);++ordinal;return result;});}
     std::future<Run> complete_run(std::string id,std::string assistant)override{return ready<Run>([&]{own(id);if(canonical.empty()||assistant!=canonical)throw Conflict("AgentRunner did not consume the backend receipt");return client.complete_run(current_attempt);});}
     AgentWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
@@ -139,12 +140,13 @@ public:
 };
 struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
 inline Outcome execute(AgentWorkerRpcPeer& peer){
+    rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer);UnsupportedContextJournal context;
     check(journal.client.run(peer.scope().run_id).state==RunState::queued,"Actual child must receive queued admission");
     rejects<Conflict>([&]{journal.client.reserve_model_call("before-start");});
     auto gateway=std::make_shared<ChildModel>(journal);AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
     AgentRunner runner(journal,context,std::move(settings),AgentRunnerPorts{gateway,std::make_shared<ClosedCatalog>(),std::make_shared<ClosedTools>(),std::make_shared<ClosedRuntime>()});
-    Run result;try{result=runner.execute(peer.scope().run_id);}catch(const std::exception& error){throw std::runtime_error(std::string("Child AgentRunner: ")+error.what()+"; model diagnostic: "+journal.model_diagnostic);}check(result.state==RunState::completed&&gateway->observed==journal.ordinal&&!journal.canonical.empty(),"Actual child AgentRunner must complete through scoped backend ports");
+    Run result;try{result=runner.execute(peer.scope().run_id);}catch(const AgentTerminalHandoff&){throw;}catch(const std::exception& error){throw std::runtime_error(std::string("Child AgentRunner: ")+error.what()+"; model diagnostic: "+journal.model_diagnostic);}check(result.state==RunState::completed&&gateway->observed==journal.ordinal&&!journal.canonical.empty(),"Actual child AgentRunner must complete through scoped backend ports");
     return {result,journal.current_attempt,journal.canonical,journal.ordinal};
 }
 }

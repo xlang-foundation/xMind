@@ -1,5 +1,6 @@
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
 #include "agentflow/agent_process_tool_host.hpp"
@@ -1040,7 +1041,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!context_manager)for(auto& next:continuation) request.messages.push_back(std::move(next));
         }
         return terminate(RunState::failed,{{"reason","model_turn_limit"}});
-    } catch(const TransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
+    } catch(const AgentTerminalHandoff&) {throw;}
+      catch(const TransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const RootBudgetDeadlineExceeded&){return terminate(RunState::failed,{{"reason","agent_timeout"}});}
       catch(const RootBudgetExhausted&){return terminate(RunState::failed,{{"reason","execution_budget_exhausted"}});}
       catch(const BudgetOutcomeUnrecorded&){throw;}
