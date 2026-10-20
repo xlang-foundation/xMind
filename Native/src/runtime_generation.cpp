@@ -136,7 +136,7 @@ std::set<std::string> inventory(const std::wstring& root,std::vector<Handle>* di
 }
 }
 struct VerifiedRuntimeGeneration::Impl {
-    RuntimeGenerationBinding binding;Handle root;std::vector<Handle> ancestors,directories,files;std::map<std::string,std::size_t> positions;std::set<std::string> expected;std::string manifest;std::size_t total=0;bool fast_copy=false;mutable std::mutex verification;
+    RuntimeGenerationBinding binding;Handle root;std::vector<Handle> ancestors,directories;mutable std::vector<Handle> files;mutable std::map<std::string,std::size_t> positions;std::set<std::string> expected;std::string manifest;std::size_t total=0;mutable bool fast_copy=false;mutable std::mutex verification;
     Impl(const std::string& directory,const std::string& digest,const std::string& excluded,bool trusted_copy=false):root(absolute(directory),true){
         require(hex(digest,64));for(std::size_t separator=7;(separator=root.path.find(L'\\',separator))!=std::wstring::npos;++separator)ancestors.emplace_back(root.path.substr(0,separator),true,true);if(!excluded.empty()){Handle workspace(absolute(excluded),true);const auto& path=workspace.path;require(!same(root.path,path)&&!(root.path.size()>path.size()&&same(root.path.substr(0,path.size()),path)&&root.path[path.size()]==L'\\'));}
         Handle source(child(root.path,"native-runtime-manifest.json"),false);manifest=source.bytes(4*1024*1024);require(context_digest(manifest)==digest);auto input=manifest;if(input.starts_with("\xef\xbb\xbf"))input.erase(0,3);std::vector<std::set<std::string>> keys;const auto j=Json::parse(input,[&](int depth,Json::parse_event_t event,Json& parsed){require(depth<=8);if(event==Json::parse_event_t::object_start)keys.emplace_back();else if(event==Json::parse_event_t::object_end)keys.pop_back();else if(event==Json::parse_event_t::key)require(!keys.empty()&&keys.back().insert(parsed.get<std::string>()).second);return true;});
@@ -155,8 +155,23 @@ struct VerifiedRuntimeGeneration::Impl {
         // directory checks, then rescan names to reject inventory changes.
         for(const auto& handle:ancestors)handle.stable(false);root.stable();for(const auto& handle:directories)handle.stable();require(inventory(root.path)==expected);
     }
-    void revalidate()const{std::lock_guard lock(verification);for(const auto& handle:ancestors)handle.stable(false);root.stable();for(const auto& handle:directories)handle.stable();for(const auto& handle:files)handle.stable();require(inventory(root.path)==expected);require(files.at(positions.at("native-runtime-manifest.json")).bytes(4*1024*1024)==manifest);if(fast_copy){auto input=manifest;if(input.starts_with("\xef\xbb\xbf"))input.erase(0,3);const auto parsed=Json::parse(input);const auto& entries=parsed.at("files");std::size_t bytes=0;for(auto it=entries.begin();it!=entries.end();++it){Handle file(child(root.path,it.key()),false);require(file.size()<=128*1024*1024&&bytes+file.size()<=256*1024*1024);bytes+=static_cast<std::size_t>(file.size());require(context_digest(file.bytes(128*1024*1024))==it.value().get<std::string>());}}}
-    void current_image()const{std::wstring image(32768,L'\0');const auto size=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));require(size>0&&size<image.size());image.resize(size);Handle actual(absolute(utf8(image)),false);const auto& server=files.at(positions.at("xmind.exe"));require(actual.identity()==server.identity()&&same(actual.path,server.path)&&context_digest(actual.bytes(128*1024*1024))==binding.server_sha256);}
+    void pin_verified_copy()const{
+        // Managed startup defers payload hashing. Once an owner boundary pays
+        // for a complete check, retain the same deny-write/delete handles used
+        // by ordinary generations. Never publish a partially verified set.
+        auto input=manifest;if(input.starts_with("\xef\xbb\xbf"))input.erase(0,3);const auto parsed=Json::parse(input);const auto& entries=parsed.at("files");
+        std::vector<Handle> additions;additions.reserve(entries.size());auto next_positions=positions;std::size_t bytes=0;
+        for(auto it=entries.begin();it!=entries.end();++it){
+            const auto existing=positions.find(it.key());
+            if(existing!=positions.end()){const auto& file=files.at(existing->second);file.stable();require(file.size()<=128*1024*1024&&bytes+file.size()<=256*1024*1024);bytes+=static_cast<std::size_t>(file.size());continue;}
+            Handle file(child(root.path,it.key()),false);require(file.size()<=128*1024*1024&&bytes+file.size()<=256*1024*1024);bytes+=static_cast<std::size_t>(file.size());require(context_digest(file.bytes(128*1024*1024))==it.value().get<std::string>());
+            require(next_positions.emplace(it.key(),files.size()+additions.size()).second);additions.push_back(std::move(file));
+        }
+        for(const auto& file:additions)file.stable();for(const auto& directory:directories)directory.stable();root.stable();require(inventory(root.path)==expected);require(files.at(positions.at("native-runtime-manifest.json")).bytes(4*1024*1024)==manifest);
+        files.reserve(files.size()+additions.size());for(auto& file:additions)files.push_back(std::move(file));positions.swap(next_positions);fast_copy=false;
+    }
+    void revalidate()const{std::lock_guard lock(verification);for(const auto& handle:ancestors)handle.stable(false);root.stable();for(const auto& handle:directories)handle.stable();for(const auto& handle:files)handle.stable();require(inventory(root.path)==expected);require(files.at(positions.at("native-runtime-manifest.json")).bytes(4*1024*1024)==manifest);if(fast_copy)pin_verified_copy();}
+    void current_image()const{std::lock_guard lock(verification);std::wstring image(32768,L'\0');const auto size=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));require(size>0&&size<image.size());image.resize(size);Handle actual(absolute(utf8(image)),false);const auto& server=files.at(positions.at("xmind.exe"));require(actual.identity()==server.identity()&&same(actual.path,server.path)&&context_digest(actual.bytes(128*1024*1024))==binding.server_sha256);}
     void current()const{revalidate();current_image();}
 };
 VerifiedRuntimeGeneration::VerifiedRuntimeGeneration(const std::string& root,const std::string& digest,const std::string& excluded){try{impl_=std::make_unique<Impl>(root,digest,excluded);}catch(const RuntimeGenerationDenied&){throw;}catch(...){denied();}}

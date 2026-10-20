@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-20T08:53:14.307Z",
+  "completedAt": "2026-10-20T08:53:54.835Z",
+  "pid": 34876,
+  "exitCode": 0,
+  "signal": null,
+  "milliseconds": 40526.4651,
+  "runtime": "C:\\xMindNativeValidation\\xmind-local-profile-Y4Q1AZ\\profiles\\625263a86349202fcc789edf62ec465a6769a2a04a19faf5cd94910eb61d0bf6\\runtime-1dfde2b520fa8dda599ca97aa11ee0fc5e17882c5b91c295e5e871f7c8643c8a",
+  "manifestSha256": "163732a62b8666a7b30160215de3935321c2c699f167d6bdbdb181177021c220",
+  "manifestUnchanged": true,
+  "executableSha256": "e62dda8e37c8f9ed2dd3a8b96017937bc49abc42da80d41c13ec5fd57c0dd33f",
+  "stdout": "{\"manifest_sha256\":\"163732a62b8666a7b30160215de3935321c2c699f167d6bdbdb181177021c220\",\"root\":\"C:\\\\xMindNativeValidation\\\\xmind-local-profile-Y4Q1AZ\\\\profiles\\\\625263a86349202fcc789edf62ec465a6769a2a04a19faf5cd94910eb61d0bf6\\\\runtime-1dfde2b520fa8dda599ca97aa11ee0fc5e17882c5b91c295e5e871f7c8643c8a\",\"root_identity\":\"windows-runtime-file-v1:3229637299:6755399445522305\",\"self_verified\":false,\"verified\":true}\r\n",
+  "stderr": ""
+}

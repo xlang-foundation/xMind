@@ -1,0 +1,101 @@
+Start testing: Oct 20 01:58 Pacific Daylight Time
+----------------------------------------------------------
+129/155 Testing: native_local_profile_contract
+129/155 Test: native_local_profile_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_local_profile_contract" start time: Oct 20 01:58 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualManagedNativeStartup":true,"trustedMcpFirstLaunchAndFingerprint":true,"mcpChangeRequiresProtectedHandoff":true,"retiredMcpRefusedBeforeOwnerRetirement":true,"malformedMcpRefusedBeforeOwnerRetirement":true,"mcpRevisionAndHistorySurviveConfigRemoval":true,"authenticatedNativeOwnerVerified":true,"concurrentReattachmentSameOwner":true,"encryptedRendezvous":true,"consoleDetachKeepsOwner":true,"changedPolicyAndDamagedRecordRefused":true,"actualToolGraph":true,"activeGraphBlocksUpgrade":true,"humanResumeAfterRefusedUpgrade":true,"profilePreservingRuntimeUpgrade":true,"stableOwnerPort":true,"sameSqliteProfileAfterObservedExit":true,"historyExactAfterRestart":true,"privateStorageExclusion":true,"providerRequests":0,"releasePackage":false,"installedIde":false}
+<end of output>
+Test time = 461.32 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_profile_contract" end time: Oct 20 02:06 Pacific Daylight Time
+"native_local_profile_contract" time elapsed: 00:07:41
+----------------------------------------------------------
+
+130/155 Testing: native_local_view_contract
+130/155 Test: native_local_view_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_local_view_contract" start time: Oct 20 02:06 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualProductionExtensionController":true,"actualNativeSidebarSubscription":true,"actualSidebarDetachReattach":true,"retiredSidebarCannotSubmitInput":true,"actualSidebarHumanToolCompletion":true,"installedIde":false,"renderedIde":false,"providerRequests":0,"actualSidebarProposalComparison":true,"retiredSidebarCannotApprove":true,"actualSidebarApprovedCreation":true,"actualCreationReceiptMatchesDisk":true,"actualNativeView":true,"unsafeRendezvousRejectedBeforeBackendStartup":true,"actualProductionEditorHostAdapter":true,"actualSharedConsoleBackend":true,"actualToolGraph":true,"browserCookieAccess":true,"actualBrowserControllerStreaming":true,"actualGatewayRestartScopedReplay":true,"actualPausedFeedDetachAndReattach":true,"actualHumanResumeIncrementalEvents":true,"actualStreamCapacityAndCommandFairness":true,"actualStreamReauthenticationAfterViewExit":true,"actualNativeBrowserWorkspaceRegistration":true,"actualBrowserMembershipSelectionAndRevocation":true,"backendTokenNeverExported":true,"ownerControlRejected":true,"duplicateGrantRejected":true,"processBoundViewRevokedAfterExit":true,"sameProfileAndHistoryAcrossHostReload":true,"renderedUi":false}
+<end of output>
+Test time = 134.99 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_view_contract" end time: Oct 20 02:08 Pacific Daylight Time
+"native_local_view_contract" time elapsed: 00:02:14
+----------------------------------------------------------
+
+131/155 Testing: native_local_view_provider_config_contract
+131/155 Test: native_local_view_provider_config_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_provider_config_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_local_view_provider_config_contract" start time: Oct 20 02:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualNativeView":true,"trustedMcpAvailableInInitialExistingAndCreatedWorkspaces":true,"hostImportsOnlyExactTrustedProviderPath":true,"untrustedViewCannotImportProviderFiles":true,"existingNonemptyProfileImportsNewYamlEntries":true,"newWorkspaceImportsSharedYaml":true,"userSelectedProviderSurvivesWorkspaceReattachment":true,"keysReturnedToBrowser":false,"providerRequests":0,"actualViewWorkspaceConfig":true,"renderedBrowser":false}
+<end of output>
+Test time =  58.75 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_view_provider_config_contract" end time: Oct 20 02:09 Pacific Daylight Time
+"native_local_view_provider_config_contract" time elapsed: 00:00:58
+----------------------------------------------------------
+
+144/155 Testing: native_runtime_generation_contract
+144/155 Test: native_runtime_generation_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/runtime_generation_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_runtime_generation_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_runtime_generation_contract" start time: Oct 20 02:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualWindowsVerifier":true,"actualLoadedImageVerification":true,"loadedImageOnlyCheck":true,"unicodeRoot":true,"unicodeFilename":true,"transientExclusiveManifestLockRetried":true,"managedPayloadPinnedAfterFullVerification":true,"managedLateInventoryRejected":true,"pinnedSourceWriteDeleteRenameRejected":true,"pinnedRuntimeRootRenameRejected":true,"ancestorControlAtomicReplaceAllowed":true,"lateInventoryChangeRejected":true,"lateHardlinkCreated":true,"lateHardlinkPreventedOrDetected":true,"syntheticPackageMetadata":true,"providerRequests":0,"cpythonExecuted":false,"installed":false}
+<end of output>
+Test time =  15.11 sec
+----------------------------------------------------------
+Test Passed.
+"native_runtime_generation_contract" end time: Oct 20 02:09 Pacific Daylight Time
+"native_runtime_generation_contract" time elapsed: 00:00:15
+----------------------------------------------------------
+
+145/155 Testing: native_backend_owner_http_contract
+145/155 Test: native_backend_owner_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/backend_owner_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_backend_owner_http_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_backend_owner_http_contract" start time: Oct 20 02:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+warning: in the working copy of 'status fixture.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'status fixture.txt', LF will be replaced by CRLF the next time Git touches it
+{"actualNativeOwnerHttp":true,"actualEmbeddedSqlite":true,"scopedViewDenied":true,"workspaceAndReceiptCas":true,"activeLedgerRejected":true,"contextAndA2aAdmissionFenced":true,"concurrentHttpRaces":8,"durableRetirementRequestTested":true,"resumeAfterRetirementDenied":true,"providerRequests":0,"retirementShutdownTested":false,"migrationTested":false,"installed":false}
+<end of output>
+Test time =   7.63 sec
+----------------------------------------------------------
+Test Passed.
+"native_backend_owner_http_contract" end time: Oct 20 02:10 Pacific Daylight Time
+"native_backend_owner_http_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+146/155 Testing: native_backend_handoff_contract
+146/155 Test: native_backend_handoff_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/backend_handoff_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_backend_handoff_contract" start time: Oct 20 02:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualProductionServerEntryPoint":true,"actualQualifiedImageAndWorkspace":true,"unicodeWorkspaceAndPackage":true,"targetBoundRetirementAndObservedExit":true,"wrongAuthWorkspacePolicyManifestAndPackageRejected":true,"preparedAdmissionClosed":true,"nativeActivationAndNewAdmission":true,"savedSessionAndEmptyHistoryAndProviderListRetained":true,"providerRequests":0,"liveProvider":false,"releasePackage":false,"installedLegacyMigration":false,"installed":false,"fileWrite":false}
+<end of output>
+Test time =   4.39 sec
+----------------------------------------------------------
+Test Passed.
+"native_backend_handoff_contract" end time: Oct 20 02:10 Pacific Daylight Time
+"native_backend_handoff_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 20 02:10 Pacific Daylight Time

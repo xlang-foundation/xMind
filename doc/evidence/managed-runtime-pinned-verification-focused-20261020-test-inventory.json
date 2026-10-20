@@ -1,0 +1,209 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test"
+    ],
+    "files": [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1235,
+        "parent": 0
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1239,
+        "parent": 2
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1243,
+        "parent": 4
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1352,
+        "parent": 6
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1360,
+        "parent": 8
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1363,
+        "parent": 10
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 1,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_local_profile_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 600
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 3,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_local_view_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 240
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 5,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/local_view_provider_config_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_local_view_provider_config_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 240
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 7,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/runtime_generation_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_runtime_generation_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll"
+      ],
+      "config": "Release",
+      "name": "native_runtime_generation_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 9,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/backend_owner_http_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_backend_owner_http_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_backend_owner_http_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 11,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/backend_handoff_contract.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_backend_handoff_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 90
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

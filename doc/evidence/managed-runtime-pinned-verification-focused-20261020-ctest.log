@@ -1,0 +1,17 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 129: native_local_profile_contract
+1/6 Test #129: native_local_profile_contract ................   Passed  461.32 sec
+    Start 130: native_local_view_contract
+2/6 Test #130: native_local_view_contract ...................   Passed  134.99 sec
+    Start 131: native_local_view_provider_config_contract
+3/6 Test #131: native_local_view_provider_config_contract ...   Passed   58.75 sec
+    Start 144: native_runtime_generation_contract
+4/6 Test #144: native_runtime_generation_contract ...........   Passed   15.11 sec
+    Start 145: native_backend_owner_http_contract
+5/6 Test #145: native_backend_owner_http_contract ...........   Passed    7.63 sec
+    Start 146: native_backend_handoff_contract
+6/6 Test #146: native_backend_handoff_contract ..............   Passed    4.39 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) = 682.20 sec
