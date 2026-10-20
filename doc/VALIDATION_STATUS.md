@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete nested-context native qualification — 2026-10-20
+
+Exact committed source `af34bfe0af3ebaa4bed7c8f55283ca8db9a4649d` passes all156 registered native contracts in1073.26seconds. CTest46208 and wrapper66492 are terminal0. All2630project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets and hashes remain unchanged; source patch is empty. Executable SHA256 `dc900cadbf559ae7fb6de3722d3953d83a127925cb9ce0f40e3b37603b005dbe`, pinned SDK58a8aab9 and runtime DLL `1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3`.
+
+This complete gate includes the new nested contextual execution/read/restart/human-input/cancellation fixture, repository schema35 tree budgets/pause/input/resume/retirement, existing noncontext nested graphs and interactive CLI controls, all provider/MCP/A2A/process/context contracts, actual profile-preserving upgrade470.24seconds, local view137.08seconds, provider configuration58.38seconds, owner/handoff, credentials and runtime inventory protection. Provider replies are controlled fixture data; actual native transport, tool, HTTP/controller, embedded-xlang3/SQLite and owner protocols execute. This is separate from live-provider and rendered IDE/browser acceptance. The original missing-SSE-event23-contract failure remains preserved.
+
+See [complete gate](evidence/nested-context-current-full-native-20261020-gate.json), [CTest output](evidence/nested-context-current-full-native-20261020-ctest.log), [exact inventory](evidence/nested-context-current-full-native-20261020-test-inventory.json) and terminal receipts. Complete source/SDK/library/dependency/binary manifests remain under C:/xMindNativeValidation/nested-context-current-full-native-20261020. The matching executable/DLL pair is independently copied and byte-verified under C:/xMindNativeValidation/qualified-nested-context-binaries-20261020 with [qualification metadata](evidence/nested-context-qualified-binaries-20261020.json); this pair is not a complete distribution.
+
+Installed57, existing owners/pages/settings/history and completed user tasks remain unchanged. Candidate packaging/client integration, safe adoption, live-provider/rendered acceptance, remaining generic Local/Nexus worker protocol and other documented OSS requirements remain open. No CPython or full-goal completion is claimed.
+
 ## Native nested contextual execution integration — 2026-10-20
 
 GraphRunner now captures agent authority across the recursive plan and shares one live RootExecutionBudget and measured deadline with every invocation controller. Controllers consume no physical leaf slot, release their workers after proving their descendants quiescent, and retain their original IDs/checkpoints. Only the ultimate root closes or opens clock segments; resumed controllers borrow that same budget. GraphService validates the complete paused tree when adopting, observing readiness, accepting answers and scheduling existing owners. Public nested-context admission is enabled by this candidate.

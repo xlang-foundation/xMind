@@ -1,0 +1,9 @@
+{
+  "preservedAt": "2026-10-20T11:09:26.658Z",
+  "source": "af34bfe0af3ebaa4bed7c8f55283ca8db9a4649d",
+  "fullGate": "C:/xMindNativeValidation/nested-context-current-full-native-20261020",
+  "nativeSha256": "dc900cadbf559ae7fb6de3722d3953d83a127925cb9ce0f40e3b37603b005dbe",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "tests": 156,
+  "scope": "Exact fully qualified native executable/DLL pair only; not a complete distribution or installation."
+}
