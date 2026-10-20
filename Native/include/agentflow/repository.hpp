@@ -149,6 +149,7 @@ public:
     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
     GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);
     GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+    GraphRootRecord input_graph_tree_human(const std::string& root_id,const std::string& owner_id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_root_revision,std::int64_t expected_owner_revision);
     GraphRootRecord input_graph_human(const std::string& id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_checkpoint_revision);
     GraphRootRecord skip_graph_node(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
     Run retire_graph_run(const std::string& id,RunState terminal_state,const std::string& reason_json);

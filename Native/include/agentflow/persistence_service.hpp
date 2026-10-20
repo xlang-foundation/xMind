@@ -135,6 +135,7 @@ public:
     std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json,std::int64_t expected_checkpoint_revision=0);
     std::future<GraphRootRecord> settle_graph_child(std::string child_id,std::int64_t expected_checkpoint_revision=0);
     std::future<GraphRootRecord> start_graph_human(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
+    std::future<GraphRootRecord> input_graph_tree_human(std::string root_id,std::string owner_id,std::string node_id,std::string input_json,std::string actor,std::int64_t expected_root_revision,std::int64_t expected_owner_revision);
     std::future<GraphRootRecord> input_graph_human(std::string id,std::string node_id,std::string input_json,std::string actor,std::int64_t expected_checkpoint_revision);
     std::future<GraphRootRecord> skip_graph_node(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
     std::future<Run> retire_graph_run(std::string id,RunState terminal_state,std::string reason_json);

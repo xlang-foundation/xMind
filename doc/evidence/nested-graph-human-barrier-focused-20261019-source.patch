@@ -1,0 +1,144 @@
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 798354f3..85d8f889 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -135,6 +135,7 @@ public:
+     std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json,std::int64_t expected_checkpoint_revision=0);
+     std::future<GraphRootRecord> settle_graph_child(std::string child_id,std::int64_t expected_checkpoint_revision=0);
+     std::future<GraphRootRecord> start_graph_human(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
++    std::future<GraphRootRecord> input_graph_tree_human(std::string root_id,std::string owner_id,std::string node_id,std::string input_json,std::string actor,std::int64_t expected_root_revision,std::int64_t expected_owner_revision);
+     std::future<GraphRootRecord> input_graph_human(std::string id,std::string node_id,std::string input_json,std::string actor,std::int64_t expected_checkpoint_revision);
+     std::future<GraphRootRecord> skip_graph_node(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
+     std::future<Run> retire_graph_run(std::string id,RunState terminal_state,std::string reason_json);
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index f47ef029..b8a33ef8 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -149,6 +149,7 @@ public:
+     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
+     GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);
+     GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
++    GraphRootRecord input_graph_tree_human(const std::string& root_id,const std::string& owner_id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_root_revision,std::int64_t expected_owner_revision);
+     GraphRootRecord input_graph_human(const std::string& id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_checkpoint_revision);
+     GraphRootRecord skip_graph_node(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+     Run retire_graph_run(const std::string& id,RunState terminal_state,const std::string& reason_json);
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 090b8760..8e2b6313 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -251,6 +251,7 @@ std::future<Run> PersistenceService::start_graph_child(std::string id,std::strin
+ std::future<GraphRootRecord> PersistenceService::start_graph_invocation(std::string id,std::string parent,std::string node,std::int64_t expected){return impl_->submit([id=std::move(id),parent=std::move(parent),node=std::move(node),expected](Repository& repository){return repository.start_graph_invocation(id,parent,node,expected);});}
+ std::future<GraphRootRecord> PersistenceService::settle_graph_child(std::string id,std::int64_t expected){return impl_->submit([id=std::move(id),expected](Repository& repository){return repository.settle_graph_child(id,expected);});}
+ std::future<GraphRootRecord> PersistenceService::start_graph_human(std::string id,std::string node,std::int64_t expected){return impl_->submit([id=std::move(id),node=std::move(node),expected](Repository& repository){return repository.start_graph_human(id,node,expected);});}
++std::future<GraphRootRecord> PersistenceService::input_graph_tree_human(std::string root,std::string owner,std::string node,std::string input,std::string actor,std::int64_t root_revision,std::int64_t owner_revision){return impl_->submit([root=std::move(root),owner=std::move(owner),node=std::move(node),input=std::move(input),actor=std::move(actor),root_revision,owner_revision](Repository& r){return r.input_graph_tree_human(root,owner,node,input,actor,root_revision,owner_revision);});}
+ std::future<GraphRootRecord> PersistenceService::input_graph_human(std::string id,std::string node,std::string input,std::string actor,std::int64_t expected){return impl_->submit([id=std::move(id),node=std::move(node),input=std::move(input),actor=std::move(actor),expected](Repository& repository){return repository.input_graph_human(id,node,input,actor,expected);});}
+ std::future<GraphRootRecord> PersistenceService::skip_graph_node(std::string id,std::string node,std::int64_t expected){return impl_->submit([id=std::move(id),node=std::move(node),expected](Repository& repository){return repository.skip_graph_node(id,node,expected);});}
+ std::future<Run> PersistenceService::retire_graph_run(std::string id,RunState state,std::string reason){return impl_->submit([id=std::move(id),state,reason=std::move(reason)](Repository& repository){return repository.retire_graph_run(id,state,reason);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 633af7d1..954fb445 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -596,8 +596,37 @@ struct Repository::Impl {
+         GraphDecision decisions;try{decisions=coordinator.inspect();}catch(const std::invalid_argument&){return false;}
+         return !decisions.halted && !decisions.waiting_human.empty() && decisions.ready.empty() && decisions.skippable.empty() && decisions.running.empty();
+     }
++    bool pause_graph_tree(const std::string& root_id){
++        auto& db=database;
++        if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())return false;
++        const auto root_state=db.execute("SELECT state FROM runs WHERE id=? AND parent_run_id IS NULL",{root_id}).rows;
++        if(root_state.empty()||text(root_state[0][0])!="running")return false;
++        const auto rows=db.execute("WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) SELECT r.id,r.session_id,r.state,COALESCE(r.parent_run_id,''),COALESCE(r.node_id,''),g.run_id,g.graph_id,g.graph_revision,g.specification,g.checkpoint_revision,g.checkpoint,COALESCE(g.input,'') FROM tree t JOIN runs r ON r.id=t.id LEFT JOIN graph_roots g ON g.run_id=r.id ORDER BY t.depth DESC,r.id",{root_id}).rows;
++        if(rows.size()>257)throw Conflict("Graph pause tree exceeds its immutable expansion limit");
++        std::map<std::string,Run> runs;std::vector<std::pair<GraphRootRecord,GraphCoordinator>> owners;bool waiting=false;
++        for(const auto& row:rows){const bool graph=!std::holds_alternative<std::nullptr_t>(row[5]);Run current{text(row[0]),text(row[1]),state_value(text(row[2])),text(row[3]),text(row[4]),graph};runs.emplace(current.id,current);
++            if(has_operations(current.id,"'proposed','awaiting_approval','approved','executing','uncertain'"))return false;
++            if(terminal(current.state))continue;
++            if(!graph||current.state==RunState::queued)return false;
++            if(graph_lineage(current.id).first!=root_id)throw Conflict("Graph pause owner differs from the actual root");
++            GraphRootRecord record{current,text(row[6]),integer(row[7]),text(row[8]),integer(row[9]),text(row[10]),text(row[11])};owners.emplace_back(record,GraphCoordinator(GraphPlan(record.specification_json),record.checkpoint_json,GraphRestoreMode::live));
++        }
++        if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root_id}).rows.empty())return false;
++        std::set<std::string> closed;
++        for(const auto& [record,coordinator]:owners){const auto decision=coordinator.inspect();if(decision.halted||decision.finished||!decision.ready.empty()||!decision.skippable.empty())return false;waiting=waiting||!decision.waiting_human.empty();
++            for(const auto& node:decision.running){bool observed=false;for(const auto& [id,child]:runs)if(child.parent_id==record.run.id&&child.node_id==node&&child.graph_root&&closed.contains(id))observed=true;if(!observed)return false;}
++            closed.insert(record.run.id);
++        }
++        if(!waiting||!closed.contains(root_id))return false;
++        for(auto& [record,coordinator]:owners)if(record.run.state==RunState::running){graph_checkpoint(record,coordinator,record.checkpoint_revision);changed_one(db.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{record.run.id}));event(record.run.id,"run.paused",Json{{"reason","graph_tree_human_wait"},{"root_run_id",root_id},{"checkpoint_revision",record.checkpoint_revision}}.dump());}
++        return true;
++    }
+     void graph_human_pause(GraphRootRecord& root,const GraphCoordinator& coordinator){
+         if(!database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root.run.id}).rows.empty())return;
++        const auto owner=graph_lineage(root.run.id).first;
++        if(!database.execute("SELECT run_id FROM graph_invocations WHERE root_run_id=? LIMIT 1",{owner}).rows.empty()){
++            if(pause_graph_tree(owner)){const auto row=database.execute("SELECT state,checkpoint_revision,checkpoint FROM runs r JOIN graph_roots g ON g.run_id=r.id WHERE r.id=?",{root.run.id}).rows.at(0);root.run.state=state_value(text(row[0]));root.checkpoint_revision=integer(row[1]);root.checkpoint_json=text(row[2]);}return;
++        }
+         if(root.run.state==RunState::running && graph_waiting_only(coordinator)){
+             root_boundary(root.run,RunState::paused);changed_one(database.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{root.run.id}));event(root.run.id,"run.paused",R"({"reason":"graph_human_wait"})");root.run.state=RunState::paused;
+         }
+@@ -2401,7 +2430,22 @@ GraphRootRecord Repository::start_graph_human(const std::string& id,const std::s
+     transaction.commit();return root;
+ }
+ GraphRootRecord Repository::input_graph_human(const std::string& id,const std::string& node,const std::string& input,const std::string& actor,std::int64_t expected){
+-    identifier(actor);if(actor.size()>256 || expected<1)throw std::invalid_argument("Invalid graph controller input");object_json(input);auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(root.run.state!=RunState::running && root.run.state!=RunState::paused)throw Conflict("Graph cannot receive human input");const bool contextual=!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty();if(contextual){if(root.run.state!=RunState::paused)throw Conflict("Registered graph human input requires its closed owner");(void)graph_context_owner(id);}GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.human.input",Json{{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",root.checkpoint_revision}}.dump());if(!contextual&&root.run.state==RunState::paused && !impl_->graph_waiting_only(coordinator)){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{id}));impl_->event(id,"run.running",R"({"reason":"graph_human_input"})");root.run.state=RunState::running;}transaction.commit();return root;
++    identifier(actor);if(actor.size()>256 || expected<1)throw std::invalid_argument("Invalid graph controller input");object_json(input);auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(!root.run.parent_id.empty())throw Conflict("Nested graph input requires its observed ultimate root scope");if(root.run.state!=RunState::running && root.run.state!=RunState::paused)throw Conflict("Graph cannot receive human input");const bool contextual=!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty();if(contextual){if(root.run.state!=RunState::paused)throw Conflict("Registered graph human input requires its closed owner");(void)graph_context_owner(id);}GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.human.input",Json{{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",root.checkpoint_revision}}.dump());if(!contextual&&root.run.state==RunState::paused && !impl_->graph_waiting_only(coordinator)){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{id}));impl_->event(id,"run.running",R"({"reason":"graph_human_input"})");root.run.state=RunState::running;}transaction.commit();return root;
++}
++GraphRootRecord Repository::input_graph_tree_human(const std::string& root_id,const std::string& owner_id,const std::string& node,const std::string& input,const std::string& actor,std::int64_t expected_root,std::int64_t expected_owner){
++    identifier(actor);if(actor.size()>256||expected_root<1||expected_owner<1||owner_id==root_id)throw std::invalid_argument("Nested human input requires distinct owner and root observations");object_json(input);
++    auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(root_id),owner=graph_run(owner_id);
++    if(!root.run.parent_id.empty()||owner.run.parent_id.empty()||owner.run.session_id!=root.run.session_id||impl_->graph_lineage(owner_id).first!=root_id)throw Conflict("Nested human input owner differs from its root");
++    if((root.run.state!=RunState::paused&&root.run.state!=RunState::running)||owner.run.state!=RunState::paused)throw Conflict("Nested graph has no closed human owner");
++    if(root.checkpoint_revision!=expected_root||owner.checkpoint_revision!=expected_owner)throw Conflict("Nested human input checkpoint observation changed");
++    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())throw RunUnavailable("Nested graph context input ownership is not implemented");
++    std::vector<Run> path;for(auto current=owner.run;;current=run(current.parent_id)){if(!current.graph_root||current.session_id!=root.run.session_id||(current.state!=RunState::paused&&current.state!=RunState::running))throw Conflict("Nested input ancestry is not resumable");path.push_back(current);if(current.id==root_id)break;if(path.size()>3)throw Conflict("Nested input ancestry exceeds limits");}
++    GraphCoordinator coordinator(GraphPlan(owner.specification_json),owner.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(owner,coordinator,expected_owner);
++    GraphCoordinator parent(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);impl_->graph_checkpoint(root,parent,expected_root);
++    const auto decision=coordinator.inspect();const bool ready=decision.finished||!decision.ready.empty()||!decision.skippable.empty();
++    impl_->event(owner_id,"graph.human.input",Json{{"root_run_id",root_id},{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",owner.checkpoint_revision},{"root_checkpoint_revision",root.checkpoint_revision}}.dump());
++    if(ready)for(const auto& current:path)if(current.state==RunState::paused){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{current.id}));impl_->event(current.id,"run.running",Json{{"reason","graph_tree_human_input"},{"root_run_id",root_id},{"owner_run_id",owner_id}}.dump());}
++    const auto result=graph_run(root_id);transaction.commit();return result;
+ }
+ GraphRootRecord Repository::skip_graph_node(const std::string& id,const std::string& node,std::int64_t expected){if(expected<1)throw std::invalid_argument("A graph checkpoint revision is required");auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(root.run.state!=RunState::running)throw Conflict("Graph is not running");GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.skip(node);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.node.skipped",Json{{"node_id",node},{"checkpoint_revision",root.checkpoint_revision}}.dump());impl_->graph_human_pause(root,coordinator);transaction.commit();return root;}
+ Run Repository::retire_graph_run(const std::string& id,RunState next,const std::string& reason){
+diff --git a/Native/tests/graph_contract.cpp b/Native/tests/graph_contract.cpp
+index d0cf5346..bcf79cbd 100644
+--- a/Native/tests/graph_contract.cpp
++++ b/Native/tests/graph_contract.cpp
+@@ -211,6 +211,37 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
+     {PersistenceService store(tree_database,imports);require(store.child_admission("tree-leaf").get().root_run_id=="tree-root"&&store.run("tree-root").get().state==RunState::cancelled,"Bounded invocation lineage and terminal outcome must reopen without replay");for(const auto& id:std::vector<std::string>{"interrupted-tree-root","interrupted-tree-level1","interrupted-tree-level2","interrupted-tree-level3","interrupted-tree-leaf"})require(store.run(id).get().state==RunState::failed&&store.run_history(id).get().size()==1,"Restart must quarantine every deep owner and retain exactly its captured input");require(store.child_admission("interrupted-tree-leaf").get().root_run_id=="interrupted-tree-root","Deep interrupted lineage must remain verifiable after recovery");store.close();}
+ 
+ 
++
++    const auto pause_database=(std::filesystem::u8path(argv[1])/"nested-pause.sqlite").string();
++    {
++        PersistenceService store(pause_database,imports);
++        auto branches=nested_spec;branches["nodes"][0]["id"]="left";auto right=branches["nodes"][0];right["id"]="right";branches["nodes"].push_back(right);
++        store.create_session("pause-session","Synthetic nested human barrier").get();
++        store.start_graph_run("pause-root","pause-session","pause",1,GraphPlan(branches.dump()),R"({"content":"Captured pause task"})").get();store.transition("pause-root",RunState::queued,RunState::running).get();
++        for(const auto& id:std::vector<std::string>{"left","right"}){store.start_graph_invocation(id,"pause-root",id,store.graph_run("pause-root").get().checkpoint_revision).get();store.transition(id,RunState::queued,RunState::running).get();}
++        store.start_graph_human("left","answer",store.graph_run("left").get().checkpoint_revision).get();
++        require(store.run("left").get().state==RunState::running&&store.run("pause-root").get().state==RunState::running,"A ready sibling must prevent global human pause");
++        store.start_graph_human("right","answer",store.graph_run("right").get().checkpoint_revision).get();
++        for(const auto& id:std::vector<std::string>{"pause-root","left","right"})require(store.run(id).get().state==RunState::paused,"Quiescent nested human tree must pause all graph owners atomically");
++        require(store.history("pause-session").get().size()==1&&store.runs("pause-session").get().size()==1,"Pause must preserve one root and invent no model output");store.close();
++    }
++    {
++        PersistenceService store(pause_database,imports);auto root=store.graph_run("pause-root").get(),left=store.graph_run("left").get();
++        require(root.run.state==RunState::paused&&left.run.state==RunState::paused&&store.run("right").get().state==RunState::paused,"Paused graph tree must survive persistence restart without replay");
++        const auto events=store.graph_events("pause-root").get().size();
++        rejects<Conflict>([&]{store.input_graph_human("left","answer","{}","fixture",left.checkpoint_revision).get();});
++        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision+1,left.checkpoint_revision).get();});
++        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision+1).get();});
++        {XlangSqlite db(pause_database,imports);db.execute("CREATE TRIGGER reject_tree_input BEFORE INSERT ON events WHEN NEW.kind='graph.human.input' BEGIN SELECT RAISE(ABORT,'synthetic human input fault'); END");}
++        rejects<DatabaseError>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision).get();});
++        require(store.graph_run("pause-root").get().checkpoint_revision==root.checkpoint_revision&&store.graph_run("left").get().checkpoint_json==left.checkpoint_json&&store.graph_events("pause-root").get().size()==events,"Late input fault must roll back both checkpoints, events and states");
++        {XlangSqlite db(pause_database,imports);db.execute("DROP TRIGGER reject_tree_input");}
++        const auto resumed=store.input_graph_tree_human("pause-root","left","answer",R"({"approved":true})","fixture",root.checkpoint_revision,left.checkpoint_revision).get();
++        require(resumed.run.state==RunState::running&&resumed.checkpoint_revision==root.checkpoint_revision+1&&store.run("left").get().state==RunState::running&&store.run("right").get().state==RunState::paused,"Observed input must wake only its ancestry and advance ultimate root authority");
++        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision).get();});
++        require(store.children("left").get().empty()&&store.history("pause-session").get().size()==1,"Human input must not dispatch effects or fabricate assistant history");store.close();
++    }
++
+     const auto migration_database=(std::filesystem::u8path(argv[1])/"nested-migration.sqlite").string();
+     {PersistenceService store(migration_database,imports);store.create_session("migration-session","Synthetic v33 invocation metadata").get();store.start_graph_run("migration-root","migration-session","fixture",1,nested,R"({"content":"Migration fixture"})").get();store.transition("migration-root",RunState::queued,RunState::running).get();store.start_graph_invocation("migration-child","migration-root","call",store.graph_run("migration-root").get().checkpoint_revision).get();store.close();}
+     {

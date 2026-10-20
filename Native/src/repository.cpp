@@ -596,8 +596,37 @@ struct Repository::Impl {
         GraphDecision decisions;try{decisions=coordinator.inspect();}catch(const std::invalid_argument&){return false;}
         return !decisions.halted && !decisions.waiting_human.empty() && decisions.ready.empty() && decisions.skippable.empty() && decisions.running.empty();
     }
+    bool pause_graph_tree(const std::string& root_id){
+        auto& db=database;
+        if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())return false;
+        const auto root_state=db.execute("SELECT state FROM runs WHERE id=? AND parent_run_id IS NULL",{root_id}).rows;
+        if(root_state.empty()||text(root_state[0][0])!="running")return false;
+        const auto rows=db.execute("WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) SELECT r.id,r.session_id,r.state,COALESCE(r.parent_run_id,''),COALESCE(r.node_id,''),g.run_id,g.graph_id,g.graph_revision,g.specification,g.checkpoint_revision,g.checkpoint,COALESCE(g.input,'') FROM tree t JOIN runs r ON r.id=t.id LEFT JOIN graph_roots g ON g.run_id=r.id ORDER BY t.depth DESC,r.id",{root_id}).rows;
+        if(rows.size()>257)throw Conflict("Graph pause tree exceeds its immutable expansion limit");
+        std::map<std::string,Run> runs;std::vector<std::pair<GraphRootRecord,GraphCoordinator>> owners;bool waiting=false;
+        for(const auto& row:rows){const bool graph=!std::holds_alternative<std::nullptr_t>(row[5]);Run current{text(row[0]),text(row[1]),state_value(text(row[2])),text(row[3]),text(row[4]),graph};runs.emplace(current.id,current);
+            if(has_operations(current.id,"'proposed','awaiting_approval','approved','executing','uncertain'"))return false;
+            if(terminal(current.state))continue;
+            if(!graph||current.state==RunState::queued)return false;
+            if(graph_lineage(current.id).first!=root_id)throw Conflict("Graph pause owner differs from the actual root");
+            GraphRootRecord record{current,text(row[6]),integer(row[7]),text(row[8]),integer(row[9]),text(row[10]),text(row[11])};owners.emplace_back(record,GraphCoordinator(GraphPlan(record.specification_json),record.checkpoint_json,GraphRestoreMode::live));
+        }
+        if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root_id}).rows.empty())return false;
+        std::set<std::string> closed;
+        for(const auto& [record,coordinator]:owners){const auto decision=coordinator.inspect();if(decision.halted||decision.finished||!decision.ready.empty()||!decision.skippable.empty())return false;waiting=waiting||!decision.waiting_human.empty();
+            for(const auto& node:decision.running){bool observed=false;for(const auto& [id,child]:runs)if(child.parent_id==record.run.id&&child.node_id==node&&child.graph_root&&closed.contains(id))observed=true;if(!observed)return false;}
+            closed.insert(record.run.id);
+        }
+        if(!waiting||!closed.contains(root_id))return false;
+        for(auto& [record,coordinator]:owners)if(record.run.state==RunState::running){graph_checkpoint(record,coordinator,record.checkpoint_revision);changed_one(db.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{record.run.id}));event(record.run.id,"run.paused",Json{{"reason","graph_tree_human_wait"},{"root_run_id",root_id},{"checkpoint_revision",record.checkpoint_revision}}.dump());}
+        return true;
+    }
     void graph_human_pause(GraphRootRecord& root,const GraphCoordinator& coordinator){
         if(!database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root.run.id}).rows.empty())return;
+        const auto owner=graph_lineage(root.run.id).first;
+        if(!database.execute("SELECT run_id FROM graph_invocations WHERE root_run_id=? LIMIT 1",{owner}).rows.empty()){
+            if(pause_graph_tree(owner)){const auto row=database.execute("SELECT state,checkpoint_revision,checkpoint FROM runs r JOIN graph_roots g ON g.run_id=r.id WHERE r.id=?",{root.run.id}).rows.at(0);root.run.state=state_value(text(row[0]));root.checkpoint_revision=integer(row[1]);root.checkpoint_json=text(row[2]);}return;
+        }
         if(root.run.state==RunState::running && graph_waiting_only(coordinator)){
             root_boundary(root.run,RunState::paused);changed_one(database.execute("UPDATE runs SET state='paused' WHERE id=? AND state='running'",{root.run.id}));event(root.run.id,"run.paused",R"({"reason":"graph_human_wait"})");root.run.state=RunState::paused;
         }
@@ -2401,7 +2430,22 @@ GraphRootRecord Repository::start_graph_human(const std::string& id,const std::s
     transaction.commit();return root;
 }
 GraphRootRecord Repository::input_graph_human(const std::string& id,const std::string& node,const std::string& input,const std::string& actor,std::int64_t expected){
-    identifier(actor);if(actor.size()>256 || expected<1)throw std::invalid_argument("Invalid graph controller input");object_json(input);auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(root.run.state!=RunState::running && root.run.state!=RunState::paused)throw Conflict("Graph cannot receive human input");const bool contextual=!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty();if(contextual){if(root.run.state!=RunState::paused)throw Conflict("Registered graph human input requires its closed owner");(void)graph_context_owner(id);}GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.human.input",Json{{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",root.checkpoint_revision}}.dump());if(!contextual&&root.run.state==RunState::paused && !impl_->graph_waiting_only(coordinator)){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{id}));impl_->event(id,"run.running",R"({"reason":"graph_human_input"})");root.run.state=RunState::running;}transaction.commit();return root;
+    identifier(actor);if(actor.size()>256 || expected<1)throw std::invalid_argument("Invalid graph controller input");object_json(input);auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(!root.run.parent_id.empty())throw Conflict("Nested graph input requires its observed ultimate root scope");if(root.run.state!=RunState::running && root.run.state!=RunState::paused)throw Conflict("Graph cannot receive human input");const bool contextual=!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty();if(contextual){if(root.run.state!=RunState::paused)throw Conflict("Registered graph human input requires its closed owner");(void)graph_context_owner(id);}GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.human.input",Json{{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",root.checkpoint_revision}}.dump());if(!contextual&&root.run.state==RunState::paused && !impl_->graph_waiting_only(coordinator)){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{id}));impl_->event(id,"run.running",R"({"reason":"graph_human_input"})");root.run.state=RunState::running;}transaction.commit();return root;
+}
+GraphRootRecord Repository::input_graph_tree_human(const std::string& root_id,const std::string& owner_id,const std::string& node,const std::string& input,const std::string& actor,std::int64_t expected_root,std::int64_t expected_owner){
+    identifier(actor);if(actor.size()>256||expected_root<1||expected_owner<1||owner_id==root_id)throw std::invalid_argument("Nested human input requires distinct owner and root observations");object_json(input);
+    auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(root_id),owner=graph_run(owner_id);
+    if(!root.run.parent_id.empty()||owner.run.parent_id.empty()||owner.run.session_id!=root.run.session_id||impl_->graph_lineage(owner_id).first!=root_id)throw Conflict("Nested human input owner differs from its root");
+    if((root.run.state!=RunState::paused&&root.run.state!=RunState::running)||owner.run.state!=RunState::paused)throw Conflict("Nested graph has no closed human owner");
+    if(root.checkpoint_revision!=expected_root||owner.checkpoint_revision!=expected_owner)throw Conflict("Nested human input checkpoint observation changed");
+    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{root_id}).rows.empty())throw RunUnavailable("Nested graph context input ownership is not implemented");
+    std::vector<Run> path;for(auto current=owner.run;;current=run(current.parent_id)){if(!current.graph_root||current.session_id!=root.run.session_id||(current.state!=RunState::paused&&current.state!=RunState::running))throw Conflict("Nested input ancestry is not resumable");path.push_back(current);if(current.id==root_id)break;if(path.size()>3)throw Conflict("Nested input ancestry exceeds limits");}
+    GraphCoordinator coordinator(GraphPlan(owner.specification_json),owner.checkpoint_json,GraphRestoreMode::live);coordinator.provide_human(node,input);impl_->graph_checkpoint(owner,coordinator,expected_owner);
+    GraphCoordinator parent(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);impl_->graph_checkpoint(root,parent,expected_root);
+    const auto decision=coordinator.inspect();const bool ready=decision.finished||!decision.ready.empty()||!decision.skippable.empty();
+    impl_->event(owner_id,"graph.human.input",Json{{"root_run_id",root_id},{"node_id",node},{"actor",actor},{"input",Json::parse(input)},{"checkpoint_revision",owner.checkpoint_revision},{"root_checkpoint_revision",root.checkpoint_revision}}.dump());
+    if(ready)for(const auto& current:path)if(current.state==RunState::paused){changed_one(db.execute("UPDATE runs SET state='running' WHERE id=? AND state='paused'",{current.id}));impl_->event(current.id,"run.running",Json{{"reason","graph_tree_human_input"},{"root_run_id",root_id},{"owner_run_id",owner_id}}.dump());}
+    const auto result=graph_run(root_id);transaction.commit();return result;
 }
 GraphRootRecord Repository::skip_graph_node(const std::string& id,const std::string& node,std::int64_t expected){if(expected<1)throw std::invalid_argument("A graph checkpoint revision is required");auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(root.run.state!=RunState::running)throw Conflict("Graph is not running");GraphCoordinator coordinator(GraphPlan(root.specification_json),root.checkpoint_json,GraphRestoreMode::live);coordinator.skip(node);impl_->graph_checkpoint(root,coordinator,expected);impl_->event(id,"graph.node.skipped",Json{{"node_id",node},{"checkpoint_revision",root.checkpoint_revision}}.dump());impl_->graph_human_pause(root,coordinator);transaction.commit();return root;}
 Run Repository::retire_graph_run(const std::string& id,RunState next,const std::string& reason){

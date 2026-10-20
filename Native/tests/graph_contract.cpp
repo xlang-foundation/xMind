@@ -211,6 +211,37 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
     {PersistenceService store(tree_database,imports);require(store.child_admission("tree-leaf").get().root_run_id=="tree-root"&&store.run("tree-root").get().state==RunState::cancelled,"Bounded invocation lineage and terminal outcome must reopen without replay");for(const auto& id:std::vector<std::string>{"interrupted-tree-root","interrupted-tree-level1","interrupted-tree-level2","interrupted-tree-level3","interrupted-tree-leaf"})require(store.run(id).get().state==RunState::failed&&store.run_history(id).get().size()==1,"Restart must quarantine every deep owner and retain exactly its captured input");require(store.child_admission("interrupted-tree-leaf").get().root_run_id=="interrupted-tree-root","Deep interrupted lineage must remain verifiable after recovery");store.close();}
 
 
+
+    const auto pause_database=(std::filesystem::u8path(argv[1])/"nested-pause.sqlite").string();
+    {
+        PersistenceService store(pause_database,imports);
+        auto branches=nested_spec;branches["nodes"][0]["id"]="left";auto right=branches["nodes"][0];right["id"]="right";branches["nodes"].push_back(right);
+        store.create_session("pause-session","Synthetic nested human barrier").get();
+        store.start_graph_run("pause-root","pause-session","pause",1,GraphPlan(branches.dump()),R"({"content":"Captured pause task"})").get();store.transition("pause-root",RunState::queued,RunState::running).get();
+        for(const auto& id:std::vector<std::string>{"left","right"}){store.start_graph_invocation(id,"pause-root",id,store.graph_run("pause-root").get().checkpoint_revision).get();store.transition(id,RunState::queued,RunState::running).get();}
+        store.start_graph_human("left","answer",store.graph_run("left").get().checkpoint_revision).get();
+        require(store.run("left").get().state==RunState::running&&store.run("pause-root").get().state==RunState::running,"A ready sibling must prevent global human pause");
+        store.start_graph_human("right","answer",store.graph_run("right").get().checkpoint_revision).get();
+        for(const auto& id:std::vector<std::string>{"pause-root","left","right"})require(store.run(id).get().state==RunState::paused,"Quiescent nested human tree must pause all graph owners atomically");
+        require(store.history("pause-session").get().size()==1&&store.runs("pause-session").get().size()==1,"Pause must preserve one root and invent no model output");store.close();
+    }
+    {
+        PersistenceService store(pause_database,imports);auto root=store.graph_run("pause-root").get(),left=store.graph_run("left").get();
+        require(root.run.state==RunState::paused&&left.run.state==RunState::paused&&store.run("right").get().state==RunState::paused,"Paused graph tree must survive persistence restart without replay");
+        const auto events=store.graph_events("pause-root").get().size();
+        rejects<Conflict>([&]{store.input_graph_human("left","answer","{}","fixture",left.checkpoint_revision).get();});
+        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision+1,left.checkpoint_revision).get();});
+        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision+1).get();});
+        {XlangSqlite db(pause_database,imports);db.execute("CREATE TRIGGER reject_tree_input BEFORE INSERT ON events WHEN NEW.kind='graph.human.input' BEGIN SELECT RAISE(ABORT,'synthetic human input fault'); END");}
+        rejects<DatabaseError>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision).get();});
+        require(store.graph_run("pause-root").get().checkpoint_revision==root.checkpoint_revision&&store.graph_run("left").get().checkpoint_json==left.checkpoint_json&&store.graph_events("pause-root").get().size()==events,"Late input fault must roll back both checkpoints, events and states");
+        {XlangSqlite db(pause_database,imports);db.execute("DROP TRIGGER reject_tree_input");}
+        const auto resumed=store.input_graph_tree_human("pause-root","left","answer",R"({"approved":true})","fixture",root.checkpoint_revision,left.checkpoint_revision).get();
+        require(resumed.run.state==RunState::running&&resumed.checkpoint_revision==root.checkpoint_revision+1&&store.run("left").get().state==RunState::running&&store.run("right").get().state==RunState::paused,"Observed input must wake only its ancestry and advance ultimate root authority");
+        rejects<Conflict>([&]{store.input_graph_tree_human("pause-root","left","answer","{}","fixture",root.checkpoint_revision,left.checkpoint_revision).get();});
+        require(store.children("left").get().empty()&&store.history("pause-session").get().size()==1,"Human input must not dispatch effects or fabricate assistant history");store.close();
+    }
+
     const auto migration_database=(std::filesystem::u8path(argv[1])/"nested-migration.sqlite").string();
     {PersistenceService store(migration_database,imports);store.create_session("migration-session","Synthetic v33 invocation metadata").get();store.start_graph_run("migration-root","migration-session","fixture",1,nested,R"({"content":"Migration fixture"})").get();store.transition("migration-root",RunState::queued,RunState::running).get();store.start_graph_invocation("migration-child","migration-root","call",store.graph_run("migration-root").get().checkpoint_revision).get();store.close();}
     {
