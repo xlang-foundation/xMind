@@ -1,0 +1,78 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start   1: native_root_work_executor_contract
+ 1/21 Test   #1: native_root_work_executor_contract .........   Passed    0.09 sec
+      Start  25: native_dynamic_plan_repository_contract
+ 2/21 Test  #25: native_dynamic_plan_repository_contract ....   Passed    3.71 sec
+      Start  26: native_context_repository_contract
+ 3/21 Test  #26: native_context_repository_contract .........   Passed    2.92 sec
+      Start  30: native_context_graph_engine_contract
+ 4/21 Test  #30: native_context_graph_engine_contract .......   Passed    1.52 sec
+      Start  32: native_planning_http_contract
+ 5/21 Test  #32: native_planning_http_contract ..............   Passed    0.79 sec
+      Start  35: native_dynamic_plan_engine_contract
+ 6/21 Test  #35: native_dynamic_plan_engine_contract ........   Passed    6.92 sec
+      Start  43: native_graph_service_http_contract
+ 7/21 Test  #43: native_graph_service_http_contract .........***Failed    0.31 sec
+file:///D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs:44
+ port=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Graph server readiness timed out')),10000);child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Graph server exited ${code}: ${err}`));});child.stdout.on('data',data=>{out+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(out);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
+                                                                                                                                                                                                                                                       ^
+
+Error: Graph server exited 1: Missing graph text field
+
+    at ChildProcess.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs:44:248)
+    at Object.onceWrapper (node:events:634:26)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.19.0
+
+      Start  45: native_provider_setup_contract
+ 8/21 Test  #45: native_provider_setup_contract .............   Passed    1.33 sec
+      Start  46: native_graph_runner_contract
+ 9/21 Test  #46: native_graph_runner_contract ...............   Passed   12.20 sec
+      Start  50: native_delegation_contract
+10/21 Test  #50: native_delegation_contract .................   Passed    2.63 sec
+      Start  53: native_graph_children_contract
+11/21 Test  #53: native_graph_children_contract .............   Passed    0.35 sec
+      Start  54: native_graph_contract
+12/21 Test  #54: native_graph_contract ......................   Passed    1.98 sec
+      Start  81: native_agent_service_contract
+13/21 Test  #81: native_agent_service_contract ..............   Passed    1.75 sec
+      Start 113: native_agent_http_contract
+14/21 Test #113: native_agent_http_contract .................   Passed   10.05 sec
+      Start 126: native_unified_graph_http_contract
+15/21 Test #126: native_unified_graph_http_contract .........***Failed    0.29 sec
+file:///D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs:44
+ port=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Graph server readiness timed out')),10000);child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Graph server exited ${code}: ${err}`));});child.stdout.on('data',data=>{out+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(out);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
+                                                                                                                                                                                                                                                       ^
+
+Error: Graph server exited 1: Missing graph text field
+
+    at ChildProcess.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs:44:248)
+    at Object.onceWrapper (node:events:634:26)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.19.0
+
+      Start 137: native_operation_repository_contract
+16/21 Test #137: native_operation_repository_contract .......   Passed    0.91 sec
+      Start 139: persistence_service_contract
+17/21 Test #139: persistence_service_contract ...............   Passed    1.90 sec
+      Start 140: native_backend_owner_contract
+18/21 Test #140: native_backend_owner_contract ..............   Passed    2.25 sec
+      Start 142: native_legacy_owner_contract
+19/21 Test #142: native_legacy_owner_contract ...............   Passed    0.56 sec
+      Start 146: native_backend_handoff_contract
+20/21 Test #146: native_backend_handoff_contract ............   Passed    4.40 sec
+      Start 151: native_provider_profile_runtime_contract
+21/21 Test #151: native_provider_profile_runtime_contract ...   Passed    5.56 sec
+
+90% tests passed, 2 tests failed out of 21
+
+Total Test time (real) =  62.45 sec
+
+The following tests FAILED:
+	 43 - native_graph_service_http_contract (Failed)
+	126 - native_unified_graph_http_contract (Failed)
+Errors while running CTest

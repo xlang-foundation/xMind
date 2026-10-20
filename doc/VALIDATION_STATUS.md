@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Interactive CLI nested graph review and mixed human pause — 2026-10-20
+
+The native CLI now traverses admitted graph descendants with bounded depth/count, exact parent/session/role checks and immutable graph ID/revision/spec pins. Events, usage and approval ownership include nested leaves. Human review exposes root-relative node_path, owner_run_id and owner_checkpoint_revision. /input NODE_PATH JSON maps only a displayed path to its observed owner; nested answers require the advertised capability and send both root/owner revisions. Flat node IDs remain valid. Strict JSON validation occurs before sending input, and rejected requests require a refreshed review rather than automatic replay.
+
+A real compiled server/CLI/xlang3/SQLite fixture answers choose at the root and left/choose and right/choose in separate invocation owners, executes both actual file reads, observes descendant completion and reconnects to exact persisted events with one conversation root/two messages and zero provider requests. It exposed a backend bug: root input woke a root whose remaining running checkpoint nodes were closed descendant human waits, leaving no runnable controller and faulting the service. Root input now uses the existing whole-tree closed-pause proof to retain the valid pause until a descendant answer wakes its ancestry. The same fixture passes both server entry points.
+
+Complete serial Release build and21focused contracts pass91.64seconds with all2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets/hashes unchanged. Native SHA2564be29b889919d6634b21e3707fdf6d6f34f017d6f7cd82bf5a01f71db86754a6. Passing receipts: evidence/nested-graph-interactive-cli-mixed-pause-focused-20261020-*. Earlier19/21 failures are retained: the first new fixture omitted required invocation prompts; the second exposed the mixed-pause defect and failed by its original bounded console timeout. No deadlines were increased. Raw patches/closures remain under the matching C:/xMindNativeValidation directories.
+
+This closes interactive descendant review for noncontext graphs, not shared durable context/model/active-time budgets, worker transport, generic Local/Nexus protocol, full155 qualification or installed/rendered/live-provider acceptance. Installed56 and user history/settings remain unchanged.
+
 ## Persisted graph owner paths at execution — 2026-10-20
 
 Child admission now derives a root-relative logical node path from the validated immutable parent chain for graph invocations, agents and tools. Context history authority, logical turn limits, durable model-call reservations and agent-runner model binding use this backend-derived path. Callers cannot supply it. Existing flat paths remain identical; nested context execution remains rejected pending shared admission/model-call budgets and measured active-time pause/resume across the full tree.

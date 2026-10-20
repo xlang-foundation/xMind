@@ -585,7 +585,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
     };
     std::string session;bool tree=false,plan_observation=false;
     const auto initial=read(path);if(!initial.is_object()||initial.value("id",std::string{})!=run||!initial.contains("session_id")||!initial["session_id"].is_string()||initial["session_id"].get<std::string>().empty())throw std::runtime_error("Invalid observed run identity");session=initial["session_id"].get<std::string>();
-    if(graph&&initial.value("graph_root",false)!=true)throw std::runtime_error("Select a graph root for graph observation");
+    if(graph&&(initial.value("graph_root",false)!=true||!initial.value("parent_id",std::string{}).empty()))throw std::runtime_error("Select a graph root for graph observation");
     if(!graph&&initial.value("parent_id",std::string{}).empty()&&!initial.value("graph_root",false)){const auto health=read("/v1/health");tree=health.value("owned_child_observation",false);plan_observation=health.contains("agent_planning")&&health["agent_planning"].is_boolean();}
     // Usage events are cumulative provider snapshots, not separate responses.
     // Keep each owner's latest supplied snapshot until its response ends;
@@ -597,12 +597,31 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         if(!line.empty())std::cerr<<'\n'<<line<<'\n';
         pending_usage.erase(found);
     };
+    struct ObservedGraphOwner {Json record;std::string path;std::size_t depth;};
+    std::vector<ObservedGraphOwner> graph_owners;
+    const bool nested_graph_input=graph&&read("/v1/health").value("graph_tree_human_input",false);
+    const auto node_identity=[](const std::string& id){return !id.empty()&&id.size()<=64&&id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")==std::string::npos;};
     auto owners=[&] {
         std::set<std::string> owned{run};
         if(graph){
-            const auto children=read("/v1/graph-runs/"+run+"/children");
-            if(!children.is_array())throw std::runtime_error("Invalid graph child batch");
-            for(const auto& child:children){const auto id=child.value("id",std::string{});if(!child.is_object() || child.value("parent_id",std::string{})!=run || child.value("session_id",std::string{})!=session || id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos || !owned.insert(id).second)throw std::runtime_error("Invalid graph child ownership");}
+            graph_owners.clear();graph_owners.push_back({read("/v1/graph-runs/"+run),{},0});std::size_t declared_count=0;
+            for(std::size_t at=0;at<graph_owners.size();++at){
+                const auto owner=graph_owners[at];const auto& record=owner.record;const auto& identity=record.at("run");const auto owner_id=identity.at("id").get<std::string>();
+                if(identity.value("session_id",std::string{})!=session||!identity.value("graph_root",false)||(at==0&&(owner_id!=run||!identity.value("parent_id",std::string{}).empty()))||!record.at("checkpoint_revision").is_number_integer()||record["checkpoint_revision"]<1||record["checkpoint_revision"]>9007199254740991||!record.at("spec").at("nodes").is_array()||record["spec"]["nodes"].size()>100||!record.at("checkpoint").at("nodes").is_array())throw std::runtime_error("Invalid graph owner snapshot");
+                std::map<std::string,Json> declared;for(const auto& node:record["spec"]["nodes"]){const auto id=node.value("id",std::string{});if(!node_identity(id)||!declared.emplace(id,node).second)throw std::runtime_error("Invalid declared graph identity");}
+                declared_count+=declared.size();if(declared_count>256)throw std::runtime_error("Expanded graph observation exceeds limits");
+                const auto children=read("/v1/graph-runs/"+owner_id+"/children");if(!children.is_array()||children.size()>100)throw std::runtime_error("Invalid graph child batch");std::set<std::string> claimed;
+                for(const auto& child:children){
+                    const auto id=child.value("id",std::string{}),node_id=child.value("node_id",std::string{});const auto definition=declared.find(node_id);
+                    if(child.value("parent_id",std::string{})!=owner_id||child.value("session_id",std::string{})!=session||id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||definition==declared.end()||!claimed.insert(node_id).second||!owned.insert(id).second||owned.size()>257)throw std::runtime_error("Invalid graph child ownership");
+                    const auto kind=definition->second.value("type",std::string{});if((kind!="agent"&&kind!="tool"&&kind!="graph")||!child.contains("graph_root")||!child["graph_root"].is_boolean()||child["graph_root"]!=(kind=="graph"))throw std::runtime_error("Invalid graph child role");
+                    if(kind=="graph"){
+                        if(owner.depth>=3)throw std::runtime_error("Graph invocation observation exceeds depth limit");const auto nested=read("/v1/graph-runs/"+id);const auto& actual=nested.at("run");
+                        if(actual.value("id",std::string{})!=id||actual.value("parent_id",std::string{})!=owner_id||actual.value("node_id",std::string{})!=node_id||actual.value("session_id",std::string{})!=session||!actual.value("graph_root",false)||nested.at("graph_id")!=definition->second.at("graph_id")||nested.at("graph_revision")!=definition->second.at("graph_revision")||nested.at("spec")!=definition->second.at("graph_spec"))throw std::runtime_error("Graph invocation immutable snapshot changed");
+                        graph_owners.push_back({nested,owner.path.empty()?node_id:owner.path+"/"+node_id,owner.depth+1});
+                    }
+                }
+            }
         }
         if(tree){const auto children=read(path+"/children");if(!children.is_array()||children.size()>8)throw std::runtime_error("Invalid owned child batch");for(const auto& record:children){if(!record.is_object()||!record.contains("run")||!record["run"].is_object())throw std::runtime_error("Invalid owned child metadata");observed_dynamic_child(record);const auto& child=record["run"];const auto id=child.value("id",std::string{});if(child.value("parent_id",std::string{})!=run||child.value("session_id",std::string{})!=session||child.value("graph_root",false)||id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!owned.insert(id).second)throw std::runtime_error("Invalid owned child identity");}}
         return owned;
@@ -731,26 +750,28 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 }
             }
             if(graph){
-                const auto snapshot=read("/v1/graph-runs/"+run);
-                if(!snapshot.is_object()||snapshot.at("run").value("id",std::string{})!=run||snapshot.at("run").value("session_id",std::string{})!=session||!snapshot.contains("checkpoint_revision")||!snapshot["checkpoint_revision"].is_number_integer()||snapshot["checkpoint_revision"]<1||snapshot["checkpoint_revision"]>9007199254740991||!snapshot.at("checkpoint").at("nodes").is_array()||!snapshot.at("spec").at("nodes").is_array())throw std::runtime_error("Invalid graph input snapshot");
-                auto steps=Json::array();std::set<std::string> waiting;
-                for(const auto& node:snapshot["checkpoint"]["nodes"]){
-                    if(node.value("state",std::string{})!="waiting_human")continue;
-                    const auto id=node.value("id",std::string{});
-                    if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||!waiting.insert(id).second)throw std::runtime_error("Invalid graph human identity");
-                    const auto& definitions=snapshot["spec"]["nodes"];const auto definition=std::find_if(definitions.begin(),definitions.end(),[&](const Json& value){return value.value("id",std::string{})==id&&value.value("type",std::string{})=="human";});
-                    if(definition==definitions.end()||!definition->contains("prompt")||!(*definition)["prompt"].is_string())throw std::runtime_error("Invalid graph human definition");
-                    steps.push_back({{"node_id",id},{"prompt",(*definition)["prompt"]}});
+                (void)owners();const auto& snapshot=graph_owners.front().record;
+                auto steps=Json::array();struct HumanTarget {std::string owner,node;std::int64_t revision;};std::map<std::string,HumanTarget> waiting;
+                for(const auto& owner:graph_owners){
+                    if(!owner.path.empty()&&(!nested_graph_input||owner.record.at("run").value("state",std::string{})!="paused"))continue;
+                    std::set<std::string> checkpoint_ids;
+                    for(const auto& node:owner.record["checkpoint"]["nodes"]){
+                        const auto id=node.value("id",std::string{});if(!node_identity(id)||!checkpoint_ids.insert(id).second)throw std::runtime_error("Invalid graph checkpoint identity");if(node.value("state",std::string{})!="waiting_human")continue;
+                        const auto& definitions=owner.record["spec"]["nodes"];const auto definition=std::find_if(definitions.begin(),definitions.end(),[&](const Json& value){return value.value("id",std::string{})==id&&value.value("type",std::string{})=="human";});
+                        if(definition==definitions.end()||!definition->contains("prompt")||!(*definition)["prompt"].is_string())throw std::runtime_error("Invalid graph human definition");
+                        const auto key=owner.path.empty()?id:owner.path+"/"+id;const auto owner_id=owner.record.at("run").at("id").get<std::string>();const auto revision=owner.record.at("checkpoint_revision").get<std::int64_t>();
+                        if(!waiting.emplace(key,HumanTarget{owner_id,id,revision}).second)throw std::runtime_error("Duplicate graph human path");steps.push_back({{"node_id",id},{"node_path",key},{"owner_run_id",owner_id},{"owner_checkpoint_revision",revision},{"prompt",(*definition)["prompt"]}});
+                    }
                 }
                 if(!steps.empty()){
                     const auto revision=snapshot["checkpoint_revision"].get<std::int64_t>();
                     std::cout<<Json{{"type","graph_human_review"},{"root_run_id",run},{"checkpoint_revision",revision},{"steps",steps}}.dump()<<'\n'<<std::flush;
                     if(!std::cout)throw std::runtime_error("Graph review output is unavailable");
-                    std::cerr<<"Enter /input NODE_ID JSON for a displayed step, /cancel or /exit to detach.\n";
+                    std::cerr<<"Enter /input NODE_PATH JSON for a displayed step, /cancel or /exit to detach.\n";
                     std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(answer=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                     std::string route;Json body;
                     if(answer=="/cancel"){route=path+"/cancel";body=Json::object();}
-                    else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}route="/v1/graph-runs/"+run+"/human/"+node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};}
+                    else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}try{validate_plan_input(input);}catch(...){std::cerr<<"No input sent. Use a bounded strict JSON object.\n";continue;}const auto& target=waiting.at(node);route="/v1/graph-runs/"+run+(target.owner==run?std::string{}:"/invocations/"+target.owner)+"/human/"+target.node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};if(target.owner!=run)body["expected_owner_checkpoint_revision"]=target.revision;}
                     else {std::cerr<<"No input sent. Use /input, /cancel or /exit.\n";continue;}
                     const auto response=client.Post(route,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server for graph input");if(response->status<200||response->status>=300)std::cerr<<"Backend rejected graph input (HTTP "<<response->status<<"). Refreshing the checkpoint; no automatic retry.\n";else std::cout<<Json{{"type",answer=="/cancel"?"run_cancel_result":"graph_input_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
                 }

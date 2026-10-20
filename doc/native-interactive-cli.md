@@ -290,8 +290,13 @@ commands instead of being interpreted as a live cancellation or detach request.
 
 At an actual approval prompt, `/allow ID` and `/deny ID` use only the displayed
 owned operation; the backend revalidates its exact plan, arguments and expiry.
-At a graph human prompt, `/input NODE_ID JSON` forwards bounded raw JSON with
-the displayed checkpoint revision. `/cancel` requests cancellation and
+At a graph human prompt, `/input NODE_PATH JSON` forwards strict bounded JSON with
+the displayed root checkpoint revision. Root steps retain their node IDs; nested
+steps use paths such as `left/choose`, derived from pinned invocation ownership.
+The review includes each owner ID and checkpoint revision. Nested input also
+sends that owner revision and requires `graph_tree_human_input` capability.
+Graph observation validates parent/session/role and immutable invocation pins
+before accepting descendant events, operations or review targets. `/cancel` requests cancellation and
 observation continues to the actual terminal event; an acknowledgement is not
 a completed cancellation. EOF or `/exit` at either prompt detaches without
 approval, human input or cancellation. No approval is automatic.
