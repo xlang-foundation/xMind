@@ -39,3 +39,6 @@ Nested execution implementation checkpoint: pinned invocation admission and exac
 
 
 Nested execution update: native agent/tool invocation trees now run under one private root deadline and shared physical leaf permits, with actual read/write/cancellation/deadline and synthetic-provider agent transport contracts. Nested human waits and context-enabled graphs remain rejected. Continue with typed durable pause propagation and authenticated nested input/resume, shared context/model-call budgets, full native qualification and eventual verified package adoption. Process-isolated execution and Local/Nexus authenticated worker transport remain separate unfinished requirements.
+
+
+Current qualification: backend d2865a32/af166abb passes complete155 native tests; isolated client460/159 gates and actual browser-controller/native nested reviewed file creation/readback/reconnect pass. Nested descendants are now observable/reviewable in shared browser/editor adapters, with synthetic DOM and host coverage. No installed or rendered-editor acceptance is implied. Continue nested human/context pause/resume and shared context/model-call budgeting, then qualified packaging/adoption and remaining worker placement/authenticated transport and connection protocol requirements.

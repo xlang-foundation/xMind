@@ -1,0 +1,19 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Descendant histories must remain isolated from the root transcript
+
+4 !== 2
+
+    at file:///C:/xMindNativeValidation/nested-graph-client-worktree-20261019/views/browser/tests/native-contract.mjs:73:560
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 4,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
