@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-10-20T23:15:16.195Z",
+  "gate": {
+    "recordedAt": "2026-10-20T23:15:02.311Z",
+    "sourceParent": "94cfa5abfde015df0e98e9bc46e2dc1d26fdf81d",
+    "sourcePatchSha256": "0cebcd23bc10aab3507e2c27c491ec5a8d4b2b0f6751c1fd9b105d7214e9c265",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 68996,
+      "launchedAt": "2026-10-20T23:10:57.200Z",
+      "completedAt": "2026-10-20T23:12:19.421Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "29b87fea79252b5dd3fcd69cf3f49e3ff3fd110a94a9b69f48fbb06827549de0"
+    },
+    "test": {
+      "pid": 68688,
+      "launchedAt": "2026-10-20T23:12:22.555Z",
+      "completedAt": "2026-10-20T23:14:59.708Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5f02d9f4d12ee2f292b5996159e60e1f5c2976445eb7a38a3ba2cc8636d04d85"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 157.11,
+    "projectFiles": 2688,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "a152527c45dce5bb8aaa087458b593e768a67d2cfb7bb0b1ecd90f42ee07c4b4",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-control-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-control-focused-20261020-build.log": "3b88a56c0430fc66bf12c8bb21f4397bc06f4705cce7d48ec4ff72a364cd3729",
+        "doc/evidence/agent-worker-control-focused-20261020-build-terminal.json": "365817f3f69723ad25241b49593864aa4a8c013836fcb7adf9445bf2e6d0b995"
+      }
+    },
+    "agent-worker-control-corrected-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-control-corrected-20261020-build.log": "29b87fea79252b5dd3fcd69cf3f49e3ff3fd110a94a9b69f48fbb06827549de0",
+        "doc/evidence/agent-worker-control-corrected-20261020-build-terminal.json": "83a7a5f5010f4da8471cb559e36c77ae64658cc7b3f6fb6fe2a264f7ff03253e",
+        "doc/evidence/agent-worker-control-corrected-20261020-ctest.log": "5f02d9f4d12ee2f292b5996159e60e1f5c2976445eb7a38a3ba2cc8636d04d85",
+        "doc/evidence/agent-worker-control-corrected-20261020-ctest-terminal.json": "9ab790c13038c5ec3cc581f9f539556dd044c0e8ed3ae0b92c6cddfa4d044b94",
+        "doc/evidence/agent-worker-control-corrected-20261020-LastTest.log": "0a78f444d5806f556d16f3fdc58b72cf0b972a59f14acf55487e69da67a3473c",
+        "doc/evidence/agent-worker-control-corrected-20261020-test-inventory.json": "713dad0d02046a779c44b15e1be153f6008caa9c7659bdb1c2d083f5061ffaf1",
+        "doc/evidence/agent-worker-control-corrected-20261020-gate.json": "05aa52a5c4e6572765e20443051f3244b78a8906e1c94889da542a99fb2efd61"
+      }
+    }
+  },
+  "fixtureSha256": "b0b254fc50d0f18dc2eab90428f7e6114f042c0b3d4d14729a1a1c14a1420c8d",
+  "ledgerFixtureSha256": "dae54b7a0b31c4659f57e4c8de6c75480b4a582fa509002974f4a7df0795c06d",
+  "scope": "Native backend supervisor control API requests execution/cancellation and strictly decodes fixed child terminal intents",
+  "verified": [
+    "Reply decoder caps payload at 256 bytes and rejects duplicates, unknown fields, malformed/nested/trailing data and unsupported or non-integral versions",
+    "Only completed, failed and cancelled are accepted; child reason text is not accepted",
+    "Actual unified product child completion, no-tools, profile, provider failure, typed denial and approval cancellation use the native request helper",
+    "Cancellation acknowledgement must be an exact versioned boolean stop_requested true",
+    "Existing post-reply tests retain live process ownership until exact physical drain and backend durable terminal commit",
+    "Independent peer verifies exactly 45 intentional controlled requests"
+  ],
+  "failedAttempt": "Initial build failed because the worker runner target lacked the private third_party JSON include path. Failed build log and terminal receipt are retained; correction changes that target include path only.",
+  "limitations": [
+    "Child replies remain intents, never authority for a durable reason, successful completion or physical capacity release",
+    "AgentService/GraphService process placement and broader worker capabilities remain open",
+    "No new full-suite, installed, hosted, rendered-client or live-provider acceptance claim"
+  ],
+  "passed": true
+}

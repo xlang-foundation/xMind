@@ -1,3 +1,27 @@
+## Native worker supervisor control API — 2026-10-20
+
+Backend supervisors now have a native execution/cancellation request helper with
+strict decoding of the fixed versioned child replies. Execution accepts only
+completed, failed or cancelled intents. Replies are capped at 256 bytes; duplicate
+or unknown fields, non-integral/unsupported versions, nested/malformed/trailing
+data and child-supplied reason text are rejected. Cancellation requires an exact
+versioned `stop_requested: true` acknowledgement.
+
+Actual unified-product completion, no-tools, provider failure, typed denial,
+profile and approval-cancellation fixtures now use these helpers. Existing checks
+still require actual physical exit and backend canonical facts before retirement;
+an intent never becomes a fabricated durable Run or permission to release capacity.
+The independent peer verifies exactly 45 intentional controlled requests.
+
+Initial build failed on the missing private JSON include directory; the failed
+log is retained and the target dependency corrected. Final serial Release build
+and 53 contracts pass in 157.11 seconds with all frozen input/file sets and 133
+native binaries unchanged during validation. No CPython or live model is used.
+This is focused qualification; the preceding complete160 result applies to its
+earlier source. AgentService/GraphService placement and broader requirements remain
+open. Installed59 and user state are untouched. See
+[receipt and both build records](evidence/agent-worker-control-corrected-20261020.json).
+
 ## Complete native qualification of worker read owner — 2026-10-20
 
 Exact committed source `27a5d9ec27197c0f2476cde4780e5d20cc98ec10` passes all
