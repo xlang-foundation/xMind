@@ -2,6 +2,16 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.57 and profile-preserving adoption — 2026-10-20
+
+Installed57 is client6dbab29f/native971ad1e1/fc94ced1 with SDK58a8aab9/DLL1ff2a8e7: complete155 native and462extension/161browser gates, staged browser/native integration,2448archive entries and2445installed payloads verify. The prior56 extension is preserved with2447files verified; settings SHA2565ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b is unchanged and all seven prior profile directories remain. Actual VS Code CLI installs/lists57 without opening an editor; this is not rendered IDE acceptance.
+
+Before adoption, fresh independent browser/API and byte-safe native CLI snapshots match all7sessions/159messages/12runs and provider/process/MCP/workspace configuration. Every existing root is terminal. The single explicit native --upgrade-backend operation retires only verified7768 (birth2026-10-20T03:59:50.9506960Z, image3854a562) and starts69196 born2026-10-20T09:46:30.9386120Z with qualified imagefc94ced1. It retains the same TestProj SQLite profile and origin57779. After-adoption snapshots are exact; all requests complete with no prompt/tool/model submission or completed-task replay. Raw history/config snapshots stay private under C:/xMindNativeValidation/installed57-primary-adoption-20261020; public receipts contain only ownership/control metadata and hashes.
+
+Existing browser host54928/native view56652 keep their exact births/images, and page55684 still serves and restores the same workspace/history/runs/provider selection through the upgraded backend. Its old assets/gateway are retained; no57client or rendered-coding claim is made for that page. A separate57browser host is required for new gateway routes. New installed browser/rendered/live-provider acceptance and current VS Code/external-browser acceptance remain open, as do shared nested-context execution and the other documented OSS requirements. The schema35 work remains isolated and untested.
+
+See evidence/coding57-installed/preservation/primary-adoption/adopted-owners/view-after-adoption/install-terminal-20261020.*. Installed package path C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.57; adopted managed image is under p-current/6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d/runtime-cba060157576812b176ae1d677b801a31cd8855a1b3c80a924394b16bfe363fe. No published-release or full-goal completion claim is made.
+
 ## Qualified 0.1.57 development package — 2026-10-20
 
 Candidate0.1.57 combines client source6dbab29f1c03fe4f019176ed48166a8172e0be9a with complete155-qualified native source971ad1e/fc94ced1 and pinned SDK58a8aab9/DLL1ff2a8e7. The staged runtime reuses the verified installed56 public payload, replaces only the qualified xmind executable and provenance, and verifies every production SDK payload against the full native input manifest. SDK linker .lib/.exp artifacts remain outside distribution. Runtime manifest SHA2568e563f8eb7f5107af695c7429d8a5cbf8d8603aae7c4230b85e6b71044be592f;2402payload files. Actual Native/CMake sources still match the full native qualification; client version changes are separately qualified.
