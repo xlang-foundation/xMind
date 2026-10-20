@@ -13,6 +13,7 @@
 #include "agentflow/mcp_oauth_refresh_records.hpp"
 #include "agentflow/mcp_input_records.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/agent_worker_records.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -190,6 +191,15 @@ public:
     std::vector<Message> history(const std::string& id);
     MessagePage history_page(const std::string& id,std::optional<std::int64_t> before_sequence,std::size_t count);
     void put_information(const std::string& category,const std::string& id,const std::string& json);
+    // Trusted backend dispatcher only; these are deliberately absent from the
+    // worker journal port. Each mutation validates and commits atomically.
+    AgentWorkerLeaseRecord admit_agent_worker(const AgentWorkerLeaseSpec&);
+    AgentWorkerLeaseRecord agent_worker_lease(const std::string& generation);
+    AgentWorkerLeaseRecord retire_agent_worker(const std::string& generation,const std::string& reason);
+    AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
+    AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);
+    AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);
+    AgentWorkerModelClaimRecord record_agent_worker_model_response(const AgentWorkerModelClaimSpec&,const std::string& actual_response_json);
     // Exact durable compare-and-swap; null expected means create only if absent.
     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
     std::string information(const std::string& category,const std::string& id);

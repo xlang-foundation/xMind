@@ -1,0 +1,33 @@
+{
+  "scope": "Backend worker authority, ordinary model inference host and ownership recovery; child RPC integration remains open",
+  "finalGate": "agent-worker-ledger-rollback-20261020-gate.json",
+  "retainedFailure": "agent-worker-ledger-focused-20261020-gate.json",
+  "fixtureExecutableSha256": "a090ce3202d33e5e6f94700abbf1e4ca80db62c7f45a586db693b886daf7a33a",
+  "contractsPassed": 36,
+  "seconds": 121.70,
+  "controlledProviderRequestsObserved": 1,
+  "actualNativeHttpSse": true,
+  "liveModelKeyUsed": false,
+  "ledgerProcessMetadata": "Explicitly synthetic; actual child process/channel tests are a separate contract",
+  "concurrentDuplicateClaimRejected": true,
+  "replacementDoesNotResetAllowance": true,
+  "orphanRetirementAtomicWithOwnerRecovery": true,
+  "injectedRecoveryAbortPreservesRunAttemptWorkerBudgetAndEventRows": true,
+  "failedRunRevivalRejected": true,
+  "activeWorkerBlocksQuiescenceAndSessionDeletion": true,
+  "modelRouteToolsUsageAndOutputControlsCapturedByBackend": true,
+  "actualResponseBytesRecordedBeforeReturn": true,
+  "initialFailureObserver": {
+    "engine": "Pinned xlang3, no CPython",
+    "uriKeywordUnsupported": true,
+    "existingFileVerifiedBeforeOpen": true,
+    "queryOnly": true,
+    "databaseSha256BeforeAndAfter": "9c77054638ddde12232661cdfbabb44f9f171ecd461b13bf439dc130afced300"
+  },
+  "authenticatedModelOrJournalRpcImplemented": false,
+  "productChildAgentRunnerImplemented": false,
+  "contextCountCompactionWorkerHostImplemented": false,
+  "fullNativeSuiteRun": false,
+  "installed": false,
+  "cpythonExecuted": false
+}

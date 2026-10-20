@@ -1,0 +1,1 @@
+{"runs": [["foreign-root", "failed"], ["no-snapshot", "failed"], ["worker-root", "failed"]], "attempts": [["foreign-root", "foreign-attempt", "interrupted"], ["worker-root", "attempt-one", "interrupted"], ["worker-root", "attempt-two", "interrupted"]], "leases": [["generation-one", "retired"]], "claims": [["attempt-two", "responded"], ["attempt-one", "uncertain"]]}

@@ -1,0 +1,656 @@
+CMake is re-running because C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp is out-of-date.
+  the file 'D:/CantorAI2026/xMind/Native/CMakeLists.txt'
+  is newer than 'C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- Configuring done (3.4s)
+-- Generating done (30.0s)
+-- Build files have been written to: C:/xMindNativeValidation/native-current-source-full
+
+  Checking File Globs
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_wire.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_json_schema.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_models.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_models.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_secrets.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secrets.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph.cpp
+  persistence_service.cpp
+  repository.cpp
+D:\CantorAI2026\xMind\Native\src\repository.cpp(557,315): warning C4458: declaration of 'path' hides class member [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_core.vcxproj]
+      D:\CantorAI2026\xMind\Native\src\repository.cpp(488,17):
+      see declaration of 'agentflow::Repository::Impl::path'
+  
+  Generating Code...
+  agentflow_core.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_core.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_provider_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_transport.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  a2a_agent_registry.cpp
+  a2a_task_control.cpp
+  Generating Code...
+  agentflow_a2a.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_log_severity.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_raw_logging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_spinlock_wait.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_base.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_base_cpu_detect.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/hash/CMakeLists.txt
+  absl_city.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+  absl_civil_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+  absl_crc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_hardening.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/numeric/CMakeLists.txt
+  absl_int128.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/types/CMakeLists.txt
+  absl_source_location.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_throw_delegate.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_strings_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_strings.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_str_format_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+  absl_crc32c.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+  absl_crc_cord_state.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_debugging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/hash/CMakeLists.txt
+  absl_hash.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_cord_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/profiling/CMakeLists.txt
+  absl_exponential_biased.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_cordz_functions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_utf8_for_code_point.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_decode_rust_punycode.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_demangle_rust.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_demangle_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_malloc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+  absl_graphcycles_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+  absl_time_zone.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+  absl_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+  absl_kernel_timeout_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_stacktrace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_symbolize.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_tracing_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+  absl_synchronization.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_cordz_handle.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_cordz_info.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+  absl_cord.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_examine_stack.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_commandlineflag_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_commandlineflag.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_program_name.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_config.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_marshalling.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_private_handle_accessor.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/container/CMakeLists.txt
+  absl_hashtablez_sampler.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/container/CMakeLists.txt
+  absl_raw_hash_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+  absl_flags_reflection.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+  absl_leak_check.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_entry.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_fnmatch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_vlog_config_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_format.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_sink.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_log_sink_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_nullguard.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_structured_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+  absl_strerror.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_message.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_check_op.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+  absl_log_internal_conditions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/yaml-cpp/CMakeLists.txt
+  Scanning sources for module dependencies...
+  yaml-cpp.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_authoring.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_authoring.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_definitions.cpp
+  agentflow_agent_definitions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_definitions.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_chat_provider.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_file_patch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  permission_waiter.cpp
+  agentflow_policy.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_policy.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/third_party/re2/CMakeLists.txt
+  re2.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\re2\Release\re2.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_workspace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  create_executor.cpp
+  edit_executor.cpp
+  patch_executor.cpp
+  patch_file_executor.cpp
+  patch_tool.cpp
+  restore_executor.cpp
+  Generating Code...
+  agentflow_edits.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edits.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_stdio.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_language_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_language_server_tools.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_tools.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_configuration.cpp
+  agentflow_mcp_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_client_factory.cpp
+  mcp_oauth_credentials.cpp
+  Generating Code...
+  agentflow_mcp_client_factory.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_factory.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  xmind_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_schema_worker.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_tool_registry.cpp
+  agentflow_mcp_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effects.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_run_subscription_observer.cpp
+  agentflow_mcp_run_observer.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_run_observer.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_permission_grants.cpp
+  agentflow_permission_grants.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  process_executor.cpp
+  agentflow_process_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_effects.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_xlang_python.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_xlang_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_worker_model_host.cpp
+  agent_backend_runtime.cpp
+  agent_backend_catalog.cpp
+  agent_model_gateway.cpp
+  agent_file_tool_host.cpp
+  agent_remote_tool_host.cpp
+  agent_process_tool_host.cpp
+  agent_read_tool_host.cpp
+  agent_guidance_tool_host.cpp
+  agent_callable_tool_host.cpp
+  agent_runner.cpp
+  agent_service.cpp
+  root_execution_budget.cpp
+  delegation_executor.cpp
+  agent_authority.cpp
+  native_child_executor.cpp
+  dynamic_plan_executor.cpp
+  context_manager.cpp
+  context_model_policy.cpp
+  a2a_tool_registry.cpp
+  Generating Code...
+  agentflow_agent.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_runtime_generation.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  backend_owner_control.cpp
+  agentflow_backend_owner_control.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_control.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  connection_profiles.cpp
+  agentflow_connection_profiles.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_renewal.cpp
+  mcp_oauth_service.cpp
+  Generating Code...
+  agentflow_mcp_oauth_service.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_vcs.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_vcs.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  view_sessions.cpp
+  agentflow_view_sessions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_view_sessions.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  http_server.cpp
+  agentflow_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  a2a_agent_registry_contract.cpp
+  agentflow_a2a_agent_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_agent_registry_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_a2a_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_a2a_client_sdk_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_sdk_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_authority_contract.cpp
+  agentflow_agent_authority_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_authority_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_file_tool_host_contract.cpp
+  agentflow_agent_file_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_file_tool_host_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_process_tool_host_contract.cpp
+  agentflow_agent_process_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_process_tool_host_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_read_tool_host_contract.cpp
+  agentflow_agent_read_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_read_tool_host_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_remote_tool_host_contract.cpp
+  agentflow_agent_remote_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_remote_tool_host_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_catalog.cpp
+  agentflow_graph.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_runner.cpp
+  graph_service.cpp
+  Generating Code...
+  agentflow_graph_execution.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_execution.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  execution_platform.cpp
+  provider_profile_legacy_setup.cpp
+  provider_profile_runtime.cpp
+  provider_profiles.cpp
+  provider_setup.cpp
+  provider_yaml_config.cpp
+  xlang_python_config.cpp
+  Generating Code...
+  agentflow_runtime.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_console_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_console_transport.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_instructions.cpp
+  agentflow_instruction_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  language_server_configuration.cpp
+  agentflow_language_server_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_legacy_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_process.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  local_profile.cpp
+  agentflow_local_profile.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_local_profile.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_resource_catalog.cpp
+  agentflow_mcp_resource_catalog.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_catalog.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  process_configuration.cpp
+  agentflow_process_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  admin_main.cpp
+  server_main.cpp
+  Generating Code...
+  xmind.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_runner_contract.cpp
+  agentflow_agent_runner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_runner_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_service_contract.cpp
+  agentflow_agent_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_service_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_worker_channel.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_channel.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_agent_worker_channel_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_channel_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_worker_ledger_contract.cpp
+  agentflow_agent_worker_ledger_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_ledger_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  anthropic_agent_contract.cpp
+  agentflow_anthropic_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_agent_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_anthropic_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_history_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_anthropic_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_provider_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_anthropic_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_request_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_anthropic_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_stream_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  approved_edit_http_fixture.cpp
+  agentflow_approved_edit_http_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_approved_edit_http_fixture.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  backend_owner_contract.cpp
+  agentflow_backend_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  backend_owner_http_contract.cpp
+  agentflow_backend_owner_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_http_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_chat_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_cli_plan_review_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_cli_plan_review_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_command_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_command_context_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  connection_profiles_contract.cpp
+  agentflow_connection_profiles_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  connection_profiles_http_contract.cpp
+  agentflow_connection_profiles_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_http_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_conpty_cli_harness.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_conpty_cli_harness.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  context_control_contract.cpp
+  agentflow_context_control_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_control_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  context_engine_contract.cpp
+  agentflow_context_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_engine_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  context_graph_engine_contract.cpp
+  agentflow_context_graph_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_graph_engine_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  context_repository_contract.cpp
+  agentflow_context_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_context_selection_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_selection_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  create_executor_contract.cpp
+  agentflow_create_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_create_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  credential_repository_contract.cpp
+  agentflow_credential_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_credential_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  deepseek_profile_runtime_contract.cpp
+  agentflow_deepseek_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_deepseek_profile_runtime_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  deepseek_provider_contract.cpp
+  agentflow_deepseek_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_deepseek_provider_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_dynamic_plan_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  xmind_cli.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_cli.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  dynamic_plan_engine_contract.cpp
+  agentflow_dynamic_plan_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_engine_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  dynamic_plan_mcp_contract.cpp
+  agentflow_dynamic_plan_mcp_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_mcp_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  dynamic_plan_repository_contract.cpp
+  agentflow_dynamic_plan_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  edit_executor_contract.cpp
+  agentflow_edit_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edit_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_file_patch_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  gemini_agent_contract.cpp
+  agentflow_gemini_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_agent_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_gemini_catalogue_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_catalogue_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_gemini_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_history_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  gemini_profile_runtime_contract.cpp
+  agentflow_gemini_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_profile_runtime_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_gemini_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_provider_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_gemini_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_request_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_gemini_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_stream_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_checkpoint_contract.cpp
+  agentflow_graph_checkpoint_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_checkpoint_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_children_contract.cpp
+  agentflow_graph_children_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_children_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_contract.cpp
+  agentflow_graph_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_mcp_contract.cpp
+  agentflow_graph_mcp_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_mcp_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_runner_contract.cpp
+  agentflow_graph_runner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_runner_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_http_stream_transport_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http_stream_transport_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  incoming_repository_contract.cpp
+  agentflow_incoming_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_incoming_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  instruction_configuration_contract.cpp
+  agentflow_instruction_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_json_schema_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  language_server_configuration_contract.cpp
+  agentflow_language_server_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  language_server_contract.cpp
+  agentflow_language_server_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_language_server_diagnostics_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_diagnostics_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  legacy_owner_contract.cpp
+  agentflow_legacy_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_configuration_contract.cpp
+  agentflow_mcp_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_effect_contract.cpp
+  agentflow_mcp_effect_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effect_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_handshake_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_handshake_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_http_fallback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_fallback_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_http_readonly_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_readonly_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_input_contract.cpp
+  agentflow_mcp_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_input_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_oauth_callback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_callback_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_credentials_contract.cpp
+  agentflow_mcp_oauth_credentials_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_credentials_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_oauth_refresh_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_refresh_storage_contract.cpp
+  agentflow_mcp_oauth_refresh_storage_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_storage_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_renewal_contract.cpp
+  agentflow_mcp_oauth_renewal_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_renewal_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_service_contract.cpp
+  agentflow_mcp_oauth_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_trusted_contract.cpp
+  agentflow_mcp_oauth_trusted_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_trusted_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_resource_route_contract.cpp
+  agentflow_mcp_resource_route_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_route_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_stdio_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_mcp_wire_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_model_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_request_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_model_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_stream_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  multifolder_language_server_contract.cpp
+  agentflow_multifolder_language_server_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_multifolder_language_server_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  native_child_executor_contract.cpp
+  agentflow_native_child_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_child_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  native_delegation_contract.cpp
+  agentflow_native_delegation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_delegation_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  operation_repository_contract.cpp
+  agentflow_operation_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_operation_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_owner_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  patch_executor_contract.cpp
+  agentflow_patch_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  patch_file_executor_contract.cpp
+  agentflow_patch_file_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_file_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  patch_tool_contract.cpp
+  agentflow_patch_tool_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_tool_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  permission_grants_contract.cpp
+  agentflow_permission_grants_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  permission_waiter_contract.cpp
+  agentflow_permission_waiter_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_waiter_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  persistence_service_contract.cpp
+  agentflow_persistence_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_persistence_service_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  planning_http_contract.cpp
+  agentflow_planning_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_planning_http_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  process_configuration_contract.cpp
+  agentflow_process_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  process_executor_contract.cpp
+  agentflow_process_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_profile_record_publication_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_profile_record_publication_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_provider_history_bridge_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_history_bridge_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_model_policy_runtime_contract.cpp
+  agentflow_provider_model_policy_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_model_policy_runtime_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_profile_cli_contract.cpp
+  agentflow_provider_profile_cli_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_cli_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_profile_lsp_responsiveness_contract.cpp
+  agentflow_provider_profile_lsp_responsiveness_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_lsp_responsiveness_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_profile_runtime_contract.cpp
+  agentflow_provider_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_runtime_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_profiles_contract.cpp
+  agentflow_provider_profiles_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profiles_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_setup_contract.cpp
+  agentflow_provider_setup_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_setup_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  provider_yaml_config_contract.cpp
+  agentflow_provider_yaml_config_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_yaml_config_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_pty_sessions_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_pty_sessions_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  repository_contract.cpp
+  agentflow_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_responses_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_context_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_responses_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  restore_executor_contract.cpp
+  agentflow_restore_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_restore_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_root_work_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_root_work_executor_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_runtime_generation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_schema_budget_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_budget_fixture.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_schema_worker_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_secret_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secret_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_skill_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_context_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  skill_state_contract.cpp
+  agentflow_skill_state_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_state_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  task_list_repository_contract.cpp
+  agentflow_task_list_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_task_list_repository_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_terminal_key_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_terminal_key_input_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_workspace_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_registry_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_workspace_tools_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_tools_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  xlang_authoring_program_contract.cpp
+  agentflow_xlang_authoring_program_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_authoring_program_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  xlang_python_config_contract.cpp
+  agentflow_xlang_python_config_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python_config_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_xlang_python_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_xlang_sqlite_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_sqlite_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agentflow_xlang_worker_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  admin_main.cpp
+  xmind_admin.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_admin.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  persistence_demo.cpp
+  xmind_persistence_demo.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_persistence_demo.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  server_main.cpp
+  xmind_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_server.exe

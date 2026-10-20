@@ -485,6 +485,7 @@ Json dynamic_prompt(const DynamicNodeDefinition& d,const std::string& input,cons
 }
 }
 struct Repository::Impl {
+    AgentWorkerLeaseRecord retire_worker(const std::string& generation,const std::string& reason);
     std::string path;
     XlangSqlite database;
     Impl(const std::string& file,const std::vector<std::string>& roots):path(file),database(file,roots) {}
@@ -1628,6 +1629,7 @@ void Repository::delete_session(const std::string& id) {
     for(const auto& row:db.execute("SELECT f.session_id FROM session_forks f JOIN sessions child ON child.id=f.session_id WHERE f.parent_session_id=? AND NOT EXISTS(SELECT 1 FROM deleted_sessions d WHERE d.id=child.id) ORDER BY child.rowid",{id}).rows)
         removed.push_back(text(row[0]));
     for(const auto& target:removed){
+        if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.spec.owner_run_id') WHERE i.category='native-agent-worker-leases' AND json_extract(i.payload,'$.state')='active' AND r.session_id=? LIMIT 1",{target}).rows.empty()||!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.spec.owner_run_id') WHERE i.category='native-agent-worker-model-claims' AND json_extract(i.payload,'$.state')='dispatching' AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker or model dispatch");
         if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{target}).rows.empty()||
            !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{target}).rows.empty()||
            !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{target}).rows.empty()||
@@ -3020,6 +3022,8 @@ void require_database_idle(XlangSqlite& db,bool allow_refresh=false){
     // All predicates are native literals. Include unfinished effect and context
     // ownership even if a corrupt/failed root claims to be terminal.
     const auto require_empty=[&](const char* sql,const char* owner){if(!db.execute(sql).rows.empty())throw Conflict(std::string("Native backend upgrade is blocked by ")+owner);};
+    require_empty("SELECT id FROM information WHERE category='native-agent-worker-leases' AND json_extract(payload,'$.state')='active' LIMIT 1","an active native worker lease");
+    require_empty("SELECT id FROM information WHERE category='native-agent-worker-model-claims' AND json_extract(payload,'$.state')='dispatching' LIMIT 1","an active worker model dispatch");
     require_empty("SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1","a queued, running or paused run");
     require_empty("SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1","an active model call");
     require_empty("SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1","an active delegation batch");
@@ -3093,9 +3097,93 @@ BackendOwnerState Repository::activate_backend_replacement(const BackendLease& l
     if(BackendOwnerReceipt{prior.generation,prior.receipt_id,prior.revision}!=expected)throw Conflict("Prepared replacement receipt changed");
     require_database_idle(db);if(!prior.legacy_ticket_id.empty()){verify_legacy_owner_saved_records(db);consume_legacy_owner_ticket(db,prior.legacy_ticket_id);}owner_revision(prior.revision+1);BackendOwnerState active{prior.generation,prior.revision+1,false,{}};write_owner(db,active,previous);tx.commit();return active;
 }
+
+namespace {
+constexpr const char* worker_lease_category="native-agent-worker-leases";
+constexpr const char* worker_current_category="native-agent-worker-current";
+constexpr const char* worker_claim_category="native-agent-worker-model-claims";
+bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category;}
+void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
+Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
+    bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
+    if(spec.workspace_revision<1||spec.workspace_revision>9007199254740991||!spec.pid||spec.creation_time.empty()||spec.creation_time.size()>20||spec.creation_time[0]=='0'||spec.creation_time.find_first_not_of("0123456789")!=std::string::npos||spec.executable_identity.empty()||spec.executable_identity.size()>4096||spec.executable_identity.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw std::invalid_argument("Invalid captured worker process identity");
+    return {{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"owner_run_id",spec.owner_run_id},{"workspace_id",spec.workspace_id},{"workspace_revision",spec.workspace_revision},{"pid",spec.pid},{"creation_time",spec.creation_time},{"executable_identity",spec.executable_identity},{"provider_identity",Json::parse(object_json(spec.provider_identity_json,4096))}};
+}
+Json worker_lease_json(const AgentWorkerLeaseRecord& record){return {{"version",1},{"spec",worker_spec_json(record.spec)},{"state",record.state},{"retirement_reason",record.retirement_reason},{"revision",record.revision}};}
+AgentWorkerLeaseRecord read_worker_lease(XlangSqlite& db,const std::string& generation){
+    bounded_identity(generation);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_lease_category),generation}).rows;if(rows.empty())throw NotFound("Worker lease not found");
+    try{const auto value=Json::parse(text(rows[0][0]));const auto& s=value.at("spec");AgentWorkerLeaseRecord record;
+        record.spec={s.at("generation").get<std::string>(),s.at("root_run_id").get<std::string>(),s.at("owner_run_id").get<std::string>(),s.at("workspace_id").get<std::string>(),s.at("workspace_revision").get<std::int64_t>(),s.at("pid").get<std::uint32_t>(),s.at("creation_time").get<std::string>(),s.at("executable_identity").get<std::string>(),s.at("provider_identity").dump()};record.state=value.at("state").get<std::string>();record.retirement_reason=value.at("retirement_reason").get<std::string>();record.revision=value.at("revision").get<std::int64_t>();
+        if(record.spec.generation!=generation||record.revision<1||record.revision>9007199254740991||(record.state!="active"&&record.state!="retired")||(record.state=="active")!=record.retirement_reason.empty()||worker_lease_json(record)!=value)throw DatabaseError("Invalid stored worker lease");return record;
+    }catch(const Json::exception&){throw DatabaseError("Invalid stored worker lease");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker lease");}
+}
+Json worker_claim_spec_json(const AgentWorkerModelClaimSpec& spec){bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.attempt_id);worker_digest(spec.request_binding);return {{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"owner_run_id",spec.owner_run_id},{"attempt_id",spec.attempt_id},{"request_binding",spec.request_binding}};}
+std::string worker_claim_key(const std::string& root,const std::string& attempt){bounded_identity(root);bounded_identity(attempt);return context_digest(Json::array({root,attempt}).dump());}
+Json worker_claim_json(const AgentWorkerModelClaimRecord& record){return {{"version",1},{"spec",worker_claim_spec_json(record.spec)},{"state",record.state},{"actual_response_json",record.actual_response_json},{"response_binding",record.response_binding}};}
+AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string& root,const std::string& attempt){
+    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_claim_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker model dispatch not found");
+    try{const auto value=Json::parse(text(rows[0][0]));const auto& s=value.at("spec");AgentWorkerModelClaimRecord record{{s.at("generation").get<std::string>(),s.at("root_run_id").get<std::string>(),s.at("owner_run_id").get<std::string>(),s.at("attempt_id").get<std::string>(),s.at("request_binding").get<std::string>()},value.at("state").get<std::string>(),value.at("actual_response_json").get<std::string>(),value.at("response_binding").get<std::string>()};
+        if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
+        if(record.state=="responded"){(void)object_json(record.actual_response_json,8*1024*1024);if(record.response_binding!=context_digest(record.actual_response_json))throw DatabaseError("Stored worker response binding differs");}
+        else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
+    }catch(const Json::exception&){throw DatabaseError("Invalid stored worker dispatch");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker dispatch");}
+}
+void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec){
+    const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);const auto budget=repository.root_budget(spec.root_run_id);
+    if(root.state!=RunState::running||owner.state!=RunState::running||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||Json::parse(budget.spec.provider_identity_json)!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its running owners");
+    if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
+    const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;
+    if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
+    else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
+}
+}
+AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec& spec){
+    (void)worker_spec_json(spec);auto& db=impl_->database;Transaction tx(db);worker_running_scope(*this,db,spec);
+    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_lease_category),spec.generation}).rows.empty())throw Conflict("Worker generation cannot be reused");
+    const auto prior=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),spec.owner_run_id}).rows;
+    if(!prior.empty()){const auto current=read_worker_lease(db,Json::parse(text(prior[0][0])).at("generation").get<std::string>());if(current.spec.owner_run_id!=spec.owner_run_id||current.state!="retired")throw Conflict("Worker owner already has an active generation");}
+    AgentWorkerLeaseRecord record{spec,"active",{},1};record.spec.provider_identity_json=Json::parse(spec.provider_identity_json).dump();changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_lease_category),spec.generation,worker_lease_json(record).dump()}));
+    changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{std::string(worker_current_category),spec.owner_run_id,Json{{"generation",spec.generation}}.dump()}));impl_->event(spec.owner_run_id,"worker.lease.admitted",Json{{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"pid",spec.pid}}.dump());tx.commit();return record;
+}
+AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
+AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
+AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
+    (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);
+    if(lease.state!="active"||lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker model dispatch has no active scoped lease");worker_running_scope(*this,db,lease.spec);
+    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),spec.owner_run_id}).rows;if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=spec.generation)throw Conflict("Worker generation is stale");
+    const auto call=db.execute("SELECT state,purpose,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{spec.root_run_id,spec.attempt_id,spec.owner_run_id}).rows;if(call.empty()||text(call[0][0])!="started"||text(call[0][1])!="inference")throw Conflict("Worker requires its exact started inference attempt");
+    if(!text(call[0][2]).empty()){const auto projection=db.execute("SELECT input_binding FROM inference_attempt_members WHERE root_run_id=? AND attempt_id=? AND step_id=? AND outcome IS NULL",{spec.root_run_id,spec.attempt_id,text(call[0][2])}).rows;if(projection.empty()||text(projection[0][0])!=spec.request_binding)throw Conflict("Worker inference projection differs from its funded attempt");}
+    AgentWorkerModelClaimRecord record{spec,"dispatching",{}, {}};const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id),worker_claim_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker model attempt was already dispatched; no retry is authorized");
+    impl_->event(spec.owner_run_id,"worker.model.dispatching",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"request_binding",spec.request_binding}}.dump());tx.commit();return record;
+}
+
+AgentWorkerModelClaimRecord Repository::interrupt_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
+    (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(record.spec)!=worker_claim_spec_json(spec))throw Conflict("Worker dispatch interruption has a foreign binding");
+    if(record.state=="responded")throw Conflict("Acknowledged worker response cannot become uncertain");if(record.state=="uncertain"){tx.commit();return record;}record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));impl_->event(spec.owner_run_id,"worker.model.uncertain",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id}}.dump());tx.commit();return record;
+}
+
+AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const AgentWorkerModelClaimSpec& spec,const std::string& actual){
+    (void)worker_claim_spec_json(spec);(void)object_json(actual,8*1024*1024);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(record.spec)!=worker_claim_spec_json(spec))throw Conflict("Worker response has a foreign attempt binding");
+    const auto lease=read_worker_lease(db,spec.generation);if(lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker response owner differs");
+    if(record.state=="responded"){if(record.actual_response_json!=actual)throw Conflict("Acknowledged worker response changed");tx.commit();return record;}
+    record.state="responded";record.actual_response_json=actual;record.response_binding=context_digest(actual);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
+    impl_->event(spec.owner_run_id,"worker.model.responded",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"response_binding",record.response_binding}}.dump());tx.commit();return record;
+}
+AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& generation,const std::string& reason){
+    const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
+    if(lease.state=="retired"){if(lease.retirement_reason!=reason)throw Conflict("Worker retirement observation changed");return lease;}
+    if(lease.revision>=9007199254740991)throw std::overflow_error("Worker lease revision exhausted");std::int64_t uncertain=0;
+    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.spec.generation')=?",{std::string(worker_claim_category),generation}).rows;
+    for(const auto& row:rows){const auto saved=Json::parse(text(row[0]));auto record=read_worker_claim(db,saved.at("spec").at("root_run_id").get<std::string>(),saved.at("spec").at("attempt_id").get<std::string>());if(record.state!="dispatching")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(record.spec.root_run_id,record.spec.attempt_id)}));++uncertain;}
+    lease.state="retired";lease.retirement_reason=reason;++lease.revision;changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_lease_json(lease).dump(),std::string(worker_lease_category),generation}));event(lease.spec.owner_run_id,"worker.lease.retired",Json{{"generation",generation},{"reason",reason},{"uncertain_model_dispatches",uncertain}}.dump());return lease;
+}
+
+AgentWorkerLeaseRecord Repository::retire_agent_worker(const std::string& generation,const std::string& reason){Transaction tx(impl_->database);auto record=impl_->retire_worker(generation,reason);tx.commit();return record;}
+
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);
     if(category==backend_owner_category||category==legacy_owner_category||category==refresh_category)throw std::invalid_argument("Use typed native owner control");
+    if(worker_private_category(category))throw std::invalid_argument("Use typed native worker control");
     if(category=="secrets" || category=="credentials") throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     changed_one(impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{category,id,json}));
@@ -3105,6 +3193,7 @@ void Repository::compare_information(const std::string& category,const std::stri
     identifier(category);identifier(id);
     if(category==legacy_owner_category||category==refresh_category)throw std::invalid_argument("Use typed native owner control");
     if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
+    if(worker_private_category(category))throw std::invalid_argument("Use typed native worker control");
     if(category=="secrets"||category=="credentials")throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     const auto result=expected
@@ -3114,6 +3203,7 @@ void Repository::compare_information(const std::string& category,const std::stri
     transaction.commit();
 }
 std::string Repository::information(const std::string& category,const std::string& id) {
+    if(worker_private_category(category))throw std::invalid_argument("Use typed native worker control");
     const auto result=impl_->database.execute("SELECT payload FROM information WHERE category=? AND id=?",{category,id});
     if(result.rows.empty()) throw NotFound("Information not found"); return text(result.rows[0][0]);
 }
@@ -3436,6 +3526,10 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
         const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='interrupted' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root});changed_one(db.execute("UPDATE agent_execution_budgets SET planned_children_reserved=0,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND parent_calls_held>=?",{holds,root,holds}));db.execute("UPDATE dynamic_owner_pauses SET state='retired' WHERE root_run_id=?",{root});db.execute("UPDATE dynamic_owner_pause_waits SET state='retired' WHERE root_run_id=?",{root});impl_->event(root,"plan.interrupted",Json{{"plan_id",plan},{"reason","server_restart"},{"replayed",false}}.dump());
     }
     for(const auto& row:db.execute("SELECT run_id FROM graph_roots").rows){if(preserved_pauses.contains(text(row[0])))continue;auto root=graph_run(text(row[0]));const GraphCoordinator recovered(GraphPlan(root.specification_json),root.checkpoint_json);if(recovered.checkpoint()!=root.checkpoint_json){impl_->graph_checkpoint(root,recovered);impl_->event(root.run.id,"graph.recovered",Json{{"checkpoint_revision",root.checkpoint_revision},{"reason","interrupted_nodes_not_replayed"}}.dump());}}
+    // This database's exclusive BackendLease was proved above. Retire orphan
+    // process generations in the same transaction as run/attempt recovery;
+    // preserve acknowledged responses and never refund or reissue a claim.
+    for(const auto& row:db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.state')='active'",{std::string(worker_lease_category)}).rows)impl_->retire_worker(text(row[0]),"backend_recovery");
     transaction.commit(); return roots.size();
 }
 }

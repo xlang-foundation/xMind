@@ -13,6 +13,15 @@ struct PersistenceBusy : std::runtime_error {using std::runtime_error::runtime_e
 // Scope authorization belongs to the calling backend service.
 class PersistenceService : public AgentRunJournal, public AgentContextJournal {
 public:
+    // Backend-only owner/dispatch authority; never expose these through a worker
+    // journal or a generic RPC method selected by the child.
+    std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
+    std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
+    std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
+    std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
+    std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec);
+    std::future<AgentWorkerModelClaimRecord> agent_worker_model_claim(std::string root,std::string attempt);
+    std::future<AgentWorkerModelClaimRecord> record_agent_worker_model_response(AgentWorkerModelClaimSpec,std::string actual_response_json);
     PersistenceService(std::string database,std::vector<std::string> import_roots,
         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
         std::optional<LegacyOwnerBootstrap> legacy={});
