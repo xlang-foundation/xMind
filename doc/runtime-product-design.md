@@ -103,14 +103,14 @@ root concurrency limit. Installed54 uses a cancellable worker-ready FIFO and has
 passed its complete154-contract gate and existing-profile adoption.
 [Full qualification](evidence/shared-root-dispatch-full-20261019.json).
 
-The newer uninstalled source reserves that FIFO rank when a runnable root enters
+Installed55 reserves that FIFO rank when a runnable root enters
 either service's queue, so an older local-backlog root cannot be overtaken by a
 later root from the other service. Queue tickets are one-shot, withdrawn on failed
 admission/cancellation/shutdown, and renewed on a runnable wake. A human pause
 retains durable admission but releases execution. The actual mixed-service
 ordering regression fails against installed54 production bytes and passes with
 the correction, alongside seven related contracts. The complete154-contract local
-gate now passes in1,061.07seconds; installation and hosted acceptance remain pending.
+gate passes in1,061.07seconds; installed55 adoption passes while hosted acceptance remains pending.
 Worker loops/ceilings remain separate; a strict
 FIFO head can wait for its service worker rather than use another service's idle
 worker. This does not implement a unified work-conserving pool or process placement.
@@ -232,3 +232,12 @@ native contracts, client adapters and a fresh installed profile, then stream
 disconnect/replay, equivalent declarative/code registration and real agent
 worker crash/cancellation/effect reconciliation. A passing parser or dispatcher fixture
 does not establish those product boundaries.
+
+The next shared physical worker component, RootWorkExecutor, is implemented and
+passes its focused actual-thread lifecycle contract. Its staged FIFO tickets
+reserve rank before durable admission and commit after acceptance; rollback
+withdraws undispatched work, while owner/pool closure stop-requests and drains
+committed retirement actions. Services must observe action futures and retain
+their own fault/paused-root policy. This component is not yet wired into the
+agent/graph services; its pass does not qualify production pool integration.
+See [focused component evidence](evidence/shared-root-worker-component-20261019.json).

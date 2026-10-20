@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared physical root executor component — 2026-10-19
+
+RootWorkExecutor adds a bounded native pool for root retirement actions across service types. Staging reserves global FIFO rank before durable admission; one-shot commit enables dispatch after acceptance. Withdrawn staged work never executes. Ticket destruction stop-requests and drains committed physical work; pool close withdraws staged admission, stops queued/running work outside its mutex, drains retirement closures and joins all workers. Exceptions settle the actual action future for its owning service to observe.
+
+The new actual-thread lifecycle contract passes1/1 in0.09seconds with source/SDK/libraries/dependencies/binaries and file sets frozen. It covers a staged FIFO head, rollback, mixed work using the second worker while the first is held, explicit cancellation, queued/running shutdown, closed admission, bounded capacity and propagated action failure. CTest59072 exits0; inventory contains155 local contracts and the hosted inventory explicitly includes the new name. This is component qualification only: AgentService/GraphService still use their old loops, integration and complete-suite validation remain open, and installed55 is untouched.
+
+See evidence/shared-root-worker-component-20261019.json, its raw log, inventory and gate script.
+
 ## Installed55 CLI-originated coding — 2026-10-19
 
 A new isolated chunking fixture establishes a failing2/4 baseline. One real Claude task submitted through installed55 CLI run/watch reads both files, proposes the single slice-end correction, and waits for native CLI approval. The approved replacement succeeds; its one registered PowerShell process runs Node tests4/4, exit0, complete output and retired process tree. Tests remain byte-identical. The terminal stream contains run.completed and history restores9messages. All six prior sessions/150messages/eleven runs plus provider/process/MCP/membership configuration remain exact on owner56032. No earlier task is replayed. This is command-mode coding evidence, not new direct-console or editor rendering. The model explanation incorrectly says slices start at zero; the actual patch and test counts are correct.
