@@ -1,0 +1,59 @@
+{
+  "url": "http://127.0.0.1:55684/ui/",
+  "assets": [
+    {
+      "path": "/ui/",
+      "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a"
+    },
+    {
+      "path": "/ui/patch-review.js",
+      "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+    },
+    {
+      "path": "/ui/browser.js",
+      "sha256": "d12970c6621cb4266ad620397a3b432eac60683884a8e0e9c62dd4e3a3000c52"
+    },
+    {
+      "path": "/ui/terminal.js",
+      "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+    },
+    {
+      "path": "/ui/browser.css",
+      "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+    },
+    {
+      "path": "/ui/xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+    },
+    {
+      "path": "/ui/xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+    },
+    {
+      "path": "/ui/xterm-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+    },
+    {
+      "path": "/ui/chat.js",
+      "sha256": "9979333cb8f064094d314d11f1ef5126b394067194b2993d1920034f08e9264a"
+    },
+    {
+      "path": "/ui/chat.css",
+      "sha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f"
+    },
+    {
+      "path": "/ui/client.js",
+      "sha256": "5b8f6ca97f0d00dacdd68d43c87d107faa0fbb1ad2521199aecaefd7f56b3994"
+    },
+    {
+      "path": "/ui/marked.js",
+      "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+    },
+    {
+      "path": "/ui/purify.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    }
+  ],
+  "matchesInstalled53Assets": true,
+  "rendered": false
+}

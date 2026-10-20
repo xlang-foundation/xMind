@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-10-20T01:31:36.499Z",
+  "url": "http://127.0.0.1:55684/ui/",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "backendPid": 55848,
+  "backendReplaced": true,
+  "backendAuthorityChanged": true,
+  "oldPageRetired": false,
+  "workspaceCatalogueStatus": 200,
+  "workspaceCount": 7,
+  "membershipStatus": 200,
+  "providerIds": [
+    "claude",
+    "gemini",
+    "deepseek",
+    "openai"
+  ],
+  "automaticLocalConnection": true,
+  "serverTokenEntered": false,
+  "providerKeyEntered": false,
+  "exactPrimaryHistoryAndRunsPreserved": true,
+  "histories": {
+    "58ef35476048503c598b5629019379da": {
+      "messages": 43,
+      "runs": 4
+    },
+    "b6b46ac843ad6b08658f4c568a2e5ea4": {
+      "messages": 25,
+      "runs": 1
+    },
+    "9d170d81910b61a45c21ecd8557936c0": {
+      "messages": 63,
+      "runs": 2
+    },
+    "b49f242b063af1ab6ca13db94c5165a8": {
+      "messages": 4,
+      "runs": 2
+    }
+  },
+  "taskSubmissions": 0,
+  "providerInferenceRequests": 0,
+  "renderedExternalBrowserAcceptance": false,
+  "installedExtensionUpdated": true,
+  "installedNativePayloadsVerified": true,
+  "passed": true
+}

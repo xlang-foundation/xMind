@@ -2,6 +2,33 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.53 conversation layout — 2026-10-19
+
+Source f8eb874e passes the complete 445-extension/158-browser suites with all
+17,439 staged files unchanged. The 34,440,454-byte VSIX has SHA256
+30a87c0cae2ca7e723466509768c9f531670a652f11901b804119b864eb93951;
+all 2,448 archive entries and 2,445 installed payloads verify. The native runtime
+is reused byte-for-byte from installed52 (9eb26146 executable, SDK58a8aab,
+DLL1ff2a8e7, manifest7f3ec1f0); no new native suite is claimed. Settings and seven
+existing profile directories remain unchanged; installed52 backup verifies 2,447
+files. VS Code remains closed.
+
+The fresh page is <http://127.0.0.1:55684/ui/>. Host54928/view56652/backend55848
+started at 01:31:22/23/24 UTC on October20 (October19 local). This is a fresh
+startup of the existing p-current TestProj profile after all earlier owners were
+observed absent, not preservation of PID63876. Four sessions, 135 messages and
+nine runs match the prior snapshot exactly; workspace ID/root are preserved,
+while process authority changed. All 13 served assets match installed53; seven
+workspaces and four saved providers load without key or token entry. No model
+task was submitted. Installed rendered editor and external-browser coding
+acceptance remain open; fixture layout verification is recorded separately.
+
+See [client gate](evidence/coding53-client-gate-20261019.json),
+[package](evidence/coding53-package-20261019.json),
+[installation](evidence/coding53-installed-20261019.json),
+[service restore](evidence/coding53-primary-service-api-20261019.json) and
+[served assets](evidence/coding53-primary-assets-20261019.json).
+
 ## Pre-0.1.53 process inventory — 2026-10-19
 
 Before installing 0.1.53, all 48 identities from the installed52 receipt are
