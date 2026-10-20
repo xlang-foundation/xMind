@@ -145,3 +145,5 @@ doc/evidence/agent-worker-terminal-*.log -text whitespace=-blank-at-eol,-blank-a
 doc/evidence/agent-worker-drain-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/cli-output-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/agent-worker-read-approval-cancel-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

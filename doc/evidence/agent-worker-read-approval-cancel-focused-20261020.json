@@ -1,0 +1,85 @@
+{
+  "cancelledRunnerChild": {
+    "pid": 52604,
+    "creationTime": "134369987118449376"
+  },
+  "recordedAt": "2026-10-20T19:39:41.945Z",
+  "gate": {
+    "recordedAt": "2026-10-20T19:39:22.847Z",
+    "sourceParent": "232e5c42cab3573dbd87be8c898cf0e279ac8d38",
+    "sourcePatchSha256": "ac355c1e14104610b13d74cbe7017b61b34a8f5f7be08249822c1ae4e9c5bac2",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 63588,
+      "launchedAt": "2026-10-20T19:35:50.192Z",
+      "completedAt": "2026-10-20T19:36:43.860Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9e23ad16cd956fb145d418ab5178d1391c77abd82204a6df5f2a542a55efbd8a"
+    },
+    "test": {
+      "pid": 10828,
+      "launchedAt": "2026-10-20T19:36:46.533Z",
+      "completedAt": "2026-10-20T19:39:20.250Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dbe3790a7dcbf69aac57f1053e4547b0fdbbadf20d2e97d3fcbd777d05ee1921"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 153.67,
+    "projectFiles": 2670,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "31e5babf0c4701e685bf550634d2c6ec8b98e285de0cacbca265ffce37cbe2d8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-read-approval-cancel-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-build.log": "9e23ad16cd956fb145d418ab5178d1391c77abd82204a6df5f2a542a55efbd8a",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-build-terminal.json": "008f6eb91d346699927435fcbed086d6188b33541a7129ccccb9ae5e3fac0b59",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-ctest.log": "dbe3790a7dcbf69aac57f1053e4547b0fdbbadf20d2e97d3fcbd777d05ee1921",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-ctest-terminal.json": "c943053d13bada84329568009fa6591e653c7d55f9c207aa4089f3438ac8fcbb",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-LastTest.log": "991a236ff10653500cf360503b0a2e2ce7830928f276cc65d24cedc8f6aa820a",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-test-inventory.json": "a602b13f1fd6ac86ad70a5322b77c8d62ef13a1749053140135a7e7c6807e176",
+        "doc/evidence/agent-worker-read-approval-cancel-focused-20261020-gate.json": "5aa7a3de3cce6ff61edad3ca42015c0a69e8e3691062a78995f17e128edb0e7b"
+      },
+      "localManifestHashes": {
+        "source.patch": "ac355c1e14104610b13d74cbe7017b61b34a8f5f7be08249822c1ae4e9c5bac2",
+        "inputs-before-build.json": "eca068564075549f3c5d7d447dcfd021359b9d4a3afa77ac9e9db07a0b03cbf1",
+        "binaries-before-test.json": "077a8d00efeee3ffe785463ad804a49e6a97c1a10bae4b2839198e9a86fd76ad"
+      }
+    }
+  },
+  "fixtureSha256": "75ba77adf1b089e243c610f701f0cb7b3e1516805be26b2af686e6daf5e127b2",
+  "ledgerFixtureSha256": "e9e858928a40c3f70b6a32e9838b158fdcf6601f706460de9f609a5cca883294",
+  "scope": "Actual read-capable child AgentRunner cancellation while native read approval is pending; fixture adapters using the existing native request, read, handoff and drain components.",
+  "verified": [
+    "Two actual backend model windows admit real root/nested guidance and read catalogue",
+    "Controller observes native awaiting-approval operation before stopping the exact child",
+    "Real runner returns cancelled handoff without a fabricated terminal Run",
+    "Native pending approval becomes cancelled and read claim retains actual returned failure with dispatched=false",
+    "Before drain root remains running, lease active, child alive, and prior four canonical history messages retained",
+    "After observed child exit one cancellation is recorded, both model charges and exact prior history retained",
+    "No target-read dispatch or interruption of finished model reservations is recorded",
+    "Independent HTTP peer verifies exactly 27 requests with no extra inference"
+  ],
+  "limitations": [
+    "No production worker journal or public AgentService placement integration",
+    "Graph, effect and broader profile worker placement remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native, installed, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}

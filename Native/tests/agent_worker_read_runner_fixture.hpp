@@ -34,14 +34,14 @@ public:
     ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unsupported read-runner compaction");}
     Journal& journal;AgentWorkerModelClient client;std::int64_t calls=0;
 };
-inline std::string execute(AgentWorkerRpcPeer& peer){
-    Journal journal(peer);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=std::make_shared<Workspace>(peer);
+inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
+    Journal journal(peer,cancel);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=std::make_shared<Workspace>(peer);
     AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
     AgentRunnerPorts ports{model,std::make_shared<worker_runner_fixture::ClosedCatalog>(),std::make_shared<worker_runner_fixture::ClosedTools>(),std::make_shared<worker_runner_fixture::ClosedRuntime>(),workspace};
     for(const auto* payload:{R"({"attempt_id":"forged","ordinal":0,"phase":"started","json":"forged event"})",R"({"attempt_id":"forged","ordinal":0,"phase":"unknown"})",R"({"attempt_id":"forged","ordinal":0.5,"phase":"started"})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.tool_event",payload);});
     auto invalid=settings;invalid.instructions="worker replacement policy";rejects<std::invalid_argument>([&]{AgentRunner rejected(journal,context,invalid,ports);});
     AgentRunner runner(journal,context,std::move(settings),std::move(ports));rejects<RunUnavailable>([&]{runner.start("unadmitted","unadmitted","must not start a child-selected run");});
-    Run result;try{result=runner.execute(peer.scope().run_id);}catch(const std::exception& error){return Json{{"runner_failure",std::string(error.what())+"; model: "+journal.model_diagnostic}}.dump();}
+    Run result;try{result=runner.execute(peer.scope().run_id,cancel);}catch(const AgentTerminalHandoff& intent){return Json{{"pid",GetCurrentProcessId()},{"terminal_handoff",to_string(intent.outcome())}}.dump();}catch(const std::exception& error){return Json{{"runner_failure",std::string(error.what())+"; model: "+journal.model_diagnostic}}.dump();}
     check(result.state==RunState::completed&&model->calls==3&&journal.tool_turns==2&&journal.tool_events==6&&!journal.canonical.empty(),"Actual child AgentRunner must execute three actual models, three read activities and two canonical tool turns");
     return Json{{"pid",GetCurrentProcessId()},{"actual_runner",true},{"models",model->calls},{"tool_turns",journal.tool_turns},{"tool_events",journal.tool_events},{"model_events",journal.model_events},{"final_assistant",journal.canonical}}.dump();
 }

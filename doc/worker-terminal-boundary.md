@@ -122,6 +122,27 @@ the existing native handoff/drain components with an actual child AgentRunner;
 public controller-to-worker integration in AgentService, read-worker approval
 cancellation, production adapters and graph/effect placement remain open.
 
+The [read approval-cancellation checkpoint](evidence/agent-worker-read-approval-cancel-focused-20261020.json)
+now covers the actual read-capable child AgentRunner while its native read
+approval is pending. Two actual backend model windows supply root/nested
+guidance and the real read catalogue. The first model's two guidance-blocked
+reads form a committed canonical turn; the second model's read reaches an
+awaiting-approval operation. The controller observes that operation and stops
+the captured child. The real runner hands off cancellation, the operation
+becomes cancelled, and the backend retains a returned failed read claim with
+`dispatched=false`. Before drain the test requires live process ownership,
+running root, active lease and the four prior canonical messages. Exact child
+exit then precedes one terminal cancellation, preserving both model charges and
+all prior message bytes. No target-read dispatch or interruption of finished
+model reservations is recorded.
+
+The focused gate passes 53 contracts in 153.67 seconds with frozen inputs and
+all 133 native binaries. The independent peer verifies exactly 27 requests,
+including two windows for this new cancellation case and all earlier cases.
+This remains qualification through fixture adapters. Production worker entry,
+public AgentService placement, broader profiles and graph/effect placement are
+still required; no installed or complete product acceptance follows from it.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary
