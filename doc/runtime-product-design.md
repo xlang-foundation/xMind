@@ -102,8 +102,9 @@ graph worker loops, using the platform's configured worker count as the combined
 root concurrency limit. Worker-ready roots wait in one cancellable FIFO. A human
 pause releases execution while retaining admission. The services still retain
 separate local backlogs, so global admission-order fairness and worker placement
-remain incomplete. This candidate passes eight focused contracts; it is not yet
-installed or qualified by a new complete native suite.
+remain incomplete. This candidate passes eight focused contracts and the complete
+154-contract native suite; installation and current rendered-client acceptance
+remain pending. [Full qualification](evidence/shared-root-dispatch-full-20261019.json).
 
 The coding default is a single-agent model/tool loop. Explicit planning is
 optional; predefined graphs do not require a planning LLM call. A planner can

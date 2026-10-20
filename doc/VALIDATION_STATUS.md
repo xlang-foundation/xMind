@@ -2,6 +2,27 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete shared-dispatch native gate — 2026-10-19
+
+Source8b462140 completes the full Release build and all154 registered native
+contracts in1,061.80seconds. CTest39404 exits0 and the wrapper verifies every
+source/SDK/library/dependency/binary set and hash unchanged:2,625project inputs,
+16SDK files,1,870pure libraries,76SDK runtime files,18,598dependencies and
+129native binaries. Native executable db694de1 includes the shared execution-slot
+policy. The expanded mixed-service regression passes in1.49seconds; local profile
+startup/upgrade/pause/restart passes in470.67seconds within its unchanged600-second
+budget. Native view/provider configuration pass139.63/58.61seconds. No command was
+restarted or timeout increased. Original focused peer mismatch remains retained.
+
+This closes complete local native qualification for the scheduling candidate.
+It remains uninstalled: installed53 and the live TestProj runtime retain their
+earlier generation. Packaging, installed adoption and fresh rendered acceptance
+are separate. Global local-backlog ordering and process placement remain open.
+See [gate](evidence/shared-root-dispatch-full-20261019.json),
+[raw log](evidence/shared-root-dispatch-full-20261019.log),
+[inventory](evidence/shared-root-dispatch-full-inventory-20261019.json) and
+[gate script](evidence/shared-root-dispatch-full-gate-20261019.mjs).
+
 ## Shared agent/graph execution slots — 2026-10-19
 
 The native candidate adds a cancellable FIFO for worker-ready roots to the shared

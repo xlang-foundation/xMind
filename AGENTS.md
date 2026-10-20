@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Candidate db694de1 shares agent/graph execution slots;8 focused contracts pass45.02s. Initial7/8 peer mismatch retained. Full candidate gate/installation pending; installed53 unchanged. See doc/VALIDATION_STATUS.md.
+- Candidate db694de1/source8b462140 passes all154 native contracts in1061.80s; full frozen closure unchanged. Shared agent/graph execution slots are qualified but uninstalled; installed53 unchanged. See doc/VALIDATION_STATUS.md.
 
 - Installed53 native9eb26146 now passes the complete154-contract gate in1069.74s on source0a8ec093; all2625project/16SDK/1870pure/76runtime/18598dependency/129binary sets/hashes unchanged, complete build matches installed executable. CTest64788 exited0; no gate remains live. See coding53-full-native receipt and doc/delivery-requirement-audit-20261019.md for remaining scope. Older focused-only statements below are historical.
 
