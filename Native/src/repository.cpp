@@ -659,7 +659,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>34)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>35)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -688,7 +688,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>34) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>35) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -1130,6 +1130,17 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         trigger.replace(position,original.size(),"(p.parent_run_id IS NULL OR EXISTS(SELECT 1 FROM graph_invocations gi JOIN runs root ON root.id=gi.root_run_id WHERE gi.run_id=p.id AND root.parent_run_id IS NULL AND root.state='running' AND root.session_id=NEW.session_id AND NOT EXISTS(SELECT 1 FROM graph_context_owners co WHERE co.root_run_id=root.id)))");
         db.execute("DROP TRIGGER owned_child_boundary");db.execute(trigger);db.execute("PRAGMA user_version=34");
         if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Graph invocation migration did not preserve repository ownership");
+    }
+    if(version<35){
+        // Context invocations borrow the ultimate root's open clock; they never
+        // acquire an independent budget or context owner.
+        for(const auto& item:std::vector<std::pair<std::string,std::string>>{{"graph_invocation_admission","r.id"},{"owned_child_boundary","root.id"}}){
+            auto sql=text(db.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND name=?",{item.first}).rows.at(0).at(0));
+            const auto previous="NOT EXISTS(SELECT 1 FROM graph_context_owners co WHERE co.root_run_id="+item.second+")";const auto at=sql.find(previous);if(at==std::string::npos||sql.find(previous,at+previous.size())!=std::string::npos)throw DatabaseError("Context invocation migration found an incompatible owner boundary");
+            sql.replace(at,previous.size(),"("+previous+" OR EXISTS(SELECT 1 FROM graph_context_owners co JOIN agent_budget_segments segment ON segment.root_run_id=co.root_run_id WHERE co.root_run_id="+item.second+" AND segment.state='open'))");
+            db.execute("DROP TRIGGER "+item.first);db.execute(sql);
+        }
+        db.execute("PRAGMA user_version=35");if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Context invocation migration did not preserve ownership");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
@@ -2142,7 +2153,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
     if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
     if(role==ModelCallRole::parent){if(owner!=root||parent.graph_root)throw Conflict("Parent model attempt owner differs");}
     else {const auto admitted=child_admission(owner);const bool graph=admitted.kind==ChildAdmissionKind::graph_agent&&budget.spec.policy_id=="native.graph-context";if((!graph&&admitted.kind!=ChildAdmissionKind::delegated_leaf&&admitted.kind!=ChildAdmissionKind::dynamic_agent)||admitted.root_run_id!=root)throw Conflict("Leaf model attempt is not owned by this root");
-        auto limit=std::int64_t(4);if(graph){const auto capture=graph_context_owner(root);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph attempt lacks its open owner clock");limit=graph_context_agent(capture.authority,admitted.graph_node_path).turn_limit;}if(admitted.kind==ChildAdmissionKind::dynamic_agent){const auto p=dynamic_plan(admitted.plan_id);const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==owner;});limit=dynamic_preset(p.capabilities,n->definition).turn_limit;}const auto calls=integer(db.execute("SELECT count(DISTINCT COALESCE(inference_step_id,attempt_id)) FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND purpose='inference'",{root,owner}).rows.at(0).at(0));if(calls>=limit&&db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows.empty())throw RootBudgetExhausted("Durable child-turn allowance exhausted");}
+        auto limit=std::int64_t(4);if(graph){if(impl_->graph_lineage(actor.parent_id,true).first!=root)throw Conflict("Graph model attempt ancestry differs from its running root");const auto capture=graph_context_owner(root);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph attempt lacks its open owner clock");limit=graph_context_agent(capture.authority,admitted.graph_node_path).turn_limit;}if(admitted.kind==ChildAdmissionKind::dynamic_agent){const auto p=dynamic_plan(admitted.plan_id);const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==owner;});limit=dynamic_preset(p.capabilities,n->definition).turn_limit;}const auto calls=integer(db.execute("SELECT count(DISTINCT COALESCE(inference_step_id,attempt_id)) FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND purpose='inference'",{root,owner}).rows.at(0).at(0));if(calls>=limit&&db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows.empty())throw RootBudgetExhausted("Durable child-turn allowance exhausted");}
     const auto previous=db.execute("SELECT owner_run_id,role,state,purpose,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows;
     if(!previous.empty()){if(text(previous[0][0])!=owner||text(previous[0][1])!=role_name||text(previous[0][3])!="inference")throw Conflict("Model attempt identity or purpose changed");transaction.commit();return {root,attempt,owner,role,text(previous[0][2]),ModelCallPurpose::inference,text(previous[0][4])};}
     const auto dynamic=budget.spec.policy_id=="native.dynamic-plan";
@@ -2384,7 +2395,7 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
     auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
     if(parent.run.state!=RunState::running)throw Conflict("Invocation parent is not running");
     const auto lineage=impl_->graph_lineage(parent_id,true);if(lineage.second>=3)throw Conflict("Graph invocation depth exceeds limits");
-    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
+    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty()){const auto capture=graph_context_owner(lineage.first);if(!capture.segment||capture.segment->state!="open")throw Conflict("Context invocation requires its ultimate root open clock");}
     if(parent.checkpoint_revision!=expected)throw Conflict("Graph checkpoint revision changed");
     if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph invocation identity already exists");
     GraphCoordinator coordinator(GraphPlan(parent.specification_json),parent.checkpoint_json,GraphRestoreMode::live);
@@ -2427,9 +2438,17 @@ GraphRootRecord Repository::start_graph_invocation(const std::string& id,const s
 Run Repository::start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt,std::int64_t expected){
     identifier(id);if(node_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos || node_id.empty())throw std::invalid_argument("Invalid graph node identity");if(node_id.size()>64)throw std::invalid_argument("Graph node ID exceeds limits");object_json(prompt);const auto provider=prompt_context(prompt);auto& db=impl_->database;Transaction transaction(db);auto parent=graph_run(parent_id);
     if(parent.run.state!=RunState::running)throw Conflict("Graph parent is not running");
-    const auto lineage=impl_->graph_lineage(parent_id,true);if(lineage.second>0&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty())throw RunUnavailable("Nested graph context and budget ownership is not implemented");
+    const auto lineage=impl_->graph_lineage(parent_id,true);
     const auto specification=Json::parse(parent.specification_json);bool executable=false,agent=false;for(const auto& node:specification.at("nodes"))if(node.at("id")==node_id && (node.at("type")=="agent" || node.at("type")=="tool")){executable=true;agent=node.at("type")=="agent";}if(!executable)throw std::invalid_argument("Child must name a declared executable node");
-    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{parent_id}).rows.empty()){const auto capture=graph_context_owner(parent_id);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph child requires its open owner clock");if(agent){(void)graph_context_agent(capture.authority,node_id);const auto budget=root_budget(parent_id);const auto active=integer(db.execute("SELECT count(*) FROM runs r WHERE r.parent_run_id=? AND r.state IN ('queued','running','paused') AND EXISTS(SELECT 1 FROM json_each((SELECT authority_json FROM graph_context_owners WHERE root_run_id=?),'$.agents') a WHERE json_extract(a.value,'$.node_id')=r.node_id)",{parent_id,parent_id}).rows[0][0]);if(budget.children_admitted>=budget.spec.max_children||active>=budget.spec.max_parallel)throw RootBudgetExhausted("Registered graph child allowance exhausted");changed_one(db.execute("UPDATE agent_execution_budgets SET children_admitted=children_admitted+1,revision=revision+1 WHERE root_run_id=? AND revision=?",{parent_id,budget.revision}));}}
+    if(!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{lineage.first}).rows.empty()){
+        const auto capture=graph_context_owner(lineage.first);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph child requires its ultimate root open clock");
+        if(agent){
+            (void)graph_context_agent(capture.authority,impl_->graph_node_path(parent_id,node_id,lineage.first));const auto budget=root_budget(lineage.first);
+            const auto active=integer(db.execute("WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) SELECT count(*) FROM tree t JOIN runs r ON r.id=t.id WHERE r.state IN ('queued','running','paused') AND EXISTS(SELECT 1 FROM graph_roots g JOIN json_each(g.specification,'$.nodes') n WHERE g.run_id=r.parent_run_id AND json_extract(n.value,'$.id')=r.node_id AND json_extract(n.value,'$.type')='agent')",{lineage.first}).rows[0][0]);
+            if(budget.children_admitted>=budget.spec.max_children||active>=budget.spec.max_parallel)throw RootBudgetExhausted("Registered graph tree child allowance exhausted");
+            changed_one(db.execute("UPDATE agent_execution_budgets SET children_admitted=children_admitted+1,revision=revision+1 WHERE root_run_id=? AND revision=?",{lineage.first,budget.revision}));
+        }
+    }
     if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph child identity already exists");
     GraphCoordinator coordinator(GraphPlan(parent.specification_json),parent.checkpoint_json,GraphRestoreMode::live);coordinator.start(node_id);impl_->graph_checkpoint(parent,coordinator,expected);
     changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{id,parent.run.session_id,parent_id,node_id}));
