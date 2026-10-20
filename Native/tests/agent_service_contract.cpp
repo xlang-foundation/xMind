@@ -128,9 +128,9 @@ int main(int argc,char** argv) {
             const auto pause_graph=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& e){return e.id=="dispatch.pause";});
             agents.submit("lane-a","lane-a","hold-stream");streaming(store,"lane-a");
             graphs.submit_graph("lane-graph","lane-graph","dispatch.agent",agent_graph->revision,"hold-stream");
-            eventually([&]{return lanes->dispatch_waiting()==1;},"Graph worker must wait for the occupied shared lane");
+            eventually([&]{return lanes->dispatch_waiting()==1&&lanes->dispatch_blocked()==1;},"Graph worker must actually block on the occupied shared lane");
             agents.submit("lane-b","lane-b","hold-stream");
-            eventually([&]{return lanes->dispatch_waiting()==2;},"Both service types must enter the same dispatch queue");
+            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->dispatch_blocked()==2;},"Both service types must actually block on the shared dispatch queue");
             require(lanes->running()==1&&store.run("lane-graph").get().state==RunState::queued&&store.run("lane-b").get().state==RunState::queued,"Waiting roots must not start a model or leave Queued before their lane");
             agents.cancel("lane-a");cancelled(store,"lane-a");
             eventually([&]{return !store.children("lane-graph").get().empty();},"First waiting graph must dispatch after the active agent retires");
@@ -140,7 +140,7 @@ int main(int argc,char** argv) {
             // Cancellation while waiting must withdraw the ticket without a
             // provider child or a fabricated response, then wake its successor.
             graphs.submit_graph("lane-cancel","lane-cancel","dispatch.agent",agent_graph->revision,"must not infer");
-            eventually([&]{return lanes->dispatch_waiting()==1;},"Queued graph must join the shared lane before cancellation");
+            eventually([&]{return lanes->dispatch_waiting()==1&&lanes->dispatch_blocked()==1;},"Queued graph worker must actually block before cancellation");
             graphs.cancel("lane-cancel","fixture-controller");cancelled(store,"lane-cancel");
             require(store.children("lane-cancel").get().empty(),"Cancelled undispatched graph must not create a child");
             eventually([&]{return lanes->dispatch_waiting()==0;},"Cancelled dispatch ticket must be removed");
@@ -159,12 +159,32 @@ int main(int argc,char** argv) {
             store.create_session("lane-shutdown-graph","Shutdown while waiting for a shared lane").get();
             agents.submit("lane-shutdown-agent","lane-shutdown-agent","hold-stream");streaming(store,"lane-shutdown-agent");
             graphs.submit_graph("lane-shutdown-graph","lane-shutdown-graph","dispatch.agent",agent_graph->revision,"must not infer");
-            eventually([&]{return lanes->dispatch_waiting()==1;},"Shutdown fixture must actually wait for shared execution capacity");
+            eventually([&]{return lanes->dispatch_waiting()==1&&lanes->dispatch_blocked()==1;},"Shutdown fixture's graph worker must actually block on shared execution capacity");
             graphs.close();
             require(store.run("lane-shutdown-graph").get().state==RunState::cancelled&&store.children("lane-shutdown-graph").get().empty(),"Closing a waiting service must join cancellation without starting a child");
             require(lanes->running()==1&&lanes->dispatch_waiting()==0,"Closing graph service must preserve another service's active lane");
             agents.close();
             require(store.run("lane-shutdown-agent").get().state==RunState::cancelled&&lanes->running()==0&&lanes->occupied()==0,"Closing the active service must drain and release all shared capacity");
+        }
+        {
+            const auto lanes=std::make_shared<RootAdmissionPool>(8,1);
+            AgentService agents(store,settings,1,8,lanes);
+            GraphService graphs(store,settings,1,8,2,lanes);
+            const auto catalog=graphs.graphs();const auto graph=std::find_if(catalog.begin(),catalog.end(),[](const auto& e){return e.id=="dispatch.agent";});
+            require(graph!=catalog.end(),"Backlog regression needs the registered agent graph");
+            for(const auto* id:{"backlog-a","backlog-b","backlog-g"})store.create_session(id,id).get();
+            agents.submit("backlog-a","backlog-a","hold-stream");streaming(store,"backlog-a");
+            agents.submit("backlog-b","backlog-b","hold-stream");
+            require(store.run("backlog-b").get().state==RunState::queued,"Older agent must actually wait in the single worker's local backlog");
+            graphs.submit_graph("backlog-g","backlog-g","dispatch.agent",graph->revision,"hold-stream");
+            eventually([&]{return lanes->dispatch_waiting()==2&&lanes->dispatch_blocked()==1;},"Shared dispatch must rank both backlog roots while only the graph worker can reach its slot wait");
+            agents.cancel("backlog-a");cancelled(store,"backlog-a");
+            eventually([&]{return store.run("backlog-b").get().state==RunState::running||store.run("backlog-g").get().state==RunState::running;},"One of the waiting roots must actually dispatch");
+            require(store.run("backlog-b").get().state==RunState::running&&store.run("backlog-g").get().state==RunState::queued,"Older locally queued agent must dispatch before a later graph from another service");
+            streaming(store,"backlog-b");agents.cancel("backlog-b");cancelled(store,"backlog-b");
+            eventually([&]{return !store.children("backlog-g").get().empty();},"Later graph must dispatch after the older agent retires");streaming(store,store.children("backlog-g").get().front().id);
+            graphs.cancel("backlog-g","fixture-controller");cancelled(store,"backlog-g");
+            graphs.close();agents.close();require(lanes->running()==0&&lanes->dispatch_waiting()==0&&lanes->occupied()==0,"Backlog ordering test must drain all execution and admission ownership");
         }
         store.close();
         std::cout<<"Native agent service contract passed: parallel native streams, cross-service agent/graph capacity isolation across queued, active and paused roots, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";

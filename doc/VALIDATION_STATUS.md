@@ -2,6 +2,40 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared runnable-queue rank fixes cross-service overtaking — 2026-10-19
+
+An actual regression reproduces a queue-order bug against unchanged installed54
+production bytes db694de1: one busy agent worker leaves an older agent in its
+local backlog, while a later graph worker joins the shared execution FIFO first.
+On slot release, the graph starts before that older agent. Baseline passes7/8 and
+fails the explicit older-agent-before-later-graph assertion; its failure is retained.
+
+RootAdmissionPool now separates a one-shot DispatchTicket from its Execution
+slot. Agent and graph queues reserve shared rank before their durable admission
+or wake transaction, and workers move that ticket to the cancellable slot wait.
+Rollback, queue removal and graph fault/shutdown release pending rank. Paused
+roots retain admission without a dispatch ticket until their next runnable wake.
+Waits hold no service-owner lock. The blocked-worker counter lets the real
+service regression establish actual slot waits before cancellation/shutdown,
+rather than infer a worker wait merely from queue membership.
+
+The complete build and8focused contracts pass in45.63seconds with every source,
+SDK, pure-library, dependency and binary set/hash unchanged. The peer requires
+exactly16requests and2graph prompts. It observes the older agent running while
+the later graph stays queued, then allows the graph after the agent retires.
+Existing mixed-service cancellation, human pause/resume and shutdown checks pass.
+Candidate cc854ad0 remains uninstalled; complete native qualification is pending.
+Installed54/live owner36040 are unchanged.
+
+This shares FIFO queue admission, not worker threads, durable replay scheduling
+or process placement. Service worker ceilings remain; head-of-line waiting can
+leave another service's worker idle. See
+[baseline](evidence/shared-backlog-order-baseline-20261019.json),
+[failed assertion](evidence/shared-backlog-order-baseline-20261019.log),
+[final gate](evidence/shared-backlog-order-focused-20261019.json),
+[final log](evidence/shared-backlog-order-focused-20261019.log) and
+[inventory](evidence/shared-backlog-order-inventory-20261019.json).
+
 ## Explicit installed54 adoption and actual provider reopen — 2026-10-19
 
 The verified old TestProj owner55848 (birth01:31:24.2246670Z, a26bed3f) was idle

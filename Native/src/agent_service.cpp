@@ -49,7 +49,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -164,9 +164,9 @@ struct AgentService::Impl {
     auto ticket(const std::shared_ptr<Job>& job){return std::find(pending.begin(),pending.end(),job);}
     bool reserve_wake(const std::shared_ptr<Job>& job){
         if(ticket(job)!=pending.end())return false;if(pending.size()>=limit)throw RunBusy("Agent wake queue is full");
-        pending.push_back(job);return true;
+        auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);return true;
     }
-    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);}
+    void remove_ticket(const std::shared_ptr<Job>& job){const auto found=ticket(job);if(found!=pending.end())pending.erase(found);job->dispatch.reset();}
     std::size_t waiting_count()const{std::size_t count=0;for(const auto& [id,job]:active){(void)id;if(job->phase==Phase::waiting)++count;}return count;}
     void require_admission()const{
         require_available();if(active.size()>=owned_limit||pending.size()+waiting_count()>=limit)throw RunBusy("Agent ownership queue is full");
@@ -193,18 +193,19 @@ struct AgentService::Impl {
         }}catch(...){fail();}
     }
     void work(){
-        for(;;){std::shared_ptr<Job> job;
+        for(;;){std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
             {
                 std::unique_lock lock(mutex);
                 changed.wait(lock,[&]{return !accepting||std::any_of(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});});
                 const auto next=std::find_if(pending.begin(),pending.end(),[](const auto& value){return value->phase==Phase::queued;});
-                if(next==pending.end())return;job=*next;pending.erase(next);job->phase=Phase::working;
+                if(next==pending.end())return;job=*next;pending.erase(next);dispatch=std::move(job->dispatch);job->phase=Phase::working;
             }
             if(children&&!children->healthy())fail();
             try{
                 // Waiting never holds the service mutex. Cancelled roots still
                 // enter the runner with their stopped token for durable retirement.
-                auto execution=root_admission->acquire_execution(job->stop.get_token());
+                if(!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
+                auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
@@ -445,7 +446,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
-    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
+    try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
@@ -457,7 +458,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
-    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
+    try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
@@ -466,7 +467,7 @@ Run AgentService::submit_message(std::string id,std::string context,std::string 
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;
     impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
-    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
+    try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     auto prompt=Json{{"content",content},{"a2a_message_id",message}};if(!impl_->provider_context.empty())prompt["provider_context"]=Json::parse(impl_->provider_context);
     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}

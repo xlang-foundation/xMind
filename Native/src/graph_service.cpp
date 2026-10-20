@@ -23,7 +23,7 @@ void controller(const std::string& actor) {
 }
 struct GraphService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;std::unique_ptr<RootAdmissionPool::Lease> admission;};
+    struct Job {std::string id,cancel_reason;Phase phase=Phase::queued;std::stop_source stop;bool cancelled=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;};
     PersistenceService& store;
     std::shared_ptr<RootAdmissionPool> root_admission;
     GraphRunner runner;
@@ -81,22 +81,27 @@ struct GraphService::Impl {
     void require_available() const {
         if(!accepting || faulted)throw RunUnavailable("Graph execution service is unavailable");
     }
+    void enqueue(const std::shared_ptr<Job>& job){
+        auto dispatch=root_admission->queue_execution();pending.push_back(job);job->dispatch=std::move(dispatch);
+    }
+    void drop_pending_back(){pending.back()->dispatch.reset();pending.pop_back();}
     void fail_locked() {
         faulted=true;accepting=false;
-        for(const auto& [id,job]:active){(void)id;job->stop.request_stop();}
+        for(const auto& [id,job]:active){(void)id;job->dispatch.reset();job->stop.request_stop();}
         changed.notify_all();
     }
     void work() {
         for(;;) {
-            std::shared_ptr<Job> job;
+            std::shared_ptr<Job> job;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;
             {
                 std::unique_lock lock(mutex);
                 changed.wait(lock,[&]{return !accepting || !pending.empty();});
                 if(!accepting)return;
-                job=std::move(pending.front());pending.pop_front();job->phase=Phase::working;
+                job=std::move(pending.front());pending.pop_front();dispatch=std::move(job->dispatch);job->phase=Phase::working;
             }
             try {
-                auto execution=root_admission->acquire_execution(job->stop.get_token());
+                if(!dispatch)throw DatabaseError("Graph root lost its shared dispatch ticket");
+                auto execution=root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),true);
                 std::lock_guard lock(mutex);
                 if(terminal(observed.state)){active.erase(job->id);continue;}
@@ -109,7 +114,7 @@ struct GraphService::Impl {
                 if(current.state==RunState::paused){
                     if(job->cancelled){runner.retire(job->id,RunState::cancelled,job->cancel_reason);active.erase(job->id);}
                     else if(accepting&&!job->stop.stop_requested()&&runner.captured_context(job->id)&&runnable(store.graph_run(job->id).get())){
-                        pending.push_back(job);job->phase=Phase::queued;changed.notify_one();
+                        enqueue(job);job->phase=Phase::queued;changed.notify_one();
                     }else job->phase=Phase::waiting;
                     continue;
                 }
@@ -117,7 +122,7 @@ struct GraphService::Impl {
                 if(!accepting || job->stop.stop_requested()) {
                     runner.retire(job->id,RunState::cancelled,R"({"reason":"graph_service_shutdown"})");
                     active.erase(job->id);
-                } else {pending.push_back(job);job->phase=Phase::queued;changed.notify_one();}
+                } else {enqueue(job);job->phase=Phase::queued;changed.notify_one();}
             } catch(const GraphContextUnavailable&) {
                 std::lock_guard lock(mutex);
                 try{
@@ -140,6 +145,7 @@ struct GraphService::Impl {
             // Accepted but not dispatched roots can be retired without effects.
             // Already-paused roots are retained for the next backend owner.
             for(const auto& job:pending) {
+                job->dispatch.reset();
                 try {
                     if(store.run(job->id).get().state==RunState::paused&&runner.captured_context(job->id)){job->phase=Phase::waiting;continue;}
                     runner.retire(job->id,RunState::cancelled,R"({"reason":"graph_service_shutdown_before_dispatch"})");active.erase(job->id);
@@ -194,10 +200,10 @@ Run GraphService::submit_graph_with_attachments(std::string id,std::string sessi
     const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();if(input.size()>2*1024*1024)throw std::invalid_argument("Graph prompt and file attachments exceed the 2 MiB persisted input limit");
     auto job=std::make_shared<Impl::Job>();job->id=id;job->admission=impl_->root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
-    try {impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
+    try {impl_->enqueue(job);}catch(...){impl_->active.erase(owned);throw;}
     Run result;
     try {result=impl_->store.start_graph_run(id,session,graph,revision,entry->plan,input,budget,context_authority,membership).get();}
-    catch(...){impl_->pending.pop_back();impl_->active.erase(owned);throw;}
+    catch(...){impl_->drop_pending_back();impl_->active.erase(owned);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
 Run GraphService::restore_operation(std::string id,std::string session,std::string operation_id) {
@@ -220,10 +226,10 @@ Run GraphService::restore_operation(std::string id,std::string session,std::stri
     const auto input=Json{{"content","Restore saved file operation "+operation_id},{"model_id",""}}.dump();
     auto job=std::make_shared<Impl::Job>();job->id=id;job->admission=impl_->root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
-    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
+    try{impl_->enqueue(job);}catch(...){impl_->active.erase(owned);throw;}
     Run result;
     try{result=impl_->store.start_graph_run(id,session,"native-restore-operation",1,plan,input,{}, {},membership).get();}
-    catch(...){impl_->pending.pop_back();impl_->active.erase(owned);throw;}
+    catch(...){impl_->drop_pending_back();impl_->active.erase(owned);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
 GraphRootRecord GraphService::human_input(const std::string& id,const std::string& node,
@@ -239,13 +245,13 @@ GraphRootRecord GraphService::human_input(const std::string& id,const std::strin
     const bool context=impl_->runner.captured_context(id).has_value();
     // Reserve a possible wakeup before the transaction. Allocation failure
     // cannot leave committed runnable work without its scheduler entry.
-    if(waiting)impl_->pending.push_back(job);
+    if(waiting)impl_->enqueue(job);
     GraphRootRecord result;
     try {result=impl_->store.input_graph_human(id,node,input,actor,revision).get();}
-    catch(...){if(waiting)impl_->pending.pop_back();throw;}
+    catch(...){if(waiting)impl_->drop_pending_back();throw;}
     try{if(waiting) {
         if(result.run.state==RunState::running||(result.run.state==RunState::paused&&context&&runnable(result)))job->phase=Impl::Phase::queued;
-        else impl_->pending.pop_back();
+        else impl_->drop_pending_back();
     }}catch(...){job->phase=Impl::Phase::faulted;impl_->fail_locked();throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
@@ -259,9 +265,9 @@ Run GraphService::resume_graph(const std::string& id,const std::string& actor,st
     if(!context||!context->segment||context->segment->state!="closed"||!runnable(root))throw Conflict("Graph has no ready closed context owner");
     impl_->runner.validate_context_owner(id);
     if(job->phase==Impl::Phase::waiting){
-        impl_->pending.push_back(job);
+        impl_->enqueue(job);
         try{impl_->store.append_event(id,"graph.context.resume_requested",Json{{"actor",actor},{"checkpoint_revision",revision}}.dump()).get();}
-        catch(...){impl_->pending.pop_back();throw;}
+        catch(...){impl_->drop_pending_back();throw;}
         job->phase=Impl::Phase::queued;
     }else if(job->phase!=Impl::Phase::queued&&job->phase!=Impl::Phase::working)throw RunUnavailable("Graph owner cannot resume");
     lock.unlock();impl_->changed.notify_one();return root.run;
@@ -287,6 +293,7 @@ void GraphService::cancel(const std::string& id,const std::string& actor) {
         impl_->store.append_event(id,"graph.cancel.requested",reason).get();job->cancelled=true;job->stop.request_stop();
     } else {
         impl_->runner.retire(id,RunState::cancelled,reason);
+        job->dispatch.reset();
         const auto queued=std::find(impl_->pending.begin(),impl_->pending.end(),job);if(queued!=impl_->pending.end())impl_->pending.erase(queued);
         impl_->active.erase(owned);
     }

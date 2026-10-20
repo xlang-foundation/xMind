@@ -99,12 +99,21 @@ standalone agents and graph runs. Queued, running and durably paused roots all
 hold a reservation; terminal runs and rejected admissions release or avoid
 reservations. The new native source shares execution slots across the agent and
 graph worker loops, using the platform's configured worker count as the combined
-root concurrency limit. Worker-ready roots wait in one cancellable FIFO. A human
-pause releases execution while retaining admission. The services still retain
-separate local backlogs, so global admission-order fairness and worker placement
-remain incomplete. This candidate passes eight focused contracts and the complete
-154-contract native suite; installation and current rendered-client acceptance
-remain pending. [Full qualification](evidence/shared-root-dispatch-full-20261019.json).
+root concurrency limit. Installed54 uses a cancellable worker-ready FIFO and has
+passed its complete154-contract gate and existing-profile adoption.
+[Full qualification](evidence/shared-root-dispatch-full-20261019.json).
+
+The newer uninstalled source reserves that FIFO rank when a runnable root enters
+either service's queue, so an older local-backlog root cannot be overtaken by a
+later root from the other service. Queue tickets are one-shot, withdrawn on failed
+admission/cancellation/shutdown, and renewed on a runnable wake. A human pause
+retains durable admission but releases execution. The actual mixed-service
+ordering regression fails against installed54 production bytes and passes with
+the correction, alongside seven related contracts. Complete candidate qualification
+and installation remain pending. Worker loops/ceilings remain separate; a strict
+FIFO head can wait for its service worker rather than use another service's idle
+worker. This does not implement a unified work-conserving pool or process placement.
+[Focused red/green scope](evidence/shared-backlog-order-focused-20261019.json).
 
 The coding default is a single-agent model/tool loop. Explicit planning is
 optional; predefined graphs do not require a planning LLM call. A planner can

@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- Uninstalled cc854ad0 fixes local-backlog overtaking with shared one-shot queue tickets. Baseline db694de1 fails actual ordering7/8; candidate passes8/8 in45.63s with frozen closure unchanged. Complete candidate gate pending. Keep installed54/owner36040 unchanged. See shared-backlog-order evidence in doc/VALIDATION_STATUS.md.
+
 - Installed54 source3e8ef953/native8b462140/db694de1 passes154native and445/158clients;2448archive/2445installed verify. Explicit native upgrade retired55848 and started36040 born2026-10-20T02:29:09.7891420Z in the SAME p-current TestProj profile/origin57779. All5old sessions/146messages/10runs/provider/process/MCP/membership are exact. Page55684 host54928/view56652 remain. Fresh IAB read session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completes1read/4messages and reload; NEVER replay it. Initial observer UTF-8 split failure retained; byte-safe reread and earlier HTTP snapshot prove no history change. See coding54-primary-adoption and adopted-live-read receipts. External Edge/current VS Code acceptance remain open.
 
 - Installed53 native9eb26146 now passes the complete154-contract gate in1069.74s on source0a8ec093; all2625project/16SDK/1870pure/76runtime/18598dependency/129binary sets/hashes unchanged, complete build matches installed executable. CTest64788 exited0; no gate remains live. See coding53-full-native receipt and doc/delivery-requirement-audit-20261019.md for remaining scope. Older focused-only statements below are historical.
