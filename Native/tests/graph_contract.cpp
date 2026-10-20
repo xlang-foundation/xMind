@@ -6,6 +6,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
+#include <algorithm>
 #include <iostream>
 using namespace agentflow;using Json=nlohmann::json;
 namespace {
@@ -111,5 +112,23 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         store.close();
     }
     {PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);const auto reopened=AgentDefinitionStore(store).load();const auto graph=GraphCatalogStore(store).load();const auto selection=store.session_agent("named-session").get();require(reopened.entries[0].revision==2&&graph.entries[0].plan.nodes()[0].agent_revision==2&&selection.revision==2&&!selection.selected,"Named agent, graph snapshots and session selection must reopen through actual xlang3/SQLite storage");store.close();}
+    const auto nested_database=(std::filesystem::u8path(argv[1])/"nested-catalog.sqlite").string();
+    const auto invocation=[](const std::string& target){return Json{{"nodes",Json::array({{{"id","invoke"},{"type","graph"},{"prompt","Synthetic registered child"},{"graph_id",target}}})}};};
+    Json reusable={{"graphs",Json::array({{{"id","outer"},{"spec",invocation("middle")}},{{"id","middle"},{"spec",invocation("leaf")}},{{"id","leaf"},{"spec",nested_leaf}}})}};
+    std::string old_parent;
+    {PersistenceService store(nested_database,imports);GraphCatalogStore catalog(store);
+        const auto first=catalog.apply(reusable.dump());require(first.revision==1&&first.entries[0].plan.nodes()[0].graph->revision==1,"Parent-before-child import must resolve backend-owned graph revisions");old_parent=first.entries[0].plan.json();
+        require(catalog.apply(reusable.dump()).revision==1,"Equivalent nested import must preserve every immutable revision");
+        auto reversed=reusable;std::reverse(reversed["graphs"].begin(),reversed["graphs"].end());const auto reordered=catalog.apply(reversed.dump());require(reordered.revision==2&&std::all_of(reordered.entries.begin(),reordered.entries.end(),[](const auto& entry){return entry.revision==1;}),"Child-before-parent order must preserve entry revisions while updating catalogue order");
+        reusable["graphs"][2]["spec"]["nodes"][0]["prompt"]="Changed nested child";const auto changed=catalog.apply(reusable.dump());require(changed.revision==3&&std::all_of(changed.entries.begin(),changed.entries.end(),[](const auto& entry){return entry.revision==2;}),"A changed leaf must propagate new immutable revisions through both ancestors");
+        const GraphPlan old_outer(old_parent);const GraphPlan old_middle(old_outer.nodes()[0].graph->specification_json);require(old_middle.nodes()[0].graph->revision==1&&old_middle.nodes()[0].graph->specification_json==nested_leaf.dump(),"A previously captured invocation must retain its old descendant revision and bytes");
+        const auto saved=store.information("native-graphs","catalog").get();
+        for(int bad=0;bad<7;++bad){auto invalid=reusable;switch(bad){case 0:invalid["graphs"][0]["spec"]["nodes"][0]["graph_revision"]=999;break;case 1:invalid["graphs"][0]["spec"]["nodes"][0]["graph_spec"]=nested_leaf;break;case 2:invalid["graphs"][0]["spec"]["nodes"][0]["graph_id"]="missing";break;case 3:invalid["graphs"][0]["spec"]["nodes"][0]["graph_id"]="outer";break;case 4:invalid["graphs"][1]["spec"]["nodes"][0]["graph_id"]="outer";break;case 5:invalid["graphs"].erase(2);break;case 6:invalid["graphs"].push_back(invalid["graphs"][0]);break;}rejects<std::invalid_argument>([&]{catalog.apply(invalid.dump());});require(store.information("native-graphs","catalog").get()==saved,"Rejected nested binding must not alter actual SQLite configuration");}
+        Json too_deep={{"graphs",Json::array()}};for(int i=0;i<5;++i)too_deep["graphs"].push_back({{"id","depth"+std::to_string(i)},{"spec",i==4?nested_leaf:invocation("depth"+std::to_string(i+1))}});rejects<std::invalid_argument>([&]{catalog.apply(too_deep.dump());});
+        Json too_wide={{"graphs",Json::array({{{"id","wide"},{"spec",{{"nodes",Json::array()}}}}})}};for(const auto& part:std::vector<std::pair<std::string,int>>{{"a",100},{"b",100},{"c",54}}){auto call=invocation(part.first)["nodes"][0];call["id"]=part.first;too_wide["graphs"][0]["spec"]["nodes"].push_back(call);too_wide["graphs"].push_back({{"id",part.first},{"spec",humans(part.second)}});}rejects<std::invalid_argument>([&]{catalog.apply(too_wide.dump());});
+        auto large_leaf=humans(4);for(auto& node:large_leaf["nodes"])node["prompt"]=std::string(18000,'x');Json amplified={{"graphs",Json::array({{{"id","large"},{"spec",large_leaf}}})}};for(int i=0;i<15;++i)amplified["graphs"].push_back({{"id","copy"+std::to_string(i)},{"spec",invocation("large")}});require(amplified.dump().size()<262144,"Storage amplification fixture must fit the trusted input budget");rejects<std::invalid_argument>([&]{catalog.apply(amplified.dump());});require(store.information("native-graphs","catalog").get()==saved,"Expanded depth/width/storage rejection must preserve the old catalogue");
+        auto corrupt=Json::parse(saved);corrupt["graphs"][0]["spec"]["nodes"][0]["graph_revision"]=1;store.put_information("native-graphs","catalog",corrupt.dump()).get();rejects<std::invalid_argument>([&]{catalog.load();});store.put_information("native-graphs","catalog",saved).get();store.close();
+    }
+    {PersistenceService store(nested_database,imports);GraphCatalogStore catalog(store);const auto reopened=catalog.load();require(reopened.revision==3&&reopened.entries[0].plan.nodes()[0].graph->revision==2,"Pinned nested graph catalogue must reopen through actual embedded-xlang3 SQLite");const auto removed=catalog.apply(R"({"graphs":[]})");require(removed.retired_ids.size()==3,"Removing nested definitions must retire all identities");rejects<std::invalid_argument>([&]{catalog.apply(reusable.dump());});store.close();}
     std::cout<<"Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay, bounded YAML catalog import and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

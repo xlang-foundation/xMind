@@ -31,3 +31,25 @@ Offline configuration import is available while the selected backend is stopped:
 The command returns catalog/definition revisions and node counts, with `execution_available:false`. Importing a definition does not execute it. The actual backend lease rejects an offline import while a server owns that database. No graph run button or simulated execution route was added.
 
 The next integration must introduce root/child execution and conversation records behind the C++ repository, with all database I/O through xlang3. The existing one-active-run session rule must apply to root runs; graph nodes are child executions with isolated model conversations. They must not be submitted as competing ordinary runs on the root session. Node admission/checkpoint/event updates must commit together, child agent nodes must invoke the shared native engine, and tool nodes must use the same registered handlers, permissions, guidance bindings and effect journals. Root cancellation must wait for observed child retirement; owner recovery must preserve completed/human-wait work and quarantine interrupted effects. Only then can authenticated graph submit/inspect/resume, CLI and sidebar workflows be enabled and tested with actual model/tool work. Bounded loops, delegation, live providers/peers and the remaining full platform/parity scope stay required.
+
+## Nested invocation snapshots (runtime pending)
+
+Trusted catalogue import accepts a graph node referencing another definition in
+the same import. Definition order does not matter:
+
+```json
+{"graphs":[{"id":"parent","spec":{"nodes":[{"id":"invoke","type":"graph","graph_id":"child","prompt":"Use the registered child"}]}},{"id":"child","spec":{"nodes":[{"id":"answer","type":"human","prompt":"Review the result"}]}}]}
+```
+
+The backend pins graph_revision and graph_spec; callers may not supply them.
+Changing a child propagates revisions to referring parents, while previously
+captured plans retain their original bytes. Recursive aliases, missing/retired
+targets, more than three invocation levels or256expanded nodes are rejected.
+Each plan still permits1–100nodes and262144JSON bytes; the stored catalogue
+is bounded to1048576bytes. Rejected imports leave configuration unchanged.
+
+This is a catalogue/snapshot contract. Nested parents remain non-executable:
+GraphRunner preflight and GraphCoordinator claiming reject them until durable
+child ownership, shared runtime budgets, cancellation, human/context resume and
+recovery are implemented. Ordinary agent/tool/human graphs retain their existing
+execution path. [Focused evidence](evidence/nested-graph-catalog-focused-20261019.json).

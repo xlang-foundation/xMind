@@ -5,6 +5,7 @@
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <set>
+#include <functional>
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;constexpr std::int64_t maximum_revision=9007199254740991;
@@ -20,6 +21,10 @@ GraphCatalog decode(const Json& value,bool stored){
     std::set<std::string> ids;
     for(const auto& record:value["graphs"]){if(stored)fields(record,{"id","revision","spec"});else fields(record,{"id","spec"});const auto key=id(record);if(!ids.insert(key).second || !record.contains("spec"))throw std::invalid_argument("Duplicate graph or missing specification");const auto rev=stored?revision(record,"revision"):0;if(rev>result.revision)throw std::invalid_argument("Graph revision exceeds catalog revision");result.entries.push_back({key,rev,GraphPlan(record["spec"].dump())});}
     if(stored){if(!value.contains("retired_ids") || !value["retired_ids"].is_array() || value["retired_ids"].size()>4096)throw std::invalid_argument("Invalid retired graph identities");for(const auto& retired:value["retired_ids"]){if(!retired.is_string())throw std::invalid_argument("Invalid retired graph identity");auto key=retired.get<std::string>();if(!identifier(key) || !ids.insert(key).second)throw std::invalid_argument("Duplicate or active retired graph identity");result.retired_ids.push_back(std::move(key));}}
+    if(stored)for(const auto& entry:result.entries)for(const auto& node:entry.plan.nodes())if(node.graph){
+        const auto target=std::find_if(result.entries.begin(),result.entries.end(),[&](const auto& candidate){return candidate.id==node.graph->graph_id;});
+        if(target==result.entries.end()||target->revision!=node.graph->revision||target->plan.json()!=node.graph->specification_json)throw std::invalid_argument("Stored nested graph binding disagrees with its catalogue snapshot");
+    }
     return result;
 }
 Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definitions){
@@ -28,7 +33,7 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
         if(!entry.is_object()||!entry.contains("spec")||!entry["spec"].is_object()||!entry["spec"].contains("nodes")||!entry["spec"]["nodes"].is_array())continue;
         for(auto& node:entry["spec"]["nodes"]){
             if(node.is_object()&&node.contains("type")&&node["type"].is_string()&&node["type"]=="graph")
-                throw std::invalid_argument("Nested graph catalogue resolution is not implemented; invocation snapshots are backend-owned");
+                if(node.contains("graph_revision")||node.contains("graph_spec"))throw std::invalid_argument("Nested graph revision and snapshot are backend-owned");
             if(!node.is_object()||!node.contains("agent_id"))continue;
             if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id")||node.contains("tools")||node.contains("permissions"))
                 throw std::invalid_argument("Named graph agents cannot override or supply backend-pinned definition fields");
@@ -45,12 +50,57 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
     }
     return value;
 }
+GraphCatalog resolve_graph_definitions(const Json& value,const GraphCatalog& previous){
+    fields(value,{"graphs"});
+    if(!value.contains("graphs")||!value["graphs"].is_array()||value["graphs"].size()>16)throw std::invalid_argument("Graph catalog accepts at most 16 definitions");
+    const auto& records=value["graphs"];std::vector<std::string> ids;
+    for(const auto& record:records){
+        fields(record,{"id","spec"});const auto key=id(record);
+        if(std::find(ids.begin(),ids.end(),key)!=ids.end()||!record.contains("spec"))throw std::invalid_argument("Duplicate graph or missing specification");
+        if(std::find(previous.retired_ids.begin(),previous.retired_ids.end(),key)!=previous.retired_ids.end())throw std::invalid_argument("Retired graph identities cannot be reused");
+        ids.push_back(key);
+    }
+    std::vector<std::optional<GraphCatalogEntry>> compiled(records.size());
+    std::vector<bool> visiting(records.size(),false);
+    std::vector<std::size_t> expanded(records.size(),0),depth(records.size(),0);
+    std::function<void(std::size_t)> compile=[&](std::size_t index){
+        if(compiled[index])return;
+        if(visiting[index])throw std::invalid_argument("Nested graph catalogue references must not be recursive");
+        visiting[index]=true;auto spec=records[index]["spec"];
+        if(!spec.is_object()||!spec.contains("nodes")||!spec["nodes"].is_array()||spec["nodes"].empty()||spec["nodes"].size()>100)throw std::invalid_argument("A graph requires 1-100 nodes");
+        expanded[index]=spec["nodes"].size();
+        for(auto& node:spec["nodes"]){
+            if(!node.is_object()||!node.contains("type")||!node["type"].is_string()||node["type"]!="graph")continue;
+            if(!node.contains("graph_id")||!node["graph_id"].is_string()||!identifier(node["graph_id"].get<std::string>()))throw std::invalid_argument("Nested graph requires a registered graph identity");
+            const auto found=std::find(ids.begin(),ids.end(),node["graph_id"].get<std::string>());
+            if(found==ids.end())throw std::invalid_argument("Nested graph references an unknown catalogue identity");
+            const auto child=static_cast<std::size_t>(found-ids.begin());compile(child);
+            if(expanded[child]>256-expanded[index])throw std::invalid_argument("Nested graph snapshot exceeds 256 total nodes");
+            expanded[index]+=expanded[child];depth[index]=std::max(depth[index],1+depth[child]);
+            if(depth[index]>3)throw std::invalid_argument("Nested graph snapshot depth exceeds three invocation levels");
+            node["graph_revision"]=compiled[child]->revision;
+            node["graph_spec"]=Json::parse(compiled[child]->plan.json());
+            if(spec.dump().size()>262144)throw std::invalid_argument("Resolved graph snapshot exceeds limits");
+        }
+        GraphPlan plan(spec.dump());const auto old=std::find_if(previous.entries.begin(),previous.entries.end(),[&](const auto& entry){return entry.id==ids[index];});
+        std::int64_t rev=1;
+        if(old!=previous.entries.end()){
+            rev=old->revision;
+            if(old->plan.json()!=plan.json()){if(rev==maximum_revision)throw std::overflow_error("Graph revision exhausted");++rev;}
+        }
+        compiled[index].emplace(GraphCatalogEntry{ids[index],rev,std::move(plan)});visiting[index]=false;
+    };
+    GraphCatalog desired;
+    for(std::size_t i=0;i<records.size();++i)compile(i);
+    for(auto& entry:compiled)desired.entries.push_back(std::move(*entry));
+    return desired;
+}
 std::string encode(const GraphCatalog& catalog){auto entries=Json::array();for(const auto& graph:catalog.entries)entries.push_back({{"id",graph.id},{"revision",graph.revision},{"spec",Json::parse(graph.plan.json())}});return Json{{"version",1},{"revision",catalog.revision},{"graphs",std::move(entries)},{"retired_ids",catalog.retired_ids}}.dump();}
 }
 GraphCatalog GraphCatalogStore::load(){std::string source;try{source=store_.information("native-graphs","catalog").get();}catch(const NotFound&){return {};};return decode(parse(source,true),true);}
 GraphCatalog GraphCatalogStore::apply(const std::string& source){
     const auto definitions=AgentDefinitionStore(store_).load();
-    auto desired=decode(resolve_agent_definitions(parse(source,false),definitions),false);const auto previous=load();desired.retired_ids=previous.retired_ids;bool changed=previous.revision==0 || desired.entries.size()!=previous.entries.size();
+    const auto previous=load();auto desired=resolve_graph_definitions(resolve_agent_definitions(parse(source,false),definitions),previous);desired.retired_ids=previous.retired_ids;bool changed=previous.revision==0 || desired.entries.size()!=previous.entries.size();
     for(std::size_t i=0;i<desired.entries.size();++i){auto& entry=desired.entries[i];if(std::find(previous.retired_ids.begin(),previous.retired_ids.end(),entry.id)!=previous.retired_ids.end())throw std::invalid_argument("Retired graph identities cannot be reused");const auto found=std::find_if(previous.entries.begin(),previous.entries.end(),[&](const auto& old){return old.id==entry.id;});
         if(found==previous.entries.end()){entry.revision=1;changed=true;}
         else if(found->plan.json()==entry.plan.json()){entry.revision=found->revision;}
@@ -58,6 +108,6 @@ GraphCatalog GraphCatalogStore::apply(const std::string& source){
         if(i>=previous.entries.size() || previous.entries[i].id!=entry.id)changed=true;
     }
     for(const auto& old:previous.entries)if(std::none_of(desired.entries.begin(),desired.entries.end(),[&](const auto& graph){return graph.id==old.id;})){if(desired.retired_ids.size()>=4096)throw std::overflow_error("Retired graph identity budget exhausted");desired.retired_ids.push_back(old.id);changed=true;}
-    if(!changed)return previous;if(previous.revision==maximum_revision)throw std::overflow_error("Graph catalog revision exhausted");desired.revision=previous.revision+1;store_.put_information("native-graphs","catalog",encode(desired)).get();return desired;
+    if(!changed)return previous;if(previous.revision==maximum_revision)throw std::overflow_error("Graph catalog revision exhausted");desired.revision=previous.revision+1;const auto encoded=encode(desired);if(encoded.size()>1048576)throw std::invalid_argument("Resolved graph catalog exceeds storage budget");store_.put_information("native-graphs","catalog",encoded).get();return desired;
 }
 }

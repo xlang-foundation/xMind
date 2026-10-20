@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested graph catalogue binding — 2026-10-19
+
+Trusted catalogue import now resolves graph_id references independently of definition order and writes backend-owned graph_revision/graph_spec snapshots. A changed child revision propagates through all referring ancestors; an already captured parent remains byte-identical. Imports reject cycles, unknown/retired identities, supplied backend pins and expanded depth/node/byte limits before changing SQLite. Stored catalogue loading checks each nested binding against its catalogue snapshot. A one-MiB resolved storage cap prevents accepted amplification from creating a catalogue that cannot reopen.
+
+Actual embedded-xlang3 SQLite tests cover parent-before-child and reversed imports, unchanged revisions, leaf-to-two-ancestor revision propagation, retained old snapshots, corrupt stored pins, reopen, retirement, direct/indirect cycles, missing targets, depth/width and storage amplification. Complete Release build and10focused contracts pass45.04seconds; CTest40588 exits0. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets and hashes remain frozen during the gate. Candidatec148682e is uninstalled, with no full-suite qualification.
+
+GraphRunner and GraphCoordinator still explicitly refuse nested executable ownership. This establishes catalogue snapshots, not child execution, shared runtime budgets, cancellation, human/context resume or recovery. Installed56/owner7768 are untouched. See evidence/nested-graph-catalog-focused-20261019.json/.log, source patch, inventory and gate script.
+
 ## Nested graph snapshot boundary — 2026-10-19
 
 GraphPlan now validates a backend-owned nested invocation snapshot: graph identity/revision, task prompt and a complete child specification. Validation shares a256-node expansion budget across the invocation tree, permits at most three invocation levels, preserves the existing100-node per-plan limit, rejects inconsistent identity/revision snapshots and retains canonical checkpoint identity. It contains owned native strings rather than live catalogue aliases or runtime values.
