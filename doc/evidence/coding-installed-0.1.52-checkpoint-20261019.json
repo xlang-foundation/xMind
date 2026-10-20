@@ -1,0 +1,305 @@
+{
+  "recordedAt": "2026-10-20T00:45:09.258Z",
+  "version": "0.1.52",
+  "sourceRevision": "bb664c7afca672c5f826835b21da13f356d554a2",
+  "clientGate": {
+    "recordedAt": "2026-10-20T00:38:35.322Z",
+    "version": "0.1.52",
+    "sourceRevision": "bb664c7afca672c5f826835b21da13f356d554a2",
+    "extension": {
+      "exitCode": 0,
+      "tests": 445,
+      "passed": 445,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "26ccac2980bd18b429e931ea7d08c1efce39e153faf7c3a6090290a022aa7c4f"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 158,
+      "passed": 158,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "b4b04551c79fe422c0ac70c4aac56ab4b4f2183983e800a4a81c6bb8aaf057e0"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17439,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "nativeGate": {
+    "recordedAt": "2026-10-20T00:34:54.291Z",
+    "sourceParent": "08bfe632cfd0f8878ac9787664fff9f92768e228",
+    "sourcePatchSha256": "f04322f401011af65c5b10cce56d019b948ee6f6a038468f50da5dcbfdd9d972",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 30636,
+      "launchedAt": "2026-10-20T00:31:21.126Z",
+      "completedAt": "2026-10-20T00:31:44.794Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "794c58e4747b742ab1d7c30824d023ed80e84b2543ff0faab509e63353885945"
+    },
+    "test": {
+      "pid": 44860,
+      "launchedAt": "2026-10-20T00:31:47.626Z",
+      "completedAt": "2026-10-20T00:34:51.174Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4888412c5eadc0d123c335ac6876b573fe8c375112ddbf6bb94a9e92c7ae1e8b"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 183.5,
+    "projectFiles": 2625,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 129,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9eb261461f346cec38aa7fcad15b3dfe5615832ca3dd4f0a57934a79f15660ba",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "package": {
+    "recordedAt": "2026-10-20T00:39:19.626Z",
+    "version": "0.1.52",
+    "sourceRevision": "bb664c7afca672c5f826835b21da13f356d554a2",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.52-complete-win32-x64.vsix",
+    "archiveBytes": 34440414,
+    "archiveSha256": "fd20e2092a780082c0db58a3ccad9abb6c855bb24487e50ceb4a5f5355df8229",
+    "archiveEntries": 2448,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17439,
+    "terminal": {
+      "startedAt": "2026-10-20T00:38:39.108Z",
+      "completedAt": "2026-10-20T00:39:16.043Z",
+      "pid": 44740,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4cfa9d69f2ca88507d133a7796c00a54c2d9b18dd8fbf31ef6fd410d2341a080"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "installed": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.52",
+    "version": "0.1.52",
+    "checkedPayloads": 2445,
+    "nativeFiles": 2402,
+    "nativeRevision": "bb664c7afca672c5f826835b21da13f356d554a2",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "9eb261461f346cec38aa7fcad15b3dfe5615832ca3dd4f0a57934a79f15660ba",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "7f3ec1f07b00b60ac889e0af0bd7b81852f0015a2872e421bbf8aad44b3f2c60",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "backup": {
+    "recordedAt": "2026-10-20T00:39:26.305Z",
+    "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.51",
+    "backup": "C:/xMindNativeValidation/preserved-vscode-0.1.51-before-0.1.52",
+    "checkedFiles": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "profileRoot": "C:\\Users\\shaw9\\.xMind\\p-current",
+    "previousProfiles": [
+      "1095659ea5468f9c5b573ccd04765ff994a34d36debe1026c89a219846d7b0cf",
+      "1d740dcdac2755a76246ad98652805439c4cf981f9278ef511fb943754757233",
+      "3e90eb7951a5c4896e2feadb791f913c962349c986ab5b52b574b66e0c036d0f",
+      "6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+      "81d773a5284cfb88f059b12301c2676debebdf30d66454f326ac1c60dfe22508",
+      "857fd70b1a8f536792499f1475997e636914f3920ea18429af2ddefcb8890d04",
+      "b52e2af3cff4d7271382dcb0ce9c09ed1ecb6280117f4d3358b35420c1186e0e"
+    ]
+  },
+  "editor": {
+    "recordedAt": "2026-10-20T00:43:41.971Z",
+    "version": "0.1.52",
+    "nativeRevision": "bb664c7afca672c5f826835b21da13f356d554a2",
+    "nativeSha256": "9eb261461f346cec38aa7fcad15b3dfe5615832ca3dd4f0a57934a79f15660ba",
+    "actualInstalledEditorPaneObserved": true,
+    "windowsOpened": 1,
+    "verificationWindowClosed": true,
+    "layoutRestored": true,
+    "settingsUnchanged": true,
+    "backend": {
+      "pid": 63876,
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-55c5b5dca7b4bd478c80560c42fcee79e7a00b88d840cd049b48c48899408009\\xmind.exe",
+      "birth": "2026-10-20T00:27:24.1375610Z"
+    },
+    "backendReplaced": false,
+    "workspace": "D:/CantorAI2026/TestProj",
+    "session": "58ef35476048503c598b5629019379da",
+    "selectedRun": "51cf04c154e7c86ab8a4217dec2456dd",
+    "selectedModel": "claude-sonnet-4-6",
+    "selectedProvider": "Claude",
+    "restoredUsage": {
+      "uncachedInput": 31918,
+      "output": 142,
+      "total": null,
+      "cacheWrite": 0,
+      "cacheRead": 0,
+      "firstTokenSeconds": 1.75,
+      "responseSeconds": 4.48
+    },
+    "projectFilesChecked": 2,
+    "projectFilesUnchanged": true,
+    "initialReceiptScriptIssue": "A single-owner PowerShell result was an object, not an array. The final verifier normalizes this shape; no native operation was replayed.",
+    "layoutControlMisfire": "A maximize control opened the editor terminal panel; no commands or terminal text were submitted. It was hidden before restoring layout.",
+    "taskSubmissions": 0,
+    "modelRequests": 0,
+    "fileWrites": 0,
+    "uiProcessExecutionTested": false,
+    "externalBrowserRendered": false,
+    "scopePassed": true
+  },
+  "browser": {
+    "recordedAt": "2026-10-20T00:43:54.948Z",
+    "url": "http://127.0.0.1:53530/ui/",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "backendPid": 63876,
+    "backendReplaced": false,
+    "backendAuthorityChanged": false,
+    "oldPageRetired": false,
+    "workspaceCatalogueStatus": 200,
+    "workspaceCount": 7,
+    "membershipStatus": 200,
+    "providerIds": [
+      "claude",
+      "gemini",
+      "deepseek",
+      "openai"
+    ],
+    "automaticLocalConnection": true,
+    "serverTokenEntered": false,
+    "providerKeyEntered": false,
+    "exactPrimaryHistoryAndRunsPreserved": true,
+    "histories": {
+      "58ef35476048503c598b5629019379da": {
+        "messages": 43,
+        "runs": 4
+      },
+      "b6b46ac843ad6b08658f4c568a2e5ea4": {
+        "messages": 25,
+        "runs": 1
+      },
+      "9d170d81910b61a45c21ecd8557936c0": {
+        "messages": 63,
+        "runs": 2
+      },
+      "b49f242b063af1ab6ca13db94c5165a8": {
+        "messages": 4,
+        "runs": 2
+      }
+    },
+    "taskSubmissions": 0,
+    "providerInferenceRequests": 0,
+    "renderedExternalBrowserAcceptance": false,
+    "installedExtensionUpdated": true,
+    "installedNativePayloadsVerified": true,
+    "passed": true
+  },
+  "browserAssets": {
+    "url": "http://127.0.0.1:53530/ui/",
+    "assets": [
+      {
+        "path": "/ui/",
+        "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a"
+      },
+      {
+        "path": "/ui/patch-review.js",
+        "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+      },
+      {
+        "path": "/ui/browser.js",
+        "sha256": "d12970c6621cb4266ad620397a3b432eac60683884a8e0e9c62dd4e3a3000c52"
+      },
+      {
+        "path": "/ui/terminal.js",
+        "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+      },
+      {
+        "path": "/ui/browser.css",
+        "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+      },
+      {
+        "path": "/ui/xterm.css",
+        "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+      },
+      {
+        "path": "/ui/xterm.js",
+        "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+      },
+      {
+        "path": "/ui/xterm-fit.js",
+        "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+      },
+      {
+        "path": "/ui/chat.js",
+        "sha256": "9979333cb8f064094d314d11f1ef5126b394067194b2993d1920034f08e9264a"
+      },
+      {
+        "path": "/ui/chat.css",
+        "sha256": "a96eb75d475dc2b7fe011e595a738133dbc99cf7947b88e85329eabe8978fc8a"
+      },
+      {
+        "path": "/ui/client.js",
+        "sha256": "5b8f6ca97f0d00dacdd68d43c87d107faa0fbb1ad2521199aecaefd7f56b3994"
+      },
+      {
+        "path": "/ui/marked.js",
+        "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+      },
+      {
+        "path": "/ui/purify.js",
+        "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+      }
+    ],
+    "matchesInstalled52Assets": true,
+    "rendered": false
+  },
+  "preservation": {
+    "owners": 48,
+    "pages": 18,
+    "priorOwnersPreserved": 46,
+    "priorHtmlPagesPreserved": 17,
+    "backendReplacedDuringInstalled52Checks": false,
+    "receipt": "C:/xMindNativeValidation/coding-0.1.52-final-live-owners-20261019.json",
+    "scope": "Exact process identities and HTML availability; obsolete view APIs are not qualified"
+  },
+  "earlierUnexpectedHandoff": {
+    "previousBackend": 32704,
+    "currentBackend": 63876,
+    "recordedSeparately": true
+  },
+  "newFullNativeSuiteRun": false,
+  "newLiveInferenceRequests": 0,
+  "externalBrowserRendered": false,
+  "goalStatus": "active",
+  "releaseAccepted": false
+}

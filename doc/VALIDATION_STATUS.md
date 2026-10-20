@@ -2,6 +2,46 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed 0.1.52 connection fixes — 2026-10-19
+
+Installed 0.1.52 includes native library lifetime protection and explicit-only
+backend upgrades. Source `bb664c7a`, native `9eb26146`, SDK58a8aab and DLL1ff2a8e7
+are packaged in a 34,440,414-byte VSIX (`fd20e209`, 2,448 entries). All 2,445
+installed payloads verify. Complete local extension/browser gates pass 445/158;
+all 17,439 staged source, dependency, runtime and asset files remain unchanged
+through testing and packaging. The corrected native view/provider/runtime gate
+passes 3/3 in 183.50 seconds. This is a focused native gate, not a new 154-contract
+suite or a release acceptance claim.
+
+An actual installed VS Code window on the ordinary TestProj profile restores
+session `58ef35476048503c598b5629019379da`, completed run
+`51cf04c154e7c86ab8a4217dec2456dd`, Claude/claude-sonnet-4-6 and supplied metrics
+(31,918 uncached input, 142 output, 1.75-second first token, 4.48-second response).
+The existing backend 63876 and its creation identity remain unchanged. This
+read-only pane check submits no model prompt, edit or process command; prior
+coding-edit/process evidence retains its original scope. The one editor window
+is closed, layout is restored, settings remain byte-identical and project hashes
+are unchanged. The installed51 backup verifies 2,447 files.
+
+Use <http://127.0.0.1:53530/ui/> for the current webpage. Its retained native view
+is byte-identical to installed52, and all 13 served assets match that package.
+Workspace catalogue/membership return 200, seven workspaces and four saved
+providers load, and all 135 original messages/nine runs plus workspace authority
+match the before-connection snapshot. No server token or provider key was entered.
+The backend remains the existing `a26bed3f` server; the `9eb26146` fixes concern
+view startup, so opening either updated client does not replace it. The earlier
+unexpected 32704-to-63876 handoff remains recorded separately below.
+
+All 46 prior owner identities and 17 prior HTML pages survive this installed52
+phase; the new browser brings the inventory to 48 owners/18 pages. This inventory
+proves process/HTML preservation, not repaired APIs for every obsolete view.
+External-browser rendering remains unverified. The broader goal remains active.
+
+See [checkpoint](evidence/coding-installed-0.1.52-checkpoint-20261019.json),
+[actual editor pane](evidence/editor-installed-0.1.52-restored-20261019.png),
+[extension tests](evidence/coding-installed-0.1.52-extension-20261019.log) and
+[browser tests](evidence/coding-installed-0.1.52-browser-20261019.log).
+
 ## Primary webpage repair and explicit view upgrades — 2026-10-19
 
 The repaired connection is <http://127.0.0.1:51321/ui/>. Its 13 HTTP assets match
