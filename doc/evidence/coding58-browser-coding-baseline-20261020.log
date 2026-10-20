@@ -1,0 +1,141 @@
+TAP version 13
+# Subtest: clamps below, within and above the range
+not ok 1 - clamps below, within and above the range
+  ---
+  duration_ms: 1.6799
+  type: 'test'
+  location: 'D:\\CantorAI2026\\TestProj\\xmind-browser58-coding-20261020\\normalize.test.mjs:5:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    -   0,
+    -   5,
+        10,
+    +   10,
+    +   20
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 0
+    1: 5
+    2: 10
+  actual:
+    0: 10
+    1: 10
+    2: 20
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/CantorAI2026/TestProj/xmind-browser58-coding-20261020/normalize.test.mjs:5:60)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: normalizes clamped values into zero through one
+not ok 2 - normalizes clamped values into zero through one
+  ---
+  duration_ms: 0.8566
+  type: 'test'
+  location: 'D:\\CantorAI2026\\TestProj\\xmind-browser58-coding-20261020\\normalize.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   10,
+    +   10,
+    +   10,
+    +   10,
+    +   20
+    -   0,
+    -   0,
+    -   0.5,
+    -   1,
+    -   1
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 0
+    1: 0
+    2: 0.5
+    3: 1
+    4: 1
+  actual:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+    4: 20
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/CantorAI2026/TestProj/xmind-browser58-coding-20261020/normalize.test.mjs:6:67)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: uses the supplied offset and width
+not ok 3 - uses the supplied offset and width
+  ---
+  duration_ms: 0.1871
+  type: 'test'
+  location: 'D:\\CantorAI2026\\TestProj\\xmind-browser58-coding-20261020\\normalize.test.mjs:7:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   10,
+    +   10,
+    +   10
+    -   0,
+    -   0.5,
+    -   1
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 0
+    1: 0.5
+    2: 1
+  actual:
+    0: 10
+    1: 10
+    2: 10
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/CantorAI2026/TestProj/xmind-browser58-coding-20261020/normalize.test.mjs:7:54)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: preserves the input array
+ok 4 - preserves the input array
+  ---
+  duration_ms: 0.1354
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 67.2044

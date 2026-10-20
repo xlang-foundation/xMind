@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-10-20T11:24:17.021Z",
+  "root": "D:/CantorAI2026/TestProj/xmind-browser58-coding-20261020",
+  "hashes": {
+    "clamp.mjs": "6061bdeff515c980050666d5bb523efc4a3ba8aee1f03cab9b32a83f180dd6d5",
+    "normalize.mjs": "bb07d843b3e96d6c754aa9d0b302e78ab02727f50a62473537f177a2897c8ab8",
+    "normalize.test.mjs": "a44ebcda5ef207650c7978c326ff83115b515eaf3f072c013d0cd26ff5955cc4"
+  },
+  "baseline": {
+    "exitCode": 1,
+    "tests": 4,
+    "pass": 1,
+    "fail": 3
+  },
+  "taskSubmissions": 0
+}

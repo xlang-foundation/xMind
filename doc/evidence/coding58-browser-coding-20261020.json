@@ -1,0 +1,168 @@
+{
+  "recordedAt": "2026-10-20T11:27:13.179Z",
+  "version": "0.1.58",
+  "url": "http://127.0.0.1:59185/ui/",
+  "session": "ad86de667793281272e4ea9c4f9cd89c",
+  "root": "dae9c437883303078971bf053b83fb51",
+  "taskSubmissions": 1,
+  "state": "completed",
+  "rootMessages": 12,
+  "ownedChild": "25d0579e63e14be260ff92939184cf63",
+  "childMessages": 8,
+  "readPaths": [
+    "xmind-browser58-coding-20261020/clamp.mjs",
+    "xmind-browser58-coding-20261020/normalize.mjs",
+    "xmind-browser58-coding-20261020/normalize.test.mjs"
+  ],
+  "edits": [
+    {
+      "operation": "515dc9f9ff7a950019bdb73d74bde88b",
+      "path": "xmind-browser58-coding-20261020/clamp.mjs",
+      "beforeSha256": "6061bdeff515c980050666d5bb523efc4a3ba8aee1f03cab9b32a83f180dd6d5",
+      "afterSha256": "c5a5db475cfde53c6a88823ba923bbb5e929db376f25d78f9dd334bce7d4a012"
+    },
+    {
+      "operation": "da2626c24a7db87db9e88f7696395402",
+      "path": "xmind-browser58-coding-20261020/normalize.mjs",
+      "beforeSha256": "bb07d843b3e96d6c754aa9d0b302e78ab02727f50a62473537f177a2897c8ab8",
+      "afterSha256": "c460a86dfd2d4d1f90f14ffd56212d4c43a48528e8d5cfbeb3a041883d3465df"
+    }
+  ],
+  "processOperation": "a46f4e41e7f0d01348678366e64caf6a",
+  "baseline": {
+    "exitCode": 1,
+    "tests": 4,
+    "pass": 1,
+    "fail": 3
+  },
+  "after": {
+    "exitCode": 0,
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "processTreeRetired": true
+  },
+  "testsSha256": "a44ebcda5ef207650c7978c326ff83115b515eaf3f072c013d0cd26ff5955cc4",
+  "testsUnchanged": true,
+  "fixtureFileSetExact": true,
+  "priorEightSessions167Messages13RootsTwoChildren11MessagesExact": true,
+  "providerMetadataExact": true,
+  "suppliedUsage": [
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 149,
+        "input_tokens": 8584,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 149,
+        "prompt_tokens": 8584,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 4402,
+      "first_token_ms": 2176
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 100,
+        "input_tokens": 9624,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 100,
+        "prompt_tokens": 9624,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3001,
+      "first_token_ms": 1573
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 237,
+        "input_tokens": 9852,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 237,
+        "prompt_tokens": 9852,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 6244,
+      "first_token_ms": 2900
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 152,
+        "input_tokens": 10254,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 152,
+        "prompt_tokens": 10254,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2560,
+      "first_token_ms": 1230
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 142,
+        "input_tokens": 10550,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 142,
+        "prompt_tokens": 10550,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2824,
+      "first_token_ms": 909
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 338,
+        "input_tokens": 11198,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 338,
+        "prompt_tokens": 11198,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 6755,
+      "first_token_ms": 1329
+    }
+  ],
+  "modelProseLimitation": "Final explanation calls Math.max-to-Math.min a one-character fix; two characters change. Applied bytes and reported tests are correct.",
+  "scope": "Actual installed58 hidden IAB multi-file coding through shared adopted native backend, approved edits and registered PowerShell Node tests; separate from current VS Code/external-browser and nested graph live-provider acceptance.",
+  "passed": true,
+  "processProof": {
+    "profile": "powershell",
+    "arguments": [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "node --test normalize.test.mjs"
+    ],
+    "workdir": "xmind-browser58-coding-20261020",
+    "background": false,
+    "persistent": false
+  },
+  "reloadRestoredWithoutReplay": true,
+  "composerGeometryVerified": true,
+  "existingOwnersPreserved": 7,
+  "hostObserverCorrection": "Initial shell verifier requested /ui/index.html and got404. The observed /ui/ document route was used instead; failed quoting edits made no changes. No model task or tool was resubmitted."
+}

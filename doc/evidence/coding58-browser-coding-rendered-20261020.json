@@ -1,0 +1,103 @@
+{
+  "reloadRestored": true,
+  "expanded": {
+    "rectangles": [
+      {
+        "disabled": false,
+        "height": 668,
+        "id": "agent-sidebar",
+        "width": 420,
+        "x": 860,
+        "y": 52
+      },
+      {
+        "disabled": false,
+        "height": 72,
+        "id": "prompt",
+        "width": 376,
+        "x": 882.3333740234375,
+        "y": 566.3541870117188
+      },
+      {
+        "disabled": false,
+        "height": 24,
+        "id": "footer-provider",
+        "width": 82.30208587646484,
+        "x": 943.6771240234376,
+        "y": 650.09375
+      },
+      {
+        "disabled": false,
+        "height": 24,
+        "id": "model",
+        "width": 82.30208587646484,
+        "x": 1031.979248046875,
+        "y": 650.09375
+      },
+      {
+        "disabled": false,
+        "height": 31.479167938232425,
+        "id": "send",
+        "width": 57.75,
+        "x": 1200.5833740234375,
+        "y": 646.3541870117188
+      }
+    ],
+    "root": "dae9c437883303078971bf053b83fb51",
+    "session": "ad86de667793281272e4ea9c4f9cd89c",
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    },
+    "skillsOpen": true
+  },
+  "collapsed": {
+    "model": "claude-sonnet-4-6",
+    "observedAt": "2026-10-20T11:28:50.846Z",
+    "provider": "claude",
+    "rectangles": [
+      {
+        "height": 668,
+        "id": "agent-sidebar",
+        "width": 420,
+        "x": 860,
+        "y": 52
+      },
+      {
+        "height": 72,
+        "id": "prompt",
+        "width": 376,
+        "x": 882.3333740234375,
+        "y": 566.3541870117188
+      },
+      {
+        "height": 24,
+        "id": "footer-provider",
+        "width": 82.30208587646484,
+        "x": 943.6771240234376,
+        "y": 650.09375
+      },
+      {
+        "height": 24,
+        "id": "model",
+        "width": 82.30208587646484,
+        "x": 1031.979248046875,
+        "y": 650.09375
+      },
+      {
+        "height": 31.479167938232425,
+        "id": "send",
+        "width": 57.75,
+        "x": 1200.5833740234375,
+        "y": 646.3541870117188
+      }
+    ],
+    "root": "dae9c437883303078971bf053b83fb51",
+    "rootMessages": 12,
+    "sendEnabled": true,
+    "session": "ad86de667793281272e4ea9c4f9cd89c",
+    "skillsOpen": false,
+    "url": "http://127.0.0.1:59185/ui/"
+  },
+  "taskSubmissions": 1
+}
