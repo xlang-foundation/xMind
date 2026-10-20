@@ -2463,21 +2463,21 @@ Run Repository::retire_graph_run(const std::string& id,RunState next,const std::
     if(!impl_->database.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context retirement requires its typed owner operation");
     if(next!=RunState::failed && next!=RunState::cancelled)throw std::invalid_argument("Graph retirement requires a failed/cancelled outcome");object_json(reason);auto& db=impl_->database;Transaction transaction(db);auto root=graph_run(id);if(!allowed(root.run.state,next))throw Conflict("Graph cannot retire from its current state");
     if(root.run.state==RunState::paused&&!root.run.parent_id.empty())throw Conflict("Paused invocation retirement requires its ultimate root owner");
-    if(root.run.state==RunState::paused&&root.run.parent_id.empty()&&!db.execute("SELECT run_id FROM graph_invocations WHERE root_run_id=? LIMIT 1",{id}).rows.empty()){
+    if((root.run.state==RunState::paused||root.run.state==RunState::running)&&root.run.parent_id.empty()&&!db.execute("SELECT run_id FROM graph_invocations WHERE root_run_id=? LIMIT 1",{id}).rows.empty()){
         const auto tree=db.execute("WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) SELECT r.id FROM tree t JOIN runs r ON r.id=t.id ORDER BY t.depth DESC,r.id",{id}).rows;
-        if(tree.size()>257)throw Conflict("Paused retirement tree exceeds expansion limits");
+        if(tree.size()>257)throw Conflict("Quiescent retirement tree exceeds expansion limits");
         std::vector<std::string> owners;
         for(const auto& row:tree){const auto current=run(text(row[0]));if(terminal(current.state))continue;
-            if(!current.graph_root||current.state!=RunState::paused||impl_->graph_lineage(current.id).first!=id)throw Conflict("Paused retirement tree still owns executable work");
-            if(impl_->has_operations(current.id,"'proposed','awaiting_approval','approved','executing','uncertain'"))throw Conflict("Paused retirement tree has unresolved effects");owners.push_back(current.id);
+            if(!current.graph_root||(current.state!=RunState::paused&&current.state!=RunState::running&&current.state!=RunState::queued)||impl_->graph_lineage(current.id).first!=id)throw Conflict("Quiescent retirement tree still owns executable work");
+            if(impl_->has_operations(current.id,"'proposed','awaiting_approval','approved','executing','uncertain'"))throw Conflict("Quiescent retirement tree has unresolved effects");owners.push_back(current.id);
         }
-        if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{id}).rows.empty())throw Conflict("Paused retirement tree still owns model transport");
+        if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{id}).rows.empty())throw Conflict("Quiescent retirement tree still owns model transport");
         for(const auto& owner:owners){auto graph=graph_run(owner);impl_->root_boundary(graph.run,next);GraphCoordinator coordinator(GraphPlan(graph.specification_json),graph.checkpoint_json,GraphRestoreMode::live);
             for(const auto& node:coordinator.inspect().running){const auto children=db.execute("SELECT id,state FROM runs WHERE parent_run_id=? AND node_id=?",{owner,node}).rows;
-                if(children.size()!=1||!terminal(state_value(text(children[0][1])))||text(children[0][1])=="completed")throw Conflict("Paused retirement has an unsettled child outcome");
-                coordinator.fail(node,false);impl_->event(owner,"graph.child.settled",Json{{"child_run_id",text(children[0][0])},{"node_id",node},{"child_state",text(children[0][1])},{"reason","paused_tree_retirement"}}.dump());
+                if(children.size()!=1||!terminal(state_value(text(children[0][1])))||text(children[0][1])=="completed")throw Conflict("Quiescent retirement has an unsettled child outcome");
+                coordinator.fail(node,false);impl_->event(owner,"graph.child.settled",Json{{"child_run_id",text(children[0][0])},{"node_id",node},{"child_state",text(children[0][1])},{"reason","quiescent_tree_retirement"}}.dump());
             }
-            coordinator.cancel_pending();impl_->graph_checkpoint(graph,coordinator,graph.checkpoint_revision);changed_one(db.execute("UPDATE runs SET state=? WHERE id=? AND state='paused'",{state_name(next),owner}));impl_->cancel_waiting(owner);impl_->event(owner,"run."+state_name(next),reason);
+            coordinator.cancel_pending();impl_->graph_checkpoint(graph,coordinator,graph.checkpoint_revision);changed_one(db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),owner,state_name(graph.run.state)}));impl_->cancel_waiting(owner);impl_->event(owner,"run."+state_name(next),reason);
         }
         transaction.commit();root.run.state=next;return root.run;
     }

@@ -100,7 +100,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
     std::size_t agent_count=0;
     const auto visit=[&](auto&& self,const GraphPlan& current,bool nested)->void {for(const auto& node:current.nodes()){
         if(node.kind==GraphNodeKind::graph){if(settings_.context)throw GraphContextUnavailable("Nested graph context ownership is not implemented");self(self,GraphPlan(node.graph->specification_json),true);continue;}
-        if(nested&&node.kind==GraphNodeKind::human)throw RunUnavailable("Nested graph human pause/resume ownership is not implemented");
+
         if(node.kind==GraphNodeKind::agent){if(!agents_)throw RunUnavailable("Graph agent execution requires a configured model");if(!node.model_id.empty() && std::find(configured.begin(),configured.end(),node.model_id)==configured.end())throw std::invalid_argument("Graph node model is not configured");}
         if(node.kind==GraphNodeKind::agent)++agent_count;
         if(node.kind==GraphNodeKind::tool){
@@ -349,6 +349,7 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
         }
     }else{
         if(execution_budget(plan,model))throw GraphContextUnavailable("Graph has no captured context admission");
+        if(root.run.state==RunState::paused&&!root.run.parent_id.empty())return root.run;
         if(root.run.state==RunState::queued)root.run=store_.transition(id,RunState::queued,RunState::running).get();else if(root.run.state!=RunState::running)throw Conflict("Graph is not eligible for execution");
     }
     std::stop_source stop;std::stop_callback cancelled(external,[&]{stop.request_stop();});
@@ -382,7 +383,7 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
     try {for(;;){
         if(std::chrono::steady_clock::now()>=deadline){timed_out=true;stop.request_stop();}
         for(auto it=flights.begin();it!=flights.end();){if(it->result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready){++it;continue;}
-            try{const auto child=it->result.get();if(!terminal(child.state))throw DatabaseError("Graph child returned without retirement");store_.settle_graph_child(child.id).get();if(child.state!=RunState::completed)stop.request_stop();}
+            try{const auto child=it->result.get();if(!terminal(child.state)){if(!child.graph_root||it->slot||it->physical||store_.child_admission(child.id).get().root_run_id!=scope->root_id)throw DatabaseError("Graph child returned without retirement or closed invocation ownership");if(child.state!=RunState::paused){resolution_failed=true;stop.request_stop();}}else{store_.settle_graph_child(child.id).get();if(child.state!=RunState::completed)stop.request_stop();}}
             catch(...){if(!fault)fault=std::current_exception();stop.request_stop();}if(it->slot)budget->release_leaf();if(it->physical)scope->release();it=flights.erase(it);
         }
         if(fault){if(flights.empty())std::rethrow_exception(fault);std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
@@ -390,6 +391,9 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
         if(preserve_human_pause&&external.stop_requested()&&root.run.state==RunState::paused&&flights.empty())return root.run;
         if(stop.stop_requested()){
             if(!flights.empty()){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
+            // Descendant controllers relinquish metadata after draining leaves;
+            // the ultimate root retires every remaining invocation atomically.
+            if(scope->root_id!=id)return root.run;
             return retire_owner(external.stop_requested()?RunState::cancelled:RunState::failed,Json{{"reason",external.stop_requested()?"graph_cancelled":timed_out.load()?"graph_active_segment_timeout":resolution_failed?"graph_data_resolution_failed":"graph_child_failed"}});
         }
         GraphCoordinator coordinator(plan,root.checkpoint_json,GraphRestoreMode::live);GraphDecision decisions;

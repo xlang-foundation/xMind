@@ -303,6 +303,13 @@ GraphRootRecord GraphService::human_input(const std::string& id,const std::strin
     }}catch(...){job->phase=Impl::Phase::faulted;impl_->fail_locked();throw;}
     impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
 }
+GraphRootRecord GraphService::tree_human_input(const std::string& id,const std::string& owner,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision,std::int64_t owner_revision){
+    controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();const auto owned=impl_->active.find(id);if(owned==impl_->active.end())throw NotFound("Graph is not owned by this service");const auto job=owned->second;const bool waiting=job->phase==Impl::Phase::waiting;if(job->cancelled)throw Conflict("Graph cancellation is pending");const auto root=impl_->store.graph_run(id).get();const auto task=Json::parse(root.input_json);impl_->runner.validate(GraphPlan(root.specification_json),task.value("model_id",std::string{}));impl_->runner.validate_context_owner(id);
+    if(waiting)impl_->enqueue(job);GraphRootRecord result;
+    try{result=impl_->store.input_graph_tree_human(id,owner,node,input,actor,revision,owner_revision).get();}catch(...){if(waiting)impl_->drop_pending_back();throw;}
+    if(waiting){if(result.run.state==RunState::running)job->phase=Impl::Phase::queued;else impl_->drop_pending_back();}
+    impl_->publish_locked();lock.unlock();impl_->changed.notify_one();return result;
+}
 Run GraphService::resume_graph(const std::string& id,const std::string& actor,std::int64_t revision){
     controller(actor);if(revision<1)throw std::invalid_argument("Graph resume requires its observed checkpoint revision");
     std::unique_lock lock(impl_->mutex);impl_->require_available();const auto owned=impl_->active.find(id);

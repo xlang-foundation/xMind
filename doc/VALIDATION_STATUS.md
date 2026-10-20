@@ -2,6 +2,18 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Native nested human runner/service continuation — 2026-10-20
+
+Noncontext nested graphs now execute human waits through the native runner. Paused child controllers relinquish their live futures without being settled as failed. Typed service input requires the observed ultimate-root and owner checkpoint revisions, wakes only the answered ancestry and reuses the existing invocation identities/checkpoints. Descendant controllers drain their leaf work on stop, leaving the ultimate root to retire quiescent graph ownership atomically, including a mixture of running and still-paused branches. Active executable leaves still prevent transactional retirement. Nested graphs with context enabled remain rejected.
+
+The actual embedded-xlang3/SQLite and native-tool fixture runs a three-invocation-level graph: one real prefix file read, a durable nested human wait, persistence/service restart, stale input rejection and then the chosen real file read through the service scheduler. Prefix event/history counts remain unchanged and the root has only its user input/final join. A separate actual partial-resume fixture answers one of two nested branches, observes its create_file approval proposal while the other branch stays paused, then cancels and verifies both invocation owners retire and neither unapproved file exists. Existing nested effects, shared physical leaf permits, cancellation/deadline, context, service and recovery regressions remain in the focused gate.
+
+Complete Release build and18focused contracts pass63.49seconds with2629project/16SDK/1870pure-library/76SDK-runtime/18598dependency/130binary file sets/hashes unchanged. Candidate executable SHA2567d95d70b8c1b96f5bd61955f09cc0bfca5ddfb999a7ff3df3509faae14cc3c34. Original compile failure (a fixture variable collision) and subsequent17/18 fixture failure (incorrect exception expectation for a missing root node) are retained alongside the passing gate in evidence/nested-graph-human-runtime-*-20261020-*; raw patches/closures remain under C:/xMindNativeValidation/nested-graph-human-runtime-*.
+
+This is native runner and concrete GraphService delivery, not external descendant-answer delivery. ExecutionPlatform/provider wrapper forwarding, authenticated versioned HTTP and CLI commands, capability negotiation and browser/VS Code answer controls remain to be wired and tested. Root physical permits/deadline are shared within a live execution segment; shared durable active-time/context/model-call accounting across pauses is still required. No new full155 pass or installed/rendered acceptance is claimed. Installed56 and user tasks/settings/history remain unchanged; complete backend qualification remains the separately preserved bd06e275/bf189ca7 artifact.
+
+
+
 ## Nested paused-tree recovery and service adoption — 2026-10-19
 
 The service now validates a whole paused invocation tree before metadata-only adoption: immutable graph bindings and ultimate-root admission, immediate parents/session/roles, three invocation levels and256children, a human wait somewhere in the tree, and no runnable or active executable child. Unavailable nested answer execution keeps its closed ownership available for inspection/cancellation; input preflight still rejects it without mutation. Service close preserves the paused tree, and a new service can cancel it atomically after restart.

@@ -56,6 +56,8 @@ public:
     Run restore_operation(std::string id,std::string session,std::string operation_id) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;
+    GraphRootRecord tree_human_input(const std::string& root,const std::string& owner,const std::string& node,
+        const std::string& input,const std::string& actor,std::int64_t root_revision,std::int64_t owner_revision);
     Run resume_graph(const std::string& root,const std::string& authenticated_actor,
         std::int64_t expected_checkpoint_revision) override;
     GraphContextMetadata graph_context(const std::string& root)const override;
