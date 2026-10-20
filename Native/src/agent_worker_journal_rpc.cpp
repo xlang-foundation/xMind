@@ -65,6 +65,14 @@ ModelCallReservation attempt_call(AgentWorkerRpcPeer& peer,const std::string& me
     }catch(const Json::exception&){invalid();}
     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
 }
+void digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)invalid();}
+std::string encode_turn(const AgentWorkerToolTurnRecord& turn){const auto& m=turn.model;return Json{{"model",{{"generation",m.generation},{"root_run_id",m.root_run_id},{"owner_run_id",m.owner_run_id},{"attempt_id",m.attempt_id},{"request_binding",m.request_binding}}},{"message_sequences",turn.message_sequences},{"messages_binding",turn.messages_binding}}.dump();}
+AgentWorkerToolTurnRecord decode_turn(const AgentWorkerScope& scope,const std::string& attempt,const std::string& bytes){
+    try{const auto v=parse(bytes);object(v,3);const auto& m=v.at("model");object(m,5);AgentWorkerToolTurnRecord turn{{text(m.at("generation")),text(m.at("root_run_id")),text(m.at("owner_run_id")),attempt_id(m.at("attempt_id")),text(m.at("request_binding"))},{},text(v.at("messages_binding"))};
+        if(turn.model.generation!=scope.generation||turn.model.root_run_id!=scope.root_id||turn.model.owner_run_id!=scope.run_id||turn.model.attempt_id!=attempt)invalid();digest(turn.model.request_binding);digest(turn.messages_binding);
+        const auto& sequences=v.at("message_sequences");if(!sequences.is_array()||sequences.size()<2||sequences.size()>65)invalid();std::int64_t previous=0;for(const auto& s:sequences){const auto n=integer(s);if(n<=previous||n>9007199254740991LL)invalid();turn.message_sequences.push_back(n);previous=n;}return turn;
+    }catch(const Json::exception&){invalid();}
+}
 }
 Run AgentWorkerJournalClient::run(const std::string& id){return std::get<Run>(call(peer_,"journal.run",id));}
 Session AgentWorkerJournalClient::session(const std::string& id){return std::get<Session>(call(peer_,"journal.session",id));}
@@ -82,6 +90,10 @@ Event AgentWorkerJournalClient::acknowledge_model_event(const std::string& attem
 ModelCallReservation AgentWorkerJournalClient::reserve_model_call(const std::string& attempt){return attempt_call(peer_,"journal.reserve_model",attempt,"reserved");}
 ModelCallReservation AgentWorkerJournalClient::start_model_call(const std::string& attempt){return attempt_call(peer_,"journal.start_model",attempt,"started");}
 ModelCallReservation AgentWorkerJournalClient::finish_model_call(const std::string& attempt){return attempt_call(peer_,"journal.finish_model",attempt,"finished");}
+AgentWorkerToolTurnRecord AgentWorkerJournalClient::commit_read_turn(const std::string& attempt){
+    try{return decode_turn(peer_.scope(),attempt,peer_.call("journal.commit_read_turn",Json{{"attempt_id",attempt}}.dump()));}
+    catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker read turn rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker read turn cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker read turn deadline elapsed");throw;}
+}
 Run AgentWorkerJournalClient::complete_run(const std::string& attempt){
     try{const auto value=std::get<Run>(decode(AgentWorkerJournalReadKind::run,peer_.call("journal.complete_run",Json{{"attempt_id",attempt}}.dump())));if(value.id!=peer_.scope().run_id||value.state!=RunState::completed)invalid();return value;}
     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker completion rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker completion cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker completion deadline elapsed");throw;}
@@ -94,6 +106,7 @@ AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService& store,Ag
         try{check();const auto v=parse(payload);
             if(method=="journal.begin_run"){object(v,0);return encode(store.start_agent_worker_run(lease,deadline,owner_cancel,cancel).get());}
             if(method=="journal.model_event"){object(v,4);const auto result=store.agent_worker_model_event(lease,attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),text(v.at("kind")),text(v.at("json"))).get();check();return encode(std::vector<Event>{result});}
+            if(method=="journal.commit_read_turn"){object(v,1);const auto result=store.commit_agent_worker_read_turn(lease,attempt_id(v.at("attempt_id")),deadline,owner_cancel,cancel).get();check();return encode_turn(result);}
             if(reserve||start||finish||complete){object(v,1);const auto attempt=attempt_id(v.at("attempt_id"));if(complete)return encode(store.complete_agent_worker_run(lease,attempt,deadline,owner_cancel,cancel).get());if(finish)return encode_attempt(store.finish_agent_worker_model(lease,attempt,deadline,owner_cancel,cancel).get());return encode_attempt(reserve?store.reserve_agent_worker_model(lease,attempt,deadline,owner_cancel,cancel).get():store.start_agent_worker_model(lease,attempt,deadline,owner_cancel,cancel).get());}
             const auto k=kind(method);object(v,2);AgentWorkerJournalRead query{k,text(v.at("target")),integer(v.at("after"))};const auto result=store.read_agent_worker_journal(lease,std::move(query)).get();check();return encode(result);}
         catch(const AgentWorkerRpcRemoteError&){throw;}

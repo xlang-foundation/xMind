@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-20T17:30:41.969Z",
+  "gate": {
+    "recordedAt": "2026-10-20T17:30:36.211Z",
+    "sourceParent": "1ad1f38d7ed3d0c02a09b1ddc06144b8092fd58d",
+    "sourcePatchSha256": "fbd982ce62287bbb0bb1668be3722963fcc34210811d0e353887bcf9ecddea95",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 56720,
+      "launchedAt": "2026-10-20T17:13:06.399Z",
+      "completedAt": "2026-10-20T17:27:52.836Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6bacddc321c01ee070b638276ebe6eb08a33a8bc1a9efdab52400dc075e1ede2"
+    },
+    "test": {
+      "pid": 4500,
+      "launchedAt": "2026-10-20T17:27:56.631Z",
+      "completedAt": "2026-10-20T17:30:33.450Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "25fc3b3f202328a2f1ef41772bc38397b9a8bccfd0e166486fa33c6e0e075f37"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 156.77,
+    "projectFiles": 2661,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "a1ab5c722eeefb0e9b49712c137b082d80787bb8f77ebe4593985f2e5fd95934",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-tool-turn-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-build.log": "6bacddc321c01ee070b638276ebe6eb08a33a8bc1a9efdab52400dc075e1ede2",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-build-terminal.json": "3dfe604d6cfbc97fb5e1347e1c7de700b2dd1ff5f3b0ef9b7687a370a7d7ea85",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-ctest.log": "25fc3b3f202328a2f1ef41772bc38397b9a8bccfd0e166486fa33c6e0e075f37",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-ctest-terminal.json": "4b32dd6e5f79ffdc3448519eed84537c99d401171786f9fe28cad4869c8096d7",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-LastTest.log": "8d870320860554d6a61f8535b05940de829b759025abae906e396550f5a5335a",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-test-inventory.json": "003af88feea3dd6f57d9e64500802c9ff8e19fcc72287747e5ffd3dfd0203a9c",
+        "doc/evidence/agent-worker-tool-turn-focused-20261020-gate.json": "faf84ae2cc94725d3b2707e6c89872e534fcd04f5ad5dce67db3144ee39b4b38"
+      },
+      "localManifestHashes": {
+        "source.patch": "fbd982ce62287bbb0bb1668be3722963fcc34210811d0e353887bcf9ecddea95",
+        "inputs-before-build.json": "6b10195b5d0f4f0c352ef378cfca7908bd4b9f9dc850f15eed1ec6f63708c642",
+        "binaries-before-test.json": "8faec43d693d38a55e3b0c9667501a893cab5e8b94cae6f272743e740791d4c0"
+      }
+    }
+  },
+  "children": [
+    {
+      "mode": "read",
+      "pid": 64252,
+      "creationTime": "134369909847092247"
+    },
+    {
+      "mode": "read_delivery",
+      "pid": 9068,
+      "creationTime": "134369909848406135"
+    },
+    {
+      "mode": "read_denied",
+      "pid": 15628,
+      "creationTime": "134369909849106491"
+    },
+    {
+      "mode": "read_cancel",
+      "pid": 17196,
+      "creationTime": "134369909850169603"
+    },
+    {
+      "mode": "read_turn_delivery",
+      "pid": 25420,
+      "creationTime": "134369909851530078"
+    },
+    {
+      "mode": "read_turn_rollback",
+      "pid": 39512,
+      "creationTime": "134369909852314668"
+    }
+  ],
+  "fixtureSha256": "85f09ffb60c97213177f6612394a0200674cdac76e5f02c1a0880fa089cb91f4",
+  "ledgerFixtureSha256": "d470f66ee2fbb949315ad4e2eef3b67d27c5856eb408d4cf6b05f3c82d221802",
+  "behavior": "An authenticated journal.commit_read_turn request contains only an attempt ID. Backend persistence validates the full captured current lease and ordinary root, actual canonical assistant, fully retired/latest model attempt, unique complete provider call set and exact returned native read records. It derives every tool message from protected actual output bytes, then appends the assistant and all results, conversation/worker events and an immutable compact message-sequence/content binding receipt in one xlang3/SQLite transaction. No worker-supplied assistant, results or skill selection are accepted.",
+  "continuation": "New worker reservation, starting a previously reserved attempt, dispatching a previously started attempt and final completion require all captured actual tool responses to have committed turns. Idempotent acknowledgement returns the same receipt, verifies its persisted message bindings and appends nothing. Generic information APIs cannot read or change the new private tool-turn category. The owned receipt decoder checks exact fields, scope/model identity, safe ordered sequences and digests.",
+  "actualChildCases": "The positive child reads the unseen native marker, reconstructs the host and rejects repeat I/O, commits by attempt only, reloads its canonical backend history, performs a second actual native HTTP model call using that history and completes from the backend final receipt. The independent RPC peer checks the actual assistant call and original marker tool content on the continuation. Native denial/cancelled approval turns commit their captured failure outputs. Original read-result lost delivery remains covered. New turn lost delivery proves committed canonical history before exact owned child termination and duplicate-free acknowledgement. An actual injected SQLite information-insert fault is observed by the backend; history/events roll back while actual read/model facts remain.",
+  "ledgerCases": "Synthetic metadata/response fixtures cover incomplete batches, exact multi-call ordering and opaque output bytes, success plus known pre-dispatch failure, concurrency/idempotence, receipt-to-message binding, wrong process metadata, queue deadline/cancellation, revoked acknowledgement and funding/start/dispatch continuation guards. Eight malformed authenticated turn receipts exercise the child decoder without production writes or model requests.",
+  "limits": "Actual child proxy orchestration and read-turn persistence only. Full child coding AgentRunner workspace/guidance construction, activity/failure/context/graph/effect adapters, product AgentService/GraphService placement and Local/Nexus integration remain open. Model requests are still child-supplied; full backend inference/context-window authority remains open. Large history paging remains open. Installed clients/backend unchanged. No full suite, hosted, rendered, actual live-provider task or CPython qualification."
+}

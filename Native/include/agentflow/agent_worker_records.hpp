@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "agentflow/delegation_records.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include <variant>
@@ -37,6 +38,11 @@ struct AgentWorkerReadClaimRecord {
     std::string state;
     bool dispatched=false,success=false;
     std::string actual_output_json,output_binding;
+};
+struct AgentWorkerToolTurnRecord {
+    AgentWorkerModelClaimSpec model;
+    std::vector<std::int64_t> message_sequences;
+    std::string messages_binding;
 };
 // An explicit read vocabulary, never arbitrary repository reflection. The
 // backend validates the exact captured lease in the same transaction as a read.
