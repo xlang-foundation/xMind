@@ -97,8 +97,13 @@ when their initial implementation is inside the same native service.
 The native execution platform shares one bounded root admission budget between
 standalone agents and graph runs. Queued, running and durably paused roots all
 hold a reservation; terminal runs and rejected admissions release or avoid
-reservations. Agent and graph services still dispatch through separate worker
-loops, so global ordering, fairness and worker placement remain incomplete.
+reservations. The new native source shares execution slots across the agent and
+graph worker loops, using the platform's configured worker count as the combined
+root concurrency limit. Worker-ready roots wait in one cancellable FIFO. A human
+pause releases execution while retaining admission. The services still retain
+separate local backlogs, so global admission-order fairness and worker placement
+remain incomplete. This candidate passes eight focused contracts; it is not yet
+installed or qualified by a new complete native suite.
 
 The coding default is a single-agent model/tool loop. Explicit planning is
 optional; predefined graphs do not require a planning LLM call. A planner can

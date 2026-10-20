@@ -2,6 +2,41 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Shared agent/graph execution slots — 2026-10-19
+
+The native candidate adds a cancellable FIFO for worker-ready roots to the shared
+RootAdmissionPool. ExecutionPlatform uses its configured worker count as the
+combined root concurrency limit. Durable root admission remains independent:
+queued/running/human-paused roots retain their reservations, while an execution
+slot is released at terminal retirement or clean pause and reacquired on wake.
+Waits hold no service mutex. Cancelled waiters enter the existing runner with a
+stopped token so durable retirement still occurs without an execution effect.
+
+The actual AgentService/GraphService regression holds a real synthetic provider
+stream in one lane, queues a graph then an agent, observes FIFO dispatch and
+prevents the later agent from overtaking the graph. It cancels a waiting graph
+without a child/model request, resumes a paused graph behind an active agent,
+and closes a service waiting on another service's lane. The peer requires exactly
+13 requests, one graph prompt and no requests from the cancelled/shutdown graph
+waiters. Existing admission-capacity and stream-cancellation cases remain.
+
+The complete build and eight focused context/planning/graph/agent/HTTP/handoff
+contracts pass in45.02seconds with every source/SDK/library/dependency/binary set
+and hash unchanged. Native executable db694de1 is uninstalled. The initial gate
+passed7/8; the old peer expected only a plain hold-stream prompt and rejected the
+new exact graph prompt. That failure is retained; the peer now validates the
+exact graph form and updated request counts. Production bytes are unchanged
+between initial and final focused gates. No timeout was increased.
+
+This is shared execution capacity and worker-ready FIFO, not unified ordering of
+the services' local backlogs, agent process placement or a new full-suite pass.
+Installed53/live TestProj are unchanged. See
+[initial failure](evidence/shared-root-dispatch-initial-20261019.json),
+[initial log](evidence/shared-root-dispatch-initial-20261019.log),
+[final qualification](evidence/shared-root-dispatch-final-20261019.json),
+[final log](evidence/shared-root-dispatch-final-20261019.log) and
+[exact inventory](evidence/shared-root-dispatch-inventory-20261019.json).
+
 ## Complete installed-generation native qualification — 2026-10-19
 
 Current source0a8ec093 completes the full Release build and all 154 registered

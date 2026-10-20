@@ -202,6 +202,9 @@ struct AgentService::Impl {
             }
             if(children&&!children->healthy())fail();
             try{
+                // Waiting never holds the service mutex. Cancelled roots still
+                // enter the runner with their stopped token for durable retirement.
+                auto execution=root_admission->acquire_execution(job->stop.get_token());
                 const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");

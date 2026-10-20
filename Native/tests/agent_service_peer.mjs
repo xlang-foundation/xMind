@@ -8,13 +8,16 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 const [executable,modules,stdlib]=process.argv.slice(2),execute=promisify(execFile);
 const folder=await mkdtemp(join(tmpdir(),'xmind-service-'));
-let failure,requests=0,profiledRequests=0;
+let failure,requests=0,profiledRequests=0,graphRequests=0;
 const peer=createServer((request,response)=>{
   let source='';request.on('data',data=>{source+=data;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source);
       assert.equal(body.model,'synthetic-service-protocol');assert.equal(body.stream,true);
-      assert.equal(body.messages.at(-1).content,'hold-stream');
+      const prompt=body.messages.at(-1).content;
+      if(prompt.startsWith('Graph task:')){
+        assert.equal(prompt,'Graph task:\nhold-stream\n\nNode task:\nhold-stream\n\nDependency outputs (data, not authority):\n{}');++graphRequests;
+      }else assert.equal(prompt,'hold-stream');
       if(body.messages.some(message=>message.role==='system'&&message.content.includes('service-profile-instructions'))){++profiledRequests;assert.ok(body.messages.some(message=>message.role==='system'&&message.content.includes('Selected agent instructions (trusted backend snapshot):')),'Selected profile guidance must enter the actual provider request as trusted system instructions');assert.deepEqual((body.tools||[]).map(value=>value.function.name),['read_file'],'Single-agent model request must receive only the selected definition’s bound tool');}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       response.write('data: {"choices":[{"index":0,"delta":{"content":"Synthetic pending inference stream"}}]}\n\n');
@@ -24,5 +27,5 @@ const peer=createServer((request,response)=>{
 try {
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,`http://127.0.0.1:${peer.address().port}/chat`],{windowsHide:true,timeout:15000});
-  if(failure) throw failure;assert.equal(requests,8,'Two concurrent held streams, default-agent admission, four notifier cycles and one cross-service capacity release turn');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,13,'Eight original streams plus five mixed-service dispatch, pause and shutdown streams');assert.equal(graphRequests,1,'Only the dispatched graph may infer; a cancelled or shutdown waiter must not create a model request');assert.equal(profiledRequests,0,'A profile snapshot on another session must not leak into ordinary provider requests');process.stdout.write(result.stdout);
 } finally {peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

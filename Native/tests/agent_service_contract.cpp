@@ -29,6 +29,11 @@ void cancelled(PersistenceService& store,const std::string& id) {
     }
     throw std::runtime_error("Actual held provider stream did not retire after controller cancellation");
 }
+template<class Predicate> void eventually(Predicate predicate,const char* message){
+    const auto deadline=std::chrono::steady_clock::now()+5s;
+    while(std::chrono::steady_clock::now()<deadline){if(predicate())return;std::this_thread::sleep_for(10ms);}
+    require(false,message);
+}
 }
 int main(int argc,char** argv) {
     if(argc!=5) return 2;
@@ -110,6 +115,56 @@ int main(int argc,char** argv) {
             while((!shared_agent.idle()||budget->occupied()!=0)&&std::chrono::steady_clock::now()<release_deadline)std::this_thread::sleep_for(10ms);
             require(shared_agent.idle()&&budget->occupied()==0,"A cancelled agent must release the shared root reservation");
             shared_graph.close();shared_agent.close();
+        }
+        {
+            // The graph and ordinary-agent worker loops share one execution
+            // lane, independently of eight durable admission reservations.
+            const auto lanes=std::make_shared<RootAdmissionPool>(8,1);
+            const auto catalog=GraphCatalogStore(store).apply(R"({"graphs":[{"id":"dispatch.agent","spec":{"nodes":[{"id":"agent","type":"agent","prompt":"hold-stream"}]}},{"id":"dispatch.pause","spec":{"nodes":[{"id":"human","type":"human","prompt":"Wait without occupying an execution lane"}]}}]})");
+            AgentService agents(store,settings,2,8,lanes);
+            GraphService graphs(store,settings,1,8,2,lanes);
+            for(const auto* id:{"lane-a","lane-b","lane-graph","lane-cancel","lane-pause","lane-after-pause"})store.create_session(id,id).get();
+            const auto agent_graph=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& e){return e.id=="dispatch.agent";});
+            const auto pause_graph=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& e){return e.id=="dispatch.pause";});
+            agents.submit("lane-a","lane-a","hold-stream");streaming(store,"lane-a");
+            graphs.submit_graph("lane-graph","lane-graph","dispatch.agent",agent_graph->revision,"hold-stream");
+            eventually([&]{return lanes->dispatch_waiting()==1;},"Graph worker must wait for the occupied shared lane");
+            agents.submit("lane-b","lane-b","hold-stream");
+            eventually([&]{return lanes->dispatch_waiting()==2;},"Both service types must enter the same dispatch queue");
+            require(lanes->running()==1&&store.run("lane-graph").get().state==RunState::queued&&store.run("lane-b").get().state==RunState::queued,"Waiting roots must not start a model or leave Queued before their lane");
+            agents.cancel("lane-a");cancelled(store,"lane-a");
+            eventually([&]{return !store.children("lane-graph").get().empty();},"First waiting graph must dispatch after the active agent retires");
+            const auto child=store.children("lane-graph").get().front();streaming(store,child.id);
+            require(lanes->running()==1&&store.run("lane-b").get().state==RunState::queued,"Later ordinary root must not overtake the graph or expand shared concurrency");
+            graphs.cancel("lane-graph","fixture-controller");cancelled(store,"lane-graph");streaming(store,"lane-b");
+            // Cancellation while waiting must withdraw the ticket without a
+            // provider child or a fabricated response, then wake its successor.
+            graphs.submit_graph("lane-cancel","lane-cancel","dispatch.agent",agent_graph->revision,"must not infer");
+            eventually([&]{return lanes->dispatch_waiting()==1;},"Queued graph must join the shared lane before cancellation");
+            graphs.cancel("lane-cancel","fixture-controller");cancelled(store,"lane-cancel");
+            require(store.children("lane-cancel").get().empty(),"Cancelled undispatched graph must not create a child");
+            eventually([&]{return lanes->dispatch_waiting()==0;},"Cancelled dispatch ticket must be removed");
+            agents.cancel("lane-b");cancelled(store,"lane-b");
+            eventually([&]{return lanes->running()==0;},"Terminal roots must release shared execution capacity");
+            graphs.submit_graph("lane-pause","lane-pause","dispatch.pause",pause_graph->revision,"Pause while another root executes");
+            eventually([&]{return store.run("lane-pause").get().state==RunState::paused&&lanes->running()==0;},"Human pause must release execution while retaining admission");
+            require(lanes->occupied()==1,"Paused graph must still own its durable root reservation");
+            agents.submit("lane-after-pause","lane-after-pause","hold-stream");streaming(store,"lane-after-pause");
+            const auto paused=store.graph_run("lane-pause").get();
+            graphs.human_input("lane-pause","human",R"({"answer":"ready"})","fixture-controller",paused.checkpoint_revision);
+            eventually([&]{return lanes->dispatch_waiting()==1;},"Resumed human graph must compete for the same shared execution lane");
+            agents.cancel("lane-after-pause");cancelled(store,"lane-after-pause");
+            eventually([&]{return store.run("lane-pause").get().state==RunState::completed&&lanes->running()==0&&lanes->occupied()==0;},"Resumed graph must settle and release both kinds of capacity");
+            store.create_session("lane-shutdown-agent","Shutdown while holding a shared lane").get();
+            store.create_session("lane-shutdown-graph","Shutdown while waiting for a shared lane").get();
+            agents.submit("lane-shutdown-agent","lane-shutdown-agent","hold-stream");streaming(store,"lane-shutdown-agent");
+            graphs.submit_graph("lane-shutdown-graph","lane-shutdown-graph","dispatch.agent",agent_graph->revision,"must not infer");
+            eventually([&]{return lanes->dispatch_waiting()==1;},"Shutdown fixture must actually wait for shared execution capacity");
+            graphs.close();
+            require(store.run("lane-shutdown-graph").get().state==RunState::cancelled&&store.children("lane-shutdown-graph").get().empty(),"Closing a waiting service must join cancellation without starting a child");
+            require(lanes->running()==1&&lanes->dispatch_waiting()==0,"Closing graph service must preserve another service's active lane");
+            agents.close();
+            require(store.run("lane-shutdown-agent").get().state==RunState::cancelled&&lanes->running()==0&&lanes->occupied()==0,"Closing the active service must drain and release all shared capacity");
         }
         store.close();
         std::cout<<"Native agent service contract passed: parallel native streams, cross-service agent/graph capacity isolation across queued, active and paused roots, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";
