@@ -1,3 +1,28 @@
+## Installed 0.1.59, existing backend preserved — 2026-10-20
+
+The actual headless VS Code extension CLI installs and lists 0.1.59. All 2,445
+installed archive payloads match the qualified stage; installed runtime manifest
+`624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a`
+and all 2,402 declared native/runtime payloads verify. Client source is `225d7c49`,
+native source `959f1d95`/binary `2a2ce860`, qualified by 160 native, 462 extension and 161 browser
+contracts and the staged native-browser contract. No editor window was opened.
+
+Predecessor 0.1.58 is backed up at
+`C:/xMindNativeValidation/preserved-vscode-0.1.58-before-0.1.59`; all 2,447
+predecessor files remain byte-identical in place too. Settings SHA `5ebaae37` and
+seven prior profile directories are preserved. All seven checked live process
+identities and three existing browser pages remain intact. Exact before/after
+snapshots retain nine sessions, 179 root messages, 14 roots, three owned children and
+19 child messages, plus workspace/provider configuration. Full snapshots and the
+unrelated extension inventory remain private; public evidence contains counts,
+hashes and process identities. No model or tool task was submitted or replayed.
+
+Primary TestProj backend `32396`, born `2026-10-20T11:19:37.8496800Z`, remains the
+predecessor 0.1.58/`dc900cad` at port 57779. This checkpoint installs files; it does not adopt
+the new backend, activate a rendered editor, add installed 0.1.59 live-provider coding
+proof or declare release acceptance. Remaining product requirements stay open.
+[Installed payload and preservation evidence](evidence/coding59-installed-checkpoint-20261020.json).
+
 ## Verified 0.1.59 package candidate — 2026-10-20
 
 `C:/xMindNativeValidation/xmind-0.1.59-complete-win32-x64.vsix` is built and
