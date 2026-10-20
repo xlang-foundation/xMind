@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-10-20T09:54:40.386Z",
+  "version": "0.1.57",
+  "url": "http://127.0.0.1:60938/ui/",
+  "hiddenBrowser": true,
+  "restored": {
+    "conversation": "CLI55 isolated chunk coding acceptance",
+    "messages": 9,
+    "model": "claude-sonnet-4-6",
+    "provider": "Claude",
+    "runId": "cc3d14ff5b4c570cebf41a92c85c6d52",
+    "sendEnabled": true,
+    "sessionId": "f5eebd145890d132cfc59b0589491803"
+  },
+  "expanded": {
+    "model": {
+      "bottom": 674.09375,
+      "height": 24,
+      "left": 1031.979248046875,
+      "right": 1114.2813339233398,
+      "top": 650.09375,
+      "width": 82.30208587646484
+    },
+    "prompt": {
+      "bottom": 638.3541870117188,
+      "height": 72,
+      "left": 882.3333740234375,
+      "right": 1258.3333740234375,
+      "top": 566.3541870117188,
+      "width": 376
+    },
+    "provider": {
+      "bottom": 674.09375,
+      "height": 24,
+      "left": 943.6771240234376,
+      "right": 1025.9792098999023,
+      "top": 650.09375,
+      "width": 82.30208587646484
+    },
+    "restoredMessages": 9,
+    "send": {
+      "bottom": 677.8333549499512,
+      "height": 31.479167938232425,
+      "left": 1200.5833740234375,
+      "right": 1258.3333740234375,
+      "top": 646.3541870117188,
+      "width": 57.75
+    },
+    "sendEnabled": true,
+    "sidebar": {
+      "bottom": 720,
+      "height": 668,
+      "left": 860,
+      "right": 1280,
+      "top": 52,
+      "width": 420
+    },
+    "skillsOpen": true
+  },
+  "final": {
+    "messages": 9,
+    "sendEnabled": true,
+    "skillsOpen": false
+  },
+  "screenshots": [
+    "coding57-iab-restore-20261020.png",
+    "coding57-iab-skills-20261020.png"
+  ],
+  "reloadRestored": true,
+  "taskSubmissions": 0,
+  "completedTasksReplayed": 0,
+  "observerCorrection": "Playwright button-role lookup did not match the HTML SUMMARY; inspected its actual tag/id and used the observed skills-summary locator.",
+  "renderedIab": true,
+  "renderedVsCode": false,
+  "renderedExternalBrowser": false
+}

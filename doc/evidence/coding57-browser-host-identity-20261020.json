@@ -1,0 +1,95 @@
+{
+  "observedAt": "2026-10-20T09:55:23.073Z",
+  "version": "0.1.57",
+  "url": "http://127.0.0.1:60938/ui/",
+  "nativeViewOrigin": "http://127.0.0.1:52415",
+  "primaryBackendOrigin": "http://127.0.0.1:57779",
+  "identities": [
+    {
+      "pid": 69196,
+      "birth": "2026-10-20T09:46:30.9386120Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-cba060157576812b176ae1d677b801a31cd8855a1b3c80a924394b16bfe363fe\\xmind.exe"
+    },
+    {
+      "pid": 67436,
+      "birth": "2026-10-20T09:50:06.0265650Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe"
+    },
+    {
+      "pid": 61600,
+      "birth": "2026-10-20T09:50:06.8679030Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.57\\native-runtime\\xmind.exe"
+    }
+  ],
+  "assets": [
+    {
+      "name": "index.html",
+      "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a",
+      "bytes": 20053
+    },
+    {
+      "name": "patch-review.js",
+      "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+      "bytes": 6467
+    },
+    {
+      "name": "browser.js",
+      "sha256": "974e58538a434630306c8a680b98b8a83f5b2b4b60b70e520ab12bab18f8f4f7",
+      "bytes": 131163
+    },
+    {
+      "name": "terminal.js",
+      "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09",
+      "bytes": 5749
+    },
+    {
+      "name": "browser.css",
+      "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+      "bytes": 14348
+    },
+    {
+      "name": "xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "bytes": 7112
+    },
+    {
+      "name": "xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+      "bytes": 488663
+    },
+    {
+      "name": "xterm-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+      "bytes": 1521
+    },
+    {
+      "name": "chat.js",
+      "sha256": "ccc4eede88220b05a6d7b36ffef47bee2df647742ceb5fcf4d43ec82d633b860",
+      "bytes": 130930
+    },
+    {
+      "name": "chat.css",
+      "sha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f",
+      "bytes": 17385
+    },
+    {
+      "name": "client.js",
+      "sha256": "93bbc071e3304e835b38f205887209e2e8048448e410bde7247c2e1d5a41163e",
+      "bytes": 155340
+    },
+    {
+      "name": "marked.js",
+      "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "bytes": 47225
+    },
+    {
+      "name": "purify.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "bytes": 28885
+    }
+  ],
+  "all13ServedAssetsMatchInstalled57": true,
+  "old55684PagePreserved": true,
+  "taskSubmissions": 0,
+  "passed": true
+}

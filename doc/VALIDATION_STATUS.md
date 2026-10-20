@@ -2,6 +2,14 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed57 hidden-browser restoration and footer — 2026-10-20
+
+A separate installed57 browser host now serves http://127.0.0.1:60938/ui/ through native view52415 and the same adopted backend57779/owner69196. Exact new identities are Node67436 born2026-10-20T09:50:06.0265650Z and installed57 native view61600 born2026-10-20T09:50:06.8679030Z. Both native images match qualifiedfc94ced1. All13served shell assets match installed57 bytes; old page55684/host54928/view56652 remain unchanged.
+
+Actual hidden IAB automatically restores the completed CLI55 conversation, its9messages, exact cc3d14ff5b4c570cebf41a92c85c6d52 run, saved Claude/claude-sonnet-4-6 selection, metrics/operation summaries and enabled composer. Reload restores those same values. At1280x720 with420px sidebar, prompt/provider/model/Send stay fully within the sidebar with Skills expanded or collapsed; the composer remains72px high and no footer controls overlap. Skills is returned to its original collapsed state. Screenshots and DOM geometry are in evidence/coding57-iab-restore-20261020.* and coding57-iab-skills-20261020.png. A Playwright button-role lookup did not match the actual SUMMARY disclosure; inspecting its tag/id and using the observed locator corrected the observer without changing the app.
+
+Independent gateway/API comparison after rendering still matches all7sessions/159messages/12runs/configuration, with no prompt submission, model inference or completed-task/tool replay. This is rendered installed IAB restoration and footer proof, not a fresh installed57 coding task, current rendered VS Code or external-browser acceptance. Those remain open. See coding57-browser-host-identity and coding57-iab-api-preservation receipts. The hidden tab is retained for subsequent bounded acceptance work.
+
 ## Installed 0.1.57 and profile-preserving adoption — 2026-10-20
 
 Installed57 is client6dbab29f/native971ad1e1/fc94ced1 with SDK58a8aab9/DLL1ff2a8e7: complete155 native and462extension/161browser gates, staged browser/native integration,2448archive entries and2445installed payloads verify. The prior56 extension is preserved with2447files verified; settings SHA2565ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b is unchanged and all seven prior profile directories remain. Actual VS Code CLI installs/lists57 without opening an editor; this is not rendered IDE acceptance.
