@@ -1,0 +1,7 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {wrapIndex} from "./wrap-index.mjs";
+test("positive overflow wraps", () => assert.equal(wrapIndex(7, 5), 2));
+test("zero stays at zero", () => assert.equal(wrapIndex(0, 5), 0));
+test("negative one wraps to last", () => assert.equal(wrapIndex(-1, 5), 4));
+test("multiple negative cycles wrap", () => assert.equal(wrapIndex(-9, 4), 3));

@@ -1,0 +1,12 @@
+{
+  "arguments_json": "{\"after_content\":\"export function wrapIndex(index, length) {\\n  return ((index % length) + length) % length;\\n}\\n\",\"after_sha256\":\"6f41729dc80f2d704256b1da96e1a720341876b728e83f69aea56ba661476254\",\"before_content\":\"export function wrapIndex(index, length) {\\n  return index % length;\\n}\\n\",\"before_sha256\":\"751836555c1a24763c4f5bff576d59c860e3f9a5abcef9e353a54ce88c32277f\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:ead12000000004000000000000000000\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:e8d12000000005000000000000000000\",\"path\":\"wrap-index.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:e8d12000000005000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:e8d12000000005000000000000000000\",\"workspace_revision\":1}",
+  "decision_actor": "local-owner",
+  "expires_unix_ms": 1792534630578,
+  "id": "87899b322a8e90aeb088fd62bdd1ba6d",
+  "resources": [],
+  "result_json": "{}",
+  "run_id": "0c35d911e7417e3c4982726fbb2fb201",
+  "state": "ready",
+  "tool": "replace_file",
+  "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:e8d12000000005000000000000000000"
+}

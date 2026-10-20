@@ -1,0 +1,170 @@
+{
+  "recordedAt": "2026-10-20T22:10:16.876Z",
+  "version": "0.1.59",
+  "scope": "One fresh installed59 native CLI command-mode real Claude coding task on a separate native profile/workspace; existing primary owner and history untouched.",
+  "session": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+  "root": "0c35d911e7417e3c4982726fbb2fb201",
+  "backend": {
+    "origin": "http://127.0.0.1:62378",
+    "process_id": 68928,
+    "profile_directory": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40",
+    "started": false,
+    "workspace": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\workspace",
+    "workspace_edits": "approved",
+    "pid": 68928,
+    "birth": "2026-10-20T22:06:08.0468140Z",
+    "image": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40\\runtime-7a629f1a8e3a2971b472c69562b74f9b8c40d1a840fa3d268eee246d814c6fbb\\xmind.exe",
+    "name": "xmind.exe",
+    "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f"
+  },
+  "taskSubmissions": 1,
+  "state": "completed",
+  "historyMessages": 9,
+  "toolCalls": [
+    "read_file",
+    "read_file",
+    "edit_file",
+    "run_process"
+  ],
+  "modelReservations": 4,
+  "editOperation": "87899b322a8e90aeb088fd62bdd1ba6d",
+  "processOperation": "6ece228ad5294d61e80370677c6dcb93",
+  "baseline": {
+    "tests": 4,
+    "passed": 2,
+    "failed": 2,
+    "exitCode": 1
+  },
+  "after": {
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "exitCode": 0,
+    "processTreeRetired": true
+  },
+  "sourceBeforeSha256": "751836555c1a24763c4f5bff576d59c860e3f9a5abcef9e353a54ce88c32277f",
+  "sourceAfterSha256": "6f41729dc80f2d704256b1da96e1a720341876b728e83f69aea56ba661476254",
+  "testSha256": "1e56710b5036488f742cddbe1793adc0e13ebd444ba18f78aa6ef31ac9e6e6b3",
+  "testsUnchanged": true,
+  "onlyFixtureSourceChanged": true,
+  "profileConfigurationStable": true,
+  "sevenPriorOwnersPreserved": true,
+  "originalNineSessionsAndRootChildHistoryExact": true,
+  "settingsUnchanged": true,
+  "primaryBackendPreserved": 32396,
+  "rawUsageAndTimings": [
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 102,
+        "input_tokens": 8302,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 102,
+        "prompt_tokens": 8302,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2161,
+      "first_token_ms": 1519
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 190,
+        "input_tokens": 8833,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 190,
+        "prompt_tokens": 8833,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3181,
+      "first_token_ms": 975
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 130,
+        "input_tokens": 9148,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 130,
+        "prompt_tokens": 9148,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3495,
+      "first_token_ms": 1738
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 312,
+        "input_tokens": 9752,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 312,
+        "prompt_tokens": 9752,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 6361,
+      "first_token_ms": 1325
+    }
+  ],
+  "cpythonExecuted": false,
+  "editorOpened": false,
+  "renderedAcceptance": false,
+  "limitations": [
+    "Four declared fixture tests qualify this bounded workflow, not exhaustive algorithm correctness or broad coding reliability",
+    "Command-mode acceptance does not establish interactive-console or rendered editor/browser coding",
+    "Agent-level worker process placement remains open; this uses the normal native backend service"
+  ],
+  "passed": true,
+  "evidence": {
+    "doc/evidence/coding59-cli-baseline.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/baseline.log",
+      "sha256": "91fb31d62d30fff6b1a87df93bf3c5cc9cfc7a63d2c7ae8f344fa553b767f9c8"
+    },
+    "doc/evidence/coding59-cli-admit.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/admit.stdout.log",
+      "sha256": "1f6dfa4ca415e82b7efc688a6086ffa7d633c47ae67d51c24d0a8da08aed8f23"
+    },
+    "doc/evidence/coding59-cli-watch.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/watch.stdout.log",
+      "sha256": "013a84ffdaa2332d8d398625ed402d945836eef05271a9e54a64dd2e6173405b"
+    },
+    "doc/evidence/coding59-cli-review-1.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/review-1.stdout.log",
+      "sha256": "ed9eed0a19cb6f3e433b7a98903ddb4717e0f0225e9ef038a137f8eeb64e41fa"
+    },
+    "doc/evidence/coding59-cli-allow-edit.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/allow-edit.stdout.log",
+      "sha256": "ffbcb1738a7fbc92611dbd62a805eeca1ca6104689b72008d2e9788bd998e542"
+    },
+    "doc/evidence/coding59-cli-review-2.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/review-2.stdout.log",
+      "sha256": "f007c06d8de9bcb9962fb206d63b31a73edfdf1769a8651ba33185dfdeb29598"
+    },
+    "doc/evidence/coding59-cli-history.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli59-live-coding-20261020/history.stdout.log",
+      "sha256": "fb138ce6f24466448fffa0e26e968824a05cc0308dc4f50dc47b6589c8ec00cc"
+    },
+    "doc/evidence/coding59-cli-source-before.txt": {
+      "sha256": "751836555c1a24763c4f5bff576d59c860e3f9a5abcef9e353a54ce88c32277f"
+    },
+    "doc/evidence/coding59-cli-source-after.txt": {
+      "sha256": "6f41729dc80f2d704256b1da96e1a720341876b728e83f69aea56ba661476254"
+    },
+    "doc/evidence/coding59-cli-tests.txt": {
+      "sha256": "1e56710b5036488f742cddbe1793adc0e13ebd444ba18f78aa6ef31ac9e6e6b3"
+    }
+  },
+  "originalHistorySnapshotsPrivate": true
+}

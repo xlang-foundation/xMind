@@ -1,0 +1,74 @@
+TAP version 13
+# Subtest: positive overflow wraps
+ok 1 - positive overflow wraps
+  ---
+  duration_ms: 0.5278
+  type: 'test'
+  ...
+# Subtest: zero stays at zero
+ok 2 - zero stays at zero
+  ---
+  duration_ms: 0.0893
+  type: 'test'
+  ...
+# Subtest: negative one wraps to last
+not ok 3 - negative one wraps to last
+  ---
+  duration_ms: 0.5961
+  type: 'test'
+  location: 'C:\\xMindNativeValidation\\cli59-live-coding-20261020\\workspace\\wrap-index.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    -1 !== 4
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 4
+  actual: -1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/xMindNativeValidation/cli59-live-coding-20261020/workspace/wrap-index.test.mjs:6:49)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: multiple negative cycles wrap
+not ok 4 - multiple negative cycles wrap
+  ---
+  duration_ms: 0.7958
+  type: 'test'
+  location: 'C:\\xMindNativeValidation\\cli59-live-coding-20261020\\workspace\\wrap-index.test.mjs:7:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    -1 !== 3
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 3
+  actual: -1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/xMindNativeValidation/cli59-live-coding-20261020/workspace/wrap-index.test.mjs:7:52)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 2
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 69.5888

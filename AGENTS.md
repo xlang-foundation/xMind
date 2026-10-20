@@ -38,6 +38,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Keep VS Code closed and open no visible editor/browser windows unless asked. Earlier desktop control failed with black capture/GetCursorPos access denied; do not repeat unlock questions. The new Code pane observation is separate from still-unverified visible-browser acceptance. Headless sandboxed Edge development checks are separate evidence. Preserve all older user pages/owners, including ports 62084, 54662, 51118 and 52757. Exact older process identities, historical receipts and installation details remain in doc/development-checkpoints-20261018.md and doc/evidence. Verify PID, creation time and image before any intentional retirement; no mass cleanup of user owners, views or profiles.
 
+- CLI59 isolated owner68928/62378 Native2a2: session3b25f9b24e1fdc7e66aae877d42cf5f4/root0c35d911e7417e3c4982726fbb2fb201 completed2reads/approvededit/Node4/4,9msgs; NEVER replay. Exact birth/profile in doc/VALIDATION_STATUS.md; primary32396 unchanged.
+
 ## Execution and evidence rules
 
 - Before heavy native builds/tests, inspect live process command lines for pyperformance, run_benchmark.py, run_pyperformance_xlang3_shimmed.py, benchmarks/ or benchmarks\, and scratch/performance/run- variants. Defer while such work is live. Do not overlap native builds/tests. Follow one specific live session/PID plus birth/image to terminal; an observation timeout is not process completion and never authorizes restarting or killing it. Never weaken process budgets, retry effects or conceal a failed fixture to get a pass.

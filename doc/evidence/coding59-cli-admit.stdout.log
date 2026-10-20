@@ -1,0 +1,16 @@
+{
+  "graph_root": false,
+  "id": "0c35d911e7417e3c4982726fbb2fb201",
+  "node_id": "",
+  "parent_id": "",
+  "provider_context": {
+    "model_id": "claude-sonnet-4-6",
+    "profile_id": "claude",
+    "profile_revision": 2,
+    "provider": "anthropic",
+    "route_id": "anthropic.messages",
+    "wire": "anthropic-messages"
+  },
+  "session_id": "3b25f9b24e1fdc7e66aae877d42cf5f4",
+  "state": "queued"
+}

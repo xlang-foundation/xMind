@@ -3,6 +3,15 @@
 Current assessment, 2026-10-20: installed58 is client62141200/nativeaf34bfe0/dc900cad, TestProj backend32396 born2026-10-20T11:19:37.8496800Z/origin57779. Complete156 native and462extension/161browser gates pass;2448archive entries/2445installed payloads verify. Adoption preserves8sessions/167root messages/13roots/2owned children/11child messages, configuration, settings and prior pages exactly. Fresh installed58 hidden-IAB coding then performs three delegated reads, two separately approved dependent module edits, registered PowerShell Node4/4 from failing1/4 baseline, and exact12root-message/eight-child-message reload. Tests remain byte-identical and prior histories unchanged. See [complete native qualification](evidence/nested-context-current-full-native-20261020-gate.json), [adoption](evidence/coding58-adoption-preservation-20261020.json), [fresh browser coding](evidence/coding58-browser-coding-20261020.json), [rendered proof](evidence/coding58-browser-coding-result-20261020.png) and [current validation status](VALIDATION_STATUS.md). These named scopes do not establish every remaining product requirement.
 This is not a completion declaration.
 
+A fresh installed59 CLI task now also completes actual configured-Claude reads,
+reviewed file approval and registered Node tests on a separate native59 profile:
+baseline 2/4 becomes 4/4, tests unchanged, nine messages persist and the process
+tree retires. Original primary owner/history/settings remain unchanged. The
+completed task is pinned against replay in AGENTS.md and [current CLI evidence](evidence/coding59-cli-live-coding-20261020.json).
+This closes the current installed command-mode CLI evidence gap for this bounded
+workflow; interactive-console and rendered editor/external-browser scopes remain
+separate, alongside the other product requirements below.
+
 Installed 0.1.59 now supersedes 0.1.58 as the extension installation, with 2,445
 payloads verified. Seven checked owners, three browser pages and exact nine-session
 root/child history remain intact; the primary backend is deliberately still 0.1.58.

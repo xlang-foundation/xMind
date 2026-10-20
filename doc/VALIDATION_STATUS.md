@@ -1,3 +1,30 @@
+## Installed 0.1.59 isolated CLI coding — 2026-10-20
+
+One fresh CLI-originated task on the installed 0.1.59 native runtime completes
+two actual reads, one reviewed file edit and one registered PowerShell/Node test
+process. The four declared tests improve from two failures to four passes; the
+test file stays byte-identical, only the fixture source changes, process exit is
+zero and the actual process tree is retired. Nine canonical messages and terminal
+`run.completed` restore through the native CLI. Four model reservations and raw
+Claude usage/timing records are retained without estimates.
+
+This uses a separate profile/workspace at
+`C:/xMindNativeValidation/cli59-live-coding-20261020`, backend `68928`, born
+`2026-10-20T22:06:08.0468140Z`, origin `http://127.0.0.1:62378`, native SHA
+`2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f`.
+Session `3b25f9b24e1fdc7e66aae877d42cf5f4`, completed root
+`0c35d911e7417e3c4982726fbb2fb201`: **never replay this task**. Actual provider is
+Claude/`claude-sonnet-4-6`, captured profile revision 2. Existing configured keys
+are resolved by the backend; no key is supplied on command lines or in context.
+
+All seven prior checked owners remain intact, including primary `32396` still
+on 0.1.58. Its nine sessions, 179 root messages, 14 roots, three owned children and
+19 child messages, workspace/provider configuration and user settings are exact.
+The new isolated backend is retained for inspection. No CPython or visible editor
+was used. This is command-mode coding proof for four bounded fixture cases, not
+interactive-console, rendered-client or agent-worker-process placement acceptance.
+[Receipt, raw operations/events and exact source/test bytes](evidence/coding59-cli-live-coding-20261020.json).
+
 ## Installed 0.1.59, existing backend preserved — 2026-10-20
 
 The actual headless VS Code extension CLI installs and lists 0.1.59. All 2,445
