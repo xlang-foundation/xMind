@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-20T01:34:52.130Z",
+  "scope": "Actual direct pseudoterminal interactive chat resume, followed by independent CLI JSON comparison; not visible desktop/resize/full-screen terminal acceptance.",
+  "ptySessionId": 75368,
+  "toolChunks": [
+    "f041b6",
+    "ef2f82",
+    "4a8754"
+  ],
+  "session": "cb160a995f28f81865b47f95f294999d",
+  "run": "5fdd5b9dfea15f7eeb110fa00d3e0af7",
+  "observedHumanReadablePromptAndAssistantHistory": true,
+  "observedFinalMetrics": {
+    "uncachedInput": 10371,
+    "output": 232,
+    "cached": 0,
+    "cacheWrite": 0
+  },
+  "commands": [
+    "/runs",
+    "/exit"
+  ],
+  "chatExitCode": 0,
+  "historyMessages": 11,
+  "historyUnchanged": true,
+  "runsUnchanged": true,
+  "sameBackendPid": 55848,
+  "started": false,
+  "newTaskSubmissions": 0,
+  "passed": true
+}

@@ -2,6 +2,23 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Installed53 shared CLI and interactive restore — 2026-10-19
+
+The actual installed53 console discovers the existing TestProj p-current backend
+55848 without starting or replacing it. Its history command returns the exact
+11-message browser coding transcript, runs returns terminal root
+5fdd5b9dfea15f7eeb110fa00d3e0af7, and operations restores the approved edit and
+successful Node process. Direct pseudoterminal `chat SESSION` prints human-readable
+user/assistant history and actual final input10371/output232 metrics. `/runs`
+shows the same completed root; `/exit` exits0. Independent post-chat console
+queries confirm unchanged history, one run and the same profile/backend. No
+prompt was resubmitted, approval repeated or process rerun. This proves command
+and interactive console restoration, not a new CLI-originated coding task or
+visible full-screen terminal/resize acceptance.
+
+See [command receipt](evidence/coding53-shared-cli-20261019.json) and
+[interactive observation](evidence/coding53-interactive-cli-20261019.json).
+
 ## Actual in-app browser coding and reload — 2026-10-19
 
 The actual Codex in-app browser opens installed53 page55684 in a hidden tab and
