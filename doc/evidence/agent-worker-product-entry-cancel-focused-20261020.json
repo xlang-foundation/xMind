@@ -1,0 +1,136 @@
+{
+  "recordedAt": "2026-10-20T20:57:38.749Z",
+  "gate": {
+    "recordedAt": "2026-10-20T20:57:08.936Z",
+    "sourceParent": "795e68b9253fadfd01c205333d80e76158355d80",
+    "sourcePatchSha256": "1d3d2ebadf3e18dc66064dbec44f77a77ee8c4fd05f40d243b49ee628916bd77",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 60788,
+      "launchedAt": "2026-10-20T20:53:28.241Z",
+      "completedAt": "2026-10-20T20:54:27.941Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "451cb0cd05eda494d6cdfb99ac55adf5d5f003cfbcde1a7d58fd18ed54ed3bbb"
+    },
+    "test": {
+      "pid": 72076,
+      "launchedAt": "2026-10-20T20:54:30.655Z",
+      "completedAt": "2026-10-20T20:57:06.402Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b1b1a0e98375a03e91cc078f0d5ec6b28a864d49af71a06ebce21d741d47da94"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 155.7,
+    "projectFiles": 2684,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-product-entry-cancel-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-build.log": "451cb0cd05eda494d6cdfb99ac55adf5d5f003cfbcde1a7d58fd18ed54ed3bbb",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-build-terminal.json": "9d3636d64a532aef8e0df6d901f3eff0f8a357772206abbd3ef1ff5a26bdd30e",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-ctest.log": "b1b1a0e98375a03e91cc078f0d5ec6b28a864d49af71a06ebce21d741d47da94",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-ctest-terminal.json": "4ea826c18d399789808eccbffd96e8db983ef5528f233c3fb14271b58a930446",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-LastTest.log": "744f850c3dd37bd62145b40eb2437f0a359c8aa006134925174da9a373791a3c",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+        "doc/evidence/agent-worker-product-entry-cancel-focused-20261020-gate.json": "a37fa602a940f6ba4e20ee3e7e5c5d8e9a5607fdbd6613d6cb517258379d55af"
+      },
+      "localManifestHashes": {
+        "source.patch": "1d3d2ebadf3e18dc66064dbec44f77a77ee8c4fd05f40d243b49ee628916bd77",
+        "inputs-before-build.json": "1d6133ccc93820c15af661050d9ba55fdd8976ad7550f94e05dd4c2e4d8a2c56",
+        "binaries-before-test.json": "059418cb180f70ddd7978caa444ec2cf07cf02633d5ce431b63b8ce345ff381c"
+      }
+    },
+    "agent-worker-product-entry-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-product-entry-focused-20261020-build.log": "7e9652f6da451e46995384f889f47b5229c68c7e59be11520505ec6c853a61ed",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-build-terminal.json": "d7ec9647dfeb033c2f7889e29ee1c032d60ae816ec971a013ca33c2eaf488ae6",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-ctest.log": "899085b1ad808e6aebfd592690e588e6629bc8ca8cc8e4b764cce03122257ef8",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-ctest-terminal.json": "d15838ccb534142f60ba50f69a1373ce9a342a122d62e31e31b544910cfa7644",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-LastTest.log": "28b3daaf9b6a917a9719a11d772bace7bb5d8f5e5308d55ec2df1583962c908a",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+        "doc/evidence/agent-worker-product-entry-focused-20261020-gate.json": "d1a347ad4c880bcd83a86d4389a0571ae33efc27611037b0ab3ab18261958e68"
+      },
+      "localManifestHashes": {
+        "source.patch": "255d7ac586076d7cb276372d334c437943d06e19015935200f85a01209cd878b",
+        "inputs-before-build.json": "0dd16d54b428e77941ca6bc8b5b95c1c80ac4df1a2d9c4e1e573ffb9764c394c",
+        "binaries-before-test.json": "9ccf72894f2c31a4f077ed65c59977197755c62ef79ed973464ecff3e079aca0"
+      }
+    }
+  },
+  "fixtureSha256": "e480c452dcb7ff87c4fb0aac494c5f1f6cb3d8a83bf85ce360756923d32a3dfc",
+  "ledgerFixtureSha256": "d7de151592474d74c1b851e9233208a97fbf281d536173503f7cd82659ec491e",
+  "productChildren": {
+    "product_read": {
+      "pid": 59976,
+      "creationTime": "134370033777025551",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_read_cancel": {
+      "pid": 45644,
+      "creationTime": "134370033779570994",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_read_error": {
+      "pid": 33052,
+      "creationTime": "134370033781842363",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_admission_cancel": {
+      "pid": 70016,
+      "creationTime": "134370033783344384",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_admission_timeout": {
+      "pid": 8052,
+      "creationTime": "134370033784087839",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_journal_cancel": {
+      "pid": 61592,
+      "creationTime": "134370033784870897",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    },
+    "product_journal_timeout": {
+      "pid": 27172,
+      "creationTime": "134370033785723822",
+      "imageSha256": "9a6b7af7a000f47459ae9e42202e2ee6ab808d5e08a544f11532b6c81cc6128f"
+    }
+  },
+  "scope": "Actual unified xmind.exe private inherited-channel worker entry, using native ordinary read root composition. Fresh synthetic backend owners verify completion, cancellation, provider failure and typed journal denials.",
+  "verified": [
+    "Version 1 authenticated bootstrap required before RPC execution; unsupported bootstrap exits without execution",
+    "Only canonical empty worker.execute/worker.cancel payloads admitted; malformed controls and unknown methods reject without model funding",
+    "One execution per child; concurrent and post-completion duplicate execute reject",
+    "Completion retains seven canonical history messages, three model charges, two tool turns, six activity facts and one fresh native read",
+    "Child remains alive after canonical completion until parent drains transport and observes exact exit",
+    "Approval cancellation retains prior canonical turn and two charges, with no read dispatch; root terminal state follows physical exit",
+    "Controlled provider failure returns fixed intent only, retains one charge and uncertain reservation until post-exit retirement",
+    "Journal admission/history RPC cancellation normalizes to TransportCancelled and deadline failure to TransportTimeout; four forced typed-denial cases preserve history and zero model funding",
+    "Independent HTTP peer verifies exactly 38 intentional requests; typed-denial cases issue no model requests"
+  ],
+  "limitations": [
+    "Reply outcome is observation/intent, not backend authority; a supervisor must derive failure/cancellation cause from captured backend evidence",
+    "One-hour child transport ceiling never extends original backend operation deadlines or revoked authority",
+    "AgentService/GraphService placement, general settings bootstrap, broad provider profile identity and graph/context/effect capabilities remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native suite, installed runtime, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}

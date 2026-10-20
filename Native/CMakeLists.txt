@@ -231,6 +231,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_include_directories(agentflow_worker_journal_rpc PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_rpc agentflow_core agentflow_models)
   add_library(agentflow_worker_runner STATIC src/agent_worker_runner.cpp)
+  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
   target_include_directories(agentflow_worker_runner PUBLIC include)
   target_link_libraries(agentflow_worker_runner PUBLIC agentflow_worker_model_rpc agentflow_worker_journal_rpc)
   add_library(agentflow_graph_execution STATIC src/graph_runner.cpp src/graph_service.cpp)
@@ -309,6 +310,7 @@ target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_p
 target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
 if(WIN32)
   target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp)
+  target_link_libraries(xmind PRIVATE agentflow_worker_runner)
   target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_language_server_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_mcp_resource_catalog agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process agentflow_xlang_python agentflow_xlang_worker bcrypt ws2_32 crypt32 shell32 ole32)
   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -906,6 +908,7 @@ if(BUILD_TESTING)
     add_executable(agentflow_agent_worker_model_rpc_contract tests/agent_worker_model_rpc_contract.cpp)
     target_include_directories(agentflow_agent_worker_model_rpc_contract PRIVATE third_party)
     target_link_libraries(agentflow_agent_worker_model_rpc_contract PRIVATE agentflow_worker_runner)
+    add_dependencies(agentflow_agent_worker_model_rpc_contract xmind)
     add_custom_command(TARGET agentflow_agent_worker_model_rpc_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_model_rpc_contract>")
     if(AGENTFLOW_NODE_EXECUTABLE)

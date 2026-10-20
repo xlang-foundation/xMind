@@ -18,6 +18,8 @@ template<class T,class F> std::future<T> owned(F action){
     try{if constexpr(std::is_void_v<T>){action();result.set_value();}else result.set_value(action());}
     catch(const AgentWorkerAuthorityCancelled&){result.set_exception(std::make_exception_ptr(TransportCancelled("Worker journal authority cancelled")));}
     catch(const AgentWorkerAuthorityExpired&){result.set_exception(std::make_exception_ptr(TransportTimeout("Worker journal authority expired")));}
+    catch(const AgentWorkerRpcCancelled&){result.set_exception(std::make_exception_ptr(TransportCancelled("Worker journal RPC cancelled")));}
+    catch(const AgentWorkerRpcTimeout&){result.set_exception(std::make_exception_ptr(TransportTimeout("Worker journal RPC deadline elapsed")));}
     catch(...){result.set_exception(std::current_exception());}return future;
 }
 class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
@@ -114,5 +116,9 @@ private:
     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
 };
 }
-std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){return std::make_unique<OrdinaryJournal>(peer,cancel);}
+std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
+    try{return std::make_unique<OrdinaryJournal>(peer,cancel);}
+    catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
+    catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
+}
 }

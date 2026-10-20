@@ -1,5 +1,10 @@
 # Worker failure and cancellation boundary
 
+Current checkpoint: the unified `xmind.exe` private inherited-channel entry is
+implemented and qualified with synthetic backend owners below. Service placement
+and broader worker capabilities remain open. Earlier checkpoint limitations in
+this document describe their respective source versions.
+
 Source audit against `ff463d0c` (2026-10-20). This is an implementation
 requirement, not evidence that service placement or failure retirement works.
 
@@ -330,6 +335,43 @@ frozen. Evidence: `evidence/agent-worker-native-assembly-focused-20261020.json`.
 Production process entry, service placement, general settings bootstrap, broad
 provider profiles and graph/context/effect placement remain open. This library
 composition checkpoint is not installed-runtime or full-suite qualification.
+
+## Unified product worker entry checkpoint
+
+The unified executable now dispatches private `agent-channel-worker` launches
+directly to the native worker entry. It accepts only its inherited handle,
+requires the authenticated version 1 bootstrap, and exposes canonical empty
+`worker.execute` and `worker.cancel` requests. Each child admits one execution;
+concurrent and later duplicate execution requests reject. The entry uses the
+production read-root composition and retains transport after completion or
+terminal intent until parent shutdown. Fixed replies carry only version and
+outcome; they neither fabricate a `Run` nor authorize backend retirement.
+
+The child transport has a one-hour ceiling. Backend operations continue to
+enforce the original deadline, exact current lease and owner cancellation.
+Journal RPC cancellation and timeout are normalized at construction and future
+boundaries to the shared runner's transport exceptions. This avoids treating a
+typed cancellation during a journal history read as an ordinary agent error.
+
+Fresh cases launch the actual bound `xmind.exe`, rather than the fixture image,
+for canonical completion, read-approval cancellation and controlled provider
+failure. Four further cases inject typed cancellation/timeout replies at journal
+admission and history reads. They preserve the exact queued/running boundary,
+existing history and zero model charges until observed child exit and backend
+retirement. Invalid bootstrap exits without execution; malformed controls,
+unknown methods and duplicate execute requests cannot add model calls.
+
+The final focused gate passes 53 contracts in 155.70 seconds, with 2,684 project
+files and 133 native binaries frozen. Its independent HTTP peer observes exactly
+38 intentional requests. The earlier 53-contract entry gate (154.63 seconds) is
+also retained with its different source patch. Evidence and exact product child
+identities: `evidence/agent-worker-product-entry-cancel-focused-20261020.json`.
+
+Normal AgentService/GraphService dispatch still requires integration. The owner
+must derive terminal causes from captured backend evidence, retain physical
+capacity through drain, and preserve a completed root when its reply is lost.
+General settings, broad provider profiles, graph/context/effect placement and
+installed/rendered/full-suite qualification remain open.
 
 ## Qualification required before service placement
 

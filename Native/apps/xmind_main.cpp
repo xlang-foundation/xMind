@@ -3,6 +3,7 @@
 #include "agentflow/workspace_registry.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/agent_worker.hpp"
+#include "agentflow/agent_worker_entry.hpp"
 #include "nlohmann/json.hpp"
 #include <charconv>
 #include <cstdlib>
@@ -101,6 +102,7 @@ int dispatch(int argc,char** argv){
         else if(mode=="admin")entry=run_admin;
         else if(mode=="view")entry=run_local_view;
         else if(mode=="worker")entry=agentflow::run_agent_worker;
+        else if(mode=="agent-channel-worker")entry=agentflow::run_agent_channel_worker;
 #endif
         if(entry){std::vector<char*> forwarded{argv[0]};for(int i=2;i<argc;++i)forwarded.push_back(argv[i]);forwarded.push_back(nullptr);return entry(static_cast<int>(forwarded.size()-1),forwarded.data());}
     }
