@@ -2,6 +2,29 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Complete installed-generation native qualification — 2026-10-19
+
+Current source0a8ec093 completes the full Release build and all 154 registered
+native contracts, with no failed/skipped tests, in 1,069.74 seconds. The exact
+154-name inventory is preflighted. All 2,625 project inputs, 16 SDK headers,
+1,870 pure-library files, 76 SDK runtime files, 18,598 Node dependencies and 129
+native binaries retain identical file sets and hashes. The complete build's
+xmind executable SHA256 9eb261461f346cec38aa7fcad15b3dfe5615832ca3dd4f0a57934a79f15660ba
+equals installed53; paired runtime is 1ff2a8e7. The local-profile contract passes
+in 479.82 seconds within its unchanged600-second budget. The browser-view and
+provider-config cases pass in140.13/61.40seconds. CTest64788 exits0, followed by
+successful frozen-input verification; no restart or timeout extension occurred.
+
+This is a complete controlled native contract gate for the installed runtime,
+separate from actual provider/IAB/CLI evidence. It does not prove agent-level
+process placement, shared scheduling, nested super-agents, remote Nexus routing
+or remaining rendered-client acceptance. See the
+[delivery audit](delivery-requirement-audit-20261019.md),
+[terminal gate](evidence/coding53-full-native-20261019.json),
+[raw log](evidence/coding53-full-native-20261019.log),
+[inventory](evidence/coding53-full-native-inventory-20261019.json) and
+[gate script](evidence/coding53-full-native-gate-20261019.mjs).
+
 ## Installed53 shared CLI and interactive restore — 2026-10-19
 
 The actual installed53 console discovers the existing TestProj p-current backend
