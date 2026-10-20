@@ -1,3 +1,7 @@
+## Actual ordinary AgentRunner in a child — 2026-10-20
+
+The actual C++ AgentRunner now executes a queued, workspace-free ordinary root in the supervised child fixture through typed journal/model RPC. Backend startup is a real compare-and-swap, and backend-recorded stream event receipts make child append acknowledgements verifiable without granting an event writer.51 focused contracts prove this plain loop and retained lifecycle regressions with ten independent controlled provider requests. Unsupported fixture context/tool/catalogue/runtime ports throw explicitly. This does not place product AgentService/GraphService work or qualify coding, context, graph, failed-attempt, shared-clock or Local/Nexus worker integration. [Exact evidence and limits](evidence/agent-worker-runner-corrected-20261020.json).
+
 ## Backend-owned worker assistant and closure — 2026-10-20
 
 Actual provider responses now acquire backend-built assistant receipts and separate durable bindings. Explicit ordinary-root finish/complete RPC accepts only the attempt; it cannot supply assistant content/usage/context/timing. Finish returns the actual stored receipt, and final closure requires the latest finished stop response before atomic message/run/lease retirement. Ordinary AgentRunner consumes returned journal receipts through RootExecutionBudget; the actual child still uses a fixture rather than AgentRunner.51 focused contracts include provider/replay stability, exact observed completion-rollback fault and committed closure with lost reply. Full journal/context/tool/effect/failed-attempt adapters, queued admission, actual agent-loop placement, graph/context closure and shared root clocks remain required. [Exact evidence and limits](evidence/agent-worker-completion-observed-20261020.json).
@@ -13,6 +17,8 @@ Authenticated native read RPC now returns run/session/history/events/root-budget
 ## Worker provider error signal — 2026-10-20
 
 Scoped model RPC retains the registered HTTP 400 context overflow code across an actual child; malformed error DTOs reject and other provider details stay filtered.37 focused contracts pass after the retained new-regression failure. This fixes a prerequisite for the existing AgentRunner context branch; it does not supply backend-authoritative pre-output overflow evidence or a context-journal adapter, and does not authorize retry of the charged worker claim. Those remain part of actual worker/context integration. [Exact evidence](evidence/agent-worker-model-rpc-errors-20261020.json).
+
+Earlier checkpoint details below retain their original qualification scope. The ordinary child Runner proof above supersedes the older proxy-only description; product placement remains open.
 
 ## Current agent-worker gap map — 2026-10-20
 

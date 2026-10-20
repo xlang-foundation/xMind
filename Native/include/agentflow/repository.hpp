@@ -173,7 +173,7 @@ public:
     std::vector<Run> runs(const std::string& session_id);
     RootRunPage list_root_runs(const std::string& context,const std::string& state,std::optional<std::int64_t> since,std::size_t count,
         std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
-    Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");
+    Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}",const AgentWorkerLeaseSpec* worker=nullptr);
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
     bool append_a2a_task_event(const std::string& run_id,const std::string& operation_id,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);
@@ -196,6 +196,8 @@ public:
     AgentWorkerLeaseRecord admit_agent_worker(const AgentWorkerLeaseSpec&);
     AgentWorkerLeaseRecord agent_worker_lease(const std::string& generation);
     AgentWorkerJournalValue read_agent_worker_journal(const AgentWorkerLeaseSpec&,const AgentWorkerJournalRead&);
+    Event record_agent_worker_model_event(const AgentWorkerModelClaimSpec&,const std::string& kind,const std::string& json);
+    Event agent_worker_model_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);
     AgentWorkerLeaseRecord retire_agent_worker(const std::string& generation,const std::string& reason);
     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&);

@@ -6,6 +6,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
+#include <algorithm>
 #include <future>
 #include <iostream>
 #include <random>
@@ -31,6 +32,13 @@ public:
     ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected worker fixture compaction");}
     unsigned calls=0;
 };
+void queued_start(PersistenceService& store){
+    const std::string id="queued-worker-root";store.create_session(id,"Queued worker fixture").get();store.start_prompt_run(id,id,R"({"content":"Queued ordinary worker"})",RootBudgetSpec{"native.direct-agent",1,"workspace:none",provider,0,0,8,600000}).get();
+    const auto captured=store.admit_agent_worker({"queued-generation",id,id,"workspace:none",1,12345,"134000000000000000","synthetic-queued-image",provider}).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+    require(std::get<Run>(store.read_agent_worker_journal(captured,{AgentWorkerJournalReadKind::run,id}).get()).state==RunState::queued,"Enrolled worker must read its queued root without starting it");rejects<Conflict>([&]{store.reserve_agent_worker_model(captured,"before-start",deadline).get();});
+    auto first=store.start_agent_worker_run(captured,deadline),duplicate=store.start_agent_worker_run(captured,deadline);unsigned accepted=0,rejected=0;for(auto* value:{&first,&duplicate})try{require(value->get().state==RunState::running,"Queued worker must start running");++accepted;}catch(const Conflict&){++rejected;}
+    const auto events=store.events(id).get();require(accepted==1&&rejected==1&&store.root_budget(id).get().model_calls_reserved==0&&std::count_if(events.begin(),events.end(),[](const Event& e){return e.kind=="run.running";})==1,"Queued worker start must compare-and-swap once without charging a model");store.retire_agent_worker(captured.generation,"cancelled").get();store.transition(id,RunState::running,RunState::cancelled).get();auto revival=captured;revival.generation="queued-revival";rejects<Conflict>([&]{store.admit_agent_worker(revival).get();});
+}
 void funding(PersistenceService& store){
     root(store,"funding-root");auto first=store.admit_agent_worker(lease("funding-root","funding-generation-one")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
     auto one=store.reserve_agent_worker_model(first,"funding-reserved",deadline),two=store.reserve_agent_worker_model(first,"funding-reserved",deadline);
@@ -65,11 +73,11 @@ void completion_receipts(PersistenceService& store){
 void ledger(const std::string& path,const std::vector<std::string>& imports){
     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
     {
-        PersistenceService store(path,imports);funding(store);completion_receipts(store);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+        PersistenceService store(path,imports);queued_start(store);funding(store);completion_receipts(store);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
-        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
+        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims","native-agent-worker-model-events"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
         pending=claim(original,"attempt-one");start(store,"worker-root",pending.attempt_id,false);rejects<Conflict>([&]{store.claim_agent_worker_model(pending).get();});store.start_model_call("worker-root","worker-root",pending.attempt_id).get();
         start(store,"foreign-root","foreign-attempt");auto foreign=pending;foreign.root_run_id="foreign-root";foreign.owner_run_id="foreign-root";foreign.attempt_id="foreign-attempt";rejects<Conflict>([&]{store.claim_agent_worker_model(foreign).get();});
         auto first=store.claim_agent_worker_model(pending),second=store.claim_agent_worker_model(pending);unsigned admitted=0,rejected=0;for(auto* result:{&first,&second}){try{require(result->get().state=="dispatching","Claim must precede physical dispatch");++admitted;}catch(const Conflict&){++rejected;}}require(admitted==1&&rejected==1,"Concurrent duplicates must issue exactly one dispatch claim");

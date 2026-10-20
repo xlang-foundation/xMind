@@ -20,6 +20,9 @@ public:
     std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
     std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
     std::future<AgentWorkerJournalValue> read_agent_worker_journal(AgentWorkerLeaseSpec,AgentWorkerJournalRead);
+    std::future<Run> start_agent_worker_run(AgentWorkerLeaseSpec,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<Event> record_agent_worker_model_event(AgentWorkerModelClaimSpec,std::string kind,std::string json);
+    std::future<Event> agent_worker_model_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
     // Deadline and cancellation are checked on the serialized backend worker,
     // not only before the RPC handler enters the persistence queue.
     std::future<ModelCallReservation> reserve_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});

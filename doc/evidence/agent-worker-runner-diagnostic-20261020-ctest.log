@@ -1,0 +1,44 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 81: native_agent_worker_model_rpc_contract
+1/1 Test #81: native_agent_worker_model_rpc_contract ...***Failed    1.31 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51593
+Child AgentRunner: Model call retirement could not be recorded; stop execution and recover ownership; model diagnostic: Stream acknowledgement replay must not append events
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51593',
+  stdout: 'Native RPC case normal child_pid=71600 creation_time=134369856762365955\r\n' +
+    'Native RPC case cancel child_pid=58960 creation_time=134369856763640337\r\n' +
+    'Native RPC case crash child_pid=15516 creation_time=134369856764466374\r\n' +
+    'Native RPC case delivery child_pid=48180 creation_time=134369856765255241\r\n' +
+    'Native RPC case overflow child_pid=43140 creation_time=134369856765882665\r\n' +
+    'Native RPC case other_error child_pid=1480 creation_time=134369856766832327\r\n' +
+    'Native RPC case completion child_pid=59916 creation_time=134369856767617093\r\n' +
+    'Native RPC case completion_delivery child_pid=69688 creation_time=134369856768593171\r\n' +
+    'Native RPC case completion_rollback child_pid=68756 creation_time=134369856769395645\r\n' +
+    'Observed injected completion retirement fault; run/history/events/lease rollback verified.\r\n' +
+    'Native RPC case runner child_pid=49072 creation_time=134369856770518651\r\n',
+  stderr: 'Child AgentRunner: Model call retirement could not be recorded; stop execution and recover ownership; model diagnostic: Stream acknowledgement replay must not append events\r\n'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.33 sec
+
+The following tests FAILED:
+	 81 - native_agent_worker_model_rpc_contract (Failed)
+Errors while running CTest

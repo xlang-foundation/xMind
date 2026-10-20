@@ -1,0 +1,365 @@
+{
+  "failureAnalysis": {
+    "initialResult": "50/51; the new Runner case failed after a recorded provider response",
+    "diagnosticResult": "Targeted diagnostic reproduced the fixture failure",
+    "confirmedDiagnostic": true,
+    "cause": "The fixture compared a moving global event count while the provider continued recording its stream",
+    "correction": "Check acknowledged event identity during streaming, then check the final complete model-event total after drain",
+    "snapshot": {
+      "recordedAt": "2026-10-20T16:00:17.305Z",
+      "databaseSha256Before": "4e9622e47f48213df7c77d0863e15986333a857bccbeb0b691009b0732ef7850",
+      "databaseSha256After": "4e9622e47f48213df7c77d0863e15986333a857bccbeb0b691009b0732ef7850",
+      "queryOnly": true,
+      "cliSha256": "210d9b1aec9d97376296b14c88596fc0d02ffb3fddf2c99c658ee242b4cbd5b0",
+      "probeSha256": "08d6c0e44cc24913b85aed6b16d2d3f49658681d9b99611bf7978553979abf3a",
+      "cpythonExecuted": false,
+      "snapshot": {
+        "run": [
+          [
+            "rpc-runner",
+            "running"
+          ]
+        ],
+        "budget": [
+          [
+            1
+          ]
+        ],
+        "events": [
+          [
+            133,
+            "run.queued",
+            "{}"
+          ],
+          [
+            134,
+            "fixture.journal_owned",
+            "{\"opaque\":1.0000000000000001,\"text\":\"owned\\u0000value\"}"
+          ],
+          [
+            135,
+            "worker.lease.admitted",
+            "{\"generation\":\"generation-runner\",\"pid\":39820,\"root_run_id\":\"rpc-runner\"}"
+          ],
+          [
+            136,
+            "run.running",
+            "{}"
+          ],
+          [
+            137,
+            "budget.model_call.reserved",
+            "{\"attempt_id\":\"c2fb88a3dce2fb41f27acae249090682\",\"role\":\"parent\",\"root_run_id\":\"rpc-runner\",\"worker_generation\":\"generation-runner\"}"
+          ],
+          [
+            138,
+            "budget.model_call.started",
+            "{\"attempt_id\":\"c2fb88a3dce2fb41f27acae249090682\",\"role\":\"parent\",\"root_run_id\":\"rpc-runner\"}"
+          ],
+          [
+            139,
+            "worker.model.dispatching",
+            "{\"attempt_id\":\"c2fb88a3dce2fb41f27acae249090682\",\"generation\":\"generation-runner\",\"request_binding\":\"5c1646ff05b76392b42367774319f19999534dd0a8a0a61e04bc013208f9a85c\"}"
+          ],
+          [
+            140,
+            "model.text",
+            "{\"text\":\"Actual native RPC runner.\"}"
+          ],
+          [
+            141,
+            "model.usage",
+            "{\"completion_tokens\":3,\"prompt_tokens\":7,\"total_tokens\":10}"
+          ],
+          [
+            142,
+            "model.finish",
+            "{\"reason\":\"stop\"}"
+          ],
+          [
+            143,
+            "model.done",
+            "{}"
+          ],
+          [
+            144,
+            "worker.model.responded",
+            "{\"attempt_id\":\"c2fb88a3dce2fb41f27acae249090682\",\"generation\":\"generation-runner\",\"response_binding\":\"d2c3273582703ae0a4aba7fad75c1e525c54c21900f2c126ce85ebb110ef8455\"}"
+          ]
+        ],
+        "claims": [
+          [
+            "c2fb88a3dce2fb41f27acae249090682",
+            "responded"
+          ]
+        ]
+      }
+    }
+  },
+  "recordedAt": "2026-10-20T16:06:33.088Z",
+  "sourceParent": "261644dd362e5f554a199e84eadceb286861ac25",
+  "sourcePatchSha256": "81240dc1ed70e1502ff722ed5b2499c5c1e7b930485b74e1b39a18efcd0951d4",
+  "gate": {
+    "recordedAt": "2026-10-20T16:05:48.500Z",
+    "sourceParent": "261644dd362e5f554a199e84eadceb286861ac25",
+    "sourcePatchSha256": "81240dc1ed70e1502ff722ed5b2499c5c1e7b930485b74e1b39a18efcd0951d4",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 59720,
+      "launchedAt": "2026-10-20T16:02:23.339Z",
+      "completedAt": "2026-10-20T16:03:14.283Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9"
+    },
+    "test": {
+      "pid": 35768,
+      "launchedAt": "2026-10-20T16:03:17.094Z",
+      "completedAt": "2026-10-20T16:05:45.737Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9ec9f747b577c6fc2c6f4913c56d3b5127219c01fe7cfe6aa2da676dd5e3c943"
+    },
+    "total": 51,
+    "failed": 0,
+    "passed": 51,
+    "seconds": 148.6,
+    "projectFiles": 2655,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9e2dba660cded7d37cd62cee13a26a9f697c2f82ae3f0459203b865a00dfc09f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-runner-corrected-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T16:05:48.500Z",
+        "sourceParent": "261644dd362e5f554a199e84eadceb286861ac25",
+        "sourcePatchSha256": "81240dc1ed70e1502ff722ed5b2499c5c1e7b930485b74e1b39a18efcd0951d4",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 59720,
+          "launchedAt": "2026-10-20T16:02:23.339Z",
+          "completedAt": "2026-10-20T16:03:14.283Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9"
+        },
+        "test": {
+          "pid": 35768,
+          "launchedAt": "2026-10-20T16:03:17.094Z",
+          "completedAt": "2026-10-20T16:05:45.737Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "9ec9f747b577c6fc2c6f4913c56d3b5127219c01fe7cfe6aa2da676dd5e3c943"
+        },
+        "total": 51,
+        "failed": 0,
+        "passed": 51,
+        "seconds": 148.6,
+        "projectFiles": 2655,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "9e2dba660cded7d37cd62cee13a26a9f697c2f82ae3f0459203b865a00dfc09f",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": {
+        "doc/evidence/agent-worker-runner-corrected-20261020-gate.json": "4d15d3c162cb5df22efbbc6b8b671244d1d25c24a7da097de428dbcec49c3ac2",
+        "doc/evidence/agent-worker-runner-corrected-20261020-ctest.log": "9ec9f747b577c6fc2c6f4913c56d3b5127219c01fe7cfe6aa2da676dd5e3c943",
+        "doc/evidence/agent-worker-runner-corrected-20261020-build.log": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9",
+        "doc/evidence/agent-worker-runner-corrected-20261020-LastTest.log": "fc9b015c113bba28b0b284f8df90d62aac35e66081bd31ac2f581096ec61d26c",
+        "doc/evidence/agent-worker-runner-corrected-20261020-test-inventory.json": "abf2d529f3e9cabe1f6316f2f6b41b638d0033a3a0d91be586c8422224a6b4fc",
+        "doc/evidence/agent-worker-runner-corrected-20261020-build-terminal.json": "882aed3562d1c4f8c9acffec854ed6ed016a7201466200020ad12b277ab38794",
+        "doc/evidence/agent-worker-runner-corrected-20261020-ctest-terminal.json": "28dc00ad699cf3ea8909f8b802d50cc9fffc09ed5d47d32c0a67b96aff2f1ea8"
+      }
+    },
+    "agent-worker-runner-diagnostic-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T16:01:19.834Z",
+        "sourceParent": "261644dd362e5f554a199e84eadceb286861ac25",
+        "sourcePatchSha256": "346f10d2dee0cd09854a5487a270e20846335c26bcc07a3b3a96ea0e6dd719c2",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 11856,
+          "launchedAt": "2026-10-20T16:00:20.828Z",
+          "completedAt": "2026-10-20T16:01:13.060Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9"
+        },
+        "test": {
+          "pid": 62316,
+          "launchedAt": "2026-10-20T16:01:15.772Z",
+          "completedAt": "2026-10-20T16:01:17.148Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "dc2389836780baa0bd1ebdafce1d228747b772e2a8a02fa5c6cb1fc2307b0830"
+        },
+        "total": 1,
+        "failed": 1,
+        "passed": 0,
+        "seconds": 1.33,
+        "projectFiles": 2655,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "9e2dba660cded7d37cd62cee13a26a9f697c2f82ae3f0459203b865a00dfc09f",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": {
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-gate.json": "efe3f99d45e44cbede8bfffa4608976651555ce920542b13971fa456400d35a3",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-ctest.log": "dc2389836780baa0bd1ebdafce1d228747b772e2a8a02fa5c6cb1fc2307b0830",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-build.log": "a2a3dd5249ce102f8387d048cf94cf59423b4be33886cf474d9dbdca157cdec9",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-LastTest.log": "5045fdbc35a98f5954395f727f981b7d55207bfcc62897d57eee256695ee2209",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-test-inventory.json": "6f77294731486f0d9d27f1c5c23e0c25f7491a82f0aea71ee586e4878cb915e7",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-build-terminal.json": "91a74d32dfed61589ccbc194bb4b84723a4056829f2b57e6a0e5e69030c4262b",
+        "doc/evidence/agent-worker-runner-diagnostic-20261020-ctest-terminal.json": "87ba52e732f842931e9a873e9e3b3c12ad974ab191ef4e41387f65ae2a265cbf"
+      }
+    },
+    "agent-worker-runner-focused-20261020": {
+      "gate": {
+        "recordedAt": "2026-10-20T15:55:45.921Z",
+        "sourceParent": "261644dd362e5f554a199e84eadceb286861ac25",
+        "sourcePatchSha256": "fb2ca603bfd2478135faa141df2293e23f27e3a519c04f2d4a1cff4ebc0d8658",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 53528,
+          "launchedAt": "2026-10-20T15:38:29.308Z",
+          "completedAt": "2026-10-20T15:53:07.208Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "9dd0e9fb9caca0f5f2dbe327a4fcf77d44e0d7d22cc1113c18137a6f8c1049b8"
+        },
+        "test": {
+          "pid": 28232,
+          "launchedAt": "2026-10-20T15:53:10.673Z",
+          "completedAt": "2026-10-20T15:55:43.239Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "4488b0be1716a00a162b809020211953debcd95c21b667f4496560dc22e3ce42"
+        },
+        "total": 51,
+        "failed": 1,
+        "passed": 50,
+        "seconds": 152.51,
+        "projectFiles": 2655,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "9e2dba660cded7d37cd62cee13a26a9f697c2f82ae3f0459203b865a00dfc09f",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": {
+        "doc/evidence/agent-worker-runner-focused-20261020-gate.json": "b1da5b1c0b8279bbdb8c214bc766fa3c430acd825d53ac2a439e326ac94d2411",
+        "doc/evidence/agent-worker-runner-focused-20261020-ctest.log": "4488b0be1716a00a162b809020211953debcd95c21b667f4496560dc22e3ce42",
+        "doc/evidence/agent-worker-runner-focused-20261020-build.log": "9dd0e9fb9caca0f5f2dbe327a4fcf77d44e0d7d22cc1113c18137a6f8c1049b8",
+        "doc/evidence/agent-worker-runner-focused-20261020-LastTest.log": "8f6580416e09628a471fb9273d97f43e08c0fa66600b94b84b07eebf4fdc847c",
+        "doc/evidence/agent-worker-runner-focused-20261020-test-inventory.json": "abf2d529f3e9cabe1f6316f2f6b41b638d0033a3a0d91be586c8422224a6b4fc",
+        "doc/evidence/agent-worker-runner-focused-20261020-build-terminal.json": "934591f7b6590159446d4903ee35acb3019a538aac2474543378fd35c14a5171",
+        "doc/evidence/agent-worker-runner-focused-20261020-ctest-terminal.json": "3926d33cae96cefa4a2d582337dc8599ccf86edeaec0bae81ab01abf77236f30",
+        "doc/evidence/agent-worker-runner-focused-20261020-diagnostic.log": "2395c758526f2a8cf1ade4164aeace7626e659b3b5a66ea4928df52edea3bd86",
+        "doc/evidence/agent-worker-runner-focused-20261020-diagnostic.json": "4cd89aab3d2cbd127bbe4d4dd4558f365c973574829326c658bb989332798ab6"
+      }
+    }
+  },
+  "children": [
+    {
+      "mode": "normal",
+      "pid": 56636,
+      "creationTime": "134369859004471225"
+    },
+    {
+      "mode": "cancel",
+      "pid": 4200,
+      "creationTime": "134369859005802955"
+    },
+    {
+      "mode": "crash",
+      "pid": 54844,
+      "creationTime": "134369859006613624"
+    },
+    {
+      "mode": "delivery",
+      "pid": 57092,
+      "creationTime": "134369859007392646"
+    },
+    {
+      "mode": "overflow",
+      "pid": 25644,
+      "creationTime": "134369859008023567"
+    },
+    {
+      "mode": "other_error",
+      "pid": 52264,
+      "creationTime": "134369859009115106"
+    },
+    {
+      "mode": "completion",
+      "pid": 58360,
+      "creationTime": "134369859010051734"
+    },
+    {
+      "mode": "completion_delivery",
+      "pid": 59348,
+      "creationTime": "134369859011052035"
+    },
+    {
+      "mode": "completion_rollback",
+      "pid": 59484,
+      "creationTime": "134369859011860469"
+    },
+    {
+      "mode": "runner",
+      "pid": 21644,
+      "creationTime": "134369859013041116"
+    }
+  ],
+  "fixtureSha256": "086d35b65ee1512357d2c3fab5bc617cd3666c5f03450b718b875ce732622bf7",
+  "ledgerFixtureSha256": "d1b944074cc0314a6c03422627a0784268de1bef121930a0f9669f9c02f57021",
+  "behavior": "The actual native AgentRunner executes a plain ordinary root inside the private supervised child. Its explicit fixture adapters call authenticated backend journal/model RPC; parent code does not execute this loop. Queued direct-root lease enrollment permits scoped metadata reads, but reserve/start/model dispatch require running state. Typed startup compare-and-swaps queued to running with exact lease/current-generation/workspace/provider/target checks in the same transaction. Competing starts produce one running event and no charged model.",
+  "events": "Backend model host now records each actual native model event and immutable attempt/generation/ordinal-to-event receipt in one xlang3/SQLite transaction before streaming it. The new private information category is inaccessible through generic information APIs. Child append_event acknowledges an existing exact kind/JSON/event ordinal; duplicate acknowledgement returns the same event without inserting one, while changed data/kind, invalid index, foreign/stale/uncertain scope reject. There is no generic worker event writer.",
+  "actualFixture": "The new runner case begins with a queued workspace:none root, performs its own start/reserve/start/model loop, acknowledges every actual stream event, receives the canonical backend assistant through RootExecutionBudget.finish and completes/retire via the backend. Parent assertions verify actual distinct child identity, one running event, no duplicated model events, one model allowance and exactly two history messages equal to the backend acknowledgement. The existing nine cancellation/crash/error/closure/lost-delivery/rollback cases remain; independent controlled peer sees exactly ten HTTP requests, one per case.",
+  "disabledPorts": "Fixture-local unsupported AgentRunJournal and AgentContextJournal methods throw explicitly. Catalogue/tool/runtime services also throw if called. Plain settings disable workspace/tools/context/delegation/planning/MCP/A2A. These are test adapters, not complete product worker ports, and return no fabricated catalogue, context, permission or tool results.",
+  "limits": "Actual no-tool ordinary AgentRunner child proof only. AgentService/GraphService product dispatch still executes in-process; no placement setting is advertised. Coding/tool/effect/guidance/context/graph adapters, failed-attempt/retirement paths, worker lifecycle integration and Local/Nexus authenticated enrollment/protocol remain open. The child ordinary budget timer is local/advisory; backend RPC/model/channel retain the captured original deadline, but shared physical root clocks across processes are not qualified. Event receipts cap 8192 events per attempt and 2 MiB per event; existing RPC row/byte bounds and large-window negotiation remain open. No full native suite, live paid model, hosted qualification or installed upgrade.",
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "cpythonExecuted": false
+}

@@ -20,7 +20,7 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
-void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&);
+void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
 std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
 std::string worker_assistant_receipt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string& attempt,bool final);
 BackendOwnerState decode_owner(const std::string&);
@@ -2770,9 +2770,10 @@ RootRunPage Repository::list_root_runs(const std::string& context,const std::str
     for(const auto& row:rows){if(result.entries.size()==count){result.more=true;break;}if(integer(row[2])<1)throw DatabaseError("Task status journal is unavailable");result.entries.push_back({run(text(row[0])),std::holds_alternative<std::nullptr_t>(row[1])?std::optional<std::int64_t>{}:std::optional<std::int64_t>{integer(row[1])},integer(row[2])});}
     transaction.commit();return result;
 }
-Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json) {
+Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json,const AgentWorkerLeaseSpec* worker) {
     if(!allowed(expected,next)) throw std::invalid_argument("Invalid run transition");
     auto& db=impl_->database; Transaction transaction(db); auto result=run(id);std::optional<DynamicPlanRecord> child_plan;
+    if(worker){worker_current_scope(*this,db,*worker,true);if(id!=worker->owner_run_id||id!=worker->root_run_id||expected!=RunState::queued||next!=RunState::running||json!="{}"||root_budget(id).spec.policy_id!="native.direct-agent")throw Conflict("Worker startup differs from captured ordinary-root admission");}
     if(result.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context lifecycle requires its typed owner operation");
     if(next==RunState::completed&&!result.parent_id.empty()){
         const auto admission=child_admission(id);
@@ -3114,7 +3115,8 @@ namespace {
 constexpr const char* worker_lease_category="native-agent-worker-leases";
 constexpr const char* worker_current_category="native-agent-worker-current";
 constexpr const char* worker_claim_category="native-agent-worker-model-claims";
-bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category;}
+constexpr const char* worker_event_category="native-agent-worker-model-events";
+bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category;}
 void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
 Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
     bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
@@ -3131,6 +3133,7 @@ AgentWorkerLeaseRecord read_worker_lease(XlangSqlite& db,const std::string& gene
 }
 Json worker_claim_spec_json(const AgentWorkerModelClaimSpec& spec){bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.attempt_id);worker_digest(spec.request_binding);return {{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"owner_run_id",spec.owner_run_id},{"attempt_id",spec.attempt_id},{"request_binding",spec.request_binding}};}
 std::string worker_claim_key(const std::string& root,const std::string& attempt){bounded_identity(root);bounded_identity(attempt);return context_digest(Json::array({root,attempt}).dump());}
+std::string worker_event_key(const std::string& root,const std::string& attempt,std::int64_t ordinal){bounded_identity(root);bounded_identity(attempt);if(ordinal<0||ordinal>=8192)throw std::invalid_argument("Invalid worker model event ordinal");return context_digest(Json::array({root,attempt,ordinal}).dump());}
 Json worker_claim_json(const AgentWorkerModelClaimRecord& record){Json value={{"version",1},{"spec",worker_claim_spec_json(record.spec)},{"state",record.state},{"actual_response_json",record.actual_response_json},{"response_binding",record.response_binding}};if(!record.actual_assistant_json.empty()){value["actual_assistant_json"]=record.actual_assistant_json;value["assistant_binding"]=record.assistant_binding;}return value;}
 AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string& root,const std::string& attempt){
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_claim_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker model dispatch not found");
@@ -3142,16 +3145,17 @@ AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string&
         else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker dispatch");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker dispatch");}
 }
-void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec){
+void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
     const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);const auto budget=repository.root_budget(spec.root_run_id);
-    if(root.state!=RunState::running||owner.state!=RunState::running||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||Json::parse(budget.spec.provider_identity_json)!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its running owners");
+    const bool queued=allow_queued_root&&spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&owner.state==RunState::queued&&budget.spec.policy_id=="native.direct-agent";
+    if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||Json::parse(budget.spec.provider_identity_json)!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
     if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;
     if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
     else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
 }
-void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& expected){
-    const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");worker_running_scope(repository,db,expected);
+void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& expected,bool allow_queued_root){
+    const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");worker_running_scope(repository,db,expected,allow_queued_root);
     const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
     if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker generation is stale");
 }
@@ -3173,7 +3177,7 @@ std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,cons
 }
 }
 AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec& spec){
-    (void)worker_spec_json(spec);auto& db=impl_->database;Transaction tx(db);worker_running_scope(*this,db,spec);
+    (void)worker_spec_json(spec);auto& db=impl_->database;Transaction tx(db);worker_running_scope(*this,db,spec,true);
     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_lease_category),spec.generation}).rows.empty())throw Conflict("Worker generation cannot be reused");
     const auto prior=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),spec.owner_run_id}).rows;
     if(!prior.empty()){const auto current=read_worker_lease(db,Json::parse(text(prior[0][0])).at("generation").get<std::string>());if(current.spec.owner_run_id!=spec.owner_run_id||current.state!="retired")throw Conflict("Worker owner already has an active generation");}
@@ -3183,7 +3187,7 @@ AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec
 AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
 AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
     if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
-    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected);
+    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected,true);
     const auto owner=run(expected.owner_run_id);
     AgentWorkerJournalValue result;
     switch(query.kind){
@@ -3200,6 +3204,21 @@ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerL
     default:throw std::invalid_argument("Unsupported worker journal read");
     }
     tx.commit();return result;
+}
+Event Repository::record_agent_worker_model_event(const AgentWorkerModelClaimSpec& spec,const std::string& kind,const std::string& json){
+    identifier(kind);if(!kind.starts_with("model.")||kind.size()>64)throw std::invalid_argument("Worker model event kind differs");(void)object_json(json);auto& db=impl_->database;Transaction tx(db);
+    const auto claim=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(claim.spec)!=worker_claim_spec_json(spec)||claim.state!="dispatching")throw Conflict("Model event has no live captured dispatch");
+    const auto lease=read_worker_lease(db,spec.generation);worker_current_scope(*this,db,lease.spec);
+    const auto ordinal=integer(db.execute("SELECT count(*) FROM information WHERE category=? AND json_extract(payload,'$.spec.root_run_id')=? AND json_extract(payload,'$.spec.attempt_id')=?",{std::string(worker_event_category),spec.root_run_id,spec.attempt_id}).rows.at(0).at(0));const auto key=worker_event_key(spec.root_run_id,spec.attempt_id,ordinal);
+    const auto event=impl_->event(spec.owner_run_id,kind,json);const auto receipt=Json{{"version",1},{"spec",worker_claim_spec_json(spec)},{"ordinal",ordinal},{"event_sequence",event.sequence}}.dump();
+    changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_event_category),key,receipt}));tx.commit();return event;
+}
+Event Repository::agent_worker_model_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json){
+    const auto key=worker_event_key(lease.root_run_id,attempt,ordinal);if(kind.size()>64||json.size()>2*1024*1024)throw std::invalid_argument("Invalid worker model event acknowledgement");auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
+    const auto claim=read_worker_claim(db,lease.root_run_id,attempt);if(claim.spec.owner_run_id!=lease.owner_run_id||claim.spec.generation!=lease.generation||(claim.state!="dispatching"&&claim.state!="responded"))throw Conflict("Worker cannot acknowledge a foreign or uncertain stream");
+    const auto receipts=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_event_category),key}).rows;if(receipts.size()!=1)throw NotFound("Captured worker model event not found");const auto receipt=Json::parse(text(receipts[0][0]));const auto sequence=receipt.at("event_sequence").get<std::int64_t>();
+    if(receipt!=Json{{"version",1},{"spec",worker_claim_spec_json(claim.spec)},{"ordinal",ordinal},{"event_sequence",sequence}})throw DatabaseError("Stored model event binding differs");const auto rows=db.execute("SELECT run_id,kind,payload FROM events WHERE seq=?",{sequence}).rows;
+    if(rows.size()!=1||text(rows[0][0])!=lease.owner_run_id||text(rows[0][1])!=kind||text(rows[0][2])!=json)throw Conflict("Worker event differs from actual backend observation");Event result{sequence,lease.owner_run_id,kind,json};tx.commit();return result;
 }
 AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
 AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
