@@ -2,6 +2,17 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested graph client observation preparation — 2026-10-19
+
+Prepared in isolated C:/xMindNativeValidation/nested-graph-client-worktree-20261019 while the main checkout's d2865a32 full-native validation remains frozen. Browser and VS Code now traverse native-declared graph children through immediate parent edges, verify each nested identity/revision/specification, preserve repeated node names using root-relative paths, collect descendant agent histories and operations, and route descendant stream events to distinct rendered rows. Shared event-stream admission verifies the same bounded tree. Existing API history routes remain sufficient when addressed through the actual immediate graph parent. Traversal bounds include three invocation levels,256 admitted descendants and256 displayed declared nodes. No execution or approval authority moves to JavaScript.
+
+Complete isolated client suites pass460extension/159browser, with71source/vendor files and18browser assets byte-identical before/after. Source inventory grows from63 to64tracked client files; CI exact counts update accordingly. Tests cover immutable pins, foreign ownership, duplicate/cyclic identities, depth/expanded limits, repeated labels, browser histories/operations/events, VS Code direct descendant streaming, and DOM row/metric separation. No native process, model inference, installed editor or user history is exercised by these synthetic client suites. The Node dependency directory is a read-only reuse of the main checkout's dependency tree, which is concurrently frozen by the full-native gate. This is not actual rendered IDE or live provider acceptance.
+
+The first complete client gate passes455/457extension and159/159browser; two existing stream fixtures lacked the newly required graph metadata request. Fixtures now provide that native-shaped metadata and retain wrong-owner/session rejection. Initial targeted setup/renderer/harness failures are kept in C:/xMindNativeValidation/nested-client-*-20261019.log. Final shared-observer, renderer and controller checks pass. See evidence/nested-graph-client-20261019-* and source patch.
+
+Native/browser integration with this client candidate, merge into main and package adoption are still pending. Main native155 gate session54711 is live and must reach terminal before any change to its source or binary closure. Installed56 remains unchanged. Nested human/context pause and resume and other delivery audit requirements remain unfinished.
+
+
 ## Full nested native gate: schema assertion correction — 2026-10-19
 
 Complete source1d12fe4d native155 gate is terminal failure154/155 in1076.69seconds (CTest12156, wrapper39157 exit1). The sole failure is native_skill_state_contract: its final check still required version!=33 to be false even though schema34 had valid empty foreign_key_check results. All actual nested execution, graph, MCP, process, profile/view lifecycle, persistence, owner and remaining contracts pass at that source, but this is not a full-suite qualification. All2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets/hashes remain frozen. Original failed logs and full inventory are retained in evidence/nested-graph-full-native-failed-20261019.*.

@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('../client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('../client');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -72,10 +72,10 @@ function harness(options={}) {
       graphRequests.push(JSON.parse(requestOptions.body));data=options.graphRoot.run;
     }
     else if(target.pathname.startsWith('/v1/graph-runs/')){
-      const root=options.graphRoot;assert.ok(root,'Graph fixture must be explicit');assert.equal(target.pathname.split('/')[3],root.run.id);
+      const root=options.graphRecords?.[target.pathname.split('/')[3]]||options.graphRoot;assert.ok(root,'Graph fixture must be explicit');assert.equal(target.pathname.split('/')[3],root.run.id);
       if(target.pathname.endsWith('/events'))data=target.search==='?after=0'?(options.graphEvents||[]):[];
       else if(target.pathname.endsWith('/history'))data=options.childHistory||[];
-      else if(target.pathname.endsWith('/children'))data=options.graphChildren||[];
+      else if(target.pathname.endsWith('/children'))data=options.graphChildBatches?.[root.run.id]||options.graphChildren||[];
       else if(target.pathname.includes('/human/')){humanInputs.push(JSON.parse(requestOptions.body));data=options.graphInputResult||root;}
       else data=root;
     }
@@ -190,7 +190,7 @@ function harness(options={}) {
     dispose(){languageServerEditorCalls.push({type:'dispose'});}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':key==='openOnStartup'&&options.openOnStartup===true?true:undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(file,data)=>{const value=JSON.parse(data);if(file==='labeled-fixture-marker')ready.push(value);else previewFailures.push(value);}}:originalRequire(name);
@@ -1106,4 +1106,10 @@ test('folder switching before the first sidebar exists reopens the latest worksp
  const h=harness({beforeConnect:async root=>{if(root==='D:\\TestProj'){entered();await paused;}}});await h.activation;const first=h.commands.get('agentflow.open')();await arrived;
  h.changeWorkspace('D:\\LatestProject');release();await first;
  try{await until(()=>h.views.length===1&&h.backendOwners.some(owner=>owner.metadata.root==='D:\\LatestProject'));const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='workspace'&&message.root==='D:\\LatestProject'));assert.ok(!h.backendOwners.some(owner=>owner.metadata.root==='D:\\TestProj'));assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));}finally{for(const view of h.views)view.close();}
+});
+
+
+test('sidebar routes nested direct stream events to the observed descendant row',async()=>{
+ const root={id:'root',session_id:'saved',state:'running',graph_root:true,parent_id:'',node_id:''},child={...root,id:'child',parent_id:'root',node_id:'call'},leaf={...root,id:'leaf',graph_root:false,parent_id:'child',node_id:'worker'},spec={nodes:[{id:'worker',type:'agent'}]},record={run:root,spec:{nodes:[{id:'call',type:'graph',graph_id:'child-flow',graph_revision:4,graph_spec:spec}]}},nested={run:child,graph_id:'child-flow',graph_revision:4,spec},options={runs:[root],graphRoot:record,graphRecords:{root:record,child:nested},graphChildren:[child,leaf],graphChildBatches:{root:[child],child:[leaf]},childHistory:[]};const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='graph'&&m.children.some(c=>c.id==='leaf')));await h.streams[0].options.onEvent({seq:8,run_id:'leaf',kind:'model.text',data:{text:'Synthetic nested stream'}});assert.deepEqual(view.posted.filter(m=>m.type==='graph-event').map(m=>m.node_id),['call/worker']);assert.equal(view.posted.findLast(m=>m.type==='graph').graphs[0].record.run.id,'child');assert.ok(!view.posted.some(m=>m.type==='error'));}finally{view.close();}
 });

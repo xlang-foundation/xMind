@@ -571,17 +571,18 @@ const needsModelSelection=()=>!!profileState&&(!profileState.active||!byId('mode
 const canExecute=()=>byId('workflow').value?workflowExecutable:execution&&!needsModelSelection();
 const refreshSendControl=()=>{const button=byId('send'),queueing=activeRun||sessionBusy;button.disabled=queueing?!byId('sessions').value:!canExecute();button.textContent=queueing?'Queue ↑':'Send ↑';button.title=queueing?'Queue this prompt after the active turn':!byId('workflow').value&&needsModelSelection()?'Choose a model in the sidebar footer':'Send · Enter';};
 function clearGraph(){clearPlan();clearOwned();graphRows.clear();observedGraph=undefined;displayedGraph=undefined;byId('graph-view').replaceChildren();byId('graph-view').hidden=true;}
-function graphView(record,children,histories){
+function graphView(record,children,histories,graphs=[]){
   const root=record.run.id;if(observedGraph!==root){clearGraph();observedGraph=root;const heading=node('h3',record.graph_id+' · revision '+record.graph_revision);byId('graph-view').append(heading);}
   displayedGraph=record;
   let resume=byId('graph-resume');if(!resume){resume=node('button','Resume ready graph','primary');resume.id='graph-resume';byId('graph-view').append(resume);resume.onclick=()=>{if(resume.disabled||displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true||displayedGraph.run.state!=='paused')return;resume.disabled=true;api.postMessage({type:'graph-resume',root:displayedGraph.run.id,revision:displayedGraph.checkpoint_revision});};}
   resume.hidden=record.context?.enabled!==true||record.context?.resumable!==true||record.run.state!=='paused';resume.disabled=resume.hidden||byId('runs').value!==record.run.id;
   let clock=byId('graph-clock');if(!clock){clock=node('p',undefined,'inspection-note');clock.id='graph-clock';byId('graph-view').append(clock);}clock.hidden=!Number.isSafeInteger(record.context?.remaining_active_ms);clock.textContent=clock.hidden?'':'Remaining active allowance '+(record.context.remaining_active_ms/1000).toFixed(3)+'s · closed backend clock';
-  byId('graph-view').hidden=false;const definitions=new Map(record.spec.nodes.map(n=>[n.id,n]));
-  for(const state of record.checkpoint.nodes){
-    let row=graphRows.get(state.id);
-    if(!row){const card=node('section',undefined,'graph-node'),heading=node('h4'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};graphRows.set(state.id,row);byId('graph-view').append(card);}
-    const definition=definitions.get(state.id),child=children.find(c=>c.node_id===state.id);row.childState=child?.state;row.heading.textContent=state.id+' · '+definition.type+' · '+state.state;
+  byId('graph-view').hidden=false;
+  for(const observed of [{record,path:[]},...graphs]){const graph=observed.record,path=observed.path,definitions=new Map(graph.spec.nodes.map(n=>[n.id,n]));
+  for(const state of graph.checkpoint.nodes){const key=[...path,state.id].join('/');
+    let row=graphRows.get(key);
+    if(!row){const card=node('section',undefined,'graph-node'),heading=node('h4'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};graphRows.set(key,row);byId('graph-view').append(card);}
+    const definition=definitions.get(state.id),child=children.find(c=>c.parent_id===graph.run.id&&c.node_id===state.id);row.childState=child?.state;row.heading.textContent=key+' · '+definition.type+' · '+state.state;
     const waiting=definition.type==='human'&&state.state==='waiting_human'&&['paused','running'].includes(record.run.state);
     if(waiting){
       if(!row.form){row.body.replaceChildren();row.body.append(node('p',definition.prompt||'Provide input'));const form=node('form',undefined,'graph-input'),label=node('label','JSON input'),input=node('textarea'),button=node('button','Submit answer','primary');input.setAttribute('aria-label','JSON input for '+state.id);input.placeholder='{}';input.maxLength=65536;button.type='submit';label.append(input);form.append(label,node('p','Input supplies data; it does not approve tools or commands.','inspection-note'),button);row.body.append(form);row.form=form;row.input=input;row.button=button;
@@ -592,7 +593,7 @@ function graphView(record,children,histories){
     }
     if(child && histories[child.id]){const history=histories[child.id],signature=JSON.stringify(history);if(row.historySignature!==signature){row.responses.replaceChildren();for(const item of history)if(item.role!=='user')entry(item.role,item.data,row.responses);row.historySignature=signature;row.stream.replaceChildren();row.text='';row.usage=undefined;}}
     if(['completed','failed','cancelled'].includes(row.childState)){discardMarkdown(row.stream);row.stream.replaceChildren();row.text='';row.usage=undefined;}
-  }
+  }}
 }
 let displayedContext,contextSubmitting=false;
 function clearContext(){displayedContext=undefined;contextSubmitting=false;byId('context-view').hidden=true;byId('context-status').replaceChildren();byId('context-metrics').replaceChildren();byId('context-compact').disabled=true;}
@@ -735,7 +736,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='owned-clear')clearOwned();
   else if(m.type==='owned-children')ownedView(m.parent,m.children,m.histories);
   else if(m.type==='owned-event')ownedEvent(m);
-  else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories);}
+  else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories,m.graphs);}
   else if(m.type==='graph-event')graphEvent(m);
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.active?'● Running · '+session.title:session.title);option.value=session.id;option.dataset.sessionId=session.id;option.dataset.sessionTitle=session.title;option.dataset.sessionActive=session.active?'true':'false';option.title=session.active?'A run is active in this conversation':session.title;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;deletePending=false;refreshRename();refreshForkControls();refreshDeleteControls();}
   else if(m.type==='session-exported'){if(!m.archive||m.archive.format!=='xmind.session'){byId('status').textContent='The backend returned an invalid session archive.';return;}const blob=new Blob([JSON.stringify(m.archive,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),link=node('a');link.href=url;link.download='xmind-session-'+byId('sessions').value+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);byId('status').textContent='Conversation archive downloaded.';}

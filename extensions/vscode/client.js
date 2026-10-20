@@ -373,7 +373,8 @@ class BackendClient {
     const known=new Set([id]);
     return readCommittedEventStream(response,{root:id,session:session_id,scope,after,signal,onEvent,onObservation,authorizeEvent:async event=>{
       if(known.has(event.run_id))return true;
-      const children=scope==='graph'?await this.graphChildren(id):await this.ownedChildren(id);signal?.throwIfAborted();
+      if(scope==='graph'){const root=await this.graph(id);if(root.run.id!==id)throw new Error('Graph stream root changed');const tree=await observeGraphTree(this,root,session_id);signal?.throwIfAborted();for(const child of tree.children)known.add(child.id);return known.has(event.run_id);}
+      const children=await this.ownedChildren(id);signal?.throwIfAborted();
       if(!Array.isArray(children)||children.length>4096)throw new Error('Invalid owned stream children');
       const seen=new Set();for(const record of children){const child=scope==='graph'?record:record.run;validateRunDTO(child);if(child.id===id||seen.has(child.id)||child.parent_id!==id||child.session_id!==session_id||child.graph_root)throw new Error('Owned stream child identity changed');seen.add(child.id);known.add(child.id);}
       return known.has(event.run_id);
@@ -527,6 +528,36 @@ function validateVcsDiff(value){
 // Observation only. Events are read before owners so concurrent admission is
 // covered; bounded pages preserve the exact committed cursor without replaying
 // execution. Both hosts share the same identity and operation checks.
+// Traverse only native-declared invocation edges. A nested controller is not
+// an independent root; IDs and immediate parents remain backend authority.
+async function observeGraphTree(client,root,session){
+  if(!root?.run||root.run.session_id!==session||root.run.graph_root!==true||root.run.parent_id)throw new Error('Graph root observation changed');
+  const children=[],graphs=[],definitions=new Map(),paths=new Map(),seen=new Set([root.run.id]);
+  const canonical=value=>{if(Array.isArray(value))return value.map(canonical);if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])]));return value;};
+  const owners=[{record:root,path:[],depth:0}];let declaredCount=0;
+  for(let at=0;at<owners.length;++at){
+    const {record,path,depth}=owners[at];
+    if(!record.spec||!Array.isArray(record.spec.nodes)||record.spec.nodes.length>100)throw new Error('Invalid graph specification observation');
+    declaredCount+=record.spec.nodes.length;if(declaredCount>256)throw new Error('Expanded graph observation exceeds limits');
+    const declared=new Map();for(const node of record.spec.nodes){if(!node||typeof node.id!=='string'||declared.has(node.id))throw new Error('Invalid declared graph node');declared.set(node.id,node);}
+    const batch=await client.graphChildren(record.run.id);if(!Array.isArray(batch)||batch.length>100)throw new Error('Invalid graph child observation');
+    const claimed=new Set();
+    for(const child of batch){
+      validateRunDTO(child);const definition=declared.get(child.node_id);
+      if(child.parent_id!==record.run.id||child.session_id!==session||seen.has(child.id)||claimed.has(child.node_id)||!definition||!['agent','tool','graph'].includes(definition.type)||child.graph_root!==(definition.type==='graph'))throw new Error('Graph child ownership identity changed');
+      if(children.length>=256)throw new Error('Graph descendant observation exceeds limits');
+      seen.add(child.id);claimed.add(child.node_id);children.push(child);definitions.set(child.id,definition);const nodePath=[...path,child.node_id];paths.set(child.id,nodePath);
+      if(child.graph_root){
+        if(depth>=3)throw new Error('Graph invocation observation exceeds depth limit');
+        const nested=await client.graph(child.id);
+        if(!nested?.run||nested.run.id!==child.id||nested.run.node_id!==child.node_id||nested.run.parent_id!==record.run.id||nested.run.session_id!==session||nested.run.graph_root!==true||nested.graph_id!==definition.graph_id||nested.graph_revision!==definition.graph_revision||JSON.stringify(canonical(nested.spec))!==JSON.stringify(canonical(definition.graph_spec)))throw new Error('Graph invocation snapshot changed');
+        graphs.push({record:nested,path:nodePath});owners.push({record:nested,path:nodePath,depth:depth+1});
+      }
+    }
+  }
+  return {children,graphs,definitions,paths};
+}
+
 async function observeOwnedRun(client,run,session,after){
   if(!run||run.session_id!==session||run.parent_id||run.graph_root||!Number.isSafeInteger(after)||after<0)throw new Error('Owned run observation changed');
   const events=[];let cursor=after,caughtUp=false;
@@ -1153,5 +1184,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};

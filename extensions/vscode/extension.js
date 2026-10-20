@@ -2,7 +2,7 @@
 const vscode = require('vscode');
 const crypto = require('node:crypto');
 const path = require('node:path');
-const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('./client');
+const { BackendClient,SessionHistoryPager,backendOrigin,validateToken,validateEditInspection,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,eventRequiresSnapshot,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview,canRestoreFileOperation}=require('./patch-review');
@@ -71,7 +71,7 @@ async function activate(context) {
   let profileController;
   let mcpController;
   let graphCatalogue=[],selectedGraph,graphSnapshot;
-  let graphChildren=new Map(),childHistory=new Map();
+  let graphChildren=new Map(),childHistory=new Map(),graphPaths=new Map();
   let ownedObservation=false;
   let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
   let contextObservation=false,contextController;
@@ -114,7 +114,7 @@ async function activate(context) {
       if(pin.root===runId&&event.seq>cursor){
         if(event.run_id!==runId&&!graphChildren.has(event.run_id))await poll();
         if(!streamCurrent(pin))return;
-        if(event.seq>cursor){const child=graphChildren.get(event.run_id);if(event.run_id!==runId&&!child)throw new Error('Refresh the owned child before displaying its event');const accepted=await post({type:event.run_id===runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:child?.node_id,child_id:event.run_id});if(!streamCurrent(pin))return;if(accepted===false)throw new Error('Sidebar did not accept the committed event');cursor=event.seq;}
+        if(event.seq>cursor){const child=graphChildren.get(event.run_id);if(event.run_id!==runId&&!child)throw new Error('Refresh the owned child before displaying its event');const accepted=await post({type:event.run_id===runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:graphPaths.get(event.run_id)?.join('/')??child?.node_id,child_id:event.run_id});if(!streamCurrent(pin))return;if(accepted===false)throw new Error('Sidebar did not accept the committed event');cursor=event.seq;}
       }
       if(!snapshotTimer&&eventRequiresSnapshot(event))snapshotTimer=setTimeout(()=>{snapshotTimer=undefined;if(streamCurrent(pin))poll().then(()=>{if(streamCurrent(pin))watch();});},100);
     },onEnd:async(result,pin)=>{if(!streamCurrent(pin))return;await poll();if(streamCurrent(pin))watch();},onError:(error,pin)=>{if(streamCurrent(pin))post({type:'error',text:error.message});}});
@@ -137,11 +137,11 @@ async function activate(context) {
     // Permission lists refresh independently of run snapshots. Once a decision
     // is observed, an older pending-list response cannot restore its controls.
     for(const [id,operation] of sessionPermissionRequests)if(!reviewed.has(id)||reviewed.get(id).state==='awaiting_approval')reviewed.set(id,operation);
-    post({type:'operations',operations:[...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});
+    post({type:'operations',operations:[...reviewed.values()].map(operation=>({...operation,node_id:graphPaths.get(operation.run_id)?.join('/')??graphChildren.get(operation.run_id)?.node_id}))});
   }
   async function refreshSessionPermissions(target=client,session=sessionId,version=generation){if(!target||!session)return;const observed=await target.sessionPermissions(session);if(target!==client||session!==sessionId||version!==generation||!panel)return;if(!observed||observed.session_id!==session||!Array.isArray(observed.requests)||observed.requests.length>256||observed.requests.some(operation=>!operation||typeof operation.id!=='string'||typeof operation.run_id!=='string'||operation.state!=='awaiting_approval'||!Number.isSafeInteger(operation.expires_unix_ms)))throw new Error('Invalid session permission request list.');sessionPermissionRequests=new Map(observed.requests.map(operation=>[operation.id,operation]));sessionPermissionsLoaded=true;publishOperations();}
   function schedulePermissionRefresh(version=generation){clearTimeout(permissionTimer);if(!panel||!client||!sessionId)return;permissionTimer=setTimeout(async()=>{permissionTimer=undefined;if(!panel||version!==generation)return;try{await refreshSessionPermissions(client,sessionId,version);}catch(error){if(panel&&version===generation)post({type:'error',text:error.message});}if(panel&&version===generation)schedulePermissionRefresh(version);},2500);}
-  const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
+  const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();graphPaths.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   let inboxDispatching=false;
   const inboxSelection=new QueuedRunSelection();
   async function refreshInbox(target=client,session=sessionId,version=generation){
@@ -240,25 +240,19 @@ async function activate(context) {
   }
   async function pollGraph(id,version){
     const events=await client.graphEvents(id,cursor);
-    const root=await client.graph(id),children=await client.graphChildren(id);
-    if(version!==generation || !panel)return;
-    if(root.run.id!==id || root.run.session_id!==sessionId || !root.run.graph_root || !Array.isArray(children) || children.some(c=>c.parent_id!==id || c.session_id!==sessionId || typeof c.node_id!=='string'))throw new Error('Graph observation identity changed.');
-    const owned=new Map(children.map(c=>[c.id,c]));
-    for(const event of events)if(event.run_id!==id && !owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
-    const definitions=new Map(root.spec.nodes.map(n=>[n.id,n]));
-    for(const child of children){
-      if(definitions.get(child.node_id)?.type!=='agent')continue;
-      const history=await client.graphChildHistory(id,child.id);if(version!==generation || !panel)return;childHistory.set(child.id,{state:child.state,history});
-    }
-    const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation || !panel)return;}
-    graphSnapshot=root;graphChildren=owned;
-    post({type:'graph',record:root,children,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
-    for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+    const root=await client.graph(id);if(root.run.id!==id||root.run.session_id!==sessionId)throw new Error('Graph observation identity changed.');const snapshot=await observeGraphTree(client,root,sessionId),children=snapshot.children;
+    if(version!==generation||!panel)return;const owned=new Map(children.map(c=>[c.id,c]));
+    for(const event of events)if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
+    for(const child of children){if(snapshot.definitions.get(child.id)?.type!=='agent')continue;const history=await client.graphChildHistory(child.parent_id,child.id);if(version!==generation||!panel)return;childHistory.set(child.id,{state:child.state,history});}
+    const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation||!panel)return;}
+    graphSnapshot=root;graphChildren=owned;graphPaths=snapshot.paths;
+    post({type:'graph',record:root,children,graphs:snapshot.graphs,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
+    for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:snapshot.paths.get(event.run_id)?.join('/')});cursor=event.seq;}
     publishOperations(operations);post({type:'status',text:root.run.state});await readMcpInputs(id,version);if(version!==generation||!panel)return;
     sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
     if(['completed','failed','cancelled'].includes(root.run.state)){
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
-      for(const event of finalEvents){if(event.seq<=cursor)continue;if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+      for(const event of finalEvents){if(event.seq<=cursor)continue;if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:snapshot.paths.get(event.run_id)?.join('/')});cursor=event.seq;}
       const history=await historyPager.refresh();if(version!==generation || !panel)return;post({type:'transcript',...history});
       await refreshGitChangesSnapshot().catch(()=>{});
     }
