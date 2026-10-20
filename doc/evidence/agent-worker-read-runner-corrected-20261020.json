@@ -1,0 +1,90 @@
+{
+  "recordedAt": "2026-10-20T18:25:01.787Z",
+  "gate": {
+    "recordedAt": "2026-10-20T18:24:45.250Z",
+    "sourceParent": "cfa9d7450c836a8f261020d260560161f55efa4a",
+    "sourcePatchSha256": "7a3142b648aa26b3981356567724eb69f70ac53fa93cc1f54827e403c2d5758b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 69428,
+      "launchedAt": "2026-10-20T18:19:06.643Z",
+      "completedAt": "2026-10-20T18:22:03.104Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "eaf99baadbfa875a3fbf04847dad607ad8cbf66f4655ef52acd73d01172c5604"
+    },
+    "test": {
+      "pid": 37172,
+      "launchedAt": "2026-10-20T18:22:06.346Z",
+      "completedAt": "2026-10-20T18:24:42.567Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b28170a9784955307b106c981cd3caec78294cd04f1e0a84204010da69d18b14"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 156.16,
+    "projectFiles": 2666,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "76d8885ac4001ec01e6702d4077b168a36925cb74b6c1cc8a19c1999171960bc",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-read-runner-corrected-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-build.log": "eaf99baadbfa875a3fbf04847dad607ad8cbf66f4655ef52acd73d01172c5604",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-build-terminal.json": "56e8d8b05ef39051ca7ce3a9650fe4fd168a957a7eead89498a091d664e37e07",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-ctest.log": "b28170a9784955307b106c981cd3caec78294cd04f1e0a84204010da69d18b14",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-ctest-terminal.json": "c1f869052a96499f549e7804f6d648c6203f2b11c51554ab07814a2310bd58f6",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-LastTest.log": "cf1c46e10b1717ab091fb5c599085dc5d750b628b3c6816a258861caa103e53d",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-test-inventory.json": "00c892fee6e1ff6dd048d1fae0c66f85c0049c9e0a26ae20c952dd6e2138e854",
+        "doc/evidence/agent-worker-read-runner-corrected-20261020-gate.json": "2a0e4a21d7defcc1512201bf6c8df05308b3ec144868aff2e0ca6c35521fd141"
+      },
+      "localManifestHashes": {
+        "source.patch": "7a3142b648aa26b3981356567724eb69f70ac53fa93cc1f54827e403c2d5758b",
+        "inputs-before-build.json": "1f73ad8179a0dd49f03c75713dffaf09c223887333f0c2616a078fce6dbe6fd6",
+        "binaries-before-test.json": "8d2865225cda3e018c0b1f09ecc0106008079f1b44321b1989a0d674550cadfb"
+      }
+    },
+    "agent-worker-read-runner-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-read-runner-focused-20261020-build.log": "f035d043d527b401e7ed9e3445e026fb03624e3eb7b4e58a20d13cc4f70499d0",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-build-terminal.json": "22da17e2345bf80a26eb385d31546c8db10f37739a72ad079d5c8b69265730f8",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-ctest.log": "a5c992bf4f5f4a64c56c61f94fcb7c14146c0b7b343148270a27e5efef27d44c",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-ctest-terminal.json": "49d0ad9f67c50ff4dcb90b2b0006aa32974cc32c54c29770deb8e28efe1941d0",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-LastTest.log": "0760b7110907b71159de485aec1c42e628d55042a8a551ceaca5c05280225ed8",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-test-inventory.json": "00c892fee6e1ff6dd048d1fae0c66f85c0049c9e0a26ae20c952dd6e2138e854",
+        "doc/evidence/agent-worker-read-runner-focused-20261020-gate.json": "3f2ab02963c130c1a5c8fc9d6331992176bc5ee9d273e8cb34408fc1665e26a0"
+      },
+      "localManifestHashes": {
+        "source.patch": "0c454a60b27f2706ba2c785ddc1a48cc9c3ea03fd566fbdf95d00c793ef6b336",
+        "inputs-before-build.json": "50bb7af288afa084cd0600b19bf0bda825b8a4655a6a29b60ccca2d4447bb9f2",
+        "binaries-before-test.json": "3c95b53629e4395333894d71a5d8a751db5079ea8d54a5e05cd8457ba2fe9eda"
+      }
+    }
+  },
+  "readRunnerChild": {
+    "pid": 56744,
+    "creationTime": "134369942335274331"
+  },
+  "fixtureSha256": "b100befdea70e669dd996f50701b8d6c7193c11ecca9b288cfdaf2204edf281c",
+  "ledgerFixtureSha256": "fb8910dfcefd16798a535a3c607cb89b4414da85277bfa00a3ef1153d96715ac",
+  "failureAnalysis": "Initial serial build passed but the focused gate was 51/52. The actual read AgentRunner received its first valid tool response, then an existing supported-turn guard rejected it because it recognized only a local workspace or callable tools. The corrected guard recognizes the admitted read-workspace port. No budget, guidance, tool/event permission or deadline checks were weakened. Original failed gate/logs are retained.",
+  "behavior": "The actual shared native AgentRunner accepts an optional owned ordinary read-workspace port. The child opens no native workspace on this path. The port supplies backend-prepared ModelRequest values and an authenticated read host; native roots, repository/skill contexts and SQLite remain at the backend. The runner checks immutable workspace identity/revision, model controls and a stable read-only catalogue, uses the owned workspace identity for root budget/read invocations, and refreshes the authoritative model window each turn. Conflicting local workspace/policy/effect settings and child-selected run admission are rejected.",
+  "activities": "journal.tool_event accepts only an owned attempt, provider tool ordinal and started/returned phase. Backend persistence derives activity ID/name/arguments from the fully finished actual model response and completion data/kind from its immutable native read result, with exact active full-lease/generation/latest-model checks. A private metadata-to-event receipt makes repeated publication idempotent; returned requires a prior start and actual result. No child-supplied event payload is written. Generic information APIs reject the new category; native ledger cases check ordinal/scope/deadline/cancellation, actual success/failure and repeated acknowledgement.",
+  "actualRunner": "A distinct real child runs AgentRunner::execute from queued ordinary admission through three actual native HTTP model windows. Real root/nested AGENTS.md and a nonempty skill catalogue remain backend-owned. Two initial nested reads are withheld; the next backend model window supplies the guidance and permits one fresh unseen-marker read. The loop publishes three started/two failed/one completed activity facts through typed acknowledgements, commits two backend canonical tool turns and completes exactly its final backend assistant with lease retirement. Parent checks seven history messages, one start, three charged model attempts and exact stream/activity facts without duplicates. Unsupported fixture ports throw and the parent does not execute this loop.",
+  "retainedCases": "The direct context proxy remains separately qualified, alongside original plain AgentRunner, read reconstruction, cancellation, crash, both lost-delivery barriers, rollback and provider error cases. The independent RPC peer observes exactly twenty-three controlled requests. All input/binary file sets and hashes stay frozen across the final build/test gate; every gate stage is retained.",
+  "limits": "Ordinary read-only actual child loop fixture qualification. Product AgentService/GraphService placement is still not wired; there is no placement flag. Write/process/remote/guidance-activation/context-graph ports, broader profile/history authority, failure/cancellation/crash service reconciliation, shared physical clocks/pool, large-history paging and Local/Nexus integration remain open. This does not qualify full coding effects or every exposed read operation. Child local timing remains advisory and backend deadlines remain captured. Installed clients/backend unchanged. No complete native suite, hosted, rendered/live-provider task or CPython qualification."
+}

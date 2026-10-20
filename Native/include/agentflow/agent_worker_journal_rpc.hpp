@@ -16,6 +16,7 @@ public:
     RootBudgetRecord root_budget(const std::string&);
     Run begin_run();
     Event acknowledge_model_event(const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);
+    Event acknowledge_tool_event(const std::string& attempt,std::int64_t ordinal,bool returned,const std::string& kind,const std::string& json);
     // Root, owner and role come from captured backend admission, not arguments.
     ModelCallReservation reserve_model_call(const std::string& attempt);
     ModelCallReservation start_model_call(const std::string& attempt);

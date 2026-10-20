@@ -81,7 +81,7 @@ class UnsupportedContextJournal:public AgentContextJournal {public:
     std::future<InferenceStepRecord> reserve_inference_rebuild([[maybe_unused]] InferenceRebuildSpec spec) override {throw std::logic_error("Unsupported child fixture port: reserve_inference_rebuild");}
 };
 
-class ChildJournal final:public UnsupportedRunJournal {
+class ChildJournal:public UnsupportedRunJournal {
 public:
     explicit ChildJournal(AgentWorkerRpcPeer& peer):peer(peer),client(peer){}
     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}

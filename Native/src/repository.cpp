@@ -3123,7 +3123,8 @@ constexpr const char* worker_claim_category="native-agent-worker-model-claims";
 constexpr const char* worker_event_category="native-agent-worker-model-events";
 constexpr const char* worker_read_category="native-agent-worker-read-claims";
 constexpr const char* worker_turn_category="native-agent-worker-tool-turns";
-bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_turn_category;}
+constexpr const char* worker_tool_event_category="native-agent-worker-tool-events";
+bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_turn_category||category==worker_tool_event_category;}
 void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
 Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
     bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
@@ -3320,6 +3321,18 @@ AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const
     if(!assistant.empty()){record.actual_assistant_json=assistant;record.assistant_binding=context_digest(assistant);}
     changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
     impl_->event(spec.owner_run_id,"worker.model.responded",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"response_binding",record.response_binding}}.dump());tx.commit();return record;
+}
+Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned){
+    if(ordinal<0||ordinal>=64)throw std::invalid_argument("Invalid worker tool activity ordinal");auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.state!="responded"||model.actual_assistant_json.empty()||model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id)throw Conflict("Worker activity lacks its actual captured model response");const auto actual=decode_agent_model_completion(model.actual_response_json);
+    if(static_cast<std::size_t>(ordinal)>=actual.tool_calls.size())throw Conflict("Worker tool activity has no actual provider call");const auto& tool=actual.tool_calls[static_cast<std::size_t>(ordinal)];const auto args=Json::parse(object_json(tool.arguments_json));
+    AgentWorkspaceInvocation call{1,lease.owner_run_id,attempt,tool.id,lease.workspace_id,lease.workspace_revision,args.value("folder_id",lease.workspace_id),tool.name,tool.arguments_json};const auto authority=worker_read_authority(*this,db,lease,call);
+    const auto key_for=[&](bool completed){return context_digest(Json::array({lease.root_run_id,attempt,ordinal,completed}).dump());};
+    std::string kind="tool.started";Json payload={{"activity_id",lease.owner_run_id+":"+attempt+":"+std::to_string(ordinal)},{"call_id",tool.id},{"name",tool.name}};
+    if(returned){if(db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_tool_event_category),key_for(false)}).rows.empty())throw Conflict("Worker cannot return an unstarted tool activity");const auto read=read_worker_read(db,lease.root_run_id,attempt,tool.id);if(read.state!="returned"||read.invocation.serialize()!=call.serialize()||worker_claim_spec_json(read.model)!=worker_claim_spec_json(authority))throw Conflict("Worker tool activity lacks its actual returned native read");kind=read.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(read.actual_output_json);}
+    else payload["arguments"]=args;
+    const auto json=payload.dump(),key=key_for(returned);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_tool_event_category),key}).rows;
+    if(!rows.empty()){const auto saved=Json::parse(text(rows[0][0]));const auto sequence=saved.at("event_sequence").get<std::int64_t>();if(saved!=Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",sequence}})throw DatabaseError("Stored worker activity binding differs");const auto events=db.execute("SELECT run_id,kind,payload FROM events WHERE seq=?",{sequence}).rows;if(events.size()!=1||text(events[0][0])!=lease.owner_run_id||text(events[0][1])!=kind||text(events[0][2])!=json)throw DatabaseError("Stored worker activity differs from its actual native fact");tx.commit();return {sequence,lease.owner_run_id,kind,json};}
+    const auto event=impl_->event(lease.owner_run_id,kind,json);changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_tool_event_category),key,Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",event.sequence}}.dump()}));tx.commit();return event;
 }
 AgentWorkerToolTurnRecord Repository::commit_agent_worker_read_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);

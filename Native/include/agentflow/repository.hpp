@@ -208,6 +208,7 @@ public:
     AgentWorkerReadClaimRecord record_agent_worker_read_result(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerReadClaimRecord agent_worker_read_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
+    Event agent_worker_tool_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned);
     // Exact durable compare-and-swap; null expected means create only if absent.
     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
     std::string information(const std::string& category,const std::string& id);

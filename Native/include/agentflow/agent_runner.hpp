@@ -5,6 +5,7 @@
 #include "agentflow/agent_backend_catalog.hpp"
 #include "agentflow/agent_tool_host_factory.hpp"
 #include "agentflow/agent_backend_runtime.hpp"
+#include "agentflow/agent_runner_read_workspace.hpp"
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
@@ -80,6 +81,7 @@ struct AgentRunnerPorts {
     std::shared_ptr<AgentBackendCatalog> catalog;
     std::shared_ptr<AgentToolHostFactory> tools;
     std::shared_ptr<AgentBackendRuntime> runtime;
+    std::shared_ptr<AgentRunnerReadWorkspace> read_workspace;
 };
 // Shared native single-agent/model-tool loop. Backend adapters own persistence
 // and credentials. Explicit ports permit separate construction; authenticated
@@ -127,6 +129,7 @@ private:
     std::shared_ptr<AgentBackendCatalog> backend_catalog_;
     std::shared_ptr<AgentToolHostFactory> tool_hosts_;
     std::shared_ptr<AgentBackendRuntime> backend_runtime_;
+    std::shared_ptr<AgentRunnerReadWorkspace> read_workspace_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<AgentProcessToolHost> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;

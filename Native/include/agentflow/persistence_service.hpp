@@ -39,6 +39,7 @@ public:
     std::future<AgentWorkerReadClaimRecord> record_agent_worker_read_result(AgentWorkerLeaseSpec,AgentWorkspaceInvocation,bool success,std::string actual_output_json);
     std::future<AgentWorkerReadClaimRecord> agent_worker_read_claim(std::string root,std::string attempt,std::string call);
     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     PersistenceService(std::string database,std::vector<std::string> import_roots,
         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
         std::optional<LegacyOwnerBootstrap> legacy={});
