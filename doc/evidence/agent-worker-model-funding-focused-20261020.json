@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-10-20T14:52:52.830Z",
+  "sourceParent": "4bd2ae4284c399bb2de6cc397bb42580466edd38",
+  "sourcePatchSha256": "0a789a449ab459c480d64955f7ad669dcee07455a8ac022572d26ca4408e71c2",
+  "gate": {
+    "recordedAt": "2026-10-20T14:52:35.816Z",
+    "sourceParent": "4bd2ae4284c399bb2de6cc397bb42580466edd38",
+    "sourcePatchSha256": "0a789a449ab459c480d64955f7ad669dcee07455a8ac022572d26ca4408e71c2",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 32064,
+      "launchedAt": "2026-10-20T14:35:44.844Z",
+      "completedAt": "2026-10-20T14:50:26.397Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cacb2bc56b2dab3b5271a873ac449e88775398aef8da60e1499d3a012995c3b0"
+    },
+    "test": {
+      "pid": 30936,
+      "launchedAt": "2026-10-20T14:50:29.820Z",
+      "completedAt": "2026-10-20T14:52:33.172Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "db8cf62b96073391c489f90eff138fe6c742d131da14c5f8869793f1c7d1b451"
+    },
+    "total": 37,
+    "failed": 0,
+    "passed": 37,
+    "seconds": 123.31,
+    "projectFiles": 2654,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "edcae00bad5f6b7290b43c849afa8850da0d4e53912f8a5313d8183d5489f188",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-model-funding-focused-20261020-gate.json": "e32bfaaa9643ab1b58aab86da524362c1fbbecceb0da1b25dbc502640fc8859b",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-ctest.log": "db8cf62b96073391c489f90eff138fe6c742d131da14c5f8869793f1c7d1b451",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-build.log": "cacb2bc56b2dab3b5271a873ac449e88775398aef8da60e1499d3a012995c3b0",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-LastTest.log": "1744a8fe1d40377d722fa10707fad8318ca9a1f65303d5fd4c21a48594873e34",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-test-inventory.json": "de0052cf711d6f91c2091f832aee99660d1c45f100ce636f39dccc7c0f54c3c4",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-build-terminal.json": "29377cd647811b254ce6b371d4546464a18f061e77b8b64e37ad31bd1cab093c",
+    "doc/evidence/agent-worker-model-funding-focused-20261020-ctest-terminal.json": "c781e16011bb9660c29c5254737ad38ebd9f92a9623cba3b339ace9594689988"
+  },
+  "children": [
+    {
+      "mode": "normal",
+      "pid": 16760,
+      "creationTime": "134369815223987439"
+    },
+    {
+      "mode": "cancel",
+      "pid": 15460,
+      "creationTime": "134369815225164633"
+    },
+    {
+      "mode": "crash",
+      "pid": 43328,
+      "creationTime": "134369815225988757"
+    },
+    {
+      "mode": "delivery",
+      "pid": 67984,
+      "creationTime": "134369815226576747"
+    },
+    {
+      "mode": "overflow",
+      "pid": 54952,
+      "creationTime": "134369815227098507"
+    },
+    {
+      "mode": "other_error",
+      "pid": 70660,
+      "creationTime": "134369815227890344"
+    }
+  ],
+  "fixtureSha256": "9491e7424005748bf860dc210d371848a21bf0de37265a0f4ea5337f678ccc7a",
+  "ledgerFixtureSha256": "1ad383e35b68b0275209803b3004524701be8e427d2778d7bd06cc2d7dd4dbf8",
+  "behavior": "Explicit journal.reserve_model and journal.start_model RPC take only an attempt ID. Backend-derived root/owner/role, exact active captured lease/current generation/admission, durable funding provenance and mutation share a transaction. Queue execution checks captured deadline and owner/caller cancellation. Reserved replay is idempotent; repeated start and adoption of started/retired/foreign-generation attempts reject. RootBudgetExhausted survives the fixed RPC error vocabulary.",
+  "funding": "Worker-funded budget.model_call.reserved events retain worker_generation. Model dispatch rejects a different funding generation. Trusted backend-funded compatibility attempts must have reservation sequence after the current worker.lease.admitted event, preventing replacement adoption of pre-enrollment work. Generic worker.* lifecycle appends reject, as budget.* already do. No allowance is refunded or reset.",
+  "actualFixture": "All six actual child model cases now reserve/start through RPC before controlled HTTP. The normal child checks reserved replay, repeated start, malformed owner/role override, backend-funded attempt adoption rejection, full eight-call allowance, exhaustion, reserved replay at capacity and live revocation of reserve/start. The same six independent HTTP requests remain exactly once; failed dispatches retain uncertainty and supplied acknowledgements remain exact.",
+  "ledgerFixture": "Synthetic generation/process metadata proves two concurrent reserved requests charge once, expired/cancelled mutations do not charge/start, replacement cannot reserve/start or dispatch old worker-funded attempts or dispatch old backend-funded work, stale generation rejects and a fresh replacement attempt increments the existing allowance without reset. Existing atomic recovery/fault rollback regressions remain in the gate. This is not an actual replacement-process test.",
+  "limits": "Reserve/start RPC is currently restricted to ordinary native.direct-agent roots; context/dynamic/graph model funding still requires its dedicated authority integration. Completion/assistant/tool-turn/context/effect mutations and actual child AgentRunner placement remain open, as do shared process budgets/clocks and Local/Nexus enrollment/protocol. No full native suite, live paid model, hosted qualification or installed upgrade.",
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "cpythonExecuted": false
+}

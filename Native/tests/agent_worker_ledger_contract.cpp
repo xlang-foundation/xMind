@@ -30,11 +30,26 @@ public:
     ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected worker fixture compaction");}
     unsigned calls=0;
 };
+void funding(PersistenceService& store){
+    root(store,"funding-root");auto first=store.admit_agent_worker(lease("funding-root","funding-generation-one")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+    auto one=store.reserve_agent_worker_model(first,"funding-reserved",deadline),two=store.reserve_agent_worker_model(first,"funding-reserved",deadline);
+    require(one.get().state=="reserved"&&two.get().state=="reserved"&&store.root_budget("funding-root").get().model_calls_reserved==1,"Concurrent reserved replay must charge exactly once");
+    store.reserve_agent_worker_model(first,"funding-started",deadline).get();store.start_agent_worker_model(first,"funding-started",deadline).get();
+    start(store,"funding-root","backend-funded-old");rejects<std::invalid_argument>([&]{store.append_event("funding-root","worker.lease.admitted",R"({"generation":"forged"})").get();});
+    std::stop_source cancelled;cancelled.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.reserve_agent_worker_model(first,"cancelled-owner",deadline,cancelled.get_token()).get();});rejects<AgentWorkerAuthorityCancelled>([&]{store.start_agent_worker_model(first,"funding-reserved",deadline,{},cancelled.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.reserve_agent_worker_model(first,"expired-funding",std::chrono::steady_clock::now()-1ms).get();});
+    store.retire_agent_worker(first.generation,"worker_exit").get();auto replacement=first;replacement.generation="funding-generation-two";replacement=store.admit_agent_worker(replacement).get().spec;
+    for(const auto* id:{"funding-reserved","funding-started"}){rejects<Conflict>([&]{store.reserve_agent_worker_model(replacement,id,deadline).get();});rejects<Conflict>([&]{store.start_agent_worker_model(replacement,id,deadline).get();});}
+    auto old=claim(replacement,"funding-started");rejects<Conflict>([&]{store.claim_agent_worker_model(old).get();});rejects<NotFound>([&]{store.agent_worker_model_claim("funding-root","funding-started").get();});
+    rejects<Conflict>([&]{store.claim_agent_worker_model(claim(replacement,"backend-funded-old")).get();});
+    rejects<Conflict>([&]{store.reserve_agent_worker_model(first,"stale-funding",deadline).get();});
+    require(store.root_budget("funding-root").get().model_calls_reserved==3,"Cancellation, expiry, retirement and replacement must preserve charged allowance");
+    store.reserve_agent_worker_model(replacement,"fresh-funding",deadline).get();store.start_agent_worker_model(replacement,"fresh-funding",deadline).get();require(store.root_budget("funding-root").get().model_calls_reserved==4,"Replacement may fund only a new attempt without resetting allowance");store.retire_agent_worker(replacement.generation,"cancelled").get();
+}
 
 void ledger(const std::string& path,const std::vector<std::string>& imports){
     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
     {
-        PersistenceService store(path,imports);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+        PersistenceService store(path,imports);funding(store);root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

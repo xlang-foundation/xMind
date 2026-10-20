@@ -56,19 +56,34 @@ AgentWorkerJournalValue call(AgentWorkerRpcPeer& peer,const std::string& method,
     try{return decode(kind(method),peer.call(method,Json{{"target",target},{"after",after}}.dump()));}
     catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker journal read rejected");if(error.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker journal owner cancelled");if(error.code()=="timeout")throw AgentWorkerRpcTimeout("Worker journal deadline elapsed");throw;}
 }
+std::string attempt_id(const Json& v){auto id=text(v);if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)invalid();return id;}
+std::string encode_attempt(const ModelCallReservation& r){return Json{{"root_run_id",r.root_run_id},{"owner_run_id",r.owner_run_id},{"attempt_id",r.attempt_id},{"role",r.role==ModelCallRole::parent?"parent":"leaf"},{"state",r.state},{"purpose",r.purpose==ModelCallPurpose::inference?"inference":"context_compaction"},{"inference_step_id",r.inference_step_id}}.dump();}
+ModelCallReservation attempt_call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& attempt,const std::string& expected_state){
+    try{const auto v=parse(peer.call(method,Json{{"attempt_id",attempt}}.dump()));object(v,7);const auto& scope=peer.scope();
+        if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||attempt_id(v.at("attempt_id"))!=attempt||text(v.at("role"))!="parent"||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference"||!text(v.at("inference_step_id")).empty())invalid();
+        return {scope.root_id,attempt,scope.run_id,ModelCallRole::parent,expected_state};
+    }catch(const Json::exception&){invalid();}
+    catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
+}
 }
 Run AgentWorkerJournalClient::run(const std::string& id){return std::get<Run>(call(peer_,"journal.run",id));}
 Session AgentWorkerJournalClient::session(const std::string& id){return std::get<Session>(call(peer_,"journal.session",id));}
 std::vector<Message> AgentWorkerJournalClient::run_history(const std::string& id){return std::get<std::vector<Message>>(call(peer_,"journal.history",id));}
 std::vector<Event> AgentWorkerJournalClient::events(const std::string& id,std::int64_t after){return std::get<std::vector<Event>>(call(peer_,"journal.events",id,after));}
 RootBudgetRecord AgentWorkerJournalClient::root_budget(const std::string& id){return std::get<RootBudgetRecord>(call(peer_,"journal.root_budget",id));}
+ModelCallReservation AgentWorkerJournalClient::reserve_model_call(const std::string& attempt){return attempt_call(peer_,"journal.reserve_model",attempt,"reserved");}
+ModelCallReservation AgentWorkerJournalClient::start_model_call(const std::string& attempt){return attempt_call(peer_,"journal.start_model",attempt,"started");}
 AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token owner_cancel){
     if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Journal channel differs from captured lease");
     (void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
     return [&store,lease=std::move(lease),deadline,owner_cancel](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
-        const auto k=kind(method);auto check=[&]{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");};
-        try{check();const auto v=parse(payload);object(v,2);AgentWorkerJournalRead query{k,text(v.at("target")),integer(v.at("after"))};const auto result=store.read_agent_worker_journal(lease,std::move(query)).get();check();return encode(result);}
+        const bool reserve=method=="journal.reserve_model",start=method=="journal.start_model";auto check=[&]{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");};
+        try{check();const auto v=parse(payload);
+            if(reserve||start){object(v,1);const auto attempt=attempt_id(v.at("attempt_id"));return encode_attempt(reserve?store.reserve_agent_worker_model(lease,attempt,deadline,owner_cancel,cancel).get():store.start_agent_worker_model(lease,attempt,deadline,owner_cancel,cancel).get());}
+            const auto k=kind(method);object(v,2);AgentWorkerJournalRead query{k,text(v.at("target")),integer(v.at("after"))};const auto result=store.read_agent_worker_journal(lease,std::move(query)).get();check();return encode(result);}
         catch(const AgentWorkerRpcRemoteError&){throw;}
+        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+        catch(const RootBudgetExhausted&){throw AgentWorkerRpcRemoteError("budget_exhausted");}
         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const AgentWorkerProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
     };

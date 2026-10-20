@@ -1,3 +1,11 @@
+## Generation-scoped worker model funding — 2026-10-20
+
+Actual ordinary-root children now reserve and start model attempts through explicit authenticated journal RPC. The backend derives root/owner/role and validates exact active captured lease/current generation/admission and generation-bound funding inside the mutation transaction. Deadline and owner/caller cancellation are checked on the persistence queue. Reserved replay charges once; repeated start, changed owner/role, exhausted allowance, revoked lease and replacement adoption reject. The fixed budget-exhausted error survives RPC.
+
+Worker-funded attempts record their generation in protected budget events. Backend-funded compatibility attempts must originate after the current lease admission; replacement cannot dispatch earlier work. Generic worker lifecycle appends now reject. Native ledger checks use synthetic replacement identities; actual child tests prove reserve/start/stream/cancel/crash/lost-delivery behavior and eight-call exhaustion with exactly the same six controlled HTTP requests.37focused contracts pass in 123.31s after the complete serial build, with all source/SDK/library/runtime/dependency/native binary file sets and hashes unchanged.
+
+This is ordinary direct-agent funding only. Full completion/context/tool/effect journal adapters, actual child AgentRunner, graph/context funding and shared clocks, and Local/Nexus protocol remain open. No full-suite/hosted/installed/live-provider qualification. [Evidence and limits](evidence/agent-worker-model-funding-focused-20261020.json).
+
 ## Scoped worker journal reads — 2026-10-20
 
 An explicit native journal read bridge now serves owned run/session/history/events/root-budget DTOs to the authenticated child. Every read validates the exact active captured lease, current generation, running/admitted root and owner, workspace/provider identity and target in the same backend xlang3/SQLite transaction. Owner history/events/session and owner/ultimate-root metadata remain separate; no SQL, generic information or writes are exposed. Exact opaque event/history strings survive serialization.

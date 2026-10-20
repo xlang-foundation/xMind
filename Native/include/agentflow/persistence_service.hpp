@@ -3,6 +3,8 @@
 #include "agentflow/agent_context_journal.hpp"
 #include "agentflow/repository.hpp"
 #include <future>
+#include <chrono>
+#include <stop_token>
 
 namespace agentflow {
 struct PersistenceClosed : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -18,6 +20,10 @@ public:
     std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
     std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
     std::future<AgentWorkerJournalValue> read_agent_worker_journal(AgentWorkerLeaseSpec,AgentWorkerJournalRead);
+    // Deadline and cancellation are checked on the serialized backend worker,
+    // not only before the RPC handler enters the persistence queue.
+    std::future<ModelCallReservation> reserve_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<ModelCallReservation> start_agent_worker_model(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec);

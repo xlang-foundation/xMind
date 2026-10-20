@@ -4,7 +4,7 @@
 
 namespace agentflow {
 class PersistenceService;
-// Synchronous owned reads used by a future AgentRunJournal adapter. This is
+// Synchronous owned operations used by a future AgentRunJournal adapter. This is
 // deliberately not a partial AgentRunJournal implementation with no-op writes.
 class AgentWorkerJournalClient {
 public:
@@ -14,10 +14,14 @@ public:
     std::vector<Message> run_history(const std::string&);
     std::vector<Event> events(const std::string&,std::int64_t after=0);
     RootBudgetRecord root_budget(const std::string&);
+    // Root, owner and role come from captured backend admission, not arguments.
+    ModelCallReservation reserve_model_call(const std::string& attempt);
+    ModelCallReservation start_model_call(const std::string& attempt);
 private:AgentWorkerRpcPeer& peer_;
 };
 // Bind only this captured backend lease to its exact authenticated channel.
-// No writes, permissions, arbitrary information categories or SQL are exposed.
+// Only scoped reserve/start mutations are exposed; completion, permissions,
+// arbitrary information categories and SQL remain backend-only.
 AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService&,AgentWorkerLeaseSpec,
     const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={});
 }

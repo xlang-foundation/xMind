@@ -96,8 +96,8 @@ public:
     Run retire_dynamic_owner(const std::string& root,RunState terminal_state,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_active_elapsed_ms=0);
     Run complete_dynamic_owner(const std::string& root,const std::string& assistant_json,const std::string& segment_id,std::int64_t measured_active_elapsed_ms);
     RootBudgetRecord root_budget(const std::string& id);
-    ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role);
-    ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
+    ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role,const AgentWorkerLeaseSpec* worker=nullptr);
+    ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker=nullptr);
     ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json={});
     ContextSnapshot context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
     ContextStatusObservation context_status_observation(const ContextScope& scope,const ContextBinding& binding);

@@ -17,7 +17,7 @@ using Json=nlohmann::json;
 constexpr std::size_t max_calls=8,max_queued_bytes=8*1024*1024;
 constexpr std::uint64_t max_id=9007199254740991;
 void identifier(const std::string& value){if(value.empty()||value.size()>64||value.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789_.")!=std::string::npos)throw AgentWorkerProtocolError("Invalid native RPC method");}
-bool error_code(const std::string& code){return std::set<std::string>{"rejected","unsupported","cancelled","timeout","failed","outcome_unrecorded","provider_http","model_protocol","capacity"}.contains(code);}
+bool error_code(const std::string& code){return std::set<std::string>{"rejected","unsupported","cancelled","timeout","failed","outcome_unrecorded","provider_http","model_protocol","capacity","budget_exhausted"}.contains(code);}
 Json parse(const std::string& bytes){
     if(bytes.empty()||bytes.size()>AgentWorkerFrameCodec::max_frame_bytes)throw AgentWorkerProtocolError("Native RPC envelope exceeds limits");std::vector<std::set<std::string>> keys;
     return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerProtocolError("Invalid native RPC envelope");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerProtocolError("Duplicate native RPC field");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});

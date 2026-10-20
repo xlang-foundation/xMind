@@ -19,6 +19,8 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&);
+std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
 BackendOwnerState decode_owner(const std::string&);
 std::optional<std::string> owner_record(XlangSqlite&);
 void require_bootstrap(XlangSqlite&,const BackendLease&,const BackendOwnerState&,const BackendOwnerBootstrap&);
@@ -2162,15 +2164,17 @@ RootBudgetRecord Repository::root_budget(const std::string& id){
     if(current.graph_root&&result.spec.policy_id!="native.graph-context")throw Conflict("Graph has no registered context budget");
     (void)budget_provider_identity(result.spec);return result;
 }
-ModelCallReservation Repository::reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role){
+ModelCallReservation Repository::reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role,const AgentWorkerLeaseSpec* worker){
     bounded_identity(attempt);const auto role_name=std::string(call_role(role));auto& db=impl_->database;Transaction transaction(db);
+    if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||role!=(owner==root?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Worker funding owner differs from captured admission");}
     const auto budget=root_budget(root);const auto parent=run(root),actor=run(owner);
+    if(worker&&(budget.spec.policy_id!="native.direct-agent"||owner!=root))throw Conflict("Worker reserve requires ordinary direct-agent admission");
     if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
     if(role==ModelCallRole::parent){if(owner!=root||parent.graph_root)throw Conflict("Parent model attempt owner differs");}
     else {const auto admitted=child_admission(owner);const bool graph=admitted.kind==ChildAdmissionKind::graph_agent&&budget.spec.policy_id=="native.graph-context";if((!graph&&admitted.kind!=ChildAdmissionKind::delegated_leaf&&admitted.kind!=ChildAdmissionKind::dynamic_agent)||admitted.root_run_id!=root)throw Conflict("Leaf model attempt is not owned by this root");
         auto limit=std::int64_t(4);if(graph){if(impl_->graph_lineage(actor.parent_id,true).first!=root)throw Conflict("Graph model attempt ancestry differs from its running root");const auto capture=graph_context_owner(root);if(!capture.segment||capture.segment->state!="open")throw Conflict("Registered graph attempt lacks its open owner clock");limit=graph_context_agent(capture.authority,admitted.graph_node_path).turn_limit;}if(admitted.kind==ChildAdmissionKind::dynamic_agent){const auto p=dynamic_plan(admitted.plan_id);const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& v){return v.child_run_id==owner;});limit=dynamic_preset(p.capabilities,n->definition).turn_limit;}const auto calls=integer(db.execute("SELECT count(DISTINCT COALESCE(inference_step_id,attempt_id)) FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND purpose='inference'",{root,owner}).rows.at(0).at(0));if(calls>=limit&&db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows.empty())throw RootBudgetExhausted("Durable child-turn allowance exhausted");}
     const auto previous=db.execute("SELECT owner_run_id,role,state,purpose,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows;
-    if(!previous.empty()){if(text(previous[0][0])!=owner||text(previous[0][1])!=role_name||text(previous[0][3])!="inference")throw Conflict("Model attempt identity or purpose changed");transaction.commit();return {root,attempt,owner,role,text(previous[0][2]),ModelCallPurpose::inference,text(previous[0][4])};}
+    if(!previous.empty()){if(text(previous[0][0])!=owner||text(previous[0][1])!=role_name||text(previous[0][3])!="inference")throw Conflict("Model attempt identity or purpose changed");if(worker&&(text(previous[0][2])!="reserved"||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation}))throw Conflict("Worker cannot adopt an existing started, retired or foreign-generation attempt");transaction.commit();return {root,attempt,owner,role,text(previous[0][2]),ModelCallPurpose::inference,text(previous[0][4])};}
     const auto dynamic=budget.spec.policy_id=="native.dynamic-plan";
     if(dynamic){const auto caps=dynamic_capabilities(root);if(!caps.catalogue_finalized)throw DynamicPlanUnavailable("Dynamic catalogue is not finalized");
         if(role==ModelCallRole::parent&&!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready') OR (root_run_id=? AND state='turn_committed' AND continuation_attempt_id IS NULL)",{root,root}).rows.empty())throw Conflict("Parent must use its exact dynamic continuation");}
@@ -2181,10 +2185,13 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
     if(budget.revision>=9007199254740991)throw std::overflow_error("Root budget revision exhausted");
     changed_one(db.execute("UPDATE agent_execution_budgets SET model_calls_reserved=model_calls_reserved+1,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND revision=?",{static_cast<std::int64_t>(held),root,budget.revision}));
     changed_one(db.execute("INSERT INTO agent_model_call_reservations(root_run_id,attempt_id,owner_run_id,role,state) VALUES(?,?,?,?,'reserved')",{root,attempt,owner,role_name}));
-    impl_->event(owner,"budget.model_call.reserved",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",role_name}}.dump());transaction.commit();return {root,attempt,owner,role,"reserved"};
+    Json funding={{"root_run_id",root},{"attempt_id",attempt},{"role",role_name}};if(worker)funding["worker_generation"]=worker->generation;
+    impl_->event(owner,"budget.model_call.reserved",funding.dump());transaction.commit();return {root,attempt,owner,role,"reserved"};
 }
-ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt){
+ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
     auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
+    if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Worker cannot start an attempt funded by another authority");}
+    if(worker&&(root_budget(root).spec.policy_id!="native.direct-agent"||owner!=root))throw Conflict("Worker start requires ordinary direct-agent admission");
     if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
     const auto rows=db.execute("SELECT role,state,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
     if(rows.empty())throw NotFound("Owned model attempt not found");if(text(rows[0][1])!="reserved")throw Conflict("Model attempt has already started or retired");
@@ -2784,7 +2791,7 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     transaction.commit(); result.state=next; return result;
 }
 Event Repository::append_event(const std::string& id,const std::string& kind,const std::string& json) {
-    identifier(kind); if(kind.rfind("context.",0)==0 || kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0 || kind.rfind("plan.",0)==0 || kind.rfind("skill.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
+    identifier(kind); if(kind.rfind("context.",0)==0 || kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0 || kind.rfind("plan.",0)==0 || kind.rfind("skill.",0)==0 || kind.rfind("worker.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
     Transaction transaction(impl_->database);
     const auto owner_run=run(id);
     if(terminal(owner_run.state)) {
@@ -3136,6 +3143,16 @@ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWork
     if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
     else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
 }
+void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& expected){
+    const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");worker_running_scope(repository,db,expected);
+    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
+    if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker generation is stale");
+}
+std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::string& root,const std::string& owner,const std::string& attempt){
+    const auto rows=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? AND json_extract(payload,'$.attempt_id')=?",{owner,root,attempt}).rows;
+    if(rows.empty())return {};if(rows.size()!=1)throw DatabaseError("Model reservation has ambiguous funding provenance");const auto saved=Json::parse(text(rows[0][0]));
+    if(!saved.contains("worker_generation"))return {};if(!saved.at("worker_generation").is_string()||saved.at("worker_generation").get_ref<const std::string&>().empty())throw DatabaseError("Invalid model funding generation");return saved.at("worker_generation").get<std::string>();
+}
 }
 AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec& spec){
     (void)worker_spec_json(spec);auto& db=impl_->database;Transaction tx(db);worker_running_scope(*this,db,spec);
@@ -3148,11 +3165,7 @@ AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec
 AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
 AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
     if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
-    auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,expected.generation);
-    if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker journal has no exact active captured lease");
-    worker_running_scope(*this,db,lease.spec);
-    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
-    if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker journal generation is stale");
+    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected);
     const auto owner=run(expected.owner_run_id);
     AgentWorkerJournalValue result;
     switch(query.kind){
@@ -3175,6 +3188,14 @@ AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWork
     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);
     if(lease.state!="active"||lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker model dispatch has no active scoped lease");worker_running_scope(*this,db,lease.spec);
     const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),spec.owner_run_id}).rows;if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=spec.generation)throw Conflict("Worker generation is stale");
+    const auto funded=worker_attempt_generation(db,spec.root_run_id,spec.owner_run_id,spec.attempt_id);if(funded&&*funded!=spec.generation)throw Conflict("Worker cannot dispatch another generation's funded attempt");
+    if(!funded){
+        // Trusted backend-funded compatibility attempts must also originate
+        // during this lease. A replacement cannot adopt pre-admission work.
+        const auto origin=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? AND json_extract(payload,'$.attempt_id')=?",{spec.owner_run_id,spec.root_run_id,spec.attempt_id}).rows;
+        const auto admission=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{spec.owner_run_id,spec.generation}).rows;
+        if(origin.size()!=1||admission.size()!=1||integer(origin[0][0])<=integer(admission[0][0]))throw Conflict("Worker backend funding predates its current generation");
+    }
     const auto call=db.execute("SELECT state,purpose,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{spec.root_run_id,spec.attempt_id,spec.owner_run_id}).rows;if(call.empty()||text(call[0][0])!="started"||text(call[0][1])!="inference")throw Conflict("Worker requires its exact started inference attempt");
     if(!text(call[0][2]).empty()){const auto projection=db.execute("SELECT input_binding FROM inference_attempt_members WHERE root_run_id=? AND attempt_id=? AND step_id=? AND outcome IS NULL",{spec.root_run_id,spec.attempt_id,text(call[0][2])}).rows;if(projection.empty()||text(projection[0][0])!=spec.request_binding)throw Conflict("Worker inference projection differs from its funded attempt");}
     AgentWorkerModelClaimRecord record{spec,"dispatching",{}, {}};const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id),worker_claim_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker model attempt was already dispatched; no retry is authorized");

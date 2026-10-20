@@ -3,8 +3,11 @@
 #include <string>
 #include "agentflow/delegation_records.hpp"
 #include <variant>
+#include <stdexcept>
 
 namespace agentflow {
+struct AgentWorkerAuthorityCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
+struct AgentWorkerAuthorityExpired:std::runtime_error {using std::runtime_error::runtime_error;};
 // Backend-created immutable process/admission metadata. No session channel key,
 // provider credential, executable path or worker-selected authority is stored.
 struct AgentWorkerLeaseSpec {
