@@ -27,6 +27,27 @@ This does not qualify actual child failure/cancellation, pending-approval drain,
 effect retirement or product placement. The remaining qualification below stays
 open; the source observations describe the pre-operation baseline.
 
+`drain_and_terminate_agent_worker` now provides an owner-thread component around
+that transaction. Before shutdown it checks the captured PID, creation time,
+executable identity, scope and current durable lease. `AgentWorkerRpcPeer::drain`
+also requires the exact process channel object, joins the RPC reader/handlers
+through stop, closes the channel and observes process/job exit. Only then does
+the helper call the terminal transaction. It never terminates or restarts a
+process on an observation timeout; the caller retains the same objects and
+authority for further observation. External RPC call threads must already be
+joined, and this operation must never run inside a handler or sink.
+
+The [drain component gate](evidence/agent-worker-drain-focused-20261020.json)
+passed 52 focused contracts in 159.92 seconds with frozen inputs and all 133
+native binaries. The actual controlled child RPC cases now use this component
+for streaming cancellation, two provider errors and streaming child exit (code
+73). The fixture checks wrong-PID rejection without stopping the worker, and
+rejects a different channel even when its scope matches. The independent peer
+still observes exactly 23 model requests. These are model-proxy child cases;
+the actual child AgentRunner failure/cancellation journal and AgentService
+integration remain open. Dedicated timeout and post-drain storage-failure
+injections also remain open.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary

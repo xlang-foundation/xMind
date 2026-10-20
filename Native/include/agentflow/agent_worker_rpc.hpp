@@ -34,6 +34,10 @@ public:
     bool alive()const;
     void wait_closed();
     void stop();
+    // Owner thread only, after external call threads have joined. Stops and
+    // joins handlers, closes this exact child's channel, then observes its exit.
+    // A wait timeout retains process ownership and never kills or restarts it.
+    std::uint32_t drain(AgentWorkerProcess&,AgentWorkerChannel::Deadline);
     const AgentWorkerScope& scope()const noexcept;
 private:struct Impl;std::unique_ptr<Impl> impl_;
 };

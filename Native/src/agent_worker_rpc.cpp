@@ -86,5 +86,9 @@ std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string
 bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
 void AgentWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
 void AgentWorkerRpcPeer::stop(){impl_->stop();}
+std::uint32_t AgentWorkerRpcPeer::drain(AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline){
+    if(&impl_->channel!=&worker.channel())throw std::invalid_argument("RPC drain requires its exact owned child channel");
+    stop();impl_->channel.close();return worker.wait(deadline);
+}
 const AgentWorkerScope& AgentWorkerRpcPeer::scope()const noexcept{return impl_->channel.scope();}
 }

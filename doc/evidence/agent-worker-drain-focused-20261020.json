@@ -1,0 +1,82 @@
+{
+  "recordedAt": "2026-10-20T18:58:15.252Z",
+  "gate": {
+    "recordedAt": "2026-10-20T18:57:56.082Z",
+    "sourceParent": "12adb21463ab9eae1c71e8a65d1713476132386a",
+    "sourcePatchSha256": "0cc6add97b496830acc1861a07949461aadbc0f61b8027ed443bc55f74b36369",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 63964,
+      "launchedAt": "2026-10-20T18:52:46.505Z",
+      "completedAt": "2026-10-20T18:55:10.382Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "952ad7cfb031c881e42615ff4441f28dd409a6f04bcb0073409b83c190434dc1"
+    },
+    "test": {
+      "pid": 48360,
+      "launchedAt": "2026-10-20T18:55:13.358Z",
+      "completedAt": "2026-10-20T18:57:53.331Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "46878a60bbbcd5aa39ad0d8e483db0680e49ccc48466ec810c70484f187189a5"
+    },
+    "total": 52,
+    "failed": 0,
+    "passed": 52,
+    "seconds": 159.92,
+    "projectFiles": 2668,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "438af630e3965f1e092d2523bb8b22fc6963efe21b73e57c65fb60e3497e569f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-drain-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-drain-focused-20261020-build.log": "952ad7cfb031c881e42615ff4441f28dd409a6f04bcb0073409b83c190434dc1",
+        "doc/evidence/agent-worker-drain-focused-20261020-build-terminal.json": "f5e6b35a36944af6671318266f004663ff29cfeba59aa79c87b4a972f6031ad9",
+        "doc/evidence/agent-worker-drain-focused-20261020-ctest.log": "46878a60bbbcd5aa39ad0d8e483db0680e49ccc48466ec810c70484f187189a5",
+        "doc/evidence/agent-worker-drain-focused-20261020-ctest-terminal.json": "72f1172cccb0d825e0a20dfa33837b4be2cbd751be13650796e5dea84d9771f6",
+        "doc/evidence/agent-worker-drain-focused-20261020-LastTest.log": "f40de6e97a6da44f493cfde885e305834e78cc75630549e421ac99a5bfbecaa9",
+        "doc/evidence/agent-worker-drain-focused-20261020-test-inventory.json": "05f787960254aa6662053b0872edb435c12a02a077b9b2661128f82ff0219ddd",
+        "doc/evidence/agent-worker-drain-focused-20261020-gate.json": "9fbff0334ef25ff1596649128cfa33b3001ba671701f2197e5ca409003c90506"
+      },
+      "localManifestHashes": {
+        "source.patch": "0cc6add97b496830acc1861a07949461aadbc0f61b8027ed443bc55f74b36369",
+        "inputs-before-build.json": "d511054867c4ab56464f60c6d6307516e3cab2abc0b379d1541596c3011ab21b",
+        "binaries-before-test.json": "906e0cd54e8eb3d84b1230497a877e5d59d105d2a86a85c873c75f757461aaa6"
+      }
+    }
+  },
+  "fixtureSha256": "7ee6166270bcfde19e0bcff8c7f24ae904202fe962a4fdf8ed4bf09ea7c195d9",
+  "ledgerFixtureSha256": "7bbc4163a6c839b0dd82a717e6f4171987b60a94649c8ac656ed8f52e50d5272",
+  "scope": "Backend owner process/channel drain followed by ordinary-root terminal persistence. Actual controlled child model cancellation, provider errors and exit; no product AgentRunner failure placement claim.",
+  "verified": [
+    "Exact PID, creation time, executable identity and scope checked before shutdown",
+    "Wrong PID leaves the actual worker and peer live",
+    "A different channel with the same scope is rejected without stopping either child",
+    "RPC stop joins reader and handlers before exact channel closure",
+    "Owned process/job wait observes actual child and descendant exit before terminal transaction",
+    "Actual streaming child exit code 73 retained with failed root and charged uncertainty",
+    "Controlled cancellation and two provider-error cases drain with exit code 0 and atomic cancelled/failed root",
+    "Independent HTTP peer request inventory unchanged; no model retry"
+  ],
+  "limitations": [
+    "No AgentService placement or new actual child AgentRunner failure/cancellation journal",
+    "No dedicated timeout or post-drain storage-error injection in this checkpoint",
+    "External call threads must already have joined; drain must not be called in a handler or sink",
+    "No automatic termination or restart on observation timeout",
+    "No full native, hosted, installed, rendered UI or live-provider acceptance claim"
+  ]
+}

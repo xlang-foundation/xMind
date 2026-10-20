@@ -222,6 +222,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_worker_model_rpc PUBLIC agentflow_worker_rpc agentflow_agent agentflow_models)
   add_library(agentflow_worker_journal_rpc STATIC src/agent_worker_journal_rpc.cpp)
+  target_sources(agentflow_worker_journal_rpc PRIVATE src/agent_worker_retirement.cpp)
   target_include_directories(agentflow_worker_journal_rpc PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_rpc agentflow_core)
   add_library(agentflow_graph_execution STATIC src/graph_runner.cpp src/graph_service.cpp)
