@@ -1,3 +1,22 @@
+## Current client/native integration and runtime stage — 2026-10-20
+
+The current source also passes **462/462 extension and 161/161 browser Node
+contracts**, plus the actual browser-controller/native C++/xlang3/SQLite contract
+against the exact fully qualified native binary. Real graph/file output,
+pause/input, gateway disconnect/reconnect without replay, origin-bound browser
+sessions, cookies, profile routes and controlled adapter/backend restart pass.
+Navigation and clipboard use host fixtures; no provider inference or rendered
+editor/browser coding claim is made. The complete native qualification closure
+and 18 generated browser assets remain unchanged through these checks.
+
+The next runtime-only candidate is staged at
+`C:/xMindNativeValidation/coding59-native-runtime-20261020`: all 2,402 payloads
+verify, native SHA `2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f`,
+manifest SHA `624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a`.
+It is not yet a VSIX, installation or accepted release. Installed 0.1.58,
+existing owners/pages/settings/history and successful tasks are preserved.
+[Evidence, raw logs and runtime receipt](evidence/worker-current-client-native-20261020.json).
+
 ## Complete current-source native suite — 2026-10-20
 
 Source `959f1d956a95cdaa036fb0e51bc02ebe2c004639` passes the complete,

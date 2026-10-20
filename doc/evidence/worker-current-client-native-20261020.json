@@ -1,0 +1,95 @@
+{
+  "recordedAt": "2026-10-20T21:47:03.819Z",
+  "gate": {
+    "recordedAt": "2026-10-20T21:45:08.252Z",
+    "sourceRevision": "7a0b96ef4cdf9a973d533da374a492ac94e55a32",
+    "nativeQualificationSource": "959f1d956a95cdaa036fb0e51bc02ebe2c004639",
+    "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "extension": {
+      "pid": 56368,
+      "launchedAt": "2026-10-20T21:44:42.402Z",
+      "completedAt": "2026-10-20T21:44:46.732Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "79196b243c77dfa4c9459703d71e6669a99aaa41eef669f51f7f426502740be8",
+      "tests": 462,
+      "passed": 462,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "pid": 13796,
+      "launchedAt": "2026-10-20T21:44:42.412Z",
+      "completedAt": "2026-10-20T21:45:00.022Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4301c66e38dc1d2d4770232ff86261c04e031aeb1f8cfdff8b816d98da7daea5",
+      "tests": 161,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "nativeBrowser": {
+      "pid": 16628,
+      "launchedAt": "2026-10-20T21:45:02.695Z",
+      "completedAt": "2026-10-20T21:45:05.612Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+    },
+    "sourceSdkLibraryDependencyBinaryAndFileSetsUnchanged": true,
+    "projectFiles": 2684,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 133,
+    "browserAssets": 18,
+    "assetsUnchanged": true,
+    "providerRequests": 0,
+    "installed": false,
+    "renderedAcceptance": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "runtimeCandidate": {
+    "runtimeRoot": "C:/xMindNativeValidation/coding59-native-runtime-20261020",
+    "manifestSha256": "624bb131a59dfb21673772657221037c6a0030d43568b2fdc9b79b37b4d3a94a",
+    "nativeSha256": "2a2ce8602a5213fc93e0119e0c7edbc90eb6149c0e02cacdf0c033f070b69e5f",
+    "nativeRevision": "959f1d956a95cdaa036fb0e51bc02ebe2c004639",
+    "files": 2402,
+    "completeNativeContracts": 160,
+    "sdkReusedByteForByte": true,
+    "releaseAccepted": false,
+    "scopePassed": true
+  },
+  "rawEvidence": {
+    "doc/evidence/worker-current-client-native-20261020-assets.log": "bf3ca1094c328e52a9cefc56e1431f2f289a8b507c019cfea0d91b855c14d2d0",
+    "doc/evidence/worker-current-client-native-20261020-assets-terminal.json": "1393ece7fd03f1411b58c2ea2b96a177edc4766f3584a98b2b9ffdc985c4b60e",
+    "doc/evidence/worker-current-client-native-20261020-assets-before.json": "16031c98c2198e111be6b45c28bf07f339bbb037018075dab53da78e3981ae28",
+    "doc/evidence/worker-current-client-native-20261020-extension.log": "79196b243c77dfa4c9459703d71e6669a99aaa41eef669f51f7f426502740be8",
+    "doc/evidence/worker-current-client-native-20261020-extension-terminal.json": "23f4930d53ab2ebf4ca539a52f1d0ba0d3d020232e29f935a60ce6c303606465",
+    "doc/evidence/worker-current-client-native-20261020-browser.log": "4301c66e38dc1d2d4770232ff86261c04e031aeb1f8cfdff8b816d98da7daea5",
+    "doc/evidence/worker-current-client-native-20261020-browser-terminal.json": "40c1d221b355e790e41d85936a135744913856fe7545028320f1e9fb905adea6",
+    "doc/evidence/worker-current-client-native-20261020-client-results.json": "c1f9d33d0242860f37f3bf77943b49e126e2876c8c074dae19879d564971dd1e",
+    "doc/evidence/worker-current-client-native-20261020-browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "doc/evidence/worker-current-client-native-20261020-browser-native-terminal.json": "9b05b71c4a396e8a9347df6e62ca349d9027bde1d8655a430b756afc1f8a871b",
+    "doc/evidence/worker-current-client-native-20261020-gate.json": "294b9795a8244a8ea9fdecd054c163d819acbca0ec825cf7a1c1c01c8745f286"
+  },
+  "scope": "Current source extension/browser Node suites plus actual browser-controller/C++-xlang3-SQLite integration using the exact fully qualified native binary. A runtime-only candidate bundle is staged for the next package.",
+  "verified": [
+    "462 extension and 161 browser contracts pass with zero failures/skips/cancellations",
+    "18 generated browser assets remain byte-identical through the gate",
+    "Source, SDK, allowed pure libraries, dependencies, native binaries and all file sets match the full native qualification closure before and after client/native checks",
+    "Actual native graph/file output, human pause/input, disconnect/reconnect and cookie/session boundaries pass",
+    "Only fresh disposable contract processes are restarted; no existing user task is submitted or replayed",
+    "Runtime candidate manifest verifies all 2402 payloads and exact qualified native hash; SDK/runtime payload reused byte-for-byte"
+  ],
+  "limitations": [
+    "Node suites and native browser contract are not rendered editor/browser coding acceptance",
+    "Runtime-only stage is not a packaged VSIX, installation or accepted release",
+    "Installed 0.1.58, existing owners, pages, settings and successful tasks remain preserved",
+    "AgentService/GraphService process placement and other product requirements remain open",
+    "No provider inference, CPython or visible editor/browser window was used"
+  ]
+}

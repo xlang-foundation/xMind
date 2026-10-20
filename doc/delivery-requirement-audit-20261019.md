@@ -3,6 +3,16 @@
 Current assessment, 2026-10-20: installed58 is client62141200/nativeaf34bfe0/dc900cad, TestProj backend32396 born2026-10-20T11:19:37.8496800Z/origin57779. Complete156 native and462extension/161browser gates pass;2448archive entries/2445installed payloads verify. Adoption preserves8sessions/167root messages/13roots/2owned children/11child messages, configuration, settings and prior pages exactly. Fresh installed58 hidden-IAB coding then performs three delegated reads, two separately approved dependent module edits, registered PowerShell Node4/4 from failing1/4 baseline, and exact12root-message/eight-child-message reload. Tests remain byte-identical and prior histories unchanged. See [complete native qualification](evidence/nested-context-current-full-native-20261020-gate.json), [adoption](evidence/coding58-adoption-preservation-20261020.json), [fresh browser coding](evidence/coding58-browser-coding-20261020.json), [rendered proof](evidence/coding58-browser-coding-result-20261020.png) and [current validation status](VALIDATION_STATUS.md). These named scopes do not establish every remaining product requirement.
 This is not a completion declaration.
 
+Current candidate qualification now extends beyond the installed58 baseline:
+the exact `959f1d95` native source passes the complete 160-contract inventory,
+and unchanged current client code passes 462 extension/161 browser contracts plus
+actual browser-controller/native integration. A verified 2,402-payload runtime
+candidate is staged for the next package, with no installation or user-task
+replay. These checks do not close rendered editor/external-browser acceptance,
+worker service placement or the remaining Local/Nexus/product requirements.
+See [current client/native evidence](evidence/worker-current-client-native-20261020.json)
+and [complete native evidence](evidence/agent-worker-current-full-native-20261020.json).
+
 ## Installed55 CLI coding evidence
 
 One new isolated task on installed55 completes native reads, reviewed CLI file approval and a real registered process: Node4/4 exit0 from failing2/4 baseline, tests unchanged. Terminal run.completed and9messages restore; all six earlier sessions/150messages/eleven runs and configuration remain exact. See evidence/coding55-cli-live-coding-20261019.json. This adds command-mode coding proof, with the recorded inaccurate model prose, and leaves current VS Code/external browser rendering open.
