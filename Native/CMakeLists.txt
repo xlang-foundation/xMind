@@ -234,6 +234,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_control.cpp)
+  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_supervisor.cpp)
   target_include_directories(agentflow_worker_runner PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_worker_runner PUBLIC agentflow_worker_model_rpc agentflow_worker_journal_rpc)
   add_library(agentflow_graph_execution STATIC src/graph_runner.cpp src/graph_service.cpp)

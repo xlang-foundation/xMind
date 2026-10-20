@@ -1,0 +1,28 @@
+#pragma once
+#include "agentflow/agent_worker_read_owner.hpp"
+#include "agentflow/agent_worker_retirement.hpp"
+
+namespace agentflow {
+// Backend lifetime owner for one actual product child. No restart or task replay.
+// Keep this object, persistence and workspace alive until drain succeeds; join
+// external execute/cancel callers before drain or destruction. Observation timeout
+// retains this same process and lease for another observation.
+class AgentWorkerSupervisor final {
+public:
+    AgentWorkerSupervisor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,
+        AgentWorkerScope,std::string provider_identity_json,AgentWorkerChannel::Deadline);
+    ~AgentWorkerSupervisor();
+    AgentWorkerSupervisor(const AgentWorkerSupervisor&)=delete;
+    AgentWorkerSupervisor& operator=(const AgentWorkerSupervisor&)=delete;
+    void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+    RunState execute();
+    void cancel();
+    AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
+    AgentWorkerTerminalObservation drain_terminal(RunState,const std::string& reason,AgentWorkerChannel::Deadline);
+    const AgentWorkerLeaseSpec& lease()const noexcept;
+    bool alive()const;
+private:
+    struct Impl;std::unique_ptr<Impl> impl_;
+};
+}

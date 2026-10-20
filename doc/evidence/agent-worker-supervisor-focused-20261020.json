@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-20T23:44:59.372Z",
+  "gate": {
+    "recordedAt": "2026-10-20T23:44:42.810Z",
+    "sourceParent": "69754bcba020f962235a6fdbb45ddd786c805d51",
+    "sourcePatchSha256": "59f497788699f11bde30de5b2e7149b8afbb5a4db15c54b667eb878a7e2da912",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 51572,
+      "launchedAt": "2026-10-20T23:40:20.401Z",
+      "completedAt": "2026-10-20T23:41:49.287Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6e8676bf4199b7efcebbcd033d61d9f945a888c41b842605b4b14f9a3f84474b"
+    },
+    "test": {
+      "pid": 8620,
+      "launchedAt": "2026-10-20T23:41:52.459Z",
+      "completedAt": "2026-10-20T23:44:39.113Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "52a5daeef5fc4d2ce68d655dffc6b8ea046b4288729d4a51a9a2d708d576f3f7"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 166.59,
+    "projectFiles": 2691,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d91265e66bb1d41a58427c928619b24b288a25a204ec4088bdf7a18784c40755",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-supervisor-focused-20261020-build.log": "6e8676bf4199b7efcebbcd033d61d9f945a888c41b842605b4b14f9a3f84474b",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-build-terminal.json": "0c4eb9a35293e2c35d37a4ec67ed305ac2222a993bb7b1b4ed0fce0df34fdd6b",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-ctest.log": "52a5daeef5fc4d2ce68d655dffc6b8ea046b4288729d4a51a9a2d708d576f3f7",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-ctest-terminal.json": "2b3fb7f75cf2f4a5397c9ba1d37137fd81b1a00a9b144d186c5950c776de2445",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-LastTest.log": "5779f1002236920f02ba6f81d2e0926e21864ab4398947b3da06dc5c904a15a9",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-test-inventory.json": "f0a877e62c58e67a5f78164bf4a3885451b0e116438827936320ff62a582f8ad",
+    "doc/evidence/agent-worker-supervisor-focused-20261020-gate.json": "1b2ddbaeae76f41b523749ed0adc24d2c0ceb25d267b3e08cc1c9aded450a55c"
+  },
+  "fixtureSha256": "3da9ed85f73d70fcf0521466913e3ce5be47507c3b78589c36d6b23066a39356",
+  "scope": "Native backend supervisor owns actual product process, captured lease, read/model/journal owner and authenticated peer through startup, one execution and exact physical drain",
+  "verified": [
+    "Ordinary root launch and durable lease use exact PID, birth/image and channel scope",
+    "Controls reject before startup; repeated startup and execution reject without replay",
+    "Actual product child completes one backend-owned empty-tools model request with captured instructions/guidance and exact two-message canonical history",
+    "Completion intent retains live child until exact physical drain; repeated completed observation adds no event",
+    "Rejected startup retains live child/lease and queued history with zero model funding; exact exit precedes durable dispatch_error",
+    "Existing actual read/profile/cancellation/failure cases continue passing; independent peer verifies exactly 46 intentional requests"
+  ],
+  "limitations": [
+    "New supervisor-specific actual cases cover completion and failure before peer construction; concurrent controls, observation timeouts and later startup failure phases need additional qualification",
+    "External callers must join before drain/destruction; persistence and borrowed workspace capabilities must outlive the supervisor",
+    "AgentService/GraphService placement and broader worker effects/context/graphs remain open",
+    "No full-suite, installed, hosted, rendered-client or live-provider acceptance claim"
+  ],
+  "passed": true
+}

@@ -1,3 +1,29 @@
+## Native product worker supervisor — 2026-10-20
+
+`AgentWorkerSupervisor` owns one launched product child, its captured lease,
+backend read/model/journal owner and authenticated peer. It rejects controls before
+successful startup, restart and repeated execution. External execute/cancel callers
+must join before drain/destruction. A drain observation timeout retains the same
+object/process/lease for later observation; no restart, model replay or inferred
+terminal fact is introduced. Borrowed workspace and persistence outlive this owner.
+
+An actual unified `xmind.exe` child completes one backend-captured no-tools model
+window through this supervisor. The exact two-message canonical history and one
+model charge persist while the child remains alive; exact physical drain then
+returns exit zero. Repeated completed observation adds no event. A separate actual
+startup failure before peer construction retains its live child/lease and queued
+history with zero model funding, rejects restart, observes exact exit and only then
+records durable `dispatch_error`. The independent peer verifies 46 intentional
+controlled requests across the complete fixture.
+
+Serial Release build and 53 contracts pass in 166.59 seconds with all frozen input
+and binary file sets/hashes unchanged. Supervisor-specific concurrent controls,
+observation timeouts and later startup-failure phases still need qualification;
+AgentService/GraphService placement and broader worker capabilities remain open.
+Installed59 and user state are untouched; no full-suite, live-provider, hosted or
+rendered-client acceptance is claimed. See
+[receipt](evidence/agent-worker-supervisor-focused-20261020.json).
+
 ## Backend-observed worker dispatch failure receipt — 2026-10-20
 
 The backend model host now classifies dispatch interruption with a fixed typed
