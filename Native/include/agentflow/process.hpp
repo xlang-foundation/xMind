@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <stop_token>
@@ -40,11 +41,20 @@ struct ProcessResult {
 // durable effect claim before run(). No approval/journal/model logic lives here.
 // Job ownership bounds lifetime, not filesystem/network authority. A result
 // proves observed process lifecycle only, never arbitrary side-effect validity.
+class BoundProcessExecutable {
+public:
+    virtual ~BoundProcessExecutable()=default;
+    virtual const std::string& path()const noexcept=0;
+    virtual const std::string& identity()const noexcept=0;
+};
 class ForegroundProcess {
 public:
     using OutputObserver=std::function<void(bool stderr_channel,std::string_view bytes)>;
     static std::string directory_identity(const std::string& absolute_directory);
     static std::string executable_identity(const std::string& absolute_executable);
+    // Retains the verified image and directory chain against write/rename for
+    // an owner that launches and supervises a long-lived native worker.
+    static std::shared_ptr<const BoundProcessExecutable> bind_executable(const std::string& absolute_executable);
     // Observer receives every raw output byte. ProcessResult separately retains
     // at most output_limit bytes total. Observer failure after dispatch retires
     // the job and reports effect uncertainty.

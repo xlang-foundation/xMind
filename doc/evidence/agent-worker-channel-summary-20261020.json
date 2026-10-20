@@ -1,0 +1,26 @@
+{
+  "scope": "Native authenticated worker transport and owned process primitives; dedicated fixture child only",
+  "finalGate": "agent-worker-channel-retirement-20261020-gate.json",
+  "retainedFailures": [
+    "agent-worker-channel-focused-20261020-gate.json",
+    "agent-worker-channel-corrected-20261020-gate.json"
+  ],
+  "fixtureExecutableSha256": "ec4fab22db1a2b023645e3844569f2b174ae95cd96f420e880f52226ead6763f",
+  "fixtureContractSeconds": 0.51,
+  "allFocusedContractsPassed": 29,
+  "allFocusedContractsSeconds": 108.08,
+  "actualChildPidAndCreationTime": true,
+  "actualPendingReadAndWriteCancellation": true,
+  "actualDescendantRetirement": true,
+  "ambientPrivateAuthAndPathAbsent": true,
+  "frameReplayForeignScopeTamperAndReflectionRejected": true,
+  "observationTimeoutLeavesWorkerAlive": true,
+  "fixtureWorkersAbsentAfterGate": true,
+  "actualProductAgentRunnerChildImplemented": false,
+  "authenticatedJournalModelToolDispatchImplemented": false,
+  "durableLeaseOrEffectDeduplicationImplemented": false,
+  "crossProcessRootClockImplemented": false,
+  "fullNativeSuiteRun": false,
+  "installed": false,
+  "cpythonExecuted": false
+}

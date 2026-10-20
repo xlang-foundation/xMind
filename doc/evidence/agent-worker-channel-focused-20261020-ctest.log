@@ -1,0 +1,69 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start   8: native_permission_grants_contract
+ 1/29 Test   #8: native_permission_grants_contract .............   Passed    0.14 sec
+      Start  11: native_a2a_agent_registry_contract
+ 2/29 Test  #11: native_a2a_agent_registry_contract ............   Passed    2.15 sec
+      Start  24: native_agent_authority_contract
+ 3/29 Test  #24: native_agent_authority_contract ...............   Passed    0.11 sec
+      Start  29: native_context_engine_contract
+ 4/29 Test  #29: native_context_engine_contract ................   Passed    5.08 sec
+      Start  30: native_context_graph_engine_contract
+ 5/29 Test  #30: native_context_graph_engine_contract ..........   Passed    1.60 sec
+      Start  31: native_nested_context_graph_engine_contract
+ 6/29 Test  #31: native_nested_context_graph_engine_contract ...   Passed    0.82 sec
+      Start  36: native_dynamic_plan_engine_contract
+ 7/29 Test  #36: native_dynamic_plan_engine_contract ...........   Passed    6.80 sec
+      Start  39: native_a2a_task_control_http_contract
+ 8/29 Test  #39: native_a2a_task_control_http_contract .........   Passed    1.08 sec
+      Start  40: native_a2a_message_http_contract
+ 9/29 Test  #40: native_a2a_message_http_contract ..............   Passed    0.42 sec
+      Start  41: native_a2a_stream_http_contract
+10/29 Test  #41: native_a2a_stream_http_contract ...............   Passed    1.50 sec
+      Start  42: native_a2a_v1_http_contract
+11/29 Test  #42: native_a2a_v1_http_contract ...................   Passed    1.35 sec
+      Start  47: native_graph_runner_contract
+12/29 Test  #47: native_graph_runner_contract ..................   Passed   12.22 sec
+      Start  48: native_graph_mcp_contract
+13/29 Test  #48: native_graph_mcp_contract .....................   Passed    6.52 sec
+      Start  49: native_graph_mcp_http_contract
+14/29 Test  #49: native_graph_mcp_http_contract ................   Passed    2.84 sec
+      Start  50: native_graph_mcp_http_subscription_contract
+15/29 Test  #50: native_graph_mcp_http_subscription_contract ...   Passed    0.72 sec
+      Start  51: native_delegation_contract
+16/29 Test  #51: native_delegation_contract ....................   Passed    2.77 sec
+      Start  58: native_process_executor_contract
+17/29 Test  #58: native_process_executor_contract ..............   Passed   18.24 sec
+      Start  59: native_agent_process_http_contract
+18/29 Test  #59: native_agent_process_http_contract ............   Passed   16.41 sec
+      Start  61: native_process_adapter_contract
+19/29 Test  #61: native_process_adapter_contract ...............   Passed    4.47 sec
+      Start  81: native_agent_worker_channel_contract
+20/29 Test  #81: native_agent_worker_channel_contract ..........***Failed    0.11 sec
+Cannot create owned worker
+
+      Start  82: native_xlang3_shared_memory_worker_contract
+21/29 Test  #82: native_xlang3_shared_memory_worker_contract ...   Passed    1.16 sec
+      Start  84: native_agent_runner_contract
+22/29 Test  #84: native_agent_runner_contract ..................   Passed    9.56 sec
+      Start  96: native_agent_remote_tool_host_contract
+23/29 Test  #96: native_agent_remote_tool_host_contract ........   Passed    0.58 sec
+      Start  97: native_agent_file_tool_host_contract
+24/29 Test  #97: native_agent_file_tool_host_contract ..........   Passed    1.07 sec
+      Start  98: native_agent_process_tool_host_contract
+25/29 Test  #98: native_agent_process_tool_host_contract .......   Passed    0.50 sec
+      Start  99: native_agent_read_tool_host_contract
+26/29 Test  #99: native_agent_read_tool_host_contract ..........   Passed    1.18 sec
+      Start 118: native_agent_mcp_http_contract
+27/29 Test #118: native_agent_mcp_http_contract ................   Passed    3.35 sec
+      Start 119: native_agent_mcp_http_subscription_contract
+28/29 Test #119: native_agent_mcp_http_subscription_contract ...   Passed    0.87 sec
+      Start 153: native_provider_profile_runtime_contract
+29/29 Test #153: native_provider_profile_runtime_contract ......   Passed    5.40 sec
+
+97% tests passed, 1 tests failed out of 29
+
+Total Test time (real) = 109.06 sec
+
+The following tests FAILED:
+	 81 - native_agent_worker_channel_contract (Failed)
+Errors while running CTest

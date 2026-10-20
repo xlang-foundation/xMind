@@ -186,6 +186,15 @@ bool drain(CapturePipe& pipe,bool error,ProcessResult& result,std::size_t limit,
 }
 std::string ForegroundProcess::directory_identity(const std::string& path){return DirectoryLease(wide(path)).id();}
 std::string ForegroundProcess::executable_identity(const std::string& path){return ExecutableLease(wide(path)).bound;}
+std::shared_ptr<const BoundProcessExecutable> ForegroundProcess::bind_executable(const std::string& path){
+    struct Binding final:BoundProcessExecutable {
+        std::string path_;ExecutableLease lease;
+        explicit Binding(std::string path):path_(std::move(path)),lease(wide(path_)){}
+        const std::string& path()const noexcept override{return path_;}
+        const std::string& identity()const noexcept override{return lease.bound;}
+    };
+    return std::make_shared<Binding>(path);
+}
 ProcessResult ForegroundProcess::run(const ProcessConfiguration& config,std::stop_token cancel,OutputObserver observer) {
     const auto started=Clock::now();
     if(config.timeout<std::chrono::milliseconds(1) || config.timeout>std::chrono::minutes(10) || config.output_limit<8192 || config.output_limit>4*1024*1024 || config.arguments.size()>64 || config.working_directory_id.empty())throw std::invalid_argument("Process configuration exceeds limits or lacks directory identity");
