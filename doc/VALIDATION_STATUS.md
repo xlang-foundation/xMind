@@ -1,3 +1,24 @@
+## Actual product child with no tools — 2026-10-20
+
+An actual unified `xmind.exe` worker now completes an ordinary root with a
+backend-captured empty tool catalogue. The independent HTTP peer observes the
+captured instructions/user history and usage controls with no tools or tool_choice.
+The backend retains exactly the prompt and canonical final assistant, one model
+charge and a completed lease, with no tool/read activity; the child drains with
+exit zero. All 45 intentional controlled-provider requests are independently checked.
+
+The first gate failed 52/53: shared AgentRunner still rejected empty backend tool
+windows after context admission. That failed evidence is retained. Removing only
+this redundant non-empty check makes the unchanged child fixture pass; non-read
+tools and changed model controls remain rejected. Corrected serial Release build
+and 53 contracts pass in 157.29 seconds, with all frozen inputs/file sets and 133
+native binaries unchanged during validation. No CPython or live model is used.
+
+This is actual child capability qualification. AgentService/GraphService placement,
+broader worker effects/context/graphs and Local/Nexus integration remain open;
+installed59, user owners/history/settings and visible windows are untouched.
+See [passing and failed evidence](evidence/agent-worker-no-tools-child-corrected-20261020.json).
+
 ## Worker explicit empty tool catalogue — 2026-10-20
 
 The backend worker request context now accepts an explicitly empty tool catalogue,

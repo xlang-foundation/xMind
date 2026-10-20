@@ -1,0 +1,123 @@
+{
+  "recordedAt": "2026-10-20T22:41:40.991Z",
+  "gate": {
+    "recordedAt": "2026-10-20T22:41:23.977Z",
+    "sourceParent": "232458e8cbd89fe9240cf3941579f07d7c80f46a",
+    "sourcePatchSha256": "133e7019197b63522a06371eab68f6639d17826fd18538985c7ba2c00a394899",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 43228,
+      "launchedAt": "2026-10-20T22:36:11.067Z",
+      "completedAt": "2026-10-20T22:38:40.723Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e4b6760246f6de874e3bdc6924fc9b3ef1af4bf11e0086aa7e0c225fca70720f"
+    },
+    "test": {
+      "pid": 25860,
+      "launchedAt": "2026-10-20T22:38:43.915Z",
+      "completedAt": "2026-10-20T22:41:21.257Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e684e4fc23a4ffc82627bd0379a814460652067d76b6bf113f19fcf2cc448c8d"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 157.29,
+    "projectFiles": 2684,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "7bd33c14d91ab40d7937cc0b90a31fec79af896121e191d3449b66c1ba234519",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-build.log": "e4b6760246f6de874e3bdc6924fc9b3ef1af4bf11e0086aa7e0c225fca70720f",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-build-terminal.json": "a99892d9fadf2b84c9c6cb23138f7f69e83a7b7b0a0b635301b049507640602a",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-ctest.log": "e684e4fc23a4ffc82627bd0379a814460652067d76b6bf113f19fcf2cc448c8d",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-ctest-terminal.json": "02a7c498993c572b53ec23e9b3c4fc8691d9aec8e56f9941db7b9405a2de8b04",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-LastTest.log": "f56e879802295d457da9c8297c4d12c0b12b2773b90c9deb811ee2807ea66eec",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+    "doc/evidence/agent-worker-no-tools-child-corrected-20261020-gate.json": "3006c4ea394bf91bf5bd201bd5ef0cfb2b5abc68e003205c2aaa0b740b1ee2e2"
+  },
+  "fixtureSha256": "d698269038fc574928c8a13950942c56ec2673cd6fbd0527b4923dc6e9b9cfa3",
+  "scope": "Actual unified xmind child completes an ordinary root under a backend-captured empty tool catalogue",
+  "verified": [
+    "Independent HTTP peer observes one request with captured backend instructions, user history, usage and no tools/tool_choice",
+    "Product child uses private authenticated bootstrap and native shared AgentRunner composition",
+    "Backend retains exactly two canonical messages, one funded model and completed lease",
+    "No tool activity or worker read dispatch is recorded",
+    "Exact child physically drains with exit zero after canonical completion",
+    "Independent controlled peer verifies exactly 45 intentional requests across all fixture modes"
+  ],
+  "limitations": [
+    "Controlled provider response; no live model or installed client acceptance",
+    "No-tools worker capability is qualified; AgentService/GraphService process placement remains open",
+    "Broader effect/context/graph worker capabilities, generic Local/Nexus integration and rendered VS Code acceptance remain open",
+    "No new full native suite or hosted acceptance claim"
+  ],
+  "passed": true,
+  "failedAttempt": {
+    "gate": {
+      "recordedAt": "2026-10-20T22:35:49.146Z",
+      "sourceParent": "232458e8cbd89fe9240cf3941579f07d7c80f46a",
+      "sourcePatchSha256": "e527a4e314093de5f63c0802206830ec0fd1d764f2786b5ff1b6067858115bfb",
+      "uncommittedSource": true,
+      "build": {
+        "pid": 71116,
+        "launchedAt": "2026-10-20T22:32:35.665Z",
+        "completedAt": "2026-10-20T22:33:09.806Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "19a381d71c1859d326aefbbfcdfeaeee054c922f4725491f4f12f52e6284f847"
+      },
+      "test": {
+        "pid": 27200,
+        "launchedAt": "2026-10-20T22:33:12.525Z",
+        "completedAt": "2026-10-20T22:35:46.549Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "a343aadd8061e5d07ac2ae73c3675442c5b8c76c8f6ad906aabdefe8e5f61479"
+      },
+      "total": 53,
+      "failed": 1,
+      "passed": 52,
+      "seconds": 153.98,
+      "projectFiles": 2684,
+      "sdkSourceFiles": 16,
+      "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 76,
+      "nativeBinaries": 133,
+      "nodeDependencyFiles": 18598,
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "nativeSha256": "fd24126b6a63d015fc15b1a2e780d7652f94b05ce3690d774e3128230b354f2f",
+      "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic fixtures only; no live model key used",
+      "installed": false,
+      "cpythonExecuted": false,
+      "scopePassed": false
+    },
+    "diagnosis": "Shared AgentRunner rejected an empty backend-owned request tool window before dispatch. Removing only that redundant non-empty check permits the unchanged actual product-child fixture to complete.",
+    "files": {
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-build.log": "19a381d71c1859d326aefbbfcdfeaeee054c922f4725491f4f12f52e6284f847",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-build-terminal.json": "ffae2b227c3e7d017f167484f31665ef4baf89b89728cacd5df54c4dc39dd90f",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-ctest.log": "a343aadd8061e5d07ac2ae73c3675442c5b8c76c8f6ad906aabdefe8e5f61479",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-ctest-terminal.json": "6f0d1f34bd10a55535b066f2d36be3dc6fc0c18462cf3d808d7f79dcafa8dc52",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-LastTest.log": "813a80085c1ee396fb178f87f3f4e6157763efe7ef9007cc741cbda30f889299",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-test-inventory.json": "b4520b018d3f81f68bfca039bee6eaf253048af16aa2aeac41708668e811254a",
+      "doc/evidence/agent-worker-no-tools-child-focused-20261020-gate.json": "a85fd49e36e2c76eabccff1848f8b15194d100e7156e4fbc1adc77d91a034295"
+    }
+  }
+}
