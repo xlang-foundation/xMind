@@ -36,3 +36,6 @@ The complete native gate and explicit installed54 adoption have passed. Continue
 
 
 Nested execution implementation checkpoint: pinned invocation admission and exact inherited workspace selection are now durable and tested (see VALIDATION_STATUS). Runtime is still closed. Schema34 now records a bounded immutable invocation tree with a distinct ultimate session root, descendant observation and recovery contracts. Next share the root deadline and leaf capacity across graph controllers, propagate nested human pauses without marking the child terminal, route authenticated nested input/resume, and observe/recover the entire tree without replay. Metadata admission and queued cancellation do not establish any of these runtime requirements.
+
+
+Nested execution update: native agent/tool invocation trees now run under one private root deadline and shared physical leaf permits, with actual read/write/cancellation/deadline and synthetic-provider agent transport contracts. Nested human waits and context-enabled graphs remain rejected. Continue with typed durable pause propagation and authenticated nested input/resume, shared context/model-call budgets, full native qualification and eventual verified package adoption. Process-isolated execution and Local/Nexus authenticated worker transport remain separate unfinished requirements.

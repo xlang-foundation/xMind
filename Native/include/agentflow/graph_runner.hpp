@@ -28,6 +28,8 @@ public:
     // Explicit cancellation is still retired by that service's controller.
     Run execute(const std::string& root_id,std::stop_token cancel={},bool preserve_human_pause=false);
 private:
+    struct ExecutionScope;
+    Run execute_owned(const std::string& id,std::stop_token cancel,bool preserve_human_pause,std::shared_ptr<ExecutionScope> scope);
     Run tool(const std::string& child_id,GraphPreparedNode node,std::stop_token cancel,
         std::chrono::steady_clock::time_point deadline,bool shared_context,
         std::shared_ptr<const WorkspaceToolSet> workspace_tools);

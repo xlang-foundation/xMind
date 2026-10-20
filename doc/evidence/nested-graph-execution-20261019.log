@@ -1,0 +1,41 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start   1: native_root_work_executor_contract
+ 1/18 Test   #1: native_root_work_executor_contract ........   Passed    0.09 sec
+      Start  25: native_dynamic_plan_repository_contract
+ 2/18 Test  #25: native_dynamic_plan_repository_contract ...   Passed    3.71 sec
+      Start  26: native_context_repository_contract
+ 3/18 Test  #26: native_context_repository_contract ........   Passed    2.84 sec
+      Start  30: native_context_graph_engine_contract
+ 4/18 Test  #30: native_context_graph_engine_contract ......   Passed    1.50 sec
+      Start  32: native_planning_http_contract
+ 5/18 Test  #32: native_planning_http_contract .............   Passed    0.81 sec
+      Start  35: native_dynamic_plan_engine_contract
+ 6/18 Test  #35: native_dynamic_plan_engine_contract .......   Passed    6.18 sec
+      Start  43: native_graph_service_http_contract
+ 7/18 Test  #43: native_graph_service_http_contract ........   Passed    9.77 sec
+      Start  46: native_graph_runner_contract
+ 8/18 Test  #46: native_graph_runner_contract ..............   Passed   11.62 sec
+      Start  50: native_delegation_contract
+ 9/18 Test  #50: native_delegation_contract ................   Passed    2.76 sec
+      Start  53: native_graph_children_contract
+10/18 Test  #53: native_graph_children_contract ............   Passed    0.41 sec
+      Start  54: native_graph_contract
+11/18 Test  #54: native_graph_contract .....................   Passed    2.33 sec
+      Start  81: native_agent_service_contract
+12/18 Test  #81: native_agent_service_contract .............   Passed    1.59 sec
+      Start 113: native_agent_http_contract
+13/18 Test #113: native_agent_http_contract ................   Passed    9.76 sec
+      Start 137: native_operation_repository_contract
+14/18 Test #137: native_operation_repository_contract ......   Passed    0.93 sec
+      Start 139: persistence_service_contract
+15/18 Test #139: persistence_service_contract ..............   Passed    1.96 sec
+      Start 140: native_backend_owner_contract
+16/18 Test #140: native_backend_owner_contract .............   Passed    2.33 sec
+      Start 142: native_legacy_owner_contract
+17/18 Test #142: native_legacy_owner_contract ..............   Passed    0.59 sec
+      Start 146: native_backend_handoff_contract
+18/18 Test #146: native_backend_handoff_contract ...........   Passed    4.45 sec
+
+100% tests passed, 0 tests failed out of 18
+
+Total Test time (real) =  63.64 sec

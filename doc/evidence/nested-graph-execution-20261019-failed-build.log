@@ -1,0 +1,437 @@
+
+  Checking File Globs
+  agentflow_mcp_wire.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire.lib
+  agentflow_json_schema.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema.lib
+  agentflow_models.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secrets.lib
+  agentflow_core.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_core.lib
+  agentflow_provider_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_transport.lib
+  agentflow_a2a.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a.lib
+  absl_log_severity.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+  absl_raw_logging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+  absl_spinlock_wait.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+  absl_base.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+  absl_base_cpu_detect.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+  absl_city.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+  absl_civil_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+  absl_crc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+  absl_hardening.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+  absl_int128.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+  absl_source_location.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+  absl_throw_delegate.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+  absl_strings_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+  absl_strings.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+  absl_str_format_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+  absl_crc32c.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+  absl_crc_cord_state.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+  absl_debugging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+  absl_hash.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+  absl_cord_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+  absl_exponential_biased.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+  absl_cordz_functions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+  absl_utf8_for_code_point.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+  absl_decode_rust_punycode.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+  absl_demangle_rust.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+  absl_demangle_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+  absl_malloc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+  absl_graphcycles_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+  absl_time_zone.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+  absl_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+  absl_kernel_timeout_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+  absl_stacktrace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+  absl_symbolize.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+  absl_tracing_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+  absl_synchronization.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+  absl_cordz_handle.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+  absl_cordz_info.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+  absl_cord.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+  absl_examine_stack.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+  absl_flags_commandlineflag_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+  absl_flags_commandlineflag.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+  absl_flags_program_name.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+  absl_flags_config.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+  absl_flags_marshalling.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+  absl_flags_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+  absl_flags_private_handle_accessor.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+  absl_hashtablez_sampler.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+  absl_raw_hash_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+  absl_flags_reflection.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+  absl_leak_check.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+  absl_log_internal_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+  absl_log_entry.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+  absl_log_internal_fnmatch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+  absl_vlog_config_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+  absl_log_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+  absl_log_internal_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+  absl_log_internal_format.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+  absl_log_sink.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+  absl_log_internal_log_sink_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+  absl_log_internal_nullguard.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+  absl_log_internal_structured_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+  absl_strerror.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+  absl_log_internal_message.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+  absl_log_internal_check_op.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+  absl_log_internal_conditions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+  Scanning sources for module dependencies...
+  yaml-cpp.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  agentflow_authoring.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_authoring.lib
+  agentflow_agent_definitions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_definitions.lib
+  agentflow_chat_provider.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider.lib
+  agentflow_file_patch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch.lib
+  agentflow_policy.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_policy.lib
+  re2.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\re2\Release\re2.lib
+  agentflow_workspace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace.lib
+  agentflow_edits.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edits.lib
+  agentflow_mcp_stdio.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio.lib
+  agentflow_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process.lib
+  agentflow_language_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server.lib
+  agentflow_language_server_tools.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_tools.lib
+  agentflow_mcp_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http.lib
+  agentflow_mcp_client_factory.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_factory.lib
+  xmind_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker.lib
+  agentflow_mcp_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effects.lib
+  agentflow_mcp_run_observer.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_run_observer.lib
+  agentflow_permission_grants.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants.lib
+  agentflow_process_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_effects.lib
+  agentflow_xlang_python.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python.lib
+  agentflow_xlang_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker.lib
+  agentflow_agent.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent.lib
+  agentflow_runtime_generation.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation.lib
+  backend_owner_control.cpp
+  agentflow_backend_owner_control.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_control.lib
+  agentflow_connection_profiles.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles.lib
+  agentflow_mcp_oauth_service.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service.lib
+  agentflow_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process.lib
+  agentflow_vcs.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_vcs.lib
+  agentflow_view_sessions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_view_sessions.lib
+  http_server.cpp
+  agentflow_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http.lib
+  agentflow_a2a_agent_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_agent_registry_contract.exe
+  agentflow_a2a_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_contract.exe
+  agentflow_a2a_client_sdk_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_sdk_contract.exe
+  agentflow_agent_authority_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_authority_contract.exe
+  agentflow_agent_file_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_file_tool_host_contract.exe
+  agentflow_agent_process_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_process_tool_host_contract.exe
+  agentflow_agent_read_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_read_tool_host_contract.exe
+  agentflow_agent_remote_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_remote_tool_host_contract.exe
+  agentflow_graph.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph.lib
+  graph_runner.cpp
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(64,21): error C2039: 'ExecutionScope': is not a member of 'agentflow::GraphRunner' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\graph_runner.hpp(10,7):
+      see declaration of 'agentflow::GraphRunner'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(326,107): error C3861: 'execute_owned': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(327,18): error C2039: 'execute_owned': is not a member of 'agentflow::GraphRunner' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\graph_runner.hpp(10,7):
+      see declaration of 'agentflow::GraphRunner'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(328,15): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(329,20): error C3536: 'root': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(329,192): error C2065: 'settings_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(329,214): error C2065: 'limit_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(330,41): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(331,119): error C2737: 'input': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(331,158): error C3536: 'input': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(332,16): error C2737: 'model': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(332,80): error C2512: 'agentflow::GraphPlan::GraphPlan': no appropriate default constructor available [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(332,80):
+      while trying to match the argument list '()'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(332,120): error C3536: 'model': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(332,106): error C3861: 'validate': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(334,63): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(335,13): error C2065: 'workspace_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(335,51): error C2065: 'workspace_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(335,138): error C2065: 'workspace_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(337,34): error C2672: 'std::make_shared': no matching overloaded function found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2999,44):
+      could be 'std::shared_ptr<_Ty> std::make_shared(const remove_extent<_Ty>::type &)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(337,34):
+          the associated constraints are not satisfied
+              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2998,23):
+              the concept 'std::_Bounded_builtin_array<agentflow::WorkspaceToolSet>' evaluated to false
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(1578,34):
+                  the constraint was not satisfied
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2990,44):
+      or       'std::shared_ptr<_Ty> std::make_shared(void)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(337,34):
+          'std::shared_ptr<_Ty> std::make_shared(void)': expects 0 arguments - 1 provided
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2985,44):
+      or       'std::shared_ptr<_Ty> std::make_shared(const size_t,const remove_extent<_Ty>::type &)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(337,34):
+          'std::shared_ptr<_Ty> std::make_shared(const size_t,const remove_extent<_Ty>::type &)': expects 2 arguments - 1 provided
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2980,44):
+      or       'std::shared_ptr<_Ty> std::make_shared(const size_t)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(337,34):
+          the associated constraints are not satisfied
+              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2979,23):
+              the concept 'std::_Unbounded_builtin_array<agentflow::WorkspaceToolSet>' evaluated to false
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(1581,36):
+                  the constraint was not satisfied
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(2943,44):
+      or       'std::shared_ptr<_Ty> std::make_shared(_Types ...)'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(339,24): error C3861: 'captured_context': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(341,13): error C3861: 'validate_context_owner': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(342,56): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(348,20): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(351,12): error C3861: 'execution_budget': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(352,54): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(361,18): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(361,45): error C3861: 'validate_context_owner': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(364,24): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(366,30): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(366,24): error C2737: 'saved': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(366,168): error C3536: 'saved': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(368,57): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(368,109): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(373,58): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(373,65): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,54): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'agentflow::GraphContextBoundarySpec' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,54):
+      Invalid aggregate initialization
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+          'initializing': cannot convert from 'int64_t' to 'std::string'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+              'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string': no overloaded function could convert all the argument types
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(818,5):
+                  could be 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const )'
+          with
+          [
+              _Elem=char
+          ]
+                      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+                      'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const )': cannot convert argument 1 from 'int64_t' to 'const _Elem *const '
+          with
+          [
+              _Elem=char
+          ]
+                          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+                          Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1390,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+                      'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)': cannot convert argument 1 from 'int64_t' to 'std::initializer_list<_Elem>'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+          and
+          [
+              _Elem=char
+          ]
+                          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+                          Conversion requires a second user-defined-conversion operator or constructor
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1207,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Ty &,const unsigned __int64,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(848,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(_Iter,_Iter,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(842,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const unsigned __int64,const _Elem,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(825,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const ,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(812,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const ,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(376,158):
+                  while trying to match the argument list '(int64_t)'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(377,77): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(377,190): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(380,55): error C2065: 'limit_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(380,65): error C2065: 'limit_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(380,16): error C2737: 'parallel': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(381,141): error C3536: 'parallel': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(385,140): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(389,14): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(395,37): error C2665: 'agentflow::GraphCoordinator::GraphCoordinator': no overloaded function could convert all the argument types [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\graph.hpp(54,5):
+      could be 'agentflow::GraphCoordinator::GraphCoordinator(agentflow::GraphPlan,const std::string &,agentflow::GraphRestoreMode)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(395,37):
+          'agentflow::GraphCoordinator::GraphCoordinator(agentflow::GraphPlan,const std::string &,agentflow::GraphRestoreMode)': cannot convert argument 2 from 'agentflow::GraphRestoreMode' to 'const std::string &'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(395,82):
+              Reason: cannot convert from 'agentflow::GraphRestoreMode' to 'const std::string'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(395,82):
+              No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(395,37):
+      while trying to match the argument list '(const agentflow::GraphPlan, agentflow::GraphRestoreMode)'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,24): error C2737: 'snapshot': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,110): error C2530: 'node': references must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,110): error C3531: 'node': a symbol whose type contains 'auto' must have an initializer [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,114): error C2143: syntax error: missing ';' before ':' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,115): error C3536: 'snapshot': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(399,135): error C2143: syntax error: missing ';' before ')' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(401,36): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(403,20): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(407,24): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(411,46): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(417,21): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(419,74): error C3482: 'this' can only be used as a lambda capture within a non-static member function [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(420,47): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(420,160): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(425,68): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(426,115): error C2059: syntax error: ')' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(427,41): error C3536: 'task': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(427,89): error C2166: l-value specifies const object [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(427,268): error C3861: 'provider_context': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(427,340): error C2166: l-value specifies const object [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(431,17): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,162): error C3482: 'this' can only be used as a lambda capture within a non-static member function [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,339): error C2065: 'agents_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,485): error C3861: 'tool': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,123): error C2679: binary '=': no operator found which takes a right-hand operand of type 'std::future<void>' (or there is no acceptable conversion) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\future(853,13):
+      could be 'std::future<agentflow::Run> &std::future<agentflow::Run>::operator =(const std::future<agentflow::Run> &)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,123):
+          'std::future<agentflow::Run> &std::future<agentflow::Run>::operator =(const std::future<agentflow::Run> &)': cannot convert argument 2 from 'std::future<void>' to 'const std::future<agentflow::Run> &'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,141):
+              Reason: cannot convert from 'std::future<void>' to 'const std::future<agentflow::Run>'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,141):
+              No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\future(838,13):
+      or       'std::future<agentflow::Run> &std::future<agentflow::Run>::operator =(std::future<agentflow::Run> &&)'
+          D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,123):
+          'std::future<agentflow::Run> &std::future<agentflow::Run>::operator =(std::future<agentflow::Run> &&)': cannot convert argument 2 from 'std::future<void>' to 'std::future<agentflow::Run> &&'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,141):
+              Reason: cannot convert from 'std::future<void>' to 'std::future<agentflow::Run>'
+              D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,141):
+              No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(436,123):
+      while trying to match the argument list '(std::future<agentflow::Run>, std::future<void>)'
+  
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(437,91): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(437,204): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+D:\CantorAI2026\xMind\Native\src\graph_runner.cpp(445,101): error C2065: 'store_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_graph_execution.vcxproj]
+  graph_service.cpp
+  Generating Code...
+  agentflow_console_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_console_transport.lib
+  agentflow_instruction_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration.lib
+  agentflow_language_server_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration.lib
+  agentflow_legacy_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_process.lib
+  agentflow_local_profile.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_local_profile.lib
+  agentflow_mcp_resource_catalog.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_catalog.lib
+  agentflow_process_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration.lib
+  agentflow_anthropic_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_agent_contract.exe
+  agentflow_anthropic_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_history_contract.exe
+  agentflow_anthropic_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_provider_contract.exe
+  agentflow_anthropic_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_request_contract.exe
+  agentflow_anthropic_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_stream_contract.exe
+  agentflow_approved_edit_http_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_approved_edit_http_fixture.exe
+  agentflow_backend_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_contract.exe
+  agentflow_chat_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider_contract.exe
+  agentflow_cli_plan_review_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_cli_plan_review_contract.exe
+  agentflow_command_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_command_context_contract.exe
+  agentflow_connection_profiles_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_contract.exe
+  agentflow_connection_profiles_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_http_contract.exe
+  agentflow_conpty_cli_harness.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_conpty_cli_harness.exe
+  agentflow_context_control_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_control_contract.exe
+  agentflow_context_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_engine_contract.exe
+  agentflow_context_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_repository_contract.exe
+  agentflow_context_selection_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_selection_contract.exe
+  agentflow_create_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_create_executor_contract.exe
+  agentflow_credential_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_credential_repository_contract.exe
+  agentflow_deepseek_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_deepseek_provider_contract.exe
+  agentflow_dynamic_plan_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_contract.exe
+  xmind_cli.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_cli.exe
+  agentflow_dynamic_plan_mcp_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_mcp_contract.exe
+  agentflow_dynamic_plan_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_repository_contract.exe
+  agentflow_edit_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edit_executor_contract.exe
+  agentflow_file_patch_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch_contract.exe
+  agentflow_gemini_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_agent_contract.exe
+  agentflow_gemini_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_history_contract.exe
+  agentflow_gemini_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_provider_contract.exe
+  agentflow_gemini_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_request_contract.exe
+  agentflow_gemini_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_stream_contract.exe
+  agentflow_graph_checkpoint_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_checkpoint_contract.exe
+  agentflow_graph_children_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_children_contract.exe
+  agentflow_http_stream_transport_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http_stream_transport_contract.exe
+  agentflow_incoming_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_incoming_repository_contract.exe
+  agentflow_instruction_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration_contract.exe
+  agentflow_json_schema_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema_contract.exe
+  agentflow_language_server_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration_contract.exe
+  agentflow_language_server_diagnostics_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_diagnostics_contract.exe
+  agentflow_legacy_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_contract.exe
+  agentflow_mcp_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_contract.exe
+  agentflow_mcp_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration_contract.exe
+  agentflow_mcp_effect_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effect_contract.exe
+  agentflow_mcp_handshake_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_handshake_contract.exe
+  agentflow_mcp_http_fallback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_fallback_contract.exe
+  agentflow_mcp_http_readonly_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_readonly_contract.exe
+  agentflow_mcp_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_input_contract.exe
+  agentflow_mcp_oauth_callback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_callback_contract.exe
+  agentflow_mcp_oauth_credentials_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_credentials_contract.exe
+  agentflow_mcp_oauth_refresh_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_contract.exe
+  agentflow_mcp_oauth_refresh_storage_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_storage_contract.exe
+  agentflow_mcp_oauth_renewal_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_renewal_contract.exe
+  agentflow_mcp_oauth_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service_contract.exe
+  agentflow_mcp_oauth_trusted_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_trusted_contract.exe
+  agentflow_mcp_stdio_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio_contract.exe
+  agentflow_mcp_wire_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire_contract.exe
+  agentflow_model_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_request_contract.exe
+  agentflow_model_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_stream_contract.exe
+  agentflow_native_child_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_child_executor_contract.exe
+  agentflow_native_delegation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_delegation_contract.exe
+  agentflow_operation_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_operation_repository_contract.exe
+  agentflow_owner_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process_contract.exe
+  agentflow_patch_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_executor_contract.exe
+  agentflow_patch_file_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_file_executor_contract.exe
+  agentflow_patch_tool_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_tool_contract.exe
+  agentflow_permission_grants_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants_contract.exe
+  agentflow_permission_waiter_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_waiter_contract.exe
+  agentflow_persistence_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_persistence_service_contract.exe
+  agentflow_planning_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_planning_http_contract.exe
+  agentflow_process_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration_contract.exe
+  agentflow_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_contract.exe
+  agentflow_process_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_executor_contract.exe
+  agentflow_profile_record_publication_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_profile_record_publication_contract.exe
+  agentflow_provider_history_bridge_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_history_bridge_contract.exe
+  agentflow_pty_sessions_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_pty_sessions_contract.exe
+  agentflow_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_repository_contract.exe
+  agentflow_responses_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_context_contract.exe
+  agentflow_responses_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_contract.exe
+  agentflow_restore_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_restore_executor_contract.exe
+  agentflow_root_work_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_root_work_executor_contract.exe
+  agentflow_runtime_generation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation_contract.exe
+  agentflow_schema_budget_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_budget_fixture.exe
+  agentflow_schema_worker_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker_contract.exe
+  agentflow_secret_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secret_contract.exe
+  agentflow_skill_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_context_contract.exe
+  agentflow_skill_state_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_state_contract.exe
+  agentflow_task_list_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_task_list_repository_contract.exe
+  agentflow_terminal_key_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_terminal_key_input_contract.exe
+  agentflow_workspace_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_registry_contract.exe
+  agentflow_workspace_tools_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_tools_contract.exe
+  agentflow_xlang_python_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python_contract.exe
+  agentflow_xlang_sqlite_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_sqlite_contract.exe
+  xmind_persistence_demo.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_persistence_demo.exe

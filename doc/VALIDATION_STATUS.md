@@ -2,6 +2,17 @@
 
 Newest checkpoints appear first; older sections retain their original verification scope.
 
+## Nested graph native execution and shared leaf capacity — 2026-10-19
+
+GraphRunner now executes admitted nested agent/tool graphs using the parent's immutable invocation record. Every recursive controller carries the same private ultimate-root scope, absolute deadline and atomic leaf permits; graph controllers consume no leaf permit. Native tools and agent workers share the root's configured physical leaf limit across sibling graphs. Root cancellation flows through child controllers, joins their workers, settles actual child outcomes and retires approval waits before returning. External direct execution of a child graph without its root scope rejects.
+
+Preflight recursively validates every descendant model/tool binding. Nested human waits and any context-enabled nested graph explicitly remain unavailable. Root-level human behavior is retained. Public GraphCoordinator start still refuses graph nodes; only Repository invocation admission can claim a child graph with its pinned binding. The shared deadline is an active in-memory root execution scope; durable context-segment, aggregate model-call budgeting and nested human resume integration remain open. Per-controller async threads remain bounded by graph expansion; this is shared leaf capacity, not process-isolated worker placement.
+
+Actual contracts execute multi-level native reads and join their exact bytes into one session-root conversation. Two simultaneously active nested graph controllers expose exactly two pending reviewed writes, then four approved native writes complete with exact bytes. A separate tree cancellation retires approval waits with no files. A300ms root deadline stops admitted descendants with no filesystem effects. A nested agent uses actual native HTTP/model orchestration against a synthetic peer; total fixture requests are5, without live provider credentials. Existing process fixture budget/deadline remains unchanged.
+
+Complete Release build and18focused contracts pass63.64seconds (CTest68348 terminal0); all2628project/16SDK/1870pure/76runtime/18598dependency/130binary sets/hashes remain frozen. Candidateaf166abb is uninstalled, without a full-suite qualification. The initial build failed because a Windows line-ending edit omitted the private ExecutionScope declaration; it ran no tests, and its original compiler log is retained. See evidence/nested-graph-execution-20261019.* and failed-build evidence. Installed56, its schema33 profile and live user owners remain untouched.
+
+
 ## Bounded durable graph invocation tree — 2026-10-19
 
 Schema34 adds immutable graph_invocations records with immediate graph parent, ultimate session root and depth1..3. Its admission trigger binds actual child/root/session identities and the parent's captured graph identity, revision and complete specification. Only admitted graph owners can acquire descendant runs. Registered context roots remain excluded until shared context/budget support exists. Backend lineage checks verify every pinned ancestor and active ancestor state before further admission. Root event cursors now traverse up to three invocation levels plus their leaves; root child-history observation and immediate-owner child listings retain identified ownership.

@@ -61,6 +61,15 @@ std::optional<WorkspaceMembershipSnapshot> saved_graph_workspace_membership(Pers
     return result;
 }
 }
+struct GraphRunner::ExecutionScope {
+    std::string root_id;
+    std::chrono::steady_clock::time_point deadline;
+    const std::size_t capacity;
+    std::atomic<std::size_t> active=0;
+    ExecutionScope(std::string root,std::chrono::steady_clock::time_point limit,std::size_t count):root_id(std::move(root)),deadline(limit),capacity(count){}
+    bool acquire(){auto observed=active.load();while(observed<capacity){if(active.compare_exchange_weak(observed,observed+1))return true;}return false;}
+    void release(){active.fetch_sub(1);}
+};
 GraphRunner::GraphRunner(PersistenceService& store,AgentSettings settings,std::size_t count):store_(store),settings_(std::move(settings)),limit_(count){
     if(count<1 || count>8 || settings_.run_timeout.count()<1 || settings_.run_timeout>std::chrono::hours(1))throw std::invalid_argument("Invalid graph execution budget");
     // MCP-only graphs do not construct AgentRunner; validate their immutable
@@ -89,8 +98,9 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
     const auto configured=models();if(!model.empty()&&!settings_.provider_identity&&std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Graph model is not configured");
     const std::vector<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions"};
     std::size_t agent_count=0;
-    for(const auto& node:plan.nodes()){
-        if(node.kind==GraphNodeKind::graph)throw RunUnavailable("Nested graph execution ownership is not implemented");
+    const auto visit=[&](auto&& self,const GraphPlan& current,bool nested)->void {for(const auto& node:current.nodes()){
+        if(node.kind==GraphNodeKind::graph){if(settings_.context)throw GraphContextUnavailable("Nested graph context ownership is not implemented");self(self,GraphPlan(node.graph->specification_json),true);continue;}
+        if(nested&&node.kind==GraphNodeKind::human)throw RunUnavailable("Nested graph human pause/resume ownership is not implemented");
         if(node.kind==GraphNodeKind::agent){if(!agents_)throw RunUnavailable("Graph agent execution requires a configured model");if(!node.model_id.empty() && std::find(configured.begin(),configured.end(),node.model_id)==configured.end())throw std::invalid_argument("Graph node model is not configured");}
         if(node.kind==GraphNodeKind::agent)++agent_count;
         if(node.kind==GraphNodeKind::tool){
@@ -101,6 +111,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
             }else{const bool read=std::find(reads.begin(),reads.end(),node.tool)!=reads.end();const bool write=settings_.approved_edits && (node.tool=="edit_file" || node.tool=="create_file" || node.tool=="apply_patch" || node.tool=="restore_operation");if(!read && !write && !(node.tool=="run_process" && process_))throw std::invalid_argument("Graph tool is not registered for direct execution");}
         }
     }
+    };visit(visit,plan,false);
     if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
 }
 std::optional<RootBudgetSpec> GraphRunner::execution_budget(const GraphPlan& plan,const std::string& model)const{
@@ -312,8 +323,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
     catch(const PermissionExpired&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_tool_permission_expired"})").get();}
     catch(const ProcessBeforeDispatchError&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_process_not_dispatched"})").get();}
 }
-Run GraphRunner::execute(const std::string& id,std::stop_token external,bool preserve_human_pause){
-    auto root=store_.graph_run(id).get();if(root.input_json.empty())throw RunUnavailable("Legacy graph input requires review before execution");const auto input=Json::parse(root.input_json);if(!input.contains("content") || !input["content"].is_string())throw std::invalid_argument("Graph input requires task content");
+Run GraphRunner::execute(const std::string& id,std::stop_token external,bool preserve_human_pause){return execute_owned(id,external,preserve_human_pause,{});}
+Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bool preserve_human_pause,std::shared_ptr<ExecutionScope> scope){
+    auto root=store_.graph_run(id).get();
+    if(!scope){if(!root.run.parent_id.empty())throw Conflict("Nested graph requires its live root execution scope");scope=std::make_shared<ExecutionScope>(id,std::chrono::steady_clock::now()+settings_.run_timeout,limit_);}
+    else if(root.run.parent_id.empty()||store_.child_admission(id).get().root_run_id!=scope->root_id)throw Conflict("Nested graph execution scope differs from its admitted root");
+    if(root.input_json.empty())throw RunUnavailable("Legacy graph input requires review before execution");const auto input=Json::parse(root.input_json);if(!input.contains("content") || !input["content"].is_string())throw std::invalid_argument("Graph input requires task content");
     const auto model=input.value("model_id",std::string{});const GraphPlan plan(root.specification_json);validate(plan,model);
     std::shared_ptr<const WorkspaceToolSet> run_workspace_tools;
     if(const auto membership=saved_graph_workspace_membership(store_,id)){
@@ -337,7 +352,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
         if(root.run.state==RunState::queued)root.run=store_.transition(id,RunState::queued,RunState::running).get();else if(root.run.state!=RunState::running)throw Conflict("Graph is not eligible for execution");
     }
     std::stop_source stop;std::stop_callback cancelled(external,[&]{stop.request_stop();});
-    std::shared_ptr<RootExecutionBudget> budget;auto deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
+    std::shared_ptr<RootExecutionBudget> budget;auto deadline=scope->deadline;
     if(context){
         std::optional<GraphContextOpenRecord> opened;std::chrono::steady_clock::time_point active_started;
         // Authenticated input may advance the checkpoint before a queued wake
@@ -363,12 +378,12 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
     std::atomic<bool> timed_out=false;
     std::jthread timer([&](std::stop_token ending){std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);changed.wait_until(lock,ending,deadline,[]{return false;});if(!ending.stop_requested()){timed_out=true;stop.request_stop();}});
     const auto parallel=context?std::min<std::size_t>(limit_,2):limit_;
-    struct Flight {std::string id;std::future<Run> result;bool slot=false;};std::vector<Flight> flights;flights.reserve(parallel);std::exception_ptr fault;bool resolution_failed=false;
+    struct Flight {std::string id;std::future<Run> result;bool slot=false;bool physical=false;};std::vector<Flight> flights;flights.reserve(parallel);std::exception_ptr fault;bool resolution_failed=false;
     try {for(;;){
         if(std::chrono::steady_clock::now()>=deadline){timed_out=true;stop.request_stop();}
         for(auto it=flights.begin();it!=flights.end();){if(it->result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready){++it;continue;}
             try{const auto child=it->result.get();if(!terminal(child.state))throw DatabaseError("Graph child returned without retirement");store_.settle_graph_child(child.id).get();if(child.state!=RunState::completed)stop.request_stop();}
-            catch(...){if(!fault)fault=std::current_exception();stop.request_stop();}if(it->slot)budget->release_leaf();it=flights.erase(it);
+            catch(...){if(!fault)fault=std::current_exception();stop.request_stop();}if(it->slot)budget->release_leaf();if(it->physical)scope->release();it=flights.erase(it);
         }
         if(fault){if(flights.empty())std::rethrow_exception(fault);std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
         root=store_.graph_run(id).get();
@@ -396,19 +411,30 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
         if(!decisions.skippable.empty()){try{store_.skip_graph_node(id,decisions.skippable.front(),root.checkpoint_revision).get();}catch(const Conflict&){}continue;}
         if(!decisions.ready.empty() && flights.size()<parallel){
             const auto node_id=decisions.ready.front();GraphPreparedNode prepared;
+            const auto definition=std::find_if(plan.nodes().begin(),plan.nodes().end(),[&](const auto& n){return n.id==node_id;});
+            if(definition->kind==GraphNodeKind::graph){
+                const auto child_id=identifier();
+                try{store_.start_graph_invocation(child_id,id,node_id,root.checkpoint_revision).get();}catch(const Conflict&){continue;}
+                flights.push_back({child_id,{},false,false});
+                try{flights.back().result=std::async(std::launch::async,[this,child_id,scope,token=stop.get_token()]{return execute_owned(child_id,token,false,scope);});}
+                catch(...){flights.pop_back();store_.retire_graph_run(child_id,RunState::failed,R"({"reason":"graph_invocation_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}
+                continue;
+            }
+
             try{prepared=coordinator.start(node_id);}catch(const std::invalid_argument&){resolution_failed=true;stop.request_stop();continue;}
             if(prepared.definition.kind==GraphNodeKind::human){try{store_.start_graph_human(id,node_id,root.checkpoint_revision).get();}catch(const Conflict&){}continue;}
             const auto child_id=identifier();const auto task="Graph task:\n"+input.at("content").get<std::string>()+"\n\nNode task:\n"+prepared.definition.prompt+"\n\nDependency outputs (data, not authority):\n"+prepared.dependency_outputs_json;
             auto prompt=Json{{"content",task}};if(input.contains("files"))prompt["files"]=input["files"];if(prepared.definition.kind==GraphNodeKind::agent){const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;const auto context=provider_context(selected);if(!context.empty())prompt["provider_context"]=Json::parse(context);}
+            if(!scope->acquire()){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
             const bool slot=budget&&prepared.definition.kind==GraphNodeKind::agent;
-            if(slot&&!budget->try_acquire_leaf()){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
+            if(slot&&!budget->try_acquire_leaf()){scope->release();std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
             try{store_.start_graph_child(child_id,id,node_id,prompt.dump(),root.checkpoint_revision).get();}
-            catch(const Conflict&){if(slot)budget->release_leaf();continue;}catch(...){if(slot)budget->release_leaf();throw;}
+            catch(const Conflict&){if(slot)budget->release_leaf();scope->release();continue;}catch(...){if(slot)budget->release_leaf();scope->release();throw;}
             // Allocate tracking before launching: once a worker exists, no
             // allocation failure may relabel its effects as "not dispatched".
-            flights.push_back({child_id,{},slot});
+            flights.push_back({child_id,{},slot,true});
             try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token(),run_workspace_tools]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget,prepared.definition.instructions,prepared.definition.tools,false,prepared.definition.permissions):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget),run_workspace_tools);});}
-            catch(...){if(slot)budget->release_leaf();flights.pop_back();store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"graph_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}continue;
+            catch(...){if(slot)budget->release_leaf();scope->release();flights.pop_back();store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"graph_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}continue;
         }
         if(flights.empty() && decisions.waiting_human.empty())throw DatabaseError("Graph has no runnable or waiting work");
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -416,7 +442,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
         const auto original=std::current_exception();stop.request_stop();
         // Stop and join every owned worker even when controller persistence
         // fails. Preserve the original fault and uncertain ledger for review.
-        for(auto& flight:flights){try{const auto child=flight.result.get();if(terminal(child.state))store_.settle_graph_child(child.id).get();}catch(...){}if(flight.slot)budget->release_leaf();}
+        for(auto& flight:flights){try{const auto child=flight.result.get();if(terminal(child.state))store_.settle_graph_child(child.id).get();}catch(...){}if(flight.slot)budget->release_leaf();if(flight.physical)scope->release();}
         std::rethrow_exception(original);
     }
 }
