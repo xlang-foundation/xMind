@@ -1,0 +1,87 @@
+{
+  "representativeReadRunnerChild": {
+    "pid": 61044,
+    "creationTime": "134370013718641951"
+  },
+  "recordedAt": "2026-10-20T20:25:28.155Z",
+  "gate": {
+    "recordedAt": "2026-10-20T20:23:43.053Z",
+    "sourceParent": "bcf9d4e131002f52d5eaa10bd4220c0b497ff9d6",
+    "sourcePatchSha256": "79fe7b569d4c585eab233bec1ae5c06fee8bcc064cc2c72b57e080846fb375c9",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 70780,
+      "launchedAt": "2026-10-20T20:19:55.366Z",
+      "completedAt": "2026-10-20T20:21:03.865Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "00adf35aaeabfa8b57b04593f29ece3cbcc2d7f01e8d4e99f6e57bb7c6a2a48b"
+    },
+    "test": {
+      "pid": 35356,
+      "launchedAt": "2026-10-20T20:21:06.757Z",
+      "completedAt": "2026-10-20T20:23:40.369Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1e77f8879cacd8a998cb84794bdaffe67424d90e8b6cce41c402fde59649d382"
+    },
+    "total": 53,
+    "failed": 0,
+    "passed": 53,
+    "seconds": 153.56,
+    "projectFiles": 2678,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "31e5babf0c4701e685bf550634d2c6ec8b98e285de0cacbca265ffce37cbe2d8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "evidence": {
+    "agent-worker-closed-ports-focused-20261020": {
+      "files": {
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-build.log": "00adf35aaeabfa8b57b04593f29ece3cbcc2d7f01e8d4e99f6e57bb7c6a2a48b",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-build-terminal.json": "6bf53f7f77a13f230d061c58e03a126ac21aaf734953279186f14b733314cd75",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-ctest.log": "1e77f8879cacd8a998cb84794bdaffe67424d90e8b6cce41c402fde59649d382",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-ctest-terminal.json": "9c8b55900e2f1459423475bb8e3b7252acc13f729b71361cceb7f67e737bce0f",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-LastTest.log": "12c9a67f4729956bb5d7af019086c36ee5aed9a74058d9ac4c2745ff06fe1c93",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-test-inventory.json": "ed31a8fc550550dcfba099f6915f580eb313c76219eb453be5f74de8a1990f0c",
+        "doc/evidence/agent-worker-closed-ports-focused-20261020-gate.json": "f8b5d3e3e11fdfc4cdfee3b183a3e9e265a8dbbde03e6989ca705ec9d579fb5b"
+      },
+      "localManifestHashes": {
+        "source.patch": "79fe7b569d4c585eab233bec1ae5c06fee8bcc064cc2c72b57e080846fb375c9",
+        "inputs-before-build.json": "79ac2a70d6a8ab8d5c187234539130b17adb6f7f905a12ccef8bf83a47bce081",
+        "binaries-before-test.json": "bbff366e2428794e18ad69bf17073befd187ea38c720923dda9b5856f14c94cd"
+      }
+    }
+  },
+  "fixtureSha256": "90bf470503ebd8173dc0ff9d2cb1258ac5d770df6e01f7bfc8f575cdcca27572",
+  "ledgerFixtureSha256": "e9e858928a40c3f70b6a32e9838b158fdcf6601f706460de9f609a5cca883294",
+  "evidenceMethod": "Actual child plain/read fixtures instantiate the native closed-port factory. Parent authenticated success records follow child probes; child stdout is discarded.",
+  "scope": "Production explicit-denial ports for ordinary worker context maintenance, catalogue queries and child-local native effects/runtime; admitted model/read capabilities remain separate native RPC adapters.",
+  "verified": [
+    "Native factory returns non-null context, catalogue, tools and runtime guard objects",
+    "Context compaction observation and void maintenance write explicitly reject, rather than return empty facts or acknowledge writes",
+    "Agent definitions and credential-version catalogue queries explicitly reject",
+    "Child-local native read construction and native A2A catalogue access explicitly reject",
+    "Probes require not-admitted diagnostics, so invalid futures cannot masquerade as denials",
+    "Actual plain/read AgentRunner completion, provider failure, model cancellation and read-approval cancellation use native guards with native journal/model/read adapters",
+    "Fixture-only unsupported context/catalogue/tool/runtime classes removed from the actual worker loop",
+    "Independent HTTP peer still verifies exactly 27 requests with no retry"
+  ],
+  "limitations": [
+    "These objects deny capabilities; they do not implement context maintenance, native effects, MCP/A2A or delegation inside the worker",
+    "Production process entry, captured settings/bootstrap and AgentService placement remain open",
+    "Broader profiles, graph and effect worker placement remain open",
+    "Earlier intermittent normal-pipe CLI output failure remains unexplained",
+    "No full native, installed, hosted, rendered UI or live-provider acceptance claim"
+  ]
+}

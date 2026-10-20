@@ -26,7 +26,7 @@ public:
     Journal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t calls=0;
 };
 inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
-    Journal journal(peer,cancel);worker_runner_fixture::UnsupportedContextJournal context;auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
+    Journal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();worker_runner_fixture::verify_closed_ports(closed);auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
     rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,{});});
     struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,foreign);});
@@ -34,10 +34,10 @@ inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{workspace->prepare_request(stopped.get_token());});
     auto unadmitted=workspace->read_host();AgentWorkspaceInvocation wrong{1,"foreign-root","unadmitted","unadmitted",peer.scope().workspace_id,peer.scope().workspace_revision,peer.scope().workspace_id,"read_file",R"({"path":"nested/same.txt"})"};rejects<Conflict>([&]{unadmitted->invoke(wrong);});
     AgentSettings settings;settings.provider={"worker://captured","worker-rpc-fixture",Capability::supported,Capability::supported};settings.instructions.clear();settings.max_turns=8;settings.a2a_enabled=false;
-    AgentRunnerPorts ports{model,std::make_shared<worker_runner_fixture::ClosedCatalog>(),std::make_shared<worker_runner_fixture::ClosedTools>(),std::make_shared<worker_runner_fixture::ClosedRuntime>(),workspace};
+    AgentRunnerPorts ports{model,closed.catalogue,closed.tools,closed.runtime,workspace};
     for(const auto* payload:{R"({"attempt_id":"forged","ordinal":0,"phase":"started","json":"forged event"})",R"({"attempt_id":"forged","ordinal":0,"phase":"unknown"})",R"({"attempt_id":"forged","ordinal":0.5,"phase":"started"})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.tool_event",payload);});
-    auto invalid=settings;invalid.instructions="worker replacement policy";rejects<std::invalid_argument>([&]{AgentRunner rejected(journal,context,invalid,ports);});
-    AgentRunner runner(journal,context,std::move(settings),std::move(ports));rejects<RunUnavailable>([&]{runner.start("unadmitted","unadmitted","must not start a child-selected run");});
+    auto invalid=settings;invalid.instructions="worker replacement policy";rejects<std::invalid_argument>([&]{AgentRunner rejected(journal,*closed.context,invalid,ports);});
+    AgentRunner runner(journal,*closed.context,std::move(settings),std::move(ports));rejects<RunUnavailable>([&]{runner.start("unadmitted","unadmitted","must not start a child-selected run");});
     Run result;try{result=runner.execute(peer.scope().run_id,cancel);}catch(const AgentTerminalHandoff& intent){return Json{{"pid",GetCurrentProcessId()},{"terminal_handoff",to_string(intent.outcome())}}.dump();}catch(const std::exception& error){return Json{{"runner_failure",std::string(error.what())+"; model: "+journal.model_diagnostic}}.dump();}
     check(result.state==RunState::completed&&model->calls==3&&journal.tool_turns==2&&journal.tool_events==6&&!journal.canonical.empty(),"Actual child AgentRunner must execute three actual models, three read activities and two canonical tool turns");
     const auto actual=journal.native->progress();check(actual.model_events==journal.model_events&&actual.tool_events==journal.tool_events&&actual.tool_turns==journal.tool_turns&&actual.canonical_assistant==journal.canonical,"Production journal must derive read activity bindings and canonical turns from backend receipts");

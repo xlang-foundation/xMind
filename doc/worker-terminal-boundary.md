@@ -216,6 +216,26 @@ the independent peer still verifies exactly 27 requests. Runtime/closed-context
 adapters, production process entry, broader profiles and AgentService placement
 remain open; this is not installed or complete product acceptance.
 
+The [native closed-port checkpoint](evidence/agent-worker-closed-ports-focused-20261020.json)
+adds `make_agent_worker_closed_ports` and removes fixture-only unsupported
+context/catalogue/tool/runtime classes from the actual worker loop. The factory
+returns native guard objects whose operations explicitly reject unadmitted
+context maintenance, catalogue queries and child-local native effects/runtime.
+They return neither empty facts nor successful write acknowledgements. Admitted
+model/read operations continue through their separate native RPC adapters.
+
+Actual plain/read AgentRunner fixtures use these native objects. Probes check
+context compaction, a void maintenance write, agent/credential catalogue access,
+child-local read construction and native A2A catalogue access. They require an
+explicit not-admitted diagnostic, so an invalid future cannot masquerade as a
+denial. Completion, provider failure, model cancellation and read-approval
+cancellation pass with the guards. The focused gate passes 53 contracts in
+153.56 seconds with frozen inputs and all 133 binaries; the independent peer
+still verifies exactly 27 requests. These objects deny capabilities rather than
+implement context maintenance, MCP/A2A, native effects or delegation in the
+worker. Captured settings/bootstrap, production process entry, broad profiles
+and AgentService placement remain open.
+
 ## Observed ownership gap
 
 `Repository::transition` permits a captured worker only for the exact ordinary
