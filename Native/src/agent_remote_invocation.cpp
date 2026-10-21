@@ -5,6 +5,7 @@
 namespace agentflow {
 using Json=nlohmann::json;
 namespace {bool bounded_id(const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;});}}
+bool is_agent_remote_tool(const std::string& name){return name.starts_with("mcp_")||name.starts_with("a2a_delegate_");}
 void validate_agent_remote_tool_invocation(const AgentRemoteToolInvocation& call){
     const auto text=[](const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&value.find('\0')==std::string::npos;};
     if(call.protocol_version!=1||!bounded_id(call.run_id,128)||!bounded_id(call.attempt_id,128)||!bounded_id(call.tool_name,128)||!text(call.call_id,256)||!text(call.workspace_id,256)||call.workspace_revision<1||call.workspace_revision>9007199254740991LL||call.tool_index>=64||call.arguments_json.size()>4*1024*1024)throw std::invalid_argument("Invalid remote-tool invocation envelope");

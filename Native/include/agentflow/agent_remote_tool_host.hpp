@@ -29,6 +29,7 @@ struct AgentRemoteToolInvocation {
     static AgentRemoteToolInvocation parse(std::string_view);
 };
 void validate_agent_remote_tool_invocation(const AgentRemoteToolInvocation&);
+bool is_agent_remote_tool(const std::string& name);
 struct AgentRemoteToolResult {bool success=false;std::string output_json;};
 class AgentRemoteToolHost {
 public:

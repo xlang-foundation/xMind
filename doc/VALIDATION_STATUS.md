@@ -1,3 +1,29 @@
+## Durable remote host and authenticated worker RPC — 2026-10-21
+
+Canonical mixed worker turns now derive remote activity and exact history from
+durable results, alongside reads, file changes and processes. Atomic rollback,
+idempotent commit and read-only rejection remain tested. The native remote host
+claims calls before entry and binds approved operations at the pre-send authority
+boundary. Six cases verify approval, policy/controller denial, cancellation,
+retired authority, unrecorded acknowledgement and reconstructed-host rejection.
+
+Actual separate children invoke authenticated xlang3 SDK C++ remote RPC. Approved
+effects, unrecorded results and lost delivery retain one actual synthetic MCP
+peer effect, durable receipts and physical child retirement. Forged authority
+and changed invocations reject. Model admission is a backend-controlled fixture;
+this adds no provider HTTP requests.
+
+The serial Release build and **62/62 selected native contracts pass in 211.75
+seconds**. All 2729 project inputs, 16 SDK headers, 1870 pure-library files,
+76 runtime files, 18598 Node dependencies and 133 native binaries remain
+unchanged. Three focused diagnostic runs remain preserved.
+[Scope, patches and raw evidence](evidence/process-worker-remote-rpc-focused-20261021.json).
+
+Production unified xmind remote ports/catalogues and remaining capability/default
+placement integration are unfinished. This adds no full-suite, installation,
+hosted, rendered or live-provider acceptance. Existing owners and completed
+tasks remain preserved.
+
 ## Durable worker remote-call ownership — 2026-10-21
 
 Typed remote claims bind the exact current finished model call and ordinal to
