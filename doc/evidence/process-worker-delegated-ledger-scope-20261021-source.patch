@@ -1,0 +1,167 @@
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index bd6b8cd4..ef6a9d11 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -21,6 +21,8 @@ namespace agentflow {
+ namespace {
+ using Json=nlohmann::json;
+ bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context";}
++bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
++bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
+ void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
+ std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
+ std::string worker_assistant_receipt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string& attempt,bool final);
+@@ -2178,7 +2180,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
+     bounded_identity(attempt);const auto role_name=std::string(call_role(role));auto& db=impl_->database;Transaction transaction(db);
+     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||role!=(owner==root?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Worker funding owner differs from captured admission");}
+     const auto budget=root_budget(root);const auto parent=run(root),actor=run(owner);
+-    if(worker&&(budget.spec.policy_id!="native.direct-agent"||owner!=root))throw Conflict("Worker reserve requires ordinary direct-agent admission");
++    if(worker&&!((owner==root&&budget.spec.policy_id=="native.direct-agent")||worker_delegated_owner(*this,*worker)))throw Conflict("Worker reserve requires ordinary direct-agent admission");
+     if(worker)worker_require_tool_turns(db,*worker);
+     if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
+     if(role==ModelCallRole::parent){if(owner!=root||parent.graph_root)throw Conflict("Parent model attempt owner differs");}
+@@ -2202,7 +2204,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
+ ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
+     auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
+     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Worker cannot start an attempt funded by another authority");}
+-    if(worker&&(root_budget(root).spec.policy_id!="native.direct-agent"||owner!=root))throw Conflict("Worker start requires ordinary direct-agent admission");
++    if(worker&&!((owner==root&&root_budget(root).spec.policy_id=="native.direct-agent")||worker_delegated_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
+     if(worker)worker_require_tool_turns(db,*worker);
+     if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
+     const auto rows=db.execute("SELECT role,state,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
+@@ -2787,7 +2789,7 @@ RootRunPage Repository::list_root_runs(const std::string& context,const std::str
+ Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json,const AgentWorkerLeaseSpec* worker) {
+     if(!allowed(expected,next)) throw std::invalid_argument("Invalid run transition");
+     auto& db=impl_->database; Transaction transaction(db); auto result=run(id);std::optional<DynamicPlanRecord> child_plan;
+-    if(worker){worker_current_scope(*this,db,*worker,true);if(id!=worker->owner_run_id||id!=worker->root_run_id||expected!=RunState::queued||next!=RunState::running||json!="{}"||!ordinary_worker_policy(root_budget(id).spec.policy_id))throw Conflict("Worker startup differs from captured ordinary-root admission");}
++    if(worker){worker_current_scope(*this,db,*worker,true);if(id!=worker->owner_run_id||expected!=RunState::queued||next!=RunState::running||json!="{}"||!worker_agent_owner(*this,*worker))throw Conflict("Worker startup differs from captured ordinary-root admission");}
+     if(result.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context lifecycle requires its typed owner operation");
+     if(next==RunState::completed&&!result.parent_id.empty()){
+         const auto admission=child_admission(id);
+@@ -3310,7 +3312,7 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
+ bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server","read_repository_instructions","list_skills","load_skill"};return reads.contains(name);}
+ template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
+     (void)call.serialize();worker_current_scope(repository,db,lease);
+-    if(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
++    if(((file||process)?(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)):!worker_agent_owner(repository,lease))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+     if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):!worker_read_tool(call.tool_name))throw Conflict("Worker workspace tool is not admitted");
+     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
+     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read has no actual model receipt");
+@@ -3358,12 +3360,27 @@ AgentWorkerModelClaimSpec worker_callable_authority(Repository& repository,Xlang
+ AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){return worker_workspace_authority(repository,db,lease,call,false);}
+ AgentWorkerModelClaimSpec worker_file_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,true);}
+ AgentWorkerModelClaimSpec worker_process_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentProcessToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,false,true);}
++bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
++    if(lease.owner_run_id==lease.root_run_id)return false;
++    const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
++    const auto budget=repository.root_budget(lease.root_run_id);
++    if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.parent_id!=root.id||owner.session_id!=root.session_id||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1)return false;
++    const auto admitted=repository.child_admission(owner.id);
++    return admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.root_run_id==root.id&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1&&repository.delegation_batch(admitted.batch_id).state=="accepted";
++}
++bool worker_agent_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
++    return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):worker_delegated_owner(repository,lease);
++}
+ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
+-    const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);const auto budget=repository.root_budget(spec.root_run_id);
+-    const bool queued=allow_queued_root&&spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&owner.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id);
+-    if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||Json::parse(budget.spec.provider_identity_json)!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
++    const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");const auto budget=repository.root_budget(spec.root_run_id);
++    const bool delegated=worker_delegated_owner(repository,spec);
++    const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||(delegated&&root.state==RunState::running));
++    auto provider=Json::parse(budget.spec.provider_identity_json);
++    if(delegated){const auto history=repository.run_history(owner.id);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}
++    if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||provider!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
+     if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
+     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;
++    if(delegated){const auto parent_membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.root_run_id}).rows;if(parent_membership.empty()!=membership.empty()||(!membership.empty()&&Json::parse(text(parent_membership[0][0]))!=Json::parse(text(membership[0][0]))))throw Conflict("Delegated worker membership differs from its captured parent");}
+     if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
+     else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
+ }
+@@ -3378,14 +3395,14 @@ std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::
+     if(!saved.contains("worker_generation"))return {};if(!saved.at("worker_generation").is_string()||saved.at("worker_generation").get_ref<const std::string&>().empty())throw DatabaseError("Invalid model funding generation");return saved.at("worker_generation").get<std::string>();
+ }
+ std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool final){
+-    worker_current_scope(repository,db,lease);if(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id))throw Conflict("Worker completion requires ordinary direct-agent admission");
++    worker_current_scope(repository,db,lease);if(!worker_agent_owner(repository,lease))throw Conflict("Worker completion requires its exact agent admission");
+     const auto claim=read_worker_claim(db,lease.root_run_id,attempt);
+     if(claim.spec.generation!=lease.generation||claim.spec.owner_run_id!=lease.owner_run_id||claim.state!="responded"||claim.actual_assistant_json.empty())throw Conflict("Worker completion has no captured actual assistant receipt");
+     if(final){const auto response=decode_agent_model_completion(claim.actual_response_json);if(response.finish_reason!="stop"||!response.tool_calls.empty())throw Conflict("Worker cannot complete a non-final model response");
+         worker_require_tool_turns(db,lease);
+-        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_read_category),lease.root_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved read ownership");
+-        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_file_category),lease.root_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved file ownership");
+-        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_callable_category),lease.root_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved callable ownership");
++        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.model.owner_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_read_category),lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved read ownership");
++        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.model.owner_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_file_category),lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved file ownership");
++        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.model.owner_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_callable_category),lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved callable ownership");
+         const auto call=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,attempt}).rows;
+         const auto latest=db.execute("SELECT json_extract(payload,'$.attempt_id') FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? ORDER BY seq DESC LIMIT 1",{lease.owner_run_id,lease.root_run_id}).rows;
+         if(call.size()!=1||text(call[0][0])!="finished"||text(call[0][1])!=claim.actual_assistant_json||latest.size()!=1||text(latest[0][0])!=attempt||!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND state!='finished' LIMIT 1",{lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker final response is not its latest fully retired attempt");
+@@ -3518,7 +3535,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const A
+ }
+ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
+     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
+-    if(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(root_budget(lease.root_run_id).spec.policy_id))throw Conflict("Worker read turn requires ordinary direct-agent ownership");
++    if(!worker_agent_owner(*this,lease)||(allow_files&&lease.owner_run_id!=lease.root_run_id))throw Conflict("Worker tool turn differs from its exact read-only or coding admission");
+     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
+     // Check the admitted vocabulary even for an already committed turn. A read
+@@ -3743,7 +3760,7 @@ Run Repository::terminate_agent_worker(const AgentWorkerLeaseSpec& lease,RunStat
+         throw std::invalid_argument("Invalid worker terminal observation");
+     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease,true);
+     auto current=run(lease.owner_run_id);
+-    if(lease.owner_run_id!=lease.root_run_id||!current.parent_id.empty()||current.graph_root||!ordinary_worker_policy(root_budget(current.id).spec.policy_id)||
++    if(!worker_agent_owner(*this,lease)||current.graph_root||
+        !db.execute("SELECT root_run_id FROM dynamic_capabilities WHERE root_run_id=?",{current.id}).rows.empty())
+         throw Conflict("Worker termination requires an ordinary direct root");
+     impl_->root_boundary(current,outcome);
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index e7daa07f..8b33d462 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -34,6 +34,36 @@ public:
+     ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected worker fixture compaction");}
+     unsigned calls=0;
+ };
++void delegated_workers(PersistenceService& store){
++    const std::string parent="delegated-worker-root",membership=R"({"workspace_id":"worker-fixture-workspace","revision":7,"snapshot":"synthetic_backend_fixture"})";
++    store.create_session(parent,"Synthetic admitted child IPC ledger").get();store.start_prompt_run(parent,parent,R"({"content":"Bounded child admission"})",RootBudgetSpec{"native.delegation",1,"worker-fixture-workspace",provider,8,2,8,600000}).get();store.transition(parent,RunState::queued,RunState::running).get();store.append_event(parent,"agent.workspace_membership",membership).get();
++    DelegationBatchSpec batch;batch.id="worker-child-batch";batch.parent_run_id=parent;batch.provider_tool_call_id="worker-delegate-call";Json tasks=Json::array();
++    for(const auto* id:{"worker-leaf","worker-sibling","worker-named"}){Json requested={{"id",id},{"objective","Synthetic read-only objective"},{"preset","workspace.inspect"}},prompt={{"content","Synthetic read-only objective"}};if(std::string(id)=="worker-named"){requested["agent_id"]="named-reader";prompt["agent_profile"]={{"id","named-reader"},{"revision",1},{"model_id","named-worker-model"},{"instructions","Read the named file only"},{"mode","subagent"}};}tasks.push_back(requested);batch.tasks.push_back({id,std::string(id)+"-node",id,prompt.dump(),"Synthetic read-only objective"});}
++    batch.arguments_json=Json{{"tasks",tasks}}.dump();batch.parent_assistant_json=Json{{"content",""},{"tool_calls",Json::array({{{"id",batch.provider_tool_call_id},{"name","delegate_tasks"},{"arguments",batch.arguments_json}}})}}.dump();batch.expected_budget_revision=store.root_budget(parent).get().revision;store.accept_delegation_batch(batch).get();
++    const auto deadline=std::chrono::steady_clock::now()+10s;
++    auto capture=[&](const std::string& id){auto value=lease(id,id+"-generation");value.root_run_id=parent;store.append_event(id,"agent.workspace_membership",membership).get();if(id=="worker-named")value.provider_identity_json=R"({"wire":"chat-completions","model_id":"named-worker-model"})";return value;};
++    auto leaf=capture("worker-leaf"),sibling=capture("worker-sibling"),named=capture("worker-named");
++    auto wrong=named;wrong.provider_identity_json=provider;rejects<Conflict>([&]{store.admit_agent_worker(wrong).get();});
++    for(unsigned field=0;field<3;++field){auto changed=leaf;if(field==0)changed.root_run_id="worker-sibling";if(field==1)++changed.workspace_revision;if(field==2)changed.provider_identity_json=R"({"wire":"chat-completions","model_id":"unadmitted-model"})";rejects<Conflict>([&]{store.admit_agent_worker(changed).get();});}
++    for(auto* value:{&leaf,&sibling,&named}){*value=store.admit_agent_worker(*value).get().spec;require(std::get<Run>(store.read_agent_worker_journal(*value,{AgentWorkerJournalReadKind::run,value->owner_run_id}).get()).state==RunState::queued,"Admitted child may inspect its own queued run");rejects<Conflict>([&]{store.reserve_agent_worker_model(*value,"before-child-start",deadline).get();});store.start_agent_worker_run(*value,deadline).get();rejects<Conflict>([&]{store.start_agent_worker_run(*value,deadline).get();});}
++    require(store.root_budget(parent).get().model_calls_reserved==0,"Child enrollment/start cannot charge model calls");
++    auto reply=[&](const AgentWorkerLeaseSpec& owner,const std::string& attempt,ModelCompletion response){const auto funded=store.reserve_agent_worker_model(owner,attempt,deadline).get();require(funded.role==ModelCallRole::leaf&&funded.root_run_id==parent&&funded.owner_run_id==owner.owner_run_id,"Worker child must reserve against the shared root with leaf role");store.start_agent_worker_model(owner,attempt,deadline).get();const auto actual=claim(owner,attempt);store.claim_agent_worker_model(actual).get();store.record_agent_worker_model_response(actual,encode_agent_model_completion(response),format_agent_model_assistant(response,Json::parse(owner.provider_identity_json).at("model_id"),23,5)).get();store.finish_agent_worker_model(owner,attempt,deadline).get();};
++    const std::string args=R"({"path":"actual.txt"})";reply(leaf,"leaf-read",{"","","tool_calls","{}",{{"leaf-read-call","read_file",args}},"[]"});
++    AgentWorkspaceInvocation read{1,leaf.owner_run_id,"leaf-read","leaf-read-call",leaf.workspace_id,7,leaf.workspace_id,"read_file",args};store.claim_agent_worker_read(leaf,read,deadline).get();store.start_agent_worker_read(leaf,read,deadline).get();store.record_agent_worker_read_result(leaf,read,true,R"({"content":"exact child read"})").get();
++    rejects<Conflict>([&]{store.reserve_agent_worker_model(leaf,"uncommitted-child-turn",deadline).get();});store.commit_agent_worker_read_turn(leaf,"leaf-read",deadline).get();require(store.run_history(leaf.owner_run_id).get().size()==3&&store.run_history(parent).get().size()==1,"Child canonical read stays in its own history");
++    reply(sibling,"sibling-read",{"","","tool_calls","{}",{{"sibling-read-call","read_file",args},{"forbidden-edit","edit_file",args},{"forbidden-process","run_process","{}"},{"forbidden-remote","mcp.fixture.tool","{}"}},"[]"});
++    auto pending=read;pending.run_id=sibling.owner_run_id;pending.attempt_id="sibling-read";pending.call_id="sibling-read-call";store.claim_agent_worker_read(sibling,pending,deadline).get();
++    AgentFileToolInvocation file;file.run_id=sibling.owner_run_id;file.attempt_id="sibling-read";file.call_id="forbidden-edit";file.workspace_id=sibling.workspace_id;file.workspace_revision=7;file.folder_id=sibling.workspace_id;file.tool_name="edit_file";file.arguments_json=args;rejects<Conflict>([&]{store.claim_agent_worker_file(sibling,file,deadline).get();});
++    AgentProcessToolInvocation process;process.run_id=sibling.owner_run_id;process.attempt_id="sibling-read";process.call_id="forbidden-process";process.workspace_id=sibling.workspace_id;process.workspace_revision=7;process.folder_id=sibling.workspace_id;process.tool_name="run_process";process.arguments_json="{}";rejects<Conflict>([&]{store.claim_agent_worker_process(sibling,process,deadline).get();});
++    rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(sibling,"sibling-read",deadline).get();});rejects<Conflict>([&]{store.commit_agent_worker_read_turn(sibling,"sibling-read",deadline).get();});
++    for(unsigned i=0;i<4;++i)reply(named,"named-"+std::to_string(i),{"Named child result","","stop","{}",{},"[]"});rejects<RootBudgetExhausted>([&]{store.reserve_agent_worker_model(named,"named-fifth",deadline).get();});store.complete_agent_worker_run(named,"named-3",deadline).get();
++    reply(leaf,"leaf-final",{"Actual final child result","","stop","{}",{},"[]"});rejects<RootBudgetExhausted>([&]{store.reserve_agent_worker_model(leaf,"root-exhausted",deadline).get();});require(store.complete_agent_worker_run(leaf,"leaf-final",deadline).get().state==RunState::completed,"Sibling unresolved read must not block this leaf's final receipt");
++    require(store.run(parent).get().state==RunState::running&&store.run(sibling.owner_run_id).get().state==RunState::running&&store.root_budget(parent).get().model_calls_reserved==7&&store.root_budget(parent).get().parent_calls_held==1,"Child completion preserves running parent/sibling, charges and held parent continuation");
++    auto stale=sibling;stale.generation="foreign-generation";rejects<NotFound>([&]{store.terminate_agent_worker(stale,RunState::cancelled,"cancelled").get();});store.terminate_agent_worker(sibling,RunState::cancelled,"cancelled").get();require(store.agent_worker_read_claim(parent,"sibling-read","sibling-read-call").get().state=="uncertain"&&store.run(parent).get().state==RunState::running&&store.run_history(leaf.owner_run_id).get().size()==4&&store.root_budget(parent).get().model_calls_reserved==7,"Child cancellation retains read uncertainty and completed sibling history without refund");
++    for(const auto* id:{"worker-leaf","worker-sibling","worker-named"})store.settle_delegation_child(id).get();store.settle_delegation_batch(batch.id).get();
++    std::cout<<"Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch."<<std::endl;
++}
++
+ void queued_start(PersistenceService& store){
+     const std::string id="queued-worker-root";store.create_session(id,"Queued worker fixture").get();store.start_prompt_run(id,id,R"({"content":"Queued ordinary worker"})",RootBudgetSpec{"native.direct-agent",1,"workspace:none",provider,0,0,8,600000}).get();
+     const auto captured=store.admit_agent_worker({"queued-generation",id,id,"workspace:none",1,12345,"134000000000000000","synthetic-queued-image",provider}).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+@@ -299,7 +329,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

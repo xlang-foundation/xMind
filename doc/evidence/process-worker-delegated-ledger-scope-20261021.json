@@ -1,0 +1,123 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:57:23.492Z",
+    "sourceParent": "80d2ee790eef4d3c0ec240f34d4e33d95a1c51b1",
+    "sourcePatchSha256": "cb65e927b700c41d3aad335b2d48aff87fac45d26ad35dd956976566182bd22a",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 43060,
+      "launchedAt": "2026-10-21T13:55:11.208Z",
+      "completedAt": "2026-10-21T13:56:11.026Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "89819021d7bcc3b4989a648c46b3e3b6f2512e2c511e5232cb411842d06feabf"
+    },
+    "test": {
+      "pid": 29080,
+      "launchedAt": "2026-10-21T13:56:14.031Z",
+      "completedAt": "2026-10-21T13:57:20.555Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "be03a5d8bb03fe5d7271f2b2827d670e085ca83c6a1363164ccd060e272c6759"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 66.47,
+    "projectFiles": 2745,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "87f30ca2ed85feeb8971a6c5d975ce197111d935628f57aff59807a07d36aad5",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-build.log": "89819021d7bcc3b4989a648c46b3e3b6f2512e2c511e5232cb411842d06feabf",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-build-terminal.json": "b3a670f79061260b554b8b6c76a1418bde66091331c06373139ce4528d76d327",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-ctest.log": "be03a5d8bb03fe5d7271f2b2827d670e085ca83c6a1363164ccd060e272c6759",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-ctest-terminal.json": "0d4f374dd0c0fffe7e4fe92310c204938e912b507e78b2f0bb84500692534437",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-LastTest.log": "ca5730de7b2b5b92abfb1616fc267e1e39a1462cf8132cdf818f1c8e01a890c1",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-gate.json": "120cb2576fc28faa2ea5875680f1bc297738b0e156f5861599bd7d522804a6b6",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-source.patch": "cb65e927b700c41d3aad335b2d48aff87fac45d26ad35dd956976566182bd22a",
+    "doc/evidence/process-worker-delegated-ledger-scope-20261021-binaries-before-test.json": "fdf5bc92e7dbb0c48abd7850f2f8cace348fb969f1be2d78f56956383aa43a05",
+    "doc/evidence/process-worker-delegated-ledger-20261021-build.log": "d43bae4c71e0f61a8eff1f132e663cbd82521de062d14fa7b69a8e196b45ad81",
+    "doc/evidence/process-worker-delegated-ledger-20261021-build-terminal.json": "974a1d37fc4104fde20c08e2f373c4d94bf343e086cd5c2dcc6215a6a771273a",
+    "doc/evidence/process-worker-delegated-ledger-20261021-ctest.log": "661306e531863974b03ca1e19748e368a4990bcb1fdaf34f8b482d92afea7cd8",
+    "doc/evidence/process-worker-delegated-ledger-20261021-ctest-terminal.json": "4c4c47ab0fdc113870bf876316b0e25764c863cc3acfaf0b7bac7a181fb2400f",
+    "doc/evidence/process-worker-delegated-ledger-20261021-LastTest.log": "affdcc46f38870727430e46f929c1c06fcf3f6bd0f1746e9fa48b283ce2e3d27",
+    "doc/evidence/process-worker-delegated-ledger-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-delegated-ledger-20261021-gate.json": "a67145650b082e7db69fef5a954ad06ea6ee85d92a1fe343097b2dba57b3c7ec",
+    "doc/evidence/process-worker-delegated-ledger-20261021-source.patch": "833bbad23fdbc8ed2d92365d6af4f1522b4757743aba9f37a217109b324c443e",
+    "doc/evidence/process-worker-delegated-ledger-20261021-binaries-before-test.json": "acef37ff0804b4072e9cb4de75879b05eeb66aa16462a2b053197c7a17670bd6"
+  },
+  "failedRuns": [
+    {
+      "name": "process-worker-delegated-ledger-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T13:54:45.413Z",
+        "sourceParent": "80d2ee790eef4d3c0ec240f34d4e33d95a1c51b1",
+        "sourcePatchSha256": "833bbad23fdbc8ed2d92365d6af4f1522b4757743aba9f37a217109b324c443e",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 18964,
+          "launchedAt": "2026-10-21T13:52:26.251Z",
+          "completedAt": "2026-10-21T13:53:34.131Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "d43bae4c71e0f61a8eff1f132e663cbd82521de062d14fa7b69a8e196b45ad81"
+        },
+        "test": {
+          "pid": 16948,
+          "launchedAt": "2026-10-21T13:53:37.137Z",
+          "completedAt": "2026-10-21T13:54:42.585Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "661306e531863974b03ca1e19748e368a4990bcb1fdaf34f8b482d92afea7cd8"
+        },
+        "total": 7,
+        "failed": 1,
+        "passed": 6,
+        "seconds": 65.4,
+        "projectFiles": 2745,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "d8e338db034b9b0d7ad5c892105fd1ddce4a87e353072cb39164360286ce1c50",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "cause": "Malformed lease naming another child as root reached root_budget before ancestry validation; retained fixture inspected with xlang3 SQLite; corrected running-scope validation rejects non-root ancestry before budget lookup"
+    }
+  ],
+  "verified": [
+    "Exact already-admitted workspace.inspect revision-1 delegated children under native.delegation may enroll queued and start once while their actual parent is running",
+    "Child provider identity derives from its immutable admitted named profile; root model substitution and foreign root/workspace/provider are rejected",
+    "Funding charges shared root counters with leaf role and preserves the parent continuation hold; each leaf remains limited to four calls",
+    "Actual backend-captured read result commits only to child history; uncommitted tool turns prevent new funding; file/process claims and coding turns remain forbidden",
+    "A final child receipt completes despite an unresolved sibling read; sibling cancellation retains uncertainty and all seven charged calls, preserving completed child history and running parent",
+    "Seven focused contracts pass with all source/SDK/library/dependency/133-native-binary sets and hashes frozen; existing real worker IPC peer remains at 185 controlled requests"
+  ],
+  "limitations": [
+    "New delegated ledger fixture uses synthetic process identities and model receipts; actual delegated child process launch and journal/runner assembly remain unconnected",
+    "Planning and graph/default placement, full regression and updated installed/rendered/live-provider verification remain open"
+  ],
+  "passed": true
+}

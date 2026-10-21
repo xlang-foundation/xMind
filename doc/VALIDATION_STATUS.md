@@ -1,3 +1,21 @@
+## Delegated worker backend admission and lifecycle — 2026-10-21
+
+The repository now accepts exact admitted read-only delegated child worker
+leases, validates their named model and inherited workspace, starts them once,
+and charges shared root funding with the existing four-turn leaf cap. Canonical
+read turns stay in child history. Child completion ignores unresolved sibling
+reads; cancellation retains uncertainty, charges and completed sibling facts.
+File/process authority and coding turns remain closed to delegated children.
+
+**7/7 focused contracts pass in 66.47 seconds** with complete frozen inputs and
+133 binary sets/hashes; existing controlled worker peer remains at 185 requests.
+The first run failed one malformed-root rejection and is preserved alongside
+the corrected pass. [Scope and raw evidence](evidence/process-worker-delegated-ledger-scope-20261021.json).
+
+The new ledger case uses synthetic process identities/model receipts. Actual
+delegated launch/journal/runner assembly, planning, graph/default placement,
+full regression and updated installed/rendered/live-provider checks remain open.
+
 ## Scoped parent/leaf worker reservation replies — 2026-10-21
 
 The journal client now derives reservation role from its authenticated root/owner
