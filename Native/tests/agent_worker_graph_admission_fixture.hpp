@@ -1,0 +1,23 @@
+#pragma once
+// Repository boundary only: synthetic process identities, no process launch.
+void graph_worker_admission(PersistenceService& store){
+    const std::string root_id="graph-worker-root",selected=R"({"wire":"chat-completions","model_id":"graph-worker-selected"})";
+    const GraphPlan plan(R"({"nodes":[{"id":"one","type":"agent","model_id":"graph-worker-selected","prompt":"First graph agent"},{"id":"two","type":"agent","prompt":"Second graph agent"},{"id":"read","type":"tool","tool":"read_file","arguments":{"path":"actual.txt"}}]})");
+    GraphContextSpec context{context_digest("synthetic graph backend"),{{"one","graph-worker-selected",selected,context_digest("synthetic first node"),4},{"two","worker-fixture-model",provider,context_digest("synthetic second node"),4}}};
+    store.create_session(root_id,"Synthetic graph worker admission").get();WorkspaceMembershipSnapshot membership{"worker-fixture-workspace",7,{{"worker-fixture-workspace","C:/synthetic-graph-workspace"}}};
+    store.start_graph_run(root_id,root_id,"worker.graph",1,plan,R"({"content":"Synthetic graph worker boundary"})",RootBudgetSpec{"native.graph-context",1,membership.workspace_id,provider,8,2,32,600000},context,membership).get();
+    store.open_graph_context_owner({root_id,"graph-worker-segment",context.backend_identity,store.graph_run(root_id).get().checkpoint_revision,store.root_budget(root_id).get().revision}).get();
+    std::string captured;for(const auto& event:store.events(root_id).get())if(event.kind=="agent.workspace_membership")captured=event.json;
+    auto child=[&](const std::string& id,const std::string& node){store.start_graph_child(id,root_id,node,R"({"content":"Admitted graph objective"})",store.graph_run(root_id).get().checkpoint_revision).get();store.append_event(id,"agent.workspace_membership",captured).get();auto value=lease(id,id+"-generation");value.root_run_id=root_id;if(node=="one")value.provider_identity_json=selected;return value;};
+    auto one=child("graph-worker-one","one"),two=child("graph-worker-two","two"),tool=child("graph-worker-tool","read");
+    rejects<Conflict>([&]{store.admit_agent_worker(tool).get();});auto substitution=one;substitution.provider_identity_json=provider;rejects<Conflict>([&]{store.admit_agent_worker(substitution).get();});substitution=one;substitution.root_run_id=one.owner_run_id;rejects<Conflict>([&]{store.admit_agent_worker(substitution).get();});
+    // Membership must remain byte-equivalent JSON to the root snapshot.
+    auto stale=two;++stale.workspace_revision;rejects<Conflict>([&]{store.admit_agent_worker(stale).get();});
+    const auto deadline=std::chrono::steady_clock::now()+10s;
+    for(auto* owner:{&one,&two}){*owner=store.admit_agent_worker(*owner).get().spec;store.start_agent_worker_run(*owner,deadline).get();require(std::get<Run>(store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::run,owner->owner_run_id}).get()).state==RunState::running,"Graph worker may read its own started owner");rejects<Conflict>([&]{store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::history,owner==&one?two.owner_run_id:one.owner_run_id}).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(*owner,"untyped-graph-attempt",deadline).get();});}
+    require(store.root_budget(root_id).get().model_calls_reserved==0,"Graph worker enrollment cannot bypass typed graph-context funding");
+    for(const auto* owner:{&one,&two}){store.terminate_agent_worker(*owner,RunState::cancelled,"cancelled").get();store.settle_graph_child(owner->owner_run_id).get();rejects<Conflict>([&]{store.validate_agent_worker_model_window(*owner,deadline).get();});}
+    store.transition(tool.owner_run_id,RunState::queued,RunState::cancelled).get();store.settle_graph_child(tool.owner_run_id).get();store.retire_graph_context_owner(root_id,RunState::cancelled,R"({"reason":"synthetic graph admission fixture done"})","graph-worker-segment",1).get();
+    require(store.root_budget(root_id).get().model_calls_reserved==0&&store.run(root_id).get().state==RunState::cancelled,"Graph metadata admission and drain cannot create model charges");
+    std::cout<<"Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch."<<std::endl;
+}

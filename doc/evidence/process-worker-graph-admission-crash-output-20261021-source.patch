@@ -1,0 +1,121 @@
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 60b8b700..c558ce81 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -23,6 +23,7 @@ using Json=nlohmann::json;
+ bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context"||policy=="native.delegation";}
+ Json worker_provider_identity(Repository&,const std::string&,const std::string&);
+ bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
++bool worker_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
+ bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
+ void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
+ std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
+@@ -3367,8 +3368,18 @@ AgentWorkerModelClaimSpec worker_process_authority(Repository& repository,XlangS
+ Json worker_provider_identity(Repository& repository,const std::string& root,const std::string& owner){
+     const auto budget=repository.root_budget(root);auto provider=Json::parse(budget.spec.provider_identity_json);
+     if(root!=owner){const auto admitted=repository.child_admission(owner);if(admitted.kind==ChildAdmissionKind::delegated_leaf){if(admitted.root_run_id!=root)throw Conflict("Delegated model identity belongs to another root");const auto history=repository.run_history(owner);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}}
++    if(root!=owner){const auto admitted=repository.child_admission(owner);if(admitted.kind==ChildAdmissionKind::graph_agent){if(admitted.root_run_id!=root)throw Conflict("Graph worker model belongs to another root");const auto capture=repository.graph_context_owner(root);const auto found=std::find_if(capture.authority.agents.begin(),capture.authority.agents.end(),[&](const auto& value){return value.node_id==admitted.graph_node_path;});if(found==capture.authority.agents.end())throw Conflict("Graph worker lacks captured node authority");provider=Json::parse(found->provider_identity_json);}}
+     return provider;
+ }
++bool worker_graph_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
++    if(lease.owner_run_id==lease.root_run_id)return false;
++    const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);const auto budget=repository.root_budget(root.id);
++    if(!root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.session_id!=root.session_id||budget.spec.policy_id!="native.graph-context"||budget.spec.policy_revision!=1)return false;
++    const auto admission=repository.child_admission(owner.id);if(admission.kind!=ChildAdmissionKind::graph_agent||admission.root_run_id!=root.id)return false;
++    auto ancestor=repository.run(owner.parent_id);for(unsigned depth=0;ancestor.id!=root.id;++depth){if(depth>=4||!ancestor.graph_root||ancestor.state!=RunState::running||ancestor.parent_id.empty()||ancestor.session_id!=root.session_id)return false;ancestor=repository.run(ancestor.parent_id);}
++    const auto capture=repository.graph_context_owner(root.id);if(!capture.segment||capture.segment->state!="open")return false;
++    return std::any_of(capture.authority.agents.begin(),capture.authority.agents.end(),[&](const auto& node){return node.node_id==admission.graph_node_path&&Json::parse(node.provider_identity_json)==Json::parse(lease.provider_identity_json);});
++}
+ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
+     if(lease.owner_run_id==lease.root_run_id)return false;
+     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
+@@ -3378,17 +3389,17 @@ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& l
+     return admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.root_run_id==root.id&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1&&repository.delegation_batch(admitted.batch_id).state=="accepted";
+ }
+ bool worker_agent_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
+-    return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):worker_delegated_owner(repository,lease);
++    return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):(worker_delegated_owner(repository,lease)||worker_graph_owner(repository,lease));
+ }
+ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
+     const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");const auto budget=repository.root_budget(spec.root_run_id);
+-    const bool delegated=worker_delegated_owner(repository,spec);
+-    const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||(delegated&&root.state==RunState::running));
+-    const auto provider=delegated?worker_provider_identity(repository,spec.root_run_id,spec.owner_run_id):Json::parse(budget.spec.provider_identity_json);
++    const bool delegated=worker_delegated_owner(repository,spec),graph=worker_graph_owner(repository,spec);
++    const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||((delegated||graph)&&root.state==RunState::running));
++    const auto provider=(delegated||graph)?worker_provider_identity(repository,spec.root_run_id,spec.owner_run_id):Json::parse(budget.spec.provider_identity_json);
+     if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||provider!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
+     if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
+     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;
+-    if(delegated){const auto parent_membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.root_run_id}).rows;if(parent_membership.empty()!=membership.empty()||(!membership.empty()&&Json::parse(text(parent_membership[0][0]))!=Json::parse(text(membership[0][0]))))throw Conflict("Delegated worker membership differs from its captured parent");}
++    if(delegated||graph){const auto parent_membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.root_run_id}).rows;if(parent_membership.empty()!=membership.empty()||(!membership.empty()&&Json::parse(text(parent_membership[0][0]))!=Json::parse(text(membership[0][0]))))throw Conflict("Child worker membership differs from its captured root");}
+     if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
+     else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
+ }
+diff --git a/Native/tests/agent_worker_graph_admission_fixture.hpp b/Native/tests/agent_worker_graph_admission_fixture.hpp
+new file mode 100644
+index 00000000..530b56cd
+--- /dev/null
++++ b/Native/tests/agent_worker_graph_admission_fixture.hpp
+@@ -0,0 +1,23 @@
++#pragma once
++// Repository boundary only: synthetic process identities, no process launch.
++void graph_worker_admission(PersistenceService& store){
++    const std::string root_id="graph-worker-root",selected=R"({"wire":"chat-completions","model_id":"graph-worker-selected"})";
++    const GraphPlan plan(R"({"nodes":[{"id":"one","type":"agent","model_id":"graph-worker-selected","prompt":"First graph agent"},{"id":"two","type":"agent","prompt":"Second graph agent"},{"id":"read","type":"tool","tool":"read_file","arguments":{"path":"actual.txt"}}]})");
++    GraphContextSpec context{context_digest("synthetic graph backend"),{{"one","graph-worker-selected",selected,context_digest("synthetic first node"),4},{"two","worker-fixture-model",provider,context_digest("synthetic second node"),4}}};
++    store.create_session(root_id,"Synthetic graph worker admission").get();WorkspaceMembershipSnapshot membership{"worker-fixture-workspace",7,{{"worker-fixture-workspace","C:/synthetic-graph-workspace"}}};
++    store.start_graph_run(root_id,root_id,"worker.graph",1,plan,R"({"content":"Synthetic graph worker boundary"})",RootBudgetSpec{"native.graph-context",1,membership.workspace_id,provider,8,2,32,600000},context,membership).get();
++    store.open_graph_context_owner({root_id,"graph-worker-segment",context.backend_identity,store.graph_run(root_id).get().checkpoint_revision,store.root_budget(root_id).get().revision}).get();
++    std::string captured;for(const auto& event:store.events(root_id).get())if(event.kind=="agent.workspace_membership")captured=event.json;
++    auto child=[&](const std::string& id,const std::string& node){store.start_graph_child(id,root_id,node,R"({"content":"Admitted graph objective"})",store.graph_run(root_id).get().checkpoint_revision).get();store.append_event(id,"agent.workspace_membership",captured).get();auto value=lease(id,id+"-generation");value.root_run_id=root_id;if(node=="one")value.provider_identity_json=selected;return value;};
++    auto one=child("graph-worker-one","one"),two=child("graph-worker-two","two"),tool=child("graph-worker-tool","read");
++    rejects<Conflict>([&]{store.admit_agent_worker(tool).get();});auto substitution=one;substitution.provider_identity_json=provider;rejects<Conflict>([&]{store.admit_agent_worker(substitution).get();});substitution=one;substitution.root_run_id=one.owner_run_id;rejects<Conflict>([&]{store.admit_agent_worker(substitution).get();});
++    // Membership must remain byte-equivalent JSON to the root snapshot.
++    auto stale=two;++stale.workspace_revision;rejects<Conflict>([&]{store.admit_agent_worker(stale).get();});
++    const auto deadline=std::chrono::steady_clock::now()+10s;
++    for(auto* owner:{&one,&two}){*owner=store.admit_agent_worker(*owner).get().spec;store.start_agent_worker_run(*owner,deadline).get();require(std::get<Run>(store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::run,owner->owner_run_id}).get()).state==RunState::running,"Graph worker may read its own started owner");rejects<Conflict>([&]{store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::history,owner==&one?two.owner_run_id:one.owner_run_id}).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(*owner,"untyped-graph-attempt",deadline).get();});}
++    require(store.root_budget(root_id).get().model_calls_reserved==0,"Graph worker enrollment cannot bypass typed graph-context funding");
++    for(const auto* owner:{&one,&two}){store.terminate_agent_worker(*owner,RunState::cancelled,"cancelled").get();store.settle_graph_child(owner->owner_run_id).get();rejects<Conflict>([&]{store.validate_agent_worker_model_window(*owner,deadline).get();});}
++    store.transition(tool.owner_run_id,RunState::queued,RunState::cancelled).get();store.settle_graph_child(tool.owner_run_id).get();store.retire_graph_context_owner(root_id,RunState::cancelled,R"({"reason":"synthetic graph admission fixture done"})","graph-worker-segment",1).get();
++    require(store.root_budget(root_id).get().model_calls_reserved==0&&store.run(root_id).get().state==RunState::cancelled,"Graph metadata admission and drain cannot create model charges");
++    std::cout<<"Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch."<<std::endl;
++}
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 7fcf83dd..7f7ace1b 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -7,6 +7,7 @@
+ #include "agentflow/persistence_service.hpp"
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "nlohmann/json.hpp"
++#include "agentflow/graph.hpp"
+ #include <filesystem>
+ #include <algorithm>
+ #include <future>
+@@ -327,10 +328,11 @@ void completion_receipts(PersistenceService& store){
+     store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.finish_agent_worker_model(admitted,"receipt-final",deadline).get();});
+ }
+ 
++#include "agent_worker_graph_admission_fixture.hpp"
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 5cfaafbf..8172571b 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -242,7 +242,7 @@ const server=createServer((request,response)=>{
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+- const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
++ const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(error.stdout)process.stdout.write(error.stdout);if(error.stderr)process.stderr.write(error.stderr);if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('parent-child-left')&&aborted.has('parent-child-right'));assert.ok(aborted.has("worker_context_count_cancel")&&aborted.has("worker_context_inference_cancel")&&aborted.has("worker_context_compact_cancel"));assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+  process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly two hundred nineteen requests: six counted parent/child inference requests and six token counts, five unrecorded-parent-result requests, five mixed-outcome parent/child requests, three cancelled parent/child requests, three rejected-delegation parent requests, six parent/child IPC orchestration requests, four completed read windows, six counts and two failed/cancelled compactions, two single-rebuild context cases with eight inference attempts, ten counts and two compactions, four failed/cancelled token counts and two failed/cancelled inference requests, five counted context inference windows plus six native token counts and one compaction, eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

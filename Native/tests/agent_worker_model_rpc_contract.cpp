@@ -11,6 +11,7 @@
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
+#include "agent_worker_crash_fixture.hpp"
 #include <atomic>
 #include <algorithm>
 #include <array>
@@ -258,7 +259,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
     if(store.agent_worker_lease(generation).get().state=="active")store.retire_agent_worker(generation,mode=="normal"?"completed":mode=="cancel"?"cancelled":"worker_exit").get();require(store.root_budget(id).get().model_calls_reserved==(mode=="normal"?8:1),"RPC cancellation/crash/delivery must never refund charged model allowance");
 }
 }
-int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc!=4)return 2;values_contract();auto image=ForegroundProcess::bind_executable(executable());duplicate_rpc(image);std::random_device random;std::filesystem::path folder;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-model-rpc-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create private model RPC fixture");{
+int main(int argc,char** argv){worker_crash_fixture::install();try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc!=4)return 2;values_contract();auto image=ForegroundProcess::bind_executable(executable());duplicate_rpc(image);std::random_device random;std::filesystem::path folder;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-model-rpc-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create private model RPC fixture");{
     {PersistenceService initialize((folder/"state.sqlite").string(),{argv[1],argv[2]});initialize.close();}
     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}

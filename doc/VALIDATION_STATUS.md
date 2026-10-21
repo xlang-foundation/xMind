@@ -1,3 +1,19 @@
+## Graph worker admission boundary — 2026-10-21
+
+Repository admission now binds graph-agent workers to their captured node model,
+open native.graph-context segment, running graph ancestry and exact root workspace
+snapshot. Synthetic ledger checks reject tool nodes, substitutions, sibling history
+and untyped model funding. **9/9 focused contracts pass in 77.19 seconds**, including
+the existing 219-request actual parent/delegated worker scope. Graph runner IPC
+dispatch is still unfinished; this is a repository boundary checkpoint.
+
+**Unresolved:** an earlier model RPC run exited 0xC0000005 after parent delegation
+admitted two queued children, before their leases. Two later focused gates pass;
+that does not prove a fix. Added full failure output and test-only fatal module/offset
+diagnostics. All failures and the embedded-xlang3 ledger audit are preserved.
+[Scope and raw evidence](evidence/process-worker-graph-admission-fatal-diagnostic-20261021.json).
+The full 162-test pass below predates this patch; current full acceptance is unproven.
+
 ## Parent IPC complete native regression — 2026-10-21
 
 **162/162 native contracts pass in 1235.49 seconds** on committed

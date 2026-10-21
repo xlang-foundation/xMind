@@ -7,6 +7,7 @@
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
+#include "agentflow/graph.hpp"
 #include <filesystem>
 #include <algorithm>
 #include <future>
@@ -327,10 +328,11 @@ void completion_receipts(PersistenceService& store){
     store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.finish_agent_worker_model(admitted,"receipt-final",deadline).get();});
 }
 
+#include "agent_worker_graph_admission_fixture.hpp"
 void ledger(const std::string& path,const std::vector<std::string>& imports){
     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
     {
-        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
