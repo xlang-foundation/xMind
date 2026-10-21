@@ -407,6 +407,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     auto execution_settings=settings_;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
     if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
     const auto admitted=journal_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
+    if(!read_workspace_){
+        const auto history=journal_.run_history(id).get();
+        if(!history.empty()&&history.front().role=="user"){
+            const auto prompt=Json::parse(history.front().json);
+            if(prompt.contains("agent_profile")&&prompt["agent_profile"].is_object()&&prompt["agent_profile"].contains("placement")&&prompt["agent_profile"]["placement"]=="process")
+                throw std::invalid_argument("Pinned process placement requires its owning worker executor");
+        }
+    }
     if(read_workspace_&&!admitted.parent_id.empty())throw std::invalid_argument("Read workspace child admission is not implemented");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){

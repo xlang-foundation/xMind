@@ -11,7 +11,7 @@ public:
         RepositoryInstructionContext& instructions,std::string endpoint,Clock::time_point until)
         :store(value),image(std::move(bound)),workspace(files),guidance(instructions),endpoint(std::move(endpoint)),deadline(until){}
     void validate(const AgentRootExecutionRequest& request)const override{
-        if(request.model_id!="worker-rpc-fixture"||request.agent_instructions!="Captured service agent."||!request.agent_tools||!request.agent_tools->empty()||!request.agent_permissions.empty()||!request.workspace||request.workspace->workspace_id!=workspace.identity()||request.workspace->revision<1||request.workspace->folders.empty()||request.workspace->folders.front().root!=workspace.root_path())throw std::invalid_argument("Unsupported controlled worker service admission");
+        if(request.placement!="process"||request.model_id!="worker-rpc-fixture"||request.agent_instructions!="Captured service agent."||!request.agent_tools||!request.agent_tools->empty()||!request.agent_permissions.empty()||!request.workspace||request.workspace->workspace_id!=workspace.identity()||request.workspace->revision<1||request.workspace->folders.empty()||request.workspace->folders.front().root!=workspace.root_path())throw std::invalid_argument("Unsupported controlled worker service admission");
     }
     Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{
         validate(request);++executions;
@@ -56,7 +56,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     WorkspaceMembershipSnapshot current_membership{workspace.identity(),7,{{workspace.identity(),workspace.root_path()}}};
     settings.workspace_membership_snapshot=[&]{std::lock_guard lock(membership_mutex);++membership_reads;return current_membership;};
     const auto executor=std::make_shared<Executor>(store,image,workspace,guidance,endpoint,Clock::now()+20s);
-    const auto catalog=AgentDefinitionStore(store).apply("agents:\n  - id: service.worker.good\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: []\n  - id: service.worker.unsupported\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: [read_file]\n");
+    const auto catalog=AgentDefinitionStore(store).apply("agents:\n  - id: service.worker.good\n    mode: primary\n    placement: process\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: []\n  - id: service.worker.unsupported\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: [read_file]\n");
     const std::string session="rpc-service-supervised-session",id="rpc-product_service";store.create_session(session,"Actual service-owned native worker").get();
     const auto pool=std::make_shared<RootAdmissionPool>(3,1,true);
     executor->hold_drain=true;
@@ -76,9 +76,11 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     service.submit(id,session,"Native child model RPC product_service.");
     check(membership_reads==reads_before+1&&executor->executions==0,"Service must capture membership once before dispatch while its root is queued");
     {std::lock_guard lock(membership_mutex);current_membership.revision=8;current_membership.folders.push_back({"later-folder",folder.string()});}
+    AgentDefinitionStore(store).apply("agents:\n  - id: service.worker.good\n    mode: primary\n    placement: thread\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: []\n  - id: service.worker.unsupported\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: [read_file]\n");
     release_admission=true;blocker->result().get();
     const auto held_until=Clock::now()+5s;while(Clock::now()<held_until&&!executor->canonical_ready)std::this_thread::sleep_for(5ms);
     check(executor->canonical_ready&&store.run(id).get().state==RunState::completed&&!service.idle()&&pool->executor()->running()==1&&!executor->drained,"Canonical completion must retain the shared physical slot and service ownership before child drain");
+    check(store.session_agent(session).get().selected->placement=="process"&&Json::parse(store.run_history(id).get().front().json).at("agent_profile").at("placement")=="process"&&AgentDefinitionStore(store).load().entries.front().placement=="thread","Queued placement must retain its admitted process snapshot despite a later thread catalogue revision");
     check(executor->captured_revision==7&&membership_reads==reads_before+1,"Dispatch must use immutable admitted membership, never recapture the changed callback");
     const auto captured_events=store.events(id).get();const auto snapshot=std::find_if(captured_events.begin(),captured_events.end(),[](const Event& event){return event.kind=="agent.workspace_membership";});
     check(snapshot!=captured_events.end()&&Json::parse(snapshot->json).at("revision")==7&&Json::parse(snapshot->json).at("folders").size()==1,"Actual worker lease and request context must retain the admitted folder set");
@@ -97,6 +99,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     std::cout<<"AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle."<<std::endl;
     check(next_started&&pool->executor()->running()==0,"Shared executor must retire both physical actions");
     std::cout<<"AgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain."<<std::endl;
+    std::cout<<"AgentService queued placement verified: catalogue changed process to thread while queued; pinned prompt and job still dispatched one actual process child."<<std::endl;
     std::cout<<"AgentService immutable workspace capture verified: one admission snapshot, queued callback changed to revision eight, actual child retained revision seven and its exact original folder set."<<std::endl;
 }
 }

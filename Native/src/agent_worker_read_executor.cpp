@@ -43,7 +43,7 @@ public:
         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
     }
     void validate(const AgentRootExecutionRequest& request)const override{
-        if(request.placement=="thread")throw std::invalid_argument("Thread placement cannot enter a process worker executor");
+        if(!request.placement.empty()&&request.placement!="process")throw std::invalid_argument("Only process placement can enter a process worker executor");
         const auto selected=model(request);const auto models=validator_->models();
         if(!bounded(selected,256)||(!settings_.provider_identity&&std::find(models.begin(),models.end(),selected)==models.end()))throw std::invalid_argument("Worker model is not configured");
         if(request.agent_instructions.size()>32768||request.agent_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid worker agent instructions");
@@ -58,6 +58,10 @@ public:
         const auto deadline=Clock::now()+settings_.run_timeout;validate(request);
         const auto admitted=store_.run(request.run_id).get();
         if(admitted.graph_root||!admitted.parent_id.empty()||admitted.state!=RunState::queued)throw Conflict("Worker execution requires a fresh ordinary queued root");
+        const auto history=store_.run_history(request.run_id).get();
+        if(history.empty()||history.front().role!="user")throw Conflict("Worker root has no admitted prompt");
+        const auto prompt=Json::parse(history.front().json);
+        if(prompt.contains("agent_profile")&&prompt["agent_profile"].is_object()&&prompt["agent_profile"].contains("placement")&&prompt["agent_profile"]["placement"]!=request.placement)throw Conflict("Worker placement differs from its admitted prompt");
         const auto budget=store_.root_budget(request.run_id).get();const auto expected=*validator_->execution_budget(model(request));
         if(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0)throw Conflict("Worker root differs from immutable admission or was already executed");
         if(cancel.stop_requested())return store_.transition(request.run_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();

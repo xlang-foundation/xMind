@@ -1,3 +1,20 @@
+## Placement ownership and queued snapshots — 2026-10-20
+
+The low-level local AgentRunner now rejects a persisted process-placement root
+before execution. The production worker executor rejects unknown placement and
+request/prompt mismatch. Negative fixtures retain queued state, the actual prompt,
+zero model charge and no worker lease. A queued service fixture changes its
+catalog from process to thread while physical capacity is occupied; the pinned
+session, durable prompt and dispatch job still execute one actual process child.
+Existing immutable workspace and exact physical retirement checks continue to pass.
+The serial build and 55 focused contracts pass in 161.80 seconds with all frozen
+inputs and native binary sets unchanged.
+[Raw evidence](evidence/agent-placement-ownership-focused-20261020.json).
+
+Crash/shutdown/recovery, broader worker adapters and managed-profile mode remain
+open. Complete current-source native inventory qualification remains separate
+from this focused result; no new installed or live-provider acceptance is claimed.
+
 ## Standalone read-worker server entry — 2026-10-20
 
 `xmind serve --agent-execution process-read` now constructs the production

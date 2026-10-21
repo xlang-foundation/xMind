@@ -49,5 +49,8 @@ The [native qualification](evidence/agent-placement-focused-20261020.json) cover
 actual explicit process and thread roots, missing-owner rejection and persisted
 session pins. [Client qualification](evidence/agent-placement-client-validation-20261020.json)
 covers the metadata validator and selector DOM through separate Node suites.
-Explicit queued placement, recovery and low-level runner enforcement need further
-qualification; no new full-suite or installed acceptance is claimed.
+[Ownership qualification](evidence/agent-placement-ownership-focused-20261020.json)
+also covers a catalog change while a process root waits queued, the local runner's
+rejection of inline process execution, and worker request/prompt placement mismatch.
+Recovery and shutdown remain open; no new full-suite or installed acceptance is
+claimed.
