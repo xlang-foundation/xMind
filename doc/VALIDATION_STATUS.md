@@ -1,3 +1,21 @@
+## Worker compaction failure and cancellation — 2026-10-21
+
+Actual unified xmind workers now verify compaction failure and cancellation
+after two completed reads. Cancellation waits for the independent HTTP peer to
+observe the actual request. Both outcomes preserve original five-message
+history and two successful typed inference groups, retire the undelivered
+follow-up and failed maintenance, retain four charges and publish no checkpoint.
+Embedded xlang3 SQLite proves no active context ownership; children retire.
+
+**7/7 focused contracts pass in 66.08 seconds**, with 185 controlled requests
+and complete source/SDK/library/dependency/133-binary sets/hashes frozen.
+The executable is unchanged from the overflow checkpoint.
+[Scope and raw evidence](evidence/process-worker-context-maintenance-failures-20261021.json).
+
+Broader/full regression, further rebuild/unrecorded-outcome controls,
+delegation/planning, graph/default placement and final installed/rendered/
+live-provider acceptance remain open.
+
 ## One-shot worker context overflow recovery — 2026-10-21
 
 A captured backend context_length_exceeded rejection before output now retains

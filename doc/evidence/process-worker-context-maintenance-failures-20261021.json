@@ -1,0 +1,68 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:27:27.001Z",
+    "sourceParent": "fa92a4d7e19347d32336cfea538dd56804bf362f",
+    "sourcePatchSha256": "6a66b650a6f0a11c73ed527a4c0180cdbb4b38f94297272435511f47bb0a34e5",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 29192,
+      "launchedAt": "2026-10-21T13:25:19.323Z",
+      "completedAt": "2026-10-21T13:26:14.773Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e42bc4ba2411a069d34624dfce44d72288950c283c2db465c9d2f958630d1da0"
+    },
+    "test": {
+      "pid": 69832,
+      "launchedAt": "2026-10-21T13:26:17.936Z",
+      "completedAt": "2026-10-21T13:27:24.099Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fe394cb388a0f513a6cc97f83e80ae307357f5a2de2997dd8f06583ba3eb8ff1"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 66.08,
+    "projectFiles": 2744,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e66cb6dfa85498632329e4449b732c002aad877896bbaa78c7bca9212f4cc928",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-build.log": "e42bc4ba2411a069d34624dfce44d72288950c283c2db465c9d2f958630d1da0",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-build-terminal.json": "09f8b6c91b8f4c1523ee8d003a29fccd120c574f89553ca42f3eb6b083a68485",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-ctest.log": "fe394cb388a0f513a6cc97f83e80ae307357f5a2de2997dd8f06583ba3eb8ff1",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-ctest-terminal.json": "78d3e2479c9063fd73a05ae9d76deed24a7022ff27cdda33052380275a126daf",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-LastTest.log": "08a74074f198b9530124446d8a2005bac36d69e48d21b4c05d0476e80cf1bbc6",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-gate.json": "1c9f4c5c7597858feedeeacd33cf037e671a9e5d68eb33b2db53ba140430f677",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-source.patch": "6a66b650a6f0a11c73ed527a4c0180cdbb4b38f94297272435511f47bb0a34e5",
+    "doc/evidence/process-worker-context-maintenance-failures-20261021-binaries-before-test.json": "5cc6571e3fc5684763030a66039d2148b192888ca205d1fd388d9b1fed02f77f"
+  },
+  "verified": [
+    "Actual unified xmind worker completes two read turns before forced compaction fails or is controller-cancelled",
+    "Cancellation waits for independent HTTP peer observation of the actual compaction request; peer observes transport abort",
+    "Both cases preserve five original messages and two successful typed inference groups, retire the undelivered follow-up and failed maintenance, retain four charges and publish no canonical checkpoint",
+    "Embedded xlang3 SQLite proves no active count, compaction or inference ownership and no interruption of prior completed facts; actual children physically retire",
+    "All existing counted/compacted context, overflow, repeated overflow, count/inference failure/cancellation and other worker fixtures remain covered; independent peer observes 185 requests",
+    "Seven focused contracts pass with frozen source/SDK/library/dependency/133-binary sets; product executable unchanged from overflow checkpoint"
+  ],
+  "limitations": [
+    "Broader/full regression, updated installation, rendered and live-provider acceptance remain open",
+    "Additional malformed/foreign/repeated rebuild and unrecorded context outcomes still require verification",
+    "Delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}
