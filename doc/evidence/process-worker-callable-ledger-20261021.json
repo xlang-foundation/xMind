@@ -1,0 +1,71 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T11:16:00.336Z",
+    "sourceParent": "16a28c5096688e468a8029bcfb2a02c90db43879",
+    "sourcePatchSha256": "74b432d61ef75828e524c3d76efd698906faa98dea0c60231f84ee01ae21c990",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 61524,
+      "launchedAt": "2026-10-21T11:10:15.232Z",
+      "completedAt": "2026-10-21T11:15:49.609Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ab3b46ccade8cb96f297284e072f67f2f6443064796da32fd5fb7b17a9f618bf"
+    },
+    "test": {
+      "pid": 13296,
+      "launchedAt": "2026-10-21T11:15:53.018Z",
+      "completedAt": "2026-10-21T11:15:57.405Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1eee960ceefc4a3348d946623fa233af0561175013f822d32482178ac17ed399"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 4.33,
+    "projectFiles": 2733,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "bda03affe39f56297501a5cbb2f27df7f4504a9a2c8bf27bb3f0ccc681fc86a9",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-callable-ledger-20261021-build.log": "ab3b46ccade8cb96f297284e072f67f2f6443064796da32fd5fb7b17a9f618bf",
+    "doc/evidence/process-worker-callable-ledger-20261021-build-terminal.json": "ae4d3bbf46bf8465429163a45e2ed40bd7d37f7adf4c5ab224d40103ad5eb192",
+    "doc/evidence/process-worker-callable-ledger-20261021-ctest.log": "1eee960ceefc4a3348d946623fa233af0561175013f822d32482178ac17ed399",
+    "doc/evidence/process-worker-callable-ledger-20261021-ctest-terminal.json": "6ab1178a86d93322526efd2853cd64b719a938f515430cdacaddb95410592c1d",
+    "doc/evidence/process-worker-callable-ledger-20261021-LastTest.log": "4853faea028e44733261136d69c0b07172d09929fbf1d8cd4432057f98a44ada",
+    "doc/evidence/process-worker-callable-ledger-20261021-test-inventory.json": "726e14600f02cad78da5df39cfc465d4c86ac254927562e2820e71d2d5dbe053",
+    "doc/evidence/process-worker-callable-ledger-20261021-gate.json": "c172a3c21c998f92442b0b97926669e141fd09fd6cb7b48091886f2f22e07397",
+    "doc/evidence/process-worker-callable-ledger-20261021-source.patch": "74b432d61ef75828e524c3d76efd698906faa98dea0c60231f84ee01ae21c990",
+    "doc/evidence/process-worker-callable-ledger-20261021-binaries-before-test.json": "f99b7c7bfe5d3038fc8678ef1f1013f316560662f7f52e9a6dfe08f642037c6e"
+  },
+  "verified": [
+    "Strict nine-field owned callable codec retains opaque Unicode IDs and exact arguments; rejects authority fields, duplicate fields, invalid ordinals and over-limit arguments",
+    "Typed callable claims bind the latest fully finished backend model receipt, actual call name/arguments/ordinal and exact native worker lease",
+    "Native effect claim requires the exact executing xlang3_tool operation, workspace, registered alias and actual approved arguments; private operation binding is unique and immutable",
+    "Concurrent duplicate claims admit once; native effect binding and events roll back atomically after injected SQLite failure",
+    "Exact result is write-once and idempotent; missing/unresolved native effects cannot be acknowledged as success",
+    "Retirement retains entered and awaiting claims as uncertain; a replacement generation cannot replay them; late actual result remains recordable",
+    "SQLite reopen retains exact acknowledged and uncertain callable claims; session/configuration mutation and completion guard active callable ownership",
+    "Two focused native contracts pass with source/SDK/library/dependency/native binary file sets frozen"
+  ],
+  "limitations": [
+    "Ledger model and native-operation IDs are explicit synthetic fixtures; actual xlang3 authority effects have separate prior coverage",
+    "Canonical callable activity/tool-turn integration, callable native worker host/RPC and production factory remain unfinished",
+    "The focused build does not qualify the unchanged older xmind.exe for new callable ledger behavior",
+    "No new broader/full regression, installation, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

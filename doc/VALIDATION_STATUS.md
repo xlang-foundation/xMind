@@ -1,3 +1,25 @@
+## Durable callable worker claims — 2026-10-21
+
+Typed callable claims bind the latest finished model response, exact invocation
+and ordinal to one executing approved xlang3_tool operation. Private immutable
+bindings reject duplicate effects; writes/events roll back on persistence
+failure. Exact results are write-once and idempotent. Retirement retains
+entered/awaiting calls as uncertain, replacement generations cannot replay them
+and late actual receipts remain recordable. SQLite reopen preserves outcomes.
+Session/configuration and completion guards include callable ownership.
+
+The callable codec reuses the strict nine-field value format with its own
+256 KiB argument bound and rejects caller authority, duplicate fields and
+invalid ordinals. **2/2 focused contracts pass in 4.33 seconds**, with 2733
+project inputs and SDK/library/dependency/133-binary file sets/hashes frozen.
+[Scope, patches and raw evidence](evidence/process-worker-callable-ledger-20261021.json).
+
+Model/native-operation ledger identities are synthetic. Canonical callable
+turns, native worker host/RPC and factory remain unfinished. This build does
+not qualify its unchanged older xmind.exe for the new ledger. Broader/full
+regression, remaining capabilities, installation and fresh rendered/live-
+provider acceptance remain open.
+
 ## Trusted callable pre-effect authority — 2026-10-21
 
 The native callable owner now accepts backend-only live authority after approval

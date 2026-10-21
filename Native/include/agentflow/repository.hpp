@@ -220,10 +220,15 @@ public:
     AgentWorkerProcessClaimRecord record_agent_worker_process_result(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerProcessClaimRecord agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerRemoteClaimRecord claim_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+    AgentWorkerCallableClaimRecord claim_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);
     AgentWorkerRemoteClaimRecord start_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+    AgentWorkerCallableClaimRecord start_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);
     AgentWorkerRemoteClaimRecord claim_agent_worker_remote_effect(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&,const std::string& operation_id);
+    AgentWorkerCallableClaimRecord claim_agent_worker_callable_effect(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&,const std::string& operation_id);
     AgentWorkerRemoteClaimRecord record_agent_worker_remote_result(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&,bool success,const std::string& actual_output_json);
+    AgentWorkerCallableClaimRecord record_agent_worker_callable_result(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerRemoteClaimRecord agent_worker_remote_claim(const std::string& root,const std::string& attempt,const std::string& call);
+    AgentWorkerCallableClaimRecord agent_worker_callable_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
     // Backend coding admission only; results come from captured read/file claims.
     AgentWorkerToolTurnRecord commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);

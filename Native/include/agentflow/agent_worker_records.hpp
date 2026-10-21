@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/agent_callable_tool_host.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -73,6 +74,15 @@ struct AgentWorkerProcessClaimRecord {
 struct AgentWorkerRemoteClaimRecord {
     AgentWorkerModelClaimSpec model;
     AgentRemoteToolInvocation invocation;
+    std::string state;
+    std::vector<std::string> operation_ids;
+    bool success=false;
+    std::string actual_output_json,output_binding;
+};
+// Backend-owned trusted callable and its single native operation receipt.
+struct AgentWorkerCallableClaimRecord {
+    AgentWorkerModelClaimSpec model;
+    AgentCallableInvocation invocation;
     std::string state;
     std::vector<std::string> operation_ids;
     bool success=false;

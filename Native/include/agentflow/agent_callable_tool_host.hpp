@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <functional>
 #include <memory>
@@ -17,6 +18,9 @@ struct AgentCallableInvocation {
     std::uint32_t protocol_version=1;
     std::string run_id,attempt_id,call_id,workspace_id,tool_name,arguments_json;
     std::int64_t workspace_revision=1;
+    std::uint32_t tool_index=0;
+    std::string serialize()const;
+    static AgentCallableInvocation parse(std::string_view);
 };
 struct AgentCallableToolResult {bool success=false;std::string output_json;};
 struct AgentCallableEffectUncertain:std::runtime_error {using std::runtime_error::runtime_error;};
