@@ -1,3 +1,18 @@
+## Complete IPC package 0.1.60 candidate — 2026-10-21
+
+The Windows x64 VSIX has **2,447 verified archive entries** and contains the
+163-contract-qualified native image with unchanged SDK. Its 2,401-payload runtime
+excludes the legacy Python agent worker. Locked dependencies were restored in the
+isolated stage with install scripts disabled. The final stage passes **464/161
+client tests**, the native browser contract and actual staged IPC read/graph/
+model-only/coding server contracts. All **17,442 stage files** remain unchanged
+after packaging, and every extension payload matches that stage.
+[Package scope and raw receipts](evidence/coding60-package-candidate-20261021.json).
+
+The candidate is not installed. Existing user installation, owners, profiles and
+settings remain untouched. Default process execution, worker planning, crash
+diagnosis and updated installed/rendered/live-provider acceptance remain open.
+
 ## View CI inventory corrected — 2026-10-21
 
 CI now expects the verified **464 extension / 161 browser tests**, including the

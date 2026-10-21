@@ -1,0 +1,164 @@
+{
+  "recordedAt": "2026-10-21T19:17:26.191Z",
+  "version": "0.1.60",
+  "package": {
+    "recordedAt": "2026-10-21T19:16:06.185Z",
+    "version": "0.1.60",
+    "sourceRevision": "cf7dfbf487593a4672202faa04eebfa9665c7786",
+    "archive": "C:/xMindNativeValidation/xmind-0.1.60-complete-win32-x64.vsix",
+    "archiveBytes": 35022296,
+    "archiveSha256": "a7175bc5fa1497b6f2e70cf38837a91439d9c3b7ba6486ff369d9ac94f784b8c",
+    "archiveEntries": 2447,
+    "allExtensionPayloadsMatchQualifiedStage": true,
+    "archivePathCaseAliases": [
+      {
+        "archive": "extensions/vscode/readme.md",
+        "stage": "extensions/vscode/README.md"
+      },
+      {
+        "archive": "extensions/vscode/LICENSE.txt",
+        "stage": "extensions/vscode/LICENSE"
+      }
+    ],
+    "stageFilesUnchanged": 17442,
+    "terminal": {
+      "startedAt": "2026-10-21T19:15:36.573Z",
+      "completedAt": "2026-10-21T19:16:03.194Z",
+      "pid": 2756,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d15370e99a233886b1408ca118b3872769202d93caa4e7ef51896190c76bf039"
+    },
+    "installed": false,
+    "editorOpened": false,
+    "releaseAccepted": false
+  },
+  "client": {
+    "recordedAt": "2026-10-21T19:15:03.128Z",
+    "version": "0.1.60",
+    "sourceRevision": "cf7dfbf487593a4672202faa04eebfa9665c7786",
+    "extension": {
+      "exitCode": 0,
+      "tests": 464,
+      "passed": 464,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "7794312ca0b4010271eda432e1af23a99fbb4c12e2e1741bc28d8dde4f01a8f0"
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 161,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "426caa33843f07a30aa2c0208fde199040b70929896ce7ff1e6dea624be7c937"
+    },
+    "allStageSourceDependencyAssetRuntimeFilesUnchanged": true,
+    "stageFiles": 17442,
+    "nativeExecuted": true,
+    "stagedNativeBrowserAndIpcServersPassed": true,
+    "liveProviderRequests": 0,
+    "renderedAcceptance": false,
+    "passed": true
+  },
+  "runtime": {
+    "runtimeRoot": "C:/xMindNativeValidation/coding60-native-runtime-20261021",
+    "manifestSha256": "98561bc2434a6ce7c06ff6d538dfcd66ebca7022735adf32a360bd1052e1d102",
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "nativeRevision": "3123b5c540f91c7f9fc46cfafadbb41970967d21",
+    "files": 2401,
+    "completeNativeContracts": 163,
+    "sdkReusedByteForByte": true,
+    "removedLegacyWorker": {
+      "path": "worker/agent_worker.py",
+      "sha256": "ef0032c8d5c820174ef2eceab74c1d951724772b225482766e4d85acf6133220"
+    },
+    "releaseAccepted": false,
+    "scopePassed": true
+  },
+  "finalStage": {
+    "observedAt": "2026-10-21T19:16:54.917Z",
+    "stage": "C:/xMindNativeValidation/coding-0.1.60-current-source-20261021",
+    "files": 17442,
+    "allFileSetsAndHashesUnchangedAfterClientNativeAndPackagingGates": true,
+    "passed": true
+  },
+  "evidence": {
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-extension.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/extension.log",
+      "sha256": "7794312ca0b4010271eda432e1af23a99fbb4c12e2e1741bc28d8dde4f01a8f0"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-browser.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/browser.log",
+      "sha256": "426caa33843f07a30aa2c0208fde199040b70929896ce7ff1e6dea624be7c937"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-results.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/results.json",
+      "sha256": "a77f9806a33e505b89481129722c37564c196d441e11ac879cc03b15ce69d677"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-gate.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/gate.json",
+      "sha256": "735ef0526540ab6862f031535eaede9ebfecae121987a498cb47cd138ebff8b1"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-native-browser.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/native-browser.log",
+      "sha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-agent_worker_server.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/agent_worker_server.log",
+      "sha256": "afe1aaba81f6a5c1b50109fcf9ebff6b34d6128fa6892c5840ccdf924be5efe7"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-client-gate-20261021-agent_worker_coding_server.log": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/agent_worker_coding_server.log",
+      "sha256": "c8f62b239a3bca0efb8c91f965c0d02e2532d882a6846e7e3120cedd458e611a"
+    },
+    "doc/evidence/coding60-vscode-0.1.60-package-20261021.log": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.60-package-20261021.log",
+      "sha256": "d15370e99a233886b1408ca118b3872769202d93caa4e7ef51896190c76bf039"
+    },
+    "doc/evidence/coding60-vscode-0.1.60-package-terminal-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.60-package-terminal-20261021.json",
+      "sha256": "78e17e4bff3b85d5e88c3d330cc6cf58d1e24debe4abaff5ecb1f6ce12cfef64"
+    },
+    "doc/evidence/coding60-vscode-0.1.60-archive-hashes-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/vscode-0.1.60-archive-hashes-20261021.json",
+      "sha256": "b76c29a62c42c5e4be26a4bb83a897de3950b100e6116a2cf7680d0d778e7e06"
+    },
+    "doc/evidence/coding60-coding-0.1.60-final-stage-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-final-stage-20261021.json",
+      "sha256": "d22b1e87a053c469ebe001af428b670d5224726d9141cddcc78b6fc88f16780c"
+    },
+    "doc/evidence/coding60-coding60-native-runtime-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/coding60-native-runtime-20261021.json",
+      "sha256": "af7492f21ea7951cd0684812a1d2faf5ec260e63ec2743a0041609aac7f083c2"
+    },
+    "doc/evidence/coding60-coding60-npm-ci-20261021.log": {
+      "localSource": "C:/xMindNativeValidation/coding60-npm-ci-20261021.log",
+      "sha256": "350c7db944114d49c52ac4d0678949f52ede287b4f0761e9c363d1d628ba59c3"
+    },
+    "doc/evidence/coding60-coding60-npm-ci-terminal-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/coding60-npm-ci-terminal-20261021.json",
+      "sha256": "8ebdbcba65888bac0e658957692f0e647a413c73ea66939685404d5f262c2ac4"
+    },
+    "doc/evidence/coding60-coding-0.1.60-current-source-20261021.json": {
+      "localSource": "C:/xMindNativeValidation/coding-0.1.60-current-source-20261021.json",
+      "sha256": "ded37e2633b4b3c12601394ee1f05ae4965c3e2ce166ab126ecdbc446f56420d"
+    }
+  },
+  "localStageManifest": {
+    "path": "C:/xMindNativeValidation/coding-0.1.60-current-client-gate-20261021/inputs-before.json",
+    "sha256": "4f96eec3720b060e94cf3a95d91a79997981d3c97d3429c002aa2caad45c87be"
+  },
+  "preparationFindings": [
+    "Older staging dependencies differed from the current qualified source tree; preflight refused reuse before stage creation",
+    "Copied source build tooling had yazl 2.5.1 while lockfile declares 3.3.1; isolated stage restored with npm ci --ignore-scripts, and every direct dependency matches its exact lockfile version"
+  ],
+  "scope": "Verified Windows x64 VSIX containing the complete-163-qualified native image, locked Node dependencies, freshly qualified 464/161 clients, native browser contract and actual staged IPC read/graph/model-only/coding server cases. All archive payloads match the frozen 17442-file stage. Legacy Python agent worker excluded.",
+  "limitations": [
+    "Candidate is not installed or release accepted; existing installation and user owners/profiles/settings remain untouched",
+    "No new live-provider or rendered browser/editor acceptance",
+    "Default process execution, worker planning, earlier intermittent crash diagnosis and combined parent compaction/overflow remain unfinished"
+  ]
+}

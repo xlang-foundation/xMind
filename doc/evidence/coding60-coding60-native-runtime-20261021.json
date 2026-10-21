@@ -1,0 +1,15 @@
+{
+  "runtimeRoot": "C:/xMindNativeValidation/coding60-native-runtime-20261021",
+  "manifestSha256": "98561bc2434a6ce7c06ff6d538dfcd66ebca7022735adf32a360bd1052e1d102",
+  "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+  "nativeRevision": "3123b5c540f91c7f9fc46cfafadbb41970967d21",
+  "files": 2401,
+  "completeNativeContracts": 163,
+  "sdkReusedByteForByte": true,
+  "removedLegacyWorker": {
+    "path": "worker/agent_worker.py",
+    "sha256": "ef0032c8d5c820174ef2eceab74c1d951724772b225482766e4d85acf6133220"
+  },
+  "releaseAccepted": false,
+  "scopePassed": true
+}

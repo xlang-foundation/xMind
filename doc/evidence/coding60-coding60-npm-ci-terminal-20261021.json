@@ -1,0 +1,10 @@
+{
+  "pid": 34264,
+  "launchedAt": "2026-10-21T19:13:12.237Z",
+  "completedAt": "2026-10-21T19:13:35.953Z",
+  "exitCode": 0,
+  "signal": null,
+  "installScriptsEnabled": false,
+  "workingDirectory": "C:\\xMindNativeValidation\\coding-0.1.60-current-source-20261021\\extensions\\vscode",
+  "logSha256": "350c7db944114d49c52ac4d0678949f52ede287b4f0761e9c363d1d628ba59c3"
+}
