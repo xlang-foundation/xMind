@@ -1,0 +1,15 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 87: native_agent_worker_graph_remote_contract
+    Test #87: native_agent_worker_graph_remote_contract ...   Passed   26.42 sec
+    Start 87: native_agent_worker_graph_remote_contract
+    Test #87: native_agent_worker_graph_remote_contract ...   Passed   25.97 sec
+    Start 87: native_agent_worker_graph_remote_contract
+    Test #87: native_agent_worker_graph_remote_contract ...   Passed   26.16 sec
+    Start 87: native_agent_worker_graph_remote_contract
+    Test #87: native_agent_worker_graph_remote_contract ...   Passed   16.37 sec
+    Start 87: native_agent_worker_graph_remote_contract
+1/1 Test #87: native_agent_worker_graph_remote_contract ...   Passed   11.56 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) = 106.49 sec

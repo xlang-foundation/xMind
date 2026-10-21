@@ -1,0 +1,522 @@
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+OK                                             C:/xMindNativeValidation/xlang3-unicode-library-build/Release
+OK                                             C:/xMindNativeValidation/native-current-source-full/Native/Release
+No .natvis files found at C:\WINDOWS\SYSTEM32\Visualizers.
+No .natvis files found at C:\Users\shaw9\AppData\Local\Dbg\Visualizers.
+
+Microsoft (R) Windows Debugger Version 10.0.26100.1 AMD64
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+
+Loading Dump File [C:\xMindNativeValidation\process-xmind-native-journal-diagnostics-20261021\dumps\fixture-68892-649541625-slow.dmp]
+User Mini Dump File: Only registers, stack and portions of memory are available
+
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+OK                                             C:/xMindNativeValidation/xlang3-unicode-library-build/Release
+OK                                             C:/xMindNativeValidation/native-current-source-full/Native/Release
+Symbol search path is: C:/xMindNativeValidation/xlang3-unicode-library-build/Release;C:/xMindNativeValidation/native-current-source-full/Native/Release
+Executable search path is: 
+Windows 10 Version 26200 MP (20 procs) Free x64
+Product: WinNt, suite: SingleUserTS
+Edition build lab: 26100.1.amd64fre.ge_release.240331-1435
+Debug session time: Wed Oct 21 15:57:41.000 2026 (UTC - 7:00)
+System Uptime: 7 days 12:25:41.882
+Process Uptime: 0 days 0:00:50.000
+..............................................
+Unable to add extension DLL: ntsdexts
+Unable to add extension DLL: uext
+Unable to add extension DLL: exts
+
++------------------------------------------------------------------------+
+| This target supports Hardware-enforced Stack Protection. A HW based    |
+| "Shadow Stack" may be available to assist in debugging and analysis.   |
+| See aka.ms/userhsp for more info.                                      |
+|                                                                        |
+| dps @ssp                                                               |
+|                                                                        |
++------------------------------------------------------------------------+
+
+WARNING: Teb 32 pointer is NULL - defaulting to 00000000`7ffde000
+WARNING: 00000000`7ffde000 does not appear to be a TEB
+For analysis of this file, run !analyze -v
+Minidump doesn't have an exception context
+Unable to get exception context, HRESULT 0x80004002
+rax=0000000000000034 rbx=0000009e0d3be4c0 rcx=0000000000000000
+rdx=0000009e0d3be4c0 rsi=0000009e0d4c7000 rdi=0000000000000000
+rip=00007ff8caea23d4 rsp=0000009e0d3be3e8 rbp=0000000000000000
+ r8=00000000004c4b40  r9=000000007ffe2000 r10=0000000000000000
+r11=0000000000000000 r12=0000000000000001 r13=0000009e0d3bf750
+r14=0000000000000000 r15=0000000000000000
+iopl=0         nv up ei pl zr na po nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00000246
+ntdll!ZwDelayExecution+0x14:
+00007ff8`caea23d4 c3              ret
+Child-SP          RetAddr               Call Site
+0000009e`0d3be3e8 00007ff8`cae10fd4     ntdll!ZwDelayExecution+0x14
+0000009e`0d3be3f0 00007ff8`c82ab9c1     ntdll!RtlDelayExecution+0x34
+*** WARNING: Unable to verify checksum for agentflow_agent_worker_model_rpc_contract.exe
+0000009e`0d3be420 00007ff6`e0437b64     KERNELBASE!SleepEx+0x91
+0000009e`0d3be4b0 00007ff6`e050248e     agentflow_agent_worker_model_rpc_contract+0x27b64
+0000009e`0d3be4e0 00007ff6`e052f4ae     agentflow_agent_worker_model_rpc_contract+0xf248e
+0000009e`0d3bf5e0 00007ff6`e0aaf27f     agentflow_agent_worker_model_rpc_contract+0x11f4ae
+0000009e`0d3bfdf0 00007ff8`c934dda7     agentflow_agent_worker_model_rpc_contract+0x69f27f
+0000009e`0d3bfe30 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0d3bfe60 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+.  0  Id: 10d1c.68d8 Suspend: 0 Teb: 0000009e`0d4c7000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0d3be3e8 00007ff8`cae10fd4     ntdll!ZwDelayExecution+0x14
+0000009e`0d3be3f0 00007ff8`c82ab9c1     ntdll!RtlDelayExecution+0x34
+0000009e`0d3be420 00007ff6`e0437b64     KERNELBASE!SleepEx+0x91
+0000009e`0d3be4b0 00007ff6`e050248e     agentflow_agent_worker_model_rpc_contract+0x27b64
+0000009e`0d3be4e0 00007ff6`e052f4ae     agentflow_agent_worker_model_rpc_contract+0xf248e
+0000009e`0d3bf5e0 00007ff6`e0aaf27f     agentflow_agent_worker_model_rpc_contract+0x11f4ae
+0000009e`0d3bfdf0 00007ff8`c934dda7     agentflow_agent_worker_model_rpc_contract+0x69f27f
+0000009e`0d3bfe30 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0d3bfe60 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   1  Id: 10d1c.6874 Suspend: 0 Teb: 0000009e`0d4cd000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0d8ff6d8 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0d8ff6e0 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0d8ffa40 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0d8ffa70 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   2  Id: 10d1c.3dfc Suspend: 0 Teb: 0000009e`0d4cf000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0d9ddf88 00007ff8`cad60cad     ntdll!NtGetContextThread+0x14
+0000009e`0d9ddf90 00007ff8`c828160e     ntdll!RtlVirtualUnwind2+0x271d
+0000009e`0d9de4c0 00000000`00000000     KERNELBASE!RegQueryValueExW+0x1e9e
+
+   3  Id: 10d1c.f0ac Suspend: 0 Teb: 0000009e`0d4d1000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0daff9a8 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+*** WARNING: Unable to verify checksum for xlang3_runtime.dll
+0000009e`0daff9b0 00007fff`d2f44d75     KERNELBASE!WaitForSingleObjectEx+0xaf
+0000009e`0daffa50 00007fff`d2f3b61b     xlang3_runtime!std::vector<std::thread,std::allocator<std::thread> >::reserve+0x8e5
+0000009e`0daffc90 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<void (__cdecl*)(void)>,0>+0xb
+0000009e`0daffcc0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0daffcf0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0daffd20 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   4  Id: 10d1c.1093c Suspend: 0 Teb: 0000009e`0d4d3000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0dbff7d8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0dbff7e0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0dbff880 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0dbff8c0 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0dbff8f0 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0dbff990 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0dbff9c0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0dbff9f0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0dbffa20 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   5  Id: 10d1c.be20 Suspend: 0 Teb: 0000009e`0d4d5000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0dcff748 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0dcff750 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0dcff7f0 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0dcff830 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0dcff860 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0dcff900 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0dcff930 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0dcff960 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0dcff990 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   6  Id: 10d1c.ddbc Suspend: 0 Teb: 0000009e`0d4d7000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0ddff978 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0ddff980 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0ddffa20 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0ddffa60 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0ddffa90 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0ddffb30 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0ddffb60 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0ddffb90 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0ddffbc0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   7  Id: 10d1c.e4f0 Suspend: 0 Teb: 0000009e`0d4d9000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0deff958 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0deff960 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0deffa00 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0deffa40 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0deffa70 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0deffb10 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0deffb40 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0deffb70 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0deffba0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   8  Id: 10d1c.36a0 Suspend: 0 Teb: 0000009e`0d4db000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0dfffa78 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0dfffa80 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0dfffb20 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0dfffb60 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0dfffb90 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0dfffc30 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0dfffc60 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0dfffc90 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0dfffcc0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   9  Id: 10d1c.2360 Suspend: 0 Teb: 0000009e`0d4dd000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e0ff728 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e0ff730 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e0ff7d0 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e0ff810 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0e0ff840 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0e0ff8e0 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0e0ff910 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e0ff940 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e0ff970 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  10  Id: 10d1c.8b14 Suspend: 0 Teb: 0000009e`0d4df000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e1ff6b8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e1ff6c0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e1ff760 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e1ff7a0 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0e1ff7d0 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0e1ff870 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0e1ff8a0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e1ff8d0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e1ff900 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  11  Id: 10d1c.280c Suspend: 0 Teb: 0000009e`0d4e1000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e2ffc18 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e2ffc20 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e2ffcc0 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e2ffd00 00007fff`d2f3d71f     msvcp140!Cnd_wait+0x2a
+0000009e`0e2ffd30 00007fff`d2f3b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+0000009e`0e2ffdd0 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+0000009e`0e2ffe00 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e2ffe30 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e2ffe60 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  12  Id: 10d1c.16a0 Suspend: 0 Teb: 0000009e`0d4e9000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e3ff3a8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e3ff3b0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e3ff450 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e3ff490 00007ff6`e0784f92     msvcp140!Cnd_wait+0x2a
+0000009e`0e3ff4c0 00007ff6`e074940e     agentflow_agent_worker_model_rpc_contract+0x374f92
+0000009e`0e3ff7e0 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x33940e
+0000009e`0e3ff810 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e3ff840 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e3ff870 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  13  Id: 10d1c.7124 Suspend: 0 Teb: 0000009e`0d4fd000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e8ffbd8 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0e8ffbe0 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0e8fff40 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e8fff70 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  14  Id: 10d1c.72a8 Suspend: 0 Teb: 0000009e`0d4ff000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e9ff3d8 00007ff8`cae10fd4     ntdll!ZwDelayExecution+0x14
+0000009e`0e9ff3e0 00007ff8`c82ab9c1     ntdll!RtlDelayExecution+0x34
+0000009e`0e9ff410 00007ff8`bf2c12d2     KERNELBASE!SleepEx+0x91
+0000009e`0e9ff4a0 00007ff8`bf2c11b4     winhttp!WinHttpTimeFromSystemTime+0x2e02
+0000009e`0e9ff500 00007ff8`cadc999b     winhttp!WinHttpTimeFromSystemTime+0x2ce4
+0000009e`0e9ff540 00007ff8`cad64f29     ntdll!TpStartAsyncIoOperation+0x53b
+0000009e`0e9ff660 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1c29
+0000009e`0e9ff9c0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e9ff9f0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  15  Id: 10d1c.3188 Suspend: 0 Teb: 0000009e`0d501000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0eaff4a8 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0eaff4b0 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0eaff810 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0eaff840 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  16  Id: 10d1c.5af0 Suspend: 0 Teb: 0000009e`0d503000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0ebff818 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0ebff820 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0ebffb80 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0ebffbb0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  17  Id: 10d1c.7fc4 Suspend: 0 Teb: 0000009e`0d505000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0ecffbc8 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0ecffbd0 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0ecfff30 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0ecfff60 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  18  Id: 10d1c.11708 Suspend: 0 Teb: 0000009e`0d5fd000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e6ff628 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0e6ff630 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0e6ff990 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e6ff9c0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  19  Id: 10d1c.cb18 Suspend: 0 Teb: 0000009e`0d4f7000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0eeff538 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0eeff540 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0eeff8a0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0eeff8d0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  20  Id: 10d1c.e7c8 Suspend: 0 Teb: 0000009e`0d52f000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0f3ff628 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+0000009e`0f3ff630 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+0000009e`0f3ff990 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0f3ff9c0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  21  Id: 10d1c.5948 Suspend: 0 Teb: 0000009e`0d466000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0d6fb568 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0d6fb570 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0d6fb610 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0d6fb650 00007ff6`e05b2bd6     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0d6fb680 00007ff6`e05b1d56     agentflow_agent_worker_model_rpc_contract+0x1a2bd6
+0000009e`0d6fbad0 00007ff6`e054d111     agentflow_agent_worker_model_rpc_contract+0x1a1d56
+0000009e`0d6fbbb0 00007ff6`e053972a     agentflow_agent_worker_model_rpc_contract+0x13d111
+0000009e`0d6fbcb0 00007ff6`e0549a77     agentflow_agent_worker_model_rpc_contract+0x12972a
+0000009e`0d6fbd00 00007ff6`e05477ee     agentflow_agent_worker_model_rpc_contract+0x139a77
+0000009e`0d6fc820 00007ff6`e0544284     agentflow_agent_worker_model_rpc_contract+0x1377ee
+0000009e`0d6ff0e0 00007ff6`e0674b50     agentflow_agent_worker_model_rpc_contract+0x134284
+0000009e`0d6ff140 00007ff6`e066f3cb     agentflow_agent_worker_model_rpc_contract+0x264b50
+0000009e`0d6ff7f0 00007ff6`e066f981     agentflow_agent_worker_model_rpc_contract+0x25f3cb
+0000009e`0d6ff8a0 00007ff6`e052b027     agentflow_agent_worker_model_rpc_contract+0x25f981
+0000009e`0d6ff8d0 00007ff6`e0425177     agentflow_agent_worker_model_rpc_contract+0x11b027
+0000009e`0d6ffa00 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x15177
+0000009e`0d6ffa30 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0d6ffa60 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+
+  22  Id: 10d1c.5458 Suspend: 0 Teb: 0000009e`0d468000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0d7ff828 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0d7ff830 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0d7ff8d0 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0d7ff910 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0d7ff940 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0d7ffaf0 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0d7ffb20 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0d7ffb50 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0d7ffb80 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  23  Id: 10d1c.4a04 Suspend: 0 Teb: 0000009e`0d46a000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e4ffa08 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e4ffa10 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e4ffab0 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e4ffaf0 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0e4ffb20 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0e4ffcd0 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0e4ffd00 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e4ffd30 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e4ffd60 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  24  Id: 10d1c.c998 Suspend: 0 Teb: 0000009e`0d46c000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e5ff8f8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e5ff900 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e5ff9a0 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e5ff9e0 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0e5ffa10 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0e5ffbc0 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0e5ffbf0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e5ffc20 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e5ffc50 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  25  Id: 10d1c.9bb4 Suspend: 0 Teb: 0000009e`0d46e000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0e7ffa58 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0e7ffa60 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0e7ffb00 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0e7ffb40 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0e7ffb70 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0e7ffd20 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0e7ffd50 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0e7ffd80 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0e7ffdb0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  26  Id: 10d1c.61e0 Suspend: 0 Teb: 0000009e`0d470000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0edff898 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0edff8a0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0edff940 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0edff980 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0edff9b0 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0edffb60 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0edffb90 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0edffbc0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0edffbf0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  27  Id: 10d1c.3a08 Suspend: 0 Teb: 0000009e`0d472000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0efff8a8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0efff8b0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0efff950 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0efff990 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0efff9c0 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0efffb70 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0efffba0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0efffbd0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0efffc00 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  28  Id: 10d1c.b788 Suspend: 0 Teb: 0000009e`0d474000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0f0ff788 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0f0ff790 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0f0ff830 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0f0ff870 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0f0ff8a0 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0f0ffa50 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0f0ffa80 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0f0ffab0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0f0ffae0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  29  Id: 10d1c.1cc0 Suspend: 0 Teb: 0000009e`0d476000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0f1ff458 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0f1ff460 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0f1ff500 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0f1ff540 00007ff6`e0682e5b     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0f1ff570 00007ff6`e0680131     agentflow_agent_worker_model_rpc_contract+0x272e5b
+0000009e`0f1ff720 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x270131
+0000009e`0f1ff750 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0f1ff780 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0f1ff7b0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  30  Id: 10d1c.f208 Suspend: 0 Teb: 0000009e`0d478000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0f2ff128 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0f2ff130 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0f2ff1d0 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0f2ff210 00007ff6`e067594c     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0f2ff240 00007ff6`e066bb71     agentflow_agent_worker_model_rpc_contract+0x26594c
+0000009e`0f2ff7b0 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x25bb71
+0000009e`0f2ff7e0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0f2ff810 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0f2ff840 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  31  Id: 10d1c.2384 Suspend: 0 Teb: 0000009e`0d47a000 Unfrozen
+Child-SP          RetAddr               Call Site
+0000009e`0f4ff198 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+0000009e`0f4ff1a0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+0000009e`0f4ff240 00007ff6`e0aad338     KERNELBASE!SleepConditionVariableSRW+0x38
+0000009e`0f4ff280 00007ff6`e05c1691     agentflow_agent_worker_model_rpc_contract+0x69d338
+0000009e`0f4ff2b0 00007ff6`e05b40e9     agentflow_agent_worker_model_rpc_contract+0x1b1691
+0000009e`0f4ff3b0 00007ff6`e05aecc1     agentflow_agent_worker_model_rpc_contract+0x1a40e9
+0000009e`0f4ff780 00007ff8`c7f5cd30     agentflow_agent_worker_model_rpc_contract+0x19ecc1
+0000009e`0f4ff7b0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+0000009e`0f4ff7e0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+0000009e`0f4ff810 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+WARNING: Teb 32 pointer is NULL - defaulting to 00000000`7ffde000
+WARNING: 00000000`7ffde000 does not appear to be a TEB
+  32  Id: 10d1c.a5f8 Suspend: -1 Teb: 00000000`7ffde000 Unfrozen
+WARNING: Thread a5f8 exited during dump writing (open status NTSTATUS 0xC000000B)
+WARNING: Teb 32 pointer is NULL - defaulting to 00000000`7ffde000
+WARNING: 00000000`7ffde000 does not appear to be a TEB
+Child-SP          RetAddr               Call Site
+00000000`00000000 00000000`00000000     0x0
+start             end                 module name
+00007ff6`e0410000 00007ff6`e0e19000   agentflow_agent_worker_model_rpc_contract C (no symbols)           
+00007ff8`7a5c0000 00007ff8`7a5d6000   MSVCP140_ATOMIC_WAIT   (deferred)             
+00007ff8`8d1c0000 00007ff8`8d300000   xlang_sqlite3_x3pkg   (deferred)             
+00007ff8`9c2c0000 00007ff8`9c2fb000   dbgcore    (deferred)             
+00007ff8`a3800000 00007ff8`a38d6000   webio      (deferred)             
+00007ff8`b2040000 00007ff8`b204c000   VCRUNTIME140_1   (deferred)             
+00007ff8`b23a0000 00007ff8`b243d000   msvcp140   (export symbols)       msvcp140.dll
+00007ff8`b2bf0000 00007ff8`b2c1c000   VCRUNTIME140   (deferred)             
+00007ff8`bf240000 00007ff8`bf36a000   winhttp    (export symbols)       winhttp.dll
+00007ff8`bf560000 00007ff8`bf56b000   version    (deferred)             
+00007ff8`bf570000 00007ff8`bf595000   dhcpcsvc   (deferred)             
+00007ff8`bf5a0000 00007ff8`bf5be000   dhcpcsvc6   (deferred)             
+00007ff8`c4850000 00007ff8`c48ef000   apphelp    (deferred)             
+00007ff8`c4a70000 00007ff8`c4a7e000   winnsi     (deferred)             
+00007ff8`c5390000 00007ff8`c55dc000   dbghelp    (deferred)             
+00007ff8`c6540000 00007ff8`c6573000   IPHLPAPI   (deferred)             
+00007ff8`c6b90000 00007ff8`c6bab000   kernel_appcore   (deferred)             
+00007ff8`c6e50000 00007ff8`c6e9a000   sspicli    (deferred)             
+00007ff8`c7130000 00007ff8`c719c000   mswsock    (deferred)             
+00007ff8`c7390000 00007ff8`c739c000   CRYPTBASE   (deferred)             
+00007ff8`c7c20000 00007ff8`c7c2a000   dpapi      (deferred)             
+00007ff8`c7e10000 00007ff8`c7e3a000   bcrypt     (deferred)             
+00007ff8`c7f30000 00007ff8`c807c000   ucrtbase   (export symbols)       ucrtbase.dll
+00007ff8`c8090000 00007ff8`c820f000   crypt32    (deferred)             
+00007ff8`c8220000 00007ff8`c8621000   KERNELBASE   (export symbols)       KERNELBASE.dll
+00007ff8`c86f0000 00007ff8`c879c000   bcryptprimitives   (deferred)             
+00007ff8`c8840000 00007ff8`c88e3000   msvcp_win   (deferred)             
+00007ff8`c88f0000 00007ff8`c8a1a000   gdi32full   (deferred)             
+00007ff8`c8a20000 00007ff8`c8a47000   win32u     (deferred)             
+00007ff8`c8a50000 00007ff8`c8b0c000   advapi32   (deferred)             
+00007ff8`c8d00000 00007ff8`c8e18000   rpcrt4     (deferred)             
+00007ff8`c8f80000 00007ff8`c930b000   combase    (deferred)             
+00007ff8`c9310000 00007ff8`c9318000   psapi      (deferred)             
+00007ff8`c9320000 00007ff8`c93eb000   kernel32   (export symbols)       kernel32.dll
+00007ff8`c98a0000 00007ff8`c98d1000   imm32      (deferred)             
+00007ff8`c98e0000 00007ff8`c98ea000   nsi        (deferred)             
+00007ff8`c9900000 00007ff8`c9908000   normaliz   (deferred)             
+00007ff8`c9910000 00007ff8`c9ae7000   user32     (deferred)             
+00007ff8`c9af0000 00007ff8`c9bc9000   oleaut32   (deferred)             
+00007ff8`c9c20000 00007ff8`c9cc9000   msvcrt     (deferred)             
+00007ff8`c9e70000 00007ff8`c9ef1000   ws2_32     (deferred)             
+00007ff8`ca0c0000 00007ff8`ca168000   sechost    (deferred)             
+00007ff8`ca2c0000 00007ff8`caa5c000   shell32    (deferred)             
+00007ff8`cacd0000 00007ff8`cacfb000   gdi32      (deferred)             
+00007ff8`cad40000 00007ff8`cafa8000   ntdll      (export symbols)       ntdll.dll
+00007fff`d2750000 00007fff`d3a87000   xlang3_runtime C (export symbols)       xlang3_runtime.dll
+xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x230:
+00007fff`d28469b0 488b33          mov     rsi,qword ptr [rbx]
+00007fff`d28469b3 eb03            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x238 (00007fff`d28469b8)
+00007fff`d28469b5 488bf3          mov     rsi,rbx
+00007fff`d28469b8 4c8ba42488000000 mov     r12,qword ptr [rsp+88h]
+00007fff`d28469c0 488b5608        mov     rdx,qword ptr [rsi+8]
+00007fff`d28469c4 49ff4510        inc     qword ptr [r13+10h]
+00007fff`d28469c8 488937          mov     qword ptr [rdi],rsi
+00007fff`d28469cb 48895708        mov     qword ptr [rdi+8],rdx
+00007fff`d28469cf 48893a          mov     qword ptr [rdx],rdi
+00007fff`d28469d2 48897e08        mov     qword ptr [rsi+8],rdi
+00007fff`d28469d6 498b4d18        mov     rcx,qword ptr [r13+18h]
+00007fff`d28469da 498b4530        mov     rax,qword ptr [r13+30h]
+00007fff`d28469de 4823c5          and     rax,rbp
+00007fff`d28469e1 4803c0          add     rax,rax
+00007fff`d28469e4 4c8b04c1        mov     r8,qword ptr [rcx+rax*8]
+00007fff`d28469e8 4d3b4508        cmp     r8,qword ptr [r13+8]
+00007fff`d28469ec 7506            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x274 (00007fff`d28469f4)
+00007fff`d28469ee 48893cc1        mov     qword ptr [rcx+rax*8],rdi
+00007fff`d28469f2 eb12            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x286 (00007fff`d2846a06)
+00007fff`d28469f4 4c3bc6          cmp     r8,rsi
+00007fff`d28469f7 7506            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x27f (00007fff`d28469ff)
+00007fff`d28469f9 48893cc1        mov     qword ptr [rcx+rax*8],rdi
+Dump reader status=0x00000000
+00007fff`d28469fd eb0c            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x28b (00007fff`d2846a0b)
+00007fff`d28469ff 483954c108      cmp     qword ptr [rcx+rax*8+8],rdx
+00007fff`d2846a04 7505            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x28b (00007fff`d2846a0b)
+00007fff`d2846a06 48897cc108      mov     qword ptr [rcx+rax*8+8],rdi
+00007fff`d2846a0b 49893c24        mov     qword ptr [r12],rdi
+00007fff`d2846a0f 41c644240801    mov     byte ptr [r12+8],1
+00007fff`d2846a15 498bc4          mov     rax,r12
+00007fff`d2846a18 4883c438        add     rsp,38h
+00007fff`d2846a1c 415f            pop     r15
+00007fff`d2846a1e 415e            pop     r14
+00007fff`d2846a20 415d            pop     r13
+00007fff`d2846a22 415c            pop     r12
+00007fff`d2846a24 5f              pop     rdi
+00007fff`d2846a25 5e              pop     rsi
+00007fff`d2846a26 5d              pop     rbp
+00007fff`d2846a27 5b              pop     rbx
+00007fff`d2846a28 c3              ret
+00007fff`d2846a29 cc              int     3
+00007fff`d2846a2a cc              int     3
+00007fff`d2846a2b cc              int     3
+00007fff`d2846a2c cc              int     3
+00007fff`d2846a2d cc              int     3
+00007fff`d2846a2e cc              int     3
+00007fff`d2846a2f cc              int     3
+xlang3_runtime!std::vector<std::pair<xlang3::Value,xlang3::Value>,std::allocator<std::pair<xlang3::Value,xlang3::Value> > >::_Reallocate<0>:
+00007fff`d2846a30 4053            push    rbx
+00007fff`d2846a32 55              push    rbp

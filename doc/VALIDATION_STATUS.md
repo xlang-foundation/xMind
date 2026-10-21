@@ -1,3 +1,49 @@
+## Native SDK values and worker journal calls — 2026-10-21
+
+The IPC boundary follows Cantor's registered root/service classes and direct SDK
+method calls. Production workers use xmind.Workers().Open(ticket).Model() and
+Journal(). xlang3 IPC owns serialization, remote references and transport. The
+network-task DataFrame path in Cantor is separate. The custom NewRequest IDs,
+Append/Seal upload, ReadEvent/ReadResult byte pages and binary result wrapper
+have been removed. Model requests, event batches and results use normal SDK
+values; C++ adapters map existing domain fields. Long model/funding work returns
+an operation object with Status, Events, Result and Cancel. Short journal
+operations return bounded native result values. Remote method handles are
+retained as in Cantor's worker.
+
+Production owners discard and reject old model/journal packet handlers when
+native access is enabled. Journal read/funding/turn/completion checks remain
+backed by the exact captured lease and embedded-SQLite transactions. Native
+refusal probes cover foreign owners, invalid cursors, queued funding, missing
+model events and coding-only commits without a model charge. Startup read
+cancellation/expiry faults now enter through typed backend hooks.
+
+The final focused gate passes 18/18 in 131.35 seconds, including the complete
+219-request controlled peer, actual distinct xmind coding/graph/delegated
+workers, canonical receipts, cancellations and physical drain. It freezes 2776
+project files, 16 SDK headers, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and all 136 native binaries/file sets. Source parent0e0909dd;
+native b99407be5102815ea6e77f78bae7ec8cc8f3ea5213bafeb0c888f9575e977dad;
+SDK1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3.
+
+Earlier gates include one missing-include build failure, broad fixture timeouts
+and an intermittent SDK access violation at RVA0xf69e4. Original logs, failed
+source patches and exact-identity fixture cleanup receipts are retained. A
+50-second opt-in test dump was read with the local Windows debugger engine. An
+offline symbol-map executable has an identical .text section to the dumped
+fixture and maps its polling frame to worker_parent_delegation_fixture::parent;
+that instant does not establish a deadlock. Disassembly places the earlier SDK
+faulting instruction in a hash-map insertion routine; the cause remains open.
+Five fresh graph repetitions passed with diagnostics enabled and do not clear
+that crash. Dumps and diagnostic binaries stay under C:/xMindNativeValidation
+with hashes in the report. Test-only dump observation leaves all budgets/exit
+handling unchanged.
+
+No full-suite, SDK crash fix, installation, live-provider or rendered-client
+acceptance is claimed. Tool/control IPC, planning workers, dedicated large-value
+and lifetime boundaries and full product acceptance remain open.
+[Complete checkpoint evidence](evidence/process-xmind-root-native-sdk-values-checkpoint-20261021.json).
+
 ## Typed worker journal service — 2026-10-21
 
 AgentWorkerJournalHost now owns the typed backend operations for worker reads,

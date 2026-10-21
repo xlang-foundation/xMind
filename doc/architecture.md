@@ -1,5 +1,23 @@
 # xMind / AgentFlow architecture proposal
 
+## Native process IPC contract
+
+xMind follows Cantor's root/service registration in CantorAPISet.h and direct
+worker method calls in src/Tasks/WorkerProcess.cpp. Register the xmind root at
+startup, expose service classes/subobjects through APISET, and invoke their
+methods through the standard xlang3 SDK. xlang3 owns IPC serialization, remote
+references and transport. Cantor's network-task DataFrame path is a separate
+mechanism and is not part of this IPC contract.
+
+The current private worker services are Model() and Journal() beneath
+xmind.Workers().Open(ticket). Requests, events and results use SDK values.
+Long work returns an operation object exposing Status, Events, Result and
+Cancel. The backend keeps lease admission, credentials, budgets, permissions and
+durable effects. Third-party callers use the registered public service API;
+private worker tickets remain scoped to their admitted worker. The remaining
+tool/control packet path is a migration task, not the target architecture.
+
+
 The October 9 product decision defines three native components: **Agent
 Runtime + Coding Agent / Harness + AI Model Gateway**. One `xmind` executable
 provides backend and console modes; public authoring uses **Agent + Tool +

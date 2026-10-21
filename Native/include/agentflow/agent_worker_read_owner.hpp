@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_read_context.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_journal_host.hpp"
 
 namespace agentflow {
 struct NativeWorkerModelAccess;
@@ -13,7 +14,7 @@ public:
     AgentWorkerReadOwner(PersistenceService&,AgentWorkerLeaseSpec,const AgentWorkerScope&,
         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,
-        AgentWorkerChannel::Deadline,std::stop_token owner_cancel={});
+        AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},std::function<void(AgentWorkerJournalReadKind,std::stop_token)> journal_read={});
     ~AgentWorkerReadOwner();
     NativeWorkerModelAccess native_model_access()const;
     AgentWorkerReadOwner(const AgentWorkerReadOwner&)=delete;

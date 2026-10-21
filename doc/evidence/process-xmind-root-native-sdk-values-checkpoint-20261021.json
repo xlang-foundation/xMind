@@ -1,0 +1,525 @@
+{
+  "recordedAt": "2026-10-21T23:14:39.860Z",
+  "scope": "Production xmind workers call native Model and Journal subobjects through standard xlang3 SDK values. Removed the custom request upload IDs, Append/Seal and byte-page result/event reads. SDK owns IPC serialization and remote references.",
+  "reference": {
+    "root": "D:/CantorAI/Cantor/src/Main/CantorAPISet.h",
+    "worker": "D:/CantorAI/Cantor/src/Tasks/WorkerProcess.cpp",
+    "networkDataFrameIsSeparate": true
+  },
+  "api": [
+    "xmind.Workers().Open(ticket).Model()",
+    "xmind.Workers().Open(ticket).Journal()",
+    "Model.Complete(attempt,requestValue)",
+    "operation.Status()/Events(after)/Result()/Cancel()"
+  ],
+  "productionModelAndJournalPacketFallback": false,
+  "focusedContractsPassed": 18,
+  "exactControlledPeerRequests": 219,
+  "knownOpenIssues": [
+    "Earlier intermittent xlang3_runtime.dll access violation at RVA 0xf69e4 remains unresolved. Current and five repeated graph passes do not prove a fix.",
+    "Broad pre-correction model fixture timed out; original terminal logs retained. Final corrected source passed within unchanged per-process/CTest budgets.",
+    "Large SDK value boundaries and retained-object teardown need dedicated contracts.",
+    "Tool/control IPC migration, planning workers, full native suite and final client acceptance remain unfinished."
+  ],
+  "runs": [
+    {
+      "source": "process-xmind-native-journal-20261021",
+      "gate": null,
+      "build": {
+        "pid": 71936,
+        "launchedAt": "2026-10-21T22:37:12.791Z",
+        "completedAt": "2026-10-21T22:39:19.191Z",
+        "exitCode": 1,
+        "signal": null,
+        "logSha256": "ec827c84dbc42ae2530d07413e99e1637fb3b4d8bd2527333c17a0810bba664d"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-20261021-build-terminal.json": "ff91c4f03ea91bbbf9c36459eb6d56691c35e6b7f33f3e5edd45a105f3058c01",
+        "doc/evidence/process-xmind-root-native-journal-20261021-build.log": "ec827c84dbc42ae2530d07413e99e1637fb3b4d8bd2527333c17a0810bba664d",
+        "doc/evidence/process-xmind-root-native-journal-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-20261021-inputs-before-build.json": "54f54a2d3e2262d70afe81505f87d7bc8c2b58d07065acfea600a5a428512edb",
+        "doc/evidence/process-xmind-root-native-journal-20261021-source.patch": "57f1f972af5a0a34391db8224e59b25555974df6d5f3250fcbda13dc3cbef79a"
+      },
+      "externalDumps": []
+    },
+    {
+      "source": "process-xmind-native-journal-bound-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T22:44:57.647Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "fe15a21036589780bb924ff7dd5b6b454c4e37ad3ee3554a2a26d1cfe5be0c29",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 68340,
+          "launchedAt": "2026-10-21T22:39:39.417Z",
+          "completedAt": "2026-10-21T22:42:28.328Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "58903aed6f7f74ceb0e51d73e9fffcc121151c1e2cbdfb640b3c1c1db9f45b8c"
+        },
+        "test": {
+          "pid": 37672,
+          "launchedAt": "2026-10-21T22:42:36.204Z",
+          "completedAt": "2026-10-21T22:44:55.027Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "21f991cb1cdcc63611a45c5ec2012525249cf614966c8b5d33d33f184108a0af"
+        },
+        "total": 18,
+        "failed": 1,
+        "passed": 17,
+        "seconds": 138.77,
+        "projectFiles": 2775,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "ba28fa3aa25b0d51d2bf3b6e0302f8fbc47f2a768f90021afbc67e0f34f7bd50",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "build": {
+        "pid": 68340,
+        "launchedAt": "2026-10-21T22:39:39.417Z",
+        "completedAt": "2026-10-21T22:42:28.328Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "58903aed6f7f74ceb0e51d73e9fffcc121151c1e2cbdfb640b3c1c1db9f45b8c"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-binaries-before-test.json": "2cd2aa736807c88d48e43284f4d903317c9e05b8ad83faa314e9d18e9abe3771",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-build-terminal.json": "531dadf9a2b1bbe176f24f7b3d95f580989c2295810ae9c7ab39e0bf0c8c5a61",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-build.log": "58903aed6f7f74ceb0e51d73e9fffcc121151c1e2cbdfb640b3c1c1db9f45b8c",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-ctest-terminal.json": "36840baf0ae7778baa33f8c935ef69d95defd75b6432bf4c0c0a6703b6fb01da",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-ctest.log": "21f991cb1cdcc63611a45c5ec2012525249cf614966c8b5d33d33f184108a0af",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-gate.json": "5b66f84557ca32bc640325e8b2cda8c294e90c28cfa6ecf114f154b5e61f4751",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-inputs-before-build.json": "fa2c4ebd72793265dbf7ea4ccea40c007b8f2acda384c50ff04f0f8e5b61b3cc",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-LastTest.log": "bc14a133e046668a36f03ae3fc49fa3fb19eb5cba602068da6dd64349bebc9a2",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-owned-timeout-worker-before-retirement.json": "e92c2dd8877c1ef1a82de2649ad9c42cddf1d57d46a7b684c67f9d9063b652bb",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-source.patch": "fe15a21036589780bb924ff7dd5b6b454c4e37ad3ee3554a2a26d1cfe5be0c29",
+        "doc/evidence/process-xmind-root-native-journal-bound-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": []
+    },
+    {
+      "source": "process-xmind-native-journal-direct-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T22:51:57.422Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "3cb07d3beb7c87dd5c99a5a170ebf08299bd04ffe22e024232a69ca561e6d68b",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 48636,
+          "launchedAt": "2026-10-21T22:45:43.962Z",
+          "completedAt": "2026-10-21T22:48:53.909Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "5396a4741068c287c3db8271ef30a673b404218c6997cd2d5c5c9339232c22e9"
+        },
+        "test": {
+          "pid": 3516,
+          "launchedAt": "2026-10-21T22:49:00.298Z",
+          "completedAt": "2026-10-21T22:51:52.135Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "fdc23474ebcf260a7945d5e3c53b1752333636f5d8a49caa47c1de85064447a8"
+        },
+        "total": 18,
+        "failed": 2,
+        "passed": 16,
+        "seconds": 171.73,
+        "projectFiles": 2775,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "0f25c7bbc0603d713573025072984130a5439f88985f84b0a1e3574f1140f605",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "build": {
+        "pid": 48636,
+        "launchedAt": "2026-10-21T22:45:43.962Z",
+        "completedAt": "2026-10-21T22:48:53.909Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "5396a4741068c287c3db8271ef30a673b404218c6997cd2d5c5c9339232c22e9"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-binaries-before-test.json": "69545d10f4935305e687a41181414935e878f782b63939fdeaf2018ad96c8f36",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-build-terminal.json": "378db3223fc078832bde5da65f43e45e4e7ccec68c67ee1714552f24bc1c4f36",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-build.log": "5396a4741068c287c3db8271ef30a673b404218c6997cd2d5c5c9339232c22e9",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-ctest-terminal.json": "69a4aa109f87088fdcdf3871ee37bb512d91de10f1883ebc844916a8296c1e2f",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-ctest.log": "fdc23474ebcf260a7945d5e3c53b1752333636f5d8a49caa47c1de85064447a8",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-gate.json": "0f92424fc4e8f0a531b3f797d5123a57e85f7d24d21cc376ba14c3570cd448e5",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-inputs-before-build.json": "7fda3c14673726b01b5ca59f42f70c16c23c6b0b2c373e4721472f6dd53b37d5",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-LastTest.log": "bc232adeb45917e24f378dec0214049bfee2a20b2fdfeb2b6372372831e516cb",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-source.patch": "3cb07d3beb7c87dd5c99a5a170ebf08299bd04ffe22e024232a69ca561e6d68b",
+        "doc/evidence/process-xmind-root-native-journal-direct-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": []
+    },
+    {
+      "source": "process-xmind-native-journal-diagnostics-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T22:58:25.211Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "a0eebb3955ca25592b0b6f7e6339ee62a0192868bef06b2bd9611f1b8539b8f7",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 50688,
+          "launchedAt": "2026-10-21T22:53:59.013Z",
+          "completedAt": "2026-10-21T22:56:32.024Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "6633805ba52b6305f0bd5e47d4eabd8da375f10664afe78b66f8f831a5437664"
+        },
+        "test": {
+          "pid": 18436,
+          "launchedAt": "2026-10-21T22:56:37.402Z",
+          "completedAt": "2026-10-21T22:58:20.237Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "6cce512e398373b35656306b2f1df2f909c9edba9044454ed2af28a1b1d7aa85"
+        },
+        "total": 2,
+        "failed": 1,
+        "passed": 1,
+        "seconds": 102.75,
+        "projectFiles": 2775,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "0f25c7bbc0603d713573025072984130a5439f88985f84b0a1e3574f1140f605",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "build": {
+        "pid": 50688,
+        "launchedAt": "2026-10-21T22:53:59.013Z",
+        "completedAt": "2026-10-21T22:56:32.024Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "6633805ba52b6305f0bd5e47d4eabd8da375f10664afe78b66f8f831a5437664"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-binaries-before-test.json": "ca73f947148879a44284e28b993819a69984f46d856cdc8446b508fa074f9079",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-build-terminal.json": "14f933a9c2147d85856934999a88c3677b1c7d2a0610b1ce9573db288c92400c",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-build.log": "6633805ba52b6305f0bd5e47d4eabd8da375f10664afe78b66f8f831a5437664",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-ctest-terminal.json": "6156cded7e0d057e1a8da6cc8a28ace970e17cc6b9459484766e2ede45fcc01e",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-ctest.log": "6cce512e398373b35656306b2f1df2f909c9edba9044454ed2af28a1b1d7aa85",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-dump-analysis.log": "aebfc52e00b3d7758435afb79e9fa18a6008afba18d3dd9aabba51153f50d470",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-fixture-stack-symbols.json": "9779492fe2eb23da9338a8ccebd7baab554df42da0deb314aa8b614a49b86ed7",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-gate.json": "aa43c7799790c038c761cc8d757501beb61826b475c5133bf6133c0d8f26745d",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-inputs-before-build.json": "b72ef6ac3d0eec992cc32f5d6dacc4f6148f519fa1cd4a1703d155ca4bab16c6",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-LastTest.log": "b077de3fac1710146f0d58fd5fe608e9e6ad4399ebd765e5ae84d52e9353042d",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-source.patch": "a0eebb3955ca25592b0b6f7e6339ee62a0192868bef06b2bd9611f1b8539b8f7",
+        "doc/evidence/process-xmind-root-native-journal-diagnostics-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": [
+        {
+          "path": "C:/xMindNativeValidation/process-xmind-native-journal-diagnostics-20261021/dumps/fixture-68892-649541625-slow.dmp",
+          "bytes": 309607,
+          "sha256": "443d8529c7cdf74081be52874379617e9f4ab496733f41e0ff1cbace79229922"
+        }
+      ]
+    },
+    {
+      "source": "process-xmind-native-journal-graph-stacks-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T23:02:43.915Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "a0eebb3955ca25592b0b6f7e6339ee62a0192868bef06b2bd9611f1b8539b8f7",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 32724,
+          "launchedAt": "2026-10-21T22:59:34.440Z",
+          "completedAt": "2026-10-21T23:00:48.252Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "f9ce4cc88191e1bce331cec8202e8b194367a5a98689f4a4c94c91b6840d1d0f"
+        },
+        "test": {
+          "pid": 61184,
+          "launchedAt": "2026-10-21T23:00:54.044Z",
+          "completedAt": "2026-10-21T23:02:40.611Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "f62638a4cb4446a7442e8b0ef59ad0408a2bd769a7d869a028adfaf103a29bc9"
+        },
+        "total": 1,
+        "failed": 0,
+        "passed": 1,
+        "seconds": 106.49,
+        "projectFiles": 2775,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "0f25c7bbc0603d713573025072984130a5439f88985f84b0a1e3574f1140f605",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "build": {
+        "pid": 32724,
+        "launchedAt": "2026-10-21T22:59:34.440Z",
+        "completedAt": "2026-10-21T23:00:48.252Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "f9ce4cc88191e1bce331cec8202e8b194367a5a98689f4a4c94c91b6840d1d0f"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-binaries-before-test.json": "bad3f5c44702b89559a73cce6c5edc8cddec97d3d6619e26f89702b4168f241c",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-build-terminal.json": "4e8a341cfe3b3af80115318442c281af718fbe2ed74584d998c9df09595c83bd",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-build.log": "f9ce4cc88191e1bce331cec8202e8b194367a5a98689f4a4c94c91b6840d1d0f",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-ctest-terminal.json": "c2ddf48b15e35640a495a46200770d9f1557f3c0fe237f9908cfe35a849fbf77",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-ctest.log": "f62638a4cb4446a7442e8b0ef59ad0408a2bd769a7d869a028adfaf103a29bc9",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-gate.json": "7316360cfd142cb2e4ba84a5b173bc30ffb3eeaaaec85cb8006d8226b7ae6ca2",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-inputs-before-build.json": "4e928e24e3f17945eafdcc3fe28a69aea0faf416b1efe78be9c3d7b68c87988a",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-LastTest.log": "2853ea2117508b42f32d50b6cc29f6a5201190cd5ae742bb00ef5b03b991b449",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-source.patch": "a0eebb3955ca25592b0b6f7e6339ee62a0192868bef06b2bd9611f1b8539b8f7",
+        "doc/evidence/process-xmind-root-native-journal-graph-stacks-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": []
+    },
+    {
+      "source": "process-xmind-native-journal-cantor-handles-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T23:08:17.575Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "bcdb2391e3ac06809d09dd62c3ae90c2375ae2551473c2854f78c3b48f28553b",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 60180,
+          "launchedAt": "2026-10-21T23:05:13.462Z",
+          "completedAt": "2026-10-21T23:05:54.535Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "77e823ebe6d0731bd6f8ef04ccf22910536a89b56b6b2cac73fec0579b93b335"
+        },
+        "test": {
+          "pid": 51096,
+          "launchedAt": "2026-10-21T23:05:58.042Z",
+          "completedAt": "2026-10-21T23:08:14.817Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "f2ed5d76b4fe11ab764d912b67b3f477a8cf841c66332e0408746de9ec8389fc"
+        },
+        "total": 18,
+        "failed": 1,
+        "passed": 17,
+        "seconds": 136.72,
+        "projectFiles": 2775,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "d57fda54d6bd26b49ab2c97d1885f8ddd6c809bf5e4a44120780041596a6263d",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "build": {
+        "pid": 60180,
+        "launchedAt": "2026-10-21T23:05:13.462Z",
+        "completedAt": "2026-10-21T23:05:54.535Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "77e823ebe6d0731bd6f8ef04ccf22910536a89b56b6b2cac73fec0579b93b335"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-binaries-before-test.json": "34ac9657c0a4c5cbcc4a9f38744a31d9e2cfd467eed9a1cdc9ab074d1a4acab1",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-build-terminal.json": "7c887a519edfb0d57cda3dfe122cd5e67be234aed6557ff467a7e4022070d7d3",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-build.log": "77e823ebe6d0731bd6f8ef04ccf22910536a89b56b6b2cac73fec0579b93b335",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-ctest-terminal.json": "314ceefd28d19dc8b9023c0bdf6c2877411e2faa00b5a6d80f071e67432e13ab",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-ctest.log": "f2ed5d76b4fe11ab764d912b67b3f477a8cf841c66332e0408746de9ec8389fc",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-gate.json": "13f0dee3387e45db65f541306f453129a8817c7491321895ddd849867c2704f4",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-inputs-before-build.json": "8f848efa2f9cc6d637b49a23a7fd72a1e60e8d2d63161abe3fa4e5c0a339ee1e",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-LastTest.log": "771c71dec1c80b24ed3f1a69369eb8f5516e356b8f798fcba0529fbb3dae8c19",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-owned-timeout-worker-before-retirement.json": "67e20eb3e567bb0f1a09bd49f7c92a569beb385b3c144fa31ab158dafe70b5ee",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-source.patch": "bcdb2391e3ac06809d09dd62c3ae90c2375ae2551473c2854f78c3b48f28553b",
+        "doc/evidence/process-xmind-root-native-journal-cantor-handles-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": []
+    },
+    {
+      "source": "process-xmind-native-sdk-values-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T23:13:19.286Z",
+        "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+        "sourcePatchSha256": "395803a384dda3bf88291ea9a372bdea066a7c054db97e5aa745d3c71430450b",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 4368,
+          "launchedAt": "2026-10-21T23:09:29.053Z",
+          "completedAt": "2026-10-21T23:11:01.830Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "0a4edeadd4ad98bf24d0436d7c37f7999359997ac64321dbfeff15c80b0f0a47"
+        },
+        "test": {
+          "pid": 7684,
+          "launchedAt": "2026-10-21T23:11:05.079Z",
+          "completedAt": "2026-10-21T23:13:16.474Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "57477f49e67c827640b5d53448e4b9a79873e83d5a4a8f812dd7371f74ab267f"
+        },
+        "total": 18,
+        "failed": 0,
+        "passed": 18,
+        "seconds": 131.35,
+        "projectFiles": 2776,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "b99407be5102815ea6e77f78bae7ec8cc8f3ea5213bafeb0c888f9575e977dad",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "build": {
+        "pid": 4368,
+        "launchedAt": "2026-10-21T23:09:29.053Z",
+        "completedAt": "2026-10-21T23:11:01.830Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "0a4edeadd4ad98bf24d0436d7c37f7999359997ac64321dbfeff15c80b0f0a47"
+      },
+      "files": {
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-binaries-before-test.json": "2a5028d5b8ce44d0a13f1dbc17e9bd66956f350b31aad56106953fb9b6a783cd",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-build-terminal.json": "4972f95e61c497fed8edde27ed394ced01786a1b44ac52565637874449f53416",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-build.log": "0a4edeadd4ad98bf24d0436d7c37f7999359997ac64321dbfeff15c80b0f0a47",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-ctest-terminal.json": "d05c32c8d20a029673f9b8c55aef4fdf995eb00f6a5bbc71044a2dbc9faf50a8",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-ctest.log": "57477f49e67c827640b5d53448e4b9a79873e83d5a4a8f812dd7371f74ab267f",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-gate.json": "e3defc5e64b482a2464c3e160ebcddd4745ca824af84585353d5323bc4cc663b",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-inputs-before-build.json": "2f14d9f856e7c601be78337a0b7b3812b3b59e8bff4d15ed3f6040addc854306",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-LastTest.log": "fef987182849c14666150daf5bd145684e8a07011cc33b588892ccd9894c471e",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-source.patch": "395803a384dda3bf88291ea9a372bdea066a7c054db97e5aa745d3c71430450b",
+        "doc/evidence/process-xmind-root-native-sdk-values-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+      },
+      "externalDumps": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "path": "C:/xMindNativeValidation/read-worker-dump-20261021.cpp",
+      "bytes": 1817,
+      "sha256": "c055e6d3ae6a2aa8655624bd1d672e80ad535f26d2939c6cc857bb5c20c74d8a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/read-worker-dump-20261021.exe",
+      "bytes": 142848,
+      "sha256": "8db074d263e978fe98a58c250d6c1b1d50ca398fa9b9464cdbe25db9b5e6e4e1"
+    },
+    {
+      "path": "C:/xMindNativeValidation/worker-fixture-symbol-map-20261021.rsp",
+      "bytes": 6859,
+      "sha256": "6b68d483945334b535b9a5a9367628ea881f43baba757d9429ed40b62522c04a"
+    },
+    {
+      "path": "C:/xMindNativeValidation/worker-fixture-symbol-map-20261021.map",
+      "bytes": 58761150,
+      "sha256": "e36afb4576116719e118a61160a324a21a9b22c4cc1d38b3e17eff7c7452d2b9"
+    }
+  ],
+  "final": {
+    "recordedAt": "2026-10-21T23:13:19.286Z",
+    "sourceParent": "0e0909dd44189d9ce446cc29acaeccb5e6c098cb",
+    "sourcePatchSha256": "395803a384dda3bf88291ea9a372bdea066a7c054db97e5aa745d3c71430450b",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 4368,
+      "launchedAt": "2026-10-21T23:09:29.053Z",
+      "completedAt": "2026-10-21T23:11:01.830Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0a4edeadd4ad98bf24d0436d7c37f7999359997ac64321dbfeff15c80b0f0a47"
+    },
+    "test": {
+      "pid": 7684,
+      "launchedAt": "2026-10-21T23:11:05.079Z",
+      "completedAt": "2026-10-21T23:13:16.474Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "57477f49e67c827640b5d53448e4b9a79873e83d5a4a8f812dd7371f74ab267f"
+    },
+    "total": 18,
+    "failed": 0,
+    "passed": 18,
+    "seconds": 131.35,
+    "projectFiles": 2776,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 136,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "b99407be5102815ea6e77f78bae7ec8cc8f3ea5213bafeb0c888f9575e977dad",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "fullNativeSuite": false,
+  "installed": false,
+  "cpythonExecuted": false
+}

@@ -62,9 +62,8 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         auto wrong_scope=worker->channel().scope();wrong_scope.run_id="foreign-run";
         rejects<Conflict>([&]{AgentWorkerReadOwner rejected(store,lease,wrong_scope,owner,context_policy,config,{},gateway,deadline);});
     }
-    AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline);
+    AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline,{},[&](AgentWorkerJournalReadKind kind,std::stop_token){if((mode.starts_with("product_admission_")&&kind==AgentWorkerJournalReadKind::run)||(mode.starts_with("product_journal_")&&kind==AgentWorkerJournalReadKind::history)){if(mode.ends_with("_cancel"))throw AgentWorkerAuthorityCancelled("Injected journal cancellation");throw AgentWorkerAuthorityExpired("Injected journal deadline");}});
     AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
-        if((mode.starts_with("product_admission_")&&method=="journal.run")||(mode.starts_with("product_journal_")&&method=="journal.history"))throw AgentWorkerRpcRemoteError(mode.ends_with("_cancel")?"cancelled":"timeout");
         return backend_owner.dispatch(method,payload,std::move(sink),cancel);
     },deadline);
     std::string startup=mode;
@@ -75,6 +74,16 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         auto wrong_ticket=access;wrong_ticket.ticket[0]=wrong_ticket.ticket[0]=='a'?'b':'a';
         rejects<AgentWorkerModelOutcomeUnrecorded>([&]{NativeWorkerModelClient wrong(wrong_ticket,id,id,lease.workspace_id,generation,1);});
         rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("model.admission","{}",{},{});});
+        rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("journal.run","{}",{},{});});
+        NativeWorkerModelClient scoped(access,id,id,lease.workspace_id,generation,1);
+        check(Json::parse(scoped.journal_run(id)).at("state")=="queued","Native journal must read its actual queued owner");
+        rejects<Conflict>([&]{scoped.journal_run("rpc-foreign");});
+        rejects<Conflict>([&]{scoped.journal_events(id,-1);});
+        rejects<Conflict>([&]{scoped.journal_child_admission(id);});
+        rejects<Conflict>([&]{scoped.journal_reserve_model("unfunded-queued-attempt");});
+        rejects<Conflict>([&]{scoped.journal_model_event("missing-attempt",0,"model.delta","{}");});
+        rejects<Conflict>([&]{scoped.journal_commit_workspace_turn("missing-attempt");});
+        check(store.root_budget(id).get().model_calls_reserved==0,"Native journal refusals must not fund a model");
         }
         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
     }

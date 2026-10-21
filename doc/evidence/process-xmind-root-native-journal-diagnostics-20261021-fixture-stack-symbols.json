@@ -1,0 +1,75 @@
+{
+  "original": {
+    "rva": 4096,
+    "size": 7481344,
+    "sha256": "687d5c94dbbadb455a6c036edfd29f622f772d5c32a232570890e250312643cb"
+  },
+  "mapped": {
+    "rva": 4096,
+    "size": 7481344,
+    "sha256": "687d5c94dbbadb455a6c036edfd29f622f772d5c32a232570890e250312643cb"
+  },
+  "codeSectionsExactlyMatch": true,
+  "frames": [
+    {
+      "rva": 162496,
+      "offset": "0xa4",
+      "symbol": "??$sleep_until@Usteady_clock@chrono@std@@V?$duration@_JU?$ratio@$00$0DLJKMKAA@@std@@@23@@this_thread@std@@YAXAEBV?$time_point@Usteady_clock@chrono@std@@V?$duration@_JU?$ratio@$00$0DLJKMKAA@@std@@@23@@chrono@1@@Z",
+      "object": "f i AGENT_WORKER_MODEL_RPC_CONTRACT.OBJ"
+    },
+    {
+      "rva": 986912,
+      "offset": "0x156e",
+      "symbol": "?parent@worker_parent_delegation_fixture@@YAXAEAVPersistenceService@agentflow@@AEBV?$shared_ptr@$$CBVBoundProcessExecutable@agentflow@@@std@@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@5@AEBVpath@filesystem@5@2AEBV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@5@@Z",
+      "object": "f i AGENT_WORKER_MODEL_RPC_CONTRACT.OBJ"
+    },
+    {
+      "rva": 1167888,
+      "offset": "0x229e",
+      "symbol": "main",
+      "object": "f   AGENT_WORKER_MODEL_RPC_CONTRACT.OBJ"
+    },
+    {
+      "rva": 3624224,
+      "offset": "0x272",
+      "symbol": "??R<lambda_1>@?1???0Impl@PersistenceService@agentflow@@QEAA@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@5@_KV?$optional@UBackendOwnerBootstrap@agentflow@@@5@V?$optional@ULegacyOwnerBootstrap@agentflow@@@5@@Z@QEAA@XZ",
+      "object": "f i AGENTFLOW_CORE:persistence_service.obj"
+    },
+    {
+      "rva": 3380224,
+      "offset": "0xe",
+      "symbol": "??$_Invoke@V?$tuple@V<lambda_1>@?1???0Impl@PersistenceService@agentflow@@QEAA@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@6@_KV?$optional@UBackendOwnerBootstrap@agentflow@@@6@V?$optional@ULegacyOwnerBootstrap@agentflow@@@6@@Z@@std@@$0A@@thread@std@@CAIPEAX@Z",
+      "object": "f i AGENTFLOW_CORE:persistence_service.obj"
+    },
+    {
+      "rva": 1774400,
+      "offset": "0x351",
+      "symbol": "?receive@AgentWorkerChannel@agentflow@@QEAA?AUAgentWorkerMessage@2@V?$time_point@Usteady_clock@chrono@std@@V?$duration@_JU?$ratio@$00$0DLJKMKAA@@std@@@23@@chrono@std@@Vstop_token@6@@Z",
+      "object": "f   AGENTFLOW_WORKER_CHANNEL:agent_worker_channel.obj"
+    },
+    {
+      "rva": 1720368,
+      "offset": "0xb9",
+      "symbol": "?read@Impl@AgentWorkerRpcPeer@agentflow@@QEAAXXZ",
+      "object": "f i AGENTFLOW_WORKER_RPC:agent_worker_rpc.obj"
+    },
+    {
+      "rva": 1698992,
+      "offset": "0x11",
+      "symbol": "??$_Invoke@V?$tuple@V<lambda_1>@?1??start@Impl@AgentWorkerRpcPeer@agentflow@@QEAAXXZ@@std@@$0A@@thread@std@@CAIPEAX@Z",
+      "object": "f i AGENTFLOW_WORKER_RPC:agent_worker_rpc.obj"
+    },
+    {
+      "rva": 2512800,
+      "offset": "0x1ac",
+      "symbol": "?expire_waiting@Impl@AgentService@agentflow@@QEAAXXZ",
+      "object": "f i AGENTFLOW_AGENT:agent_service.obj"
+    },
+    {
+      "rva": 2472800,
+      "offset": "0x11",
+      "symbol": "??$_Invoke@V?$tuple@V<lambda_2>@?BJ@???0Impl@AgentService@agentflow@@QEAA@AEAVPersistenceService@4@UAgentSettings@4@_K2V?$shared_ptr@VRootAdmissionPool@agentflow@@@std@@V?$shared_ptr@VAgentRootExecutor@agentflow@@@8@UPrepared@234@@Z@@std@@$0A@@thread@std@@CAIPEAX@Z",
+      "object": "f i AGENTFLOW_AGENT:agent_service.obj"
+    }
+  ]
+}

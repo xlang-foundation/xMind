@@ -16,18 +16,19 @@ struct AgentWorkerReadOwner::Impl {
     AgentWorkerReadContext context;
     std::unique_ptr<AgentWorkerContextWindow> context_window;
     std::unique_ptr<AgentWorkerModelHost> model;
+    std::unique_ptr<AgentWorkerJournalHost> native_journal;
     std::unique_ptr<NativeWorkerModelBinding> native_model;
     bool native_model_required=false;
     AgentWorkerRpcHandler model_rpc,read_rpc,journal_rpc;
     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
         std::string identity,std::shared_ptr<AgentModelGateway> gateway,
-        AgentWorkerChannel::Deadline deadline,std::stop_token cancel)
+        AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::function<void(AgentWorkerJournalReadKind,std::stop_token)> journal_read)
         :context(store,store,lease,captured_owner(std::move(owner),deadline),policy,cancel){
         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
-        AgentWorkerJournalModelHooks hooks;
+        AgentWorkerJournalModelHooks hooks;hooks.before_read=std::move(journal_read);
         if(policy.context){
             context_window=std::make_unique<AgentWorkerContextWindow>(store,lease,provider,*policy.context,gateway,
                 [this](std::stop_token stop){return context.prepare(stop);},
@@ -42,7 +43,8 @@ struct AgentWorkerReadOwner::Impl {
         }
         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),
             std::move(model_policy),std::move(gateway),deadline,cancel);
-        native_model=std::make_unique<NativeWorkerModelBinding>(*model);
+        native_journal=std::make_unique<AgentWorkerJournalHost>(store,lease,deadline,cancel,hooks);
+        native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get());
         model_rpc=bind_agent_worker_model_rpc(*model,scope);
         read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
         journal_rpc=bind_agent_worker_journal_rpc(store,std::move(lease),scope,deadline,cancel,std::move(hooks));
@@ -50,13 +52,13 @@ struct AgentWorkerReadOwner::Impl {
 };
 AgentWorkerReadOwner::AgentWorkerReadOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
     AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
-    std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel)
-    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel)){}
+    std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::function<void(AgentWorkerJournalReadKind,std::stop_token)> journal_read)
+    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(journal_read))){}
 AgentWorkerReadOwner::~AgentWorkerReadOwner()=default;
-NativeWorkerModelAccess AgentWorkerReadOwner::native_model_access()const{impl_->native_model_required=true;return impl_->native_model->access();}
+NativeWorkerModelAccess AgentWorkerReadOwner::native_model_access()const{impl_->native_model_required=true;impl_->model_rpc={};impl_->journal_rpc={};return impl_->native_model->access();}
 std::string AgentWorkerReadOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
     if(method.starts_with("model.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->model_rpc(method,payload,std::move(sink),cancel);}
-    if(method.starts_with("journal."))return impl_->journal_rpc(method,payload,std::move(sink),cancel);
+    if(method.starts_with("journal.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->journal_rpc(method,payload,std::move(sink),cancel);}
     return impl_->read_rpc(method,payload,std::move(sink),cancel);
 }
 }

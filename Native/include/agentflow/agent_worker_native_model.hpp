@@ -3,11 +3,12 @@
 #include "xlang3/xlang3.h"
 #include <memory>
 namespace agentflow {
+class AgentWorkerJournalHost;
 struct NativeWorkerModelState;
 struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 class NativeWorkerModelBinding final {
 public:
-    explicit NativeWorkerModelBinding(AgentWorkerModelHost&);
+    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr);
     ~NativeWorkerModelBinding();
     NativeWorkerModelBinding(const NativeWorkerModelBinding&)=delete;
     NativeWorkerModelBinding& operator=(const NativeWorkerModelBinding&)=delete;
@@ -22,16 +23,57 @@ struct NativeWorkerModelApi {
     NativeWorkerModelApi()=default;
     explicit NativeWorkerModelApi(NativeWorkerApi* worker);
     X::Value Admission();
-    X::Value NewRequest();
     X::Value Prepare();
-    X::Value Rebuild(std::string attempt,std::uint64_t request);
-    X::Value Complete(std::string attempt,std::uint64_t request);
+    X::Value Rebuild(std::string attempt,X::Value request);
+    X::Value Complete(std::string attempt,X::Value request);
     BEGIN_PACKAGE(NativeWorkerModelApi)
         APISET().AddFunc<0>("Admission",&NativeWorkerModelApi::Admission);
-        APISET().AddFunc<0>("NewRequest",&NativeWorkerModelApi::NewRequest);
         APISET().AddFunc<0>("Prepare",&NativeWorkerModelApi::Prepare);
-        APISET().AddFunc<2>("Rebuild",&NativeWorkerModelApi::Rebuild);
-        APISET().AddFunc<2>("Complete",&NativeWorkerModelApi::Complete);
+        APISET().AddFunc<2>("Rebuild",&NativeWorkerModelApi::Rebuild,X3_NATIVE_IPC_ARGS_BY_VALUE);
+        APISET().AddFunc<2>("Complete",&NativeWorkerModelApi::Complete,X3_NATIVE_IPC_ARGS_BY_VALUE);
+    END_PACKAGE
+};
+struct NativeWorkerJournalApi {
+    std::shared_ptr<NativeWorkerModelState> state;
+    NativeWorkerJournalApi()=default;
+    explicit NativeWorkerJournalApi(NativeWorkerApi*);
+    X::Value Run(std::string id);
+    X::Value Session(std::string id);
+    X::Value History(std::string id);
+    X::Value Events(std::string id,std::int64_t after);
+    X::Value RootBudget(std::string id);
+    X::Value ChildAdmission(std::string id);
+    X::Value WorkspaceMode();
+    X::Value ExecutionWindow();
+    X::Value Begin();
+    X::Value ReserveModel(std::string attempt);
+    X::Value StartModel(std::string attempt);
+    X::Value FinishModel(std::string attempt);
+    X::Value ModelEvent(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
+    X::Value ToolEvent(std::string attempt,std::int64_t ordinal,bool returned);
+    X::Value WorkspaceToolEvent(std::string attempt,std::int64_t ordinal,bool returned);
+    X::Value CommitReadTurn(std::string attempt);
+    X::Value CommitWorkspaceTurn(std::string attempt);
+    X::Value Complete(std::string attempt);
+    BEGIN_PACKAGE(NativeWorkerJournalApi)
+        APISET().AddFunc<1>("Run",&NativeWorkerJournalApi::Run);
+        APISET().AddFunc<1>("Session",&NativeWorkerJournalApi::Session);
+        APISET().AddFunc<1>("History",&NativeWorkerJournalApi::History);
+        APISET().AddFunc<2>("Events",&NativeWorkerJournalApi::Events);
+        APISET().AddFunc<1>("RootBudget",&NativeWorkerJournalApi::RootBudget);
+        APISET().AddFunc<1>("ChildAdmission",&NativeWorkerJournalApi::ChildAdmission);
+        APISET().AddFunc<0>("WorkspaceMode",&NativeWorkerJournalApi::WorkspaceMode);
+        APISET().AddFunc<0>("ExecutionWindow",&NativeWorkerJournalApi::ExecutionWindow);
+        APISET().AddFunc<0>("Begin",&NativeWorkerJournalApi::Begin);
+        APISET().AddFunc<1>("ReserveModel",&NativeWorkerJournalApi::ReserveModel);
+        APISET().AddFunc<1>("StartModel",&NativeWorkerJournalApi::StartModel);
+        APISET().AddFunc<1>("FinishModel",&NativeWorkerJournalApi::FinishModel);
+        APISET().AddFunc<4>("ModelEvent",&NativeWorkerJournalApi::ModelEvent);
+        APISET().AddFunc<3>("ToolEvent",&NativeWorkerJournalApi::ToolEvent);
+        APISET().AddFunc<3>("WorkspaceToolEvent",&NativeWorkerJournalApi::WorkspaceToolEvent);
+        APISET().AddFunc<1>("CommitReadTurn",&NativeWorkerJournalApi::CommitReadTurn);
+        APISET().AddFunc<1>("CommitWorkspaceTurn",&NativeWorkerJournalApi::CommitWorkspaceTurn);
+        APISET().AddFunc<1>("Complete",&NativeWorkerJournalApi::Complete);
     END_PACKAGE
 };
 struct NativeWorkerApi {
@@ -39,10 +81,12 @@ struct NativeWorkerApi {
     NativeWorkerApi()=default;
     NativeWorkerApi(NativeWorkersApi*,std::string ticket);
     X::Value Model();
+    X::Value Journal();
     X::Value Identity();
     BEGIN_PACKAGE(NativeWorkerApi)
         APISET().AddFunc<0>("Identity",&NativeWorkerApi::Identity);
         APISET().AddFunc<0>("Model",&NativeWorkerApi::Model);
+        APISET().AddFunc<0>("Journal",&NativeWorkerApi::Journal);
     END_PACKAGE
 };
 struct NativeWorkersApi {
@@ -60,6 +104,24 @@ public:
     ModelRequest prepare_request(std::stop_token={});
     ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
     ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+    std::string journal_run(std::string id);
+    std::string journal_session(std::string id);
+    std::string journal_history(std::string id);
+    std::string journal_events(std::string id,std::int64_t after);
+    std::string journal_root_budget(std::string id);
+    std::string journal_child_admission(std::string id);
+    std::string journal_workspace_mode();
+    std::string journal_execution_window();
+    std::string journal_begin();
+    std::string journal_reserve_model(std::string attempt);
+    std::string journal_start_model(std::string attempt);
+    std::string journal_finish_model(std::string attempt);
+    std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
+    std::string journal_tool_event(std::string attempt,std::int64_t ordinal,bool returned);
+    std::string journal_workspace_tool_event(std::string attempt,std::int64_t ordinal,bool returned);
+    std::string journal_commit_read_turn(std::string attempt);
+    std::string journal_commit_workspace_turn(std::string attempt);
+    std::string journal_complete(std::string attempt);
 private:struct Impl;std::unique_ptr<Impl> impl_;
 };
 }

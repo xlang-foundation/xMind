@@ -8,6 +8,7 @@ class PersistenceService;
 class AgentWorkerFileHost;
 struct AgentWorkerJournalModelHooks {
     std::function<ModelCallReservation(const std::string&,std::stop_token)> reserve,start,finish;
+    std::function<void(AgentWorkerJournalReadKind,std::stop_token)> before_read;
 };
 // Backend authority for one captured worker lease. Native services and temporary
 // wire adapters share these typed operations; neither supplies SQL or ownership.
@@ -16,6 +17,7 @@ public:
     using Deadline=std::chrono::steady_clock::time_point;
     AgentWorkerJournalHost(PersistenceService&,AgentWorkerLeaseSpec,Deadline,std::stop_token={},AgentWorkerJournalModelHooks={});
     AgentWorkerJournalHost(PersistenceService&,AgentWorkerFileHost&,Deadline,std::stop_token={},AgentWorkerJournalModelHooks={});
+    const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
     Run run(std::string,std::stop_token={});
     Session session(std::string,std::stop_token={});
     std::vector<Message> history(std::string,std::stop_token={});
