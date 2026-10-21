@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_model_host.hpp"
 #include "agentflow/agent_read_tool_host.hpp"
+#include "agentflow/agent_file_tool_host.hpp"
 #include "xlang3/xlang3.h"
 #include <memory>
 namespace agentflow {
@@ -9,7 +10,7 @@ struct NativeWorkerModelState;
 struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 class NativeWorkerModelBinding final {
 public:
-    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr);
+    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr);
     ~NativeWorkerModelBinding();
     NativeWorkerModelBinding(const NativeWorkerModelBinding&)=delete;
     NativeWorkerModelBinding& operator=(const NativeWorkerModelBinding&)=delete;
@@ -87,6 +88,15 @@ struct NativeWorkerReadApi {
         APISET().AddFunc<1>("Invoke",&NativeWorkerReadApi::Invoke,X3_NATIVE_IPC_ARGS_BY_VALUE);
     END_PACKAGE
 };
+struct NativeWorkerFileApi {
+    std::shared_ptr<NativeWorkerModelState> state;
+    NativeWorkerFileApi()=default;
+    explicit NativeWorkerFileApi(NativeWorkerApi*);
+    X::Value Invoke(X::Value invocation);
+    BEGIN_PACKAGE(NativeWorkerFileApi)
+        APISET().AddFunc<1>("Invoke",&NativeWorkerFileApi::Invoke,X3_NATIVE_IPC_ARGS_BY_VALUE);
+    END_PACKAGE
+};
 struct NativeWorkerApi {
     std::shared_ptr<NativeWorkerModelState> state;
     NativeWorkerApi()=default;
@@ -94,12 +104,14 @@ struct NativeWorkerApi {
     X::Value Model();
     X::Value Journal();
     X::Value Reads();
+    X::Value Files();
     X::Value Identity();
     BEGIN_PACKAGE(NativeWorkerApi)
         APISET().AddFunc<0>("Identity",&NativeWorkerApi::Identity);
         APISET().AddFunc<0>("Model",&NativeWorkerApi::Model);
         APISET().AddFunc<0>("Journal",&NativeWorkerApi::Journal);
         APISET().AddFunc<0>("Reads",&NativeWorkerApi::Reads);
+        APISET().AddFunc<0>("Files",&NativeWorkerApi::Files);
     END_PACKAGE
 };
 struct NativeWorkersApi {
@@ -117,6 +129,7 @@ public:
     ModelRequest prepare_request(std::stop_token={});
     ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
     ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+    AgentFileToolResult file_invoke(const AgentFileToolInvocation&,std::stop_token={});
     AgentReadToolResult read_invoke(const AgentWorkspaceInvocation&,std::stop_token={});
     std::string journal_run(std::string id);
     std::string journal_session(std::string id);

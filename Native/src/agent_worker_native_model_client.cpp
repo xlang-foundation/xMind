@@ -15,9 +15,9 @@ namespace {
 }
 struct NativeWorkerModelClient::Impl {
     X::Runtime runtime;
-    X::Value root,worker,model,journal,reads;
-    std::mutex mutex,journal_mutex,read_mutex;
-    std::map<std::string,X::Value> model_methods,journal_methods,read_methods;
+    X::Value root,worker,model,journal,reads,files;
+    std::mutex mutex,journal_mutex,read_mutex,file_mutex;
+    std::map<std::string,X::Value> model_methods,journal_methods,read_methods,file_methods;
     Impl(const NativeWorkerModelAccess& access,const std::string& root_id,const std::string& owner,const std::string& workspace,const std::string& generation,std::int64_t revision){
         if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos||!access.pid)throw Conflict("Invalid native worker model access");
         X3LrpcEndpointInfo info{};info.size=sizeof(info);if(x3_runtime_probe_remote(runtime.get(),access.endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=access.pid)throw Conflict("Native model endpoint identity differs");
@@ -53,6 +53,10 @@ ModelCompletion NativeWorkerModelClient::complete(const std::string& attempt,con
 AgentReadToolResult NativeWorkerModelClient::read_invoke(const AgentWorkspaceInvocation& invocation,std::stop_token cancel){
     try{std::lock_guard lock(impl_->read_mutex);if(cancel.stop_requested())throw ToolCancelled("Native worker read cancelled");if(!impl_->reads.IsValid())impl_->reads=impl_->call(impl_->worker,"Reads",{});auto input=sdk_values::to_value(impl_->runtime.host(),nlohmann::json::parse(invocation.serialize()));const auto result=nlohmann::json::parse(impl_->await(impl_->service_call(impl_->reads,impl_->read_methods,"Invoke",{input}),{},cancel));if(!result.is_object()||result.size()!=2||!result.at("success").is_boolean()||!result.at("output_json").is_string())throw AgentWorkerReadOutcomeUnrecorded("Native read result differs");return {result.at("success").get<bool>(),result.at("output_json").get<std::string>()};}
     catch(const TransportCancelled&){throw ToolCancelled("Native worker read cancelled");}catch(const TransportTimeout&){throw ToolCancelled("Native worker read deadline elapsed");}catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentWorkerReadOutcomeUnrecorded("Native worker read acknowledgement unavailable; no replay authorized");}catch(const nlohmann::json::exception&){throw AgentWorkerReadOutcomeUnrecorded("Native worker read result invalid; no replay authorized");}
+}
+AgentFileToolResult NativeWorkerModelClient::file_invoke(const AgentFileToolInvocation& invocation,std::stop_token cancel){
+    try{std::lock_guard lock(impl_->file_mutex);if(cancel.stop_requested())throw ToolCancelled("Native worker file cancelled");if(!impl_->files.IsValid())impl_->files=impl_->call(impl_->worker,"Files",{});auto input=sdk_values::to_value(impl_->runtime.host(),nlohmann::json::parse(invocation.serialize()));const auto result=nlohmann::json::parse(impl_->await(impl_->service_call(impl_->files,impl_->file_methods,"Invoke",{input}),{},cancel));if(!result.is_object()||result.size()!=2||!result.at("success").is_boolean()||!result.at("output_json").is_string())throw AgentFileToolOutcomeUnrecorded("Native file result differs");return {result.at("success").get<bool>(),result.at("output_json").get<std::string>()};}
+    catch(const TransportCancelled&){throw ToolCancelled("Native worker file cancelled");}catch(const TransportTimeout&){throw ToolCancelled("Native worker file deadline elapsed");}catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentFileToolOutcomeUnrecorded("Native worker file acknowledgement unavailable; no replay authorized");}catch(const nlohmann::json::exception&){throw AgentFileToolOutcomeUnrecorded("Native worker file result invalid; no replay authorized");}
 }
 std::string NativeWorkerModelClient::journal_run(std::string id){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("Run",{impl_->text(id)}));}
 std::string NativeWorkerModelClient::journal_session(std::string id){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("Session",{impl_->text(id)}));}

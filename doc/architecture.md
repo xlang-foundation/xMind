@@ -9,7 +9,7 @@ methods through the standard xlang3 SDK. xlang3 owns IPC serialization, remote
 references and transport. Cantor's network-task DataFrame path is a separate
 mechanism and is not part of this IPC contract.
 
-The current private worker services are Model(), Journal() and Reads() beneath
+The current private worker services are Model(), Journal(), Reads() and Files() beneath
 xmind.Workers().Open(ticket). Requests, events and results use SDK values.
 Long work returns an operation object exposing Status, Events, Result and
 Cancel. The backend keeps lease admission, credentials, budgets, permissions and

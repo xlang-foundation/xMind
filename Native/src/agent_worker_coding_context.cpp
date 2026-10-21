@@ -56,22 +56,12 @@ void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelReque
     auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel,&request);
 }
 AgentReadToolResult AgentWorkerCodingContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){return reads_.invoke(call,cancel);}
-AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){
-    auto dispatch=bind_agent_worker_file_rpc(*files_,scope);
-    return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
-        if(method!="file.invoke")return dispatch(method,payload,std::move(sink),cancel);
-        try{
-            std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");
-            reads_.check(cancel);const auto call=AgentFileToolInvocation::parse(payload);
-            if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("File call lacks its actually admitted guidance window");
-            return dispatch(method,payload,std::move(sink),cancel);
-        }catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
-    };
+AgentFileToolResult AgentWorkerCodingContext::invoke(const AgentFileToolInvocation& call,std::stop_token cancel){
+    std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");
+    reads_.check(cancel);if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("File call lacks its actually admitted guidance window");
+    return files_->invoke(call,cancel);
 }
+AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){return bind_agent_worker_file_rpc(*this,files_->lease(),scope);}
 AgentWorkerRpcHandler AgentWorkerCodingContext::bind_processes(const AgentWorkerScope& scope){
     if(scope!=AgentWorkerScope{reads_.lease_.root_run_id,reads_.lease_.owner_run_id,reads_.lease_.workspace_id,reads_.lease_.generation,reads_.lease_.workspace_revision})throw Conflict("Coding process channel differs from captured lease");
     auto dispatch=processes_?bind_agent_worker_process_rpc(*processes_,scope):AgentWorkerRpcHandler{[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");}};

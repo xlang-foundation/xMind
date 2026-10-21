@@ -11,13 +11,14 @@
 namespace agentflow {
 // Backend-only composition. File operations share the guidance window actually
 // admitted to the model and the same serialized native workspace ownership.
-class AgentWorkerCodingContext final:public AgentReadToolHost {
+class AgentWorkerCodingContext final:public AgentReadToolHost,public AgentFileToolHost {
 public:
     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
         AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
     ModelRequest prepare(std::stop_token={});
     void admit(const std::string&,const ModelRequest&,std::stop_token={});
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+    AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
     AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
     AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
     AgentWorkerRpcHandler bind_callables(const AgentWorkerScope&);

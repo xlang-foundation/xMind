@@ -1,3 +1,27 @@
+## Native file SDK method checkpoint — 2026-10-21
+
+Product coding workers use Files().Invoke through ordinary SDK values and the
+existing operation object. The typed coding context preserves its actual
+admitted guidance window and serialized workspace access before native file
+approval and durable effects. The old fixture adapter delegates that same
+typed method; product owners discard/refuse old file packet handlers. A native
+read-only worker refusal check verifies that no Files service is available.
+Explicit unrecorded file outcomes retain the supervisor recovery signal.
+
+The final frozen gate passes 18/18 focused checks in 130.44s, including actual
+product approved/denied/cancelled/unrecorded file cases and graph paths. All
+136 native binary hashes and complete input sets remained unchanged. No install
+or completed user-task replay. This does not qualify the full native suite.
+
+Failures remain preserved: initial link was blocked by one identity-verified
+callable fixture left from the earlier recorded timeout; that exact process was
+retired with receipt. The next gate was 17/18 with Windows heap corruption
+0xC0000374 in the production fixture. A test-only diagnostic gate passed using
+the identical product executable d4f9ead7; it did not reproduce/capture that
+heap failure. Its 50-second observation dump stays external. Heap corruption,
+previous SDK access violation and fixture timing variability remain unresolved.
+[Raw receipts, source snapshots and limitations](evidence/process-xmind-root-native-file-migration-20261021.json).
+
 ## Native read SDK method checkpoint — 2026-10-21
 
 Production workers call Reads().Invoke using ordinary xlang3 SDK values and

@@ -27,7 +27,10 @@ inline LONG WINAPI report(EXCEPTION_POINTERS* failure){
     dump(failure,L"fatal");
     return EXCEPTION_CONTINUE_SEARCH;
 }
+inline LONG CALLBACK heap_failure(EXCEPTION_POINTERS* failure){if(failure&&failure->ExceptionRecord&&failure->ExceptionRecord->ExceptionCode==0xC0000374)report(failure);return EXCEPTION_CONTINUE_SEARCH;}
 inline void install(){SetUnhandledExceptionFilter(report);
+    // Observe heap corruption without handling it or changing Windows termination.
+    if(GetEnvironmentVariableW(L"XMIND_WORKER_FIXTURE_DUMP_DIR",nullptr,0))AddVectoredExceptionHandler(1,heap_failure);
     static std::jthread observer([](std::stop_token stop){if(!GetEnvironmentVariableW(L"XMIND_WORKER_FIXTURE_DUMP_DIR",nullptr,0))return;std::mutex mutex;std::condition_variable_any wake;std::unique_lock lock(mutex);wake.wait_for(lock,stop,std::chrono::seconds(50),[]{return false;});if(!stop.stop_requested())dump(nullptr,L"slow");});
 }
 }

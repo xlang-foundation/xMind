@@ -11,4 +11,5 @@ private:AgentWorkerRpcPeer& peer_;
 // Only the durable backend host can bind this endpoint. A local file host or
 // worker-selected lease cannot bypass per-call and per-operation admission.
 AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost&,const AgentWorkerScope&);
+AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
 }

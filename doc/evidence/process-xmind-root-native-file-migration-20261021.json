@@ -1,0 +1,227 @@
+{
+  "recordedAt": "2026-10-21T23:43:52.196Z",
+  "sourceParent": "fd468ed2d523db30bd0490346fe17acf279ff968",
+  "currentSourcePatchSha256": "fe07ba208338ce7d4c351522f15b151f000a8aaa66a5f6164eea23e1286fa981",
+  "status": "18/18 focused checkpoint; not installed; full goal active",
+  "implementation": [
+    "Files().Invoke uses native SDK values and the existing operation object; no xMind transport serializer.",
+    "Typed AgentWorkerCodingContext file invocation retains actual admitted guidance window and workspace serialization before AgentWorkerFileHost performs approval/durable effects. Legacy fixture adapter delegates the same typed method.",
+    "Product coding owners discard and refuse old file packet handlers. Read-only native worker cannot obtain Files service.",
+    "Explicit AgentFileToolOutcomeUnrecorded marks native supervisor recovery state; no replay."
+  ],
+  "gates": [
+    {
+      "name": "values",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-file-values-20261021",
+      "result": null,
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-values-20261021-build.log",
+          "sha256": "0d27a0268ef9b90f4c86d4dcd7b35aa9795d0699ae156c7cc935d4d2d34701b4",
+          "bytes": 100328
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-values-20261021-build-terminal.json",
+          "sha256": "3603ce2a9963b8dff477a341da8245119e050e1195b5108b6a6d2abfe2f6a2f0",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-values-20261021-source.patch",
+          "sha256": "79276452f0966763e0e1f96ab5d7a29706246f5c35c67829e6942315b041898f",
+          "bytes": 30429
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-values-20261021-owned-timeout-worker-before-retirement.json",
+          "sha256": "98919de8c3417b7dfc330f1e704544deff1679bb2d94cbd08c38a49895bcbcbc",
+          "bytes": 838
+        }
+      ]
+    },
+    {
+      "name": "bound",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-file-bound-20261021",
+      "result": {
+        "recordedAt": "2026-10-21T23:39:41.606Z",
+        "sourceParent": "fd468ed2d523db30bd0490346fe17acf279ff968",
+        "sourcePatchSha256": "79276452f0966763e0e1f96ab5d7a29706246f5c35c67829e6942315b041898f",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 63768,
+          "launchedAt": "2026-10-21T23:37:06.548Z",
+          "completedAt": "2026-10-21T23:37:59.002Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "34d43273092ddc384607156617640086068bcbb1adae809e87996c232b7421e2"
+        },
+        "test": {
+          "pid": 41324,
+          "launchedAt": "2026-10-21T23:38:02.262Z",
+          "completedAt": "2026-10-21T23:39:38.855Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "11e27150e32bd37a0e36cc18b10f32b7b43adfc60f685f73babb83e91ed57071"
+        },
+        "total": 18,
+        "failed": 1,
+        "passed": 17,
+        "seconds": 96.54,
+        "projectFiles": 2776,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "d4f9ead77b6774f111249bc4ebd894afc7b30d32f772ad9348c2fc7b5fbf38a2",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-gate.json",
+          "sha256": "e98911170fc6937ef41f671e076aaef1bf27043ce660f8f951c5326f567020de",
+          "bytes": 1671
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-build.log",
+          "sha256": "34d43273092ddc384607156617640086068bcbb1adae809e87996c232b7421e2",
+          "bytes": 47245
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-build-terminal.json",
+          "sha256": "3f48d9b88961e6fd8bd585b130ea1c9214fbe44e1569db88d9b618641d46f2f4",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-ctest.log",
+          "sha256": "11e27150e32bd37a0e36cc18b10f32b7b43adfc60f685f73babb83e91ed57071",
+          "bytes": 20310
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-ctest-terminal.json",
+          "sha256": "843db95938320372a014e0b9b3cc917bf57f67cff3be53e022e89dac4643eee2",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-LastTest.log",
+          "sha256": "60197928a89bdcb7bc3b8e4ae99788a7effb47afc485f07271c8e9401dd4fd0b",
+          "bytes": 45255
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-bound-20261021-source.patch",
+          "sha256": "79276452f0966763e0e1f96ab5d7a29706246f5c35c67829e6942315b041898f",
+          "bytes": 30429
+        }
+      ]
+    },
+    {
+      "name": "diagnostics",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-file-diagnostics-20261021",
+      "result": {
+        "recordedAt": "2026-10-21T23:43:25.476Z",
+        "sourceParent": "fd468ed2d523db30bd0490346fe17acf279ff968",
+        "sourcePatchSha256": "fe07ba208338ce7d4c351522f15b151f000a8aaa66a5f6164eea23e1286fa981",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 12348,
+          "launchedAt": "2026-10-21T23:40:09.992Z",
+          "completedAt": "2026-10-21T23:41:09.168Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "204343d240c5333451f5c76efe2194b0e28f98bd48c750148ef17a7d7188f4f2"
+        },
+        "test": {
+          "pid": 54760,
+          "launchedAt": "2026-10-21T23:41:12.144Z",
+          "completedAt": "2026-10-21T23:43:22.631Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "e048333ed4b571c9fda6a6b4259c61ef9b5eccd540a5332ec6f21e8a3d453607"
+        },
+        "total": 18,
+        "failed": 0,
+        "passed": 18,
+        "seconds": 130.44,
+        "projectFiles": 2776,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "d4f9ead77b6774f111249bc4ebd894afc7b30d32f772ad9348c2fc7b5fbf38a2",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-gate.json",
+          "sha256": "f4bb778ba6f14c56e0737b84253da1bf2283ab46eebd8e82ea9958585d2e1bfe",
+          "bytes": 1671
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-build.log",
+          "sha256": "204343d240c5333451f5c76efe2194b0e28f98bd48c750148ef17a7d7188f4f2",
+          "bytes": 47287
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-build-terminal.json",
+          "sha256": "b5dc666f08bb632a735c33e7b8f33163b8bebd31f62c9f8b549726677cd326cd",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-ctest.log",
+          "sha256": "e048333ed4b571c9fda6a6b4259c61ef9b5eccd540a5332ec6f21e8a3d453607",
+          "bytes": 2654
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-ctest-terminal.json",
+          "sha256": "0503b2b803b5ec2e2b40dafd3d8614e5512ba5a8831469730be84c966b3a29b8",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-LastTest.log",
+          "sha256": "c0968677f0098b468a5756b6d2ee1392e7d405a2fb09f4257ac4c4c3417e0100",
+          "bytes": 57049
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-file-diagnostics-20261021-source.patch",
+          "sha256": "fe07ba208338ce7d4c351522f15b151f000a8aaa66a5f6164eea23e1286fa981",
+          "bytes": 31624
+        }
+      ]
+    }
+  ],
+  "dumps": [
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-file-dumps-20261021/fixture-60008-652239343-slow.dmp",
+      "sha256": "f7b1852e19116d321b71dbacbf0a67cc7e578556c63b494ecca7ca7ab1ed865e",
+      "bytes": 295122,
+      "interpretation": "50-second observation dump from a passing fixture, not a captured heap-corruption failure"
+    }
+  ],
+  "limitations": [
+    "First build hit LNK1104 because PID67116 retained validation xmind.exe from the recorded read-outcomes timeout. Exact birth/image/command receipt preserved before specific retirement.",
+    "Bound gate passed 17/18 but production fixture exited Windows heap corruption 0xC0000374, after parent delegation cases and before the new file-service refusal check. Cause remains unresolved.",
+    "Diagnostic gate adds only opt-in test vectored observation of heap corruption, preserving EXCEPTION_CONTINUE_SEARCH. Identical product xmind.exe passed focused 18/18; this is not proof the heap failure is fixed.",
+    "Previous intermittent SDK access violation and production fixture timing variability remain open.",
+    "Remaining process/remote/callable/control packet migration, native planning, full current native suite and installed browser/editor/CLI acceptance remain open."
+  ],
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "fullGoalComplete": false,
+  "liveUserTasksReplayed": false,
+  "cpythonExecuted": false
+}

@@ -77,6 +77,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("journal.run","{}",{},{});});
         rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("read.invoke","{}",{},{});});
         NativeWorkerModelClient scoped(access,id,id,lease.workspace_id,generation,1);
+        rejects<AgentFileToolOutcomeUnrecorded>([&]{scoped.file_invoke(AgentFileToolInvocation{});});
         check(Json::parse(scoped.journal_run(id)).at("state")=="queued","Native journal must read its actual queued owner");
         rejects<Conflict>([&]{scoped.journal_run("rpc-foreign");});
         rejects<Conflict>([&]{scoped.journal_events(id,-1);});
