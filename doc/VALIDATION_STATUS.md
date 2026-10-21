@@ -1,3 +1,17 @@
+## Parent IPC complete native regression — 2026-10-21
+
+**162/162 native contracts pass in 1235.49 seconds** on committed
+2f60109f. Actual parent/child xmind IPC cases cover success, rejection,
+cancellation, mixed provider outcomes, unrecorded result stop and counted Responses
+context. The worker HTTP peer observes 219 controlled requests. Existing provider,
+tool, graph/planning, CLI/HTTP, owner and persistence scopes also pass.
+All 2748 project inputs and SDK/library/runtime/dependency/133-binary file
+sets/hashes remain frozen; Native/client patches are empty.
+[Full inventory and raw evidence](evidence/process-worker-parent-full-20261021.json).
+
+Planning and graph/default worker IPC integration, combined parent compaction/overflow,
+and updated installed/rendered/live-provider client acceptance remain unfinished.
+
 ## Counted parent/child IPC context — 2026-10-21
 
 Actual Responses parent and two delegated xmind workers now pass six inference
