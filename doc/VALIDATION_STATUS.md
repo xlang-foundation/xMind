@@ -1,3 +1,20 @@
+## Worker skills selected regression — 2026-10-21
+
+**65/65 selected native contracts pass in 224.55 seconds** on committed
+skills source 6d4bae34, with unchanged 2740 project inputs, SDK/libraries,
+dependencies and all 133 binary file sets/hashes. This includes all three skill
+contracts and worker, coding, graph/context, delegation, provider, MCP/A2A,
+process, permissions and persistence coverage.
+
+The original run failed 3/65: A2A discovery, approval observation and transport
+timeout. An isolated unchanged 3/3 diagnostic and the complete 65/65 repeat
+pass. All three runs remain recorded; intermittent timing cause is unproven.
+[Complete runs and raw evidence](evidence/process-worker-skills-regression-repeat-20261021.json).
+
+This is selected regression, not full-suite or product acceptance. Worker
+context, delegation/planning and graph/default placement, updated installation
+and rendered browser/VS Code/CLI acceptance remain open.
+
 ## Production worker guidance and skills — 2026-10-21
 
 Native guidance tools now use the existing durable read ownership and xlang3
