@@ -1,0 +1,80 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test"
+    ],
+    "files": [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 936,
+        "parent": 0
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1108,
+        "parent": 2
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 1,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_agent_worker_ledger_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 3,
+      "command": [
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_process_tool_host_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+      ],
+      "config": "Release",
+      "name": "native_agent_process_tool_host_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

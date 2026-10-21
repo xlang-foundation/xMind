@@ -214,6 +214,11 @@ public:
     AgentWorkerFileClaimRecord claim_agent_worker_file_effect(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,const std::string& operation_id);
     AgentWorkerFileClaimRecord record_agent_worker_file_result(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerFileClaimRecord agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call);
+    AgentWorkerProcessClaimRecord claim_agent_worker_process(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&);
+    AgentWorkerProcessClaimRecord start_agent_worker_process(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&);
+    AgentWorkerProcessClaimRecord claim_agent_worker_process_effect(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,const std::string& operation_id);
+    AgentWorkerProcessClaimRecord record_agent_worker_process_result(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,bool success,const std::string& actual_output_json);
+    AgentWorkerProcessClaimRecord agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
     // Backend coding admission only; results come from captured read/file claims.
     AgentWorkerToolTurnRecord commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);

@@ -5,6 +5,7 @@
 #include "agentflow/delegation_records.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
+#include "agentflow/agent_process_tool_host.hpp"
 #include <variant>
 #include <stdexcept>
 
@@ -53,6 +54,15 @@ struct AgentWorkerToolTurnRecord {
 struct AgentWorkerFileClaimRecord {
     AgentWorkerModelClaimSpec model;
     AgentFileToolInvocation invocation;
+    std::string state;
+    std::vector<std::string> operation_ids;
+    bool success=false;
+    std::string actual_output_json,output_binding;
+};
+// Backend-owned foreground run_process claim; observation/control admission is separate.
+struct AgentWorkerProcessClaimRecord {
+    AgentWorkerModelClaimSpec model;
+    AgentProcessToolInvocation invocation;
     std::string state;
     std::vector<std::string> operation_ids;
     bool success=false;

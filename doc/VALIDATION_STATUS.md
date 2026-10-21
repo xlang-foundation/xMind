@@ -1,3 +1,28 @@
+## Durable native process ownership — 2026-10-20
+
+Foreground run_process claims now bind exact actual model calls and worker leases
+to backend-owned native operation IDs. Approval precedes durable effect binding;
+the scope includes workspace, folder, profile and requested command arguments.
+Duplicate dispatch and reconstructed-host replay fail. Atomic rollback, retirement
+uncertainty, late actual results and SQLite reopen preserve the retained facts.
+
+The durable native process host verifies real xlang3 attached-folder execution,
+policy/controller denial, cancellation during approval, retired authority and
+failed result recording. An unrecorded result retains the successful native
+operation and actual bytes alongside unresolved worker acknowledgement.
+
+The serial Release build and **62/62 focused native contracts pass in 193.09
+seconds**. All 2715 project inputs, 16 SDK headers, 1870 pure-library files,
+76 runtime files, 18598 Node dependencies and 133 native binaries remain unchanged
+across validation. A missing test include and an incomplete synthetic membership
+event caused the earlier diagnostics; their original logs are preserved.
+[Scope, source patches and raw evidence](evidence/process-worker-native-host-focused-20261020.json).
+
+This is the backend foreground process boundary. Authenticated process RPC,
+production coding-worker command ports and wait/stop/background continuation
+remain unfinished. No full-suite, installed, hosted, rendered or live-provider
+acceptance is added. Existing owners, installations and user tasks are preserved.
+
 ## Native process dispatch authority — 2026-10-20
 
 The process owner now binds a backend-only live authority callback to its exact

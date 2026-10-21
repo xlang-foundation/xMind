@@ -46,6 +46,11 @@ public:
     std::future<AgentWorkerFileClaimRecord> claim_agent_worker_file_effect(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::string operation_id,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerFileClaimRecord> record_agent_worker_file_result(AgentWorkerLeaseSpec,AgentFileToolInvocation,bool success,std::string actual_output_json);
     std::future<AgentWorkerFileClaimRecord> agent_worker_file_claim(std::string root,std::string attempt,std::string call);
+    std::future<AgentWorkerProcessClaimRecord> claim_agent_worker_process(AgentWorkerLeaseSpec,AgentProcessToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerProcessClaimRecord> start_agent_worker_process(AgentWorkerLeaseSpec,AgentProcessToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerProcessClaimRecord> claim_agent_worker_process_effect(AgentWorkerLeaseSpec,AgentProcessToolInvocation,std::string operation_id,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerProcessClaimRecord> record_agent_worker_process_result(AgentWorkerLeaseSpec,AgentProcessToolInvocation,bool success,std::string actual_output_json);
+    std::future<AgentWorkerProcessClaimRecord> agent_worker_process_claim(std::string root,std::string attempt,std::string call);
     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_workspace_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});

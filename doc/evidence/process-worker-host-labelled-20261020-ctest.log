@@ -1,0 +1,16 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  84: native_agent_worker_ledger_contract
+1/2 Test  #84: native_agent_worker_ledger_contract .......   Passed    1.15 sec
+    Start 102: native_agent_process_tool_host_contract
+2/2 Test #102: native_agent_process_tool_host_contract ...***Failed    0.17 sec
+Durable process host case approved
+Process returned before approval: {"error":{"code":"process_access_denied","message":"Backend process did not return an acknowledged command result; inspect native operation receipts before requesting another command"}}
+
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) =   1.34 sec
+
+The following tests FAILED:
+	102 - native_agent_process_tool_host_contract (Failed)
+Errors while running CTest
