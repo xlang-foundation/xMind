@@ -1,0 +1,156 @@
+diff --git a/Native/include/agentflow/agent_runner.hpp b/Native/include/agentflow/agent_runner.hpp
+index bb82e463..76c76549 100644
+--- a/Native/include/agentflow/agent_runner.hpp
++++ b/Native/include/agentflow/agent_runner.hpp
+@@ -23,7 +23,7 @@
+ 
+ namespace agentflow {
+ class DelegationExecutor;
+-class DynamicPlanExecutor;
++class DynamicPlanExecution;
+ class A2aRemoteAgentRegistry;
+ class RootExecutionBudget;
+ // Public, immutable profile identity; never contains credentials or destinations.
+@@ -98,16 +98,16 @@ struct AgentRunnerPorts {
+ class AgentRunner {
+ public:
+     AgentRunner(AgentRunJournal&,AgentContextJournal&,AgentSettings,AgentRunnerPorts,
+-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
++        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
+         bool preserve_dynamic_child_planning_policy=false);
+     AgentRunner(PersistenceService& persistence,AgentSettings settings,
+-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
++        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
+         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
+     AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
+-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
++        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
+         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
+     AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& backend_services,AgentSettings settings,
+-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
++        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
+         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
+     ~AgentRunner();
+     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
+@@ -144,6 +144,6 @@ private:
+     std::unique_ptr<AgentProcessToolHost> process_;
+     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
+     std::shared_ptr<DelegationExecutor> delegation_;
+-    std::shared_ptr<DynamicPlanExecutor> planning_;
++    std::shared_ptr<DynamicPlanExecution> planning_;
+ };
+ }
+diff --git a/Native/include/agentflow/dynamic_plan_execution.hpp b/Native/include/agentflow/dynamic_plan_execution.hpp
+new file mode 100644
+index 00000000..db419138
+--- /dev/null
++++ b/Native/include/agentflow/dynamic_plan_execution.hpp
+@@ -0,0 +1,34 @@
++#pragma once
++#include "agentflow/dynamic_plan_records.hpp"
++#include "agentflow/model_provider.hpp"
++#include "agentflow/instruction_precondition.hpp"
++#include <functional>
++#include <memory>
++#include <stop_token>
++
++namespace agentflow {
++struct AgentSettings;
++class RootExecutionBudget;
++struct DynamicExecutionResult {
++    Run root;
++    std::string call_id,result_json;
++    bool paused=false;
++};
++using DynamicInstructionPrecondition = std::function<InstructionPrecondition(const std::string&,std::stop_token)>;
++// Trusted execution port used by the agent loop. The local implementation owns
++// durable plan scheduling; a worker adapter must resolve the same backend owner.
++// Frozen settings, capabilities, budgets and guidance are native capabilities,
++// never client-selected wire data or authority supplied by a worker.
++class DynamicPlanExecution {
++public:
++    virtual ~DynamicPlanExecution()=default;
++    virtual DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
++        const std::string& actual_assistant_json,const std::string& originating_model_attempt,
++        const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
++        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})=0;
++    virtual DynamicExecutionResult resume(const std::string& parent,const std::string& accepted_call_id,
++        const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
++        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})=0;
++    virtual bool healthy() const=0;
++};
++}
+diff --git a/Native/include/agentflow/dynamic_plan_executor.hpp b/Native/include/agentflow/dynamic_plan_executor.hpp
+index 58e13032..f057c011 100644
+--- a/Native/include/agentflow/dynamic_plan_executor.hpp
++++ b/Native/include/agentflow/dynamic_plan_executor.hpp
+@@ -1,6 +1,7 @@
+ #pragma once
+ #include "agentflow/agent_runner.hpp"
+ #include "agentflow/dynamic_plan.hpp"
++#include "agentflow/dynamic_plan_execution.hpp"
+ #include "agentflow/native_child_executor.hpp"
+ #include "agentflow/instruction_precondition.hpp"
+ #include <functional>
+@@ -10,25 +11,19 @@ namespace agentflow {
+ // identity is backend-owned; no model field can widen these native settings.
+ AgentSettings dynamic_child_settings(const AgentSettings& parent,
+     const DynamicPresetCapability& preset,const std::string& selected_model);
+-struct DynamicExecutionResult {
+-    Run root;
+-    std::string call_id,result_json;
+-    bool paused=false;
+-};
+-using DynamicInstructionPrecondition = std::function<InstructionPrecondition(const std::string&,std::stop_token)>;
+ // Executes only durable dependency-ready agent/human frontiers under the
+ // ordinary root's shared budget. Provider continuation belongs to AgentRunner.
+-class DynamicPlanExecutor {
++class DynamicPlanExecutor final:public DynamicPlanExecution {
+ public:
+     DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children);
+     DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
+         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
+         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
+-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={});
++        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})override;
+     DynamicExecutionResult resume(const std::string& parent,const std::string& accepted_call_id,
+         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
+-        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={});
+-    bool healthy() const;
++        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})override;
++    bool healthy() const override;
+ private:
+     DynamicExecutionResult execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,
+         const DynamicPlanCapabilities& capabilities,std::shared_ptr<RootExecutionBudget> budget,
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 99150fc5..d9ac3bfb 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -132,15 +132,15 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
+ }
+ }
+ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
+-    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy,
++    std::shared_ptr<DynamicPlanExecution> planning,bool preserve_dynamic_child_planning_policy,
+     std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
+     :AgentRunner(persistence,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
+ AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
+-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
++    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,
+     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
+     :AgentRunner(journal,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
+ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& persistence,AgentSettings settings,
+-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
++    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,
+     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
+     :AgentRunner(journal,context_journal,settings,AgentRunnerPorts{
+         model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings.credential),
+@@ -148,7 +148,7 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_j
+         tool_hosts?std::move(tool_hosts):make_persistence_agent_tool_host_factory(journal,persistence),
+         make_persistence_agent_backend_runtime(persistence)},std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy){}
+ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,AgentSettings settings,AgentRunnerPorts ports,
+-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
++    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,bool preserve_dynamic_child_planning_policy)
+     :journal_(journal),context_journal_(context_journal),settings_(std::move(settings)),
+      model_gateway_(std::move(ports.model)),backend_catalog_(std::move(ports.catalog)),tool_hosts_(std::move(ports.tools)),backend_runtime_(std::move(ports.runtime)),
+      read_workspace_(ports.coding_workspace?std::static_pointer_cast<AgentRunnerReadWorkspace>(ports.coding_workspace):ports.read_workspace),coding_workspace_(std::move(ports.coding_workspace)),delegation_(std::move(delegation)),planning_(std::move(planning)) {

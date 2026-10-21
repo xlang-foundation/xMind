@@ -132,15 +132,15 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
-    std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy,
+    std::shared_ptr<DynamicPlanExecution> planning,bool preserve_dynamic_child_planning_policy,
     std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
     :AgentRunner(persistence,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,PersistenceService& persistence,AgentSettings settings,
-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,
     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
     :AgentRunner(journal,persistence,persistence,std::move(settings),std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy,std::move(model_gateway),std::move(backend_catalog),std::move(tool_hosts)){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& persistence,AgentSettings settings,
-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,
     bool preserve_dynamic_child_planning_policy,std::shared_ptr<AgentModelGateway> model_gateway,std::shared_ptr<AgentBackendCatalog> backend_catalog,std::shared_ptr<AgentToolHostFactory> tool_hosts)
     :AgentRunner(journal,context_journal,settings,AgentRunnerPorts{
         model_gateway?std::move(model_gateway):make_persistence_agent_model_gateway(persistence,settings.credential),
@@ -148,7 +148,7 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_j
         tool_hosts?std::move(tool_hosts):make_persistence_agent_tool_host_factory(journal,persistence),
         make_persistence_agent_backend_runtime(persistence)},std::move(delegation),std::move(planning),preserve_dynamic_child_planning_policy){}
 AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,AgentSettings settings,AgentRunnerPorts ports,
-    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
+    std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecution> planning,bool preserve_dynamic_child_planning_policy)
     :journal_(journal),context_journal_(context_journal),settings_(std::move(settings)),
      model_gateway_(std::move(ports.model)),backend_catalog_(std::move(ports.catalog)),tool_hosts_(std::move(ports.tools)),backend_runtime_(std::move(ports.runtime)),
      read_workspace_(ports.coding_workspace?std::static_pointer_cast<AgentRunnerReadWorkspace>(ports.coding_workspace):ports.read_workspace),coding_workspace_(std::move(ports.coding_workspace)),delegation_(std::move(delegation)),planning_(std::move(planning)) {

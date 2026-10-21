@@ -1,0 +1,34 @@
+#pragma once
+#include "agentflow/dynamic_plan_records.hpp"
+#include "agentflow/model_provider.hpp"
+#include "agentflow/instruction_precondition.hpp"
+#include <functional>
+#include <memory>
+#include <stop_token>
+
+namespace agentflow {
+struct AgentSettings;
+class RootExecutionBudget;
+struct DynamicExecutionResult {
+    Run root;
+    std::string call_id,result_json;
+    bool paused=false;
+};
+using DynamicInstructionPrecondition = std::function<InstructionPrecondition(const std::string&,std::stop_token)>;
+// Trusted execution port used by the agent loop. The local implementation owns
+// durable plan scheduling; a worker adapter must resolve the same backend owner.
+// Frozen settings, capabilities, budgets and guidance are native capabilities,
+// never client-selected wire data or authority supplied by a worker.
+class DynamicPlanExecution {
+public:
+    virtual ~DynamicPlanExecution()=default;
+    virtual DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
+        const std::string& actual_assistant_json,const std::string& originating_model_attempt,
+        const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})=0;
+    virtual DynamicExecutionResult resume(const std::string& parent,const std::string& accepted_call_id,
+        const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
+        std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel={},DynamicInstructionPrecondition guidance={})=0;
+    virtual bool healthy() const=0;
+};
+}

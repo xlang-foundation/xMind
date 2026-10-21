@@ -1,0 +1,69 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T20:46:44.130Z",
+    "sourceParent": "ccbf00b8fa282b0acc749c67e6a28b3cb8035338",
+    "sourcePatchSha256": "d6eebb298800964921e8562922ea2d2777e2621999c2eb7eddb56dd2cfc70bab",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 49264,
+      "launchedAt": "2026-10-21T20:35:59.572Z",
+      "completedAt": "2026-10-21T20:44:57.549Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8fe5af5969792714a7b82037d96e10a8d8390fb46ad427ddefdcd771c9b30e81"
+    },
+    "test": {
+      "pid": 30116,
+      "launchedAt": "2026-10-21T20:45:01.796Z",
+      "completedAt": "2026-10-21T20:46:40.926Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1ec53cd5f21b78a9c35ff400ba207f6d45e850db67783d62e5f3487e519d1c80"
+    },
+    "total": 10,
+    "failed": 0,
+    "passed": 10,
+    "seconds": 99.08,
+    "projectFiles": 2756,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 134,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "caea67d96af4b6710c311cf2e53aa26b813be789d8c914acd7d6f8a38ed0712c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-planning-port-20261021-build.log": "8fe5af5969792714a7b82037d96e10a8d8390fb46ad427ddefdcd771c9b30e81",
+    "doc/evidence/process-worker-planning-port-20261021-build-terminal.json": "f49e090eaf7cbbfe97af4558f3ff20a1f291553168e5af08265d55523c84efb3",
+    "doc/evidence/process-worker-planning-port-20261021-ctest.log": "1ec53cd5f21b78a9c35ff400ba207f6d45e850db67783d62e5f3487e519d1c80",
+    "doc/evidence/process-worker-planning-port-20261021-ctest-terminal.json": "425b8653a6689a05c76e80aa37eba8cc48fc8d429a88d75f4cfc0c219e7b5686",
+    "doc/evidence/process-worker-planning-port-20261021-LastTest.log": "1ff9a31354ffe6467942592c0dc09ff8c20ea2b0a297dde332a445c10eb39189",
+    "doc/evidence/process-worker-planning-port-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-planning-port-20261021-gate.json": "de626bb30b11b9bff473e4ad1e74f7a562098098ffd3abd167fbd48c29ef6fb2",
+    "doc/evidence/process-worker-planning-port-20261021-source.patch": "d6eebb298800964921e8562922ea2d2777e2621999c2eb7eddb56dd2cfc70bab",
+    "doc/evidence/process-worker-planning-port-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-planning-port-20261021-binaries-before-test.json": "a121872d036d3136c54f3192c61f9dd8d0b3e194cc1b51711b49528a74408d5f"
+  },
+  "change": "AgentRunner planning ownership depends on DynamicPlanExecution instead of the concrete DynamicPlanExecutor. The existing native executor implements invoke/resume/healthy through that interface; result and guidance types live in the shared port header.",
+  "purpose": "Permit a future authenticated worker proxy to invoke the backend-owned planner without constructing or copying its local scheduler. This checkpoint does not implement that proxy or enable worker planning.",
+  "verified": [
+    "All four AgentRunner constructor paths and the planning owner now use the interface; existing native scheduler remains the actual implementation.",
+    "Ten focused contracts pass: dynamic plan parsing, repository ownership/nested waits, actual native plan engine and MCP planning, planning HTTP, authority, context, worker RPC/ledger and AgentRunner.",
+    "Complete frozen2756 project/16 SDK/1870 library/76 runtime/18598 dependency/134 native binary file sets and hashes checked."
+  ],
+  "limitations": [
+    "IPC planning transport, dynamic child process placement and paused-run retirement/resume remain unfinished. Native capabilities, frozen settings, guidance callbacks and budget pointers are not wire values.",
+    "Focused10 pass does not establish full165 acceptance for candidate caea67d9. The complete165 prior gate applies to6877fb1e/d27f36d8.",
+    "No new provider, client rendering, package or installation acceptance. Installed60 remains3123/5100131c.",
+    "Default IPC, combined parent compaction/overflow, updated editor rendering and intermittent native crash diagnosis remain unfinished."
+  ]
+}

@@ -1,0 +1,25 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start 23: native_dynamic_plan_contract
+ 1/10 Test #23: native_dynamic_plan_contract ..............   Passed    0.06 sec
+      Start 24: native_agent_authority_contract
+ 2/10 Test #24: native_agent_authority_contract ...........   Passed    0.10 sec
+      Start 25: native_dynamic_plan_repository_contract
+ 3/10 Test #25: native_dynamic_plan_repository_contract ...   Passed    3.96 sec
+      Start 29: native_context_engine_contract
+ 4/10 Test #29: native_context_engine_contract ............   Passed    6.09 sec
+      Start 33: native_planning_http_contract
+ 5/10 Test #33: native_planning_http_contract .............   Passed    0.87 sec
+      Start 36: native_dynamic_plan_engine_contract
+ 6/10 Test #36: native_dynamic_plan_engine_contract .......   Passed    7.24 sec
+      Start 37: native_dynamic_plan_mcp_contract
+ 7/10 Test #37: native_dynamic_plan_mcp_contract ..........   Passed   12.05 sec
+      Start 81: native_agent_worker_model_rpc_contract
+ 8/10 Test #81: native_agent_worker_model_rpc_contract ....   Passed   56.99 sec
+      Start 87: native_agent_worker_ledger_contract
+ 9/10 Test #87: native_agent_worker_ledger_contract .......   Passed    1.85 sec
+      Start 91: native_agent_runner_contract
+10/10 Test #91: native_agent_runner_contract ..............   Passed    9.83 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Total Test time (real) =  99.08 sec

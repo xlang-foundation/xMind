@@ -1,3 +1,22 @@
+## Native planning execution port for worker integration — 2026-10-21
+
+AgentRunner now depends on DynamicPlanExecution rather than the concrete
+DynamicPlanExecutor. The existing scheduler implements the same invoke, resume
+and health operations; result/guidance types are shared by the execution port.
+This separates the agent loop from scheduler construction so a worker proxy can
+resolve the actual backend owner without transmitting native capabilities.
+
+The build passes; **10/10 focused regressions pass in99.08s**, including native
+plan engine/MCP, nested repository waits, HTTP, authority, context and worker
+contracts. All2756 project inputs and SDK/library/runtime/dependency/134-native
+binary file sets and hashes stay frozen. Candidate native caea67d9/SDK1ff.
+[Original gate and raw evidence](evidence/process-worker-planning-port-20261021.json).
+
+This is a prerequisite interface change, not IPC planning acceptance. Worker
+planning transport, dynamic child placement and paused-run handoff remain open.
+No full165 claim is made for this candidate; prior full acceptance remains
+6877fb1e/d27f36d8. No package or installation changed.
+
 ## Complete current graph/callable IPC native regression — 2026-10-21
 
 Committed6877fb1e passes the complete actual **165/165 local native tests** in

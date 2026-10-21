@@ -23,7 +23,7 @@
 
 namespace agentflow {
 class DelegationExecutor;
-class DynamicPlanExecutor;
+class DynamicPlanExecution;
 class A2aRemoteAgentRegistry;
 class RootExecutionBudget;
 // Public, immutable profile identity; never contains credentials or destinations.
@@ -98,16 +98,16 @@ struct AgentRunnerPorts {
 class AgentRunner {
 public:
     AgentRunner(AgentRunJournal&,AgentContextJournal&,AgentSettings,AgentRunnerPorts,
-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
         bool preserve_dynamic_child_planning_policy=false);
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     AgentRunner(AgentRunJournal& journal,PersistenceService& backend_services,AgentSettings settings,
-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_journal,PersistenceService& backend_services,AgentSettings settings,
-        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={},
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecution> planning={},
         bool preserve_dynamic_child_planning_policy=false,std::shared_ptr<AgentModelGateway> model_gateway={},std::shared_ptr<AgentBackendCatalog> backend_catalog={},std::shared_ptr<AgentToolHostFactory> tool_hosts={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
@@ -144,6 +144,6 @@ private:
     std::unique_ptr<AgentProcessToolHost> process_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     std::shared_ptr<DelegationExecutor> delegation_;
-    std::shared_ptr<DynamicPlanExecutor> planning_;
+    std::shared_ptr<DynamicPlanExecution> planning_;
 };
 }
