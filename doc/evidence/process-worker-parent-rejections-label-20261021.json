@@ -1,0 +1,74 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T15:38:28.237Z",
+    "sourceParent": "9840564692c9f711ba274c0ad6318759ca823093",
+    "sourcePatchSha256": "55778882ce5011bb5a89f80d29033f9fa4dbd6abefa9f004d6ad4eb71449b834",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 57456,
+      "launchedAt": "2026-10-21T15:36:23.016Z",
+      "completedAt": "2026-10-21T15:37:11.526Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f43ca332ee24adffdf465285c3713e0273b833c2ea2ee51bd23973030a95e839"
+    },
+    "test": {
+      "pid": 25732,
+      "launchedAt": "2026-10-21T15:37:14.466Z",
+      "completedAt": "2026-10-21T15:38:25.269Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "31874997b18ccada89829f9d5c89c8e7624e185306cafe5f0aaf0cec3c3388c6"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 70.75,
+    "projectFiles": 2748,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9b3cde73195ad57830023410e8c37faa2275455b8b30e54b774348a48e54356c",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-parent-rejections-label-20261021-build.log": "f43ca332ee24adffdf465285c3713e0273b833c2ea2ee51bd23973030a95e839",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-build-terminal.json": "10b5d1bbf687632d558f49490b974d13e82ffa4fe0869d330a49563ebddaa9f7",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-ctest.log": "31874997b18ccada89829f9d5c89c8e7624e185306cafe5f0aaf0cec3c3388c6",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-ctest-terminal.json": "a89c566074a0576dc81f22c41544cc3a508920daef5a1eaef7477523db82a488",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-LastTest.log": "1d5b524c9d3ad742b91965278e2a6a47208f8cb955139c069efa77ac61ce2698",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-gate.json": "d4fbd456bdcc3d255fab397a964c93e3eb5a0c9bf98e8a85fa1ff3f790e39858",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-source.patch": "55778882ce5011bb5a89f80d29033f9fa4dbd6abefa9f004d6ad4eb71449b834",
+    "doc/evidence/process-worker-parent-rejections-label-20261021-binaries-before-test.json": "84a4f555ea54178bc80b4adea4bbada9697787bcae4e7e33d0267393f67c981a",
+    "doc/evidence/process-worker-parent-rejections-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-rejections-20261021-build-terminal.json": "1e212d0cb20424e4a8c520ad16fafb2b61923d604869e7ee5334ec75f2e2c816",
+    "doc/evidence/process-worker-parent-rejections-20261021-ctest.log": "5f12a7d5b36171d1f2eb552d7f5ba5dc57db71198a308026271faffa2558ec74",
+    "doc/evidence/process-worker-parent-rejections-20261021-ctest-terminal.json": "544e7f608020ad64de4bf41b59eceffadfb4958638c8229c337bd962746b4acd",
+    "doc/evidence/process-worker-parent-rejections-20261021-LastTest.log": "f135baac6effb3a43e1756cd99a12fbdc4ea8ce79ffbe37bddfa93fdcf705305",
+    "doc/evidence/process-worker-parent-rejections-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-rejections-20261021-gate.json": "3598a312b0480f02ed32aec20c1d536d7700895039317ca2ae633c3b5b554fdc",
+    "doc/evidence/process-worker-parent-rejections-20261021-source.patch": "ef2f73e19744c63e8904e201501320bf9dc5f24a455df92467720c97e2366291",
+    "doc/evidence/process-worker-parent-rejections-20261021-binaries-before-test.json": "8e29bd6b5482d1fbd8482f2659e8519e1f1662d722f94912c34b76fd417c9612"
+  },
+  "verified": [
+    "Actual parent xmind IPC permission denial admits zero children, commits canonical agent_permission_denied tool history and final response, retains two model charges and physically retires",
+    "Actual parent xmind IPC shared budget exhaustion admits zero children, commits canonical delegation_budget_exhausted tool history, retains one model charge and fails without another inference",
+    "Nine focused contracts, 194 independently observed controlled HTTP requests, complete frozen inputs and 133 native binaries"
+  ],
+  "limitations": [
+    "First passing run had a stale human-readable request-count label; raw receipts preserved; corrected source rerun passes",
+    "Cancellation, child failure, unrecorded outcomes and counted parent context remain open",
+    "Planning, graph/default placement, full current regression and installed/rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}

@@ -1,3 +1,12 @@
+## Parent IPC delegation rejection checks — 2026-10-21
+
+Actual parent workers now verify permission denial and exhausted shared funding:
+zero children admitted, exact canonical errors and charges retained, worker drained.
+**9/9 focused contracts pass in 70.75 seconds**, with 194 controlled HTTP requests.
+[Scope and raw receipts](evidence/process-worker-parent-rejections-label-20261021.json).
+Cancellation/failure/lost-result, counted parent context, planning, graph/default
+placement, full regression and installed/rendered acceptance remain open.
+
 ## Parent worker delegation through xlang3 IPC — 2026-10-21
 
 An actual parent xmind runner now calls the backend delegation capability through
