@@ -1,0 +1,71 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:47:16.831Z",
+    "sourceParent": "7ba1ef1aac0330866292f8c2d4a17f4bdbc59afb",
+    "sourcePatchSha256": "38db8c338ad8cec582936d2ac1caebb0bac0554e4a8efe843a75a1b00970bc9d",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 49900,
+      "launchedAt": "2026-10-21T17:42:12.576Z",
+      "completedAt": "2026-10-21T17:45:51.179Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a21fafdfb91a216396e9fb3ec11161a80c73f4733094f883bed2c5139dbaaeb3"
+    },
+    "test": {
+      "pid": 22896,
+      "launchedAt": "2026-10-21T17:45:54.233Z",
+      "completedAt": "2026-10-21T17:47:13.969Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c0b6d7bfe1dbe7ae65d183ee825c259053b302363d5fdad897a69a77327512a9"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 79.67,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "4e9d46f14d7e88aa72d602344f473610b35bfea0ff0375055006a1d767fae7d4",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-coding-20261021-build.log": "a21fafdfb91a216396e9fb3ec11161a80c73f4733094f883bed2c5139dbaaeb3",
+    "doc/evidence/process-worker-graph-coding-20261021-build-terminal.json": "0dfefff71665bce7c1b310a31cbb94bb799b4f080d7fac907052d74521d58363",
+    "doc/evidence/process-worker-graph-coding-20261021-ctest.log": "c0b6d7bfe1dbe7ae65d183ee825c259053b302363d5fdad897a69a77327512a9",
+    "doc/evidence/process-worker-graph-coding-20261021-ctest-terminal.json": "63653ebf29aaeb9ce37a97fdf90ec5e058b7c9bfe9eb9707014334bfb596ef8b",
+    "doc/evidence/process-worker-graph-coding-20261021-LastTest.log": "6802d2e77395c03dc67846d9986ee91df92756cdf58542e728439c6b3ca5ebd0",
+    "doc/evidence/process-worker-graph-coding-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-coding-20261021-gate.json": "41275d4813820370f2e81dfcbc3ad64728fe846e95fd4d3586fdf28d2ca0e31f",
+    "doc/evidence/process-worker-graph-coding-20261021-source.patch": "38db8c338ad8cec582936d2ac1caebb0bac0554e4a8efe843a75a1b00970bc9d",
+    "doc/evidence/process-worker-graph-coding-20261021-binaries-before-test.json": "d046f7343cff21eee54512c231af7cbbec70c7c65d5b04e11a8a7d2d9a9cb007"
+  },
+  "verified": [
+    "Two actual xmind coding workers run under GraphService with distinct captured models and the original shared root budget",
+    "Approved create_file operations require controller approvals before effects; exact file bytes, native operations and canonical worker receipts verified",
+    "Inherited root denial overrides node allowance: no file effects, approvals or native operations",
+    "Both cases verify four counted model charges, exact worker lease retirement and drain before graph join",
+    "Read-only graph journal rejects caller-supplied coding mode; delegated leaves remain excluded",
+    "Nine focused contracts pass in 79.67 seconds; complete frozen input and 133-binary sets unchanged"
+  ],
+  "limitations": [
+    "Synthetic native model gateway; no new live-provider acceptance",
+    "Graph process/remote/callable authority shares admission checks but these new graph cases only exercise create_file",
+    "Server/default wiring, graph no-context, planning and parent compaction/overflow remain unfinished",
+    "Earlier intermittent access violation remains unresolved",
+    "Full current regression and updated installed/rendered acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

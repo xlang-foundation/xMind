@@ -24,6 +24,7 @@ bool ordinary_worker_policy(const std::string& policy){return policy=="native.di
 Json worker_provider_identity(Repository&,const std::string&,const std::string&);
 bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
+bool worker_effect_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
 void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
 std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
@@ -3315,7 +3316,7 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
 bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server","read_repository_instructions","list_skills","load_skill"};return reads.contains(name);}
 template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
     (void)call.serialize();worker_current_scope(repository,db,lease);
-    if(((file||process)?(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)):!worker_agent_owner(repository,lease))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+    if(((file||process)?!worker_effect_owner(repository,lease):!worker_agent_owner(repository,lease))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
     const bool delegation=!file&&!process&&call.tool_name=="delegate_tasks";
     if(delegation&&(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.delegation"))throw Conflict("Worker delegation differs from owning root policy");
     if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):(!worker_read_tool(call.tool_name)&&!delegation))throw Conflict("Worker workspace tool is not admitted");
@@ -3332,7 +3333,7 @@ template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(R
 }
 AgentWorkerModelClaimSpec worker_remote_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call){
     (void)call.serialize();worker_current_scope(repository,db,lease);
-    if(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker remote differs from its ordinary workspace owner");
+    if(!worker_effect_owner(repository,lease)||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker remote differs from its ordinary workspace owner");
     if(!is_agent_remote_tool(call.tool_name))throw Conflict("Worker workspace tool is not admitted");
     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker remote has no actual model receipt");
@@ -3388,6 +3389,7 @@ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& l
     const auto admitted=repository.child_admission(owner.id);
     return admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.root_run_id==root.id&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1&&repository.delegation_batch(admitted.batch_id).state=="accepted";
 }
+bool worker_effect_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):worker_graph_owner(repository,lease);}
 bool worker_agent_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
     return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):(worker_delegated_owner(repository,lease)||worker_graph_owner(repository,lease));
 }
@@ -3556,7 +3558,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const A
 }
 AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
-    if(!worker_agent_owner(*this,lease)||(allow_files&&lease.owner_run_id!=lease.root_run_id))throw Conflict("Worker tool turn differs from its exact read-only or coding admission");
+    if(!worker_agent_owner(*this,lease)||(allow_files&&!worker_effect_owner(*this,lease)))throw Conflict("Worker tool turn differs from its exact read-only or coding admission");
     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
     // Check the admitted vocabulary even for an already committed turn. A read
@@ -3723,7 +3725,7 @@ AgentWorkerRemoteClaimRecord Repository::agent_worker_remote_claim(const std::st
 void Repository::admit_agent_worker_callable_catalogue(const AgentWorkerLeaseSpec& lease,const std::vector<ModelToolDefinition>& tools){
     if(tools.empty()||tools.size()>64)throw std::invalid_argument("Invalid callable catalogue size");auto ordered=tools;std::sort(ordered.begin(),ordered.end(),[](const auto& a,const auto& b){return a.name<b.name;});Json definitions=Json::array();std::string previous;for(const auto& tool:ordered){if(tool.name.empty()||tool.name.size()>128||tool.name.find('\0')!=std::string::npos||tool.name==previous||tool.description.size()>65536||tool.input_schema_json.size()>65536)throw std::invalid_argument("Invalid callable catalogue entry");(void)object_json(tool.input_schema_json,65536);previous=tool.name;definitions.push_back({{"name",tool.name},{"description",tool.description},{"input_schema_json",tool.input_schema_json}});}
     auto& db=impl_->database;Transaction tx(db);if(read_worker_lease(db,lease.generation).spec!=lease)throw Conflict("Callable catalogue differs from actual lease");const auto value=Json{{"version",1},{"lease",worker_spec_json(lease)},{"tools",definitions}}.dump();const auto rows=db.execute("SELECT payload FROM information WHERE category='native-agent-worker-callable-catalogues' AND id=?",{lease.generation}).rows;if(!rows.empty()){if(text(rows[0][0])!=value)throw Conflict("Callable catalogue cannot change after admission");tx.commit();return;}
-    worker_current_scope(*this,db,lease,true);if(lease.root_run_id!=lease.owner_run_id||!ordinary_worker_policy(root_budget(lease.root_run_id).spec.policy_id))throw Conflict("Callable catalogue requires ordinary root ownership");changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES('native-agent-worker-callable-catalogues',?,?)",{lease.generation,value}));impl_->event(lease.owner_run_id,"worker.callable.catalogue",Json{{"generation",lease.generation},{"tool_count",tools.size()}}.dump());tx.commit();
+    worker_current_scope(*this,db,lease,true);if(!worker_effect_owner(*this,lease))throw Conflict("Callable catalogue requires ordinary root ownership");changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES('native-agent-worker-callable-catalogues',?,?)",{lease.generation,value}));impl_->event(lease.owner_run_id,"worker.callable.catalogue",Json{{"generation",lease.generation},{"tool_count",tools.size()}}.dump());tx.commit();
 }
 AgentWorkerCallableClaimRecord Repository::claim_agent_worker_callable(const AgentWorkerLeaseSpec& lease,const AgentCallableInvocation& call){
     auto& db=impl_->database;Transaction tx(db);const auto model=worker_callable_authority(*this,db,lease,call);AgentWorkerCallableClaimRecord record{model,call,"awaiting_dispatch"};

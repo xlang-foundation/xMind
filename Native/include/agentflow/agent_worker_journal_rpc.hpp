@@ -18,6 +18,7 @@ public:
     RootBudgetRecord root_budget(const std::string&);
     ChildAdmissionRecord child_admission(const std::string&);
     AgentWorkerChannel::Deadline execution_deadline();
+    bool coding_workspace_admitted();
     Run begin_run();
     Event acknowledge_model_event(const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);
     Event acknowledge_tool_event(const std::string& attempt,std::int64_t ordinal,bool returned,const std::string& kind,const std::string& json);

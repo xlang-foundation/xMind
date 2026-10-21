@@ -26,7 +26,7 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std:
     settings.max_output_tokens=admission.max_output_tokens;
     settings.instructions.clear();
     const bool leaf=peer.scope().root_id!=peer.scope().run_id;
-    if(leaf&&coding)throw Conflict("Delegated worker cannot acquire coding assembly");
+    if(leaf&&coding&&budget.spec.policy_id!="native.graph-context")throw Conflict("Delegated worker cannot acquire coding assembly");
     settings.max_turns=leaf&&budget.spec.policy_id!="native.graph-context"?4:static_cast<std::size_t>(budget.spec.max_model_calls);
     settings.run_timeout=std::chrono::milliseconds(budget.spec.wall_limit_ms);
     settings.a2a_enabled=false;

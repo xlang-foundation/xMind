@@ -1,3 +1,17 @@
+## Graph coding through xlang3 SDK IPC — 2026-10-21
+
+Two actual xmind coding workers now execute under GraphService with captured
+models, original shared budget and backend-admitted coding authority. Approved
+file creation verifies controller approval before effects, exact bytes and
+canonical native receipts. Inherited denial overrides node allowance without
+creating files or operations. Read-only graph channels cannot request coding mode.
+**9/9 focused contracts pass in 79.67 seconds** with frozen inputs unchanged.
+[Scope and raw receipts](evidence/process-worker-graph-coding-20261021.json).
+
+Server/default wiring, graph no-context, planning, full current regression and
+updated installed/rendered/live-provider acceptance remain open. The earlier
+intermittent access violation remains unresolved.
+
 ## Nested graph xmind IPC cancellation — 2026-10-21
 
 GraphService now verifies controller cancellation after observing both actual

@@ -419,7 +419,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 throw std::invalid_argument("Pinned process placement requires its owning worker executor");
         }
     }
-    if(read_workspace_&&!admitted.parent_id.empty()&&coding_workspace_)throw std::invalid_argument("Delegated read worker cannot acquire coding authority");
+    if(read_workspace_&&!admitted.parent_id.empty()&&coding_workspace_&&read_workspace_->execution_policy_id()!="native.graph-context")throw std::invalid_argument("Delegated read worker cannot acquire coding authority");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(journal_,id):

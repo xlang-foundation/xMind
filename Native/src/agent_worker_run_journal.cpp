@@ -28,7 +28,7 @@ public:
         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.root_id);
         if(scope_.root_id!=scope_.run_id){
             admission_=client_.child_admission(scope_.run_id);const bool graph=admission_->kind==ChildAdmissionKind::graph_agent;
-            if(workspace_||run.parent_id.empty()||(!graph&&run.parent_id!=scope_.root_id)||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.root_run_id!=scope_.root_id||budget.spec.policy_id!=(graph?"native.graph-context":"native.delegation")||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id||(graph&&(budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)))throw Conflict("Worker child journal differs from captured admission");
+            if((workspace_&&(!graph||!client_.coding_workspace_admitted()))||run.parent_id.empty()||(!graph&&run.parent_id!=scope_.root_id)||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.root_run_id!=scope_.root_id||budget.spec.policy_id!=(graph?"native.graph-context":"native.delegation")||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id||(graph&&(budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)))throw Conflict("Worker child journal differs from captured admission");
             session_=run.session_id;return;
         }
         const bool delegation=budget.spec.policy_id=="native.delegation";

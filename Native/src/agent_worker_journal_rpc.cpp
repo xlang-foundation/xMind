@@ -89,6 +89,10 @@ ChildAdmissionRecord AgentWorkerJournalClient::child_admission(const std::string
     if(id!=peer_.scope().run_id||id==peer_.scope().root_id)throw Conflict("Worker child admission differs from its captured owner");
     auto result=std::get<ChildAdmissionRecord>(call(peer_,"journal.child_admission",id));if(result.root_run_id!=peer_.scope().root_id)invalid();return result;
 }
+bool AgentWorkerJournalClient::coding_workspace_admitted(){
+    try{const auto value=parse(peer_.call("journal.workspace_mode","{}"));object(value,1);if(!value.at("coding").is_boolean())invalid();return value.at("coding").get<bool>();}
+    catch(const Json::exception&){invalid();}catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker coding admission rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker coding admission cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker coding admission elapsed");throw;}
+}
 AgentWorkerChannel::Deadline AgentWorkerJournalClient::execution_deadline(){
     const auto before=std::chrono::steady_clock::now();
     try{const auto value=parse(peer_.call("journal.execution_window","{}"));object(value,1);const auto remaining=integer(value.at("remaining_ms"));if(remaining<0||remaining>3600000)invalid();return before+std::chrono::milliseconds(remaining);}
@@ -131,6 +135,7 @@ static AgentWorkerRpcHandler bind_journal_rpc(PersistenceService& store,AgentWor
     return [&store,lease=std::move(lease),deadline,owner_cancel,workspace,hooks=std::move(hooks)](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
         const bool reserve=method=="journal.reserve_model",start=method=="journal.start_model",finish=method=="journal.finish_model",complete=method=="journal.complete_run";auto check=[&]{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");};
         try{check();const auto v=parse(payload);
+            if(method=="journal.workspace_mode"){object(v,0);(void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();check();return Json{{"coding",workspace}}.dump();}
             if(method=="journal.execution_window"){object(v,0);(void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();check();const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count();if(remaining<0||remaining>3600000)throw AgentWorkerRpcRemoteError("timeout");return Json{{"remaining_ms",remaining}}.dump();}
             if(method=="journal.begin_run"){object(v,0);return encode(store.start_agent_worker_run(lease,deadline,owner_cancel,cancel).get());}
             if(method=="journal.model_event"){object(v,4);const auto result=store.agent_worker_model_event(lease,attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),text(v.at("kind")),text(v.at("json"))).get();check();return encode(std::vector<Event>{result});}
