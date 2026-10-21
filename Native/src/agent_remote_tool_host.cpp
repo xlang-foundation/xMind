@@ -49,6 +49,7 @@ public:
         auto& context=*owner_.repository_context;
         if(!context.skills().ready(cancel)||!context.ready(".",cancel))return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
         auto guidance=context.precondition(".");
+        if(owner_.before_effect)guidance.before_effect=[authority=owner_.before_effect,call](const std::string& id,std::stop_token stop){authority(call,id,stop);};
         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
         const auto operation=operation_id();
         if(mcp)return {true,mcp->invoke(operation,owner_.run_id,call.tool_name,call.arguments_json,expiry,owner_.deadline,cancel,std::move(guidance))};

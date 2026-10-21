@@ -1,3 +1,21 @@
+## Remote dispatch backend authority — 2026-10-21
+
+The native remote-tool owner can attach a backend-only live authority callback.
+MCP checks it after approval and guidance verification, before calling the peer.
+A2A ordinary and streaming sends check it at the transport pre-send boundary
+after validating the pinned registration. Rejection retains a known failed
+operation without sending the request or replaying an earlier effect.
+
+Actual controller approvals, loopback A2A sends and the synthetic MCP owner
+verify authority rejection in **2/2 selected contracts**, passing in 3.78 seconds.
+Frozen inputs and 133 binary file sets remain unchanged. The targeted build
+does not rebuild xmind.exe.
+[Scope, patches and raw evidence](evidence/process-worker-remote-authority-pair-20261021.json).
+
+Durable worker remote-call ownership and authenticated MCP/A2A tool RPC remain
+unfinished. This adds no full-suite, installation, rendered or live-provider
+acceptance. Existing owners and completed tasks remain preserved.
+
 ## Strict remote-tool invocation values — 2026-10-21
 
 The native MCP/A2A owner now shares a strict nine-field invocation validator

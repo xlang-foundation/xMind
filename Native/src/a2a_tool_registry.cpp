@@ -115,7 +115,7 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
                 if(on_task_event){Json observed={{"operation_id",id},{"agent_id",entry.registration.id},
                     {"event_sequence",++event_sequence},{"event",std::move(event)}};if(!stream_event.event_id.empty())observed["event_id"]=stream_event.event_id;on_task_event(observed.dump());}
             };
-            try{entry.client->stream_message(request,remaining,observe,cancel,[&]{validate_registration();dispatched=true;});}
+            try{entry.client->stream_message(request,remaining,observe,cancel,[&]{validate_registration();if(guidance.before_effect)guidance.before_effect(id,cancel);dispatched=true;});}
             catch(const TransportCancelled&){throw;}
             catch(const TransportTimeout&){throw;}
             catch(const TransportError&){
@@ -139,7 +139,7 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
                 }
                 if(!resumed)throw TransportError("A2A stream recovery requires a task ID, durable event cursor and remaining run time");
             }
-        }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();dispatched=true;});
+        }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();if(guidance.before_effect)guidance.before_effect(id,cancel);dispatched=true;});
     }catch(...){
         const auto failure=std::current_exception();
         if(dispatched){Json outcome={{"reason","a2a_dispatch_outcome_unknown"},{"agent_id",entry.registration.id},{"agent_revision",entry.registration.revision},{"message_id",message_id}};if(!streamed_task_id.empty())outcome["task_id"]=streamed_task_id;if(!streamed_context_id.empty())outcome["context_id"]=streamed_context_id;finish(OperationState::uncertain,outcome.dump());throw A2aEffectUncertain("A2A request may have reached the remote agent; automatic retry is forbidden");}

@@ -205,6 +205,7 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         }
         return Json{{"roots",std::move(roots)}}.dump();
     };
+    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"backend_authority_unavailable_before_mcp_dispatch"})");throw McpEffectNotDispatched("Backend authority rejected MCP dispatch before send");}}
     try {if(entry.kind==EntryKind::tool)reply=state.client.call_tool(entry.peer_name,approved,deadline,cancel,fulfill_input);else if(entry.kind==EntryKind::resource)readonly=state.client.read_resource(entry.resource_uri,deadline,cancel);else readonly=state.client.get_prompt(entry.peer_name,approved,deadline,cancel);}
     catch(const McpDispatchFailure& failure) {
         if(entry.kind!=EntryKind::tool){finish(OperationState::failed,Json{{"reason","mcp_read_failed"},{"request_id",failure.request_id}}.dump());throw McpReadFailed("MCP read did not complete; no result was exposed");}

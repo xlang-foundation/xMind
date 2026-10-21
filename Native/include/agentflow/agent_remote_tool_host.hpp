@@ -51,6 +51,9 @@ struct AgentRemoteToolOwnerContext {
     std::function<A2aAgentToolRegistry*(const std::string&)> a2a_registry;
     std::chrono::steady_clock::time_point deadline;
     std::chrono::milliseconds approval_timeout{600000};
+    // Native worker authority only. The registry supplies its claimed operation
+    // ID after approval and immediately before sending the admitted request.
+    std::function<void(const AgentRemoteToolInvocation&,const std::string&,std::stop_token)> before_effect;
 };
 // In-process owner adapter, not an IPC endpoint or durable RPC deduplicator.
 // Agent-worker authentication, supervision and crash reconciliation remain

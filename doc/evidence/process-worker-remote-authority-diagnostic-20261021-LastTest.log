@@ -1,0 +1,21 @@
+Start testing: Oct 21 01:58 Pacific Daylight Time
+----------------------------------------------------------
+100/162 Testing: native_agent_remote_tool_host_contract
+100/162 Test: native_agent_remote_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_remote_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_remote_tool_host_contract" start time: Oct 21 01:58 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Remote invocation codec retained literal Unicode bytes and rejected worker-selected authority, duplicate fields and invalid numeric bounds.
+Remote backend authority rejected an approved MCP operation before send and retained a known failed receipt without replay.
+Remote-tool owner: actual approvals, inherited denial, admitted membership/catalogue, pending/completed replay rejection, root guidance delivery/change and xlang3 SQLite restart pass. MCP client/model identities are synthetic; no worker IPC, live provider or GUI acceptance.
+<end of output>
+Test time =   0.65 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_remote_tool_host_contract" end time: Oct 21 01:58 Pacific Daylight Time
+"native_agent_remote_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 21 01:58 Pacific Daylight Time

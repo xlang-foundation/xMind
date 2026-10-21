@@ -1,0 +1,41 @@
+Start testing: Oct 21 02:00 Pacific Daylight Time
+----------------------------------------------------------
+11/162 Testing: native_a2a_agent_registry_contract
+11/162 Test: native_a2a_agent_registry_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_a2a_agent_registry_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_a2a_agent_registry_contract" start time: Oct 21 02:00 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-5ea944d9b1a6cac38221707a173249f6\",\"operation_id\":\"5ea944d9b1a6cac38221707a173249f6\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   3.14 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 21 02:00 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+100/162 Testing: native_agent_remote_tool_host_contract
+100/162 Test: native_agent_remote_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_remote_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_remote_tool_host_contract" start time: Oct 21 02:00 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Remote invocation codec retained literal Unicode bytes and rejected worker-selected authority, duplicate fields and invalid numeric bounds.
+Remote backend authority rejected an approved MCP operation before send and retained a known failed receipt without replay.
+Remote-tool owner: actual approvals, inherited denial, admitted membership/catalogue, pending/completed replay rejection, root guidance delivery/change and xlang3 SQLite restart pass. MCP client/model identities are synthetic; no worker IPC, live provider or GUI acceptance.
+<end of output>
+Test time =   0.63 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_remote_tool_host_contract" end time: Oct 21 02:00 Pacific Daylight Time
+"native_agent_remote_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 21 02:00 Pacific Daylight Time
