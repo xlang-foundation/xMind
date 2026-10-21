@@ -5,6 +5,7 @@
 #include "agent_worker_sdk_values.hpp"
 #include "agentflow/agent_worker_journal_host.hpp"
 #include "agentflow/agent_worker_read_host.hpp"
+#include "agentflow/process_executor.hpp"
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/agent_permissions.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -34,13 +35,14 @@ struct NativeWorkerModelState {
     AgentWorkerJournalHost* journal=nullptr;
     AgentReadToolHost* reads=nullptr;
     AgentFileToolHost* files=nullptr;
+    AgentWorkerProcessService* processes=nullptr;
     AgentWorkerLeaseSpec lease;
     std::atomic<bool> active=true;
     std::atomic<bool> outcome_unrecorded=false;
     mutable std::shared_mutex lifetime;
     std::mutex mutex;
     std::vector<std::shared_ptr<ModelJob>> jobs;
-    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files):host(&owner),journal(captured),reads(captured_reads),files(captured_files),lease(owner.lease()){}
+    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files,AgentWorkerProcessService* captured_processes):host(&owner),journal(captured),reads(captured_reads),files(captured_files),processes(captured_processes),lease(owner.lease()){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw Conflict("Native worker service closed");return lock;}
     void close();
 };
@@ -64,7 +66,7 @@ void execute(const std::shared_ptr<NativeWorkerModelState>& state,const std::sha
         auto life=state->enter();if(job->stop.stop_requested())throw TransportCancelled("Native model operation cancelled");
         auto result=action(*state->host,[&](const ModelEvent& event){const auto size=event.kind.size()+event.json.size();std::lock_guard lock(job->mutex);if(job->events.size()>=8192||size>document_limit||job->event_bytes+size>event_limit)throw ModelProtocolError("Native model event capacity exhausted");job->event_bytes+=size;job->events.push_back(event);},job->stop.get_token());
         if(result.dump().size()>document_limit)throw ModelProtocolError("Native model result capacity exhausted");std::lock_guard lock(job->mutex);job->result=std::move(result);job->done=true;
-    }catch(const AgentFileToolOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const AgentWorkerReadOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const ToolCancelled&){fail(*job,"cancelled");}catch(const PermissionCancelled&){fail(*job,"cancelled");}catch(const PermissionExpired&){fail(*job,"timeout");}catch(const PermissionDenied&){fail(*job,"rejected");}catch(const AgentPermissionDenied&){fail(*job,"rejected");}catch(const ToolAccessDenied&){fail(*job,"rejected");}catch(const McpProtocolError&){fail(*job,"rejected");}catch(const RootBudgetExhausted&){fail(*job,"budget_exhausted");}catch(const AgentWorkerJournalCapacity&){fail(*job,"capacity");}catch(const AgentWorkerModelOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const TransportCancelled&){fail(*job,"cancelled");}catch(const AgentWorkerAuthorityCancelled&){fail(*job,"cancelled");}catch(const TransportTimeout&){fail(*job,"timeout");}catch(const AgentWorkerAuthorityExpired&){fail(*job,"timeout");}catch(const ProviderHttpError& error){std::lock_guard lock(job->mutex);job->error="provider_http";job->provider_status=error.status;job->provider_code=error.status==400&&error.code=="context_length_exceeded"?error.code:std::string{};job->done=true;}catch(const Conflict&){fail(*job,"rejected");}catch(const NotFound&){fail(*job,"rejected");}catch(const std::invalid_argument&){fail(*job,"rejected");}catch(const ModelProtocolError&){fail(*job,"model_protocol");}catch(...){fail(*job,"outcome_unrecorded");}
+    }catch(const ProcessOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const ProcessEffectUncertain&){fail(*job,"effect_uncertain");}catch(const AgentFileToolOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const AgentWorkerReadOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const ToolCancelled&){fail(*job,"cancelled");}catch(const PermissionCancelled&){fail(*job,"cancelled");}catch(const PermissionExpired&){fail(*job,"timeout");}catch(const PermissionDenied&){fail(*job,"rejected");}catch(const AgentPermissionDenied&){fail(*job,"rejected");}catch(const ToolAccessDenied&){fail(*job,"rejected");}catch(const McpProtocolError&){fail(*job,"rejected");}catch(const RootBudgetExhausted&){fail(*job,"budget_exhausted");}catch(const AgentWorkerJournalCapacity&){fail(*job,"capacity");}catch(const AgentWorkerModelOutcomeUnrecorded&){state->outcome_unrecorded=true;fail(*job,"outcome_unrecorded");}catch(const TransportCancelled&){fail(*job,"cancelled");}catch(const AgentWorkerAuthorityCancelled&){fail(*job,"cancelled");}catch(const TransportTimeout&){fail(*job,"timeout");}catch(const AgentWorkerAuthorityExpired&){fail(*job,"timeout");}catch(const ProviderHttpError& error){std::lock_guard lock(job->mutex);job->error="provider_http";job->provider_status=error.status;job->provider_code=error.status==400&&error.code=="context_length_exceeded"?error.code:std::string{};job->done=true;}catch(const Conflict&){fail(*job,"rejected");}catch(const NotFound&){fail(*job,"rejected");}catch(const std::invalid_argument&){fail(*job,"rejected");}catch(const ModelProtocolError&){fail(*job,"model_protocol");}catch(...){fail(*job,"outcome_unrecorded");}
 }
 struct ModelOperationApi {
     std::shared_ptr<ModelJob> job;
@@ -89,6 +91,7 @@ struct ModelObjects {
         APISET().AddClass<0,NativeWorkerJournalApi>("Journal");
         APISET().AddClass<0,NativeWorkerReadApi>("Reads");
         APISET().AddClass<0,NativeWorkerFileApi>("Files");
+        APISET().AddClass<0,NativeWorkerProcessApi>("Processes");
         APISET().AddClass<0,ModelOperationApi>("Operation");
     END_PACKAGE
 };
@@ -102,8 +105,8 @@ X::Value journal_result(const std::shared_ptr<NativeWorkerModelState>& state,X3P
 }
 X::Value begin_journal(const std::shared_ptr<NativeWorkerModelState>& state,std::function<std::string(AgentWorkerJournalHost&,std::stop_token)> action){if(!state)throw Conflict("Unbound native worker journal");return begin(state,[state,action=std::move(action)](auto&,auto,std::stop_token stop){if(!state->journal)throw Conflict("Worker journal unavailable");return nlohmann::json::parse(action(*state->journal,stop));});}
 }
-void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;std::lock_guard data(mutex);jobs.clear();}}
-NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
+void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;processes=nullptr;std::lock_guard data(mutex);jobs.clear();}}
+NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files,AgentWorkerProcessService* processes):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files,processes)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
 NativeWorkerModelBinding::~NativeWorkerModelBinding(){{std::lock_guard lock(registry_mutex);registry.erase(ticket_);}state_->close();}
 bool NativeWorkerModelBinding::outcome_unrecorded()const noexcept{return state_->outcome_unrecorded.load();}
 NativeWorkerModelAccess NativeWorkerModelBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
@@ -117,6 +120,10 @@ X::Value NativeWorkerReadApi::Invoke(X::Value invocation){auto input=AgentWorksp
 X::Value NativeWorkerApi::Files(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->files)throw Conflict("Worker files unavailable");return objects().__xlang3_package_->CreateInstance("Files",std::make_shared<NativeWorkerFileApi>(this));}
 NativeWorkerFileApi::NativeWorkerFileApi(NativeWorkerApi* worker):state(worker->state){}
 X::Value NativeWorkerFileApi::Invoke(X::Value invocation){auto input=AgentFileToolInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->files)throw Conflict("Worker files unavailable");const auto result=state->files->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
+X::Value NativeWorkerApi::Processes(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->processes)throw Conflict("Worker processes unavailable");return objects().__xlang3_package_->CreateInstance("Processes",std::make_shared<NativeWorkerProcessApi>(this));}
+NativeWorkerProcessApi::NativeWorkerProcessApi(NativeWorkerApi* worker):state(worker->state){}
+X::Value NativeWorkerProcessApi::Invoke(X::Value invocation){auto input=AgentProcessToolInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->processes)throw Conflict("Worker processes unavailable");const auto result=state->processes->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
+X::Value NativeWorkerProcessApi::Join(std::string attempt){return begin(state,[state=state,attempt=std::move(attempt)](auto&,auto,std::stop_token stop){if(!state->processes)throw Conflict("Worker processes unavailable");return nlohmann::json{{"joined",state->processes->join_processes(attempt,stop)}};});}
 X::Value NativeWorkerApi::Identity(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();auto value=X::Value::Dict(Host());const auto& s=state->lease;for(const auto& [name,text]:std::initializer_list<std::pair<const char*,std::string>>{{"root",s.root_run_id},{"owner",s.owner_run_id},{"workspace",s.workspace_id},{"generation",s.generation}})value.Set(name,X::Value::String(Host(),text));value.Set("revision",X::Value(s.workspace_revision));return value;}
 NativeWorkerModelApi::NativeWorkerModelApi(NativeWorkerApi* worker):state(worker->state){}
 X::Value NativeWorkerModelApi::Admission(){return begin(state,[](auto& host,auto,std::stop_token stop){return nlohmann::json::parse(encode_agent_worker_model_admission(host.admission(stop)));});}

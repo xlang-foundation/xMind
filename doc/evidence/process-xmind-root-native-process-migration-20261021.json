@@ -1,0 +1,130 @@
+{
+  "recordedAt": "2026-10-21T23:52:31.204Z",
+  "sourceParent": "d4b66f4c835f10216b9270edea0d8c052a548152",
+  "currentSourcePatchSha256": "1e48fc6ab4498f2dae344d10d5ba93a088ba2c7702473db3c1bbe1e9f69587ee",
+  "status": "18/18 focused checkpoint; not installed; full goal active",
+  "implementation": [
+    "Processes().Invoke(invocation) and Processes().Join(attempt) receive native SDK values and return the existing operation object. xlang3 owns IPC serialization.",
+    "Typed AgentWorkerProcessService keeps IPC library independent of concrete coding composition. Coding context retains current guidance window, command host, permission/effect authority and durable background-join observations.",
+    "Product coding owners discard/reject old process packet handlers. Controlled legacy fixtures delegate the same typed methods.",
+    "Explicit ProcessOutcomeUnrecorded marks supervisor recovery state. ProcessEffectUncertain retains its distinct no-replay failure. Read-only native worker cannot obtain process service."
+  ],
+  "gates": [
+    {
+      "name": "values",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-process-values-20261021",
+      "result": null,
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-values-20261021-build.log",
+          "sha256": "8ee435e4efe04b6080ab703dd8b26d90b5759d502a64d924d4bf05781200d6ff",
+          "bytes": 124536
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-values-20261021-build-terminal.json",
+          "sha256": "22a3d8e2d14bc634e15cc0e1390bee646b1949effec5a2013c07d8a3b689c3cc",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-values-20261021-source.patch",
+          "sha256": "26673fac4c26554c2e2a79d382abb474cdaec0c9ab344f2b49ff8086888718b9",
+          "bytes": 46359
+        }
+      ]
+    },
+    {
+      "name": "service",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-process-service-20261021",
+      "result": {
+        "recordedAt": "2026-10-21T23:52:08.695Z",
+        "sourceParent": "d4b66f4c835f10216b9270edea0d8c052a548152",
+        "sourcePatchSha256": "1e48fc6ab4498f2dae344d10d5ba93a088ba2c7702473db3c1bbe1e9f69587ee",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 61960,
+          "launchedAt": "2026-10-21T23:47:59.335Z",
+          "completedAt": "2026-10-21T23:49:51.209Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "1e48cb7134539231e99ce37dedfd21013b86680149f7205ff232eba8c7ab7976"
+        },
+        "test": {
+          "pid": 37304,
+          "launchedAt": "2026-10-21T23:49:54.390Z",
+          "completedAt": "2026-10-21T23:52:05.983Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "ef1405020375c587fe465b95e848ebb070a1ddad7db2edabe1c62c7f1fdf7f7d"
+        },
+        "total": 18,
+        "failed": 0,
+        "passed": 18,
+        "seconds": 131.55,
+        "projectFiles": 2777,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 136,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "b3ad7e408cb186a930598733734050fe6074fc4b314ad13125dc01d2bd13977d",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-gate.json",
+          "sha256": "08570e462438a093a2a7b894a4441c3e3b390172d6ea73a1166bb20d811663d4",
+          "bytes": 1671
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-build.log",
+          "sha256": "1e48cb7134539231e99ce37dedfd21013b86680149f7205ff232eba8c7ab7976",
+          "bytes": 120656
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-build-terminal.json",
+          "sha256": "f4b09e3e458da6ad3b1e1bb1492e4609d52a059323c9badf10767d37afa86111",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-ctest.log",
+          "sha256": "ef1405020375c587fe465b95e848ebb070a1ddad7db2edabe1c62c7f1fdf7f7d",
+          "bytes": 2654
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-ctest-terminal.json",
+          "sha256": "8f228cdf55a07839e01156c8ac1bb82419216f9e83959d365cdedc5db6a39d5c",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-LastTest.log",
+          "sha256": "4662f66a721088303359453d76e4ad0d9513da020a51f44878f28b5c731d2d24",
+          "bytes": 57052
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-process-service-20261021-source.patch",
+          "sha256": "1e48fc6ab4498f2dae344d10d5ba93a088ba2c7702473db3c1bbe1e9f69587ee",
+          "bytes": 46968
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Initial link gate failed because concrete coding-context references crossed the independent IPC-library boundary. Corrected with typed virtual service interface; original source/build log preserved.",
+    "Focused tests use controlled providers. Complete independent peer still checks exactly 219 requests across unchanged transport/production fixtures.",
+    "Previous heap corruption 0xC0000374, SDK access violation and fixture timing variability remain unresolved. No new crash diagnosis is claimed.",
+    "Remote/callable/control packet migration, native planning, full current native suite and installed browser/editor/CLI acceptance remain open."
+  ],
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "fullGoalComplete": false,
+  "liveUserTasksReplayed": false,
+  "cpythonExecuted": false
+}

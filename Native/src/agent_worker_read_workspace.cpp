@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_read_workspace.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_run_journal.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/agent_worker_journal_rpc.hpp"
@@ -59,6 +60,7 @@ public:
     std::unique_ptr<AgentCallableToolHost> callable_host()override{return std::make_unique<AgentWorkerCallableClient>(peer_);}
     std::vector<std::string> callable_tool_names()override{const auto result=nlohmann::json::parse(peer_.call("callable.catalogue","{}"));if(!result.is_array()||result.size()>64)throw ModelProtocolError("Invalid worker callable catalogue");std::vector<std::string> names;for(const auto& entry:result){if(!entry.is_string())throw ModelProtocolError("Invalid worker callable alias");const auto name=entry.get<std::string>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||std::find(names.begin(),names.end(),name)!=names.end())throw ModelProtocolError("Invalid worker callable alias");names.push_back(name);}return names;}
     bool join_background(const std::string& attempt,std::stop_token cancel)override{
+        if(auto native=peer_.native_model())return native->process_join(attempt,cancel);
         try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
             if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
         catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker process join cancelled");}

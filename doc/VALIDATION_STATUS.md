@@ -1,3 +1,27 @@
+## Native process SDK method checkpoint — 2026-10-21
+
+Coding workers invoke Processes().Invoke(invocation) and Processes().Join(attempt)
+through native SDK values and operation objects. The typed coding context keeps
+the admitted guidance window, backend command ownership, final-model-response
+requirement and durable background-join observations. IPC depends on a typed
+virtual process service rather than concrete worker composition. Product owners
+discard/reject process packet handlers; legacy fixtures delegate the same typed
+methods. Unrecorded outcomes retain supervisor recovery and uncertain command
+effects retain their distinct no-replay failure. Read-only service refusal is
+covered at the native boundary.
+
+The final frozen gate passes 18/18 focused checks in 131.55s, including product
+command/approval/background-join and failed-join-receipt cases. Independent peer
+checks exactly 219 requests. All 2777 project inputs and 136 native binaries
+remain frozen with SDK/libraries/dependencies. Native executable b3ad7e40; SDK
+DLL 1ff2a8e7. Initial link failure is preserved: concrete coding-context
+dependencies were corrected with the service interface.
+
+Nothing installed or replayed. Full native/current product acceptance remains
+open. Earlier heap corruption, SDK access violation and timing variability are
+not resolved by this focused pass.
+[Raw gates and source snapshots](evidence/process-xmind-root-native-process-migration-20261021.json).
+
 ## Native file SDK method checkpoint — 2026-10-21
 
 Product coding workers use Files().Invoke through ordinary SDK values and the

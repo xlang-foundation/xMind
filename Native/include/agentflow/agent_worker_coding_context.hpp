@@ -2,6 +2,7 @@
 #include "agentflow/agent_worker_read_context.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/agent_worker_process_service.hpp"
 #include "agentflow/agent_worker_remote_rpc.hpp"
 #include "agentflow/agent_worker_callable_rpc.hpp"
 #include "agentflow/process_executor.hpp"
@@ -11,7 +12,7 @@
 namespace agentflow {
 // Backend-only composition. File operations share the guidance window actually
 // admitted to the model and the same serialized native workspace ownership.
-class AgentWorkerCodingContext final:public AgentReadToolHost,public AgentFileToolHost {
+class AgentWorkerCodingContext final:public AgentReadToolHost,public AgentFileToolHost,public AgentWorkerProcessService {
 public:
     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
         AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
@@ -19,6 +20,8 @@ public:
     void admit(const std::string&,const ModelRequest&,std::stop_token={});
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
     AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
+    AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token={})override;
+    bool join_processes(const std::string& attempt,std::stop_token={})override;
     AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
     AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
     AgentWorkerRpcHandler bind_callables(const AgentWorkerScope&);
