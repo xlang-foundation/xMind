@@ -1,3 +1,18 @@
+## Nested graph scheduler xmind IPC — 2026-10-21
+
+Actual GraphService now verifies two nested controllers, each owning an actual
+xmind leaf through SDK IPC. Exact left/one and right/two paths, node models and
+instructions, four counted leaf groups and four charges remain under one ultimate
+root budget. Controllers preserve their joins and cannot own an independent budget;
+two exact agent leases retire before the root join/segment closure and service idle.
+**9/9 focused contracts pass in 78.25 seconds**. Both earlier fixture exception
+expectation failures are preserved; the actual guard is std::invalid_argument.
+[Scope and raw receipts](evidence/process-worker-graph-nested-scheduler-guard-20261021.json).
+
+Server/default wiring, graph coding/no-context/failure/cancellation, planning, full
+current regression and installed/rendered/live-provider acceptance remain open.
+The earlier worker access violation remains unresolved.
+
 ## Production graph scheduler to xmind IPC workers — 2026-10-21
 
 GraphRunner now has a trusted backend graph-agent dispatch port. Its native factory

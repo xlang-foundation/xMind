@@ -1,0 +1,95 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:32:42.419Z",
+    "sourceParent": "097655042a0a2e130f13ddc407ec8bf1db960d2b",
+    "sourcePatchSha256": "7d7b684e877b06a1db9b48372f523d08346adc886751c6451f1d0b710b7d547b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 56268,
+      "launchedAt": "2026-10-21T17:30:07.566Z",
+      "completedAt": "2026-10-21T17:31:18.270Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f"
+    },
+    "test": {
+      "pid": 58460,
+      "launchedAt": "2026-10-21T17:31:21.314Z",
+      "completedAt": "2026-10-21T17:32:39.613Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "19e39a6e7210699cf9ec66a2205d2c451c7003f1cfade4c2bc95326639b436d0"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 78.25,
+    "projectFiles": 2752,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "81e19c3951c8fb8c81f1ee98d2e8f7f99c2a40fae1ac11a58cb749b57035279b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-build.log": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-build-terminal.json": "a0760e0bae45236646fad85dbd22a99c06046f77bcc8c4c4d2f04f7ee2bacabf",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-ctest.log": "19e39a6e7210699cf9ec66a2205d2c451c7003f1cfade4c2bc95326639b436d0",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-ctest-terminal.json": "93fcac7bc3da9479d745777819859341424dd778710f8e6d870fc8bfad59b070",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-LastTest.log": "12581c01550fe8a11f693d7fb515027991dd071446826634e5ca21d57f3b3d15",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-gate.json": "4cc9e23befd8c3e3310cdf44040c7eb6c4fb83f547ffc1df390bafa368a7fcb2",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-source.patch": "7d7b684e877b06a1db9b48372f523d08346adc886751c6451f1d0b710b7d547b",
+    "doc/evidence/process-worker-graph-nested-scheduler-guard-20261021-binaries-before-test.json": "fe823a7c20d5c6fd821d6bc4de460c6617d33460e6640ce95342e3d3e9c37079",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-build.log": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-build-terminal.json": "1806d120ae536044a0b08411076ac852e6ff2aa8da2d8463c9c9f3a56dc3fefd",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-ctest.log": "a261aea714f5bd964fe3c0c776479dc4d35f91216e64ce04f0f0933c000f7892",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-ctest-terminal.json": "d70ddb54f7b4fc84eb3eda631d50d4f8ac760d91d17e80de1b7c8af33100b282",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-LastTest.log": "9faa089bd2cc42f75849aaa14cb728d42db45767c31baf7910464249617d148e",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-gate.json": "acd311232f7f775f88c315d72787e3f7399167d0316ecc9d070fffddbef7c6b9",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-source.patch": "8891f48155d95cb25fcf3b54b4f1e7a074cc4d21aabdd49f1f4f76dd137bb5d6",
+    "doc/evidence/process-worker-graph-nested-scheduler-20261021-binaries-before-test.json": "aaa2fff0d24c62f1b7073bd99ad78679d6deb8eadde305aaba541ee4051b8dc8",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-build.log": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-build-terminal.json": "862efa3218bb71b6eb92abf5ec3b087307b0187f7193b7fc9fdc6e4b90395080",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-ctest.log": "95eb83b3d11984cfb6c6aba84cfdb14f546504857c27d30f40f6da0c42e2bc8a",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-ctest-terminal.json": "b7a46def3f1e6feee906dd6b1e0f24544c0675a3db82a9ef5a3e5f9147ace2c4",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-LastTest.log": "f885871f9a52d50fdf31cc2cbbccf5a4aa36bb8f68f0af587d092a3bc8f1140f",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-gate.json": "d31d0826c986d12281463d842fc667ac8f8cea5f20f731b24a0ef3574d0974b6",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-source.patch": "1cb68b5be52de16c08f2c389e4b6b5016f86aeff85b0f4b644c99ed3aeed2d26",
+    "doc/evidence/process-worker-graph-nested-scheduler-root-20261021-binaries-before-test.json": "eb371e16e4ed2a77cc510a25c6d4b6221c38bb98b9d095f91040895ccbc71012"
+  },
+  "verified": [
+    "Actual production GraphService runs two nested graph controllers, each owning one actual xmind agent process through scoped SDK IPC",
+    "Leaf admissions retain exact derived left/one and right/two paths, captured distinct models/instructions/read-only tools and the ultimate root budget",
+    "Intermediate controllers each preserve canonical user/join history; direct controller budget lookup rejects std::invalid_argument under the actual repository root-owner guard",
+    "Only two agent admissions and four model charges occur under the ultimate root; each of two distinct process leases is admitted/retired once with ultimate-root and actual child IDs intact",
+    "Four counted leaf inference groups, actual file-read histories, controller joins and closed measured root segment remain durable before service idle",
+    "Flat scheduler, manual graph workers, previous 219-request HTTP and 84-forgery IPC scopes pass; complete frozen input and 133-native-binary sets verified"
+  ],
+  "failedRuns": {
+    "names": [
+      "process-worker-graph-nested-scheduler-20261021",
+      "process-worker-graph-nested-scheduler-root-20261021"
+    ],
+    "cause": "Nested runtime completed, but fixture first expected NotFound and then inferred Conflict for controller budget lookup. Actual Repository::root_budget explicitly throws std::invalid_argument for child owners. Fixture now verifies that exact root-owner guard; no runtime relaxation."
+  },
+  "limitations": [
+    "Model/count responses are controlled native gateway callbacks, not live-provider or new graph HTTP acceptance",
+    "Server/default wiring, graph coding/no-context/failure/cancellation, planning and parent compaction/overflow remain unfinished",
+    "Earlier 0xC0000005 worker access violation remains unresolved; passing nested run does not establish a fix",
+    "Full current regression and updated installed/rendered/live-provider client acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}
