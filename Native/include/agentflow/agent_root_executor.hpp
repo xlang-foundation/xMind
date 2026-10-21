@@ -2,12 +2,15 @@
 #include "agentflow/agent_definition_records.hpp"
 #include "agentflow/records.hpp"
 #include <stop_token>
+#include <memory>
 
 namespace agentflow {
+struct WorkspaceMembershipSnapshot;
 struct AgentRootExecutionRequest {
     std::string run_id,model_id,agent_instructions;
     std::optional<std::vector<std::string>> agent_tools;
     std::vector<AgentPermissionRule> agent_permissions;
+    std::shared_ptr<const WorkspaceMembershipSnapshot> workspace;
 };
 // Trusted backend dispatch port, not a client/plugin callback. Settings and
 // capabilities are captured by its backend factory. Validation runs before new

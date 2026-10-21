@@ -1,0 +1,87 @@
+{
+  "recordedAt": "2026-10-21T00:43:35.752Z",
+  "gate": {
+    "recordedAt": "2026-10-21T00:43:12.132Z",
+    "sourceParent": "5f4da8bccd6684e95123baf7f7657e152637a74b",
+    "sourcePatchSha256": "3c52b0fda42ac3e01e84b1214139fe07310b6601eeeccd92437d4b952a2e608a",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 27392,
+      "launchedAt": "2026-10-21T00:32:37.294Z",
+      "completedAt": "2026-10-21T00:40:13.561Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8f28bbd82b14c1533479e66fbaa3ca3ad6451921e98da2a376940e0f3cf17292"
+    },
+    "test": {
+      "pid": 51232,
+      "launchedAt": "2026-10-21T00:40:25.182Z",
+      "completedAt": "2026-10-21T00:43:09.564Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2895ef4fb6210efe53553cbc9cd6475a6fc4c8c0b0eb49e1e2962282b806fb6a"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 164.34,
+    "projectFiles": 2693,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "aef69aaca920ab9f558af170990cb48dc89689a5747fa597fc7a7f4276b85711",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-build.log": "8f28bbd82b14c1533479e66fbaa3ca3ad6451921e98da2a376940e0f3cf17292",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-build-terminal.json": "f1b22c26f67bbba9ef6ee4181688e74518cc8b9d42d5be07daa34cad1f01b3aa",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-ctest.log": "2895ef4fb6210efe53553cbc9cd6475a6fc4c8c0b0eb49e1e2962282b806fb6a",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-ctest-terminal.json": "e59d0c2230056298a6fb55f45454a80dd1136f823d99fa1516e032b3747f9653",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-LastTest.log": "eca475f9e9742b234dd96385297e2cb66a6a12d6ec0c0b0b2d308743d392e1fc",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-test-inventory.json": "0483b5a05260ef34efb3238c03faeb13683e417796bc25e3eeff9ec865e03a07",
+    "doc/evidence/agent-service-worker-workspace-corrected-20261020-gate.json": "b37e1a3967586501618be1d7454a3b1d34ab957df1a73360e7986d77d9cd9676"
+  },
+  "fixtureSha256": "19a7d178d21aa0a9c64564132a9936a8db33ce1daa3c6ad4330100eb40ece952",
+  "scope": "AgentService captures an immutable workspace membership value for backend root execution before durable admission and reuses it at dispatch",
+  "verified": [
+    "Configured backend executor request includes a shared pointer to a const value snapshot with copied workspace ID, revision and folders",
+    "Snapshot is captured once on new ordinary/queued/incoming admission; dispatch validates the same stored request without invoking the membership callback again",
+    "Actual service root is held queued behind a physical action, then live callback changes from revision seven/one folder to revision eight/two folders",
+    "Actual product child executes with original revision seven and original folder set, with no callback reread",
+    "Controlled factory constructs native WorkspaceToolSet/guidance/lease and membership receipt from the admitted snapshot",
+    "Shared physical slot/exact child-exit proof still passes; independent peer observes exactly 48 intentional requests"
+  ],
+  "limitations": [
+    "New actual mutation case covers one primary folder without prompt attachments; broader multi-folder/attachment/recovery qualification remains open",
+    "Production executor factory and server selection are still not wired; the fixture uses a controlled backend factory",
+    "General worker effects/context/graphs, service cancellation/shutdown/faults and GraphService placement remain open",
+    "No new full-suite, installed, hosted, rendered-client or live-provider acceptance claim"
+  ],
+  "passed": true,
+  "failedBuild": {
+    "reason": "Initial compile used workspace_identity directly on optional<RootBudgetSpec>. Correction checks and dereferences the optional; no test was run against the failed build.",
+    "sourcePatchSha256": "4311da44d53a95c8fc1753a3aaeb4a4bf3855f9b28245509523576d85952a350",
+    "files": {
+      "doc/evidence/agent-service-worker-workspace-focused-20261020-build.log": "f531345471d7de85a537b04b85a880e739881696a3cd9a9c5065f8303476f97e",
+      "doc/evidence/agent-service-worker-workspace-focused-20261020-build-terminal.json": "c578070b6ecfe2837ead2c2309a451fe2e86ebdd74eeb7064d254c5027f9bcc1"
+    }
+  },
+  "scheduling": {
+    "initialOverlap": "The initial failed compile overlapped another native build in D:/CantorAI/out/build/x64-Release; this was identified and acknowledged before the corrected rerun.",
+    "correctedLaunch": {
+      "launchedAt": "2026-10-21T00:32:34.521Z",
+      "observerPid": 29436,
+      "gate": "C:/xMindNativeValidation/check-agent-service-worker-workspace-corrected-20261020.mjs"
+    },
+    "deferredRunnerSha256": "08f13da8aa290e0cb707a5b9f39372cecbf2e36ccb7466ff57571493216f290f"
+  }
+}

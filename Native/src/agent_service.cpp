@@ -49,7 +49,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;std::shared_ptr<const WorkspaceMembershipSnapshot> execution_workspace;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -64,8 +64,14 @@ struct AgentService::Impl {
     std::shared_ptr<DynamicPlanExecutor> planning;
     AgentRunner runner;
     std::shared_ptr<AgentRootExecutor> root_executor;
-    AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions};}
+    AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions,job->execution_workspace};}
     void validate_execution(const std::shared_ptr<Job>& job)const{if(root_executor)root_executor->validate(execution_request(job));}
+    void capture_execution(const std::shared_ptr<Job>& job)const{
+        if(!root_executor)return;
+        const auto budget=runner.execution_budget(job->model);
+        if(budget&&budget->workspace_identity!="workspace:none")job->execution_workspace=std::make_shared<const WorkspaceMembershipSnapshot>(runner.workspace_membership_snapshot());
+        validate_execution(job);
+    }
     mutable std::mutex mutex;
     std::mutex close_mutex;
     std::condition_variable changed;
@@ -484,7 +490,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
-    job->model=std::move(model);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    job->model=std::move(model);impl_->capture_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
@@ -496,7 +502,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
-    job->model=std::move(model);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    job->model=std::move(model);impl_->capture_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
@@ -505,7 +511,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
 Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;
-    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);impl_->capture_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     auto prompt=Json{{"content",content},{"a2a_message_id",message}};if(!impl_->provider_context.empty())prompt["provider_context"]=Json::parse(impl_->provider_context);
     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}

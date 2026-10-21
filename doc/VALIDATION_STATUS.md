@@ -1,3 +1,32 @@
+## Immutable workspace admission for backend root executors — 2026-10-20
+
+Configured AgentService root executors now receive an immutable workspace value
+snapshot captured before new durable admission. Ordinary, queued and incoming
+admission use the same capture helper; dispatch validates the stored request without
+recalling the membership callback. The default runner path is unchanged.
+
+The actual service-worker fixture holds the root queued behind a physical action,
+changes its callback from revision seven/one folder to revision eight/two folders,
+then dispatches an actual product child. The callback was read once for admission;
+the child retains revision seven and the original folder set. The controlled factory
+constructs native workspace tools, guidance, lease and membership receipt from that
+captured snapshot. Canonical completion, exact child exit and shared physical-slot
+retention still pass. The independent peer verifies 48 intentional requests.
+
+Initial compilation failed because optional RootBudgetSpec was accessed as a value;
+the failed build is retained and the optional guard corrected. After identifying an
+overlapping unrelated native build, the corrected rerun was deferred until native
+work cleared and launched once. Final serial build and 54 contracts pass in 164.34
+seconds with all frozen source/runtime/dependency/binary file sets and hashes
+unchanged during validation. No CPython or live model is used.
+
+The new actual mutation case covers ordinary admission with one primary folder
+and no prompt attachments. Production factory/server selection, broader folders,
+attachments and recovery, full coding-worker capabilities and GraphService placement
+remain open. Installed59 and user state are untouched; no full-suite, hosted or
+rendered-client acceptance is claimed. See
+[receipt and failed build](evidence/agent-service-worker-workspace-corrected-20261020.json).
+
 ## AgentService child retains shared physical capacity — 2026-10-20
 
 The actual supervised AgentService child now runs through a shared RootAdmissionPool
