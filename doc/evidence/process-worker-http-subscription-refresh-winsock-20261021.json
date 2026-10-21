@@ -1,0 +1,131 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T10:41:19.716Z",
+    "sourceParent": "ad360bbc0787aa09d443d2d0356ef594d800d257",
+    "sourcePatchSha256": "41b0a2d25cb2e439da0d70ebea251342bea1fb23190f9fb05722d586ae4f72ee",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 31364,
+      "launchedAt": "2026-10-21T10:39:46.024Z",
+      "completedAt": "2026-10-21T10:40:41.074Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c4f732f9bc93d98f7b2d9bec6d98590d7846c0c018a6c594d8500dc0f2eb5fce"
+    },
+    "test": {
+      "pid": 28816,
+      "launchedAt": "2026-10-21T10:40:44.607Z",
+      "completedAt": "2026-10-21T10:41:16.616Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3712e382d35686cd7e38f6cf65bdd9d1c2fc04106e0f4c60255c9639eb3b0c7e"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 31.95,
+    "projectFiles": 2730,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "8a8ec3f20187efab2442e8d0ca11b2c7de2201b7750a0271256e20bfcfe6ecc6",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "runs": [
+    {
+      "name": "process-worker-http-subscription-refresh-20261021",
+      "gate": null
+    },
+    {
+      "name": "process-worker-http-subscription-refresh-include-20261021",
+      "gate": null
+    },
+    {
+      "name": "process-worker-http-subscription-refresh-winsock-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T10:41:19.716Z",
+        "sourceParent": "ad360bbc0787aa09d443d2d0356ef594d800d257",
+        "sourcePatchSha256": "41b0a2d25cb2e439da0d70ebea251342bea1fb23190f9fb05722d586ae4f72ee",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 31364,
+          "launchedAt": "2026-10-21T10:39:46.024Z",
+          "completedAt": "2026-10-21T10:40:41.074Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "c4f732f9bc93d98f7b2d9bec6d98590d7846c0c018a6c594d8500dc0f2eb5fce"
+        },
+        "test": {
+          "pid": 28816,
+          "launchedAt": "2026-10-21T10:40:44.607Z",
+          "completedAt": "2026-10-21T10:41:16.616Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "3712e382d35686cd7e38f6cf65bdd9d1c2fc04106e0f4c60255c9639eb3b0c7e"
+        },
+        "total": 3,
+        "failed": 0,
+        "passed": 3,
+        "seconds": 31.95,
+        "projectFiles": 2730,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "8a8ec3f20187efab2442e8d0ca11b2c7de2201b7750a0271256e20bfcfe6ecc6",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    }
+  ],
+  "files": {
+    "doc/evidence/process-worker-http-subscription-refresh-20261021-build.log": "a85ae07fc6f2b3a41fa37b45b153e817a4bbd168aba08ce8c478b69acacaed5e",
+    "doc/evidence/process-worker-http-subscription-refresh-20261021-build-terminal.json": "075f4840eca9952c0d65011c4dbf6b97dbadc6aff4a33f6d493bbbe298afb547",
+    "doc/evidence/process-worker-http-subscription-refresh-20261021-source.patch": "8896458b46b007104112163cbd88703ca360ac18ed03b1762bfb53e8c08ecd48",
+    "doc/evidence/process-worker-http-subscription-refresh-include-20261021-build.log": "992142ff4948b1c654140d34ace881aa9467174dbf5a5bed3d1a6e358835e7c8",
+    "doc/evidence/process-worker-http-subscription-refresh-include-20261021-build-terminal.json": "1ee65ddb750e260427eded9d65c4b87d2556171e8abc057bde33771eb151ae04",
+    "doc/evidence/process-worker-http-subscription-refresh-include-20261021-source.patch": "161fd0cbea57113e28b42a7b9ebc3e6c3e40bf36a3ee9bec7c1a00918ff2d783",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-build.log": "c4f732f9bc93d98f7b2d9bec6d98590d7846c0c018a6c594d8500dc0f2eb5fce",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-build-terminal.json": "0098187398e2aaa9891dcfa1bb741f1e45c145e22f1b46a7d3a6b98e8286a6d8",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-ctest.log": "3712e382d35686cd7e38f6cf65bdd9d1c2fc04106e0f4c60255c9639eb3b0c7e",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-ctest-terminal.json": "d89fa9d7e48e92d6d6ace6cdfeddee86649f5cc686caa1b81b53265fb4735b41",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-LastTest.log": "ceb869a0ee8d938ea14f6f0401cac67fb23dc309a9c2a583c5c762d693c17eed",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-test-inventory.json": "90c07de676b426d385fa726413f308f97904325c5cf05df481fa8103d19cb2c3",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-gate.json": "eb4317e8256a44913693333d1023dc2eb53c88e455c514efe9b93182f8bbe43f",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-source.patch": "41b0a2d25cb2e439da0d70ebea251342bea1fb23190f9fb05722d586ae4f72ee",
+    "doc/evidence/process-worker-http-subscription-refresh-winsock-20261021-binaries-before-test.json": "0d575a8f0369926ec6acfa72ae425606461a69d032c5104f4ed3bcfb038d83a9"
+  },
+  "verified": [
+    "Actual configured modern HTTP MCP peer acknowledges a held subscription stream",
+    "Controller releases an actual tools/list_changed notification while the stale tool awaits approval and waits for its backend event",
+    "Approved stale operation fails without peer dispatch; factory rediscovers a replacement alias and establishes a second acknowledged subscription",
+    "Same actual unified xmind child consumes three HTTP model windows and dispatches one separately approved replacement peer file effect through xlang3 SDK C++ remote methods",
+    "Exact canonical acknowledgement matches durable remote claim and successful operation; distinct worker physically retires and both held HTTP subscription streams close",
+    "Three focused contracts pass with frozen source/SDK/library/dependency/binary file sets; independent model peer observes exactly 102 requests"
+  ],
+  "failuresPreserved": [
+    "Fixture HTTP client header initially lacked its private include path",
+    "Fixture included Windows socket headers in conflicting order; test-only WIN32_LEAN_AND_MEAN resolves the conflict"
+  ],
+  "limitations": [
+    "No new broader regression or full native suite for catalogue refresh",
+    "Remaining capability/default-placement integration, installation and fresh rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}

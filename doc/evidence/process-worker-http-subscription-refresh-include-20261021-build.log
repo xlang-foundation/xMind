@@ -1,0 +1,673 @@
+CMake is re-running because C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp is out-of-date.
+  the file 'D:/CantorAI2026/xMind/Native/CMakeLists.txt'
+  is newer than 'C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- Configuring done (0.8s)
+-- Generating done (18.9s)
+-- Build files have been written to: C:/xMindNativeValidation/native-current-source-full
+
+  Checking File Globs
+  absl_log_severity.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+  absl_raw_logging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+  absl_spinlock_wait.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+  absl_base.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+  absl_base_cpu_detect.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+  absl_city.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+  absl_civil_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+  absl_crc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+  absl_hardening.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+  absl_int128.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+  absl_source_location.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+  absl_throw_delegate.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+  absl_strings_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+  absl_strings.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+  absl_str_format_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+  absl_crc32c.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+  absl_crc_cord_state.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+  absl_debugging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+  absl_hash.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+  absl_cord_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+  absl_exponential_biased.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+  absl_cordz_functions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+  absl_utf8_for_code_point.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+  absl_decode_rust_punycode.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+  absl_demangle_rust.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+  absl_demangle_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+  absl_malloc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+  absl_graphcycles_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+  absl_time_zone.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+  absl_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+  absl_kernel_timeout_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+  absl_stacktrace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+  absl_symbolize.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+  absl_tracing_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+  absl_synchronization.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+  absl_cordz_handle.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+  absl_cordz_info.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+  absl_cord.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+  absl_examine_stack.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+  absl_flags_commandlineflag_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+  absl_flags_commandlineflag.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+  absl_flags_program_name.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+  absl_flags_config.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+  absl_flags_marshalling.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+  absl_flags_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+  absl_flags_private_handle_accessor.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+  absl_hashtablez_sampler.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+  absl_raw_hash_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+  absl_flags_reflection.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+  absl_leak_check.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+  absl_log_internal_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+  absl_log_entry.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+  absl_log_internal_fnmatch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+  absl_vlog_config_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+  absl_log_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+  absl_log_internal_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+  absl_log_internal_format.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+  absl_log_sink.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+  absl_log_internal_log_sink_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+  absl_log_internal_nullguard.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+  absl_log_internal_structured_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+  absl_strerror.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+  absl_log_internal_message.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+  absl_log_internal_check_op.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+  absl_log_internal_conditions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+  agentflow_mcp_wire.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire.lib
+  agentflow_json_schema.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema.lib
+  agentflow_models.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secrets.lib
+  agentflow_core.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_core.lib
+  agentflow_provider_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_transport.lib
+  agentflow_a2a.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a.lib
+  Scanning sources for module dependencies...
+  yaml-cpp.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  agentflow_authoring.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_authoring.lib
+  agentflow_agent_definitions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_definitions.lib
+  agentflow_chat_provider.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider.lib
+  agentflow_file_patch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch.lib
+  agentflow_policy.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_policy.lib
+  re2.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\re2\Release\re2.lib
+  agentflow_workspace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace.lib
+  agentflow_edits.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edits.lib
+  agentflow_mcp_stdio.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio.lib
+  agentflow_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process.lib
+  agentflow_language_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server.lib
+  agentflow_language_server_tools.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_tools.lib
+  agentflow_mcp_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http.lib
+  agentflow_mcp_client_factory.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_factory.lib
+  xmind_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker.lib
+  agentflow_mcp_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effects.lib
+  agentflow_mcp_run_observer.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_run_observer.lib
+  agentflow_permission_grants.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants.lib
+  agentflow_process_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_effects.lib
+  agentflow_xlang_python.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python.lib
+  agentflow_xlang_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker.lib
+  agentflow_agent.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent.lib
+  agentflow_graph.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph.lib
+  agentflow_graph_execution.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_execution.lib
+  agentflow_vcs.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_vcs.lib
+  agentflow_runtime.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime.lib
+  agentflow_worker_channel.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_channel.lib
+  agentflow_worker_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_rpc.lib
+  agentflow_worker_journal_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_journal_rpc.lib
+  agentflow_worker_model_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_model_rpc.lib
+  agentflow_worker_runner.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_runner.lib
+  agentflow_runtime_generation.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation.lib
+  agentflow_backend_owner_control.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_control.lib
+  agentflow_connection_profiles.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles.lib
+  agentflow_console_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_console_transport.lib
+  agentflow_mcp_oauth_service.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service.lib
+  agentflow_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process.lib
+  agentflow_view_sessions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_view_sessions.lib
+  agentflow_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http.lib
+  agentflow_instruction_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration.lib
+  agentflow_language_server_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration.lib
+  agentflow_legacy_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_process.lib
+  agentflow_local_profile.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_local_profile.lib
+  agentflow_mcp_resource_catalog.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_catalog.lib
+  agentflow_process_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration.lib
+  xmind.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind.exe
+  agent_worker_model_rpc_contract.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(103,9): warning C4005: 'AF_IPX': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(457,9):
+      see previous definition of 'AF_IPX'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(147,9): warning C4005: 'AF_MAX': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(476,9):
+      see previous definition of 'AF_MAX'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(187,9): warning C4005: 'SO_DONTLINGER': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(399,9):
+      see previous definition of 'SO_DONTLINGER'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(246,16): error C2011: 'sockaddr': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(482,8):
+      see declaration of 'sockaddr'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(448,5): error C2143: syntax error: missing '}' before 'constant' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(448,5): error C2059: syntax error: 'constant' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(502,1): error C2143: syntax error: missing ';' before '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(502,3): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(502,13): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(583,9): warning C4005: 'IN_CLASSA': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(284,9):
+      see previous definition of 'IN_CLASSA'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(589,9): warning C4005: 'IN_CLASSB': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(290,9):
+      see previous definition of 'IN_CLASSB'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(595,9): warning C4005: 'IN_CLASSC': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(296,9):
+      see previous definition of 'IN_CLASSC'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(606,9): warning C4005: 'INADDR_ANY': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(301,9):
+      see previous definition of 'INADDR_ANY'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(608,9): warning C4005: 'INADDR_BROADCAST': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(303,9):
+      see previous definition of 'INADDR_BROADCAST'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h(644,16): error C2011: 'sockaddr_in': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(309,8):
+      see declaration of 'sockaddr_in'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(136,16): error C2011: 'fd_set': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(65,16):
+      see declaration of 'fd_set'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(158,9): warning C4005: 'FD_SET': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(96,9):
+      see previous definition of 'FD_SET'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(180,8): error C2011: 'timeval': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(108,8):
+      see declaration of 'timeval'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(236,9): error C2011: 'hostent': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(164,9):
+      see declaration of 'hostent'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(249,9): error C2011: 'netent': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(177,9):
+      see declaration of 'netent'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(256,9): error C2011: 'servent': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(184,9):
+      see declaration of 'servent'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(268,9): error C2011: 'protoent': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(196,9):
+      see declaration of 'protoent'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(364,16): error C2011: 'WSAData': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(319,16):
+      see declaration of 'WSAData'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(462,8): error C2011: 'sockproto': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(491,8):
+      see declaration of 'sockproto'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(504,9): error C2011: 'linger': 'struct' type redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(528,9):
+      see declaration of 'linger'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(517,9): warning C4005: 'SOMAXCONN': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(541,9):
+      see previous definition of 'SOMAXCONN'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(551,9): warning C4005: 'FD_READ': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(559,9):
+      see previous definition of 'FD_READ'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(554,9): warning C4005: 'FD_WRITE': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(560,9):
+      see previous definition of 'FD_WRITE'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(557,9): warning C4005: 'FD_OOB': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(561,9):
+      see previous definition of 'FD_OOB'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(560,9): warning C4005: 'FD_ACCEPT': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(562,9):
+      see previous definition of 'FD_ACCEPT'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(563,9): warning C4005: 'FD_CONNECT': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(563,9):
+      see previous definition of 'FD_CONNECT'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(566,9): warning C4005: 'FD_CLOSE': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(564,9):
+      see previous definition of 'FD_CLOSE'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1633,1): error C2375: 'accept': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(739,19):
+      see declaration of 'accept'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1655,1): error C2375: 'bind': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(744,16):
+      see declaration of 'bind'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1676,1): error C2375: 'closesocket': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(749,16):
+      see declaration of 'closesocket'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1693,1): error C2375: 'connect': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(751,16):
+      see declaration of 'connect'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1714,1): error C2375: 'ioctlsocket': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(756,16):
+      see declaration of 'ioctlsocket'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1737,1): error C2375: 'getpeername': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(761,16):
+      see declaration of 'getpeername'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1758,1): error C2375: 'getsockname': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(766,16):
+      see declaration of 'getsockname'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1779,1): error C2375: 'getsockopt': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(771,16):
+      see declaration of 'getsockopt'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1804,1): error C2375: 'htonl': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(778,19):
+      see declaration of 'htonl'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1821,1): error C2375: 'htons': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(780,20):
+      see declaration of 'htons'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1839,1): error C2375: 'inet_addr': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(782,26):
+      see declaration of 'inet_addr'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1857,1): error C2375: 'inet_ntoa': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(784,23):
+      see declaration of 'inet_ntoa'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1957,1): error C2375: 'listen': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(786,16):
+      see declaration of 'listen'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1976,1): error C2375: 'ntohl': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(790,19):
+      see declaration of 'ntohl'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(1993,1): error C2375: 'ntohs': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(792,20):
+      see declaration of 'ntohs'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2010,1): error C2375: 'recv': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(794,16):
+      see declaration of 'recv'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2033,1): error C2375: 'recvfrom': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(800,16):
+      see declaration of 'recvfrom'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2060,1): error C2375: 'select': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(808,16):
+      see declaration of 'select'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2085,1): error C2375: 'send': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(815,16):
+      see declaration of 'send'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2108,1): error C2375: 'sendto': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(821,16):
+      see declaration of 'sendto'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2135,1): error C2375: 'setsockopt': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(829,16):
+      see declaration of 'setsockopt'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2160,1): error C2375: 'shutdown': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(836,16):
+      see declaration of 'shutdown'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2180,1): error C2375: 'socket': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(840,19):
+      see declaration of 'socket'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2205,1): error C2375: 'gethostbyaddr': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(847,33):
+      see declaration of 'gethostbyaddr'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2227,1): error C2375: 'gethostbyname': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(852,33):
+      see declaration of 'gethostbyname'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2244,1): error C2375: 'gethostname': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(854,16):
+      see declaration of 'gethostname'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2284,1): error C2375: 'getservbyport': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(858,33):
+      see declaration of 'getservbyport'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2303,1): error C2375: 'getservbyname': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(862,33):
+      see declaration of 'getservbyname'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2322,1): error C2375: 'getprotobynumber': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(866,34):
+      see declaration of 'getprotobynumber'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2339,1): error C2375: 'getprotobyname': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(868,34):
+      see declaration of 'getprotobyname'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2359,1): error C2375: 'WSAStartup': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(872,16):
+      see declaration of 'WSAStartup'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2379,1): error C2375: 'WSACleanup': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(876,16):
+      see declaration of 'WSACleanup'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2396,1): error C2375: 'WSASetLastError': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(878,17):
+      see declaration of 'WSASetLastError'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2413,1): error C2375: 'WSAGetLastError': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(880,16):
+      see declaration of 'WSAGetLastError'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2434,1): error C2375: 'WSAIsBlocking': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(882,17):
+      see declaration of 'WSAIsBlocking'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2452,1): error C2375: 'WSAUnhookBlockingHook': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(884,16):
+      see declaration of 'WSAUnhookBlockingHook'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2470,1): error C2375: 'WSASetBlockingHook': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(886,20):
+      see declaration of 'WSASetBlockingHook'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2488,1): error C2375: 'WSACancelBlockingCall': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(888,16):
+      see declaration of 'WSACancelBlockingCall'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2506,1): error C2375: 'WSAAsyncGetServByName': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(890,19):
+      see declaration of 'WSAAsyncGetServByName'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2534,1): error C2375: 'WSAAsyncGetServByPort': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(898,19):
+      see declaration of 'WSAAsyncGetServByPort'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2562,1): error C2375: 'WSAAsyncGetProtoByName': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(906,19):
+      see declaration of 'WSAAsyncGetProtoByName'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2588,1): error C2375: 'WSAAsyncGetProtoByNumber': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(913,19):
+      see declaration of 'WSAAsyncGetProtoByNumber'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2614,1): error C2375: 'WSAAsyncGetHostByName': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(920,19):
+      see declaration of 'WSAAsyncGetHostByName'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2640,1): error C2375: 'WSAAsyncGetHostByAddr': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(927,19):
+      see declaration of 'WSAAsyncGetHostByAddr'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2670,1): error C2375: 'WSACancelAsyncRequest': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(936,16):
+      see declaration of 'WSACancelAsyncRequest'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(2688,1): error C2375: 'WSAAsyncSelect': redefinition; different linkage [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(938,16):
+      see declaration of 'WSAAsyncSelect'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(4320,1): error C2059: syntax error: '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock2.h(4320,1): error C2143: syntax error: missing ';' before '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(42,12): error C2143: syntax error: missing ';' before '{' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(42,12): error C2447: '{': missing function header (old-style formal list?) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(135,9): warning C4005: 'IP_TOS': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(349,9):
+      see previous definition of 'IP_TOS'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(136,9): warning C4005: 'IP_TTL': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(348,9):
+      see previous definition of 'IP_TTL'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(137,9): warning C4005: 'IP_MULTICAST_IF': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(343,9):
+      see previous definition of 'IP_MULTICAST_IF'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(138,9): warning C4005: 'IP_MULTICAST_TTL': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(344,9):
+      see previous definition of 'IP_MULTICAST_TTL'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(139,9): warning C4005: 'IP_MULTICAST_LOOP': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(345,9):
+      see previous definition of 'IP_MULTICAST_LOOP'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(140,9): warning C4005: 'IP_ADD_MEMBERSHIP': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(346,9):
+      see previous definition of 'IP_ADD_MEMBERSHIP'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(141,9): warning C4005: 'IP_DROP_MEMBERSHIP': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(347,9):
+      see previous definition of 'IP_DROP_MEMBERSHIP'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h(142,9): warning C4005: 'IP_DONTFRAGMENT': macro redefinition [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winsock.h(350,9):
+      see previous definition of 'IP_DONTFRAGMENT'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(733,10): error C2061: syntax error: identifier 'MULTICAST_MODE_TYPE' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(740,5): error C2065: 'PIP_MSFILTER': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(740,18): error C2146: syntax error: missing ';' before identifier 'Filter' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(740,18): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(742,9): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(743,40): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(743,60): error C2065: 'SourceList': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(748,12): error C2065: 'IP_MSFILTER': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(748,12): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(749,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(749,15): error C2065: 'PIP_MSFILTER': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(749,29): error C2146: syntax error: missing ';' before identifier 'HeapAlloc' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(750,9): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(755,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(756,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(757,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(757,26): error C2065: 'FilterMode': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(758,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(758,27): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(759,9): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(760,9): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(760,9): error C2065: 'SourceList': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(760,9): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(764,47): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(767,35): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(779,11): error C2061: syntax error: identifier 'MULTICAST_MODE_TYPE' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(786,5): error C2065: 'PIP_MSFILTER': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(786,18): error C2146: syntax error: missing ';' before identifier 'Filter' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(786,18): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(788,10): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(789,40): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(789,60): error C2065: 'SourceList': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(794,12): error C2065: 'IP_MSFILTER': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(794,12): error C2065: 'SourceCount': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(795,5): error C2065: 'Filter': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\ws2tcpip.h(795,5): error C1003: error count exceeds 100; stopping compilation [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+  

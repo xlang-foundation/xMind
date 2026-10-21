@@ -1,3 +1,23 @@
+## Production HTTP subscription-driven worker refresh — 2026-10-21
+
+An actual configured modern HTTP MCP subscription now drives the full refresh
+acceptance path. After acknowledgement, the controller sends tools/list_changed
+while the stale tool awaits approval and waits for the backend notification.
+The approved stale operation fails without dispatch. The factory rediscovers
+a replacement alias, opens its second subscription and the same unified xmind
+child continues over three HTTP model windows. One separately approved
+replacement writes an actual isolated peer file; exact durable/canonical
+acknowledgement and physical worker retirement agree. Both held streams close.
+
+**3/3 focused contracts pass in 31.95 seconds**, with frozen source, SDK,
+library, dependency and 133-binary file sets unchanged. The independent model
+peer observes exactly 102 requests. Test-only HTTP header/include corrections
+and their original failed build logs remain preserved.
+[Scope, patches and raw evidence](evidence/process-worker-http-subscription-refresh-winsock-20261021.json).
+
+Broader regression for refresh, remaining capabilities/default placement,
+installation and fresh rendered/live-provider acceptance remain open.
+
 ## Worker remote catalogue refresh — 2026-10-21
 
 Known no-effect MCP invalidation now schedules backend-owned discovery before
