@@ -1,0 +1,16 @@
+{
+  "initialExpectationFailure": {
+    "expectedExtension": 462,
+    "actualExtension": 464
+  },
+  "extensionTestsPassed": 464,
+  "browserTestsPassed": 161,
+  "addedTests": [
+    "agent placement accepts explicit primary processes and thread owners while rejecting invalid or mismatched snapshots",
+    "agent selector shows explicit process and thread placement from backend metadata"
+  ],
+  "removedTests": [],
+  "sourceCommit": "81adc2fbf3670eee9b24a39522f50403c36e9518",
+  "completedAdapterSuitesReexecuted": false,
+  "review": "Two existing placement contracts account exactly for the inventory difference; original failed checker and completed raw results preserved"
+}

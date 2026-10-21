@@ -1,3 +1,17 @@
+## Current IPC client adapters and native browser contract — 2026-10-21
+
+**464/464 extension and 161/161 browser adapter tests pass**, followed by the
+disposable native browser HTTP/controller contract against the complete
+163-contract-qualified image. All project/SDK/library/dependency/binary inputs
+and 18 browser assets remain unchanged. The initial checker expected 462 extension
+tests; two existing placement tests explain the difference exactly. Its failed
+expectation and completed results are preserved without rerunning adapter suites.
+[Scope and raw evidence](evidence/worker-managed-client-native-reviewed-20261021.json).
+
+No provider requests or installation occurred. These checks do not establish
+rendered installed browser/editor acceptance. Default process execution, worker
+planning, crash diagnosis and remaining full-goal work are still open.
+
 ## Managed and graph IPC complete native regression — 2026-10-21
 
 **163/163 native contracts pass in 1236.87 seconds** on committed

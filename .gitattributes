@@ -206,3 +206,5 @@ doc/evidence/process-worker-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-
 doc/evidence/process-worker-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/coding-command-worker-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/coding-command-worker-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+
+doc/evidence/worker-managed-client-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

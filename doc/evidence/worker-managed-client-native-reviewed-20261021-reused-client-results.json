@@ -1,0 +1,28 @@
+{
+  "extension": {
+    "pid": 60780,
+    "launchedAt": "2026-10-21T19:05:01.593Z",
+    "completedAt": "2026-10-21T19:05:06.440Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "850439ab4350c760570da5e9ef38762cfccf8931da4069bf731ba174924462cc",
+    "tests": 464,
+    "passed": 464,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "pid": 43576,
+    "launchedAt": "2026-10-21T19:05:01.618Z",
+    "completedAt": "2026-10-21T19:05:19.233Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2c866dd791ae3a92b5dd386f55800b6b99fdbb64a5f442790863ebca2a0c96c5",
+    "tests": 161,
+    "passed": 161,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  }
+}

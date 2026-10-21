@@ -1,0 +1,85 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T19:06:59.537Z",
+    "sourceRevision": "84ff7c06beec2a78571f3a0ae6967403651bbefe",
+    "nativeQualificationSource": "3123b5c540f91c7f9fc46cfafadbb41970967d21",
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "extension": {
+      "pid": 60780,
+      "launchedAt": "2026-10-21T19:05:01.593Z",
+      "completedAt": "2026-10-21T19:05:06.440Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "850439ab4350c760570da5e9ef38762cfccf8931da4069bf731ba174924462cc",
+      "tests": 464,
+      "passed": 464,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "pid": 43576,
+      "launchedAt": "2026-10-21T19:05:01.618Z",
+      "completedAt": "2026-10-21T19:05:19.233Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2c866dd791ae3a92b5dd386f55800b6b99fdbb64a5f442790863ebca2a0c96c5",
+      "tests": 161,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "nativeBrowser": {
+      "pid": 21724,
+      "launchedAt": "2026-10-21T19:06:53.885Z",
+      "completedAt": "2026-10-21T19:06:56.802Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693"
+    },
+    "reviewedInventory": true,
+    "completedAdapterSuitesReexecuted": false,
+    "sourceSdkLibraryDependencyBinaryAndFileSetsUnchanged": true,
+    "projectFiles": 2753,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 133,
+    "browserAssets": 18,
+    "assetsUnchanged": true,
+    "providerRequests": 0,
+    "installed": false,
+    "renderedAcceptance": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "files": {
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-extension.log": "850439ab4350c760570da5e9ef38762cfccf8931da4069bf731ba174924462cc",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-extension-terminal.json": "349a67ef36cb879a46a5cc81ddfdbe840dc2241a3322cf7f37ed48c53e23cb60",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-browser.log": "2c866dd791ae3a92b5dd386f55800b6b99fdbb64a5f442790863ebca2a0c96c5",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-browser-terminal.json": "6a60ce3fc272f236944d7e0cc8047088f5e4f0fc47f2ee2cfc7cf2908fdb2f25",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-client-results.json": "968d9fa6ac41a7364ac15ffd86bf70d537ab2a97fea567c0c1d3847b1ec72b17",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-assets.log": "4fe2f4c687f4b79ed78b56a72b3911747a6905f99d1884fdf621b3badc8773f8",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-assets-terminal.json": "d48a0ec77c370634de60e1a12f853fee70dcb474c980bf7e64d6c87a691bb988",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-reused-assets-before.json": "2427145aca17a695f2fbae038c34dff08fa7fd337c8fa6a55a0aa32824eab12b",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-original-checker-source.log": "58bd9852c1725280d346c75b6975820b49f28489e779ae3172fce43ef2fdba2a",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-inventory-review.json": "010f777168e00ad7519ee96b6aec89d80aca272d198392916b04263d44048693",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-browser-native-terminal.json": "7e64bfd6e9bd02a0536504d5ee5b460c8273db309e96cc69715e8f149dd64a8b",
+    "doc/evidence/worker-managed-client-native-reviewed-20261021-gate.json": "a14d22a57ae24fd0e29c01cba63a7bff67502b389947402e6601d17addead3c3"
+  },
+  "verified": [
+    "Complete extension adapter suite: 464 passed, no failures/skips/cancellations",
+    "Complete browser adapter suite: 161 passed, no failures/skips/cancellations",
+    "The original checker failed its stale 462-extension expectation; two existing placement tests from 81adc2fb account exactly for the difference, with no removed tests",
+    "Completed adapter suites were not reexecuted; source/SDK/library/dependency/binary closure and asset hashes were verified after their completion and again after the native browser contract",
+    "Disposable browser/native HTTP/controller contract passed on the full-suite-qualified native image; only its disposable processes were restarted",
+    "All 2753 project inputs, 18598 dependency files, 133 binaries and 18 browser assets remain unchanged"
+  ],
+  "limitations": [
+    "Adapter DOM fixtures and native HTTP/controller contract are not rendered installed-editor/browser acceptance",
+    "No provider requests or updated installation occurred",
+    "Default process execution, worker planning, earlier intermittent crash diagnosis and combined parent compaction/overflow remain open"
+  ],
+  "passed": true
+}
