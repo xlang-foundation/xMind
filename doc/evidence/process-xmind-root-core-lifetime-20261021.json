@@ -1,0 +1,68 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T21:51:49.756Z",
+    "sourceParent": "27ef94f28b57bf15ddd849a55476b712671fae45",
+    "sourcePatchSha256": "a003ebd940da3c685d2b23598de5bad13c5fa4e0e27e9ecbb391fd735d38b7c1",
+    "clientSourcePatchSha256": "74772d55f02b6c83fdfa234581cc4c0528b51c96902b7db5f3e5790ca4414d1f",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 39788,
+      "launchedAt": "2026-10-21T21:47:16.882Z",
+      "completedAt": "2026-10-21T21:50:03.648Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d0b3662dcc40f8b0db0e511ddbdeac1480b02cee25744d4d206a498ee2477cda"
+    },
+    "test": {
+      "pid": 57128,
+      "launchedAt": "2026-10-21T21:50:09.763Z",
+      "completedAt": "2026-10-21T21:51:47.050Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9a58d78c1bbe7e6d3f1b498c15b8656fedf2757302b88fe83fcb1953bba264df"
+    },
+    "total": 14,
+    "failed": 0,
+    "passed": 14,
+    "seconds": 97.24,
+    "projectFiles": 2768,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 136,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "7131e35b4533e0d59f4593abfb7c3f230d47c3e90a6d18801f305266ed42373a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-build.log": "d0b3662dcc40f8b0db0e511ddbdeac1480b02cee25744d4d206a498ee2477cda",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-build-terminal.json": "3f6a1e7354e060b293e552c12dd937dbf8df9aa729c0b666e90ff201bb97191d",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-ctest.log": "9a58d78c1bbe7e6d3f1b498c15b8656fedf2757302b88fe83fcb1953bba264df",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-ctest-terminal.json": "e21f3f604c33e187bf46524b76d14ad820a63dd985b25c0837f471149b2a711a",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-LastTest.log": "a918484a4f91b25d9805ba5f1335fd223472a78e53a3e5c8d6db4326a948529b",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-test-inventory.json": "82c1cc9a9c0152ebcb45666a5aa9914367c1ef250b64cb141bcf3ad43cc4b761",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-gate.json": "4215e26304b1a6b40c44a7339d30e25a8cf3178ee115e3da6c8b965059a38e1d",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-source.patch": "a003ebd940da3c685d2b23598de5bad13c5fa4e0e27e9ecbb391fd735d38b7c1",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-client-source.patch": "74772d55f02b6c83fdfa234581cc4c0528b51c96902b7db5f3e5790ca4414d1f",
+    "doc/evidence/process-xmind-root-core-lifetime-20261021-binaries-before-test.json": "eb77ff7bad6a281e12715644ec461257ffa54441eaec0b012086769cb67e9a92"
+  },
+  "change": "Separate the native root API into agentflow_ipc_api, independent of HTTP. Register the process root once through ensure_xmind_ipc_api, then bind public backend services through scoped shared contexts. Move the unchanged local token validator to the shared secrets library.",
+  "verified": [
+    "Concurrent root initialization succeeds before any public backend binding, with one unchanged SDK listener and root export.",
+    "Native SDK lifecycle fixture rejects unbound services, concurrent public owners, old tokens and retained old service objects after owner closure/rebinding and after actual PersistenceService destruction. A new scoped owner reads the original persisted session through the same root.",
+    "Separate actual xmind.exe API client fixture and existing product process-read server ordinary/graph/model-only worker contracts continue to pass.",
+    "14/14 focused tests in97.24s with frozen2768 project/16 SDK/1870 library/76 runtime/18598 dependency/136 native binary file sets and hashes."
+  ],
+  "limitations": [
+    "This checkpoint prepares worker-native service registration without coupling it to HTTP. Model, journal, tool and planning worker calls still need migration; the old dispatcher has not been removed.",
+    "The lifecycle fixture is same-process SDK/SQLite evidence; separate-process calls are independently exercised by native_xmind_ipc_api_contract. No new claim of model execution through the direct native API.",
+    "Inventory168 local/169 hosted is not a complete native suite. No package/install/live-provider/rendered-editor or crash diagnosis acceptance. Installed60 and prior user owners/data remain unchanged."
+  ]
+}

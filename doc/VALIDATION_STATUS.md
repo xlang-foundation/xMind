@@ -1,3 +1,25 @@
+## Process-wide root registration and scoped service lifetimes — 2026-10-21
+
+The root API now lives in **agentflow_ipc_api**, independent of HTTP.
+ensure_xmind_ipc_api registers the xmind root once per process before public
+backend binding; XMindIpcServer binds scoped backend contexts. The unchanged
+local authentication validator is shared through the secrets library. This
+allows worker-native services to attach without importing an HTTP adapter.
+
+A native SDK/SQLite lifecycle fixture verifies concurrent initialization,
+unbound service refusal, exclusive public ownership, stale token/object refusal,
+rebinding through the same root/listener with persisted data, and refusal after
+actual backend destruction. It is same-process evidence; the separate actual
+xmind.exe client gate independently passes again. **14/14 focused tests pass
+in97.24s**, including existing product worker/server regressions.
+[Gate and original evidence](evidence/process-xmind-root-core-lifetime-20261021.json). Candidate7131e35b/SDK1ff,
+2768 project inputs/136 binaries and all SDK/library/runtime/dependency file
+sets and hashes are frozen. Inventory168 local/169 hosted is not a full suite.
+
+Worker model/journal/tool/planning calls still use the old dispatcher. Their
+service-object migration and deletion of that implementation remain next.
+No new package/install or user data changes; installed60 remains unchanged.
+
 ## Native xlang3 root/service API — 2026-10-21
 
 The agreed Cantor-style API now registers **xmind** at backend startup and exposes

@@ -1,0 +1,33 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start 23: native_dynamic_plan_contract
+ 1/14 Test #23: native_dynamic_plan_contract ................   Passed    0.20 sec
+      Start 24: native_agent_authority_contract
+ 2/14 Test #24: native_agent_authority_contract .............   Passed    0.10 sec
+      Start 25: native_dynamic_plan_repository_contract
+ 3/14 Test #25: native_dynamic_plan_repository_contract .....   Passed    4.03 sec
+      Start 27: native_xmind_ipc_lifetime_contract
+ 4/14 Test #27: native_xmind_ipc_lifetime_contract ..........   Passed    0.21 sec
+      Start 28: native_xmind_ipc_api_contract
+ 5/14 Test #28: native_xmind_ipc_api_contract ...............   Passed    0.76 sec
+      Start 31: native_context_engine_contract
+ 6/14 Test #31: native_context_engine_contract ..............   Passed    5.68 sec
+      Start 35: native_planning_http_contract
+ 7/14 Test #35: native_planning_http_contract ...............   Passed    0.87 sec
+      Start 38: native_dynamic_plan_engine_contract
+ 8/14 Test #38: native_dynamic_plan_engine_contract .........   Passed    6.53 sec
+      Start 39: native_dynamic_plan_mcp_contract
+ 9/14 Test #39: native_dynamic_plan_mcp_contract ............   Passed   11.79 sec
+      Start 83: native_agent_worker_planning_rpc_contract
+10/14 Test #83: native_agent_worker_planning_rpc_contract ...   Passed    0.23 sec
+      Start 84: native_agent_worker_model_rpc_contract
+11/14 Test #84: native_agent_worker_model_rpc_contract ......   Passed   53.56 sec
+      Start 88: native_agent_worker_server_contract
+12/14 Test #88: native_agent_worker_server_contract .........   Passed    1.55 sec
+      Start 90: native_agent_worker_ledger_contract
+13/14 Test #90: native_agent_worker_ledger_contract .........   Passed    2.01 sec
+      Start 94: native_agent_runner_contract
+14/14 Test #94: native_agent_runner_contract ................   Passed    9.69 sec
+
+100% tests passed, 0 tests failed out of 14
+
+Total Test time (real) =  97.24 sec

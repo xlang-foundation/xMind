@@ -1,0 +1,255 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 18523dda..bba08cfb 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -27,7 +27,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+ add_subdirectory(third_party/abseil-cpp EXCLUDE_FROM_ALL)
+ add_subdirectory(third_party/re2 EXCLUDE_FROM_ALL)
+ set(AGENTFLOW_XLANG3_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../xlang3" CACHE PATH "Sibling xlang3 source checkout")
+-add_library(agentflow_secrets STATIC src/secret_protection.cpp)
++add_library(agentflow_secrets STATIC src/secret_protection.cpp src/local_auth.cpp)
+ target_include_directories(agentflow_secrets PUBLIC include)
+ if(WIN32)
+   target_link_libraries(agentflow_secrets PRIVATE Crypt32)
+@@ -271,14 +271,16 @@ if(MSVC)
+   target_compile_options(agentflow_http PRIVATE /bigobj)
+ endif()
+ if(WIN32)
+-  target_sources(agentflow_http PRIVATE src/xmind_ipc_api.cpp)
+-  target_link_libraries(agentflow_http PRIVATE agentflow_connection_profiles agentflow_ipc_runtime)
++  target_link_libraries(agentflow_http PRIVATE agentflow_connection_profiles)
+   add_library(agentflow_runtime_generation STATIC src/runtime_generation.cpp)
+   target_include_directories(agentflow_runtime_generation PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_runtime_generation PRIVATE agentflow_core)
+   add_library(agentflow_backend_owner_control STATIC src/backend_owner_control.cpp)
+   target_include_directories(agentflow_backend_owner_control PUBLIC include)
+   target_link_libraries(agentflow_backend_owner_control PRIVATE agentflow_runtime_generation agentflow_core agentflow_workspace)
++  add_library(agentflow_ipc_api STATIC src/xmind_ipc_api.cpp)
++  target_include_directories(agentflow_ipc_api PUBLIC include)
++  target_link_libraries(agentflow_ipc_api PUBLIC agentflow_ipc_runtime PRIVATE agentflow_core agentflow_secrets agentflow_backend_owner_control)
+   target_link_libraries(agentflow_http PRIVATE agentflow_backend_owner_control agentflow_mcp_configuration)
+   target_link_libraries(agentflow_http PRIVATE agentflow_vcs)
+   target_link_libraries(agentflow_http PRIVATE ws2_32 crypt32)
+@@ -323,9 +325,9 @@ target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_p
+ target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
+ if(WIN32)
+   target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp apps/ipc_main.cpp)
+-  target_link_libraries(xmind PRIVATE agentflow_worker_runner)
++  target_link_libraries(xmind PRIVATE agentflow_worker_runner agentflow_ipc_api)
+   target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_language_server_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_mcp_resource_catalog agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process agentflow_xlang_python agentflow_xlang_worker bcrypt ws2_32 crypt32 shell32 ole32)
+-  target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
++  target_link_libraries(xmind_server PRIVATE agentflow_local_profile agentflow_ipc_api)
+   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
+ endif()
+@@ -521,6 +523,11 @@ if(BUILD_TESTING)
+     target_link_libraries(agentflow_context_control_contract PRIVATE agentflow_agent agentflow_http)
+     add_custom_command(TARGET agentflow_context_control_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_context_control_contract>")
++    add_executable(agentflow_xmind_ipc_lifetime_contract tests/xmind_ipc_lifetime_contract.cpp)
++    target_link_libraries(agentflow_xmind_ipc_lifetime_contract PRIVATE agentflow_ipc_api agentflow_core)
++    add_custom_command(TARGET agentflow_xmind_ipc_lifetime_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_xmind_ipc_lifetime_contract>")
++    add_test(NAME native_xmind_ipc_lifetime_contract COMMAND "$<TARGET_FILE:agentflow_xmind_ipc_lifetime_contract>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
++    set_tests_properties(native_xmind_ipc_lifetime_contract PROPERTIES TIMEOUT 30)
+     add_test(NAME native_xmind_ipc_api_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+       "${CMAKE_CURRENT_SOURCE_DIR}/tests/xmind_ipc_api_contract.mjs" "$<TARGET_FILE:xmind>"
+       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+diff --git a/Native/include/agentflow/local_auth.hpp b/Native/include/agentflow/local_auth.hpp
+new file mode 100644
+index 00000000..412edf62
+--- /dev/null
++++ b/Native/include/agentflow/local_auth.hpp
+@@ -0,0 +1,3 @@
++#pragma once
++#include <string_view>
++namespace agentflow {void validate_local_auth_token(std::string_view token);}
+diff --git a/Native/include/agentflow/xmind_ipc_api.hpp b/Native/include/agentflow/xmind_ipc_api.hpp
+index 08d7a13d..2beaf46f 100644
+--- a/Native/include/agentflow/xmind_ipc_api.hpp
++++ b/Native/include/agentflow/xmind_ipc_api.hpp
+@@ -5,8 +5,10 @@ namespace agentflow {
+ class PersistenceService;
+ class RunExecutor;
+ class BackendOwnerControl;
+-// Owns the xlang3 root export and listener. Construct after backend services;
+-// destroy before those services. No transport-specific state belongs in them.
++// Register the process root independently of public backend service binding.
++void ensure_xmind_ipc_api();
++// Binds public backend services to the process root and closes their admission
++// before backend teardown. The SDK runtime/listener is shared process-wide.
+ class XMindIpcServer final {
+ public:
+     XMindIpcServer(PersistenceService&,RunExecutor*,const std::string& local_auth_token,BackendOwnerControl* owner=nullptr);
+diff --git a/Native/src/http_server.cpp b/Native/src/http_server.cpp
+index a275d821..9fa982f9 100644
+--- a/Native/src/http_server.cpp
++++ b/Native/src/http_server.cpp
+@@ -52,10 +52,6 @@
+ #endif
+ 
+ namespace agentflow {
+-void validate_local_auth_token(std::string_view token) {
+-    if(token.size()<32 || token.size()>256) throw std::invalid_argument("Authentication token must contain 32-256 printable bytes");
+-    for(unsigned char c:token) if(c<33 || c>126) throw std::invalid_argument("Authentication token must contain printable bytes without spaces");
+-}
+ namespace {
+ using Json=nlohmann::json;
+ using Request=httplib::Request;
+diff --git a/Native/src/local_auth.cpp b/Native/src/local_auth.cpp
+new file mode 100644
+index 00000000..71f2c6b1
+--- /dev/null
++++ b/Native/src/local_auth.cpp
+@@ -0,0 +1,8 @@
++#include "agentflow/local_auth.hpp"
++#include <stdexcept>
++namespace agentflow {
++void validate_local_auth_token(std::string_view token) {
++    if(token.size()<32 || token.size()>256) throw std::invalid_argument("Authentication token must contain 32-256 printable bytes");
++    for(unsigned char c:token) if(c<33 || c>126) throw std::invalid_argument("Authentication token must contain printable bytes without spaces");
++}
++}
+diff --git a/Native/src/xmind_ipc_api.cpp b/Native/src/xmind_ipc_api.cpp
+index 73762596..a694e6c5 100644
+--- a/Native/src/xmind_ipc_api.cpp
++++ b/Native/src/xmind_ipc_api.cpp
+@@ -2,13 +2,12 @@
+ #include "agentflow/xmind_ipc_runtime.hpp"
+ #include "agentflow/persistence_service.hpp"
+ #include "agentflow/run_executor.hpp"
+-#include "agentflow/http_server.hpp"
++#include "agentflow/local_auth.hpp"
+ #include "agentflow/backend_owner_control.hpp"
+ #include <optional>
++#include <mutex>
+ #include "xlang3/xlang3.h"
+-#include <random>
+ #include <stdexcept>
+-#include <string_view>
+ namespace agentflow {
+ namespace {
+ struct ApiContext {
+@@ -18,6 +17,7 @@ struct ApiContext {
+     BackendOwnerControl* owner=nullptr;
+     mutable std::shared_mutex lifetime;
+     bool active=true;
++    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),owner(control){}
+     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
+     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
+     void authorize(const std::string& supplied)const {
+@@ -46,21 +46,21 @@ struct HostApi {
+     END_PACKAGE
+ };
+ struct SessionsApi {
+-    ApiContext& context;
++    std::shared_ptr<ApiContext> context;
+     SessionsApi(RootApi*,std::string token);
+-    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context.enter();return session_value(Host(),context.store.session(std::move(id)).get());});}
+-    X::Value Create(std::string id,std::string title){return api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();return session_value(Host(),context.store.create_session(std::move(id),std::move(title)).get());});}
++    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context->enter();return session_value(Host(),context->store.session(std::move(id)).get());});}
++    X::Value Create(std::string id,std::string title){return api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();return session_value(Host(),context->store.create_session(std::move(id),std::move(title)).get());});}
+     BEGIN_PACKAGE(SessionsApi)
+         APISET().AddFunc<1>("Open",&SessionsApi::Open);
+         APISET().AddFunc<2>("Create",&SessionsApi::Create);
+     END_PACKAGE
+ };
+ struct RunsApi {
+-    ApiContext& context;
++    std::shared_ptr<ApiContext> context;
+     RunsApi(RootApi*,std::string token);
+-    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context.enter();return run_value(Host(),context.store.run(std::move(id)).get());});}
+-    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");return run_value(Host(),context.executor->submit(std::move(id),std::move(session),std::move(prompt)));});}
+-    void Cancel(std::string id){api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");context.executor->cancel(id);});}
++    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context->enter();return run_value(Host(),context->store.run(std::move(id)).get());});}
++    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();if(!context->executor)throw RunUnavailable("Run execution unavailable");return run_value(Host(),context->executor->submit(std::move(id),std::move(session),std::move(prompt)));});}
++    void Cancel(std::string id){api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();if(!context->executor)throw RunUnavailable("Run execution unavailable");context->executor->cancel(id);});}
+     BEGIN_PACKAGE(RunsApi)
+         APISET().AddFunc<1>("Open",&RunsApi::Open);
+         APISET().AddFunc<3>("Start",&RunsApi::Start);
+@@ -68,26 +68,34 @@ struct RunsApi {
+     END_PACKAGE
+ };
+ struct RootApi {
+-    ApiContext context;
+-    RootApi(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):context{store,executor,token,owner}{}
++    std::mutex binding;
++    std::shared_ptr<ApiContext> context;
++    std::shared_ptr<ApiContext> capture(){std::lock_guard lock(binding);if(!context)throw RunUnavailable("Public backend services are unavailable");return context;}
+     BEGIN_PACKAGE(RootApi)
+         APISET().AddClass<0,HostApi,RootApi>("Host");
+         APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
+         APISET().AddClass<1,RunsApi,RootApi>("Runs");
+     END_PACKAGE
+ };
+-SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
+-RunsApi::RunsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
++SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
++RunsApi::RunsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
++RootApi& api_root(){
++    static auto root=[] {auto value=std::make_shared<RootApi>();auto& runtime=xmind_ipc_runtime();retain_xmind_ipc_service(value);auto package=runtime.RegisterPackage("xmind",*value);runtime.RegisterRemoteObject("xmind",package);(void)xmind_ipc_port();return value;}();return *root;
+ }
++}
++void ensure_xmind_ipc_api(){(void)api_root();}
+ struct XMindIpcServer::Impl {
+-    std::shared_ptr<RootApi> root;
+-    X::Runtime& runtime;
++    RootApi& root;
++    std::shared_ptr<ApiContext> context;
+     std::string endpoint;
+-    Impl(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):root(std::make_shared<RootApi>(store,executor,token,owner)),runtime(xmind_ipc_runtime()){
+-        try{validate_local_auth_token(token);retain_xmind_ipc_service(root);auto package=runtime.RegisterPackage("xmind",*root);runtime.RegisterRemoteObject("xmind",package);endpoint="lrpc:"+std::to_string(xmind_ipc_port());}
+-        catch(...){std::unique_lock lock(root->context.lifetime);root->context.active=false;throw;}
++    Impl(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):root(api_root()),context(std::make_shared<ApiContext>(store,executor,token,owner)){
++        validate_local_auth_token(token);endpoint="lrpc:"+std::to_string(xmind_ipc_port());
++        std::lock_guard lock(root.binding);if(root.context)throw Conflict("Public xMind services already have an active owner");root.context=context;
++    }
++    ~Impl(){
++        {std::unique_lock lock(context->lifetime);context->active=false;}
++        std::lock_guard lock(root.binding);if(root.context==context)root.context.reset();
+     }
+-    ~Impl(){std::unique_lock lock(root->context.lifetime);root->context.active=false;}
+ };
+ XMindIpcServer::XMindIpcServer(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):impl_(std::make_unique<Impl>(store,executor,token,owner)){}
+ XMindIpcServer::~XMindIpcServer()=default;
+diff --git a/Native/tests/xmind_ipc_lifetime_contract.cpp b/Native/tests/xmind_ipc_lifetime_contract.cpp
+new file mode 100644
+index 00000000..6b5af7f0
+--- /dev/null
++++ b/Native/tests/xmind_ipc_lifetime_contract.cpp
+@@ -0,0 +1,36 @@
++#include "agentflow/xmind_ipc_api.hpp"
++#include "agentflow/xmind_ipc_runtime.hpp"
++#include "agentflow/persistence_service.hpp"
++#include "xlang3/xlang3.h"
++#include <filesystem>
++#include <future>
++#include <iostream>
++#include <random>
++using namespace agentflow;
++namespace {
++void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
++}
++int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path folder;try{
++    folder=std::filesystem::temp_directory_path()/("xmind-api-lifetime-"+std::to_string(std::random_device{}()));check(std::filesystem::create_directory(folder),"Fresh API fixture directory required");
++    auto store=std::make_unique<PersistenceService>((folder/"state.sqlite").string(),std::vector<std::string>{argv[1],argv[2]});
++    auto first=std::async(std::launch::async,[]{ensure_xmind_ipc_api();}),second=std::async(std::launch::async,[]{ensure_xmind_ipc_api();});first.get();second.get();
++    const auto endpoint="lrpc:"+std::to_string(xmind_ipc_port());X::Runtime client;auto root=client.ImportRemote("xmind",endpoint.c_str());
++    auto text=[&](const std::string& value){return X::Value(client,value);};
++    auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value out;check(method.Call(args,out),"Native API method failed");return out;};
++    auto refused=[&](const X::Value& method,std::vector<X::Value> args){X::Value out;check(!method.Call(args,out),"Closed or unauthorized service unexpectedly accepted a call");};
++    auto host=call(root["Host"],{});check(call(host["ApiVersion"],{}).ToInt64()==1,"Process root must exist before public service binding");
++    const std::string token_one(64,'a'),token_two(64,'b');refused(root["Sessions"],{text(token_one)});X::Value stale;
++    {
++        XMindIpcServer owner(*store,nullptr,token_one);check(owner.endpoint()==endpoint,"Public binding must reuse the registered process listener");
++        stale=call(root["Sessions"],{text(token_one)});auto created=call(stale["Create"],{text("persisted"),text("Scoped native API")});check(created["id"].ToString()=="persisted","Native session creation must use the bound persistence owner");
++        bool conflict=false;try{XMindIpcServer duplicate(*store,nullptr,token_two);}catch(const Conflict&){conflict=true;}check(conflict,"Concurrent public binding must not replace the existing owner");
++    }
++    refused(stale["Open"],{text("persisted")});refused(root["Sessions"],{text(token_one)});X::Value replacement;
++    {
++        XMindIpcServer owner(*store,nullptr,token_two);check(owner.endpoint()==endpoint,"Replacement binding must preserve the original root and listener");refused(root["Sessions"],{text(token_one)});refused(stale["Open"],{text("persisted")});
++        replacement=call(root["Sessions"],{text(token_two)});check(call(replacement["Open"],{text("persisted")})["title"].ToString()=="Scoped native API","Replacement owner must retain actual persisted session data");
++    }
++    store->close();store.reset();refused(stale["Open"],{text("persisted")});refused(replacement["Open"],{text("persisted")});
++    check(std::filesystem::weakly_canonical(folder).parent_path()==std::filesystem::weakly_canonical(std::filesystem::temp_directory_path())&&folder.filename().string().starts_with("xmind-api-lifetime-"),"Refusing fixture cleanup outside its known temporary directory");std::filesystem::remove_all(folder);
++    std::cout<<"Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently."<<std::endl;return 0;
++}catch(const std::exception& error){std::cerr<<error.what()<<"; retained fixture "<<folder.string()<<std::endl;return 1;}}

@@ -2,13 +2,12 @@
 #include "agentflow/xmind_ipc_runtime.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/run_executor.hpp"
-#include "agentflow/http_server.hpp"
+#include "agentflow/local_auth.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include <optional>
+#include <mutex>
 #include "xlang3/xlang3.h"
-#include <random>
 #include <stdexcept>
-#include <string_view>
 namespace agentflow {
 namespace {
 struct ApiContext {
@@ -18,6 +17,7 @@ struct ApiContext {
     BackendOwnerControl* owner=nullptr;
     mutable std::shared_mutex lifetime;
     bool active=true;
+    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),owner(control){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
     void authorize(const std::string& supplied)const {
@@ -46,21 +46,21 @@ struct HostApi {
     END_PACKAGE
 };
 struct SessionsApi {
-    ApiContext& context;
+    std::shared_ptr<ApiContext> context;
     SessionsApi(RootApi*,std::string token);
-    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context.enter();return session_value(Host(),context.store.session(std::move(id)).get());});}
-    X::Value Create(std::string id,std::string title){return api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();return session_value(Host(),context.store.create_session(std::move(id),std::move(title)).get());});}
+    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context->enter();return session_value(Host(),context->store.session(std::move(id)).get());});}
+    X::Value Create(std::string id,std::string title){return api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();return session_value(Host(),context->store.create_session(std::move(id),std::move(title)).get());});}
     BEGIN_PACKAGE(SessionsApi)
         APISET().AddFunc<1>("Open",&SessionsApi::Open);
         APISET().AddFunc<2>("Create",&SessionsApi::Create);
     END_PACKAGE
 };
 struct RunsApi {
-    ApiContext& context;
+    std::shared_ptr<ApiContext> context;
     RunsApi(RootApi*,std::string token);
-    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context.enter();return run_value(Host(),context.store.run(std::move(id)).get());});}
-    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");return run_value(Host(),context.executor->submit(std::move(id),std::move(session),std::move(prompt)));});}
-    void Cancel(std::string id){api_call([&]{auto lifetime_lock=context.enter();auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");context.executor->cancel(id);});}
+    X::Value Open(std::string id){return api_call([&]{auto lifetime_lock=context->enter();return run_value(Host(),context->store.run(std::move(id)).get());});}
+    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();if(!context->executor)throw RunUnavailable("Run execution unavailable");return run_value(Host(),context->executor->submit(std::move(id),std::move(session),std::move(prompt)));});}
+    void Cancel(std::string id){api_call([&]{auto lifetime_lock=context->enter();auto admission=context->admit();if(!context->executor)throw RunUnavailable("Run execution unavailable");context->executor->cancel(id);});}
     BEGIN_PACKAGE(RunsApi)
         APISET().AddFunc<1>("Open",&RunsApi::Open);
         APISET().AddFunc<3>("Start",&RunsApi::Start);
@@ -68,26 +68,34 @@ struct RunsApi {
     END_PACKAGE
 };
 struct RootApi {
-    ApiContext context;
-    RootApi(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):context{store,executor,token,owner}{}
+    std::mutex binding;
+    std::shared_ptr<ApiContext> context;
+    std::shared_ptr<ApiContext> capture(){std::lock_guard lock(binding);if(!context)throw RunUnavailable("Public backend services are unavailable");return context;}
     BEGIN_PACKAGE(RootApi)
         APISET().AddClass<0,HostApi,RootApi>("Host");
         APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
         APISET().AddClass<1,RunsApi,RootApi>("Runs");
     END_PACKAGE
 };
-SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
-RunsApi::RunsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
+SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
+RunsApi::RunsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
+RootApi& api_root(){
+    static auto root=[] {auto value=std::make_shared<RootApi>();auto& runtime=xmind_ipc_runtime();retain_xmind_ipc_service(value);auto package=runtime.RegisterPackage("xmind",*value);runtime.RegisterRemoteObject("xmind",package);(void)xmind_ipc_port();return value;}();return *root;
 }
+}
+void ensure_xmind_ipc_api(){(void)api_root();}
 struct XMindIpcServer::Impl {
-    std::shared_ptr<RootApi> root;
-    X::Runtime& runtime;
+    RootApi& root;
+    std::shared_ptr<ApiContext> context;
     std::string endpoint;
-    Impl(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):root(std::make_shared<RootApi>(store,executor,token,owner)),runtime(xmind_ipc_runtime()){
-        try{validate_local_auth_token(token);retain_xmind_ipc_service(root);auto package=runtime.RegisterPackage("xmind",*root);runtime.RegisterRemoteObject("xmind",package);endpoint="lrpc:"+std::to_string(xmind_ipc_port());}
-        catch(...){std::unique_lock lock(root->context.lifetime);root->context.active=false;throw;}
+    Impl(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):root(api_root()),context(std::make_shared<ApiContext>(store,executor,token,owner)){
+        validate_local_auth_token(token);endpoint="lrpc:"+std::to_string(xmind_ipc_port());
+        std::lock_guard lock(root.binding);if(root.context)throw Conflict("Public xMind services already have an active owner");root.context=context;
     }
-    ~Impl(){std::unique_lock lock(root->context.lifetime);root->context.active=false;}
+    ~Impl(){
+        {std::unique_lock lock(context->lifetime);context->active=false;}
+        std::lock_guard lock(root.binding);if(root.context==context)root.context.reset();
+    }
 };
 XMindIpcServer::XMindIpcServer(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):impl_(std::make_unique<Impl>(store,executor,token,owner)){}
 XMindIpcServer::~XMindIpcServer()=default;
