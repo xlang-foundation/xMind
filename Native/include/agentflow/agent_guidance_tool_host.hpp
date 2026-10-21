@@ -27,6 +27,7 @@ struct AgentGuidanceToolOwnerContext {
     std::vector<AgentPermissionRule> permission_rules;
     std::chrono::steady_clock::time_point deadline;
     std::size_t base_instruction_bytes=0;
+    std::function<void(const AgentWorkspaceInvocation&)> authorize_dispatch;
 };
 // Local owner and lifetime guard. Does not establish authenticated worker RPC.
 std::unique_ptr<AgentGuidanceToolHost> make_agent_guidance_tool_host(

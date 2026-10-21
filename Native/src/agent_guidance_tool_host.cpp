@@ -51,6 +51,7 @@ public:
         if(!context)throw ToolAccessDenied("Guidance context is not admitted");
         if(call.tool_name=="read_repository_instructions"){
             if(!args.contains("directory")||!args["directory"].is_string())throw std::invalid_argument("Repository guidance requires a directory");
+            if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
             auto output=owner_.workspace_members?owner_.workspace_members->invoke(call,cancel):owner_.primary_workspace->invoke(call,cancel);
             // Reading guidance is itself discovery. Register its selected scope
             // for delivery in the next model request without requiring that
@@ -60,10 +61,12 @@ public:
         }
         if(call.tool_name=="list_skills"){
             if(!args.empty())throw std::invalid_argument("Skill listing takes no arguments");
+            if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
             return {true,context->skills().catalogue_json(cancel)};
         }
         if(!context->ready(context->skills().activation_directory(call.arguments_json,cancel),cancel))
             return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
+        if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
         return {true,context->activate_skill(call.arguments_json,owner_.base_instruction_bytes,cancel)};
     }
 private:

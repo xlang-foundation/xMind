@@ -64,16 +64,17 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
+        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
+        for(auto definition:SkillContext::definitions())definitions.push_back(std::move(definition));
         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
         for(const auto& tool:settings_.xlang_python_tools){if(std::any_of(definitions.begin(),definitions.end(),[&](const auto& existing){return existing.name==tool.definition.name;}))throw std::invalid_argument("Callable alias collides with a configured native tool");definitions.push_back(tool.definition);}
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
             if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
-            if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+            if((!is_agent_read_tool(name)&&!is_agent_guidance_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
         return result;
     }
 public:
@@ -131,7 +132,7 @@ public:
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
-        for(const auto& definition:selected_tools)if(definition.name=="language_server")policy.tools.push_back(definition);
+        for(const auto& definition:selected_tools)if(definition.name=="language_server"||((definition.name=="list_skills"||definition.name=="load_skill")&&!callable_tool(definition.name)))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
         std::unique_ptr<RemoteRunTools> remote_tools;
         if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){

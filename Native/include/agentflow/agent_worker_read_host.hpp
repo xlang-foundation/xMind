@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_read_tool_host.hpp"
+#include "agentflow/agent_guidance_tool_host.hpp"
 #include "agentflow/agent_worker_records.hpp"
 #include <mutex>
 
@@ -19,6 +20,7 @@ private:
     AgentReadToolOwnerContext owner_;
     std::stop_token owner_cancel_;
     std::unique_ptr<AgentReadToolHost> native_;
+    std::unique_ptr<AgentGuidanceToolHost> guidance_;
     std::mutex invocation_;
     std::stop_token active_cancel_;
 };

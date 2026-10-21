@@ -10,8 +10,8 @@ namespace agentflow {
 namespace {
 AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy,const std::optional<AgentCallableToolOwnerContext>& callables){
     std::set<std::string> names,callable_names;if(callables)for(const auto& binding:callables->bindings)if(!callable_names.insert(binding.definition.name).second)throw std::invalid_argument("Duplicate worker callable binding");
-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
-    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||!is_agent_read_tool(tool.name);});return policy;
+    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
+    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||(!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name));});return policy;
 }
 }
 AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,

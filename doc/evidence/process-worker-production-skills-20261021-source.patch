@@ -1,0 +1,351 @@
+diff --git a/Native/include/agentflow/agent_guidance_tool_host.hpp b/Native/include/agentflow/agent_guidance_tool_host.hpp
+index e4bad62b..f2677a8b 100644
+--- a/Native/include/agentflow/agent_guidance_tool_host.hpp
++++ b/Native/include/agentflow/agent_guidance_tool_host.hpp
+@@ -27,6 +27,7 @@ struct AgentGuidanceToolOwnerContext {
+     std::vector<AgentPermissionRule> permission_rules;
+     std::chrono::steady_clock::time_point deadline;
+     std::size_t base_instruction_bytes=0;
++    std::function<void(const AgentWorkspaceInvocation&)> authorize_dispatch;
+ };
+ // Local owner and lifetime guard. Does not establish authenticated worker RPC.
+ std::unique_ptr<AgentGuidanceToolHost> make_agent_guidance_tool_host(
+diff --git a/Native/include/agentflow/agent_read_tool_host.hpp b/Native/include/agentflow/agent_read_tool_host.hpp
+index e5ad765f..8430d41c 100644
+--- a/Native/include/agentflow/agent_read_tool_host.hpp
++++ b/Native/include/agentflow/agent_read_tool_host.hpp
+@@ -37,6 +37,7 @@ struct AgentReadToolOwnerContext {
+     std::vector<AgentPermissionRule> permission_rules;
+     std::chrono::steady_clock::time_point deadline;
+     std::chrono::milliseconds approval_timeout{600000};
++    std::size_t guidance_instruction_bytes=0;
+ };
+ // Local owner and lifetime call guard, not authenticated or durable worker RPC.
+ std::unique_ptr<AgentReadToolHost> make_agent_read_tool_host(
+diff --git a/Native/include/agentflow/agent_worker_read_host.hpp b/Native/include/agentflow/agent_worker_read_host.hpp
+index ff27fb6a..73542b38 100644
+--- a/Native/include/agentflow/agent_worker_read_host.hpp
++++ b/Native/include/agentflow/agent_worker_read_host.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ #include "agentflow/agent_read_tool_host.hpp"
++#include "agentflow/agent_guidance_tool_host.hpp"
+ #include "agentflow/agent_worker_records.hpp"
+ #include <mutex>
+ 
+@@ -19,6 +20,7 @@ private:
+     AgentReadToolOwnerContext owner_;
+     std::stop_token owner_cancel_;
+     std::unique_ptr<AgentReadToolHost> native_;
++    std::unique_ptr<AgentGuidanceToolHost> guidance_;
+     std::mutex invocation_;
+     std::stop_token active_cancel_;
+ };
+diff --git a/Native/src/agent_guidance_tool_host.cpp b/Native/src/agent_guidance_tool_host.cpp
+index c5e74370..bc810654 100644
+--- a/Native/src/agent_guidance_tool_host.cpp
++++ b/Native/src/agent_guidance_tool_host.cpp
+@@ -51,6 +51,7 @@ public:
+         if(!context)throw ToolAccessDenied("Guidance context is not admitted");
+         if(call.tool_name=="read_repository_instructions"){
+             if(!args.contains("directory")||!args["directory"].is_string())throw std::invalid_argument("Repository guidance requires a directory");
++            if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
+             auto output=owner_.workspace_members?owner_.workspace_members->invoke(call,cancel):owner_.primary_workspace->invoke(call,cancel);
+             // Reading guidance is itself discovery. Register its selected scope
+             // for delivery in the next model request without requiring that
+@@ -60,10 +61,12 @@ public:
+         }
+         if(call.tool_name=="list_skills"){
+             if(!args.empty())throw std::invalid_argument("Skill listing takes no arguments");
++            if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
+             return {true,context->skills().catalogue_json(cancel)};
+         }
+         if(!context->ready(context->skills().activation_directory(call.arguments_json,cancel),cancel))
+             return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
++        if(owner_.authorize_dispatch)owner_.authorize_dispatch(call);
+         return {true,context->activate_skill(call.arguments_json,owner_.base_instruction_bytes,cancel)};
+     }
+ private:
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index dfcf240b..b1450c14 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -617,7 +617,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+         };
+         reload_history();
+         std::set<std::string> worker_callables;if(coding_workspace_)for(const auto& name:coding_workspace_->callable_tool_names())if(!worker_callables.insert(name).second)throw Conflict("Duplicate backend worker callable alias");
+-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
++        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+         if(read_workspace_)request=prepare_workspace_window();
+         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+@@ -993,7 +993,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                         invocation.folder_id=invocation.workspace_id;invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
+                         if(call.name=="run_process"){Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process-tool arguments");}if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}}
+                         auto result=process_tool_host->invoke(invocation,token);exact_output=result.output_json;output=Json::parse(result.output_json);success=result.success;
+-                    }else if(is_agent_read_tool(call.name)&&(call.name!="language_server"||language_servers_||read_workspace_)){
++                    }else if((is_agent_read_tool(call.name)&&(call.name!="language_server"||language_servers_||read_workspace_))||(read_workspace_&&is_agent_guidance_tool(call.name))){
+                         if(!read_tool_host)throw ToolAccessDenied("Workspace read is not admitted for this run");
+                         AgentWorkspaceInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+                         invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index 3f8ce46b..e81ea37c 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -10,8 +10,8 @@ namespace agentflow {
+ namespace {
+ AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy,const std::optional<AgentCallableToolOwnerContext>& callables){
+     std::set<std::string> names,callable_names;if(callables)for(const auto& binding:callables->bindings)if(!callable_names.insert(binding.definition.name).second)throw std::invalid_argument("Duplicate worker callable binding");
+-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
+-    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||!is_agent_read_tool(tool.name);});return policy;
++    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
++    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||(!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name));});return policy;
+ }
+ }
+ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
+diff --git a/Native/src/agent_worker_read_context.cpp b/Native/src/agent_worker_read_context.cpp
+index 2565b565..c064d28f 100644
+--- a/Native/src/agent_worker_read_context.cpp
++++ b/Native/src/agent_worker_read_context.cpp
+@@ -12,10 +12,10 @@ struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::un
+ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,PersistenceService& store,AgentWorkerLeaseSpec lease,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,std::stop_token cancel)
+     :store_(store),lease_(std::move(lease)),owner_(std::move(owner)),policy_(std::move(policy)),owner_cancel_(cancel){
+     if(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
+-    std::set<std::string> names;for(const auto& tool:policy_.tools)if(!is_agent_read_tool(tool.name)||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
++    std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
+     const auto count=owner_.workspace_members?owner_.workspace_members->folders().size():1;
+     for(std::size_t index=0;index<count;++index){auto* context=owner_.repository_context(index);if(!context)throw std::invalid_argument("Worker read context requires actual native guidance");contexts_.push_back(std::make_unique<RepositoryInstructionContext>(*context));}
+-    auto read_owner=owner_;read_owner.repository_context=[this](std::size_t index){return contexts_.at(index).get();};read_owner.offered_tool=[this](const std::string& name){return std::any_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==name;});};
++    auto read_owner=owner_;read_owner.guidance_instruction_bytes=policy_.instructions.size()+policy_.instruction_suffix.size();read_owner.repository_context=[this](std::size_t index){return contexts_.at(index).get();};read_owner.offered_tool=[this](const std::string& name){return std::any_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==name;});};
+     native_=std::make_unique<AgentWorkerReadHost>(journal,store_,lease_,std::move(read_owner),owner_cancel_);
+ }
+ AgentWorkerReadContext::~AgentWorkerReadContext()=default;
+@@ -25,7 +25,8 @@ void AgentWorkerReadContext::check(std::stop_token cancel){
+ }
+ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token cancel){
+     check(cancel);Preview result;auto instructions=policy_.instructions;
+-    for(std::size_t index=0;index<contexts_.size();++index){auto copy=std::make_unique<RepositoryInstructionContext>(*contexts_[index]);if(index)instructions+="\n\nRepository guidance for registered workspace folder "+owner_.workspace_members->folders().at(index).folder_id+" (paths relative to this folder):\n";instructions+=copy->prepare(cancel);result.contexts.push_back(std::move(copy));}
++    const auto selected=store_.initialize_run_skills(lease_.owner_run_id,lease_.workspace_id).get();
++    for(std::size_t index=0;index<contexts_.size();++index){auto copy=std::make_unique<RepositoryInstructionContext>(*contexts_[index]);if(!index)copy->skills().restore(selected,cancel);if(index)instructions+="\n\nRepository guidance for registered workspace folder "+owner_.workspace_members->folders().at(index).folder_id+" (paths relative to this folder):\n";instructions+=copy->prepare(cancel);result.contexts.push_back(std::move(copy));}
+     instructions+=policy_.instruction_suffix;
+     if(instructions.size()>65536)throw ToolFileError("Combined backend worker instructions exceed limits");if(!instructions.empty())result.request.messages.push_back({MessageRole::system,std::move(instructions)});
+     const auto history=std::get<std::vector<Message>>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::history,lease_.owner_run_id}).get());for(const auto& message:history)result.request.messages.push_back(model_message_from_history(message));
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index bf54ab24..c590ca32 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -64,16 +64,17 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
+     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
+         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
++        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
+         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
+         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
+         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
++        for(auto definition:SkillContext::definitions())definitions.push_back(std::move(definition));
+         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
+         for(const auto& tool:settings_.xlang_python_tools){if(std::any_of(definitions.begin(),definitions.end(),[&](const auto& existing){return existing.name==tool.definition.name;}))throw std::invalid_argument("Callable alias collides with a configured native tool");definitions.push_back(tool.definition);}
+         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
+             if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
+             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
+-            if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
++            if((!is_agent_read_tool(name)&&!is_agent_guidance_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+         return result;
+     }
+ public:
+@@ -131,7 +132,7 @@ public:
+         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
+         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+-        for(const auto& definition:selected_tools)if(definition.name=="language_server")policy.tools.push_back(definition);
++        for(const auto& definition:selected_tools)if(definition.name=="language_server"||((definition.name=="list_skills"||definition.name=="load_skill")&&!callable_tool(definition.name)))policy.tools.push_back(definition);
+         if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
+         std::unique_ptr<RemoteRunTools> remote_tools;
+         if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){
+diff --git a/Native/src/agent_worker_read_host.cpp b/Native/src/agent_worker_read_host.cpp
+index c7fe2eda..50c66b55 100644
+--- a/Native/src/agent_worker_read_host.cpp
++++ b/Native/src/agent_worker_read_host.cpp
+@@ -16,6 +16,7 @@ AgentWorkerReadHost::AgentWorkerReadHost(AgentRunJournal& journal,PersistenceSer
+     if((owner_.workspace_members?owner_.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker read workspace revision differs");
+     for(std::size_t index=0;index<count;++index)if(!owner_.repository_context(index))throw std::invalid_argument("Worker read requires native guidance context");
+     auto native_owner=owner_;native_owner.authorize_dispatch=[this](const AgentWorkspaceInvocation& call){store_.start_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,active_cancel_).get();};
++    AgentGuidanceToolOwnerContext guidance;guidance.run_id=owner_.run_id;guidance.primary_workspace=owner_.primary_workspace;guidance.workspace_members=owner_.workspace_members;guidance.repository_context=owner_.repository_context;guidance.offered_tool=owner_.offered_tool;guidance.inherited_permission_layers=owner_.inherited_permission_layers;guidance.permission_rules=owner_.permission_rules;guidance.deadline=owner_.deadline;guidance.base_instruction_bytes=owner_.guidance_instruction_bytes;guidance.authorize_dispatch=native_owner.authorize_dispatch;guidance_=make_agent_guidance_tool_host(journal,std::move(guidance));
+     native_=make_agent_read_tool_host(journal,store_,std::move(native_owner));
+ }
+ AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation& call,std::stop_token caller){
+@@ -26,7 +27,7 @@ AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation&
+     store_.claim_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,stop.get_token()).get();active_cancel_=stop.get_token();
+     const auto save=[&](const AgentReadToolResult& result){try{store_.record_agent_worker_read_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerReadOutcomeUnrecorded("Worker read result could not be recorded; stop execution and recover ownership");}};
+     AgentReadToolResult result;
+-    try{result=native_->invoke(call,stop.get_token());}
++    try{if(is_agent_guidance_tool(call.tool_name)){const auto actual=guidance_->invoke(call,stop.get_token());result={actual.success,actual.output_json};}else result=native_->invoke(call,stop.get_token());}
+     catch(const AgentPermissionDenied&){result={false,R"({"error":{"code":"agent_permission_denied","message":"The selected agent permission rules denied this resource; the tool was not dispatched"}})"};}
+     catch(const PermissionDenied&){result={false,R"({"error":{"code":"permission_denied","message":"Controller denied this operation; the requested effect was not dispatched"}})"};}
+     catch(...){const auto original=std::current_exception();save({false,R"({"error":{"code":"worker_read_failed","message":"The backend read did not return a result."}})"});std::rethrow_exception(original);}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index b0b911b3..06e7bb88 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -492,6 +492,7 @@ Json dynamic_prompt(const DynamicNodeDefinition& d,const std::string& input,cons
+ struct Repository::Impl {
+     AgentWorkerLeaseRecord retire_worker(const std::string& generation,const std::string& reason);
+     std::string path;
++    void apply_skill_turn(Repository&,const Run&,const Json&,const std::vector<std::string>&,const std::optional<SkillSelections>&,const std::set<std::string>* activation_calls=nullptr);
+     XlangSqlite database;
+     Impl(const std::string& file,const std::vector<std::string>& roots):path(file),database(file,roots) {}
+     void initialize_budget(const std::string& id,const std::string& prompt,const RootBudgetSpec& spec){
+@@ -2696,21 +2697,17 @@ SkillSelections Repository::initialize_run_skills(const std::string& id,const st
+     if(!initial.ids.empty())impl_->event(id,"skill.selection.restored",Json{{"workspace_id",workspace},{"ids",initial.ids},{"source",inherited?"parent_run":"session"}}.dump());
+     tx.commit();return initial;
+ }
+-void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills) {
+-    if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
+-    auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
+-    if(current.state!=RunState::running) throw Conflict("Run is not running");
+-    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready')",{id}).rows.empty())throw Conflict("Signed planning turns require their typed commit");
+-    const auto actual=Json::parse(object_json(assistant_json,8*1024*1024));if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="plan_tasks"||call.value("name",std::string{})=="revise_plan")throw Conflict("Planning conversation turns require their accepted signed ledger");
++void Repository::Impl::apply_skill_turn(Repository& repository,const Run& current,const Json& actual,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills,const std::set<std::string>* activation_calls){
++    auto& db=database;const auto& id=current.id;
+     if(skills){
+-        const auto selected_json=skill_selections_json(*skills);const auto previous=run_skills(id);if(previous.workspace_id!=skills->workspace_id)throw Conflict("Skill tool turn workspace changed");
++        const auto selected_json=skill_selections_json(*skills);const auto previous=repository.run_skills(id);if(previous.workspace_id!=skills->workspace_id)throw Conflict("Skill tool turn workspace changed");
+         std::map<std::string,Json> results;for(const auto& raw:tool_json){const auto item=Json::parse(object_json(raw,8*1024*1024));if(!item.contains("tool_call_id")||!item["tool_call_id"].is_string()||!results.emplace(item["tool_call_id"].get<std::string>(),item).second)throw std::invalid_argument("Skill tool turn requires unique actual result identities");}
+         if(!actual.contains("tool_calls")||!actual["tool_calls"].is_array()||actual["tool_calls"].size()!=results.size())throw std::invalid_argument("Skill tool turn requires all matched native calls and results");
+         std::set<std::string> call_ids;for(const auto& call:actual["tool_calls"]){
+             if(!call.is_object()||!call.contains("id")||!call["id"].is_string()||call["id"].get_ref<const std::string&>().empty()||!call_ids.insert(call["id"].get<std::string>()).second||!call.contains("name")||!call["name"].is_string()||!call.contains("arguments")||!call["arguments"].is_string()||!results.contains(call["id"].get<std::string>())||!results.at(call["id"].get<std::string>()).contains("content")||!results.at(call["id"].get<std::string>())["content"].is_string())throw std::invalid_argument("Invalid matched native skill tool batch");
+         }
+         auto expected=previous;
+-        if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="load_skill"){
++        if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="load_skill"&&(!activation_calls||activation_calls->contains(call.at("id").get<std::string>()))){
+             const auto found=results.find(call.at("id").get<std::string>());if(found==results.end()||!found->second.contains("content")||!found->second["content"].is_string())throw std::invalid_argument("Skill activation lacks its matching tool result");
+             const auto output=Json::parse(object_json(found->second["content"].get<std::string>(),32768));
+             if(output.contains("activation")){
+@@ -2727,9 +2724,17 @@ void Repository::record_tool_turn(const std::string& id,const std::string& assis
+                 if(rows.empty()){if(!previous.ids.empty())throw Conflict("Session skill state disappeared");db.execute("INSERT INTO session_skills VALUES(?,?,?,1)",{current.session_id,skills->workspace_id,selected_json});}
+                 else{if(text(rows[0][0])!=skill_selections_json(previous))throw Conflict("Session skill state changed outside its running owner");changed_one(db.execute("UPDATE session_skills SET selections_json=?,revision=revision+1 WHERE session_id=? AND workspace_id=? AND revision=?",{selected_json,current.session_id,skills->workspace_id,integer(rows[0][1])}));}
+             }
+-            impl_->event(id,"skill.selection.changed",Json{{"workspace_id",skills->workspace_id},{"ids",skills->ids},{"session_selection",current.parent_id.empty()}}.dump());
++            event(id,"skill.selection.changed",Json{{"workspace_id",skills->workspace_id},{"ids",skills->ids},{"session_selection",current.parent_id.empty()}}.dump());
+         }
+     }
++}
++void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills) {
++    if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
++    auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
++    if(current.state!=RunState::running) throw Conflict("Run is not running");
++    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready')",{id}).rows.empty())throw Conflict("Signed planning turns require their typed commit");
++    const auto actual=Json::parse(object_json(assistant_json,8*1024*1024));if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="plan_tasks"||call.value("name",std::string{})=="revise_plan")throw Conflict("Planning conversation turns require their accepted signed ledger");
++    impl_->apply_skill_turn(*this,current,actual,tool_json,skills);
+     impl_->message(current,"assistant",assistant_json);
+     for(const auto& json:tool_json) impl_->message(current,"tool",json);
+     impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
+@@ -3301,7 +3306,7 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
+         try{(void)read_worker_turn(db,model.spec);}catch(const NotFound&){throw Conflict("Worker must commit its actual tool turn before another model call");}
+     }
+ }
+-bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server"};return reads.contains(name);}
++bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server","read_repository_instructions","list_skills","load_skill"};return reads.contains(name);}
+ template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
+     (void)call.serialize();worker_current_scope(repository,db,lease);
+     if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent"||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+@@ -3536,7 +3541,10 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
+         if(read.state!="returned"||worker_claim_spec_json(read.model)!=worker_claim_spec_json(model.spec)||read.invocation.tool_name!=call.name||read.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker read turn has an unfinished or changed actual result");
+         (void)worker_read_authority(*this,db,lease,read.invocation);outputs.push_back(Json{{"content",read.actual_output_json},{"tool_call_id",call.id}}.dump());
+     }
+-    const auto current=run(lease.owner_run_id);AgentWorkerToolTurnRecord turn{model.spec};
++    const auto current=run(lease.owner_run_id);std::optional<SkillSelections> selected;std::set<std::string> activations;
++    if(!db.execute("SELECT run_id FROM run_skills WHERE run_id=?",{current.id}).rows.empty())selected=run_skills(current.id);
++    for(std::size_t index=0;index<actual.tool_calls.size();++index){const auto& call=actual.tool_calls[index];if(call.name!="load_skill"||worker_callable_tool(db,lease,call.name))continue;if(!selected)throw Conflict("Worker skill activation lacks captured run selections");activations.insert(call.id);const auto result=Json::parse(Json::parse(outputs[index]).at("content").get<std::string>());if(result.contains("activation")){const auto id=Json::parse(object_json(call.arguments_json,4096)).at("id").get<std::string>();if(std::find(selected->ids.begin(),selected->ids.end(),id)==selected->ids.end())selected->ids.push_back(id);}}
++    impl_->apply_skill_turn(*this,current,Json::parse(model.actual_assistant_json),outputs,selected,&activations);AgentWorkerToolTurnRecord turn{model.spec};
+     const auto append=[&](const std::string& role,const std::string& json){impl_->message(current,role,json);turn.message_sequences.push_back(integer(db.execute("SELECT message_seq FROM task_messages WHERE run_id=? ORDER BY message_seq DESC LIMIT 1",{current.id}).rows.at(0).at(0)));};
+     append("assistant",model.actual_assistant_json);for(const auto& output:outputs)append("tool",output);turn.messages_binding=context_digest(worker_turn_messages(db,turn).dump());
+     impl_->event(current.id,"conversation.tool_turn","{}");impl_->event(current.id,"worker.tool_turn.committed",Json{{"generation",lease.generation},{"attempt_id",attempt},{"messages_binding",turn.messages_binding}}.dump());
+diff --git a/Native/tests/agent_worker_coding_skills_fixture.hpp b/Native/tests/agent_worker_coding_skills_fixture.hpp
+new file mode 100644
+index 00000000..8527a8ed
+--- /dev/null
++++ b/Native/tests/agent_worker_coding_skills_fixture.hpp
+@@ -0,0 +1,17 @@
++namespace worker_coding_skills_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;using worker_coding_fixture::check;using worker_coding_fixture::write;
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::vector<std::string>& imports){
++    for(const std::string mode:{"coding_skills","coding_skills_denied","coding_skills_rollback","coding_skills_manual"}){
++        const bool denied=mode=="coding_skills_denied",rollback=mode=="coding_skills_rollback",manual=mode=="coding_skills_manual";const auto directory=folder/mode,skill=directory/".agents"/"skills"/"fixture";check(std::filesystem::create_directories(skill),"Skill worker workspace must be fresh");write(directory/"AGENTS.md","WORKER_SKILL_ROOT_GUIDANCE\n");write(skill/"AGENTS.md","SKILL_DIRECTORY_GUIDANCE\n");write(skill/"SKILL.md","---\nname: Worker skill fixture\ndescription: Explicit native worker skill metadata\n"+(manual?std::string("disable-model-invocation: true\n"):std::string{})+"---\nSKILL_BODY_GUIDANCE\nUse actual companion bytes.\n");write(skill/"note.txt","actual skill companion\n");WorkspaceTools workspace(directory.string());
++        AgentSettings settings;settings.provider={endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.credential=CredentialReference{"worker","rpc-model","provider:chat"};settings.provider_identity=ProviderExecutionIdentity{"worker-profile","controlled-route","openai",7};if(denied)settings.permission_rules={{"load_skill","*","deny"}};
++        AgentDefinitionStore(store).apply("agents:\n  - id: skills.worker\n    mode: primary\n    placement: process\n    model_id: worker-rpc-fixture\n    instructions: Inspect and load the actual workspace skill.\n    tools: "+(manual?std::string("[]\n"):std::string("[list_skills, read_repository_instructions, load_skill, read_file]\n")));const std::string id="rpc-"+mode,session=id+"-session";store.create_session(session,"Production worker skills").get();if(manual)store.replace_session_skills(session,SkillSelections{workspace.identity(),{"fixture"},{"fixture"}},0).get();std::unique_ptr<XlangSqlite> fault;if(rollback){fault=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);fault->execute("CREATE TRIGGER fixture_worker_skill_abort BEFORE INSERT ON session_skills WHEN NEW.session_id='rpc-coding_skills_rollback-session' BEGIN SELECT RAISE(ABORT,'fixture_worker_skill_abort'); END");}
++        unsigned factories=0;ExecutionPlatform service(store,settings,1,2,[&](PersistenceService& actual,const AgentSettings& captured){++factories;return make_agent_worker_coding_executor(actual,captured,image);});service.select_session_agent(session,service.agent_definitions().front(),0);service.submit(id,session,manual?"Inspect the manually selected skill.":"Discover, load and inspect the workspace skill.");const auto until=Clock::now()+15s;while(Clock::now()<until&&!service.idle())std::this_thread::sleep_for(5ms);check(service.idle()&&service.healthy()&&factories==1,"Skill worker must physically drain");const auto history=store.run_history(id).get();const auto events=store.events(id).get();const auto calls=store.root_budget(id).get().model_calls_reserved;const auto selections=store.run_skills(id).get();const auto saved=store.session_skills(session,workspace.identity()).get();
++        check(store.run(id).get().state==(rollback?RunState::failed:RunState::completed)&&calls==(manual?1:rollback?2:denied?3:4),"Skill worker must retain actual model count and terminal outcome");check(history.size()==(manual?2:rollback?4:denied?7:9),"Skill worker must commit exact successful tool turns only");check(selections.ids==(denied||rollback?std::vector<std::string>{}:std::vector<std::string>{"fixture"})&&saved.selections.ids==selections.ids&&selections.manual_ids==(manual?std::vector<std::string>{"fixture"}:std::vector<std::string>{}),"Actual skill state must retain model/manual provenance without invented activation");check(store.operations(id).get().empty(),"Guidance must not grant or manufacture effect approvals");
++        const auto admission=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.lease.admitted";});check(admission!=events.end(),"Skills require an actual unified xmind worker");const auto lease=store.agent_worker_lease(Json::parse(admission->json).at("generation").get<std::string>()).get();check(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Skill worker child must physically retire");if(rollback){check(saved.revision==0&&std::none_of(events.begin(),events.end(),[](const auto& e){return e.kind=="skill.selection.changed";}),"Selection persistence failure must roll back run/session state, event and tool conversation together");fault->execute("DROP TRIGGER fixture_worker_skill_abort");}
++        if(mode=="coding_skills"){
++            service.submit(id+"-follow",session,"Use the saved skill without loading again.");const auto follow_until=Clock::now()+10s;while(Clock::now()<follow_until&&!service.idle())std::this_thread::sleep_for(5ms);check(service.idle()&&service.healthy()&&store.run(id+"-follow").get().state==RunState::completed&&store.root_budget(id+"-follow").get().model_calls_reserved==1&&store.run_skills(id+"-follow").get().ids==std::vector<std::string>{"fixture"},"Fresh follow-up worker must restore selected skill without replaying prior tools");const auto restored=store.events(id+"-follow").get();check(std::any_of(restored.begin(),restored.end(),[](const auto& e){return e.kind=="skill.selection.restored";}),"Follow-up restoration requires its actual backend event");
++        }
++        std::cout<<"Production skill worker "<<mode<<" verified native guidance delivery, exact history, atomic skill selections and physical retirement."<<std::endl;
++    }
++}
++}
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index 3a3a3240..a3105b80 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -34,6 +34,7 @@
+ #include "agent_worker_coding_fixture.hpp"
+ #include "agent_worker_coding_language_fixture.hpp"
+ #include "agent_worker_coding_callable_fixture.hpp"
++#include "agent_worker_coding_skills_fixture.hpp"
+ #include "agent_worker_coding_process_fixture.hpp"
+ #include "agent_worker_coding_service_fixture.hpp"
+ #include "agentflow/agent_worker_runner.hpp"
+@@ -255,6 +256,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_callable_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_callable_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_skills_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 07dfc8f8..d803feb5 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,4 +1,4 @@
+-// Independent controlled native provider; one hundred twenty-four intentional requests, no live key.
++// Independent controlled native provider; one hundred thirty-five intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+@@ -9,7 +9,7 @@ import {join} from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -55,6 +55,15 @@ const server=createServer((request,response)=>{
+    if(phase===2){assert.equal(body.messages[2].tool_calls[0].function.name,alias);assert.equal(body.messages[3].tool_call_id,'production-remote-call');const result=JSON.parse(body.messages[3].content);assert.equal(result.acknowledged_by_peer,true);if(mode==='coding_remote')assert.equal(result.request_id,'rpc-peer-reply');else if(mode==='coding_a2a_factory'){assert.equal(a2aCalls,1);assert.equal(result.task_id,'factory-task');}else assert.equal(peerCalls,1);assert.ok(result.operation_id);}
+    response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'production-remote-call',type:'function',function:{name:alias,arguments:JSON.stringify(mode==='coding_a2a_factory'?{task:'actual production remote effect'}:{text:'actual production remote effect'})}}]}:{role:'assistant',content:'Production remote complete.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
+   }
++  if(mode.startsWith('coding_skills')){
++   const phase=counts[mode],manual=mode==='coding_skills_manual',denied=mode==='coding_skills_denied';assert.match(body.messages[0].content,/WORKER_SKILL_ROOT_GUIDANCE/);const restored=manual||phase===5;
++   if(restored||phase>=3&&!denied)assert.match(body.messages[0].content,/SKILL_BODY_GUIDANCE/);else assert.equal(body.messages[0].content.includes('SKILL_BODY_GUIDANCE'),false);
++   if(manual)assert.ok(!body.tools||body.tools.length===0);else assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['list_skills','load_skill','read_file','read_repository_instructions'].sort());
++   if(phase===2)assert.match(body.messages[0].content,/SKILL_DIRECTORY_GUIDANCE/);if(phase===3){const loaded=body.messages.find(m=>m.tool_call_id==='skill-load');assert.ok(loaded);const result=JSON.parse(loaded.content);if(denied)assert.equal(result.error.code,'agent_permission_denied');else {assert.equal(result.activation,'requested_for_next_model_request');assert.equal(result.effect_permission,false);}}
++   if(phase===4){const read=body.messages.find(m=>m.tool_call_id==='skill-companion');assert.ok(read);assert.equal(JSON.parse(read.content).content,'actual skill companion\n');}
++   let tools;if(!restored&&phase===1)tools=[['skill-list','list_skills',{}],['skill-guide','read_repository_instructions',{directory:'.agents/skills/fixture'}]];else if(!restored&&phase===2)tools=[['skill-load','load_skill',{id:'fixture'}]];else if(!restored&&phase===3&&!denied)tools=[['skill-companion','read_file',{path:'.agents/skills/fixture/note.txt'}]];
++   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,tools?{role:'assistant',tool_calls:tools.map(([id,name,args],index)=>({index,id,type:'function',function:{name,arguments:JSON.stringify(args)}}))}:{role:'assistant',content:'Skill result inspected.'},tools?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
++  }
+   if(mode.startsWith('coding_callable')){
+    const phase=counts[mode],alias=mode==='coding_callable_alias'?'language_server':'trusted_probe';assert.match(body.messages[0].content,/WORKER_CALLABLE_GUIDANCE/);assert.equal(body.messages.length,phase===1?2:4);assert.equal(body.tools.filter(t=>t.function.name===alias).length,1);if(mode!=='coding_callable_default')assert.deepEqual(body.tools.map(t=>t.function.name),[alias]);else assert.ok(body.tools.some(t=>t.function.name==='read_file'));
+    if(phase===2){assert.equal(body.messages[3].tool_call_id,'callable-call');const value=JSON.parse(body.messages[3].content);if(mode==='coding_callable_policy')assert.equal(value.error.code,'agent_permission_denied');else if(mode==='coding_callable_denied')assert.equal(value.error.code,'permission_denied');else if(mode==='coding_callable_array'){assert.equal(value[0],'ACTUAL CALLABLE EFFECT');assert.ok(value[1]>0);}else {assert.equal(value.text,'ACTUAL CALLABLE EFFECT');assert.ok(value.pid>0);}}
+@@ -161,7 +170,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred twenty-four requests: sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred thirty-five requests: eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+ 
+ assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});

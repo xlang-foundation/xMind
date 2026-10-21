@@ -37,6 +37,7 @@ struct AgentReadToolOwnerContext {
     std::vector<AgentPermissionRule> permission_rules;
     std::chrono::steady_clock::time_point deadline;
     std::chrono::milliseconds approval_timeout{600000};
+    std::size_t guidance_instruction_bytes=0;
 };
 // Local owner and lifetime call guard, not authenticated or durable worker RPC.
 std::unique_ptr<AgentReadToolHost> make_agent_read_tool_host(

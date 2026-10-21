@@ -492,6 +492,7 @@ Json dynamic_prompt(const DynamicNodeDefinition& d,const std::string& input,cons
 struct Repository::Impl {
     AgentWorkerLeaseRecord retire_worker(const std::string& generation,const std::string& reason);
     std::string path;
+    void apply_skill_turn(Repository&,const Run&,const Json&,const std::vector<std::string>&,const std::optional<SkillSelections>&,const std::set<std::string>* activation_calls=nullptr);
     XlangSqlite database;
     Impl(const std::string& file,const std::vector<std::string>& roots):path(file),database(file,roots) {}
     void initialize_budget(const std::string& id,const std::string& prompt,const RootBudgetSpec& spec){
@@ -2696,21 +2697,17 @@ SkillSelections Repository::initialize_run_skills(const std::string& id,const st
     if(!initial.ids.empty())impl_->event(id,"skill.selection.restored",Json{{"workspace_id",workspace},{"ids",initial.ids},{"source",inherited?"parent_run":"session"}}.dump());
     tx.commit();return initial;
 }
-void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills) {
-    if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
-    auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
-    if(current.state!=RunState::running) throw Conflict("Run is not running");
-    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready')",{id}).rows.empty())throw Conflict("Signed planning turns require their typed commit");
-    const auto actual=Json::parse(object_json(assistant_json,8*1024*1024));if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="plan_tasks"||call.value("name",std::string{})=="revise_plan")throw Conflict("Planning conversation turns require their accepted signed ledger");
+void Repository::Impl::apply_skill_turn(Repository& repository,const Run& current,const Json& actual,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills,const std::set<std::string>* activation_calls){
+    auto& db=database;const auto& id=current.id;
     if(skills){
-        const auto selected_json=skill_selections_json(*skills);const auto previous=run_skills(id);if(previous.workspace_id!=skills->workspace_id)throw Conflict("Skill tool turn workspace changed");
+        const auto selected_json=skill_selections_json(*skills);const auto previous=repository.run_skills(id);if(previous.workspace_id!=skills->workspace_id)throw Conflict("Skill tool turn workspace changed");
         std::map<std::string,Json> results;for(const auto& raw:tool_json){const auto item=Json::parse(object_json(raw,8*1024*1024));if(!item.contains("tool_call_id")||!item["tool_call_id"].is_string()||!results.emplace(item["tool_call_id"].get<std::string>(),item).second)throw std::invalid_argument("Skill tool turn requires unique actual result identities");}
         if(!actual.contains("tool_calls")||!actual["tool_calls"].is_array()||actual["tool_calls"].size()!=results.size())throw std::invalid_argument("Skill tool turn requires all matched native calls and results");
         std::set<std::string> call_ids;for(const auto& call:actual["tool_calls"]){
             if(!call.is_object()||!call.contains("id")||!call["id"].is_string()||call["id"].get_ref<const std::string&>().empty()||!call_ids.insert(call["id"].get<std::string>()).second||!call.contains("name")||!call["name"].is_string()||!call.contains("arguments")||!call["arguments"].is_string()||!results.contains(call["id"].get<std::string>())||!results.at(call["id"].get<std::string>()).contains("content")||!results.at(call["id"].get<std::string>())["content"].is_string())throw std::invalid_argument("Invalid matched native skill tool batch");
         }
         auto expected=previous;
-        if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="load_skill"){
+        if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="load_skill"&&(!activation_calls||activation_calls->contains(call.at("id").get<std::string>()))){
             const auto found=results.find(call.at("id").get<std::string>());if(found==results.end()||!found->second.contains("content")||!found->second["content"].is_string())throw std::invalid_argument("Skill activation lacks its matching tool result");
             const auto output=Json::parse(object_json(found->second["content"].get<std::string>(),32768));
             if(output.contains("activation")){
@@ -2727,9 +2724,17 @@ void Repository::record_tool_turn(const std::string& id,const std::string& assis
                 if(rows.empty()){if(!previous.ids.empty())throw Conflict("Session skill state disappeared");db.execute("INSERT INTO session_skills VALUES(?,?,?,1)",{current.session_id,skills->workspace_id,selected_json});}
                 else{if(text(rows[0][0])!=skill_selections_json(previous))throw Conflict("Session skill state changed outside its running owner");changed_one(db.execute("UPDATE session_skills SET selections_json=?,revision=revision+1 WHERE session_id=? AND workspace_id=? AND revision=?",{selected_json,current.session_id,skills->workspace_id,integer(rows[0][1])}));}
             }
-            impl_->event(id,"skill.selection.changed",Json{{"workspace_id",skills->workspace_id},{"ids",skills->ids},{"session_selection",current.parent_id.empty()}}.dump());
+            event(id,"skill.selection.changed",Json{{"workspace_id",skills->workspace_id},{"ids",skills->ids},{"session_selection",current.parent_id.empty()}}.dump());
         }
     }
+}
+void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills) {
+    if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
+    auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
+    if(current.state!=RunState::running) throw Conflict("Run is not running");
+    if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready')",{id}).rows.empty())throw Conflict("Signed planning turns require their typed commit");
+    const auto actual=Json::parse(object_json(assistant_json,8*1024*1024));if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="plan_tasks"||call.value("name",std::string{})=="revise_plan")throw Conflict("Planning conversation turns require their accepted signed ledger");
+    impl_->apply_skill_turn(*this,current,actual,tool_json,skills);
     impl_->message(current,"assistant",assistant_json);
     for(const auto& json:tool_json) impl_->message(current,"tool",json);
     impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
@@ -3301,7 +3306,7 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
         try{(void)read_worker_turn(db,model.spec);}catch(const NotFound&){throw Conflict("Worker must commit its actual tool turn before another model call");}
     }
 }
-bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server"};return reads.contains(name);}
+bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server","read_repository_instructions","list_skills","load_skill"};return reads.contains(name);}
 template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
     (void)call.serialize();worker_current_scope(repository,db,lease);
     if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent"||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
@@ -3536,7 +3541,10 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
         if(read.state!="returned"||worker_claim_spec_json(read.model)!=worker_claim_spec_json(model.spec)||read.invocation.tool_name!=call.name||read.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker read turn has an unfinished or changed actual result");
         (void)worker_read_authority(*this,db,lease,read.invocation);outputs.push_back(Json{{"content",read.actual_output_json},{"tool_call_id",call.id}}.dump());
     }
-    const auto current=run(lease.owner_run_id);AgentWorkerToolTurnRecord turn{model.spec};
+    const auto current=run(lease.owner_run_id);std::optional<SkillSelections> selected;std::set<std::string> activations;
+    if(!db.execute("SELECT run_id FROM run_skills WHERE run_id=?",{current.id}).rows.empty())selected=run_skills(current.id);
+    for(std::size_t index=0;index<actual.tool_calls.size();++index){const auto& call=actual.tool_calls[index];if(call.name!="load_skill"||worker_callable_tool(db,lease,call.name))continue;if(!selected)throw Conflict("Worker skill activation lacks captured run selections");activations.insert(call.id);const auto result=Json::parse(Json::parse(outputs[index]).at("content").get<std::string>());if(result.contains("activation")){const auto id=Json::parse(object_json(call.arguments_json,4096)).at("id").get<std::string>();if(std::find(selected->ids.begin(),selected->ids.end(),id)==selected->ids.end())selected->ids.push_back(id);}}
+    impl_->apply_skill_turn(*this,current,Json::parse(model.actual_assistant_json),outputs,selected,&activations);AgentWorkerToolTurnRecord turn{model.spec};
     const auto append=[&](const std::string& role,const std::string& json){impl_->message(current,role,json);turn.message_sequences.push_back(integer(db.execute("SELECT message_seq FROM task_messages WHERE run_id=? ORDER BY message_seq DESC LIMIT 1",{current.id}).rows.at(0).at(0)));};
     append("assistant",model.actual_assistant_json);for(const auto& output:outputs)append("tool",output);turn.messages_binding=context_digest(worker_turn_messages(db,turn).dump());
     impl_->event(current.id,"conversation.tool_turn","{}");impl_->event(current.id,"worker.tool_turn.committed",Json{{"generation",lease.generation},{"attempt_id",attempt},{"messages_binding",turn.messages_binding}}.dump());

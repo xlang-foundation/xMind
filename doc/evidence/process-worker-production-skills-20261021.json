@@ -1,0 +1,69 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T11:59:01.499Z",
+    "sourceParent": "a21270f03708f3cf192d196de94227f59c59f719",
+    "sourcePatchSha256": "c833477e817c0d7242a4b94d1ad1609bb07dc17a87f4d098c0ab09020460806e",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 12832,
+      "launchedAt": "2026-10-21T11:52:57.210Z",
+      "completedAt": "2026-10-21T11:58:02.702Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6864266f8e386f5542dcd6a1b89b466571fdd123b8ca1fd45089b74097df3213"
+    },
+    "test": {
+      "pid": 5652,
+      "launchedAt": "2026-10-21T11:58:06.335Z",
+      "completedAt": "2026-10-21T11:58:58.564Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6a9c9feb09a364059b158a4e83182b6a6bd0bffb68f6e35625751a6dff1d675e"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 52.17,
+    "projectFiles": 2740,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d7f4ea4a4a98b015bb24340cf7d0899939783258f2a21cde981db0779c7a6297",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-production-skills-20261021-build.log": "6864266f8e386f5542dcd6a1b89b466571fdd123b8ca1fd45089b74097df3213",
+    "doc/evidence/process-worker-production-skills-20261021-build-terminal.json": "a2b156d5f434212fea571afae2a0bcb63277d1ae3b2451f65f296aeb438c11ce",
+    "doc/evidence/process-worker-production-skills-20261021-ctest.log": "6a9c9feb09a364059b158a4e83182b6a6bd0bffb68f6e35625751a6dff1d675e",
+    "doc/evidence/process-worker-production-skills-20261021-ctest-terminal.json": "3596e732090e1d6f277767d40aaa5d4749d597f82fa67ae039ab9b607ead4064",
+    "doc/evidence/process-worker-production-skills-20261021-LastTest.log": "031c3e67449c36c1e9ada83caf560778605b99e95dc13d4fdf9bbcda76b8c406",
+    "doc/evidence/process-worker-production-skills-20261021-test-inventory.json": "12d7c884e2949bb9ef09415c689f9ad21cd78542eb940cbe84189d5f59334b2b",
+    "doc/evidence/process-worker-production-skills-20261021-gate.json": "4ec6f9c9ccb4415ec3fee3a2d34cbecd6ec97708593eb91f67231380270f8407",
+    "doc/evidence/process-worker-production-skills-20261021-source.patch": "c833477e817c0d7242a4b94d1ad1609bb07dc17a87f4d098c0ab09020460806e",
+    "doc/evidence/process-worker-production-skills-20261021-binaries-before-test.json": "455162db3eac68dfdb003dee5f1302acea9540a0db94c863f896d89bd56e5c48"
+  },
+  "verified": [
+    "Native guidance tools reuse durable read ownership and xlang3 SDK C++ IPC",
+    "Skill bodies enter the next model window after actual activation; companion reads use actual native workspace guidance",
+    "Fresh follow-up restores saved selection without replaying prior tools",
+    "Manual-only skill is delivered with explicit empty tool catalogue",
+    "Denied activation changes no selections; injected session selection failure atomically rolls back skill state, event and canonical tool turn",
+    "Actual unified xmind worker children physically retire; guidance creates no effect approvals",
+    "Independent controlled HTTP peer observes exactly 135 requests"
+  ],
+  "limitations": [
+    "Four focused contracts only; full regression remains required",
+    "No new installation, rendered UI or live-provider acceptance",
+    "Context, delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}

@@ -1,3 +1,21 @@
+## Production worker guidance and skills — 2026-10-21
+
+Native guidance tools now use the existing durable read ownership and xlang3
+SDK C++ IPC path. Backend-owned skill selection commits atomically with the
+canonical tool turn. Actual unified xmind workers verify discovery, body
+delivery, companion reads, follow-up restoration, manual-only selection with
+no tools, denial and rollback on injected selection persistence failure.
+Guidance creates no effect approvals; child processes physically retire.
+
+**4/4 focused contracts pass in 52.17 seconds**. The independent HTTP peer
+observes exactly 135 model requests. All 2740 project inputs, SDK, libraries,
+dependencies and 133 native binary file sets/hashes remain frozen.
+[Scope, patch and raw evidence](evidence/process-worker-production-skills-20261021.json).
+
+Full regression, updated installation, rendered and live-provider acceptance
+remain required. Context, delegation/planning and graph/default placement
+integration remain open.
+
 ## Production callable workers over xlang3 IPC — 2026-10-21
 
 The normal coding factory now captures trusted callable bindings and definitions

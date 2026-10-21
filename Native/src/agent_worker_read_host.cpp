@@ -16,6 +16,7 @@ AgentWorkerReadHost::AgentWorkerReadHost(AgentRunJournal& journal,PersistenceSer
     if((owner_.workspace_members?owner_.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker read workspace revision differs");
     for(std::size_t index=0;index<count;++index)if(!owner_.repository_context(index))throw std::invalid_argument("Worker read requires native guidance context");
     auto native_owner=owner_;native_owner.authorize_dispatch=[this](const AgentWorkspaceInvocation& call){store_.start_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,active_cancel_).get();};
+    AgentGuidanceToolOwnerContext guidance;guidance.run_id=owner_.run_id;guidance.primary_workspace=owner_.primary_workspace;guidance.workspace_members=owner_.workspace_members;guidance.repository_context=owner_.repository_context;guidance.offered_tool=owner_.offered_tool;guidance.inherited_permission_layers=owner_.inherited_permission_layers;guidance.permission_rules=owner_.permission_rules;guidance.deadline=owner_.deadline;guidance.base_instruction_bytes=owner_.guidance_instruction_bytes;guidance.authorize_dispatch=native_owner.authorize_dispatch;guidance_=make_agent_guidance_tool_host(journal,std::move(guidance));
     native_=make_agent_read_tool_host(journal,store_,std::move(native_owner));
 }
 AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation& call,std::stop_token caller){
@@ -26,7 +27,7 @@ AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation& 
     store_.claim_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,stop.get_token()).get();active_cancel_=stop.get_token();
     const auto save=[&](const AgentReadToolResult& result){try{store_.record_agent_worker_read_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerReadOutcomeUnrecorded("Worker read result could not be recorded; stop execution and recover ownership");}};
     AgentReadToolResult result;
-    try{result=native_->invoke(call,stop.get_token());}
+    try{if(is_agent_guidance_tool(call.tool_name)){const auto actual=guidance_->invoke(call,stop.get_token());result={actual.success,actual.output_json};}else result=native_->invoke(call,stop.get_token());}
     catch(const AgentPermissionDenied&){result={false,R"({"error":{"code":"agent_permission_denied","message":"The selected agent permission rules denied this resource; the tool was not dispatched"}})"};}
     catch(const PermissionDenied&){result={false,R"({"error":{"code":"permission_denied","message":"Controller denied this operation; the requested effect was not dispatched"}})"};}
     catch(...){const auto original=std::current_exception();save({false,R"({"error":{"code":"worker_read_failed","message":"The backend read did not return a result."}})"});std::rethrow_exception(original);}
