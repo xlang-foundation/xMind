@@ -1,0 +1,333 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 6037e4f2..bda7a62d 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -222,11 +222,11 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_closed_ports.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_read_host.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_file_host.cpp)
+-  target_sources(agentflow_agent PRIVATE src/agent_worker_process_host.cpp src/agent_worker_remote_host.cpp)
++  target_sources(agentflow_agent PRIVATE src/agent_worker_process_host.cpp src/agent_worker_remote_host.cpp src/agent_worker_callable_host.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_read_context.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_rpc.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_file_rpc.cpp)
+-  target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_process_rpc.cpp src/agent_worker_remote_rpc.cpp)
++  target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_process_rpc.cpp src/agent_worker_remote_rpc.cpp src/agent_worker_callable_rpc.cpp)
+   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_model_rpc PUBLIC agentflow_worker_rpc agentflow_agent agentflow_models)
+   add_library(agentflow_worker_journal_rpc STATIC src/agent_worker_journal_rpc.cpp)
+@@ -1079,7 +1079,7 @@ if(BUILD_TESTING)
+     set_tests_properties(native_restore_executor_contract PROPERTIES TIMEOUT 60)
+     add_executable(agentflow_agent_remote_tool_host_contract tests/agent_remote_tool_host_contract.cpp)
+     target_include_directories(agentflow_agent_remote_tool_host_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_agent_remote_tool_host_contract PRIVATE agentflow_agent)
++    target_link_libraries(agentflow_agent_remote_tool_host_contract PRIVATE agentflow_agent agentflow_worker_model_rpc)
+     if(MSVC)
+       target_compile_options(agentflow_agent_remote_tool_host_contract PRIVATE /utf-8)
+     endif()
+diff --git a/Native/include/agentflow/agent_worker_callable_host.hpp b/Native/include/agentflow/agent_worker_callable_host.hpp
+new file mode 100644
+index 00000000..32070eed
+--- /dev/null
++++ b/Native/include/agentflow/agent_worker_callable_host.hpp
+@@ -0,0 +1,19 @@
++#pragma once
++#include "agentflow/agent_callable_tool_host.hpp"
++#include "agentflow/agent_worker_records.hpp"
++#include <mutex>
++namespace agentflow {
++struct AgentWorkerCallableOutcomeUnrecorded:AgentCallableOutcomeUnrecorded {using AgentCallableOutcomeUnrecorded::AgentCallableOutcomeUnrecorded;};
++// Backend-only durable owner; callable bindings and authority never cross IPC.
++class AgentWorkerCallableHost final:public AgentCallableToolHost {
++public:
++    AgentWorkerCallableHost(PersistenceService&,AgentWorkerLeaseSpec,AgentCallableToolOwnerContext,
++        std::chrono::steady_clock::time_point,std::stop_token owner_cancel={});
++    AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
++    const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
++private:
++    PersistenceService& store_;AgentWorkerLeaseSpec lease_;
++    std::chrono::steady_clock::time_point deadline_;std::stop_token owner_cancel_;
++    std::unique_ptr<AgentCallableToolHost> native_;std::mutex invocation_;
++};
++}
+diff --git a/Native/include/agentflow/agent_worker_callable_rpc.hpp b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+new file mode 100644
+index 00000000..5d346d91
+--- /dev/null
++++ b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+@@ -0,0 +1,14 @@
++#pragma once
++#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_callable_host.hpp"
++namespace agentflow {
++class AgentWorkerCallableClient final:public AgentCallableToolHost {
++public:
++    explicit AgentWorkerCallableClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
++private:AgentWorkerRpcPeer& peer_;
++};
++// Only the durable backend host can bind this endpoint. A local callable host or
++// worker-selected lease cannot bypass per-call and per-operation admission.
++AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost&,const AgentWorkerScope&);
++}
+diff --git a/Native/src/agent_callable_tool_host.cpp b/Native/src/agent_callable_tool_host.cpp
+index 36536fde..50532d2b 100644
+--- a/Native/src/agent_callable_tool_host.cpp
++++ b/Native/src/agent_callable_tool_host.cpp
+@@ -60,7 +60,7 @@ public:
+             catch(...){throw AgentCallableOutcomeUnrecorded("Callable outcome could not be recorded");}
+             if(dispatched)throw AgentCallableEffectUncertain("Trusted callable may have produced an effect; it was not retried");throw;
+         }
+-        try{journal_.finish_operation(operation.id,deferred?OperationState::failed:OperationState::succeeded,output).get();}
++        try{journal_.finish_operation(operation.id,deferred?OperationState::failed:OperationState::succeeded,Json::parse(output).is_object()?output:Json{{"output_json",output}}.dump()).get();}
+         catch(...){throw AgentCallableOutcomeUnrecorded("Callable completed but its outcome could not be recorded");}
+         return {!deferred,std::move(output)};
+     }
+diff --git a/Native/src/agent_worker_callable_host.cpp b/Native/src/agent_worker_callable_host.cpp
+new file mode 100644
+index 00000000..42b97d0c
+--- /dev/null
++++ b/Native/src/agent_worker_callable_host.cpp
+@@ -0,0 +1,39 @@
++#include "agentflow/agent_worker_callable_host.hpp"
++#include "agentflow/persistence_service.hpp"
++#include "agentflow/repository_instruction_context.hpp"
++#include "nlohmann/json.hpp"
++#include <condition_variable>
++namespace agentflow {
++namespace {AgentCallableToolResult failure(const char* code){return {false,nlohmann::json{{"error",{{"code",code},{"message","Backend callable tool did not return an acknowledged result; inspect native operation receipts before requesting another command"}}}}.dump()};}}
++AgentWorkerCallableHost::AgentWorkerCallableHost(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentCallableToolOwnerContext owner,std::chrono::steady_clock::time_point deadline,std::stop_token cancel)
++    :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
++    if(owner.run_id!=lease_.owner_run_id||owner.workspace_id!=lease_.workspace_id||owner.workspace_revision!=lease_.workspace_revision||(!owner.repository_context&&!owner.repository_context_for_call)||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_)throw std::invalid_argument("Worker callable owner differs from captured lease");
++    owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentCallableInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_callable_effect(lease,call,id,deadline,cancel,token).get();};
++    native_=make_agent_callable_tool_host(store_,std::move(owner));
++}
++AgentCallableToolResult AgentWorkerCallableHost::invoke(const AgentCallableInvocation& call,std::stop_token caller){
++    std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker callable dispatch is already active");
++    if(owner_cancel_.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker callable cancelled before entry");
++    if(std::chrono::steady_clock::now()>=deadline_)throw AgentWorkerAuthorityExpired("Worker callable deadline elapsed before entry");
++    std::stop_source stop;std::stop_callback owner_stop(owner_cancel_,[&]{stop.request_stop();});std::stop_callback caller_stop(caller,[&]{stop.request_stop();});
++    std::mutex timer_mutex;std::condition_variable_any condition;std::jthread timer([&](std::stop_token done){std::unique_lock timer_lock(timer_mutex);condition.wait_until(timer_lock,done,deadline_,[]{return false;});if(!done.stop_requested())stop.request_stop();});
++    store_.claim_agent_worker_callable(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();store_.start_agent_worker_callable(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
++    const auto save=[&](const AgentCallableToolResult& result){try{store_.record_agent_worker_callable_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerCallableOutcomeUnrecorded("Worker callable result could not be recorded; retain native ownership without replay");}};
++    AgentCallableToolResult result;std::exception_ptr interrupted;
++    try{result=native_->invoke(call,stop.get_token());}
++    catch(const AgentWorkerCallableOutcomeUnrecorded&){throw;}
++    catch(const AgentCallableOutcomeUnrecorded&){throw;}
++    catch(const AgentCallableEffectUncertain&){throw;}
++    catch(const AgentPermissionDenied&){result=failure("agent_permission_denied");}
++    catch(const PermissionDenied&){result=failure("permission_denied");}
++    catch(const PermissionExpired&){result=failure("permission_expired");}
++    catch(const PermissionCancelled&){result=failure("callable_cancelled");interrupted=std::make_exception_ptr(ToolCancelled("Worker callable cancelled"));}
++    catch(const ToolCancelled&){result=failure("callable_cancelled");interrupted=std::current_exception();}
++    catch(const ToolGuidanceChanged&){result=failure("repository_instructions_required");}
++    catch(const ToolAccessDenied&){result=failure("callable_access_denied");}
++    catch(const std::invalid_argument&){result=failure("invalid_tool_arguments");}
++    catch(...){save(failure("worker_callable_failed"));throw;}
++    save(result);if(interrupted)std::rethrow_exception(interrupted);
++    store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();if(stop.stop_requested()||std::chrono::steady_clock::now()>=deadline_)throw ToolCancelled("Worker callable cancelled before result delivery");return result;
++}
++}
+diff --git a/Native/src/agent_worker_callable_rpc.cpp b/Native/src/agent_worker_callable_rpc.cpp
+new file mode 100644
+index 00000000..1d329d71
+--- /dev/null
++++ b/Native/src/agent_worker_callable_rpc.cpp
+@@ -0,0 +1,35 @@
++#include "agentflow/agent_worker_callable_rpc.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& host,const AgentWorkerScope& scope){
++    const auto& lease=host.lease();
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentCallableEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
++        catch(const AgentCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++AgentCallableToolResult AgentWorkerCallableClient::invoke(const AgentCallableInvocation& call,std::stop_token cancel){
++    try{const auto bytes=peer_.call("callable.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
++        if(value.size()!=2||!value.at("success").is_boolean()||!value.at("output_json").is_string())throw ModelProtocolError("Invalid worker callable result");
++        return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}
++    catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker callable RPC cancelled");}
++    catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker callable RPC deadline elapsed");}
++    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker callable RPC rejected its captured call");if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker callable RPC cancelled or expired");if(error.code()=="outcome_unrecorded")throw AgentWorkerCallableOutcomeUnrecorded("Worker callable result is unrecorded; no replay is authorized");if(error.code()=="effect_uncertain")throw AgentCallableEffectUncertain("Worker callable effect is uncertain; no replay is authorized");throw ModelProtocolError("Worker callable RPC failed");}
++    catch(const McpProtocolError&){throw ModelProtocolError("Invalid worker callable result");}
++    catch(const Json::exception&){throw ModelProtocolError("Invalid worker callable result");}
++}
++}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index a94eaac9..627ae8a9 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3255,6 +3255,7 @@ AgentWorkerRemoteClaimRecord read_worker_remote(XlangSqlite& db,const std::strin
+         else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker remote has output");return record;
+     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker remote");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker remote");}
+ }
++void worker_callable_output(const std::string& output){if(output.empty()||output.size()>1024*1024)throw std::invalid_argument("Callable output exceeds limits");try{(void)Json::parse(output);}catch(const Json::exception&){throw std::invalid_argument("Callable output is not JSON");}}
+ Json worker_callable_json(const AgentWorkerCallableClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"invocation",record.invocation.serialize()},{"state",record.state},{"operation_ids",record.operation_ids},{"success",record.success},{"actual_output_json",record.actual_output_json},{"output_binding",record.output_binding}};}
+ std::string worker_callable_effect_key(const AgentCallableInvocation&,const std::string& id){return id;}
+ Json worker_callable_effect_binding(XlangSqlite& db,const AgentWorkerCallableClaimRecord& record,const std::string& id){
+@@ -3275,7 +3276,7 @@ AgentWorkerCallableClaimRecord read_worker_callable(XlangSqlite& db,const std::s
+         if(record.state!="awaiting_dispatch"&&record.state!="executing"&&record.state!="returned"&&record.state!="uncertain")throw DatabaseError("Invalid worker callable state");
+         if(record.operation_ids.size()>1||(record.state=="awaiting_dispatch"&&!record.operation_ids.empty())||(record.success&&record.operation_ids.empty()))throw DatabaseError("Invalid worker callable effect facts");
+         std::set<std::string> seen;for(const auto& id:record.operation_ids){if(!seen.insert(id).second)throw DatabaseError("Duplicate worker callable operation");(void)worker_callable_effect_binding(db,record,id);}
+-        if(record.state=="returned"){(void)object_json(record.actual_output_json);if(record.output_binding!=context_digest(record.actual_output_json))throw DatabaseError("Stored worker callable output differs");}
++        if(record.state=="returned"){worker_callable_output(record.actual_output_json);if(record.output_binding!=context_digest(record.actual_output_json))throw DatabaseError("Stored worker callable output differs");}
+         else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker callable has output");return record;
+     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker callable");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker callable");}
+ }
+@@ -3470,19 +3471,21 @@ AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const
+     changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
+     impl_->event(spec.owner_run_id,"worker.model.responded",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"response_binding",record.response_binding}}.dump());tx.commit();return record;
+ }
++namespace {bool worker_callable_tool(const std::string& name){return !is_agent_read_tool(name)&&!is_agent_file_tool(name)&&!is_agent_process_tool(name)&&!is_agent_remote_tool(name);}}
+ Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned){return agent_worker_tool_event_impl(lease,attempt,ordinal,returned,false);}
+ Event Repository::agent_worker_workspace_tool_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned){return agent_worker_tool_event_impl(lease,attempt,ordinal,returned,true);}
+ Event Repository::agent_worker_tool_event_impl(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned,bool allow_files){
+     if(ordinal<0||ordinal>=64)throw std::invalid_argument("Invalid worker tool activity ordinal");auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.state!="responded"||model.actual_assistant_json.empty()||model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id)throw Conflict("Worker activity lacks its actual captured model response");const auto actual=decode_agent_model_completion(model.actual_response_json);
+-    if(static_cast<std::size_t>(ordinal)>=actual.tool_calls.size())throw Conflict("Worker tool activity has no actual provider call");const auto& tool=actual.tool_calls[static_cast<std::size_t>(ordinal)];const bool file=is_agent_file_tool(tool.name),process=is_agent_process_tool(tool.name),remote=is_agent_remote_tool(tool.name);if((file||process||remote)&&!allow_files)throw Conflict("Read-only worker activity cannot acknowledge file tools");const auto args=Json::parse(object_json(tool.arguments_json,(file||process||remote)?4*1024*1024:2*1024*1024));
++    if(static_cast<std::size_t>(ordinal)>=actual.tool_calls.size())throw Conflict("Worker tool activity has no actual provider call");const auto& tool=actual.tool_calls[static_cast<std::size_t>(ordinal)];const bool file=is_agent_file_tool(tool.name),process=is_agent_process_tool(tool.name),remote=is_agent_remote_tool(tool.name),callable=worker_callable_tool(tool.name);if((file||process||remote||callable)&&!allow_files)throw Conflict("Read-only worker activity cannot acknowledge file tools");const auto args=Json::parse(object_json(tool.arguments_json,(file||process||remote)?4*1024*1024:2*1024*1024));
+     AgentWorkspaceInvocation call{1,lease.owner_run_id,attempt,tool.id,lease.workspace_id,lease.workspace_revision,args.value("folder_id",lease.workspace_id),tool.name,tool.arguments_json};
+     AgentFileToolInvocation file_call;file_call.run_id=call.run_id;file_call.attempt_id=call.attempt_id;file_call.call_id=call.call_id;file_call.workspace_id=call.workspace_id;file_call.workspace_revision=call.workspace_revision;file_call.folder_id=call.folder_id;file_call.tool_name=call.tool_name;file_call.arguments_json=call.arguments_json;
+     AgentProcessToolInvocation process_call;process_call.run_id=call.run_id;process_call.attempt_id=call.attempt_id;process_call.call_id=call.call_id;process_call.workspace_id=call.workspace_id;process_call.workspace_revision=call.workspace_revision;process_call.folder_id=call.folder_id;process_call.tool_name=call.tool_name;process_call.arguments_json=call.arguments_json;
+     AgentRemoteToolInvocation remote_call;remote_call.run_id=call.run_id;remote_call.attempt_id=call.attempt_id;remote_call.call_id=call.call_id;remote_call.workspace_id=call.workspace_id;remote_call.workspace_revision=call.workspace_revision;remote_call.tool_name=call.tool_name;remote_call.arguments_json=call.arguments_json;remote_call.tool_index=static_cast<std::uint32_t>(ordinal);
+-    const auto authority=remote?worker_remote_authority(*this,db,lease,remote_call):process?worker_process_authority(*this,db,lease,process_call):file?worker_file_authority(*this,db,lease,file_call):worker_read_authority(*this,db,lease,call);
++    AgentCallableInvocation callable_call;callable_call.run_id=call.run_id;callable_call.attempt_id=call.attempt_id;callable_call.call_id=call.call_id;callable_call.workspace_id=call.workspace_id;callable_call.workspace_revision=call.workspace_revision;callable_call.tool_name=call.tool_name;callable_call.arguments_json=call.arguments_json;callable_call.tool_index=static_cast<std::uint32_t>(ordinal);
++    const auto authority=callable?worker_callable_authority(*this,db,lease,callable_call):remote?worker_remote_authority(*this,db,lease,remote_call):process?worker_process_authority(*this,db,lease,process_call):file?worker_file_authority(*this,db,lease,file_call):worker_read_authority(*this,db,lease,call);
+     const auto key_for=[&](bool completed){return context_digest(Json::array({lease.root_run_id,attempt,ordinal,completed}).dump());};
+     std::string kind="tool.started";Json payload={{"activity_id",lease.owner_run_id+":"+attempt+":"+std::to_string(ordinal)},{"call_id",tool.id},{"name",tool.name}};
+-    if(returned){if(db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_tool_event_category),key_for(false)}).rows.empty())throw Conflict("Worker cannot return an unstarted tool activity");if(remote){const auto result=read_worker_remote(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=remote_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native remote result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else if(process){const auto result=read_worker_process(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=process_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native process result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else if(file){const auto result=read_worker_file(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=file_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native file result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else{const auto read=read_worker_read(db,lease.root_run_id,attempt,tool.id);if(read.state!="returned"||read.invocation.serialize()!=call.serialize()||worker_claim_spec_json(read.model)!=worker_claim_spec_json(authority))throw Conflict("Worker tool activity lacks its actual returned native read");kind=read.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(read.actual_output_json);}}
++    if(returned){if(db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_tool_event_category),key_for(false)}).rows.empty())throw Conflict("Worker cannot return an unstarted tool activity");if(callable){const auto result=read_worker_callable(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=callable_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native callable result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else if(remote){const auto result=read_worker_remote(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=remote_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native remote result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else if(process){const auto result=read_worker_process(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=process_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native process result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else if(file){const auto result=read_worker_file(db,lease.root_run_id,attempt,tool.id);if(result.state!="returned"||result.invocation.serialize()!=file_call.serialize()||worker_claim_spec_json(result.model)!=worker_claim_spec_json(authority))throw Conflict("Worker activity lacks its actual returned native file result");kind=result.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(result.actual_output_json);}else{const auto read=read_worker_read(db,lease.root_run_id,attempt,tool.id);if(read.state!="returned"||read.invocation.serialize()!=call.serialize()||worker_claim_spec_json(read.model)!=worker_claim_spec_json(authority))throw Conflict("Worker tool activity lacks its actual returned native read");kind=read.success?"tool.completed":"tool.failed";payload["data"]=Json::parse(read.actual_output_json);}}
+     else payload["arguments"]=args;
+     const auto json=payload.dump(),key=key_for(returned);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_tool_event_category),key}).rows;
+     if(!rows.empty()){const auto saved=Json::parse(text(rows[0][0]));const auto sequence=saved.at("event_sequence").get<std::int64_t>();if(saved!=Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",sequence}})throw DatabaseError("Stored worker activity binding differs");const auto events=db.execute("SELECT run_id,kind,payload FROM events WHERE seq=?",{sequence}).rows;if(events.size()!=1||text(events[0][0])!=lease.owner_run_id||text(events[0][1])!=kind||text(events[0][2])!=json)throw DatabaseError("Stored worker activity differs from its actual native fact");tx.commit();return {sequence,lease.owner_run_id,kind,json};}
+@@ -3501,10 +3504,15 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
+     // Check the admitted vocabulary even for an already committed turn. A read
+     // channel must never acknowledge a coding turn through idempotent lookup.
+-    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name))))throw Conflict("Worker turn contains an unsupported tool");
++    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)||worker_callable_tool(call.name))))throw Conflict("Worker turn contains an unsupported tool");
+     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     std::set<std::string> calls;std::vector<std::string> outputs;
+     for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
++        if(worker_callable_tool(call.name)){
++            const auto callable=read_worker_callable(db,lease.root_run_id,attempt,call.id);
++            if(callable.state!="returned"||worker_claim_spec_json(callable.model)!=worker_claim_spec_json(model.spec)||callable.invocation.tool_name!=call.name||callable.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual callable result");
++            (void)worker_callable_authority(*this,db,lease,callable.invocation);outputs.push_back(Json{{"content",callable.actual_output_json},{"tool_call_id",call.id}}.dump());continue;
++        }
+         if(is_agent_remote_tool(call.name)){
+             const auto remote=read_worker_remote(db,lease.root_run_id,attempt,call.id);
+             if(remote.state!="returned"||worker_claim_spec_json(remote.model)!=worker_claim_spec_json(model.spec)||remote.invocation.tool_name!=call.name||remote.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual remote result");
+@@ -3673,7 +3681,7 @@ AgentWorkerCallableClaimRecord Repository::claim_agent_worker_callable_effect(co
+     record.operation_ids.push_back(id);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_callable_json(record).dump(),std::string(worker_callable_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.callable.effect_claimed",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_id",id}}.dump());tx.commit();return record;
+ }
+ AgentWorkerCallableClaimRecord Repository::record_agent_worker_callable_result(const AgentWorkerLeaseSpec& lease,const AgentCallableInvocation& call,bool success,const std::string& output){
+-    (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_callable(db,lease.root_run_id,call.attempt_id,call.call_id);
++    worker_callable_output(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_callable(db,lease.root_run_id,call.attempt_id,call.call_id);
+     if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker callable result differs from its captured dispatch");
+     if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker callable result changed");tx.commit();return record;}
+     for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_callable_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded))throw Conflict("Worker callable result has an unresolved or inconsistent native effect");}
+diff --git a/Native/tests/agent_remote_tool_host_contract.cpp b/Native/tests/agent_remote_tool_host_contract.cpp
+index 243d87d0..a4acf326 100644
+--- a/Native/tests/agent_remote_tool_host_contract.cpp
++++ b/Native/tests/agent_remote_tool_host_contract.cpp
+@@ -47,8 +47,9 @@ Operation pending(PersistenceService& store,std::size_t previous){const auto dea
+ }
+ #include "agent_worker_remote_host_fixture.hpp"
+ #include "agent_callable_authority_fixture.hpp"
++#include "agent_worker_callable_host_fixture.hpp"
+ int main(int argc,char** argv){if(argc!=3)return 2;try{
+-    durable_remote_host_contract({argv[1],argv[2]});callable_authority_contract({argv[1],argv[2]});
++    durable_remote_host_contract({argv[1],argv[2]});callable_authority_contract({argv[1],argv[2]});durable_callable_host_contract({argv[1],argv[2]});
+     {AgentRemoteToolInvocation call;call.run_id="run";call.attempt_id="model";call.call_id="unicode-\xe4\xb8\xad";call.workspace_id="workspace";call.workspace_revision=7;call.tool_name="mcp_fixture_record";call.tool_index=63;call.arguments_json=R"({"text":"literal \\n bytes"})";
+         const auto wire=call.serialize();need(AgentRemoteToolInvocation::parse(wire).serialize()==wire,"Remote invocation must retain exact owned bytes");
+         for(const auto* field:{"endpoint","credential","operation_id","permission","registry"}){auto forged=Json::parse(wire);forged[field]="worker-selected";rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(forged.dump());});}
+diff --git a/Native/tests/agent_worker_callable_host_fixture.hpp b/Native/tests/agent_worker_callable_host_fixture.hpp
+new file mode 100644
+index 00000000..3e52ac21
+--- /dev/null
++++ b/Native/tests/agent_worker_callable_host_fixture.hpp
+@@ -0,0 +1,39 @@
++#include "agentflow/agent_worker_callable_rpc.hpp"
++#include "agentflow/xlang_python.hpp"
++#include "agentflow/agent_model_values.hpp"
++#include "agentflow/xlang_sqlite.hpp"
++// Real controller approvals and actual embedded xlang3 effects; model/lease identities
++// are controlled backend fixtures. Actual-child IPC is a separate contract.
++class CallableRpcFixture final:public AgentCallableToolHost {
++    AgentWorkerRpcHandler handler_;
++public:
++    explicit CallableRpcFixture(AgentWorkerRpcHandler handler):handler_(std::move(handler)){}
++    AgentCallableToolResult invoke(const AgentCallableInvocation& call,std::stop_token stop)override{const auto result=Json::parse(handler_("callable.invoke",call.serialize(),{},stop));return {result.at("success").get<bool>(),result.at("output_json").get<std::string>()};}
++};
++struct CallableTask {
++    std::stop_source stop;std::future<AgentCallableToolResult> result;
++    CallableTask(AgentCallableToolHost& host,AgentCallableInvocation call):result(std::async(std::launch::async,[this,&host,call=std::move(call)]{return host.invoke(call,stop.get_token());})){}
++    ~CallableTask(){stop.request_stop();if(result.valid())result.wait();}
++};
++void durable_callable_host_contract(const std::vector<std::string>& imports){
++    for(const std::string mode:{"approved","array","denied","policy","cancel","unrecorded","retired"}){
++        Directory directory;const auto root=directory.path/"workspace";std::filesystem::create_directory(root);WorkspaceTools workspace(root.string());WorkspaceToolSet members(workspace.identity(),7,{{workspace.identity(),workspace.root_path()}});RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));guidance.prepare();const auto database=(directory.path/"worker.sqlite").string();
++        {
++            PersistenceService store(database,imports);const std::string provider=R"({"wire":"chat-completions","model_id":"callable-worker-fixture"})";store.create_session("session","Durable native callable host").get();store.start_prompt_run("run","session",R"({"content":"Actual approved peer effect with synthetic model admission"})",RootBudgetSpec{"native.direct-agent",1,workspace.identity(),provider,0,0,8,600000}).get();store.transition("run",RunState::queued,RunState::running).get();store.append_event("run","agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",7},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})}}.dump()).get();
++            const auto deadline=std::chrono::steady_clock::now()+20s;const auto lease=store.admit_agent_worker({"callable-host-generation","run","run",workspace.identity(),7,12345,"134000000000000000","synthetic-callable-worker-identity",provider}).get().spec;
++            const auto effect=directory.path/"peer-effect.txt";std::atomic<int> sends{0};const std::string alias="trusted_probe";write(directory.path/"worker_probe.py","def invoke(arguments):\n    with open("+Json(effect.string()).dump()+", 'a', encoding='utf-8') as output:\n        output.write(arguments['text'])\n    return "+(mode=="array"?"[arguments['text']]":"{'text': arguments['text']}")+"\n");auto callable=std::make_shared<XlangPythonCallable>(imports[0],imports[1],directory.path.string(),"worker_probe","invoke");
++            AgentCallableInvocation call;call.run_id="run";call.attempt_id="callable-model";call.call_id="actual-callable";call.workspace_id=workspace.identity();call.workspace_revision=7;call.tool_name=alias;call.arguments_json=R"({"text":"once"})";
++            ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{call.call_id,call.tool_name,call.arguments_json}},"[]"};store.reserve_agent_worker_model(lease,call.attempt_id,deadline).get();store.start_agent_worker_model(lease,call.attempt_id,deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run",call.attempt_id,context_digest("synthetic callable model window")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"callable-worker-fixture",23,5)).get();store.finish_agent_worker_model(lease,call.attempt_id,deadline).get();
++            AgentCallableToolOwnerContext owner;owner.run_id="run";owner.workspace_id=workspace.identity();owner.workspace_revision=7;owner.repository_context=&guidance;owner.offered_tool=[&](const std::string& name){return name==alias;};owner.bindings.push_back({{alias,"Trusted actual xlang3 callable",R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false})"},[&](const std::string& value,std::stop_token stop){need(++sends==1,"Actual callable may dispatch only once");return callable->invoke_json(value,stop);}});owner.deadline=deadline;owner.permission_layers={{{alias,"*",mode=="policy"?"deny":"ask"}}};AgentWorkerCallableHost host(store,lease,owner,deadline);AgentWorkerScope scope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision};auto foreign=scope;foreign.run_id="foreign";rejects<Conflict>([&]{bind_agent_worker_callable_rpc(host,foreign);});auto dispatch=bind_agent_worker_callable_rpc(host,scope);rejects<AgentWorkerRpcRemoteError>([&]{dispatch("callable.unknown","{}",{},{});});auto forged=Json::parse(call.serialize());forged["module"]="worker-selected";rejects<AgentWorkerRpcRemoteError>([&]{dispatch("callable.invoke",forged.dump(),{},{});});CallableRpcFixture rpc(dispatch);
++            std::unique_ptr<XlangSqlite> fault;if(mode=="unrecorded"){fault=std::make_unique<XlangSqlite>(database,imports);fault->execute("CREATE TRIGGER fixture_callable_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-callable-claims' AND json_extract(NEW.payload,'$.state')='returned' BEGIN SELECT RAISE(ABORT,'fixture_callable_result_abort'); END");}
++            if(mode=="policy"){const auto result=host.invoke(call);need(!result.success&&Json::parse(result.output_json).at("error").at("code")=="agent_permission_denied"&&store.operations("run").get().empty(),"Inherited policy must reject before a callable proposal");}
++            else{CallableTask task(mode=="approved"||mode=="array"?static_cast<AgentCallableToolHost&>(rpc):static_cast<AgentCallableToolHost&>(host),call);const auto proposal=pending(store,0);need(store.agent_worker_callable_claim("run",call.attempt_id,call.call_id).get().state=="executing"&&sends==0,"Callable call must be durable while actual controller approval is pending");if(mode=="cancel")task.stop.request_stop();else{if(mode=="retired")store.retire_agent_worker(lease.generation,"worker_exit").get();store.decide_operation(proposal.id,mode=="denied"?OperationDecision::deny:OperationDecision::allow,"callable-controller").get();}
++                if(mode=="cancel")rejects<ToolCancelled>([&]{task.result.get();});else if(mode=="retired")rejects<Conflict>([&]{task.result.get();});else if(mode=="unrecorded")rejects<AgentWorkerCallableOutcomeUnrecorded>([&]{task.result.get();});else need(task.result.get().success==(mode=="approved"||mode=="array"),"Actual callable result must reflect the controller decision");
++            }
++            const bool effected=mode=="approved"||mode=="array"||mode=="unrecorded";need(sends==(effected?1:0)&&std::filesystem::exists(effect)==effected,"Only approved live authority may send the peer effect exactly once");const auto saved=store.agent_worker_callable_claim("run",call.attempt_id,call.call_id).get();if(effected){need(read(effect)=="once"&&saved.operation_ids.size()==1&&store.operation(saved.operation_ids[0]).get().state==OperationState::succeeded,"Actual peer acknowledgement must retain its native effect binding");if(mode=="approved"||mode=="array")need(saved.success&&saved.actual_output_json==(mode=="array"?Json::parse(store.operation(saved.operation_ids[0]).get().result_json).at("output_json").get<std::string>():store.operation(saved.operation_ids[0]).get().result_json),"Callable delivery must retain the exact native acknowledgement");}if(mode=="unrecorded"){need(saved.state=="executing"&&saved.actual_output_json.empty(),"Unrecorded callable result must not invent an acknowledgement");fault->execute("DROP TRIGGER fixture_callable_result_abort");}
++            AgentWorkerCallableHost rebuilt(store,lease,owner,deadline);rejects<Conflict>([&]{rebuilt.invoke(call);});if(mode!="retired")store.retire_agent_worker(lease.generation,"worker_exit").get();store.transition("run",RunState::running,RunState::cancelled).get();
++        }
++        {PersistenceService reopened(database,imports);const auto saved=reopened.agent_worker_callable_claim("run","callable-model","actual-callable").get();need(saved.state==(mode=="unrecorded"?"uncertain":"returned"),"Callable SQLite reopen must retain exact acknowledged and uncertain ownership");}
++        std::cout<<"Durable native callable host "<<mode<<" verified actual approval, peer-effect count, receipt and reconstruction replay rejection."<<std::endl;
++    }
++}
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 6fb1a677..e40f98f2 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -249,7 +249,7 @@ void process_controls(PersistenceService& store){
+ void workspace_turns(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
+     root(store,"workspace-turn-root");const auto owner=store.admit_agent_worker(lease("workspace-turn-root","workspace-turn-generation")).get().spec;
+     const auto deadline=std::chrono::steady_clock::now()+20s;const std::string attempt="workspace-turn-model",args=R"({"path":"fixture.txt"})";
+-    ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"},{"mixed-process","run_process",R"({"profile":"fixture","arguments":[],"workdir":"."})"},{"mixed-remote","mcp_fixture",R"({"text":"exact remote input"})"}},"[]"};
++    ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"},{"mixed-process","run_process",R"({"profile":"fixture","arguments":[],"workdir":"."})"},{"mixed-remote","mcp_fixture",R"({"text":"exact remote input"})"},{"mixed-callable","trusted_fixture",R"({"text":"exact callable input"})"}},"[]"};
+     store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(owner,attempt,deadline).get();
+     rejects<Conflict>([&]{store.agent_worker_tool_event(owner,attempt,1,false,deadline).get();});
+     store.agent_worker_workspace_tool_event(owner,attempt,0,false,deadline).get();const auto file_started=store.agent_worker_workspace_tool_event(owner,attempt,1,false,deadline).get();require(store.agent_worker_workspace_tool_event(owner,attempt,1,false,deadline).get().sequence==file_started.sequence,"Coding tool start must be acknowledged once");
+@@ -266,12 +266,14 @@ void workspace_turns(PersistenceService& store,const std::string& path,const std
+     AgentRemoteToolInvocation remote;remote.run_id=owner.owner_run_id;remote.attempt_id=attempt;remote.call_id="mixed-remote";remote.workspace_id=owner.workspace_id;remote.workspace_revision=7;remote.tool_name="mcp_fixture";remote.tool_index=3;remote.arguments_json=response.tool_calls[3].arguments_json;
+     rejects<Conflict>([&]{store.agent_worker_tool_event(owner,attempt,3,false,deadline).get();});store.agent_worker_workspace_tool_event(owner,attempt,3,false,deadline).get();store.claim_agent_worker_remote(owner,remote,deadline).get();store.start_agent_worker_remote(owner,remote,deadline).get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});
+     OperationSpec remote_op{owner.owner_run_id,owner.workspace_id,"mcp_tool",Json{{"alias","mcp_fixture"},{"arguments_json",remote.arguments_json}}.dump()};store.request_operation("mixed-native-remote",remote_op,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+30000).get();store.decide_operation("mixed-native-remote",OperationDecision::allow,"synthetic-controller").get();store.claim_operation("mixed-native-remote",remote_op).get();store.claim_agent_worker_remote_effect(owner,remote,"mixed-native-remote",deadline).get();store.finish_operation("mixed-native-remote",OperationState::succeeded,"{}").get();const std::string remote_output=R"({"operation_id":"mixed-native-remote","exact":1.0000000000000001})";store.record_agent_worker_remote_result(owner,remote,true,remote_output).get();const auto remote_returned=store.agent_worker_workspace_tool_event(owner,attempt,3,true,deadline).get();require(remote_returned.kind=="tool.completed"&&Json::parse(remote_returned.json).at("data")==Json::parse(remote_output)&&store.agent_worker_workspace_tool_event(owner,attempt,3,true,deadline).get().sequence==remote_returned.sequence,"Remote activity must derive exactly one durable native result");rejects<Conflict>([&]{store.agent_worker_tool_event(owner,attempt,3,true,deadline).get();});
++    AgentCallableInvocation callable;callable.run_id=owner.owner_run_id;callable.attempt_id=attempt;callable.call_id="mixed-callable";callable.workspace_id=owner.workspace_id;callable.workspace_revision=7;callable.tool_name="trusted_fixture";callable.tool_index=4;callable.arguments_json=response.tool_calls[4].arguments_json;
++    rejects<Conflict>([&]{store.agent_worker_tool_event(owner,attempt,4,false,deadline).get();});store.agent_worker_workspace_tool_event(owner,attempt,4,false,deadline).get();store.claim_agent_worker_callable(owner,callable,deadline).get();store.start_agent_worker_callable(owner,callable,deadline).get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});OperationSpec callable_op{owner.owner_run_id,owner.workspace_id,"xlang3_tool",Json{{"alias","trusted_fixture"},{"arguments",Json::parse(callable.arguments_json)}}.dump()};store.request_operation("mixed-native-callable",callable_op,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+30000).get();store.decide_operation("mixed-native-callable",OperationDecision::allow,"synthetic-controller").get();store.claim_operation("mixed-native-callable",callable_op).get();store.claim_agent_worker_callable_effect(owner,callable,"mixed-native-callable",deadline).get();store.finish_operation("mixed-native-callable",OperationState::succeeded,"{}").get();const std::string callable_output=R"(["exact callable result",1.0000000000000001])";store.record_agent_worker_callable_result(owner,callable,true,callable_output).get();const auto callable_returned=store.agent_worker_workspace_tool_event(owner,attempt,4,true,deadline).get();require(callable_returned.kind=="tool.completed"&&Json::parse(callable_returned.json).at("data")==Json::parse(callable_output),"Callable activity must derive the exact durable JSON value");rejects<Conflict>([&]{store.agent_worker_tool_event(owner,attempt,4,true,deadline).get();});
+     auto wrong=owner;++wrong.pid;rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(wrong,attempt,deadline).get();});std::stop_source stop;stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline,stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,std::chrono::steady_clock::now()-1ms).get();});
+     XlangSqlite sql(path,imports);const auto before=store.events(owner.owner_run_id).get().size();sql.execute("CREATE TRIGGER fixture_workspace_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' BEGIN SELECT RAISE(ABORT,'fixture_workspace_turn_abort'); END");
+     bool fault=false;try{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();}catch(const DatabaseError& error){fault=std::string(error.what()).find("fixture_workspace_turn_abort")!=std::string::npos;}sql.execute("DROP TRIGGER fixture_workspace_turn_abort");require(fault&&store.run_history(owner.owner_run_id).get().size()==1&&store.events(owner.owner_run_id).get().size()==before,"Mixed turn failure must roll back every message and event");
+-    auto first=store.commit_agent_worker_workspace_turn(owner,attempt,deadline),second=store.commit_agent_worker_workspace_turn(owner,attempt,deadline);const auto receipt=first.get(),duplicate=second.get();const auto history=store.run_history(owner.owner_run_id).get();require(receipt.message_sequences==duplicate.message_sequences&&receipt.messages_binding==duplicate.messages_binding&&history.size()==6&&history[1].json==assistant&&history[2].json==Json{{"content",read_output},{"tool_call_id","mixed-read"}}.dump()&&history[3].json==Json{{"content",file_output},{"tool_call_id","mixed-file"}}.dump()&&history[4].json==Json{{"content",process_output},{"tool_call_id","mixed-process"}}.dump()&&history[5].json==Json{{"content",remote_output},{"tool_call_id","mixed-remote"}}.dump(),"Mixed read/file/process/remote turn must retain exact ordered backend results once");
++    auto first=store.commit_agent_worker_workspace_turn(owner,attempt,deadline),second=store.commit_agent_worker_workspace_turn(owner,attempt,deadline);const auto receipt=first.get(),duplicate=second.get();const auto history=store.run_history(owner.owner_run_id).get();require(receipt.message_sequences==duplicate.message_sequences&&receipt.messages_binding==duplicate.messages_binding&&history.size()==7&&history[1].json==assistant&&history[2].json==Json{{"content",read_output},{"tool_call_id","mixed-read"}}.dump()&&history[3].json==Json{{"content",file_output},{"tool_call_id","mixed-file"}}.dump()&&history[4].json==Json{{"content",process_output},{"tool_call_id","mixed-process"}}.dump()&&history[5].json==Json{{"content",remote_output},{"tool_call_id","mixed-remote"}}.dump()&&history[6].json==Json{{"content",callable_output},{"tool_call_id","mixed-callable"}}.dump(),"Mixed read/file/process/remote/callable turn must retain exact ordered backend results once");
+     rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});store.reserve_agent_worker_model(owner,"mixed-next",deadline).get();store.retire_agent_worker(owner.generation,"cancelled").get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
+-    std::cout<<"Mixed workspace turns preserve exact ordered read/file/process/remote results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.\n";
++    std::cout<<"Mixed workspace turns preserve exact ordered read/file/process/remote/callable results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.\n";
+ }
+ void completion_receipts(PersistenceService& store){
+     root(store,"receipt-root");const auto admitted=store.admit_agent_worker(lease("receipt-root","receipt-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;

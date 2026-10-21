@@ -47,8 +47,9 @@ Operation pending(PersistenceService& store,std::size_t previous){const auto dea
 }
 #include "agent_worker_remote_host_fixture.hpp"
 #include "agent_callable_authority_fixture.hpp"
+#include "agent_worker_callable_host_fixture.hpp"
 int main(int argc,char** argv){if(argc!=3)return 2;try{
-    durable_remote_host_contract({argv[1],argv[2]});callable_authority_contract({argv[1],argv[2]});
+    durable_remote_host_contract({argv[1],argv[2]});callable_authority_contract({argv[1],argv[2]});durable_callable_host_contract({argv[1],argv[2]});
     {AgentRemoteToolInvocation call;call.run_id="run";call.attempt_id="model";call.call_id="unicode-\xe4\xb8\xad";call.workspace_id="workspace";call.workspace_revision=7;call.tool_name="mcp_fixture_record";call.tool_index=63;call.arguments_json=R"({"text":"literal \\n bytes"})";
         const auto wire=call.serialize();need(AgentRemoteToolInvocation::parse(wire).serialize()==wire,"Remote invocation must retain exact owned bytes");
         for(const auto* field:{"endpoint","credential","operation_id","permission","registry"}){auto forged=Json::parse(wire);forged[field]="worker-selected";rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(forged.dump());});}

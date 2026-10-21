@@ -1,3 +1,29 @@
+## Durable native callable host and canonical worker turns — 2026-10-21
+
+Canonical mixed read/file/process/remote/callable activity and history now
+derive exact durable results in order, including JSON arrays. Rollback and
+idempotent commit remain tested; read-only ports reject callable/coding facts
+even after commit. Non-object callable outputs use an object native operation
+receipt wrapper while preserving the exact tool output bytes.
+
+The native callable host claims before entry and binds the approved xlang3
+operation immediately before its effect. Seven cases exercise actual embedded
+xlang3 code, approvals, denial/policy, cancellation, retired authority, failed
+result recording and reconstructed-host duplicate rejection. Approved object
+and array effects traverse the callable RPC handler codec; foreign scope,
+unknown methods and injected authority fields reject.
+
+**3/3 focused contracts pass in 16.13 seconds**, with 2738 project inputs and
+all SDK/library/dependency/133-binary file sets/hashes frozen. Earlier build
+failures remain preserved.
+[Scope, patches and raw evidence](evidence/process-worker-callable-host-permissions-20261021.json).
+
+Model/lease admission is synthetic and the RPC handler fixture is in process.
+Actual-child callable IPC, factory/AgentRunner ports and aliases colliding with
+native tool vocabulary remain open. Broader/full regression, remaining worker
+capabilities, installation and fresh rendered/live-provider acceptance remain
+unfinished.
+
 ## Durable callable worker claims — 2026-10-21
 
 Typed callable claims bind the latest finished model response, exact invocation

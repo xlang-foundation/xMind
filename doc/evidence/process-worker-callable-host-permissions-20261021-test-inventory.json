@@ -1,0 +1,111 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test"
+    ],
+    "files": [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 938,
+        "parent": 0
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 979,
+        "parent": 2
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 1088,
+        "parent": 4
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 1,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_agent_worker_ledger_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 3,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_runner_peer.mjs",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe"
+      ],
+      "config": "Release",
+      "name": "native_agent_runner_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 45
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    },
+    {
+      "backtrace": 5,
+      "command": [
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_remote_tool_host_contract.exe",
+        "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config": "Release",
+      "name": "native_agent_remote_tool_host_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 60
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

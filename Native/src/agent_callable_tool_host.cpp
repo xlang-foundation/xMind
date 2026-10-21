@@ -60,7 +60,7 @@ public:
             catch(...){throw AgentCallableOutcomeUnrecorded("Callable outcome could not be recorded");}
             if(dispatched)throw AgentCallableEffectUncertain("Trusted callable may have produced an effect; it was not retried");throw;
         }
-        try{journal_.finish_operation(operation.id,deferred?OperationState::failed:OperationState::succeeded,output).get();}
+        try{journal_.finish_operation(operation.id,deferred?OperationState::failed:OperationState::succeeded,Json::parse(output).is_object()?output:Json{{"output_json",output}}.dump()).get();}
         catch(...){throw AgentCallableOutcomeUnrecorded("Callable completed but its outcome could not be recorded");}
         return {!deferred,std::move(output)};
     }
