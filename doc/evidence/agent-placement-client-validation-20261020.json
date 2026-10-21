@@ -1,0 +1,164 @@
+{
+  "sourcePatchSha256": "7702f84494aff1476f7a497aeed7f7927de38cb628f8622c6d064c15e74c87d9",
+  "files": {
+    "doc/evidence/agent-placement-client-fixture-failure-20261020-stdout.log": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-observed-failure-20261020/stdout.log",
+      "sha256": "c62ec5cd87accf55bb0f2d77891e5929c14100b218127878a49a999c46ef63c7"
+    },
+    "doc/evidence/agent-placement-client-fixture-failure-20261020-stderr.log": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-observed-failure-20261020/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "doc/evidence/agent-placement-client-fixture-failure-20261020-result.json": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-observed-failure-20261020/result.json",
+      "sha256": "56f54db4ed6c27dd4d562b47c891f926378e6e8b825908a49edd1a7470098ee2"
+    },
+    "doc/evidence/agent-placement-client-fixture-failure-20261020-inputs.json": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-observed-failure-20261020/inputs.json",
+      "sha256": "7eb9cb951d0a8c9413bc20cb7f6912ad04f2745a0a5058a0e0d055022ed8303e"
+    },
+    "doc/evidence/agent-placement-client-extension-20261020-stdout.log": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-full-20261020/stdout.log",
+      "sha256": "edb06d315dcc14b61c819ef058eb8b69bc2b5276681f0a94a4e6cb1e47774699"
+    },
+    "doc/evidence/agent-placement-client-extension-20261020-stderr.log": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-full-20261020/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "doc/evidence/agent-placement-client-extension-20261020-result.json": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-full-20261020/result.json",
+      "sha256": "64d54e6ff5dada8caa1b650aa5c306d8a45006a14b48b7abb1efe215a7116e19"
+    },
+    "doc/evidence/agent-placement-client-extension-20261020-inputs.json": {
+      "source": "C:/xMindNativeValidation/client-agent-placement-full-20261020/inputs.json",
+      "sha256": "c446f2c2e5f0fdea789cb9ebe2cb6c9a0e196f63492cf9ad829c8e7d865d9346"
+    },
+    "doc/evidence/agent-placement-client-browser-20261020-stdout.log": {
+      "source": "C:/xMindNativeValidation/browser-agent-placement-full-20261020/stdout.log",
+      "sha256": "a794818fb79925896661d560d33bd3484be62afb09d0ccdb4f5984156015b350"
+    },
+    "doc/evidence/agent-placement-client-browser-20261020-stderr.log": {
+      "source": "C:/xMindNativeValidation/browser-agent-placement-full-20261020/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "doc/evidence/agent-placement-client-browser-20261020-result.json": {
+      "source": "C:/xMindNativeValidation/browser-agent-placement-full-20261020/result.json",
+      "sha256": "01ebe2f29c30ddf6f137e41c2b73db78a1e0a6f956a7ede9fedf796b2c0fbad3"
+    },
+    "doc/evidence/agent-placement-client-browser-20261020-inputs.json": {
+      "source": "C:/xMindNativeValidation/browser-agent-placement-full-20261020/inputs.json",
+      "sha256": "c446f2c2e5f0fdea789cb9ebe2cb6c9a0e196f63492cf9ad829c8e7d865d9346"
+    }
+  },
+  "runs": {
+    "fixture-failure": {
+      "startedAt": "2026-10-21T02:00:14.473Z",
+      "completedAt": "2026-10-21T02:00:18.126Z",
+      "pid": 25368,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/renderer.test.js"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "total": 125,
+      "passed": 124,
+      "failed": 1,
+      "skipped": 0,
+      "sourceFiles": 99,
+      "sourceAndFileSetsUnchanged": true,
+      "stdoutSha256": "c62ec5cd87accf55bb0f2d77891e5929c14100b218127878a49a999c46ef63c7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedFailure": true,
+      "scope": "Exact unchanged reproduction of the new DOM fixture wrong-message failure"
+    },
+    "extension": {
+      "startedAt": "2026-10-21T02:00:24.706Z",
+      "completedAt": "2026-10-21T02:00:28.725Z",
+      "pid": 39972,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "extensions/vscode/tests/agent-selection.test.js",
+        "extensions/vscode/tests/browser-view.test.js",
+        "extensions/vscode/tests/client-context.test.js",
+        "extensions/vscode/tests/client-mcp-authorization.test.js",
+        "extensions/vscode/tests/client-mcp-resources.test.js",
+        "extensions/vscode/tests/client-planning.test.js",
+        "extensions/vscode/tests/client-timer-binding.test.js",
+        "extensions/vscode/tests/client.test.js",
+        "extensions/vscode/tests/editor-selection.test.js",
+        "extensions/vscode/tests/extension-host.test.js",
+        "extensions/vscode/tests/git-changes-tree.test.js",
+        "extensions/vscode/tests/graph-tree-observer.test.js",
+        "extensions/vscode/tests/language-server-editor.test.js",
+        "extensions/vscode/tests/mcp-authorization-controller.test.js",
+        "extensions/vscode/tests/native-runtime-package.test.js",
+        "extensions/vscode/tests/native-runtime.test.js",
+        "extensions/vscode/tests/provider-profile-controller.test.js",
+        "extensions/vscode/tests/renderer.test.js",
+        "extensions/vscode/tests/session-model.test.js",
+        "extensions/vscode/tests/session-permissions.test.js",
+        "extensions/vscode/tests/terminal.test.js",
+        "extensions/vscode/tests/vcs.test.js",
+        "extensions/vscode/tests/workspace-backend.test.js"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "total": 464,
+      "passed": 464,
+      "failed": 0,
+      "skipped": 0,
+      "sourceFiles": 99,
+      "sourceAndFileSetsUnchanged": true,
+      "stdoutSha256": "edb06d315dcc14b61c819ef058eb8b69bc2b5276681f0a94a4e6cb1e47774699",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedFailure": false,
+      "scope": "Complete extension Node test inventory; DOM fixtures only, no installed/rendered/live-provider acceptance"
+    },
+    "browser": {
+      "startedAt": "2026-10-21T02:00:43.137Z",
+      "completedAt": "2026-10-21T02:01:00.773Z",
+      "pid": 65544,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "views/browser/tests/classic-script.test.cjs",
+        "views/browser/tests/connection.test.cjs",
+        "views/browser/tests/controller.test.cjs",
+        "views/browser/tests/launcher-build.test.cjs",
+        "views/browser/tests/launcher-lifecycle.test.cjs",
+        "views/browser/tests/mcp-authorization-routes.test.cjs",
+        "views/browser/tests/planning-routes.test.cjs",
+        "views/browser/tests/responsive-layout.test.cjs",
+        "views/browser/tests/server.test.cjs",
+        "views/browser/tests/terminal.test.cjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "total": 161,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "sourceFiles": 99,
+      "sourceAndFileSetsUnchanged": true,
+      "stdoutSha256": "a794818fb79925896661d560d33bd3484be62afb09d0ccdb4f5984156015b350",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedFailure": false,
+      "scope": "Complete browser Node test inventory; DOM fixtures only, no installed/rendered/live-provider acceptance"
+    }
+  },
+  "verified": [
+    "Shared client accepts optional explicit thread/process placement and rejects malformed placement and selected/catalogue mismatch",
+    "Selector DOM renders separate process and backend thread labels",
+    "All 464 extension and 161 browser Node tests pass with 99 tracked client/tool source files and file sets unchanged around each run"
+  ],
+  "failure": "Initial new DOM fixture used agents instead of agent-selection. Exact unchanged reproduction captured 124/125; corrected fixture then passed complete extension suite.",
+  "scope": "Client edits followed the completed native gate; Native patch remains byte-identical. These are separate source qualification scopes, not an invented combined full-native or installed pass.",
+  "limitations": [
+    "Server entry factory configuration, placement-specific HTTP acceptance and installed/live-rendered client acceptance remain open"
+  ],
+  "passed": true
+}

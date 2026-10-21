@@ -43,6 +43,7 @@ public:
         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
     }
     void validate(const AgentRootExecutionRequest& request)const override{
+        if(request.placement=="thread")throw std::invalid_argument("Thread placement cannot enter a process worker executor");
         const auto selected=model(request);const auto models=validator_->models();
         if(!bounded(selected,256)||(!settings_.provider_identity&&std::find(models.begin(),models.end(),selected)==models.end()))throw std::invalid_argument("Worker model is not configured");
         if(request.agent_instructions.size()>32768||request.agent_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid worker agent instructions");

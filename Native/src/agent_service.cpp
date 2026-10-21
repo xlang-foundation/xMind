@@ -49,7 +49,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;std::shared_ptr<const WorkspaceMembershipSnapshot> execution_workspace;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
+    struct Job {std::string id,model,agent_instructions,placement;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;std::shared_ptr<const WorkspaceMembershipSnapshot> execution_workspace;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -64,10 +64,11 @@ struct AgentService::Impl {
     std::shared_ptr<DynamicPlanExecutor> planning;
     AgentRunner runner;
     std::shared_ptr<AgentRootExecutor> root_executor;
-    AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions,job->execution_workspace};}
-    void validate_execution(const std::shared_ptr<Job>& job)const{if(root_executor)root_executor->validate(execution_request(job));}
+    AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions,job->execution_workspace,job->placement};}
+    bool uses_executor(const std::shared_ptr<Job>& job)const{return root_executor&&job->placement!="thread";}
+    void validate_execution(const std::shared_ptr<Job>& job)const{if(job->placement=="process"&&!root_executor)throw RunUnavailable("Process agent placement has no configured worker owner");if(uses_executor(job))root_executor->validate(execution_request(job));}
     void capture_execution(const std::shared_ptr<Job>& job)const{
-        if(!root_executor)return;
+        if(!uses_executor(job)){validate_execution(job);return;}
         const auto budget=runner.execution_budget(job->model);
         if(budget&&budget->workspace_identity!="workspace:none")job->execution_workspace=std::make_shared<const WorkspaceMembershipSnapshot>(runner.workspace_membership_snapshot());
         validate_execution(job);
@@ -123,7 +124,7 @@ struct AgentService::Impl {
             job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
-            const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;}
+            const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;job->placement=selected.selected->placement;}
             active.emplace(run.id,job);
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
@@ -233,8 +234,8 @@ struct AgentService::Impl {
                 if(!work_pool&&!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
                 auto execution=work_pool?std::unique_ptr<RootAdmissionPool::Execution>{}:root_admission->acquire_execution(*dispatch,job->stop.get_token());
                 validate_execution(job);
-                const auto observed=root_executor?root_executor->execute(execution_request(job),job->stop.get_token()):runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);
-                if(root_executor){const auto actual=persistence.run(job->id).get();
+                const auto observed=uses_executor(job)?root_executor->execute(execution_request(job),job->stop.get_token()):runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);
+                if(uses_executor(job)){const auto actual=persistence.run(job->id).get();
                     if(observed.id!=actual.id||observed.session_id!=actual.session_id||(terminal(observed.state)&&observed.state!=actual.state))throw DatabaseError("Agent root executor returned without matching durable facts");}
                 std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
@@ -422,7 +423,7 @@ std::vector<std::string> AgentService::models()const{return impl_->runner.models
 WorkspaceMembershipSnapshot AgentService::workspace_membership_snapshot()const{return impl_->runner.workspace_membership_snapshot();}
 std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
-    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions});return result;
+    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions,item.placement});return result;
 }
 AgentDefinition AgentService::agent_definition(const std::string& id)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();const auto catalog=AgentDefinitionStore(impl_->persistence).load();
@@ -488,7 +489,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     auto job=std::make_shared<Impl::Job>();job->id=id;
     std::unique_lock lock(impl_->mutex);impl_->require_admission();impl_->reserve_root(job);
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
-    if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
+    if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;job->placement=profile->placement;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);impl_->capture_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
@@ -500,7 +501,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     if(inbox_id.empty())throw std::invalid_argument("Queued session input identity is required");if(profile)throw RunUnavailable("Provider authority must be checked by the execution platform");if(!files.empty()&&(!workspace||workspace->revision<1))throw ToolAccessDenied("Queued attachments require workspace membership admission");
     auto job=std::make_shared<Impl::Job>();job->id=id;std::unique_lock lock(impl_->mutex);impl_->require_admission();impl_->reserve_root(job);
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
-    if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
+    if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;job->placement=agent->placement;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);impl_->capture_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}

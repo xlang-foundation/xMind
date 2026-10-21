@@ -3,6 +3,17 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const {AgentSelectionController,validateAgentCatalogue,validateSessionAgent}=require('../client');
 
+test('agent placement accepts explicit primary processes and thread owners while rejecting invalid or mismatched snapshots',()=>{
+ const agent={id:'placed.agent',revision:1,model_id:'fixture-model',name:'Placed agent',description:'',mode:'primary',hidden:false,default:false,permissions:[],placement:'process'};
+ const catalogue={agents:[agent]},selection={session_id:'placed-session',revision:1,editable:true,selected:{...agent}};
+ assert.equal(validateAgentCatalogue(catalogue),catalogue);assert.equal(validateSessionAgent(selection,'placed-session',catalogue),selection);
+ for(const placement of ['thread','process'])assert.doesNotThrow(()=>validateAgentCatalogue({agents:[{...agent,placement}]}));
+ for(const placement of ['',null,undefined,'remote'])assert.throws(()=>validateAgentCatalogue({agents:[{...agent,placement}]}),/placement/);
+ assert.throws(()=>validateAgentCatalogue({agents:[{...agent,mode:'all'}]}),/placement/);
+ assert.throws(()=>validateSessionAgent({...selection,selected:{...agent,placement:'thread'}},'placed-session',catalogue),/differs/);
+ const legacy={...agent};delete legacy.placement;assert.doesNotThrow(()=>validateAgentCatalogue({agents:[legacy]}));
+});
+
 test('named agent selection pins public metadata per session, rejects stale replies and locks during a run',async()=>{
  const rules=[{action:'read_file',resource:'**/.env*',effect:'deny'},{action:'read_file',resource:'.env.example',effect:'allow'}];
  const catalogue={agents:[{id:'review.agent',revision:2,model_id:'claude-sonnet',name:'Code Reviewer',description:'Reviews changes and cites source evidence.',mode:'all',hidden:false,default:true,permissions:rules}]};

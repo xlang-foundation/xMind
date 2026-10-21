@@ -1,0 +1,40 @@
+# Named-agent placement
+
+Primary agent definitions can select the backend's native execution owner:
+
+```yaml
+agents:
+  - id: repository.reader
+    mode: primary
+    placement: process
+    instructions: Read the requested source and report the observed evidence.
+    tools: [read_file, list_files, search_files, find_files, glob_files]
+```
+
+`process` requires a configured native worker executor. Admission fails before
+creating a run when that owner is absent. The current production worker factory
+supports ordinary read roots and explicit empty tool lists. It rejects unsupported
+edit, process-tool, remote-tool, planning, delegation and context capabilities.
+Server entry-point configuration for this factory remains unfinished.
+
+`placement: thread` uses the backend's native runner even when a worker executor
+is configured. Omitting placement preserves that generation's backend default.
+Process placement currently requires `mode: primary`; graph and subagent placement
+remain unfinished.
+
+Placement changes increment the definition revision. Selecting an agent pins its
+placement with the rest of the session definition. Later catalog edits preserve
+that pinned choice. New root admission copies it into the dispatch job and prompt
+receipt, so a queued job does not select placement from a later catalog revision.
+
+Public metadata includes explicit placement. The shared browser/extension client
+validates it, checks selection/catalog agreement, and labels the agent option as
+“separate process” or “backend thread.” Installed and live-rendered placement
+acceptance remains open.
+
+The [native qualification](evidence/agent-placement-focused-20261020.json) covers
+actual explicit process and thread roots, missing-owner rejection and persisted
+session pins. [Client qualification](evidence/agent-placement-client-validation-20261020.json)
+covers the metadata validator and selector DOM through separate Node suites.
+Explicit queued placement, recovery and low-level runner enforcement need further
+qualification; no new full-suite or installed acceptance is claimed.

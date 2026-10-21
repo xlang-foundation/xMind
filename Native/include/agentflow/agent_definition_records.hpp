@@ -35,7 +35,15 @@ struct AgentDefinition {
     std::string mode = "all";
     bool hidden = false;
     bool is_default = false;
+    // Empty retains the backend default. Explicit process placement is currently
+    // available only to primary agents with a configured native worker owner.
+    std::string placement;
 };
+
+inline void validate_agent_placement(const AgentDefinition& agent){
+    if((!agent.placement.empty()&&agent.placement!="thread"&&agent.placement!="process")||
+       (agent.placement=="process"&&agent.mode!="primary"))throw std::invalid_argument("Invalid agent placement; process placement requires primary mode");
+}
 
 inline void validate_agent_permission_rules(const std::vector<AgentPermissionRule>& rules) {
     if (rules.size() > 128) throw std::invalid_argument("Agent permission rules exceed limits");
@@ -82,6 +90,7 @@ struct AgentDefinitionMetadata {
     // Ordered rules are part of an agent's effective behavior and must be
     // visible anywhere the backend publishes the reusable profile catalogue.
     std::vector<AgentPermissionRule> permissions;
+    std::string placement;
 };
 
 struct AgentDefinitionCatalog {

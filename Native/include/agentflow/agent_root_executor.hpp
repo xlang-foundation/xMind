@@ -11,6 +11,7 @@ struct AgentRootExecutionRequest {
     std::optional<std::vector<std::string>> agent_tools;
     std::vector<AgentPermissionRule> agent_permissions;
     std::shared_ptr<const WorkspaceMembershipSnapshot> workspace;
+    std::string placement;
 };
 // Trusted backend dispatch port, not a client/plugin callback. Settings and
 // capabilities are captured by its backend factory. Validation runs before new

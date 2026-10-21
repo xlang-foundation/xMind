@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-21T02:00:14.473Z",
+  "completedAt": "2026-10-21T02:00:18.126Z",
+  "pid": 25368,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "extensions/vscode/tests/agent-selection.test.js",
+    "extensions/vscode/tests/renderer.test.js"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "total": 125,
+  "passed": 124,
+  "failed": 1,
+  "skipped": 0,
+  "sourceFiles": 99,
+  "sourceAndFileSetsUnchanged": true,
+  "stdoutSha256": "c62ec5cd87accf55bb0f2d77891e5929c14100b218127878a49a999c46ef63c7",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "expectedFailure": true,
+  "scope": "Exact unchanged reproduction of the new DOM fixture wrong-message failure"
+}

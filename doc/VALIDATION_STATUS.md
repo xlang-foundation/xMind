@@ -1,3 +1,28 @@
+## Explicit primary-agent placement — 2026-10-20
+
+Named agents accept optional `placement: thread` or `placement: process`.
+Omission retains the configured backend default; process requires primary mode.
+Placement is revisioned in the catalog and pinned in the session, prompt and
+dispatch job. A missing process owner rejects before durable root admission.
+Explicit thread placement bypasses a configured worker; four explicit process
+cases each admit an actual child. Updating catalog placement preserves earlier
+session pins. [Authoring and current limits](agent-placement.md).
+
+The serial native build and 54 focused contracts pass in 161.78 seconds with
+frozen inputs and native binary sets unchanged.
+[Native evidence](evidence/agent-placement-focused-20261020.json).
+Subsequent client changes preserve that exact Native patch and qualify separately:
+464 extension and 161 browser Node tests pass. The shared validator accepts the
+optional field and rejects placement mismatches; the selector DOM labels the
+execution choice. An initial new DOM fixture used the wrong message type;
+its exact unchanged 124/125 failure reproduction is retained before correction.
+[Client evidence and raw logs](evidence/agent-placement-client-validation-20261020.json).
+
+Server entry factory selection, placement-specific HTTP/installed/live-rendered
+acceptance, explicit placement queue/recovery, low-level runner enforcement and
+graph/subagent placement remain open. These separate suites are not a new full
+native, hosted, installed or live-provider pass.
+
 ## Busy profile-worker cancellation — 2026-10-20
 
 An actual streamed worker inference now qualifies the busy-generation guard:

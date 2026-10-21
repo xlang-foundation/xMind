@@ -22,6 +22,10 @@ function renderer({batchFrames=false}={}){
   for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,paint,pendingFrames:()=>frames.size,send:data=>{dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}));if(!batchFrames)paint();}};
 }
+
+test('agent selector shows explicit process and thread placement from backend metadata',()=>{
+ const r=renderer();try{const agents=['process','thread'].map(placement=>({id:'agent.'+placement,revision:1,model_id:'fixture-model',name:placement==='process'?'Isolated reader':'Local reader',description:'',mode:'primary',hidden:false,default:false,permissions:[],placement}));r.send({type:'agent-selection',catalogue:{agents},selection:{session_id:'session-1',revision:0,editable:true,selected:null}});const doc=r.dom.window.document;assert.match(doc.querySelector('#agent option[value="agent.process"]').textContent,/separate process/);assert.match(doc.querySelector('#agent option[value="agent.thread"]').textContent,/backend thread/);}finally{r.dom.window.close();}
+});
 test('stream text is accumulated before one sanitized frame and terminal text flushes without another frame',()=>{
  const r=renderer({batchFrames:true}),doc=r.dom.window.document;
  try{
