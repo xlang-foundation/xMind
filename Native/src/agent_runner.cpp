@@ -915,14 +915,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 std::rethrow_exception(failure);}
             cancelled(token);
             if(response.finish_reason=="stop"){
+                if(coding_workspace_&&coding_workspace_->join_background(reservation?reservation->attempt_id:std::to_string(turn),token))continue;
                 if(process_){const auto joined=process_->join_run(id,token);if(!joined.empty()){
-                    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
-                        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
-                        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
-                    }observations.push_back(std::move(summary));}
-                    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
-                    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
-                    const auto observation="The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
+                    const auto observation=format_joined_process_observation(joined);
                     joined_process_notes.push_back(observation);if(!context_manager)request.messages.push_back({MessageRole::system,observation});
                     continue;
                 }}

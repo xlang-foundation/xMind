@@ -4,6 +4,8 @@
 #include "agentflow/agent_worker_read_rpc.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/process_executor.hpp"
+#include "nlohmann/json.hpp"
 #include <utility>
 
 namespace agentflow {
@@ -39,6 +41,14 @@ public:
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
+    bool join_background(const std::string& attempt,std::stop_token cancel)override{
+        try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
+            if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
+        catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker process join cancelled");}
+        catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker process join deadline elapsed");}
+        catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker process join cancelled or expired");if(error.code()=="rejected")throw Conflict("Worker process join rejected its captured attempt");if(error.code()=="outcome_unrecorded")throw ProcessOutcomeUnrecorded("Worker process join observation is unrecorded; no retry is authorized");throw ModelProtocolError("Worker process join failed");}
+        catch(const nlohmann::json::exception&){throw ModelProtocolError("Invalid worker process join result");}
+    }
 };
 }
 std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}

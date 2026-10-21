@@ -1,0 +1,302 @@
+diff --git a/Native/include/agentflow/agent_process_tool_host.hpp b/Native/include/agentflow/agent_process_tool_host.hpp
+index cc255a4d..e63ccd5e 100644
+--- a/Native/include/agentflow/agent_process_tool_host.hpp
++++ b/Native/include/agentflow/agent_process_tool_host.hpp
+@@ -31,6 +31,8 @@ public:
+     virtual ~AgentProcessOwnerHost()=default;
+     virtual AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token cancel={})=0;
+ };
++// Shared bounded model observation from backend-produced terminal job results.
++std::string format_joined_process_observation(const std::vector<std::string>& joined);
+ bool is_agent_process_tool(const std::string& name);
+ void validate_agent_process_tool_invocation(const AgentProcessToolInvocation&);
+ 
+diff --git a/Native/include/agentflow/agent_runner_coding_workspace.hpp b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+index 340fe92c..c12353e0 100644
+--- a/Native/include/agentflow/agent_runner_coding_workspace.hpp
++++ b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+@@ -10,5 +10,6 @@ class AgentRunnerCodingWorkspace:public AgentRunnerReadWorkspace {
+ public:
+     virtual std::unique_ptr<AgentFileToolHost> file_host()=0;
+     virtual std::unique_ptr<AgentProcessOwnerHost> process_host(){return {};}
++    virtual bool join_background(const std::string& attempt,std::stop_token cancel){return false;}
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_coding_context.hpp b/Native/include/agentflow/agent_worker_coding_context.hpp
+index 199b2867..8ad6ed17 100644
+--- a/Native/include/agentflow/agent_worker_coding_context.hpp
++++ b/Native/include/agentflow/agent_worker_coding_context.hpp
+@@ -3,6 +3,7 @@
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
++#include <map>
+ 
+ namespace agentflow {
+ // Backend-only composition. File operations share the guidance window actually
+@@ -23,5 +24,8 @@ private:
+     std::unique_ptr<AgentWorkerFileHost> files_;
+     std::shared_ptr<AgentProcessToolHost> process_;
+     std::unique_ptr<AgentWorkerProcessHost> processes_;
++    std::vector<std::string> joined_process_notes_;
++    std::map<std::string,bool> joined_attempts_;
++    bool join_outcome_unrecorded_=false;
+ };
+ }
+diff --git a/Native/src/agent_process_tool_host.cpp b/Native/src/agent_process_tool_host.cpp
+index 6df689a4..5063b24e 100644
+--- a/Native/src/agent_process_tool_host.cpp
++++ b/Native/src/agent_process_tool_host.cpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/process_executor.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+ #include "agentflow/mcp_wire.hpp"
++#include "agentflow/model_provider.hpp"
+ #include "nlohmann/json.hpp"
+ #include <algorithm>
+ #include <iomanip>
+@@ -68,5 +69,15 @@ private:
+     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
+ };
+ }
++std::string format_joined_process_observation(const std::vector<std::string>& joined){
++    using Json=nlohmann::json;
++    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
++        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
++        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
++    }observations.push_back(std::move(summary));}
++    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
++    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
++    return "The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
++}
+ std::unique_ptr<AgentProcessOwnerHost> make_agent_process_tool_host(PersistenceService& store,AgentProcessToolOwnerContext owner){return std::make_unique<LocalProcessToolHost>(store,std::move(owner));}
+ }
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 874e46de..f2f13788 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -915,14 +915,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                 std::rethrow_exception(failure);}
+             cancelled(token);
+             if(response.finish_reason=="stop"){
++                if(coding_workspace_&&coding_workspace_->join_background(reservation?reservation->attempt_id:std::to_string(turn),token))continue;
+                 if(process_){const auto joined=process_->join_run(id,token);if(!joined.empty()){
+-                    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
+-                        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
+-                        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
+-                    }observations.push_back(std::move(summary));}
+-                    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
+-                    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
+-                    const auto observation="The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
++                    const auto observation=format_joined_process_observation(joined);
+                     joined_process_notes.push_back(observation);if(!context_manager)request.messages.push_back({MessageRole::system,observation});
+                     continue;
+                 }}
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index b8e1648f..a9a25304 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -1,6 +1,7 @@
+ #include "agentflow/agent_worker_coding_context.hpp"
+ #include "agentflow/agent_model_values.hpp"
+ #include "agentflow/persistence_service.hpp"
++#include "agentflow/mcp_wire.hpp"
+ #include "nlohmann/json.hpp"
+ #include <algorithm>
+ #include <set>
+@@ -31,10 +32,10 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
+         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
+     }
+ }
+-ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;return request;}
++ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;for(const auto& note:joined_process_notes_)request.messages.push_back({MessageRole::system,note});return request;}
+ void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+     if(encode_agent_model_request(prepare(cancel))!=encode_agent_model_request(request))throw Conflict("Coding request changed backend history, guidance or catalogue");
+-    auto read_request=request;read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
++    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
+ }
+ AgentReadToolResult AgentWorkerCodingContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){return reads_.invoke(call,cancel);}
+ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){
+@@ -54,17 +55,37 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScop
+     };
+ }
+ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_processes(const AgentWorkerScope& scope){
+-    if(!processes_)return [](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");};
+-    auto dispatch=bind_agent_worker_process_rpc(*processes_,scope);
++    if(scope!=AgentWorkerScope{reads_.lease_.root_run_id,reads_.lease_.owner_run_id,reads_.lease_.workspace_id,reads_.lease_.generation,reads_.lease_.workspace_revision})throw Conflict("Coding process channel differs from captured lease");
++    auto dispatch=processes_?bind_agent_worker_process_rpc(*processes_,scope):AgentWorkerRpcHandler{[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");}};
+     return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
+-        if(method!="process.invoke")return dispatch(method,payload,std::move(sink),cancel);
++        if(method!="process.invoke"&&method!="process.join")return dispatch(method,payload,std::move(sink),cancel);
+         try{
+             std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");
++            if(method=="process.join"){
++                if(join_outcome_unrecorded_)throw ProcessOutcomeUnrecorded("Background join observation was not recorded; no retry is authorized");
++                reads_.check(cancel);const auto value=nlohmann::json::parse(mcp_compact_object(payload));
++                if(!value.is_object()||value.size()!=1||!value.at("attempt_id").is_string()||value.at("attempt_id")!=reads_.admitted_attempt_)throw Conflict("Process join lacks its current admitted model attempt");
++                const auto attempt=value.at("attempt_id").get<std::string>();const auto claim=reads_.store_.agent_worker_model_claim(reads_.lease_.root_run_id,attempt).get();
++                if(claim.spec.generation!=reads_.lease_.generation||claim.spec.owner_run_id!=reads_.lease_.owner_run_id||claim.state!="responded"||decode_agent_model_completion(claim.actual_response_json).finish_reason!="stop")throw Conflict("Process join requires its actual final model response");
++                if(const auto prior=joined_attempts_.find(attempt);prior!=joined_attempts_.end())return nlohmann::json{{"joined",prior->second}}.dump();
++                std::stop_source stop;std::stop_callback owner_stop(reads_.owner_cancel_,[&]{stop.request_stop();});std::stop_callback caller_stop(cancel,[&]{stop.request_stop();});
++                const auto joined=process_?process_->join_run(reads_.lease_.owner_run_id,stop.get_token()):std::vector<std::string>{};reads_.check(cancel);
++                if(!joined.empty()){
++                    join_outcome_unrecorded_=true;
++                    try{const auto note=format_joined_process_observation(joined);reads_.store_.append_event(reads_.lease_.owner_run_id,"agent.background_processes_joined",nlohmann::json{{"generation",reads_.lease_.generation},{"attempt_id",attempt},{"results",joined},{"observation",note}}.dump()).get();joined_process_notes_.push_back(note);}
++                    catch(...){throw ProcessOutcomeUnrecorded("Background join observation could not be recorded; no retry is authorized");}
++                    join_outcome_unrecorded_=false;
++                }
++                joined_attempts_.emplace(attempt,!joined.empty());return nlohmann::json{{"joined",!joined.empty()}}.dump();
++            }
+             reads_.check(cancel);const auto call=AgentProcessToolInvocation::parse(payload);
+             if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Process call lacks its actually admitted guidance window");
+             return dispatch(method,payload,std::move(sink),cancel);
+         }catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const ProcessOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+         catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+         catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+diff --git a/Native/src/agent_worker_process_host.cpp b/Native/src/agent_worker_process_host.cpp
+index 43bbb9a3..e08589b9 100644
+--- a/Native/src/agent_worker_process_host.cpp
++++ b/Native/src/agent_worker_process_host.cpp
+@@ -24,7 +24,6 @@ AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvo
+     const auto save=[&](const AgentProcessToolResult& result){try{store_.record_agent_worker_process_result(lease_,call,result.success,result.output_json).get();}catch(...){throw ProcessOutcomeUnrecorded("Worker process result could not be recorded; retain native ownership without replay");}};
+     AgentProcessToolResult result;std::exception_ptr interrupted;
+     try{
+-        if(call.tool_name=="run_process"){const auto args=nlohmann::json::parse(call.arguments_json);if(args.value("background",false)&&!args.value("persistent",false))throw std::invalid_argument("Worker background execution requires an explicit persistent service");}
+         result=native_->invoke(call,stop.get_token());
+         const auto output=nlohmann::json::parse(result.output_json);
+         if(call.tool_name=="run_process"&&result.success&&output.value("background",false)){
+diff --git a/Native/src/agent_worker_read_workspace.cpp b/Native/src/agent_worker_read_workspace.cpp
+index f429834f..ae9f5561 100644
+--- a/Native/src/agent_worker_read_workspace.cpp
++++ b/Native/src/agent_worker_read_workspace.cpp
+@@ -4,6 +4,8 @@
+ #include "agentflow/agent_worker_read_rpc.hpp"
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
++#include "agentflow/process_executor.hpp"
++#include "nlohmann/json.hpp"
+ #include <utility>
+ 
+ namespace agentflow {
+@@ -39,6 +41,14 @@ public:
+     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
+     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
++    bool join_background(const std::string& attempt,std::stop_token cancel)override{
++        try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
++            if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
++        catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker process join cancelled");}
++        catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker process join deadline elapsed");}
++        catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker process join cancelled or expired");if(error.code()=="rejected")throw Conflict("Worker process join rejected its captured attempt");if(error.code()=="outcome_unrecorded")throw ProcessOutcomeUnrecorded("Worker process join observation is unrecorded; no retry is authorized");throw ModelProtocolError("Worker process join failed");}
++        catch(const nlohmann::json::exception&){throw ModelProtocolError("Invalid worker process join result");}
++    }
+ };
+ }
+ std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 623b3340..a384f06d 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3504,7 +3504,7 @@ AgentWorkerProcessClaimRecord Repository::claim_agent_worker_process_effect(cons
+     const auto op=operation(id);const auto plan=Json::parse(object_json(op.spec.arguments_json)),args=Json::parse(object_json(call.arguments_json,4*1024*1024));
+     if(op.spec.workspace!=lease.workspace_id||op.spec.tool!="run_process")throw Conflict("Worker process has no matching native job");
+     if(call.tool_name=="run_process"){
+-        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)!=args.value("background",false)||plan.value("persistent",false)!=args.value("persistent",false)||(args.value("background",false)&&!args.value("persistent",false)))throw Conflict("Worker process operation differs from its admitted scope");
++        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)!=args.value("background",false)||plan.value("persistent",false)!=args.value("persistent",false))throw Conflict("Worker process operation differs from its admitted scope");
+         const auto& actual_args=plan.at("arguments");const auto& requested_args=args.at("arguments");if(!actual_args.is_array()||!requested_args.is_array()||actual_args.size()<requested_args.size()||!std::equal(requested_args.rbegin(),requested_args.rend(),actual_args.rbegin()))throw Conflict("Worker process arguments differ from the admitted provider call");
+     }else{
+         if(args.at("job_id")!=id||call.folder_id!=lease.workspace_id||!plan.value("background",false))throw Conflict("Worker control differs from its captured job");
+@@ -3519,7 +3519,15 @@ AgentWorkerProcessClaimRecord Repository::record_agent_worker_process_result(con
+     (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_process(db,lease.root_run_id,call.attempt_id,call.call_id);
+     if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker process result differs from its captured dispatch");
+     if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker process result changed");tx.commit();return record;}
+-    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(call.tool_name=="run_process"&&(!(Json::parse(op.spec.arguments_json).value("background",false)&&Json::parse(op.spec.arguments_json).value("persistent",false))?((op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded)):(op.state!=OperationState::executing&&op.state!=OperationState::succeeded&&op.state!=OperationState::failed))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");}
++    for(const auto& id:record.operation_ids){
++        const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);
++        if(binding.at("operation_spec_binding")!=worker_operation_binding(op))throw Conflict("Worker process result changed its native effect binding");
++        if(call.tool_name=="run_process"){
++            const bool background=Json::parse(op.spec.arguments_json).value("background",false);
++            const bool terminal=op.state==OperationState::succeeded||op.state==OperationState::failed;
++            if((background&&!terminal&&op.state!=OperationState::executing)||(!background&&(!terminal||(success&&op.state!=OperationState::succeeded))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");
++        }
++    }
+     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_process_json(record).dump(),std::string(worker_process_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.process.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
+ }
+ AgentWorkerProcessClaimRecord Repository::agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_process(impl_->database,root,attempt,call);}
+diff --git a/Native/tests/agent_worker_coding_service_fixture.hpp b/Native/tests/agent_worker_coding_service_fixture.hpp
+index fcd9c53d..cafd8188 100644
+--- a/Native/tests/agent_worker_coding_service_fixture.hpp
++++ b/Native/tests/agent_worker_coding_service_fixture.hpp
+@@ -2,6 +2,18 @@
+ #include "agentflow/execution_platform.hpp"
+ namespace worker_coding_service_fixture {
+ using namespace agentflow;using Json=nlohmann::json;using namespace std::chrono_literals;
++inline void asynchronous(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::vector<std::string>& imports,bool unrecorded=false){
++    using worker_coding_fixture::check;using worker_coding_fixture::write;
++    const auto directory=folder/(unrecorded?"coding-async-unrecorded":"coding-async");check(std::filesystem::create_directory(directory),"Async worker requires a fresh workspace");write(directory/"AGENTS.md","CODING_ASYNC_GUIDANCE\n");
++    AgentSettings settings;settings.provider={endpoint+(unrecorded?"/coding_async_unrecorded":"/coding_async"),"worker-rpc-fixture",Capability::supported,Capability::supported};settings.provider.output_limit=Capability::supported;settings.max_output_tokens=64;settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.credential=CredentialReference{"worker","rpc-model","provider:chat"};settings.provider_identity=ProviderExecutionIdentity{"worker-profile","controlled-route","openai",7};
++    ProcessProfile profile{"xlang3",(std::filesystem::u8path(imports.at(0)).parent_path()/"xlang3.exe").string(),1,{},10s};profile.xlang3_library=imports.at(1);settings.process_profiles={profile};
++    AgentDefinitionStore(store).apply("agents:\n  - id: coding.async\n    mode: primary\n    placement: process\n    model_id: worker-rpc-fixture\n    instructions: Run the admitted asynchronous command.\n    tools: [run_process]\n    permissions:\n      - action: '*'\n        resource: '**'\n        effect: allow\n");
++    const std::string id=unrecorded?"rpc-coding-async-unrecorded":"rpc-coding-async",session=id+"-session";store.create_session(session,"Production asynchronous worker join").get();ExecutionPlatform service(store,settings,1,2,[&](PersistenceService& actual,const AgentSettings& captured){return make_agent_worker_coding_executor(actual,captured,image);});service.select_session_agent(session,service.agent_definitions().front(),0);std::unique_ptr<XlangSqlite> fault;if(unrecorded){fault=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);fault->execute("CREATE TRIGGER fixture_async_join_abort BEFORE INSERT ON events WHEN NEW.kind='agent.background_processes_joined' BEGIN SELECT RAISE(ABORT,'fixture_async_join_abort'); END");}service.submit(id,session,"Run the asynchronous command and inspect its actual terminal result.");
++    std::set<std::string> approved;const auto deadline=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<deadline&&!service.idle()){for(const auto& operation:store.operations(id).get())if(operation.state==OperationState::awaiting_approval){check(approved.insert(operation.id).second&&!std::filesystem::exists(directory/"finished.txt"),"Async effect requires exactly one actual approval");store.decide_operation(operation.id,OperationDecision::allow,"async-controller").get();}std::this_thread::sleep_for(5ms);}
++    if(unrecorded){fault->execute("DROP TRIGGER fixture_async_join_abort");const auto operations=store.operations(id).get();check(service.idle()&&store.run(id).get().state==RunState::failed&&approved.size()==1&&operations.size()==1&&operations.front().state==OperationState::succeeded&&store.root_budget(id).get().model_calls_reserved==2,"Failed join observation must retain the actual successful job and fail without another model call or replay");const auto history=store.run_history(id).get();check(history.size()==3&&history.back().role=="tool","Unrecorded join must not publish the early final candidate");const auto events=store.events(id).get();check(std::none_of(events.begin(),events.end(),[](const auto& e){return e.kind=="agent.background_processes_joined";}),"Failed observation must not fabricate a join receipt");std::cout<<"Production asynchronous join receipt failure retained actual native success, no fabricated final response and no replay."<<std::endl;return;}
++    check(service.idle()&&service.healthy()&&store.run(id).get().state==RunState::completed&&approved.size()==1,"Async worker must finish once after its native job drains");check(worker_coding_fixture::bytes(directory/"finished.txt")=="actual async result","Final completion must follow the actual job effect");const auto operations=store.operations(id).get();check(operations.size()==1&&operations.front().state==OperationState::succeeded&&store.root_budget(id).get().model_calls_reserved==3,"One asynchronous operation must use launch, early final and observed final model windows");
++    const auto history=store.run_history(id).get();check(history.size()==4&&Json::parse(history.back().json).at("content")=="Async result verified.","Early final candidate must not become canonical history");const auto events=store.events(id).get();const auto joined=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="agent.background_processes_joined";});check(joined!=events.end(),"Async completion requires an actual backend join receipt");const auto receipt=Json::parse(joined->json);check(receipt.at("results").size()==1&&Json::parse(receipt.at("results")[0].get<std::string>()).at("operation_id")==operations.front().id,"Join receipt must reference the original native job");const auto admitted=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.lease.admitted";});check(admitted!=events.end()&&store.agent_worker_lease(Json::parse(admitted->json).at("generation").get<std::string>()).get().state=="retired","Async production child must physically retire");std::cout<<"Production xmind asynchronous job joined before final response; actual terminal observation reached a third model window without command replay."<<std::endl;
++}
+ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::vector<std::string>& imports){
+     using worker_coding_fixture::check;using worker_coding_fixture::write;
+     const auto directory=folder/"coding-service";check(std::filesystem::create_directory(directory),"Service test requires a fresh workspace");write(directory/"AGENTS.md","CODING_SERVICE_GUIDANCE\n");
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index 5021d5cc..c303ab96 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -250,6 +250,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index b768842d..867b36e6 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,10 +1,10 @@
+-// Independent controlled native provider; eighty-five intentional requests, no live key.
++// Independent controlled native provider; ninety intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -13,6 +13,12 @@ const server=createServer((request,response)=>{
+  let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{
+   const mode=request.url.slice(1);assert.ok(mode in counts);assert.ok(++counts[mode]<=expected[mode]);assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');assert.ok(!bytes.includes('synthetic-model-rpc-not-live'));
+   const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.equal(body.stream,true);assert.equal(body.stream_options.include_usage,true);
++  if(mode==='coding_async'||mode==='coding_async_unrecorded'){
++   const phase=counts[mode];assert.match(body.messages[0].content,/CODING_ASYNC_GUIDANCE/);assert.deepEqual(body.tools.map(t=>t.function.name),['run_process']);
++   if(phase===2){assert.ok(body.messages.find(m=>m.tool_call_id==='async-launch'));assert.equal(body.messages.some(m=>m.role==='system'&&m.content.includes('background_processes_joined_before_final_response')),false);}
++   if(phase===3){const note=body.messages.at(-1);assert.equal(note.role,'system');const result=JSON.parse(note.content.slice(note.content.indexOf('{')));assert.equal(result.reason,'background_processes_joined_before_final_response');assert.equal(result.jobs.length,1);assert.equal(result.jobs[0].state,'succeeded');assert.equal(result.jobs[0].exit_code,0);assert.equal(result.jobs[0].stdout.data,'async-done\r\n');assert.equal(body.messages.some(m=>m.content==='Early final must be withheld.'),false);}
++   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'async-launch',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'xlang3',arguments:['-B','-c',"import time; from pathlib import Path; time.sleep(2); Path('finished.txt').write_bytes(b'actual async result'); print('async-done')"],workdir:'.',timeout_ms:10000,background:true})}}]}:{role:'assistant',content:phase===2?'Early final must be withheld.':'Async result verified.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
++  }
+   if(mode==='coding_service'){
+    const phase=counts[mode];assert.match(body.messages[0].content,/CODING_SERVICE_GUIDANCE/);assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['run_process','stop_process','wait_process']);
+    let tool;
+@@ -103,5 +109,5 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly eighty-five requests: five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly ninety requests: two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

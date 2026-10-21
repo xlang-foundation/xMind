@@ -1,6 +1,7 @@
 #include "agentflow/agent_worker_coding_context.hpp"
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/persistence_service.hpp"
+#include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <set>
@@ -31,10 +32,10 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
     }
 }
-ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;return request;}
+ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;for(const auto& note:joined_process_notes_)request.messages.push_back({MessageRole::system,note});return request;}
 void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
     if(encode_agent_model_request(prepare(cancel))!=encode_agent_model_request(request))throw Conflict("Coding request changed backend history, guidance or catalogue");
-    auto read_request=request;read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
+    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
 }
 AgentReadToolResult AgentWorkerCodingContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){return reads_.invoke(call,cancel);}
 AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){
@@ -54,17 +55,37 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScop
     };
 }
 AgentWorkerRpcHandler AgentWorkerCodingContext::bind_processes(const AgentWorkerScope& scope){
-    if(!processes_)return [](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");};
-    auto dispatch=bind_agent_worker_process_rpc(*processes_,scope);
+    if(scope!=AgentWorkerScope{reads_.lease_.root_run_id,reads_.lease_.owner_run_id,reads_.lease_.workspace_id,reads_.lease_.generation,reads_.lease_.workspace_revision})throw Conflict("Coding process channel differs from captured lease");
+    auto dispatch=processes_?bind_agent_worker_process_rpc(*processes_,scope):AgentWorkerRpcHandler{[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");}};
     return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
-        if(method!="process.invoke")return dispatch(method,payload,std::move(sink),cancel);
+        if(method!="process.invoke"&&method!="process.join")return dispatch(method,payload,std::move(sink),cancel);
         try{
             std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");
+            if(method=="process.join"){
+                if(join_outcome_unrecorded_)throw ProcessOutcomeUnrecorded("Background join observation was not recorded; no retry is authorized");
+                reads_.check(cancel);const auto value=nlohmann::json::parse(mcp_compact_object(payload));
+                if(!value.is_object()||value.size()!=1||!value.at("attempt_id").is_string()||value.at("attempt_id")!=reads_.admitted_attempt_)throw Conflict("Process join lacks its current admitted model attempt");
+                const auto attempt=value.at("attempt_id").get<std::string>();const auto claim=reads_.store_.agent_worker_model_claim(reads_.lease_.root_run_id,attempt).get();
+                if(claim.spec.generation!=reads_.lease_.generation||claim.spec.owner_run_id!=reads_.lease_.owner_run_id||claim.state!="responded"||decode_agent_model_completion(claim.actual_response_json).finish_reason!="stop")throw Conflict("Process join requires its actual final model response");
+                if(const auto prior=joined_attempts_.find(attempt);prior!=joined_attempts_.end())return nlohmann::json{{"joined",prior->second}}.dump();
+                std::stop_source stop;std::stop_callback owner_stop(reads_.owner_cancel_,[&]{stop.request_stop();});std::stop_callback caller_stop(cancel,[&]{stop.request_stop();});
+                const auto joined=process_?process_->join_run(reads_.lease_.owner_run_id,stop.get_token()):std::vector<std::string>{};reads_.check(cancel);
+                if(!joined.empty()){
+                    join_outcome_unrecorded_=true;
+                    try{const auto note=format_joined_process_observation(joined);reads_.store_.append_event(reads_.lease_.owner_run_id,"agent.background_processes_joined",nlohmann::json{{"generation",reads_.lease_.generation},{"attempt_id",attempt},{"results",joined},{"observation",note}}.dump()).get();joined_process_notes_.push_back(note);}
+                    catch(...){throw ProcessOutcomeUnrecorded("Background join observation could not be recorded; no retry is authorized");}
+                    join_outcome_unrecorded_=false;
+                }
+                joined_attempts_.emplace(attempt,!joined.empty());return nlohmann::json{{"joined",!joined.empty()}}.dump();
+            }
             reads_.check(cancel);const auto call=AgentProcessToolInvocation::parse(payload);
             if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Process call lacks its actually admitted guidance window");
             return dispatch(method,payload,std::move(sink),cancel);
         }catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+        catch(const ProcessOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}

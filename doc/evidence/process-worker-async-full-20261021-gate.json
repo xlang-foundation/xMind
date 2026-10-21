@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-21T08:50:49.853Z",
+  "sourceParent": "6f2662d54cc87c3a61ff1062db36bb28ccf54214",
+  "sourcePatchSha256": "56cb8ef293a08f09f7126f48ecf7f4438dd62b76fce02d6e3d8ff2394107bec8",
+  "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "uncommittedSource": true,
+  "build": {
+    "pid": 72216,
+    "launchedAt": "2026-10-21T08:20:23.160Z",
+    "completedAt": "2026-10-21T08:29:41.451Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "9e4170519bdc8ecc010dd0f5e4186410d0d9ffa6b171af6aeca909e344e7878f"
+  },
+  "test": {
+    "pid": 32832,
+    "launchedAt": "2026-10-21T08:29:48.674Z",
+    "completedAt": "2026-10-21T08:50:01.593Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "541cb4c67f773eeb3f6a31616f98c1ab21ba627e062508a843e6f8dd6f0a73f2"
+  },
+  "total": 162,
+  "failed": 0,
+  "passed": 162,
+  "seconds": 1212.86,
+  "projectFiles": 2722,
+  "sdkSourceFiles": 16,
+  "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 76,
+  "nativeBinaries": 133,
+  "nodeDependencyFiles": 18598,
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "nativeSha256": "9b7e4b56be2c889eacb70c4628a460aeff21d2ad0549b2d1ca7b36e1a54cc2cf",
+  "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic fixtures only; no live model key used",
+  "installed": false,
+  "cpythonExecuted": false,
+  "scopePassed": true
+}

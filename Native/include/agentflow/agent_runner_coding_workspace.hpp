@@ -10,5 +10,6 @@ class AgentRunnerCodingWorkspace:public AgentRunnerReadWorkspace {
 public:
     virtual std::unique_ptr<AgentFileToolHost> file_host()=0;
     virtual std::unique_ptr<AgentProcessOwnerHost> process_host(){return {};}
+    virtual bool join_background(const std::string& attempt,std::stop_token cancel){return false;}
 };
 }

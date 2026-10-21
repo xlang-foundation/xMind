@@ -3,6 +3,7 @@
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
 #include "agentflow/process_executor.hpp"
+#include <map>
 
 namespace agentflow {
 // Backend-only composition. File operations share the guidance window actually
@@ -23,5 +24,8 @@ private:
     std::unique_ptr<AgentWorkerFileHost> files_;
     std::shared_ptr<AgentProcessToolHost> process_;
     std::unique_ptr<AgentWorkerProcessHost> processes_;
+    std::vector<std::string> joined_process_notes_;
+    std::map<std::string,bool> joined_attempts_;
+    bool join_outcome_unrecorded_=false;
 };
 }

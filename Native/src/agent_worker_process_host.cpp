@@ -24,7 +24,6 @@ AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvo
     const auto save=[&](const AgentProcessToolResult& result){try{store_.record_agent_worker_process_result(lease_,call,result.success,result.output_json).get();}catch(...){throw ProcessOutcomeUnrecorded("Worker process result could not be recorded; retain native ownership without replay");}};
     AgentProcessToolResult result;std::exception_ptr interrupted;
     try{
-        if(call.tool_name=="run_process"){const auto args=nlohmann::json::parse(call.arguments_json);if(args.value("background",false)&&!args.value("persistent",false))throw std::invalid_argument("Worker background execution requires an explicit persistent service");}
         result=native_->invoke(call,stop.get_token());
         const auto output=nlohmann::json::parse(result.output_json);
         if(call.tool_name=="run_process"&&result.success&&output.value("background",false)){

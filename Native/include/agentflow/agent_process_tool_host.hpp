@@ -31,6 +31,8 @@ public:
     virtual ~AgentProcessOwnerHost()=default;
     virtual AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token cancel={})=0;
 };
+// Shared bounded model observation from backend-produced terminal job results.
+std::string format_joined_process_observation(const std::vector<std::string>& joined);
 bool is_agent_process_tool(const std::string& name);
 void validate_agent_process_tool_invocation(const AgentProcessToolInvocation&);
 

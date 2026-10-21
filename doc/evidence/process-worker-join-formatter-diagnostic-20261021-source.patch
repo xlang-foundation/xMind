@@ -1,0 +1,60 @@
+diff --git a/Native/include/agentflow/agent_process_tool_host.hpp b/Native/include/agentflow/agent_process_tool_host.hpp
+index cc255a4d..e63ccd5e 100644
+--- a/Native/include/agentflow/agent_process_tool_host.hpp
++++ b/Native/include/agentflow/agent_process_tool_host.hpp
+@@ -31,6 +31,8 @@ public:
+     virtual ~AgentProcessOwnerHost()=default;
+     virtual AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token cancel={})=0;
+ };
++// Shared bounded model observation from backend-produced terminal job results.
++std::string format_joined_process_observation(const std::vector<std::string>& joined);
+ bool is_agent_process_tool(const std::string& name);
+ void validate_agent_process_tool_invocation(const AgentProcessToolInvocation&);
+ 
+diff --git a/Native/src/agent_process_tool_host.cpp b/Native/src/agent_process_tool_host.cpp
+index 6df689a4..5063b24e 100644
+--- a/Native/src/agent_process_tool_host.cpp
++++ b/Native/src/agent_process_tool_host.cpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/process_executor.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+ #include "agentflow/mcp_wire.hpp"
++#include "agentflow/model_provider.hpp"
+ #include "nlohmann/json.hpp"
+ #include <algorithm>
+ #include <iomanip>
+@@ -68,5 +69,15 @@ private:
+     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
+ };
+ }
++std::string format_joined_process_observation(const std::vector<std::string>& joined){
++    using Json=nlohmann::json;
++    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
++        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
++        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
++    }observations.push_back(std::move(summary));}
++    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
++    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
++    return "The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
++}
+ std::unique_ptr<AgentProcessOwnerHost> make_agent_process_tool_host(PersistenceService& store,AgentProcessToolOwnerContext owner){return std::make_unique<LocalProcessToolHost>(store,std::move(owner));}
+ }
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 874e46de..4a6ce70f 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -916,13 +916,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+             cancelled(token);
+             if(response.finish_reason=="stop"){
+                 if(process_){const auto joined=process_->join_run(id,token);if(!joined.empty()){
+-                    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
+-                        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
+-                        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
+-                    }observations.push_back(std::move(summary));}
+-                    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
+-                    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
+-                    const auto observation="The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
++                    const auto observation=format_joined_process_observation(joined);
+                     joined_process_notes.push_back(observation);if(!context_manager)request.messages.push_back({MessageRole::system,observation});
+                     continue;
+                 }}

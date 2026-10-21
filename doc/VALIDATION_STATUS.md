@@ -1,3 +1,30 @@
+## Worker asynchronous jobs joined before final response — 2026-10-21
+
+Production coding workers can launch nonpersistent background jobs through the
+shared native owner. The process.join RPC accepts only the current admitted
+model attempt and its captured stop response. Backend-produced terminal results
+enter the next exact admitted model window through the shared bounded formatter.
+A production xmind child launches one approved job, withholds an early final
+answer, observes its actual successful result in a third model window and
+physically retires. The command is never replayed.
+
+An injected embedded-xlang3 SQLite failure while writing the join receipt leaves
+the actual native operation successful, fails the run without a canonical final
+answer and makes no extra model call. Failed join observations cannot be retried
+through the same captured context to skip their missing receipt. The independent
+synthetic provider verifies exactly 90 intended requests across the worker test.
+
+The serial Release build and **complete actual 162/162 native inventory pass
+in 1212.86 seconds**. All 2722 project inputs, 16 SDK headers, 1870 pure-library
+files, 76 runtime files, 18598 Node dependencies and 133 native binaries remain
+unchanged across validation. Three focused diagnostic runs also remain retained.
+[Scope, patches and raw evidence](evidence/process-worker-async-full-20261021.json).
+
+Remaining worker capabilities and managed/default placement integration are
+unfinished. This adds no installation, hosted, rendered or live-provider
+acceptance. Existing owners, history, settings and completed tasks remain
+preserved.
+
 ## Shared persistent services across coding workers — 2026-10-21
 
 Production unified xmind workers now share the native process owner for their

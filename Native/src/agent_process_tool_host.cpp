@@ -2,6 +2,7 @@
 #include "agentflow/process_executor.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/model_provider.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <iomanip>
@@ -67,6 +68,16 @@ private:
     PersistenceService& store_;AgentProcessToolOwnerContext owner_;std::string workspace_id_;std::int64_t revision_=1;
     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
 };
+}
+std::string format_joined_process_observation(const std::vector<std::string>& joined){
+    using Json=nlohmann::json;
+    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
+        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
+        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
+    }observations.push_back(std::move(summary));}
+    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
+    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
+    return "The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
 }
 std::unique_ptr<AgentProcessOwnerHost> make_agent_process_tool_host(PersistenceService& store,AgentProcessToolOwnerContext owner){return std::make_unique<LocalProcessToolHost>(store,std::move(owner));}
 }

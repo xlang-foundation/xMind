@@ -3504,7 +3504,7 @@ AgentWorkerProcessClaimRecord Repository::claim_agent_worker_process_effect(cons
     const auto op=operation(id);const auto plan=Json::parse(object_json(op.spec.arguments_json)),args=Json::parse(object_json(call.arguments_json,4*1024*1024));
     if(op.spec.workspace!=lease.workspace_id||op.spec.tool!="run_process")throw Conflict("Worker process has no matching native job");
     if(call.tool_name=="run_process"){
-        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)!=args.value("background",false)||plan.value("persistent",false)!=args.value("persistent",false)||(args.value("background",false)&&!args.value("persistent",false)))throw Conflict("Worker process operation differs from its admitted scope");
+        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)!=args.value("background",false)||plan.value("persistent",false)!=args.value("persistent",false))throw Conflict("Worker process operation differs from its admitted scope");
         const auto& actual_args=plan.at("arguments");const auto& requested_args=args.at("arguments");if(!actual_args.is_array()||!requested_args.is_array()||actual_args.size()<requested_args.size()||!std::equal(requested_args.rbegin(),requested_args.rend(),actual_args.rbegin()))throw Conflict("Worker process arguments differ from the admitted provider call");
     }else{
         if(args.at("job_id")!=id||call.folder_id!=lease.workspace_id||!plan.value("background",false))throw Conflict("Worker control differs from its captured job");
@@ -3519,7 +3519,15 @@ AgentWorkerProcessClaimRecord Repository::record_agent_worker_process_result(con
     (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_process(db,lease.root_run_id,call.attempt_id,call.call_id);
     if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker process result differs from its captured dispatch");
     if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker process result changed");tx.commit();return record;}
-    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(call.tool_name=="run_process"&&(!(Json::parse(op.spec.arguments_json).value("background",false)&&Json::parse(op.spec.arguments_json).value("persistent",false))?((op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded)):(op.state!=OperationState::executing&&op.state!=OperationState::succeeded&&op.state!=OperationState::failed))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");}
+    for(const auto& id:record.operation_ids){
+        const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);
+        if(binding.at("operation_spec_binding")!=worker_operation_binding(op))throw Conflict("Worker process result changed its native effect binding");
+        if(call.tool_name=="run_process"){
+            const bool background=Json::parse(op.spec.arguments_json).value("background",false);
+            const bool terminal=op.state==OperationState::succeeded||op.state==OperationState::failed;
+            if((background&&!terminal&&op.state!=OperationState::executing)||(!background&&(!terminal||(success&&op.state!=OperationState::succeeded))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");
+        }
+    }
     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_process_json(record).dump(),std::string(worker_process_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.process.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
 }
 AgentWorkerProcessClaimRecord Repository::agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_process(impl_->database,root,attempt,call);}
