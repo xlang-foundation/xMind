@@ -1,4 +1,4 @@
-// Independent controlled native provider; one hundred thirty-five intentional requests, no live key.
+// Independent controlled native provider; one hundred thirty-nine intentional requests, no live key.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
@@ -9,13 +9,49 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
 const [executable,modules,stdlib]=process.argv.slice(2);
-const expected={coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+const expected={coding_context:2,coding_context_count:2,coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
 const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
 let failure;const aborted=new Set();
 function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
 const usage={prompt_tokens:7,completion_tokens:3,total_tokens:10};
+function sendContext(response, id, items, selectedModel = "worker-rpc-fixture") {
+  response.writeHead(200, {'Content-Type': 'text/event-stream'});
+  let sequence = 0;
+  const emit = (type, fields) => response.write('event: ' + type + '\ndata: ' + JSON.stringify({type, sequence_number: sequence++, ...fields}) + '\n\n');
+  emit('response.created', {response: {id, model: selectedModel, status: 'in_progress'}});
+  for (let index = 0; index < items.length; ++index) {
+    const item = items[index], base = {output_index: index, item_id: item.id};
+    const added = {...item, status: 'in_progress'};
+    if (item.type === 'reasoning') delete added.encrypted_content;
+    if (item.type === 'function_call') added.arguments = '';
+    if (item.type === 'message') added.content = [];
+    emit('response.output_item.added', {output_index: index, item: added});
+    if (item.type === 'function_call') {
+      const split = Math.floor(item.arguments.length / 2);
+      for (const delta of [item.arguments.slice(0, split), item.arguments.slice(split)]) emit('response.function_call_arguments.delta', {...base, delta});
+      emit('response.function_call_arguments.done', {...base, arguments: item.arguments});
+    } else if (item.type === 'message') {
+      const part = item.content[0];
+      emit('response.content_part.added', {...base, content_index: 0, part: {...part, text: ''}});
+      emit('response.output_text.delta', {...base, content_index: 0, delta: part.text});
+      emit('response.output_text.done', {...base, content_index: 0, text: part.text});
+      emit('response.content_part.done', {...base, content_index: 0, part});
+    }
+    emit('response.output_item.done', {output_index: index, item});
+  }
+  emit('response.completed', {response: {id, model: selectedModel, status: 'completed', output: items, usage: {input_tokens: 37, output_tokens: 5, total_tokens: 42, input_tokens_details: {cached_tokens: 0}, output_tokens_details: {reasoning_tokens: 1}}}});
+  response.end();
+}
+
 const server=createServer((request,response)=>{
  let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{
+  if(request.url.startsWith('/coding_context/responses')){
+   assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.ok(body.input.some(m=>m.role==='system'&&JSON.stringify(m).includes('WORKER_COUNTED_CONTEXT_GUIDANCE')));
+   if(request.url.endsWith('/input_tokens')){assert.ok(++counts.coding_context_count<=2);response.writeHead(200,{'content-type':'application/json'});response.end('{"object":"response.input_tokens","input_tokens":42}');return;}
+   assert.equal(request.url,'/coding_context/responses');const phase=++counts.coding_context;assert.ok(phase<=2);assert.equal(body.stream,true);assert.equal(body.max_output_tokens,128);assert.deepEqual(body.tools.map(t=>t.name),['read_file']);
+   if(phase===2){const result=body.input.find(m=>m.type==='function_call_output'&&m.call_id==='context-worker-read');assert.ok(result);assert.equal(JSON.parse(result.output).content,'Actual counted worker bytes\n');}
+   const item=phase===1?{id:'fc_worker_context',type:'function_call',status:'completed',call_id:'context-worker-read',name:'read_file',arguments:JSON.stringify({path:'actual.txt'})}:{id:'msg_worker_context',type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Counted worker context verified.',annotations:[]}]};sendContext(response,'resp_worker_context_'+phase,[item]);return;
+  }
   if(request.url==='/factory_notify'){
    assert.equal(refreshListeners.size,1);assert.equal(catalogueChanged,false);catalogueChanged=true;for(const listener of refreshListeners)listener.send({jsonrpc:'2.0',method:'notifications/tools/list_changed',params:{_meta:listener.meta}});response.writeHead(200);response.end();return;
   }
@@ -172,7 +208,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred thirty-five requests: eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred thirty-nine requests: two counted context inference windows plus two native token count requests, eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
 }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 
 assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});

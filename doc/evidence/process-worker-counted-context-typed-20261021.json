@@ -1,0 +1,126 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T12:59:10.747Z",
+    "sourceParent": "a4d4e8b4f05b8024f9f0020aeda028653aff4cdb",
+    "sourcePatchSha256": "ea4b0952eea1819ac7b2f633bc898f23ee49b74793f38a991130f2bc4c1fc491",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 8752,
+      "launchedAt": "2026-10-21T12:56:05.386Z",
+      "completedAt": "2026-10-21T12:57:59.942Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "58d0e94de28e40863bf65a63216b61c7982612af719426f608054972afe01fa4"
+    },
+    "test": {
+      "pid": 17768,
+      "launchedAt": "2026-10-21T12:58:03.911Z",
+      "completedAt": "2026-10-21T12:59:07.917Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "504ced7308e1544b5ddf13011b4deda0bc01f2e86edf8f7f4f74b0d96b6422ed"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 63.96,
+    "projectFiles": 2743,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "597304fef826d0ae510285de79bba0d85a2198193385df4b36386e4e87cc2734",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "runs": [
+    {
+      "name": "process-worker-counted-context-20261021",
+      "gate": null
+    },
+    {
+      "name": "process-worker-counted-context-typed-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:59:10.747Z",
+        "sourceParent": "a4d4e8b4f05b8024f9f0020aeda028653aff4cdb",
+        "sourcePatchSha256": "ea4b0952eea1819ac7b2f633bc898f23ee49b74793f38a991130f2bc4c1fc491",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 8752,
+          "launchedAt": "2026-10-21T12:56:05.386Z",
+          "completedAt": "2026-10-21T12:57:59.942Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "58d0e94de28e40863bf65a63216b61c7982612af719426f608054972afe01fa4"
+        },
+        "test": {
+          "pid": 17768,
+          "launchedAt": "2026-10-21T12:58:03.911Z",
+          "completedAt": "2026-10-21T12:59:07.917Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "504ced7308e1544b5ddf13011b4deda0bc01f2e86edf8f7f4f74b0d96b6422ed"
+        },
+        "total": 7,
+        "failed": 0,
+        "passed": 7,
+        "seconds": 63.96,
+        "projectFiles": 2743,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "597304fef826d0ae510285de79bba0d85a2198193385df4b36386e4e87cc2734",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    }
+  ],
+  "files": {
+    "doc/evidence/process-worker-counted-context-20261021-build.log": "6063b1ba5e058dd33bd7cbb13da12b705438a39bc24e8a15a911135abb94e376",
+    "doc/evidence/process-worker-counted-context-20261021-build-terminal.json": "bb7e38a48b35cf122baee36281660882b1db34ad5373136330bc183381790dd4",
+    "doc/evidence/process-worker-counted-context-20261021-source.patch": "4c570f1f3f74fbf96ffc3dfbcf46e0900dad7aa242e6cbec1930cb9ca076ad89",
+    "doc/evidence/process-worker-counted-context-typed-20261021-build.log": "58d0e94de28e40863bf65a63216b61c7982612af719426f608054972afe01fa4",
+    "doc/evidence/process-worker-counted-context-typed-20261021-build-terminal.json": "b97de4d112e6066e73f0736fe819078b3fe1381f48e34f3ddff4cd9932ca82eb",
+    "doc/evidence/process-worker-counted-context-typed-20261021-ctest.log": "504ced7308e1544b5ddf13011b4deda0bc01f2e86edf8f7f4f74b0d96b6422ed",
+    "doc/evidence/process-worker-counted-context-typed-20261021-ctest-terminal.json": "251f2f7a1dc8bdd9bf7ee69f8fbe8b17e8c35577fb15da76a96b57f0f70aec47",
+    "doc/evidence/process-worker-counted-context-typed-20261021-LastTest.log": "d7650c4b5986440dd659571c0d32eaeba4ba4cf4695feee67c9371b167372944",
+    "doc/evidence/process-worker-counted-context-typed-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-counted-context-typed-20261021-gate.json": "84649d900263ecb177d7847f99542cc0c238a0f8551fc464ddd6b8e8c10d310a",
+    "doc/evidence/process-worker-counted-context-typed-20261021-source.patch": "ea4b0952eea1819ac7b2f633bc898f23ee49b74793f38a991130f2bc4c1fc491",
+    "doc/evidence/process-worker-counted-context-typed-20261021-binaries-before-test.json": "945b833c417cd029cbba4a417a177e1312fbf384263ed0f399c7c18bd49e0ac3"
+  },
+  "verified": [
+    "Backend context window owns native ContextManager, configured capacity and binding, gateway and original root deadline; no replacement policy or runtime handle comes from the child",
+    "Captured coding worker can admit ordinary native.context roots while direct worker reserve/start remain closed to typed context funding",
+    "Backend context preparation funds exact typed inference; journal hooks hand this reservation to the worker through existing authenticated xlang3 SDK C++ remote methods",
+    "Actual unified xmind child performs two Responses token counts and two inference windows with one actual file read, exact canonical continuation, two model charges and physical retirement",
+    "Worker journal verifies nonempty inference membership is only returned under native.context; direct model attempts retain existing exact-ID and empty-step checks",
+    "Successful typed inference retirement uses captured backend assistant and actual timing; source, SDK, library, dependency and 133 binary sets/hashes remain frozen",
+    "Seven focused contracts include shared context engine/repository and provider-history bridge as well as worker model RPC, ledger, runner and remote host"
+  ],
+  "failuresPreserved": [
+    "First build lacked explicit channel include and workspace journal hook declaration; corrected without changing runtime budgets"
+  ],
+  "limitations": [
+    "Actual-worker fixture establishes counted inference and read continuation only, not worker compaction or automatic overflow recovery",
+    "Context failure/cancellation/retirement and duplicate/foreign window controls require additional actual-worker verification",
+    "Selected seven contracts are not full/broader regression or installation, rendered or live-provider acceptance",
+    "Delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}

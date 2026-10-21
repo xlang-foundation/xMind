@@ -20,15 +20,16 @@ public:
         if(scope_.workspace_id.empty()||scope_.workspace_id=="workspace:none"||scope_.workspace_revision<=0||scope_.workspace_revision>9007199254740991LL)
             throw std::invalid_argument("Worker read workspace has no captured native workspace");
         const auto budget=journal_->root_budget(scope_.root_id).get();if(budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker read workspace differs from its root admission");
-        provider_identity_=budget.spec.provider_identity_json;
+        provider_identity_=budget.spec.provider_identity_json;policy_id_=budget.spec.policy_id;
     }
     std::string workspace_id()const override{return scope_.workspace_id;}
     std::int64_t workspace_revision()const override{return scope_.workspace_revision;}
     std::string provider_identity_json()const override{return provider_identity_;}
+    std::string execution_policy_id()const override{return policy_id_;}
     ModelRequest prepare_request(std::stop_token cancel)override{return model_.prepare_request(cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer_);}
 private:
-    AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_;
+    AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;
 };
 }
 std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerReadWorkspace>(peer,std::move(journal));}
@@ -40,6 +41,7 @@ public:
     std::string workspace_id()const override{return read_->workspace_id();}
     std::int64_t workspace_revision()const override{return read_->workspace_revision();}
     std::string provider_identity_json()const override{return read_->provider_identity_json();}
+    std::string execution_policy_id()const override{return read_->execution_policy_id();}
     ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}

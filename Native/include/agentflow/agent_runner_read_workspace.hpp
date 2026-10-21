@@ -12,6 +12,7 @@ public:
     // Exact public identity from the immutable backend root budget. No route
     // destination or credential is carried or selected by the worker.
     virtual std::string provider_identity_json()const=0;
+    virtual std::string execution_policy_id()const{return "native.direct-agent";}
     virtual ModelRequest prepare_request(std::stop_token)=0;
     virtual std::unique_ptr<AgentReadToolHost> read_host()=0;
 };

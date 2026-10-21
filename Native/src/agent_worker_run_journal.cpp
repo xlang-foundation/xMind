@@ -27,7 +27,7 @@ public:
     OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
         if(scope_.root_id!=scope_.run_id)throw Conflict("Ordinary worker journal requires its captured root");
         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.run_id);
-        if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.direct-agent"||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
+        if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
     }

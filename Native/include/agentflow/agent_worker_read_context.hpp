@@ -1,11 +1,13 @@
 #pragma once
 #include "agentflow/agent_worker_read_host.hpp"
 #include "agentflow/context_records.hpp"
+#include "agentflow/context_manager.hpp"
 #include "agentflow/model_provider.hpp"
 #include <mutex>
 
 namespace agentflow {
 class RepositoryInstructionContext;
+struct AgentWorkerContextPolicy {ContextRuntimePolicy runtime;ContextBinding binding;};
 struct AgentWorkerReadRequestPolicy {
     std::string instructions;
     // An empty catalogue captures an agent's explicit tools: [] policy. It
@@ -17,6 +19,7 @@ struct AgentWorkerReadRequestPolicy {
     // Backend-only canonical session history owner and captured provider route.
     std::optional<ProviderHistoryOwner> history_owner;
     std::optional<ChatProviderConfig> history_provider;
+    std::optional<AgentWorkerContextPolicy> context;
 };
 // Backend-owned ordinary read context. Preparing a request works on copies of
 // real native guidance state. Only admission of a claimed, exact model request

@@ -1,3 +1,24 @@
+## Backend-owned counted context worker — 2026-10-21
+
+The coding worker path now has a backend ContextManager owner. Policy,
+capacity, provider gateway and root deadline remain backend-owned. The native
+context manager reserves typed inference; authenticated xlang3 SDK C++ journal
+methods hand that existing reservation to the child instead of funding a
+second direct-model call. Successful retirement uses the actual backend
+assistant and timing. Direct worker funding remains separate and restricted.
+
+An actual unified xmind child performs two token counts, two Responses model
+windows and one native file read, retains exact canonical continuation and
+physically retires with exactly two charged attempts. **7/7 focused contracts
+pass in 63.96 seconds**, with 139 controlled HTTP requests, 2743 project inputs
+and all SDK/library/dependency/133-binary sets/hashes frozen. The first build
+failure remains preserved. [Scope and raw evidence](evidence/process-worker-counted-context-typed-20261021.json).
+
+Worker compaction, automatic overflow recovery and context failure/cancellation
+controls still need implementation or actual-worker verification. This is not
+complete context delivery. Delegation/planning, graph/default placement, full
+regression, installation and rendered/live-provider acceptance remain open.
+
 ## Worker model-window admission boundary — 2026-10-21
 
 Backend model-window validation checks the current exact lease and committed

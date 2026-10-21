@@ -236,7 +236,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_rpc agentflow_core agentflow_models)
   add_library(agentflow_worker_runner STATIC src/agent_worker_runner.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
-  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp src/agent_worker_coding_owner.cpp src/agent_worker_coding_context.cpp)
+  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp src/agent_worker_coding_owner.cpp src/agent_worker_coding_context.cpp src/agent_worker_context_window.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_control.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_supervisor.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_executor.cpp)

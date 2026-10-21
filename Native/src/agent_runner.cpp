@@ -226,7 +226,8 @@ std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& m
         // that local model controls still select the captured model and wire.
         if(identity.at("model_id")!=selected.at("model_id")||identity.at("wire")!=selected.at("wire")||
            (identity.size()!=6&&identity!=selected))throw Conflict("Read worker model differs from captured provider identity");
-        return RootBudgetSpec{"native.direct-agent",1,read_workspace_->workspace_id(),captured,0,0,
+        const auto policy=read_workspace_->execution_policy_id();if(policy!="native.direct-agent"&&policy!="native.context")throw Conflict("Unsupported captured worker execution policy");
+        return RootBudgetSpec{policy,1,read_workspace_->workspace_id(),captured,0,0,
             static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{32})),settings_.run_timeout.count()};
     }
     if((!settings_.delegation||!delegation_)&&(!settings_.planning||!planning_)){
