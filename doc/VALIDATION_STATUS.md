@@ -1,3 +1,25 @@
+## Installed60 real CLI coding through xlang3 IPC — 2026-10-21
+
+A fresh installed60 managed `process-code` profile (owner48808, origin49919,
+born2026-10-21T19:25:31.5961490Z) completes one real Claude coding task through
+actual xmind worker42868. Session `fa20550e632f0522be7bfd4b0643c8ed`, root
+`41707328b40471d556818959016d73fb`: **NEVER replay**. The model reads source/tests,
+proposes the reviewed inclusive-loop edit, and executes one Node test command
+under the configured trusted PowerShell profile. Baseline1pass/3fail becomes
+**4pass/0fail**, with tests unchanged and only the fixture source changed.
+
+The canonical history has 13 messages and six model charges. Two initial malformed
+process requests return known argument errors with no operations; the corrected
+request alone creates a process operation. Embedded xlang3 ledger audit verifies
+all canonical file/process receipts, one completed worker lease and no replayed
+effects; physical worker exit is observed. All ten prior owners, four pages,
+settings and exact primary/CLI59 histories remain preserved.
+[Acceptance and raw receipts](evidence/coding60-cli-ipc-live-coding-20261021.json).
+
+This is installed command-mode acceptance, not rendered browser/editor or
+interactive-console acceptance. Default process execution, worker planning, crash
+diagnosis and combined parent compaction/overflow remain unfinished.
+
 ## Installed IPC package 0.1.60 with state preserved — 2026-10-21
 
 The actual VS Code CLI installs and lists **0.1.60** headlessly. All **2,444

@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed60 clientcf7dfbf4/native3123b5c5/5100131c:163native,464/161clients;2447archive/2444installed/2401runtime verify; legacy Python agent worker removed. SDK1ff unchanged. Primary32396 born2026-10-20T11:19:37.8496800Z/profile57779 remains58/dc900cad; CLI59 owner68928 remains2a2ce860; neither adopted. Primary9sessions/179messages/14roots/3children/19childmsgs and CLI1session/9messages/1root exact;10owners/4pages/settings/7profiles preserved,59backup2447files. Never replay completed tasks. See doc/VALIDATION_STATUS.md.
+- Installed60 clientcf7dfbf4/native3123b5c5/5100131c, SDK1ff:163native/464/161;2447archive/2444installed/2401runtime; no legacy agent worker. Primary32396 remains58/dc900cad and CLI59 owner68928 remains2a2; neither adopted. Ten prior owners/four pages/settings/seven profiles and exact old histories preserved;59backup2447. See doc/VALIDATION_STATUS.md for births and receipts.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 
@@ -20,7 +20,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Installed51 queue proof: sessiona38351014051ec1600ab354c4b781ab3 has52messages/5roots. UI roots815809c4153a3e7519ac45d93dc2250b and258459b84d7e02e40c182e404f6d8526 complete; queued selection was automatic while streaming, reload restores it. First has3reads; second reused context without its requested reread. Never replay these or older914c83b139d6b7b11bf5c5e7b220c219,cbedb9c76ed45ba544039920c983729e,8f87d7605b6ed084c9161d07646ebdcb. Isolated backend13676 born2026-10-19T23:38:18.9267970Z and old page53242 remain in current owner receipt; old library directories may be absent after Code cleanup. Full51 client445/158 and hosted39344911199 passed; f15 full33fixture failures remain recorded. Native d30/full154 reused then, not rerun. See doc/evidence/coding-installed-0.1.51-checkpoint-20261019.json. Do not retry external-browser control failures absent a relevant state change.
 
-- Hosted39322711780 on7245cc8f passes actual436/152 suites with70 source/18 assets frozen, but exact-count gate still expected429/147 and fails. Official artifact12220697695 SHA2e16428e verifies. Tools/ci-views.mjs now names436/152; corrected39323165807/de42d782 passes, failure retained. Evidence doc/evidence/hosted-view-inventory-failure-20261019.json.
+- Historical hosted view-count failures and corrected gates remain in doc/evidence/hosted-view-inventory-failure-20261019.json; those receipts are not new runtime acceptance.
 
 - Complete e09259c4/native5dc5bc6c local gate passes154/154 in1028.90s with checked2625 project/16 SDK/1870 pure libraries/76 runtime/18598 dependencies/129 native binaries and file sets unchanged. Gate65478 closed0; no local build/test live. Actual installed44 pane/model/inference/reload check passes in one TestProj window; source candidate remains uninstalled. Full receipt doc/evidence/process-module-profile-full-native-20261019.json.
 
@@ -38,7 +38,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Keep VS Code closed and open no visible editor/browser windows unless asked. Earlier desktop control failed with black capture/GetCursorPos access denied; do not repeat unlock questions. The new Code pane observation is separate from still-unverified visible-browser acceptance. Headless sandboxed Edge development checks are separate evidence. Preserve all older user pages/owners, including ports 62084, 54662, 51118 and 52757. Exact older process identities, historical receipts and installation details remain in doc/development-checkpoints-20261018.md and doc/evidence. Verify PID, creation time and image before any intentional retirement; no mass cleanup of user owners, views or profiles.
 
-- CLI59 isolated owner68928/62378 Native2a2: session3b25f9b24e1fdc7e66aae877d42cf5f4/root0c35d911e7417e3c4982726fbb2fb201 completed2reads/approvededit/Node4/4,9msgs; NEVER replay. Exact birth/profile in doc/VALIDATION_STATUS.md; primary32396 unchanged.
+- CLI59 owner68928/62378 session3b25f9b24e1fdc7e66aae877d42cf5f4/root0c35d911e7417e3c4982726fbb2fb201 completed wrapIndex/Node4/9msgs; NEVER replay. CLI60 owner48808/49919 (3123/5100, process-code) sessionfa20550e632f0522be7bfd4b0643c8ed/root41707328b40471d556818959016d73fb completed inclusiveRange via actual worker42868 retired: edit/Node4/13msgs/6charges/2 known argument denials. NEVER replay either task. Births/receipts: doc/VALIDATION_STATUS.md.
 
 ## Execution and evidence rules
 

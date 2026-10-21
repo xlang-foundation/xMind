@@ -1,0 +1,84 @@
+{
+  "active": "claude",
+  "profiles": [
+    {
+      "id": "claude",
+      "model": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "revision": 2,
+      "route_id": "anthropic.messages"
+    },
+    {
+      "id": "gemini",
+      "model": "",
+      "provider": "gemini",
+      "revision": 1,
+      "route_id": "gemini.generate-content"
+    },
+    {
+      "id": "deepseek",
+      "model": "",
+      "provider": "deepseek",
+      "revision": 1,
+      "route_id": "deepseek.chat"
+    },
+    {
+      "id": "openai",
+      "model": "",
+      "provider": "openai",
+      "revision": 1,
+      "route_id": "openai.responses"
+    }
+  ],
+  "revision": 2,
+  "routes": [
+    {
+      "discovery": true,
+      "id": "openai.chat",
+      "provider": "openai",
+      "wire": "chat-completions"
+    },
+    {
+      "discovery": true,
+      "id": "openai.responses",
+      "provider": "openai",
+      "wire": "responses"
+    },
+    {
+      "discovery": true,
+      "id": "anthropic.messages",
+      "provider": "anthropic",
+      "wire": "anthropic-messages"
+    },
+    {
+      "discovery": true,
+      "id": "gemini.generate-content",
+      "provider": "gemini",
+      "wire": "gemini-generate-content"
+    },
+    {
+      "discovery": true,
+      "id": "deepseek.chat",
+      "provider": "deepseek",
+      "wire": "chat-completions"
+    },
+    {
+      "discovery": true,
+      "id": "xai.responses",
+      "provider": "xai",
+      "wire": "responses"
+    },
+    {
+      "discovery": true,
+      "id": "mistral.chat",
+      "provider": "mistral",
+      "wire": "chat-completions"
+    },
+    {
+      "discovery": true,
+      "id": "openrouter.chat",
+      "provider": "openrouter",
+      "wire": "chat-completions"
+    }
+  ]
+}

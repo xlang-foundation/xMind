@@ -1,0 +1,28 @@
+[
+  {
+    "arguments_json": "{\"after_content\":\"export function inclusiveRange(start, end) {\\n  const values = [];\\n  for (let value = start; value <= end; value += 1) values.push(value);\\n  return values;\\n}\\n\",\"after_sha256\":\"f234c95201e669168886008cbb06db8e9c0dd54048c3ba2433cbef2af9683be8\",\"before_content\":\"export function inclusiveRange(start, end) {\\n  const values = [];\\n  for (let value = start; value < end; value += 1) values.push(value);\\n  return values;\\n}\\n\",\"before_sha256\":\"9f32373970e6316c6e0e522a2df21344d24535d2e7820c2c480585e2e6e32d72\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:652a2200000016000000000000000000\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"path\":\"inclusive-range.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"workspace_revision\":1}",
+    "decision_actor": "local-owner",
+    "expires_unix_ms": 1792611399988,
+    "id": "2fe485f0bf1cc68d86f9ffcfd47453c4",
+    "resources": [],
+    "result_json": "{\"after_sha256\":\"f234c95201e669168886008cbb06db8e9c0dd54048c3ba2433cbef2af9683be8\",\"before_sha256\":\"9f32373970e6316c6e0e522a2df21344d24535d2e7820c2c480585e2e6e32d72\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:652a2200000016000000000000000000\",\"path\":\"inclusive-range.mjs\",\"size\":157,\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\"}",
+    "run_id": "41707328b40471d556818959016d73fb",
+    "state": "succeeded",
+    "tool": "replace_file",
+    "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000"
+  },
+  {
+    "arguments_json": "{\"arguments\":[\"-NoLogo\",\"-NoProfile\",\"-NonInteractive\",\"-Command\",\"node --test inclusive-range.test.mjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"environment\":[],\"executable\":\"C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"powershell\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"timeout_ms\":30000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"workspace_revision\":1}",
+    "decision_actor": "trusted-process-profile:powershell",
+    "expires_unix_ms": 1792611443296,
+    "id": "a7b70cb70350245b3e5531d282320bab",
+    "resources": [
+      "process-profile:powershell"
+    ],
+    "result_json": "{\"elapsed_ms\":337,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"a7b70cb70350245b3e5531d282320bab\",\"operation_id\":\"a7b70cb70350245b3e5531d282320bab\",\"output_artifact\":{\"operation_id\":\"a7b70cb70350245b3e5531d282320bab\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":673},\"pid\":62316,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":673,\"data\":\"TAP version 13\\n# Subtest: ascending range includes both endpoints\\nok 1 - ascending range includes both endpoints\\n  ---\\n  duration_ms: 0.8987\\n  type: 'test'\\n  ...\\n# Subtest: singleton range contains its endpoint\\nok 2 - singleton range contains its endpoint\\n  ---\\n  duration_ms: 0.099\\n  type: 'test'\\n  ...\\n# Subtest: negative range includes zero endpoint\\nok 3 - negative range includes zero endpoint\\n  ---\\n  duration_ms: 0.0713\\n  type: 'test'\\n  ...\\n# Subtest: descending range stays empty\\nok 4 - descending range stays empty\\n  ---\\n  duration_ms: 0.6214\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 60.4247\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":673},\"termination\":\"exited\",\"truncated\":false}",
+    "run_id": "41707328b40471d556818959016d73fb",
+    "state": "succeeded",
+    "tool": "run_process",
+    "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000"
+  }
+]

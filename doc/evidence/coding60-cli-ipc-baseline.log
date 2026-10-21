@@ -1,0 +1,120 @@
+TAP version 13
+# Subtest: ascending range includes both endpoints
+not ok 1 - ascending range includes both endpoints
+  ---
+  duration_ms: 1.4572
+  type: 'test'
+  location: 'C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\workspace\\inclusive-range.test.mjs:4:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        2,
+        3,
+        4,
+    -   5
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 2
+    1: 3
+    2: 4
+    3: 5
+  actual:
+    0: 2
+    1: 3
+    2: 4
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/workspace/inclusive-range.test.mjs:4:62)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: singleton range contains its endpoint
+not ok 2 - singleton range contains its endpoint
+  ---
+  duration_ms: 0.2868
+  type: 'test'
+  location: 'C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\workspace\\inclusive-range.test.mjs:5:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   3
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 3
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/workspace/inclusive-range.test.mjs:5:60)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: negative range includes zero endpoint
+not ok 3 - negative range includes zero endpoint
+  ---
+  duration_ms: 0.7611
+  type: 'test'
+  location: 'C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\workspace\\inclusive-range.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        -2,
+        -1,
+    -   0
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: -2
+    1: -1
+    2: 0
+  actual:
+    0: -2
+    1: -1
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/workspace/inclusive-range.test.mjs:6:60)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: descending range stays empty
+ok 4 - descending range stays empty
+  ---
+  duration_ms: 0.2116
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 72.7654

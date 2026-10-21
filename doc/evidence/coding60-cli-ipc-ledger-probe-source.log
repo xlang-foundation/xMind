@@ -1,0 +1,14 @@
+import _sqlite3
+import json
+import sys
+assert sys.implementation.name == 'xlang3'
+root = '41707328b40471d556818959016d73fb'
+database = 'C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/profiles/56cafe6bce9d0010e085cf4774da69e492f70e802f29c0ae8219c5997b32325c/state.sqlite'
+connection = _sqlite3.connect(database)
+leases = [json.loads(row[0]) for row in connection.execute("SELECT payload FROM information WHERE category='native-agent-worker-leases' AND json_extract(payload,'$.spec.root_run_id')=?", (root,)).fetchall()]
+processes = [json.loads(row[0]) for row in connection.execute("SELECT payload FROM information WHERE category='native-agent-worker-process-claims' AND json_extract(payload,'$.model.root_run_id')=? ORDER BY rowid", (root,)).fetchall()]
+files = [json.loads(row[0]) for row in connection.execute("SELECT payload FROM information WHERE category='native-agent-worker-file-claims' AND json_extract(payload,'$.model.root_run_id')=? ORDER BY rowid", (root,)).fetchall()]
+budget = connection.execute('SELECT model_calls_reserved,parent_calls_held,policy_id FROM agent_execution_budgets WHERE root_run_id=?', (root,)).fetchall()
+reservations = connection.execute('SELECT role,state,count(*) FROM agent_model_call_reservations WHERE root_run_id=? GROUP BY role,state', (root,)).fetchall()
+print(json.dumps({'root':root,'implementation':sys.implementation.name,'leases':leases,'process_claims':processes,'file_claims':files,'budget':budget,'reservations':reservations}))
+connection.close()

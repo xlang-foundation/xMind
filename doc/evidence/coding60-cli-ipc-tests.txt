@@ -1,0 +1,7 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {inclusiveRange} from "./inclusive-range.mjs";
+test("ascending range includes both endpoints", () => assert.deepEqual(inclusiveRange(2, 5), [2, 3, 4, 5]));
+test("singleton range contains its endpoint", () => assert.deepEqual(inclusiveRange(3, 3), [3]));
+test("negative range includes zero endpoint", () => assert.deepEqual(inclusiveRange(-2, 0), [-2, -1, 0]));
+test("descending range stays empty", () => assert.deepEqual(inclusiveRange(4, 2), []));

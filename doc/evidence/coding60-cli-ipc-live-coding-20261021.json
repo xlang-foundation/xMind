@@ -1,0 +1,283 @@
+{
+  "recordedAt": "2026-10-21T19:32:33.879Z",
+  "version": "0.1.60",
+  "scope": "One fresh installed native CLI command-mode real Claude coding task through one actual xmind SDK IPC worker on a separate managed process-code profile; previous tasks and owners unchanged.",
+  "session": "fa20550e632f0522be7bfd4b0643c8ed",
+  "root": "41707328b40471d556818959016d73fb",
+  "backend": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:49919",
+    "process_id": 48808,
+    "profile_directory": "C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\profiles\\56cafe6bce9d0010e085cf4774da69e492f70e802f29c0ae8219c5997b32325c",
+    "started": false,
+    "workspace": "C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\workspace",
+    "workspace_edits": "approved",
+    "pid": 48808,
+    "birth": "2026-10-21T19:25:31.5961490Z",
+    "filetime": "134370843315961490",
+    "image": "C:\\xMindNativeValidation\\cli60-ipc-live-coding-20261021\\profiles\\56cafe6bce9d0010e085cf4774da69e492f70e802f29c0ae8219c5997b32325c\\runtime-2229426de4b5c39b07d75495617c569d1e8e883fb5ea5f05563c3e396001be33\\xmind.exe",
+    "name": "xmind.exe",
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e"
+  },
+  "worker": {
+    "creation_time": "134370843910705757",
+    "executable_identity": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:32ca2200000003000000000000000000:5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "generation": "9ed44328eab90c622888085bc6d64ad6",
+    "owner_run_id": "41707328b40471d556818959016d73fb",
+    "pid": 42868,
+    "provider_identity": {
+      "model_id": "claude-sonnet-4-6",
+      "profile_id": "claude",
+      "profile_revision": 2,
+      "provider": "anthropic",
+      "route_id": "anthropic.messages",
+      "wire": "anthropic-messages"
+    },
+    "root_run_id": "41707328b40471d556818959016d73fb",
+    "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000",
+    "workspace_revision": 1,
+    "state": "retired",
+    "retirementReason": "completed",
+    "physicalExitObserved": true,
+    "exitCodeNotCaptured": true
+  },
+  "taskSubmissions": 1,
+  "state": "completed",
+  "historyMessages": 13,
+  "modelReservations": 6,
+  "toolCalls": [
+    "read_file",
+    "read_file",
+    "edit_file",
+    "run_process",
+    "run_process",
+    "run_process"
+  ],
+  "preDispatchArgumentRejections": 2,
+  "actualProcessExecutions": 1,
+  "editOperation": "2fe485f0bf1cc68d86f9ffcfd47453c4",
+  "processOperation": "a7b70cb70350245b3e5531d282320bab",
+  "processApprovalActor": "trusted-process-profile:powershell",
+  "baseline": {
+    "tests": 4,
+    "passed": 1,
+    "failed": 3,
+    "exitCode": 1
+  },
+  "after": {
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "exitCode": 0,
+    "processTreeRetired": true
+  },
+  "sourceBeforeSha256": "9f32373970e6316c6e0e522a2df21344d24535d2e7820c2c480585e2e6e32d72",
+  "sourceAfterSha256": "f234c95201e669168886008cbb06db8e9c0dd54048c3ba2433cbef2af9683be8",
+  "testSha256": "be7fac92239993fd9a84a18f51740300a5c46e9e8ab5048536d71ce1cb0c94c0",
+  "testsUnchanged": true,
+  "onlyFixtureSourceChanged": true,
+  "canonicalToolReceiptsExact": true,
+  "profileConfigurationStable": true,
+  "priorOwnersPreserved": 10,
+  "priorPagesPreserved": 4,
+  "originalPrimaryAndCli59HistoryExact": true,
+  "settingsUnchanged": true,
+  "rawUsageAndTimings": [
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 102,
+        "input_tokens": 5556,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 102,
+        "prompt_tokens": 5556,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 3283,
+      "first_token_ms": 2603
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 238,
+        "input_tokens": 6133,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 238,
+        "prompt_tokens": 6133,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 5410,
+      "first_token_ms": 1944
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 107,
+        "input_tokens": 6498,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 107,
+        "prompt_tokens": 6498,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2106,
+      "first_token_ms": 866
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 82,
+        "input_tokens": 6651,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 82,
+        "prompt_tokens": 6651,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 1516,
+      "first_token_ms": 993
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 121,
+        "input_tokens": 6779,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 121,
+        "prompt_tokens": 6779,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 2196,
+      "first_token_ms": 1109
+    },
+    {
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 342,
+        "input_tokens": 7377,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 342,
+        "prompt_tokens": 7377,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsed_ms": 7064,
+      "first_token_ms": 951
+    }
+  ],
+  "cpythonExecuted": false,
+  "editorOpened": false,
+  "renderedAcceptance": false,
+  "limitations": [
+    "Four declared fixture tests qualify this bounded workflow, not exhaustive algorithm correctness",
+    "Two malformed process requests were canonically rejected without native operations before the corrected command; they are retained, not hidden",
+    "Command-mode acceptance does not establish interactive-console or rendered editor/browser coding",
+    "Default process execution, worker planning, earlier intermittent crash diagnosis and combined parent compaction/overflow remain open"
+  ],
+  "passed": true,
+  "evidence": {
+    "doc/evidence/coding60-cli-ipc-baseline.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/baseline.log",
+      "sha256": "bd9fadcb4b5732331aa279c748992198174ad2de7490de96c343c8fb4e5dfab0"
+    },
+    "doc/evidence/coding60-cli-ipc-admit.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/admit.stdout.log",
+      "sha256": "5790cfc3e336c97ad6f9eaeeb50226d1f55b2542f4a5a84c0819fb0e1bf348ec"
+    },
+    "doc/evidence/coding60-cli-ipc-admit.receipt.json": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/admit.receipt.json",
+      "sha256": "30681ca48ff407aa810fde0f91208fc4372cd85009a8329fa0dd48d8e646fbd7"
+    },
+    "doc/evidence/coding60-cli-ipc-review-1.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/review-1.stdout.log",
+      "sha256": "784929839fd076719127347825d2392e3b2ce7532a0b55535242859e387f1541"
+    },
+    "doc/evidence/coding60-cli-ipc-allow-edit.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/allow-edit.stdout.log",
+      "sha256": "0e008715ebe4ba458950987abf317a9fc2ed090fe1cbb9f8041e0618ed1a0332"
+    },
+    "doc/evidence/coding60-cli-ipc-operations-final.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/operations-final.stdout.log",
+      "sha256": "165cbaec05c54db0b7a25c4dabbd8efc04467e20b6cfa5eda83aca10c1bcd602"
+    },
+    "doc/evidence/coding60-cli-ipc-status-final.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/status-final.stdout.log",
+      "sha256": "2344a7f249cc5018f24272016510b64037b6083cc2259535d94b22e22bdf0035"
+    },
+    "doc/evidence/coding60-cli-ipc-children-after.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/children-after.stdout.log",
+      "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+    },
+    "doc/evidence/coding60-cli-ipc-profile-before.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/profile-before.stdout.log",
+      "sha256": "a28c6092db810b7ca61f77b3fd88e7d92d772fb8f456a0995f0701c426b27540"
+    },
+    "doc/evidence/coding60-cli-ipc-profile-after.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/profile-after.stdout.log",
+      "sha256": "71ec1cd12f74fae114e1119703896696f34b42610b9f3f7bb10d13b89bd73b8b"
+    },
+    "doc/evidence/coding60-cli-ipc-providers-after.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/providers-after.stdout.log",
+      "sha256": "99f7e8a3336f726af2e0eee81ee976a985deb168e2e4e6e120e191bac7fd935f"
+    },
+    "doc/evidence/coding60-cli-ipc-ledger-audit.stdout.log": {
+      "source": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/ledger-audit.stdout.log",
+      "sha256": "98088775c6620e05c21abeeb071d036e9663b4356c493b7b7bcf999896a8e466"
+    },
+    "doc/evidence/coding60-cli-ipc-canonical-history-summary.json": {
+      "sha256": "008634451c39003d7e68dd7866c80866df9abe594765063e1fdba6a7e624712a"
+    },
+    "doc/evidence/coding60-cli-ipc-source-before.txt": {
+      "sha256": "9f32373970e6316c6e0e522a2df21344d24535d2e7820c2c480585e2e6e32d72"
+    },
+    "doc/evidence/coding60-cli-ipc-source-after.txt": {
+      "sha256": "f234c95201e669168886008cbb06db8e9c0dd54048c3ba2433cbef2af9683be8"
+    },
+    "doc/evidence/coding60-cli-ipc-tests.txt": {
+      "sha256": "be7fac92239993fd9a84a18f51740300a5c46e9e8ab5048536d71ce1cb0c94c0"
+    },
+    "doc/evidence/coding60-cli-ipc-ledger-probe-source.log": {
+      "sha256": "0ae1f1d088dee087856b30f55382ed3ae83de0e11ba696be1f5e2f47703a0025"
+    }
+  },
+  "privateRawReceipts": [
+    {
+      "path": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/history.stdout.log",
+      "sha256": "01b0a62bc5bbbc779fd2bca25e3cd062f00b9795ee507e4213cb6f229d5b34c7"
+    },
+    {
+      "path": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/watch.stdout.log",
+      "sha256": "a51f4912875fd31d7dd6bfa62f819d18ed59319678ce66b761eb8fcd1796d1e9"
+    },
+    {
+      "path": "C:/xMindNativeValidation/cli60-ipc-live-coding-20261021/state.json",
+      "sha256": "b380ff7d8129babfacccaa01bcdf5f4c602ae53fde51ac7946ac98301f0da5cc"
+    }
+  ],
+  "privateHistorySnapshots": [
+    {
+      "path": "C:/xMindNativeValidation/primary60-after-ipc60-20261021.json",
+      "sha256": "2044ba0c5e6b83b0c9882c717b757652f68bfe775f4d625505720b65a6787df4"
+    },
+    {
+      "path": "C:/xMindNativeValidation/cli59-preserved60-after-ipc60-20261021.json",
+      "sha256": "7e21c80f2c416d9ee328001553a2826a58f463476d7010af8bb916226e069736"
+    }
+  ],
+  "opaqueProviderItemsRetainedInPrivateHistory": true
+}

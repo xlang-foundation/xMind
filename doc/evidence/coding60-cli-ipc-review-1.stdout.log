@@ -1,0 +1,14 @@
+[
+  {
+    "arguments_json": "{\"after_content\":\"export function inclusiveRange(start, end) {\\n  const values = [];\\n  for (let value = start; value <= end; value += 1) values.push(value);\\n  return values;\\n}\\n\",\"after_sha256\":\"f234c95201e669168886008cbb06db8e9c0dd54048c3ba2433cbef2af9683be8\",\"before_content\":\"export function inclusiveRange(start, end) {\\n  const values = [];\\n  for (let value = start; value < end; value += 1) values.push(value);\\n  return values;\\n}\\n\",\"before_sha256\":\"9f32373970e6316c6e0e522a2df21344d24535d2e7820c2c480585e2e6e32d72\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:652a2200000016000000000000000000\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"path\":\"inclusive-range.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000\",\"workspace_revision\":1}",
+    "decision_actor": "",
+    "expires_unix_ms": 1792611399988,
+    "id": "2fe485f0bf1cc68d86f9ffcfd47453c4",
+    "resources": [],
+    "result_json": "{}",
+    "run_id": "41707328b40471d556818959016d73fb",
+    "state": "awaiting_approval",
+    "tool": "replace_file",
+    "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:622a2200000015000000000000000000"
+  }
+]
