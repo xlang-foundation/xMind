@@ -1,0 +1,27 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start  18: native_provider_history_bridge_contract
+ 1/11 Test  #18: native_provider_history_bridge_contract .........   Passed    0.05 sec
+      Start  26: native_context_repository_contract
+ 2/11 Test  #26: native_context_repository_contract ..............   Passed    4.49 sec
+      Start  29: native_context_engine_contract
+ 3/11 Test  #29: native_context_engine_contract ..................   Passed    5.96 sec
+      Start  81: native_agent_worker_model_rpc_contract
+ 4/11 Test  #81: native_agent_worker_model_rpc_contract ..........   Passed   56.78 sec
+      Start  82: native_agent_worker_graph_no_context_contract
+ 5/11 Test  #82: native_agent_worker_graph_no_context_contract ...   Passed    5.10 sec
+      Start  83: native_agent_worker_server_contract
+ 6/11 Test  #83: native_agent_worker_server_contract .............   Passed    1.51 sec
+      Start  84: native_agent_worker_coding_server_contract
+ 7/11 Test  #84: native_agent_worker_coding_server_contract ......   Passed    1.07 sec
+      Start  85: native_agent_worker_ledger_contract
+ 8/11 Test  #85: native_agent_worker_ledger_contract .............   Passed    1.71 sec
+      Start  89: native_agent_runner_contract
+ 9/11 Test  #89: native_agent_runner_contract ....................   Passed    9.81 sec
+      Start 101: native_agent_remote_tool_host_contract
+10/11 Test #101: native_agent_remote_tool_host_contract ..........   Passed    4.23 sec
+      Start 137: native_local_profile_contract
+11/11 Test #137: native_local_profile_contract ...................   Passed  519.01 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) = 609.76 sec

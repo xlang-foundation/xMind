@@ -1,0 +1,281 @@
+diff --git a/Native/apps/server_main.cpp b/Native/apps/server_main.cpp
+index d0628dfb..74003ba2 100644
+--- a/Native/apps/server_main.cpp
++++ b/Native/apps/server_main.cpp
+@@ -116,7 +116,7 @@ int run_server(int argc,char** argv) {
+         const auto execution_mode=options.contains("--agent-execution")?options.at("--agent-execution"):"thread";
+         if(execution_mode!="thread"&&execution_mode!="process-read"&&execution_mode!="process-code")throw std::invalid_argument("Agent execution must be thread, process-read or process-code");
+         const bool process_read=execution_mode=="process-read",process_code=execution_mode=="process-code",process_worker=process_read||process_code;
+-        if(process_worker){if(process_code&&!options.contains("--workspace"))throw std::invalid_argument("Process coding execution requires an execution workspace");for(const auto* key:{"--mcp-config","--language-server-config","--python-tools-config","--runtime-manifest-sha256","--owner-receipt","--legacy-owner-ticket","--profile-state"})if(options.contains(key))throw std::invalid_argument("Standalone process execution received incompatible configuration");if(process_read&&options.contains("--process-config"))throw std::invalid_argument("Process read execution cannot acquire command profiles");if(process_read&&options.contains("--workspace-edits"))throw std::invalid_argument("Process read execution is read-only");if(process_code&&(!options.contains("--workspace-edits")||options.at("--workspace-edits")!="approved"))throw std::invalid_argument("Process coding execution requires approved workspace edits");}
++        if(process_worker){if(process_code&&!options.contains("--workspace"))throw std::invalid_argument("Process coding execution requires an execution workspace");if(process_read)for(const auto* key:{"--mcp-config","--language-server-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Standalone process execution received incompatible configuration");if(process_read&&options.contains("--process-config"))throw std::invalid_argument("Process read execution cannot acquire command profiles");if(process_read&&options.contains("--workspace-edits"))throw std::invalid_argument("Process read execution is read-only");if(process_code&&(!options.contains("--workspace-edits")||options.at("--workspace-edits")!="approved"))throw std::invalid_argument("Process coding execution requires approved workspace edits");}
+         int port=8765;
+         if(options.contains("--port")) {
+             const auto& value=options.at("--port");const auto parsed=std::from_chars(value.data(),value.data()+value.size(),port);
+@@ -169,7 +169,7 @@ int run_server(int argc,char** argv) {
+             const auto runtime_root=loaded_runtime_root();
+             if(options.contains("--profile-state")){
+                 const auto owner_receipt=options.find("--owner-receipt");
+-                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{},options.contains("--mcp-config")?options.at("--mcp-config"):std::string{},&protected_mcp_document);
++                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{},options.contains("--mcp-config")?options.at("--mcp-config"):std::string{},&protected_mcp_document,execution_mode);
+                 runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
+                 runtime_generation->require_loaded_server_image();
+             }else{
+@@ -313,8 +313,8 @@ int run_server(int argc,char** argv) {
+             settings.delegated_execution=agentflow::make_agent_worker_delegated_executor(persistence,worker_image);
+             if(!process_worker)return;
+             settings.graph_execution=agentflow::make_agent_worker_graph_executor(persistence,worker_image);
++            if(process_code){settings.process_profiles=process_profiles;settings.tool_allowlist.reset();return;}
+             settings.a2a_enabled=false;if(!options.contains("--workspace")){settings.tool_allowlist=std::vector<std::string>{};return;}settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};
+-            if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}
+             settings.tool_allowlist->push_back("delegate_tasks");
+         };
+ #endif
+@@ -326,15 +326,15 @@ int run_server(int argc,char** argv) {
+             if(options.contains("--workspace")) settings.workspace=options.at("--workspace");
+             bind_workspace_membership(settings);
+             settings.approved_edits=options.contains("--workspace-edits");
+-            if(!process_worker)settings.mcp_servers=mcp_settings;
++            if(!process_read)settings.mcp_servers=mcp_settings;
+             // A server can start before a browser creates/selects its first
+             // workspace. Keep the local shell catalog configured for that
+             // later workspace, but do not bind execution tools to an agent
+             // whose request has no verified workspace.
+-            if(!process_worker&&settings.workspace)settings.process_profiles=process_profiles;
+-            if(!process_worker)settings.language_servers=language_servers;
++            if(!process_read&&settings.workspace)settings.process_profiles=process_profiles;
++            if(!process_read)settings.language_servers=language_servers;
+             settings.instruction_policy=instruction_policy;
+-            if(!process_worker)settings.xlang_python_tools=xlang_python_tools;
++            if(!process_read)settings.xlang_python_tools=xlang_python_tools;
+             configure_execution_mode(settings);
+             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
+             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
+@@ -363,7 +363,7 @@ int run_server(int argc,char** argv) {
+         }
+ #if defined(_WIN32)
+         if(!executor){
+-            agentflow::AgentSettings settings;if(!process_worker){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
++            agentflow::AgentSettings settings;if(!process_read){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
+             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
+             bind_workspace_membership(settings);
+             // The configured profile generation enables the registered leaf
+diff --git a/Native/apps/xmind_main.cpp b/Native/apps/xmind_main.cpp
+index d2aa345a..d02fed9f 100644
+--- a/Native/apps/xmind_main.cpp
++++ b/Native/apps/xmind_main.cpp
+@@ -49,7 +49,7 @@ void help(){
+         "  xmind worker         (private xlang3 agent tool worker)\n\n"
+         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
+         "workspace init uses --workspace (or the current directory) as the first folder. Add folders later with workspace add-folder; workspace info lists IDs accepted by Git commands.\n"
+-        "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles; --mcp-config selects trusted MCP servers.\n"
++        "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles; --mcp-config selects trusted MCP servers. --agent-execution selects thread, process-read or process-code for the managed backend.\n"
+         "--upgrade-backend safely replaces the managed profile runtime when the current owner supports it.\n"
+         "Explicit --port attaches to an operator-selected backend using XMIND_AUTH_TOKEN.\n"
+         "No key is accepted on the command line. Worker execution is private to the local runtime.\n"
+@@ -115,7 +115,7 @@ int dispatch(int argc,char** argv){
+             options.approved_edits=true;continue;
+         }
+         if(option=="--upgrade-backend"){options.upgrade_backend=true;continue;}
+-        if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config"&&option!="--python-tools-config"&&option!="--language-server-config"&&option!="--process-config"&&option!="--mcp-config")throw std::invalid_argument("Unknown console option");
++        if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config"&&option!="--python-tools-config"&&option!="--language-server-config"&&option!="--process-config"&&option!="--mcp-config"&&option!="--agent-execution")throw std::invalid_argument("Unknown console option");
+         if(first==argc||!*argv[first])throw std::invalid_argument("Console option requires a value");const std::string value=argv[first++];
+         if(option=="--port"){named_port=true;port=std::to_string(port_number(value));}
+         else if(option=="--workspace"){workspace=value;options.workspace=value;}
+@@ -125,9 +125,10 @@ int dispatch(int argc,char** argv){
+         else if(option=="--language-server-config")options.language_server_config=value;
+         else if(option=="--process-config")options.process_config=value;
+         else if(option=="--mcp-config")options.mcp_config=value;
++        else if(option=="--agent-execution")options.agent_execution=value;
+         else options.graphs_config=value;
+     }
+-    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||!options.python_tools_config.empty()||!options.language_server_config.empty()||!options.process_config.empty()||!options.mcp_config.empty()||options.approved_edits||options.upgrade_backend))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
++    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||!options.python_tools_config.empty()||!options.language_server_config.empty()||!options.process_config.empty()||!options.mcp_config.empty()||options.approved_edits||options.agent_execution||options.upgrade_backend))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
+     std::function<agentflow::LocalProfileConnection()> profile;
+ #if defined(_WIN32)
+     if(!named_port)profile=[options]{return agentflow::connect_local_profile(options);};
+@@ -136,7 +137,7 @@ int dispatch(int argc,char** argv){
+ #endif
+     if(first<argc&&std::string_view(argv[first])=="profile-info"){
+         if(named_port||first+1!=argc)throw std::invalid_argument("profile-info requires a managed local profile and no command arguments");
+-        const auto connected=profile();std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(connected.port)},{"workspace",connected.workspace},{"profile_directory",connected.directory},{"process_id",connected.process_id},{"started",connected.started},{"workspace_edits",connected.approved_edits?"approved":"read_only"}}.dump()<<'\n';return 0;
++        const auto connected=profile();std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(connected.port)},{"workspace",connected.workspace},{"profile_directory",connected.directory},{"process_id",connected.process_id},{"started",connected.started},{"workspace_edits",connected.approved_edits?"approved":"read_only"},{"agent_execution",connected.agent_execution}}.dump()<<'\n';return 0;
+     }
+     if(first<argc&&std::string_view(argv[first])=="workspaces"){
+         if(named_port||first+1!=argc)throw std::invalid_argument("workspaces requires local profile storage and no command arguments");
+diff --git a/Native/include/agentflow/local_profile.hpp b/Native/include/agentflow/local_profile.hpp
+index f4d2e8ef..faa76c82 100644
+--- a/Native/include/agentflow/local_profile.hpp
++++ b/Native/include/agentflow/local_profile.hpp
+@@ -11,6 +11,7 @@ struct LocalProfileOptions {
+     bool require_existing_profile = false;
+     bool upgrade_backend = false;
+     bool defer_busy_upgrade = false;
++    std::optional<std::string> agent_execution;
+ };
+ struct LocalProfileConnection {
+     std::string workspace, directory;
+@@ -19,6 +20,7 @@ struct LocalProfileConnection {
+     bool started = false;
+     SecretBytes auth;
+     bool approved_edits = true;
++    std::string agent_execution="thread";
+ };
+ struct LocalWorkspaceProfile {
+     std::string workspace_id, root, name;
+@@ -33,7 +35,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
+                                    const std::string &auth_token,const std::string &owner_receipt={},
+                                    const std::string &language_server_config={},
+                                    const std::string &mcp_config={},
+-                                   std::string *mcp_document=nullptr);
++                                   std::string *mcp_document=nullptr,const std::string &agent_execution="thread");
+ // Returns only validated profiles already present under the user-local profile
+ // root. This never opens a client-supplied path or creates profile storage.
+ std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});
+diff --git a/Native/src/local_profile.cpp b/Native/src/local_profile.cpp
+index 75569ff4..ea5a21a1 100644
+--- a/Native/src/local_profile.cpp
++++ b/Native/src/local_profile.cpp
+@@ -384,6 +384,7 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
+             value.at("pid").get<std::uint64_t>() <= MAXDWORD && value.contains("port") &&
+             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
+             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
++    const auto execution=value.value("agent_execution",std::string{"thread"});require(execution=="thread"||execution=="process-read"||execution=="process-code","Invalid protected agent execution mode");
+     for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config","mcp_config"})
+         if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
+     require((!value.contains("process_config")||value.at("process_config").get<std::string>().empty())
+@@ -559,6 +560,7 @@ Child launch(Store &store, Json &state) {
+             std::to_string(receipt.at("revision").get<std::int64_t>())+":"+
+             receipt.at("receipt_id").get<std::string>()));
+     }
++    args.push_back(L"--agent-execution");args.push_back(wide(state.value("agent_execution",std::string{"thread"})));
+     if (state.at("approved_edits").get<bool>()) {
+         args.push_back(L"--workspace-edits");
+         args.push_back(L"approved");
+@@ -771,6 +773,7 @@ std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::stri
+     return result;
+ }
+ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options) {
++    if(options.agent_execution&&*options.agent_execution!="thread"&&*options.agent_execution!="process-read"&&*options.agent_execution!="process-code")throw std::invalid_argument("Agent execution must be thread, process-read or process-code");
+     const auto requested_mcp_path=options.mcp_config.empty()?std::string{}:text(absolute(options.mcp_config));
+     std::string requested_mcp_digest,requested_mcp_document;
+     if(!options.mcp_config.empty()){
+@@ -883,21 +886,26 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
+         if((recovered_stopped_owner||state.contains("upgrade_intent"))&&mcp_configuration_changed){
+             state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;store.write(state);
+         }
++        const bool execution_changed=options.agent_execution&&state.value("agent_execution",std::string{"thread"})!=*options.agent_execution;
++        const bool policy_requested=bool(options.approved_edits)||bool(options.agent_execution);const auto requested_execution=options.agent_execution.value_or(state.value("agent_execution",std::string{"thread"}));const bool requested_edits=options.approved_edits.value_or(state.at("approved_edits").get<bool>());
+         const bool edit_policy_changed=options.approved_edits&&
+             state.at("approved_edits").get<bool>()!=*options.approved_edits;
+         if(edit_policy_changed&&!options.upgrade_backend)
+             throw std::invalid_argument("Profile edit policy changed; update the existing backend explicitly");
+         if(state.contains("owner_receipt")&&edit_policy_changed)
+             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing workspace edit policy");
+-        if(recovered_stopped_owner&&options.approved_edits){
+-            state["approved_edits"]=*options.approved_edits;
++        if(execution_changed&&!options.upgrade_backend)throw std::invalid_argument("Profile execution mode changed; update the existing backend explicitly");
++        if(state.contains("owner_receipt")&&execution_changed)throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing execution mode");
++        if((requested_execution=="process-code"&&!requested_edits)||(requested_execution=="process-read"&&requested_edits))throw std::invalid_argument("Process execution mode differs from workspace edit policy");
++        if(recovered_stopped_owner&&policy_requested){
++            state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
+             store.write(state);
+         }
+-        if(state.contains("upgrade_intent")&&options.approved_edits){
+-            state["approved_edits"]=*options.approved_edits;
++        if(state.contains("upgrade_intent")&&policy_requested){
++            state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
+             store.write(state);
+         }
+-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
++        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+             bool deferred_busy_upgrade=false;
+             if(!state.contains("owner_receipt")){
+                 if(!state.contains("upgrade_intent")){
+@@ -909,7 +917,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
+                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
+                     if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
+                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
+-                    if(options.approved_edits)state["approved_edits"]=*options.approved_edits;
++                    if(policy_requested){state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;}
+                     state["upgrade_intent"]=true;store.write(state);
+                 }
+                 const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+@@ -945,6 +953,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
+         for (const auto &item : fs::directory_iterator(store.directory))
+             require(item.path().filename() == L"startup.lock",
+                     "Profile record is missing but storage is not empty; operator recovery is required");
++        if((options.agent_execution==std::optional<std::string>{"process-code"}&&!options.approved_edits.value_or(true))||(options.agent_execution==std::optional<std::string>{"process-read"}&&options.approved_edits.value_or(true)))throw std::invalid_argument("Process execution mode differs from workspace edit policy");
+         const auto source = absolute(loaded_root());
+         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024),
+                    digest = context_digest(raw);
+@@ -964,6 +973,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
+             {"birth", ""},
+             {"port", 0},
+             {"approved_edits", options.approved_edits.value_or(true)},
++            {"agent_execution",options.agent_execution.value_or("thread")},
+             {"provider_config",
+              options.provider_config.empty() ? "" : text(absolute(options.provider_config))},
+             {"graphs_config", options.graphs_config.empty() ? "" : text(absolute(options.graphs_config))}};
+@@ -1084,13 +1094,13 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
+             state.at("pid").get<std::uint32_t>(),
+             started,
+             SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()}),
+-            state.at("approved_edits").get<bool>()};
++            state.at("approved_edits").get<bool>(),state.value("agent_execution",std::string{"thread"})};
+ }
+ void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
+                                    const std::string &runtime_root,const std::string &manifest,
+                                    const std::string &auth_token,const std::string &owner_receipt,
+                                    const std::string &language_server_config,const std::string &mcp_config,
+-                                   std::string *mcp_document) {
++                                   std::string *mcp_document,const std::string &agent_execution) {
+     const auto path=absolute(state_file);
+     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
+     Store store(path.parent_path());
+@@ -1101,7 +1111,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
+     require(state.at("phase")=="starting"&&state.at("pid")==pid&&
+                 state.at("birth")==inspect_owner_process_birth(pid)&&
+                 state.at("runtime")==text(absolute(runtime_root))&&
+-                state.at("manifest")==manifest&&state.at("auth")==auth_token,
++                state.at("manifest")==manifest&&state.at("auth")==auth_token&&state.value("agent_execution",std::string{"thread"})==agent_execution,
+             "Managed profile runtime does not match its protected startup record");
+     const auto requested_mcp=mcp_config.empty()?std::string{}:text(absolute(mcp_config));
+     require(state.value("mcp_config_pending",false)
+diff --git a/Native/tests/agent_worker_coding_server_contract.mjs b/Native/tests/agent_worker_coding_server_contract.mjs
+index f835956f..619b4f10 100644
+--- a/Native/tests/agent_worker_coding_server_contract.mjs
++++ b/Native/tests/agent_worker_coding_server_contract.mjs
+@@ -12,7 +12,7 @@ await mkdir(workspace);await writeFile(join(workspace,'input.txt'),marker);await
+ let requests=0,failure,child,stdout='',stderr='';
+ const provider=createServer((request,response)=>{let input='';request.on('data',b=>input+=b);request.on('end',()=>{try{
+  assert.equal(request.headers.authorization,'Bearer '+key);assert(!input.includes(key));const body=JSON.parse(input);assert.equal(body.model,'coding-server-fixture');assert.equal(body.stream,true);assert.match(body.messages[0].content,/CODING_SERVER_GUIDANCE/);assert.ok(++requests<=2);
+- assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['delegate_tasks','read_file','list_files','search_files','find_files','glob_files','edit_file','create_file','apply_patch','restore_operation','run_process','wait_process','stop_process'].sort());
++ assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['read_repository_instructions','list_skills','load_skill','delegate_tasks','read_file','list_files','search_files','find_files','glob_files','edit_file','create_file','apply_patch','restore_operation','run_process','wait_process','stop_process'].sort());
+  if(requests===2){assert.equal(body.messages.length,6);assert.equal(body.messages[3].tool_call_id,'server-read');assert.equal(JSON.parse(body.messages[3].content).content,marker);assert.equal(body.messages[4].tool_call_id,'server-create');assert.ok(JSON.parse(body.messages[4].content).operation_id);assert.equal(body.messages[5].tool_call_id,'server-process');assert.equal(JSON.parse(body.messages[5].content).exit_code,0);}
+  const delta=requests===1?{role:'assistant',tool_calls:[{index:0,id:'server-read',type:'function',function:{name:'read_file',arguments:JSON.stringify({path:'input.txt'})}},{index:1,id:'server-create',type:'function',function:{name:'create_file',arguments:JSON.stringify({path:'created.txt',content:marker})}},{index:2,id:'server-process',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'xlang3',arguments:['-B','-c',"from pathlib import Path; Path('command.txt').write_bytes(Path('created.txt').read_bytes())"],workdir:'.',timeout_ms:10000})}}]}:{role:'assistant',content:'Server coding complete.'};
+  response.writeHead(200,{'content-type':'text/event-stream'});response.end('data: '+JSON.stringify({id:'coding-server-response',model:body.model,choices:[{index:0,delta,finish_reason:requests===1?'tool_calls':'stop'}],usage:{prompt_tokens:7,completion_tokens:3,total_tokens:10}})+'\n\ndata: [DONE]\n\n');
+diff --git a/Native/tests/local_profile_contract.mjs b/Native/tests/local_profile_contract.mjs
+index 9042b842..e23d1b68 100644
+--- a/Native/tests/local_profile_contract.mjs
++++ b/Native/tests/local_profile_contract.mjs
+@@ -21,7 +21,7 @@ try{
+  const invalid=await invoke(['unknown-command']);assert.equal(invalid.code,1);await assert.rejects(fs.stat(profiles),{code:'ENOENT'});
+  const emptyCatalogue=await invoke(['workspaces']);assert.equal(emptyCatalogue.code,0,emptyCatalogue.stderr);assert.deepEqual(JSON.parse(emptyCatalogue.stdout),{workspaces:[]});await assert.rejects(fs.stat(profiles),{code:'ENOENT'});
+  const invalidMcp=await invoke(['--mcp-config',invalidMcpConfig,'profile-info']);assert.equal(invalidMcp.code,2);await assert.rejects(fs.stat(profiles),{code:'ENOENT'});
+- const first=await invoke(['--graphs-config',graphs,'--language-server-config',languageServerConfig,'--process-config',processConfig,'--mcp-config',mcpConfig,'profile-info'],{program:oldExe});assert.equal(first.code,0,first.stderr);const started=JSON.parse(first.stdout);pids.add(started.process_id);assert.equal(started.started,true);assert.equal(started.workspace,await fs.realpath(workspace));assert.ok(started.profile_directory.startsWith(profiles+path.sep));assert.ok(!Object.hasOwn(started,'auth'));assert.equal((await fetch(started.origin+'/v1/health')).status,401);
++ const first=await invoke(['--agent-execution','process-code','--graphs-config',graphs,'--language-server-config',languageServerConfig,'--process-config',processConfig,'--mcp-config',mcpConfig,'profile-info'],{program:oldExe});assert.equal(first.code,0,first.stderr);const started=JSON.parse(first.stdout);pids.add(started.process_id);assert.equal(started.started,true);assert.equal(started.agent_execution,"process-code");const modeChange=await invoke(["--agent-execution","thread","profile-info"]);assert.equal(modeChange.code,2);assert.match(modeChange.stderr,/execution mode changed/);assert.equal((await inspect()).process_id,started.process_id);assert.equal((await inspect()).agent_execution,"process-code");assert.equal(started.workspace,await fs.realpath(workspace));assert.ok(started.profile_directory.startsWith(profiles+path.sep));assert.ok(!Object.hasOwn(started,'auth'));assert.equal((await fetch(started.origin+'/v1/health')).status,401);
+  const unifiedInfoResult=await invoke(['info']);assert.equal(unifiedInfoResult.code,0,unifiedInfoResult.stderr);const unifiedInfo=JSON.parse(unifiedInfoResult.stdout);assert.deepEqual(Object.keys(unifiedInfo).sort(),['capabilities','paths','pid','urls','version']);assert.equal(unifiedInfo.version,'0.1.0');assert.equal(unifiedInfo.pid,started.process_id);assert.deepEqual(unifiedInfo.urls,[started.origin]);assert.equal(path.resolve(unifiedInfo.paths.tmp),path.resolve(os.tmpdir()));assert.equal(typeof unifiedInfo.capabilities.persistentPty,'boolean');
+  const changedLanguageServers=await invoke(['--language-server-config',graphs,'profile-info']);assert.equal(changedLanguageServers.code,2);assert.match(changedLanguageServers.stderr,/launch configuration changed/);
+  const catalogue=await invoke(['workspaces']);assert.equal(catalogue.code,0,catalogue.stderr);const known=JSON.parse(catalogue.stdout).workspaces;assert.equal(known.length,1);assert.equal(known[0].root,await fs.realpath(workspace));assert.equal(known[0].name,path.basename(workspace));assert.match(known[0].workspace_id,/^windows-local-file-v1:/);assert.ok(!catalogue.stdout.includes('auth'));assert.ok(!catalogue.stdout.includes(started.profile_directory));assert.equal((await inspect()).process_id,started.process_id);
+@@ -44,9 +44,9 @@ const sourceManifestPath=path.join(runtime,'native-runtime-manifest.json'),nextS
+  const sealed=await fs.readFile(stateFile),opaque=JSON.parse(sealed);assert.deepEqual(Object.keys(opaque).sort(),['ciphertext','protection']);assert.equal(opaque.protection,'windows-dpapi-user-v1');assert.ok(!sealed.includes(Buffer.from('"auth"')));assert.ok(!sealed.includes(Buffer.from(workspace)));
+  const terminal=await invoke([],{input:'/exit\n'});assert.equal(terminal.code,0,terminal.stderr);assert.equal((await inspect()).process_id,upgraded.process_id);
+  const changed=await invoke(['--read-only','profile-info']);assert.equal(changed.code,2);assert.match(changed.stderr,/edit policy changed/);assert.equal((await inspect()).process_id,upgraded.process_id);assert.deepEqual(await command('sessions'),saved);
+- await fs.writeFile(mcpConfig,JSON.stringify({servers:[]}));const readOnlyUpgrade=await invoke(['--mcp-config',mcpConfig,'--read-only','--upgrade-backend','profile-info']);assert.equal(readOnlyUpgrade.code,0,readOnlyUpgrade.stderr);const readOnly=JSON.parse(readOnlyUpgrade.stdout);pids.delete(upgraded.process_id);pids.add(readOnly.process_id);assert.equal(readOnly.workspace_edits,'read_only');assert.notEqual(readOnly.process_id,upgraded.process_id);assert.equal(readOnly.origin,upgraded.origin);assert.equal(readOnly.profile_directory,upgraded.profile_directory);assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),graphHistory);upgraded.process_id=readOnly.process_id;
++ await fs.writeFile(mcpConfig,JSON.stringify({servers:[]}));const readOnlyUpgrade=await invoke(['--agent-execution','thread','--mcp-config',mcpConfig,'--read-only','--upgrade-backend','profile-info']);assert.equal(readOnlyUpgrade.code,0,readOnlyUpgrade.stderr);const readOnly=JSON.parse(readOnlyUpgrade.stdout);pids.delete(upgraded.process_id);pids.add(readOnly.process_id);assert.equal(readOnly.workspace_edits,'read_only');assert.equal(readOnly.agent_execution,'thread');assert.notEqual(readOnly.process_id,upgraded.process_id);assert.equal(readOnly.origin,upgraded.origin);assert.equal(readOnly.profile_directory,upgraded.profile_directory);assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),graphHistory);upgraded.process_id=readOnly.process_id;
+  assert.deepEqual(await command('mcp-servers'),{servers:[],runtime_state:'per_run'});await fs.writeFile(mcpConfig,JSON.stringify({servers:[{id:'fixture-mcp',transport:'http',endpoint:'https://fixture.example.test/mcp',enabled:false}]}));const retiredMcp=await invoke(['--mcp-config',mcpConfig,'--upgrade-backend','profile-info']);assert.equal(retiredMcp.code,2);assert.match(retiredMcp.stderr,/identity is retired/);assert.equal((await inspect()).process_id,readOnly.process_id);assert.deepEqual(await command('history',session.id),graphHistory);await fs.rm(mcpConfig);
+- const approvedUpgrade=await invoke(['--workspace-edits','approved','--upgrade-backend','profile-info']);assert.equal(approvedUpgrade.code,0,approvedUpgrade.stderr);const approved=JSON.parse(approvedUpgrade.stdout);pids.delete(upgraded.process_id);pids.add(approved.process_id);assert.equal(approved.workspace_edits,'approved');assert.notEqual(approved.process_id,upgraded.process_id);assert.equal(approved.origin,upgraded.origin);assert.equal(approved.profile_directory,upgraded.profile_directory);assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),graphHistory);upgraded.process_id=approved.process_id;
++ const approvedUpgrade=await invoke(['--agent-execution','process-code','--workspace-edits','approved','--upgrade-backend','profile-info']);assert.equal(approvedUpgrade.code,0,approvedUpgrade.stderr);const approved=JSON.parse(approvedUpgrade.stdout);pids.delete(upgraded.process_id);pids.add(approved.process_id);assert.equal(approved.workspace_edits,'approved');assert.equal(approved.agent_execution,'process-code');assert.notEqual(approved.process_id,upgraded.process_id);assert.equal(approved.origin,upgraded.origin);assert.equal(approved.profile_directory,upgraded.profile_directory);assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),graphHistory);upgraded.process_id=approved.process_id;
+   const currentSealed=await fs.readFile(stateFile),currentOpaque=JSON.parse(currentSealed),damaged=structuredClone(currentOpaque);damaged.ciphertext=(damaged.ciphertext[0]==='0'?'1':'0')+damaged.ciphertext.slice(1);await fs.writeFile(stateFile,JSON.stringify(damaged));const refusal=await invoke(['profile-info']);assert.equal(refusal.code,2);await fs.writeFile(stateFile,currentSealed);assert.equal((await inspect()).process_id,upgraded.process_id);assert.deepEqual(await command('history',session.id),graphHistory);
+  const recoveryManifest=JSON.parse(await fs.readFile(sourceManifestPath,'utf8'));recoveryManifest.nativeRevision='e'.repeat(40);await fs.writeFile(sourceManifestPath,JSON.stringify(recoveryManifest));await stop(upgraded.process_id);const recoveredUpgrade=await invoke(['--language-server-config',nextLanguageServerConfig,'--upgrade-backend','profile-info']);assert.equal(recoveredUpgrade.code,0,recoveredUpgrade.stderr);const restarted=JSON.parse(recoveredUpgrade.stdout);pids.add(restarted.process_id);assert.equal(restarted.started,true);assert.notEqual(restarted.process_id,upgraded.process_id);assert.equal(restarted.origin,started.origin);assert.equal(restarted.profile_directory,started.profile_directory);assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),graphHistory);assert.equal((await command('graph',run.id)).run.state,'completed');upgraded.process_id=restarted.process_id;
+  const overlap=await invoke(['profile-info'],{root:path.join(workspace,'private')});assert.equal(overlap.code,2);assert.match(overlap.stderr,/overlaps/);await assert.rejects(fs.stat(path.join(workspace,'private')),{code:'ENOENT'});passed=true;

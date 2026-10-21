@@ -1,0 +1,72 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T18:34:12.171Z",
+    "sourceParent": "7eb4d3dc9fca782572602f7297ea51a672adeda9",
+    "sourcePatchSha256": "c330c13594af24ddac84620106284fd9bf41c0674a0df5f3398769e6c1dbf670",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 20240,
+      "launchedAt": "2026-10-21T18:21:52.934Z",
+      "completedAt": "2026-10-21T18:23:56.264Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4a2f0df2622da82537e2f066eb7a3dd0c708bf9a667ee91febd5a2e3f08bb74b"
+    },
+    "test": {
+      "pid": 18344,
+      "launchedAt": "2026-10-21T18:23:59.372Z",
+      "completedAt": "2026-10-21T18:34:09.173Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "acd3cd9a9d6f9962023ef9544ea72384181c32cb1cb872a8da7d2b4297c8b32f"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 609.76,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-managed-mode-20261021-build.log": "4a2f0df2622da82537e2f066eb7a3dd0c708bf9a667ee91febd5a2e3f08bb74b",
+    "doc/evidence/process-worker-managed-mode-20261021-build-terminal.json": "918ae2eeb5571934261234cb3b91194f3fb3b44b76911dfac10ccc8534d2601b",
+    "doc/evidence/process-worker-managed-mode-20261021-ctest.log": "acd3cd9a9d6f9962023ef9544ea72384181c32cb1cb872a8da7d2b4297c8b32f",
+    "doc/evidence/process-worker-managed-mode-20261021-ctest-terminal.json": "9f2b2b6658c737ae48af91be470a9c4b678bc14f0e52f5f8edc9195ca1667257",
+    "doc/evidence/process-worker-managed-mode-20261021-LastTest.log": "295de6038139cbb3f56963ca341befb6828594eef4aad707aab1f8ed6454119e",
+    "doc/evidence/process-worker-managed-mode-20261021-test-inventory.json": "a20c38cdb323b74ffb4df2adba1311918b8a88383def4ee4080bc72c8c9e3434",
+    "doc/evidence/process-worker-managed-mode-20261021-gate.json": "803c707d34bcd743173061310260ea0431340ef0942315cb6f78589444af7843",
+    "doc/evidence/process-worker-managed-mode-20261021-source.patch": "c330c13594af24ddac84620106284fd9bf41c0674a0df5f3398769e6c1dbf670",
+    "doc/evidence/process-worker-managed-mode-20261021-binaries-before-test.json": "fa27948973657b946a8703968df64d0ca243bc54b93269cc775528af358a627b"
+  },
+  "verified": [
+    "Managed CLI accepts --agent-execution thread|process-read|process-code and saves the selection in protected profile state; unspecified existing profiles preserve thread semantics without migration",
+    "Mode changes require the existing explicit backend-upgrade path and cannot alter an owner receipt already in flight",
+    "Spawned server execution mode must match the protected startup record in addition to runtime, owner process, manifest and authentication bindings",
+    "Managed-profile lifecycle starts in process-code, rejects an unrequested thread change while preserving the exact owner, transitions explicitly to read-only/thread and back to approved/process-code, and retains history/configuration through replacements and restart",
+    "Process-code server retains configured MCP/language/callable/process settings and automatically offers the complete configured catalogue; obsolete fixed coding whitelist removed",
+    "Existing controlled coding server verifies the expanded native guidance catalogue alongside actual approved file/process effects and canonical history",
+    "Eleven focused contracts pass in 609.76 seconds, including the 519.01-second managed lifecycle; frozen input and 133-binary sets unchanged"
+  ],
+  "limitations": [
+    "Managed lifecycle uses no provider requests and synthetic package provenance; it does not prove a managed live-model run or installed acceptance",
+    "Enabled MCP/language/callable combinations in the managed server still need direct end-to-end inference acceptance; corresponding native library worker cases remain covered",
+    "Server and new-profile defaults remain thread; explicit process-code disables the default dynamic planner until native worker planning support is implemented",
+    "Earlier intermittent access violation remains unresolved",
+    "Full current regression, updated installation and rendered/live-provider acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

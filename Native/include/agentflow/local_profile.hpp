@@ -11,6 +11,7 @@ struct LocalProfileOptions {
     bool require_existing_profile = false;
     bool upgrade_backend = false;
     bool defer_busy_upgrade = false;
+    std::optional<std::string> agent_execution;
 };
 struct LocalProfileConnection {
     std::string workspace, directory;
@@ -19,6 +20,7 @@ struct LocalProfileConnection {
     bool started = false;
     SecretBytes auth;
     bool approved_edits = true;
+    std::string agent_execution="thread";
 };
 struct LocalWorkspaceProfile {
     std::string workspace_id, root, name;
@@ -33,7 +35,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                                    const std::string &auth_token,const std::string &owner_receipt={},
                                    const std::string &language_server_config={},
                                    const std::string &mcp_config={},
-                                   std::string *mcp_document=nullptr);
+                                   std::string *mcp_document=nullptr,const std::string &agent_execution="thread");
 // Returns only validated profiles already present under the user-local profile
 // root. This never opens a client-supplied path or creates profile storage.
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});

@@ -384,6 +384,7 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
             value.at("pid").get<std::uint64_t>() <= MAXDWORD && value.contains("port") &&
             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
+    const auto execution=value.value("agent_execution",std::string{"thread"});require(execution=="thread"||execution=="process-read"||execution=="process-code","Invalid protected agent execution mode");
     for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config","mcp_config"})
         if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
     require((!value.contains("process_config")||value.at("process_config").get<std::string>().empty())
@@ -559,6 +560,7 @@ Child launch(Store &store, Json &state) {
             std::to_string(receipt.at("revision").get<std::int64_t>())+":"+
             receipt.at("receipt_id").get<std::string>()));
     }
+    args.push_back(L"--agent-execution");args.push_back(wide(state.value("agent_execution",std::string{"thread"})));
     if (state.at("approved_edits").get<bool>()) {
         args.push_back(L"--workspace-edits");
         args.push_back(L"approved");
@@ -771,6 +773,7 @@ std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::stri
     return result;
 }
 LocalProfileConnection connect_local_profile(const LocalProfileOptions &options) {
+    if(options.agent_execution&&*options.agent_execution!="thread"&&*options.agent_execution!="process-read"&&*options.agent_execution!="process-code")throw std::invalid_argument("Agent execution must be thread, process-read or process-code");
     const auto requested_mcp_path=options.mcp_config.empty()?std::string{}:text(absolute(options.mcp_config));
     std::string requested_mcp_digest,requested_mcp_document;
     if(!options.mcp_config.empty()){
@@ -883,21 +886,26 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if((recovered_stopped_owner||state.contains("upgrade_intent"))&&mcp_configuration_changed){
             state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;store.write(state);
         }
+        const bool execution_changed=options.agent_execution&&state.value("agent_execution",std::string{"thread"})!=*options.agent_execution;
+        const bool policy_requested=bool(options.approved_edits)||bool(options.agent_execution);const auto requested_execution=options.agent_execution.value_or(state.value("agent_execution",std::string{"thread"}));const bool requested_edits=options.approved_edits.value_or(state.at("approved_edits").get<bool>());
         const bool edit_policy_changed=options.approved_edits&&
             state.at("approved_edits").get<bool>()!=*options.approved_edits;
         if(edit_policy_changed&&!options.upgrade_backend)
             throw std::invalid_argument("Profile edit policy changed; update the existing backend explicitly");
         if(state.contains("owner_receipt")&&edit_policy_changed)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing workspace edit policy");
-        if(recovered_stopped_owner&&options.approved_edits){
-            state["approved_edits"]=*options.approved_edits;
+        if(execution_changed&&!options.upgrade_backend)throw std::invalid_argument("Profile execution mode changed; update the existing backend explicitly");
+        if(state.contains("owner_receipt")&&execution_changed)throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing execution mode");
+        if((requested_execution=="process-code"&&!requested_edits)||(requested_execution=="process-read"&&requested_edits))throw std::invalid_argument("Process execution mode differs from workspace edit policy");
+        if(recovered_stopped_owner&&policy_requested){
+            state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
             store.write(state);
         }
-        if(state.contains("upgrade_intent")&&options.approved_edits){
-            state["approved_edits"]=*options.approved_edits;
+        if(state.contains("upgrade_intent")&&policy_requested){
+            state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
             store.write(state);
         }
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
@@ -909,7 +917,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
                     if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
-                    if(options.approved_edits)state["approved_edits"]=*options.approved_edits;
+                    if(policy_requested){state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;}
                     state["upgrade_intent"]=true;store.write(state);
                 }
                 const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
@@ -945,6 +953,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         for (const auto &item : fs::directory_iterator(store.directory))
             require(item.path().filename() == L"startup.lock",
                     "Profile record is missing but storage is not empty; operator recovery is required");
+        if((options.agent_execution==std::optional<std::string>{"process-code"}&&!options.approved_edits.value_or(true))||(options.agent_execution==std::optional<std::string>{"process-read"}&&options.approved_edits.value_or(true)))throw std::invalid_argument("Process execution mode differs from workspace edit policy");
         const auto source = absolute(loaded_root());
         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024),
                    digest = context_digest(raw);
@@ -964,6 +973,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             {"birth", ""},
             {"port", 0},
             {"approved_edits", options.approved_edits.value_or(true)},
+            {"agent_execution",options.agent_execution.value_or("thread")},
             {"provider_config",
              options.provider_config.empty() ? "" : text(absolute(options.provider_config))},
             {"graphs_config", options.graphs_config.empty() ? "" : text(absolute(options.graphs_config))}};
@@ -1084,13 +1094,13 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state.at("pid").get<std::uint32_t>(),
             started,
             SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()}),
-            state.at("approved_edits").get<bool>()};
+            state.at("approved_edits").get<bool>(),state.value("agent_execution",std::string{"thread"})};
 }
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,
                                    const std::string &auth_token,const std::string &owner_receipt,
                                    const std::string &language_server_config,const std::string &mcp_config,
-                                   std::string *mcp_document) {
+                                   std::string *mcp_document,const std::string &agent_execution) {
     const auto path=absolute(state_file);
     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
     Store store(path.parent_path());
@@ -1101,7 +1111,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
     require(state.at("phase")=="starting"&&state.at("pid")==pid&&
                 state.at("birth")==inspect_owner_process_birth(pid)&&
                 state.at("runtime")==text(absolute(runtime_root))&&
-                state.at("manifest")==manifest&&state.at("auth")==auth_token,
+                state.at("manifest")==manifest&&state.at("auth")==auth_token&&state.value("agent_execution",std::string{"thread"})==agent_execution,
             "Managed profile runtime does not match its protected startup record");
     const auto requested_mcp=mcp_config.empty()?std::string{}:text(absolute(mcp_config));
     require(state.value("mcp_config_pending",false)

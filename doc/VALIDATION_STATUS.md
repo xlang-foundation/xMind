@@ -1,3 +1,22 @@
+## Managed-profile IPC execution mode — 2026-10-21
+
+The native CLI now saves `--agent-execution process-code` in protected profile
+state. Changing a saved mode requires `--upgrade-backend`; startup checks the
+actual mode against that protected record. Existing profiles retain their mode.
+The managed lifecycle verifies process-code reuse, rejected implicit change,
+explicit read-only/thread and approved/process-code replacements, exact history
+and configuration preservation, damaged-record refusal and stopped-owner recovery.
+Process-code also retains configured native catalogues instead of a fixed whitelist.
+**11/11 focused contracts pass in 609.76 seconds**, including the 519.01-second
+managed lifecycle, with frozen inputs unchanged.
+[Scope and raw receipts](evidence/process-worker-managed-mode-20261021.json).
+
+This is opt-in managed execution. Default remains thread, native worker planning
+is unfinished, and this managed test makes no provider requests. Enabled remote/
+language/callable managed inference, full current regression and updated installed/
+rendered/live-provider acceptance remain open. The earlier intermittent access
+violation remains unresolved.
+
 ## Model-only roots through native xmind IPC — 2026-10-21
 
 The existing executor now supports ordinary roots without a workspace, including
