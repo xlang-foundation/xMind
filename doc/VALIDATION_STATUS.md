@@ -1,3 +1,19 @@
+## Nested graph xmind IPC cancellation — 2026-10-21
+
+GraphService now verifies controller cancellation after observing both actual
+xmind leaf model invocations beneath nested controllers. The controlled gateway
+waits for cancellation and publishes no response. Both exact leaf leases retire
+as cancelled, both controllers retire without joins, all five owner histories stay
+user-only, two charged calls and interrupted typed groups remain, and the ultimate
+segment closes before healthy service idle. No model/worker retry occurs.
+**9/9 focused contracts pass in 78.01 seconds**, including flat/nested success and
+existing 219-request HTTP/84-forgery IPC scopes.
+[Scope and raw receipts](evidence/process-worker-graph-nested-cancellation-20261021.json).
+
+Server/default wiring, graph coding/no-context/failure, planning, full current
+regression and installed/rendered/live-provider acceptance remain unfinished.
+The earlier worker access violation remains unresolved.
+
 ## Nested graph scheduler xmind IPC — 2026-10-21
 
 Actual GraphService now verifies two nested controllers, each owning an actual

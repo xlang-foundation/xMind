@@ -1,0 +1,71 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:37:28.253Z",
+    "sourceParent": "ab6a9be206d44e3611a98437eff03ce28c727dd6",
+    "sourcePatchSha256": "c62824a7ce568e136f7b84717ac197799be126abffb16c16dd72e097340dcfac",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 56988,
+      "launchedAt": "2026-10-21T17:34:55.574Z",
+      "completedAt": "2026-10-21T17:36:04.466Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f"
+    },
+    "test": {
+      "pid": 7592,
+      "launchedAt": "2026-10-21T17:36:07.415Z",
+      "completedAt": "2026-10-21T17:37:25.471Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "83458598348776c381e7f2ec3ede0dc33fdd31c35774a5057ca0ec1c186ac387"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 78.01,
+    "projectFiles": 2752,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "81e19c3951c8fb8c81f1ee98d2e8f7f99c2a40fae1ac11a58cb749b57035279b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-build.log": "ba7fc90ed026f8bd0144c4356299fcceefeb250242b83333465d546cd106534f",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-build-terminal.json": "9222e638f6d8eab43909f310f6535634bbfc9aa483afddf607bc78f135b77201",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-ctest.log": "83458598348776c381e7f2ec3ede0dc33fdd31c35774a5057ca0ec1c186ac387",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-ctest-terminal.json": "f7d9949c897dc1546c9fee51613ba422fb384e4fa317005ae9edd7f990db0f0f",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-LastTest.log": "718728e822b7ec8d2949e4d6be9c6184d7f314b95ca678f4aaa62c6a2be061d2",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-gate.json": "d50851c90d9e48033f987c94504325fa457d830cc2cdab1bf789297fcb841649",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-source.patch": "c62824a7ce568e136f7b84717ac197799be126abffb16c16dd72e097340dcfac",
+    "doc/evidence/process-worker-graph-nested-cancellation-20261021-binaries-before-test.json": "24008df666089d793656b7cf8ed05882bb3bd68319ee035d893d0ddfbbfded2b"
+  },
+  "verified": [
+    "Actual GraphService cancellation follows observation of both in-flight native model gateway calls from two distinct xmind leaf processes beneath nested graph controllers",
+    "Controlled gateway waits for real cancellation tokens and produces no synthetic response; exactly one count per child and two shared charged model calls remain",
+    "Root, both controllers and both leaf histories remain user-only; no final answer or controller join is fabricated and no worker/model call is retried",
+    "Two exact leaf process leases retire once as cancelled with ultimate-root and child identities; service becomes healthy/idle after drain and nested graph retirement",
+    "Two typed leaf inference groups are interrupted and the ultimate measured segment closes; controllers own no independent budget and keep exact derived paths",
+    "Flat/nested success, previous parent/context/coding scopes, 219 controlled HTTP requests and 84 forged SDK IPC receipts remain covered by the passing gate",
+    "Nine focused contracts pass in 78.01 seconds with complete frozen inputs and 133-native-binary sets"
+  ],
+  "limitations": [
+    "Graph gateway responses/counts and cancellation are controlled native callbacks, not a new live-provider or graph HTTP test",
+    "Server/default wiring, graph coding/no-context and provider-failure cases remain unfinished",
+    "Earlier worker access violation remains unresolved; this passing gate does not establish a fix",
+    "Planning, parent compaction/overflow, full current regression and updated installed/rendered/live-provider acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}
