@@ -1,0 +1,228 @@
+{
+  "recordedAt": "2026-10-21T19:44:08.047Z",
+  "version": "0.1.60",
+  "scope": "One fresh browser-originated real Claude coding task, UI edit approval, command output, reload and source preview in hidden IAB at 1280x720 through installed native SDK IPC worker.",
+  "session": "441d0345052dc6a0c23572fba68ee65a",
+  "root": "70066d5761dfca477a33ee38ca15c2b4",
+  "taskSubmissions": 1,
+  "completed": true,
+  "backend": {
+    "pid": 43244,
+    "birth": "2026-10-21T19:41:13.7264510Z",
+    "filetime": "134370852737264510",
+    "image": "C:\\xMindNativeValidation\\browser60-ipc-live-coding-20261021\\profiles\\34f0eda017943714886644c293b6447ae408d73a7d62a76bd0bff403c7355e13\\runtime-6119f8dc29ea576557780752ed7840675663d22a5da4c62469d15ac69dc1a21c\\xmind.exe",
+    "name": "xmind.exe"
+  },
+  "agentExecution": "process-code",
+  "worker": {
+    "creation_time": "134370853357186690",
+    "executable_identity": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:bad62200000002000000000000000000:5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "generation": "6cee3912a82507fdfecb716d702ca039",
+    "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+    "pid": 16932,
+    "provider_identity": {
+      "model_id": "claude-sonnet-4-6",
+      "profile_id": "claude",
+      "profile_revision": 2,
+      "provider": "anthropic",
+      "route_id": "anthropic.messages",
+      "wire": "anthropic-messages"
+    },
+    "root_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+    "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000",
+    "workspace_revision": 1,
+    "state": "retired",
+    "retirementReason": "completed",
+    "physicalExitObserved": true,
+    "exitCodeNotCaptured": true
+  },
+  "historyMessages": 13,
+  "modelCharges": 6,
+  "toolCalls": [
+    {
+      "arguments": "{\"path\": \"sum-squares.mjs\"}",
+      "id": "toolu_01UarnH2dEXQmtKAMax4ibZz",
+      "name": "read_file"
+    },
+    {
+      "arguments": "{\"path\": \"sum-squares.test.mjs\"}",
+      "id": "toolu_018Dc5CezjFPrNKCxdc2uTST",
+      "name": "read_file"
+    },
+    {
+      "arguments": "{\"path\": \"sum-squares.mjs\", \"old_text\": \"  return values.reduce((total, value) => total + value, 0);\", \"new_text\": \"  return values.reduce((total, value) => total + value * value, 0);\"}",
+      "id": "toolu_01G6PGthLBwP1ZmuAXtxDaDJ",
+      "name": "edit_file"
+    },
+    {
+      "arguments": "{\"profile\": \"powershell\", \"arguments\": \"node --test sum-squares.test.mjs\", \"workdir\": \".\", \"background\": false, \"timeout_ms\": 30000}",
+      "id": "toolu_01GEm3QGHNiieDHwGCzHPaSJ",
+      "name": "run_process"
+    },
+    {
+      "arguments": "{\"profile\": \"powershell\", \"arguments\": [\"node --test sum-squares.test.mjs\"], \"workdir\": \".\", \"background\": true, \"timeout_ms\": 30000}",
+      "id": "toolu_01SivQmvcvGGbvxKA9BV9Yk1",
+      "name": "run_process"
+    },
+    {
+      "arguments": "{\"job_id\": \"fe7f45341a037696db5e33643e241e31\", \"timeout_ms\": 30000}",
+      "id": "toolu_01PmD9ZdFw16vPygQxyvGg6r",
+      "name": "wait_process"
+    }
+  ],
+  "invalidProcessCallsWithoutOperations": 1,
+  "actualProcessExecutions": 1,
+  "waitsOnSameProcess": 1,
+  "operations": [
+    {
+      "arguments_json": "{\"after_content\":\"export function sumSquares(values) {\\n  return values.reduce((total, value) => total + value * value, 0);\\n}\\n\",\"after_sha256\":\"57059628969e8f943760f0183a5a752e2e513fd0dc616130800492082b08528f\",\"before_content\":\"export function sumSquares(values) {\\n  return values.reduce((total, value) => total + value, 0);\\n}\\n\",\"before_sha256\":\"9564c8ffb1559b957b77ee8109213a2afc33635ee45591585dbf1553ca49f5b8\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:f7ca2200000002000000000000000000\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"path\":\"sum-squares.mjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "decision_actor": "local-owner",
+      "expires_unix_ms": 1792612340730,
+      "id": "35c486a109c97bfbfb02640f7f3b3870",
+      "resources": [],
+      "result_json": "{\"after_sha256\":\"57059628969e8f943760f0183a5a752e2e513fd0dc616130800492082b08528f\",\"before_sha256\":\"9564c8ffb1559b957b77ee8109213a2afc33635ee45591585dbf1553ca49f5b8\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:f7ca2200000002000000000000000000\",\"path\":\"sum-squares.mjs\",\"size\":107,\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\"}",
+      "run_id": "70066d5761dfca477a33ee38ca15c2b4",
+      "state": "succeeded",
+      "tool": "replace_file",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000"
+    },
+    {
+      "arguments_json": "{\"arguments\":[\"-NoLogo\",\"-NoProfile\",\"-NonInteractive\",\"-Command\",\"node --test sum-squares.test.mjs\"],\"background\":true,\"directory_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"environment\":[],\"executable\":\"C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:17c72300000001000000000000000000:60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"powershell\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"timeout_ms\":30000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "decision_actor": "trusted-process-profile:powershell",
+      "expires_unix_ms": 1792612363483,
+      "id": "fe7f45341a037696db5e33643e241e31",
+      "resources": [
+        "process-profile:powershell"
+      ],
+      "result_json": "{\"elapsed_ms\":315,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"fe7f45341a037696db5e33643e241e31\",\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"output_artifact\":{\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":596},\"pid\":35304,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":596,\"data\":\"TAP version 13\\n# Subtest: empty input is zero\\nok 1 - empty input is zero\\n  ---\\n  duration_ms: 0.5531\\n  type: 'test'\\n  ...\\n# Subtest: positive values are squared\\nok 2 - positive values are squared\\n  ---\\n  duration_ms: 0.1029\\n  type: 'test'\\n  ...\\n# Subtest: negative values are squared\\nok 3 - negative values are squared\\n  ---\\n  duration_ms: 0.0673\\n  type: 'test'\\n  ...\\n# Subtest: fractional values are squared\\nok 4 - fractional values are squared\\n  ---\\n  duration_ms: 0.6281\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 63.6622\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":596},\"termination\":\"exited\",\"truncated\":false}",
+      "run_id": "70066d5761dfca477a33ee38ca15c2b4",
+      "state": "succeeded",
+      "tool": "run_process",
+      "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000"
+    }
+  ],
+  "baseline": {
+    "tests": 4,
+    "passed": 1,
+    "failed": 3
+  },
+  "after": {
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "exitCode": 0,
+    "processTreeRetired": true
+  },
+  "sourceBeforeSha256": "9564c8ffb1559b957b77ee8109213a2afc33635ee45591585dbf1553ca49f5b8",
+  "sourceAfterSha256": "57059628969e8f943760f0183a5a752e2e513fd0dc616130800492082b08528f",
+  "testSha256": "95a78c8adc098f4d65192705ece513a66b87bfe43998510c7bb76d4c387c31aa",
+  "testsUnchanged": true,
+  "canonicalToolReceiptsExact": true,
+  "assets": [
+    {
+      "path": "browser.css",
+      "sha256": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136"
+    },
+    {
+      "path": "browser.js",
+      "sha256": "974e58538a434630306c8a680b98b8a83f5b2b4b60b70e520ab12bab18f8f4f7"
+    },
+    {
+      "path": "chat.css",
+      "sha256": "d16ef30c1c451b91a8eb09218e8018c9443556fad0ed851312221de2f0933a5f"
+    },
+    {
+      "path": "chat.js",
+      "sha256": "729152a41b3dee2dcc9fc29d39d4c3ab6ad811cf443e3f8e7c790655079390b8"
+    },
+    {
+      "path": "client.js",
+      "sha256": "a29fc78cb5ab914dc95f88b30a520e08be33f1b16e59895c407a71474fd2956c"
+    },
+    {
+      "path": "index.html",
+      "sha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a"
+    },
+    {
+      "path": "licenses/dompurify-MPL.txt",
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    {
+      "path": "licenses/dompurify.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/marked.txt",
+      "sha256": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c"
+    },
+    {
+      "path": "licenses/xterm-addon-fit.txt",
+      "sha256": "e256f01188af527e4d06d21d06fbf785ae9c50d4b328bf03cbe0ba7f0aa4228f"
+    },
+    {
+      "path": "licenses/xterm.txt",
+      "sha256": "b569f629d00f2626a8100df2a1798210535621e42164dfd426a6fe5aac7b0ccd"
+    },
+    {
+      "path": "marked.js",
+      "sha256": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a"
+    },
+    {
+      "path": "patch-review.js",
+      "sha256": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb"
+    },
+    {
+      "path": "purify.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    },
+    {
+      "path": "terminal.js",
+      "sha256": "e1984d631692e1353c19853905a33679d75c3d2b425b4aaad102694bbcc72c09"
+    },
+    {
+      "path": "xterm-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527"
+    },
+    {
+      "path": "xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+    },
+    {
+      "path": "xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972"
+    }
+  ],
+  "priorOwnersPreserved": 10,
+  "priorPagesPreserved": 4,
+  "originalPrimaryCli59AndCli60HistoriesExact": true,
+  "settingsUnchanged": true,
+  "reloadRestoredAllMessages": true,
+  "renderedFooterVisibleWithSkillsExpanded": true,
+  "screenshot": "coding60-browser-ipc-live-coding-20261021.png",
+  "screenshotSha256": "587ab9a7a9e007c9f8b1932fb71fbfccf1552783a544940d8c54ec22117f79d2",
+  "providerRecovery": "Initial model discovery failed; Settings Fetch models succeeded using saved key before task submission.",
+  "limitations": [
+    "One malformed process argument request was rejected with no operations; corrected background command and wait reference one actual process.",
+    "Four declared tests verify the bounded fixture, not exhaustive algorithm correctness.",
+    "VS Code rendering, default IPC, worker planning, graph remote/callable and earlier native crash diagnosis remain unfinished."
+  ],
+  "cpythonExecuted": false,
+  "evidenceFiles": [
+    {
+      "path": "coding60-browser-ipc-live-coding-20261021-baseline.log",
+      "sha256": "f690700bc30da3cd84e54e610e2118200786519319ab8892815e16e32ae6f2d9"
+    },
+    {
+      "path": "coding60-browser-ipc-live-coding-20261021-ledger.json",
+      "sha256": "4183fa50028318a5219e6308159cde63a87846c6222501333d1eb0b7391b2374"
+    },
+    {
+      "path": "coding60-browser-ipc-live-coding-20261021-source.mjs",
+      "sha256": "57059628969e8f943760f0183a5a752e2e513fd0dc616130800492082b08528f"
+    },
+    {
+      "path": "coding60-browser-ipc-live-coding-20261021-tests.mjs",
+      "sha256": "95a78c8adc098f4d65192705ece513a66b87bfe43998510c7bb76d4c387c31aa"
+    }
+  ]
+}

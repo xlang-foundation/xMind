@@ -1,3 +1,27 @@
+## Installed60 fresh rendered browser coding through IPC — 2026-10-21
+
+A fresh hidden-browser task completes through installed60 actual xmind SDK IPC
+worker16932 (owner43244, origin60067). Session441d0345052dc6a0c23572fba68ee65a,
+root70066d5761dfca477a33ee38ca15c2b4: **NEVER replay**. The browser submits once,
+reviews and allows the one-line sumSquares fix, and renders the real command
+output: four tests pass, exit0, process tree retired, tests unchanged. One
+malformed process call creates no operation; the corrected background command
+and wait share one actual process operation. Six model charges and all durable
+file/process outputs match canonical tool receipts. Worker retirement and
+physical exit are observed; its exit code was not captured.
+
+Reload restores all13 messages and the Claude model. Source preview and expanded
+Skills render with the prompt and Send button visible at1280x720. All18 assets
+match installed60. Initial model discovery failed; Settings Fetch models recovered
+with the saved key before submission. Ten prior owners/four prior pages/settings
+and exact primary, CLI59 and CLI60 histories remain preserved.
+[Acceptance, command receipts and screenshot](evidence/coding60-browser-ipc-live-coding-20261021.json).
+
+This qualifies one fresh browser coding workflow. Updated VS Code rendering,
+default IPC and worker planning, graph remote/callable and native crash diagnosis
+remain unfinished. Persistent browser host72568/view58176 stay available at
+http://127.0.0.1:59129/ui/; older pages and backends are unchanged.
+
 ## Installed60 rendered browser restoration — 2026-10-21
 
 Hidden IAB at 1280x720 restores the completed CLI60 IPC session and all 13

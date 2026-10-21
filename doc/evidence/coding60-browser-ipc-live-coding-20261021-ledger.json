@@ -1,0 +1,118 @@
+{
+  "root": "70066d5761dfca477a33ee38ca15c2b4",
+  "implementation": "xlang3",
+  "leases": [
+    {
+      "retirement_reason": "completed",
+      "revision": 2,
+      "spec": {
+        "creation_time": "134370853357186690",
+        "executable_identity": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:bad62200000002000000000000000000:5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+        "generation": "6cee3912a82507fdfecb716d702ca039",
+        "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "pid": 16932,
+        "provider_identity": {
+          "model_id": "claude-sonnet-4-6",
+          "profile_id": "claude",
+          "profile_revision": 2,
+          "provider": "anthropic",
+          "route_id": "anthropic.messages",
+          "wire": "anthropic-messages"
+        },
+        "root_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000",
+        "workspace_revision": 1
+      },
+      "state": "retired",
+      "version": 1
+    }
+  ],
+  "process_claims": [
+    {
+      "actual_output_json": "{\"error\":{\"code\":\"invalid_tool_arguments\",\"message\":\"Backend process did not return an acknowledged command result; inspect native operation receipts before requesting another command\"}}",
+      "invocation": "{\"arguments_json\":\"{\\\"profile\\\": \\\"powershell\\\", \\\"arguments\\\": \\\"node --test sum-squares.test.mjs\\\", \\\"workdir\\\": \\\".\\\", \\\"background\\\": false, \\\"timeout_ms\\\": 30000}\",\"attempt_id\":\"3f52b5323aaccb791d2f6e9661426cf2\",\"call_id\":\"toolu_01GEm3QGHNiieDHwGCzHPaSJ\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"protocol_version\":1,\"run_id\":\"70066d5761dfca477a33ee38ca15c2b4\",\"tool_name\":\"run_process\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "model": {
+        "attempt_id": "3f52b5323aaccb791d2f6e9661426cf2",
+        "generation": "6cee3912a82507fdfecb716d702ca039",
+        "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "request_binding": "79789425da33c5abcc9c8685e57457ab526754316f09bc50f67de8d88b625c94",
+        "root_run_id": "70066d5761dfca477a33ee38ca15c2b4"
+      },
+      "operation_ids": [],
+      "output_binding": "44fc53759bc4bdaf55b0b8be283385e2ff882ff0bffa62bd73ab0c4ca74e4a07",
+      "state": "returned",
+      "success": false,
+      "version": 1
+    },
+    {
+      "actual_output_json": "{\"background\":true,\"job_id\":\"fe7f45341a037696db5e33643e241e31\",\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"persistent\":false,\"profile_id\":\"powershell\",\"state\":\"running\"}",
+      "invocation": "{\"arguments_json\":\"{\\\"profile\\\": \\\"powershell\\\", \\\"arguments\\\": [\\\"node --test sum-squares.test.mjs\\\"], \\\"workdir\\\": \\\".\\\", \\\"background\\\": true, \\\"timeout_ms\\\": 30000}\",\"attempt_id\":\"ab5627b0b086ebecef175d81be44a78a\",\"call_id\":\"toolu_01SivQmvcvGGbvxKA9BV9Yk1\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"protocol_version\":1,\"run_id\":\"70066d5761dfca477a33ee38ca15c2b4\",\"tool_name\":\"run_process\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "model": {
+        "attempt_id": "ab5627b0b086ebecef175d81be44a78a",
+        "generation": "6cee3912a82507fdfecb716d702ca039",
+        "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "request_binding": "c236b5154a6938b735864fca6ee71748d499d35a9a1b8c2d0f328a8d31fa981d",
+        "root_run_id": "70066d5761dfca477a33ee38ca15c2b4"
+      },
+      "operation_ids": [
+        "fe7f45341a037696db5e33643e241e31"
+      ],
+      "output_binding": "05e80df521d364274b07a502b35871c73fb6936a3b8dbc00a75c917cc7fd30fc",
+      "state": "returned",
+      "success": true,
+      "version": 1
+    },
+    {
+      "actual_output_json": "{\"job_id\":\"fe7f45341a037696db5e33643e241e31\",\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"result\":{\"elapsed_ms\":315,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"fe7f45341a037696db5e33643e241e31\",\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"output_artifact\":{\"operation_id\":\"fe7f45341a037696db5e33643e241e31\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":596},\"pid\":35304,\"process_tree_retired\":true,\"profile_id\":\"powershell\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":596,\"data\":\"TAP version 13\\n# Subtest: empty input is zero\\nok 1 - empty input is zero\\n  ---\\n  duration_ms: 0.5531\\n  type: 'test'\\n  ...\\n# Subtest: positive values are squared\\nok 2 - positive values are squared\\n  ---\\n  duration_ms: 0.1029\\n  type: 'test'\\n  ...\\n# Subtest: negative values are squared\\nok 3 - negative values are squared\\n  ---\\n  duration_ms: 0.0673\\n  type: 'test'\\n  ...\\n# Subtest: fractional values are squared\\nok 4 - fractional values are squared\\n  ---\\n  duration_ms: 0.6281\\n  type: 'test'\\n  ...\\n1..4\\n# tests 4\\n# suites 0\\n# pass 4\\n# fail 0\\n# cancelled 0\\n# skipped 0\\n# todo 0\\n# duration_ms 63.6622\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":596},\"termination\":\"exited\",\"truncated\":false},\"state\":\"succeeded\"}",
+      "invocation": "{\"arguments_json\":\"{\\\"job_id\\\": \\\"fe7f45341a037696db5e33643e241e31\\\", \\\"timeout_ms\\\": 30000}\",\"attempt_id\":\"bae54dabe914ee4c3ad5dd7fc3c88e73\",\"call_id\":\"toolu_01PmD9ZdFw16vPygQxyvGg6r\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"protocol_version\":1,\"run_id\":\"70066d5761dfca477a33ee38ca15c2b4\",\"tool_name\":\"wait_process\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "model": {
+        "attempt_id": "bae54dabe914ee4c3ad5dd7fc3c88e73",
+        "generation": "6cee3912a82507fdfecb716d702ca039",
+        "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "request_binding": "0fe5fdb785d636babc1bfbaf3d46f2fd618908c1d3e2e2496144275957c8ac29",
+        "root_run_id": "70066d5761dfca477a33ee38ca15c2b4"
+      },
+      "operation_ids": [
+        "fe7f45341a037696db5e33643e241e31"
+      ],
+      "output_binding": "d1a594ef57873ce883ddde67c54f6702da7e1d36e5aef6e6713aefd2f4deb619",
+      "state": "returned",
+      "success": true,
+      "version": 1
+    }
+  ],
+  "file_claims": [
+    {
+      "actual_output_json": "{\"content_sha256\":\"57059628969e8f943760f0183a5a752e2e513fd0dc616130800492082b08528f\",\"file_id\":\"windows-local-file-v1:fec0809ac0805ab3:f7ca2200000002000000000000000000\",\"operation_id\":\"35c486a109c97bfbfb02640f7f3b3870\",\"path\":\"sum-squares.mjs\",\"size\":107}",
+      "invocation": "{\"arguments_json\":\"{\\\"path\\\": \\\"sum-squares.mjs\\\", \\\"old_text\\\": \\\"  return values.reduce((total, value) => total + value, 0);\\\", \\\"new_text\\\": \\\"  return values.reduce((total, value) => total + value * value, 0);\\\"}\",\"attempt_id\":\"4da3426900424b9984b3c3825a25c338\",\"call_id\":\"toolu_01G6PGthLBwP1ZmuAXtxDaDJ\",\"folder_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"protocol_version\":1,\"run_id\":\"70066d5761dfca477a33ee38ca15c2b4\",\"tool_name\":\"edit_file\",\"workspace_id\":\"windows-local-file-v1:fec0809ac0805ab3:f6ca2200000003000000000000000000\",\"workspace_revision\":1}",
+      "model": {
+        "attempt_id": "4da3426900424b9984b3c3825a25c338",
+        "generation": "6cee3912a82507fdfecb716d702ca039",
+        "owner_run_id": "70066d5761dfca477a33ee38ca15c2b4",
+        "request_binding": "02de7a817f191c6c6f1c007e17db6eb5b3c463fcbc01a1bc9bb3f3f41be96b60",
+        "root_run_id": "70066d5761dfca477a33ee38ca15c2b4"
+      },
+      "operation_ids": [
+        "35c486a109c97bfbfb02640f7f3b3870"
+      ],
+      "output_binding": "2421792510cd69ec89b596aa0a45f4d9b8099fbce768daca30a0285905eb7fbb",
+      "state": "returned",
+      "success": true,
+      "version": 1
+    }
+  ],
+  "budget": [
+    [
+      6,
+      0,
+      "native.delegation"
+    ]
+  ],
+  "reservations": [
+    [
+      "parent",
+      "finished",
+      6
+    ]
+  ]
+}
