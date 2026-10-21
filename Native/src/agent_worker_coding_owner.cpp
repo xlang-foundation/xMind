@@ -36,7 +36,7 @@ struct AgentWorkerCodingOwner::Impl {
         }
         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),std::move(model_policy),std::move(gateway),deadline,cancel);
         native_journal=std::make_unique<AgentWorkerJournalHost>(store,context.files(),deadline,cancel,hooks);
-        native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get());
+        native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get(),&context);
         model_rpc=bind_agent_worker_model_rpc(*model,scope);read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
         file_rpc=context.bind_files(scope);process_rpc=context.bind_processes(scope);remote_rpc=context.bind_remotes(scope);callable_rpc=context.bind_callables(scope);journal_rpc=bind_agent_worker_workspace_journal_rpc(store,context.files(),scope,deadline,cancel,std::move(hooks));
     }
@@ -46,7 +46,8 @@ AgentWorkerCodingOwner::AgentWorkerCodingOwner(PersistenceService& store,AgentWo
     std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner)
     :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner))){}
 AgentWorkerCodingOwner::~AgentWorkerCodingOwner()=default;
-NativeWorkerModelAccess AgentWorkerCodingOwner::native_model_access()const{impl_->native_model_required=true;impl_->model_rpc={};impl_->journal_rpc={};return impl_->native_model->access();}
+bool AgentWorkerCodingOwner::outcome_unrecorded()const noexcept{return impl_->native_model->outcome_unrecorded();}
+NativeWorkerModelAccess AgentWorkerCodingOwner::native_model_access()const{impl_->native_model_required=true;impl_->model_rpc={};impl_->journal_rpc={};impl_->read_rpc={};return impl_->native_model->access();}
 std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
     if(method.starts_with("model.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->model_rpc(method,payload,std::move(sink),cancel);}
     if(method.starts_with("journal.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->journal_rpc(method,payload,std::move(sink),cancel);}
@@ -54,6 +55,7 @@ std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std
     if(method.starts_with("remote."))return impl_->remote_rpc(method,payload,std::move(sink),cancel);
     if(method.starts_with("process."))return impl_->process_rpc(method,payload,std::move(sink),cancel);
     if(method.starts_with("file."))return impl_->file_rpc(method,payload,std::move(sink),cancel);
+    if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");
     return impl_->read_rpc(method,payload,std::move(sink),cancel);
 }
 }

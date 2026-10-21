@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_read_rpc.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/agent_permissions.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -31,6 +32,7 @@ AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost& host,const A
     };
 }
 AgentReadToolResult AgentWorkerReadClient::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){
+    if(auto native=peer_.native_model())return native->read_invoke(call,cancel);
     try{const auto bytes=peer_.call("read.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
         if(value.size()!=2||!value.at("success").is_boolean()||!value.at("output_json").is_string())throw ModelProtocolError("Invalid worker read result");return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}
     catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker read RPC cancelled");}

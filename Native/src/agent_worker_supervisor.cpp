@@ -110,7 +110,7 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_terminal(RunState ou
     return {impl_->store.terminate_agent_worker(impl_->lease,outcome,reason).get(),exit};
 }
 const AgentWorkerLeaseSpec& AgentWorkerSupervisor::lease()const noexcept{return impl_->lease;}
-bool AgentWorkerSupervisor::outcome_unrecorded()const noexcept{return impl_->outcome_unrecorded.load();}
+bool AgentWorkerSupervisor::outcome_unrecorded()const noexcept{return impl_->outcome_unrecorded.load()||(impl_->owner&&impl_->owner->outcome_unrecorded())||(impl_->coding_owner&&impl_->coding_owner->outcome_unrecorded());}
 bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->alive();}
 bool AgentWorkerSupervisor::admitted()const{std::lock_guard lock(impl_->mutex);return impl_->lease_admitted;}
 std::uint32_t AgentWorkerSupervisor::drain_physical(AgentWorkerChannel::Deadline deadline){

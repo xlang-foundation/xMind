@@ -17,6 +17,7 @@ public:
         AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},std::function<void(AgentWorkerJournalReadKind,std::stop_token)> journal_read={});
     ~AgentWorkerReadOwner();
     NativeWorkerModelAccess native_model_access()const;
+    bool outcome_unrecorded()const noexcept;
     AgentWorkerReadOwner(const AgentWorkerReadOwner&)=delete;
     AgentWorkerReadOwner& operator=(const AgentWorkerReadOwner&)=delete;
     std::string dispatch(const std::string& method,const std::string& payload,

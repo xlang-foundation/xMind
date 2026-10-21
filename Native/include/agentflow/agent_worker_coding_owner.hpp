@@ -11,6 +11,7 @@ public:
         std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
     ~AgentWorkerCodingOwner();
     NativeWorkerModelAccess native_model_access()const;
+    bool outcome_unrecorded()const noexcept;
     std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
 private:
     struct Impl;std::unique_ptr<Impl> impl_;

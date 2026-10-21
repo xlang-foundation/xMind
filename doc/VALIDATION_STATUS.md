@@ -1,3 +1,26 @@
+## Native read SDK method checkpoint — 2026-10-21
+
+Production workers call Reads().Invoke using ordinary xlang3 SDK values and
+the existing operation object. Actual backend contexts retain permissions,
+guidance, delegation and durable effects. Product owners discard old read
+packet handlers after native access; an explicit refusal probe verifies this.
+Explicit read/model OutcomeUnrecorded exceptions signal the supervisor through
+native state so lost effects stop for recovery without replay.
+
+The final frozen gate passes 18/18 focused checks in 131.39s. It verifies actual
+parent/child delegation, cancellation, permission denial, lost-result recovery,
+skill rollback, server workers and graph paths with synthetic providers. All
+136 native binary hashes and the complete input sets remained unchanged.
+
+Three earlier failed gates are preserved. The last hit the unchanged 60-second
+production fixture limit after its final owned-drain assertion. The passing
+diagnostic gate uses the identical product executable (d8614cf9) and adds only
+test exit markers/refusal coverage; this is timing variability, not a timeout
+root-cause fix. Persistence close and workspace removal both returned in the
+passing run. The previous intermittent SDK crash remains undiagnosed. Nothing
+installed; full current native qualification and product acceptance remain open.
+[Raw gates, snapshots and limitations](evidence/process-xmind-root-native-read-migration-20261021.json).
+
 ## Native SDK values and worker journal calls — 2026-10-21
 
 The IPC boundary follows Cantor's registered root/service classes and direct SDK
