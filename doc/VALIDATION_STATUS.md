@@ -1,3 +1,20 @@
+## Installed60 rendered browser restoration — 2026-10-21
+
+Hidden IAB at 1280x720 restores the completed CLI60 IPC session and all 13
+messages, including the recorded four passing tests. Reload restores the same
+completed root and Claude model. The corrected inclusiveRange source renders in
+the workspace preview; expanding Skills keeps the prompt, provider/model and Send
+button inside the viewport. All 18 bundled assets match installed60; all 13
+public static responses match their files. Five license files are disk-only.
+The exact CLI history, root status and managed profile remain unchanged, with
+zero additional task submissions.
+[Receipt and screenshot](evidence/coding60-browser-restore-20261021.json).
+
+This verifies rendering/restoration of CLI-originated work. Fresh browser-originated
+IPC coding, updated editor rendering, default IPC/planning, graph remote/callable
+and native crash diagnosis remain open. Browser host40848 and native view14072
+reuse owner48808; existing owners/pages are not replaced.
+
 ## Installed60 real CLI coding through xlang3 IPC — 2026-10-21
 
 A fresh installed60 managed `process-code` profile (owner48808, origin49919,
