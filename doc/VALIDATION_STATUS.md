@@ -1,3 +1,19 @@
+## Execution-generation worker factory hook — 2026-10-20
+
+ExecutionPlatform accepts a trusted backend root-executor factory and invokes it
+once with the resolved settings for a configured generation. A null result is
+rejected. ProviderProfileRuntime retains and forwards the hook to prepared
+generations. The four actual-child factory cases now execute through
+ExecutionPlatform and its shared AgentService, checking captured provider,
+credential and instruction revisions. The serial build and 54 focused contracts
+pass in 163.17 seconds with frozen sources and 133 native binary file sets
+unchanged. [Raw evidence](evidence/worker-platform-factory-focused-20261020.json).
+
+Injected worker recreation across provider-profile switches remains untested;
+existing profile defaults passed. Public placement selection and server entry
+configuration remain open. This adds no full-suite, installed, hosted,
+rendered-client or live-provider acceptance.
+
 ## Production ordinary read-worker factory — 2026-10-20
 
 `make_agent_worker_read_executor` captures backend settings, executable and

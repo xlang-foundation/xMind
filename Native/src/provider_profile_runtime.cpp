@@ -98,11 +98,12 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
 }
 struct ProviderProfileRuntime::Impl {
     PersistenceService& store;AgentSettings base;std::vector<ProviderProfileExecutionPolicy> policy;
+    AgentRootExecutorFactory root_executor_factory;
     std::size_t workers,capacity;ProviderProfiles profiles;ProviderProfileSnapshot state;
     std::shared_ptr<ExecutionPlatform> service;mutable std::mutex mutex;
     std::unique_ptr<WorkspaceTools> workspace_binding;std::string workspace_authority;
-    Impl(PersistenceService& persistence,AgentSettings settings,std::vector<ProviderProfileExecutionPolicy> allowed,std::size_t count,std::size_t limit)
-        :store(persistence),base(std::move(settings)),policy(std::move(allowed)),workers(count),capacity(limit),profiles(store,routes(policy)){
+    Impl(PersistenceService& persistence,AgentSettings settings,std::vector<ProviderProfileExecutionPolicy> allowed,std::size_t count,std::size_t limit,AgentRootExecutorFactory factory)
+        :store(persistence),base(std::move(settings)),policy(std::move(allowed)),root_executor_factory(std::move(factory)),workers(count),capacity(limit),profiles(store,routes(policy)){
         if(count<1||count>16||limit<1||limit>4096)throw std::invalid_argument("Invalid provider execution capacity");
         if(base.workspace){workspace_binding=std::make_unique<WorkspaceTools>(*base.workspace);base.workspace=workspace_binding->root_path();workspace_authority=workspace_nonce();}
         // A workspace-backed Agent can choose the bounded native planning
@@ -138,7 +139,7 @@ struct ProviderProfileRuntime::Impl {
         if(found==policy.end())throw std::invalid_argument("Provider execution route is not allowed");return *found;
     }
     std::unique_ptr<ExecutionPlatform> platform(AgentSettings settings){
-        auto candidate=std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
+        auto candidate=std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity,root_executor_factory);
         const auto actual=candidate->execution_workspace();
         if(workspace_binding){
             if(!actual.configured||actual.workspace_id!=workspace_binding->identity())throw ToolAccessDenied("Prepared provider workspace differs from captured root");
@@ -227,8 +228,8 @@ struct ProviderProfileRuntime::Impl {
         return result;
     }
 };
-ProviderProfileRuntime::ProviderProfileRuntime(PersistenceService& store,AgentSettings base,std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers,std::size_t capacity)
-    :impl_(std::make_unique<Impl>(store,std::move(base),std::move(policy),workers,capacity)){}
+ProviderProfileRuntime::ProviderProfileRuntime(PersistenceService& store,AgentSettings base,std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers,std::size_t capacity,AgentRootExecutorFactory root_executor_factory)
+    :impl_(std::make_unique<Impl>(store,std::move(base),std::move(policy),workers,capacity,std::move(root_executor_factory))){}
 ProviderProfileRuntime::~ProviderProfileRuntime()=default;
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::configuration()const{std::lock_guard lock(impl_->mutex);return impl_->metadata();}
 std::vector<ProviderProfileRouteMetadata> ProviderProfileRuntime::profile_routes()const{

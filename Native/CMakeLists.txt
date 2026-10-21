@@ -911,7 +911,7 @@ if(BUILD_TESTING)
     add_executable(agentflow_agent_worker_ledger_contract tests/agent_worker_ledger_contract.cpp)
     add_executable(agentflow_agent_worker_model_rpc_contract tests/agent_worker_model_rpc_contract.cpp)
     target_include_directories(agentflow_agent_worker_model_rpc_contract PRIVATE third_party)
-    target_link_libraries(agentflow_agent_worker_model_rpc_contract PRIVATE agentflow_worker_runner)
+    target_link_libraries(agentflow_agent_worker_model_rpc_contract PRIVATE agentflow_worker_runner agentflow_runtime)
     add_dependencies(agentflow_agent_worker_model_rpc_contract xmind)
     add_custom_command(TARGET agentflow_agent_worker_model_rpc_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_model_rpc_contract>")

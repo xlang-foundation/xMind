@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-21T01:21:42.884Z",
+  "gate": {
+    "recordedAt": "2026-10-21T01:21:33.107Z",
+    "sourceParent": "51e503ecc128d8479a6b1ef7605aebb1cf77d1f8",
+    "sourcePatchSha256": "a1625a9c1f44c830b7acceaeda2504551df1f1481518c91523958a494a0f6a4c",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 59448,
+      "launchedAt": "2026-10-21T01:15:23.166Z",
+      "completedAt": "2026-10-21T01:18:44.649Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "481bf00b7deebd15e38cbc608cc9050c3ab85b7afbda01a1185fdedf3912452a"
+    },
+    "test": {
+      "pid": 41272,
+      "launchedAt": "2026-10-21T01:18:47.398Z",
+      "completedAt": "2026-10-21T01:21:30.611Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "08e219e8d53e6b46885cb56bbb409dc8268a239c6d632f79a2b8f39f1aa10d0e"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 163.17,
+    "projectFiles": 2696,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5ca732218f831c21cce68f999334b014679dce7efcdce93d42cc9770b697a3de",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-platform-factory-focused-20261020-build.log": "481bf00b7deebd15e38cbc608cc9050c3ab85b7afbda01a1185fdedf3912452a",
+    "doc/evidence/worker-platform-factory-focused-20261020-build-terminal.json": "293957f21e0d3c640ec4412bc2e34451eae7e23f495cc028a1ad086f4fbcb937",
+    "doc/evidence/worker-platform-factory-focused-20261020-ctest.log": "08e219e8d53e6b46885cb56bbb409dc8268a239c6d632f79a2b8f39f1aa10d0e",
+    "doc/evidence/worker-platform-factory-focused-20261020-ctest-terminal.json": "d2d6f7a3cb5920a1cbd8ce5d02ae71b2fe1207482976d489d7478d2922cb29b3",
+    "doc/evidence/worker-platform-factory-focused-20261020-LastTest.log": "f012469f6501bae56c68eba4a23ffeb95759f4345337daf817f9a58ba46cc627",
+    "doc/evidence/worker-platform-factory-focused-20261020-test-inventory.json": "0d9db7c8801c8891348d92cd3aac078a7fe2b858cdc2889e360152faaa25ae45",
+    "doc/evidence/worker-platform-factory-focused-20261020-gate.json": "4b4399828518ee9614da48fe2b7502aebce9308f63f58bf04aed1e9de424a50e"
+  },
+  "scope": "Trusted execution-generation factory construction through ExecutionPlatform",
+  "verified": [
+    "ExecutionPlatform constructs its optional root executor from the actual resolved generation settings and persistence owner",
+    "A configured factory returning null is rejected instead of silently falling back",
+    "Four actual product child cases now pass through ExecutionPlatform and its shared AgentService: empty tools, primary read, inherited denial, attached read",
+    "Fixture checks factory is invoked once per configured platform and receives the captured credential reference, provider profile revision and instruction revision",
+    "ProviderProfileRuntime retains and forwards the factory when preparing execution generations",
+    "54 focused native contracts including existing provider-profile defaults pass with frozen sources and binary sets unchanged"
+  ],
+  "limitations": [
+    "Provider-profile switching with an injected worker factory has not yet been separately exercised; forwarding is compiled but not claimed as dynamic worker-switch acceptance",
+    "No public placement selection or server entry-point configuration yet",
+    "Graph worker placement and broader worker capabilities remain unfinished",
+    "No new full-suite, installed, hosted, rendered-client or live-provider acceptance"
+  ],
+  "passed": true
+}

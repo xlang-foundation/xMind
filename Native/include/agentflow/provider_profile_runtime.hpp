@@ -26,7 +26,7 @@ struct ProviderProfileExecutionPolicy {
 class ProviderProfileRuntime final : public RunExecutor,public GraphExecution,public ProviderProfileSetup {
 public:
     ProviderProfileRuntime(PersistenceService& store,AgentSettings base,
-        std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers=2,std::size_t capacity=128);
+        std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers=2,std::size_t capacity=128,AgentRootExecutorFactory root_executor_factory={});
     ~ProviderProfileRuntime();
     ProviderProfileRuntimeMetadata configuration() const override;
     std::vector<ProviderProfileRouteMetadata> profile_routes() const override;

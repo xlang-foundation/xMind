@@ -2,14 +2,16 @@
 #include "agentflow/agent_service.hpp"
 #include "agentflow/graph_service.hpp"
 #include <map>
+#include <functional>
 #include <mutex>
 namespace agentflow {
+using AgentRootExecutorFactory=std::function<std::shared_ptr<AgentRootExecutor>(PersistenceService&,const AgentSettings&)>;
 // A configured backend execution generation. Provider changes are permitted
 // only when both single-agent and graph ownership have become idle.
 class ExecutionPlatform final : public RunExecutor,public GraphExecution {
 public:
     ExecutionPlatform(PersistenceService& store,AgentSettings settings,
-        std::size_t workers=2,std::size_t capacity=128);
+        std::size_t workers=2,std::size_t capacity=128,AgentRootExecutorFactory root_executor_factory={});
     ~ExecutionPlatform();
     Run submit(std::string id,std::string session,std::string prompt) override;
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;

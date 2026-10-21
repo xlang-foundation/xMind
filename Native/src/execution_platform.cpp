@@ -22,7 +22,7 @@ struct ExecutionPlatform::LanguageServerWorkspace {
     WorkspaceTools workspace;
     std::unique_ptr<LanguageServerToolRegistry> registry;
 };
-ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
+ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity,AgentRootExecutorFactory root_executor_factory):store_(store) {
     if(workers<1||workers>16||capacity<1||capacity>4096)throw std::invalid_argument("Invalid shared execution capacity");
     workspace_membership_snapshot_=settings.workspace_membership_snapshot;
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
@@ -40,7 +40,11 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
     const auto graph_workers=std::min<std::size_t>(workers,8);
     root_admission_=std::make_shared<RootAdmissionPool>(capacity+(has_agent_executor?workers:0)+graph_workers,
         has_agent_executor?workers:graph_workers,true);
-    if(has_agent_executor)agents_=std::make_unique<AgentService>(store,settings,workers,capacity,root_admission_);
+    if(has_agent_executor){
+        auto root_executor=root_executor_factory?root_executor_factory(store,settings):std::shared_ptr<AgentRootExecutor>{};
+        if(root_executor_factory&&!root_executor)throw std::invalid_argument("Configured agent executor factory returned no owner");
+        agents_=std::make_unique<AgentService>(store,settings,workers,capacity,root_admission_,std::move(root_executor));
+    }
     graphs_=std::make_unique<GraphService>(store,std::move(settings),graph_workers,capacity,2,root_admission_);
 }
 ExecutionPlatform::~ExecutionPlatform()=default;
