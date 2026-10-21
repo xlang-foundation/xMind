@@ -1,4 +1,21 @@
-## Complete current-source native qualification — 2026-10-20
+## File-effect authority at mutation — 2026-10-20
+
+The backend rechecks private owner authority after approval, immediately before
+each file mutation, using the admitted invocation and claimed native operation ID.
+Revoked create, edit, restore and patch operations apply no pending change; a
+two-file patch retains its first actual success when authority blocks the second.
+Restore now reports success only when its coordinator succeeds.
+
+The serial Release build and **61/61 focused contracts pass in 171.17 seconds**,
+with all source, SDK, library, dependency and binary file sets unchanged.
+[Exact scope and raw evidence](evidence/file-effect-owner-authority-corrected-20261020.json).
+The initial failed gate and diagnostic preserve their original logs and patches;
+the new fixture used incorrect edit argument names, corrected to the native schema.
+This backend extension does not yet provide worker file RPC or durable effect
+claims. The complete 161-test result below qualifies the earlier committed source;
+no new full-suite, installed, rendered or live-provider acceptance is claimed.
+
+## Complete earlier-source native qualification — 2026-10-20
 
 Committed source `20ad8c8d5f85efe33c9300497fe1e62a1bef9294` passes the complete
 actual CTest inventory: **161/161 in 1069.78 seconds**. Serial Release build and

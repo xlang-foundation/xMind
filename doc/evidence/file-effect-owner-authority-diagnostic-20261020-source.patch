@@ -1,0 +1,219 @@
+diff --git a/Native/include/agentflow/agent_file_tool_host.hpp b/Native/include/agentflow/agent_file_tool_host.hpp
+index a7b32f26..9a7dfd08 100644
+--- a/Native/include/agentflow/agent_file_tool_host.hpp
++++ b/Native/include/agentflow/agent_file_tool_host.hpp
+@@ -41,6 +41,11 @@ struct AgentFileToolOwnerContext {
+     std::vector<std::vector<AgentPermissionRule>> permission_layers;
+     std::vector<std::string> allowed_tools;
+     std::chrono::milliseconds approval_timeout{600000};
++    // Revalidate the retained owner immediately before each approved effect.
++    // A multi-file invocation may call this more than once; it cannot replay
++    // effects or replace the caller's admitted identity.
++    // The operation ID is supplied by the native executor, never by the model.
++    std::function<void(const AgentFileToolInvocation&,const std::string&,std::stop_token)> before_effect;
+ };
+ // Local owner adapter only. This is not an authenticated IPC endpoint, durable
+ // RPC deduplicator, process supervisor or an out-of-process AgentRunner.
+diff --git a/Native/include/agentflow/instruction_precondition.hpp b/Native/include/agentflow/instruction_precondition.hpp
+index 9d38c1ff..f8888b2e 100644
+--- a/Native/include/agentflow/instruction_precondition.hpp
++++ b/Native/include/agentflow/instruction_precondition.hpp
+@@ -9,6 +9,10 @@ namespace agentflow {
+ struct InstructionPrecondition {
+     std::string metadata_json;
+     std::function<void(std::stop_token)> verify;
++    // Backend-owned live authority, separate from repository metadata. It is
++    // never serialized into approval payloads or supplied by a tool request.
++    // The executor supplies its actual claimed operation ID before mutation.
++    std::function<void(const std::string&,std::stop_token)> before_effect;
+     void validate() const {
+         const bool has_metadata=!metadata_json.empty();
+         if(has_metadata!=static_cast<bool>(verify) || metadata_json.size()>24576)throw std::invalid_argument("Invalid repository instruction precondition");
+diff --git a/Native/include/agentflow/patch_tool.hpp b/Native/include/agentflow/patch_tool.hpp
+index 27832a39..e8e1bf62 100644
+--- a/Native/include/agentflow/patch_tool.hpp
++++ b/Native/include/agentflow/patch_tool.hpp
+@@ -12,9 +12,9 @@ struct PreparedPatch {
+ class PatchTool {
+ public:
+     PatchTool(PersistenceService& store,WorkspaceTools& workspace,RepositoryInstructionContext& context,
+-        std::string owner_workspace={},std::string folder_id={},std::int64_t workspace_revision=1,bool primary_folder=true)
++        std::string owner_workspace={},std::string folder_id={},std::int64_t workspace_revision=1,bool primary_folder=true,std::function<void(const std::string&,std::stop_token)> before_effect={})
+         :store_(store),workspace_(workspace),context_(context),owner_workspace_(owner_workspace.empty()?workspace.identity():std::move(owner_workspace)),
+-         folder_id_(folder_id.empty()?workspace.identity():std::move(folder_id)),workspace_revision_(workspace_revision),primary_folder_(primary_folder){}
++         folder_id_(folder_id.empty()?workspace.identity():std::move(folder_id)),workspace_revision_(workspace_revision),primary_folder_(primary_folder),before_effect_(std::move(before_effect)){}
+     static ModelToolDefinition definition();
+     std::optional<PreparedPatch> prepare(const std::string& arguments_json,std::stop_token cancel={});
+     std::string execute(std::string patch_id,std::string run_id,PreparedPatch prepared,std::int64_t expiry,std::stop_token cancel={});
+@@ -23,5 +23,6 @@ private:
+     std::optional<InstructionPrecondition> guidance(const std::vector<std::string>& directories,std::stop_token cancel);
+     PersistenceService& store_;WorkspaceTools& workspace_;RepositoryInstructionContext& context_;
+     std::string owner_workspace_,folder_id_;std::int64_t workspace_revision_=1;bool primary_folder_=true;
++    std::function<void(const std::string&,std::stop_token)> before_effect_;
+ };
+ }
+diff --git a/Native/src/agent_file_tool_host.cpp b/Native/src/agent_file_tool_host.cpp
+index 5fdd1eb0..e577a80a 100644
+--- a/Native/src/agent_file_tool_host.cpp
++++ b/Native/src/agent_file_tool_host.cpp
+@@ -64,7 +64,7 @@ public:
+             auto scope=args["path"].get<std::string>();
+             if(call.tool_name=="create_file"&&args.contains("create_parents")&&!args["create_parents"].is_boolean())throw std::invalid_argument("Invalid creation parent option");
+             scope=call.tool_name=="create_file"&&args.value("create_parents",false)?workspace->creation_directory(scope,cancel):RepositoryInstructionContext::file_directory(scope);
+-            ready=ready&&context->ready(scope,cancel);if(ready)guidance=context->precondition(scope);
++            ready=ready&&context->ready(scope,cancel);if(ready)guidance=bind_authority(context->precondition(scope),call);
+         }
+         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
+         if(call.tool_name=="apply_patch")return patch(call,args,index,*workspace,*context,ready,expiry,cancel);
+@@ -75,12 +75,19 @@ public:
+         const auto make_guidance=[&](const std::vector<std::string>& paths,std::stop_token token){
+             std::vector<InstructionPrecondition> conditions;
+             for(const auto& path:paths){const auto directory=workspace->creation_directory(path,token);if(!context->ready(directory,token))throw ToolGuidanceChanged("Updated repository guidance must reach the model before restoring this change");conditions.push_back(context->precondition(directory));}
+-            if(conditions.size()==1)return conditions.front();Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
+-            InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)if(condition.verify)condition.verify(token);}};combined.validate();return combined;
++            if(conditions.size()==1)return bind_authority(conditions.front(),call);Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
++            InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)if(condition.verify)condition.verify(token);}};combined.validate();return bind_authority(std::move(combined),call);
+         };
+         return {true,RestoreExecutor(store_,*workspace,workspace_id_,call.folder_id,revision_).invoke(operation_id(),owner_.run_id,call.arguments_json,expiry,cancel,path_authorizer,make_guidance)};
+     }
+ private:
++    std::function<void(const std::string&,std::stop_token)> dispatch_authority(const AgentFileToolInvocation& call)const{
++        if(!owner_.before_effect)return {};
++        return [check=owner_.before_effect,call](const std::string& operation,std::stop_token cancel){check(call,operation,cancel);};
++    }
++    InstructionPrecondition bind_authority(InstructionPrecondition condition,const AgentFileToolInvocation& call)const{
++        condition.before_effect=dispatch_authority(call);return condition;
++    }
+     void authorize(const std::string& tool,const std::string& resource)const{
+         for(const auto& layer:owner_.permission_layers)if(agent_permission_denies(layer,tool,resource))throw AgentPermissionDenied("Selected agent policy denied this file-tool resource");
+     }
+@@ -103,20 +110,20 @@ private:
+                 const auto folder=owner_.workspace_members->folder_index(item["folder_id"].get<std::string>());if(!seen.insert(folder).second)throw std::invalid_argument("Multi-folder patches must combine each folder into one entry");
+                 const auto folder_id=owner_.workspace_members->folders()[folder].folder_id;auto* folder_context=owner_.repository_context(folder);if(!folder_context)throw ToolAccessDenied("Patch folder has no admitted instruction context");
+                 Json input={{"folder_id",folder_id},{"patch_text",item["patch_text"]}};if(item.contains("create_parents"))input["create_parents"]=item["create_parents"];
+-                auto prepared=PatchTool(store_,owner_.workspace_members->folder_tools(folder),*folder_context,workspace_id_,folder_id,revision_,folder==0).prepare(input.dump(),cancel);
++                auto prepared=PatchTool(store_,owner_.workspace_members->folder_tools(folder),*folder_context,workspace_id_,folder_id,revision_,folder==0,dispatch_authority(call)).prepare(input.dump(),cancel);
+                 if(!prepared){ready=false;break;}groups.push_back({folder,folder_id,std::move(*prepared)});
+             }
+             std::size_t files=0;for(const auto& group:groups){if(group.patch.plan.files.size()>128-files)throw std::invalid_argument("Cross-folder patch exceeds the 128-file batch limit");files+=group.patch.plan.files.size();authorize(group.patch);}
+             ready=ready&&!groups.empty()&&groups.size()==args["patches"].size();
+         }else{
+-            single=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0).prepare(call.arguments_json,cancel);ready=single.has_value()&&ready;if(single)authorize(*single);
++            single=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0,dispatch_authority(call)).prepare(call.arguments_json,cancel);ready=single.has_value()&&ready;if(single)authorize(*single);
+         }
+         if(!ready)return guidance_required();
+-        if(single){auto result=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0).execute(operation_id(),owner_.run_id,std::move(*single),expiry,cancel);const bool success=Json::parse(result).value("state",std::string{})=="succeeded";return {success,std::move(result)};}
++        if(single){auto result=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0,dispatch_authority(call)).execute(operation_id(),owner_.run_id,std::move(*single),expiry,cancel);const bool success=Json::parse(result).value("state",std::string{})=="succeeded";return {success,std::move(result)};}
+         const auto patch_id=operation_id();Json results=Json::array(),not_requested=Json::array();std::size_t requested=0,succeeded=0,processed=0;std::string stop_reason;
+         for(const auto& group:groups)requested+=group.patch.plan.files.size();
+         for(std::size_t i=0;i<groups.size();++i){auto& group=groups[i];auto* folder_context=owner_.repository_context(group.index);if(!folder_context)throw ToolAccessDenied("Patch folder has no admitted instruction context");
+-            const auto report=Json::parse(PatchTool(store_,owner_.workspace_members->folder_tools(group.index),*folder_context,workspace_id_,group.id,revision_,group.index==0).execute(patch_id+"-"+std::to_string(i),owner_.run_id,std::move(group.patch),expiry,cancel));++processed;succeeded+=report.value("succeeded_files",std::size_t{});results.push_back(Json{{"folder_id",group.id},{"report",report}});
++            const auto report=Json::parse(PatchTool(store_,owner_.workspace_members->folder_tools(group.index),*folder_context,workspace_id_,group.id,revision_,group.index==0,dispatch_authority(call)).execute(patch_id+"-"+std::to_string(i),owner_.run_id,std::move(group.patch),expiry,cancel));++processed;succeeded+=report.value("succeeded_files",std::size_t{});results.push_back(Json{{"folder_id",group.id},{"report",report}});
+             if(report.value("state",std::string{})!="succeeded"){stop_reason=report.value("stop_reason",std::string{"folder_patch_incomplete"});for(std::size_t pending=i+1;pending<groups.size();++pending)not_requested.push_back(Json{{"folder_id",groups[pending].id},{"group_index",pending}});break;}
+         }
+         const auto state=succeeded==requested&&processed==groups.size()?std::string("succeeded"):succeeded?std::string("partial"):std::string("not_applied");
+diff --git a/Native/src/create_executor.cpp b/Native/src/create_executor.cpp
+index f4dab693..85145cfc 100644
+--- a/Native/src/create_executor.cpp
++++ b/Native/src/create_executor.cpp
+@@ -22,6 +22,7 @@ WorkspaceSnapshot CreateExecutor::execute(const std::string& id,const std::strin
+     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw EditOutcomeUnrecorded("Creation outcome could not be recorded; claimed-effect recovery is required");}};
+     WorkspaceSnapshot actual;
+     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
++    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
+     try{actual=workspace_.apply_creation(plan,cancel);}
+     catch(const ToolMutationUncertain&){finish(OperationState::uncertain,R"({"reason":"file_creation_uncertain"})");throw;}
+     catch(const ToolContentConflict&){finish(OperationState::failed,R"({"reason":"creation_precondition_conflict"})");throw;}
+diff --git a/Native/src/edit_executor.cpp b/Native/src/edit_executor.cpp
+index e94402f0..b553aed1 100644
+--- a/Native/src/edit_executor.cpp
++++ b/Native/src/edit_executor.cpp
+@@ -113,6 +113,7 @@ WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string&
+     };
+     WorkspaceSnapshot actual;
+     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
++    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
+     try {actual=workspace_.apply_plan(plan,cancel);}
+     catch(const ToolMutationUncertain&) {finish(OperationState::uncertain,R"({"reason":"file_effect_uncertain"})");throw;}
+     catch(const ToolContentConflict&) {finish(OperationState::failed,R"({"reason":"stale_edit_precondition"})");throw;}
+diff --git a/Native/src/patch_file_executor.cpp b/Native/src/patch_file_executor.cpp
+index 1ff066eb..f7c3384b 100644
+--- a/Native/src/patch_file_executor.cpp
++++ b/Native/src/patch_file_executor.cpp
+@@ -51,6 +51,7 @@ std::string PatchFileExecutor::execute(const std::string& id,const std::string&
+         catch(...){throw EditOutcomeUnrecorded("Patch file outcome was not recorded; claimed-effect recovery is required");}
+     };
+     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"patch_guidance_changed_or_unavailable_before_effect"})");throw;}}
++    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
+     std::string receipt;
+     try{
+         const auto actual=std::visit([&](const auto& file)->Json {
+diff --git a/Native/src/patch_tool.cpp b/Native/src/patch_tool.cpp
+index 18edd526..e7a32a45 100644
+--- a/Native/src/patch_tool.cpp
++++ b/Native/src/patch_tool.cpp
+@@ -13,7 +13,7 @@ std::optional<InstructionPrecondition> PatchTool::guidance(const std::vector<std
+     bool ready=true;for(const auto& directory:scopes){const auto current=context_.ready(directory,cancel);ready=current&&ready;}
+     if(!ready)return {};
+     std::vector<InstructionPrecondition> conditions;for(const auto& directory:scopes)conditions.push_back(context_.precondition(directory));
+-    if(conditions.size()==1)return conditions.front();
++    if(conditions.size()==1){auto condition=conditions.front();condition.before_effect=before_effect_;return condition;}
+     Json metadata=Json::parse(conditions.front().metadata_json);metadata["scope_directories"]=scopes;
+     std::map<std::string,Json> sources;
+     for(const auto& condition:conditions){
+@@ -26,7 +26,7 @@ std::optional<InstructionPrecondition> PatchTool::guidance(const std::vector<std
+     }
+     if(sources.size()>66)throw ToolFileError("Patch guidance source count exceeds bounds");
+     metadata["sources"]=Json::array();for(const auto& [path,file]:sources)metadata["sources"].push_back(file);
+-    InstructionPrecondition combined{metadata.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)condition.verify(token);}};combined.validate();return combined;
++    InstructionPrecondition combined{metadata.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)condition.verify(token);}};combined.before_effect=before_effect_;combined.validate();return combined;
+ }
+ std::vector<std::string> PatchTool::directories(const WorkspacePatchFilePlan& plan,std::stop_token cancel){
+     return std::visit([&](const auto& file){
+diff --git a/Native/tests/agent_file_tool_host_contract.cpp b/Native/tests/agent_file_tool_host_contract.cpp
+index a51bf9c7..80fd175c 100644
+--- a/Native/tests/agent_file_tool_host_contract.cpp
++++ b/Native/tests/agent_file_tool_host_contract.cpp
+@@ -9,6 +9,7 @@
+ #include <iostream>
+ #include <random>
+ #include <thread>
++#include <atomic>
+ using namespace agentflow;using namespace std::chrono_literals;using Json=nlohmann::json;
+ namespace {
+ void need(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+@@ -21,11 +22,11 @@ struct Directory{
+ void write(const std::filesystem::path& path,const std::string& text){std::ofstream file(path,std::ios::binary|std::ios::trunc);file<<text;file.close();need(bool(file),"Fixture write failed");}
+ std::string read(const std::filesystem::path& path){std::ifstream file(path,std::ios::binary);need(bool(file),"Actual file missing");return {std::istreambuf_iterator<char>(file),{}};}
+ struct Task{
+-    std::stop_source stop;std::future<AgentFileToolResult> result;
+-    Task(AgentFileToolHost& host,AgentFileToolInvocation call):result(std::async(std::launch::async,[this,&host,call=std::move(call)]{return host.invoke(call,stop.get_token());})){}
++    std::stop_source stop;std::string label;std::future<AgentFileToolResult> result;
++    Task(AgentFileToolHost& host,AgentFileToolInvocation call):label(call.call_id),result(std::async(std::launch::async,[this,&host,call=std::move(call)]{return host.invoke(call,stop.get_token());})){}
+     ~Task(){stop.request_stop();if(result.valid())result.wait();}
+ };
+-Operation pending(PersistenceService& store,std::size_t previous){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){const auto operations=store.operations("run").get();if(operations.size()>previous){for(const auto& operation:operations)if(operation.state==OperationState::awaiting_approval)return operation;}std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual approval proposal deadline");}
++Operation pending(PersistenceService& store,std::size_t previous,Task* task=nullptr){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){const auto operations=store.operations("run").get();if(operations.size()>previous){for(const auto& operation:operations)if(operation.state==OperationState::awaiting_approval)return operation;}if(task&&task->result.wait_for(0ms)==std::future_status::ready){const auto result=task->result.get();throw std::runtime_error("File task "+task->label+" returned before expected approval: "+result.output_json);}std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual approval proposal deadline");}
+ }
+ int main(int argc,char** argv){if(argc!=3)return 2;try{
+     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"secondary";std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);
+@@ -71,6 +72,19 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
+         {Task task(*host,guided);const auto proposal=pending(store,before_guidance);store.decide_operation(proposal.id,OperationDecision::allow,"fixture-controller").get();need(task.result.get().success&&read(primary/"after-guide.txt")=="fresh\n","Fresh model attempt after guidance delivery can create an approved file");}
+         const auto before_patch=store.operations("run").get().size();auto patch=call("multi-folder","apply_patch",{{"patches",Json::array({Json{{"folder_id",workspace_id},{"patch_text","*** Begin Patch\n*** Add File: multi-primary.txt\n+primary\n*** End Patch\n"}},Json{{"folder_id",attached_id},{"patch_text","*** Begin Patch\n*** Add File: multi-attached.txt\n+attached\n*** End Patch\n"}}})}});
+         {Task task(*host,patch);const auto first=pending(store,before_patch);store.decide_operation(first.id,OperationDecision::allow,"fixture-controller").get();const auto second=pending(store,before_patch+1);store.decide_operation(second.id,OperationDecision::deny,"fixture-controller").get();const auto result=task.result.get();const auto report=Json::parse(result.output_json);need(!result.success&&report["state"]=="partial"&&report["succeeded_files"]==1&&read(primary/"multi-primary.txt")=="primary\n"&&!std::filesystem::exists(secondary/"multi-attached.txt"),"Cross-folder partial result must retain only the actual approved first effect");}
++        {
++            std::atomic<bool> authority=true;std::atomic<std::size_t> checks=0;auto guarded_owner=owner;
++            guarded_owner.before_effect=[&](const AgentFileToolInvocation& captured,const std::string& effect_id,std::stop_token token){const auto effect=store.operation(effect_id).get();need(effect.id==effect_id&&effect.state==OperationState::executing&&effect.spec.run_id==captured.run_id&&effect.spec.workspace==workspace_id,"Live authority must bind the exact claimed native operation");need(captured.run_id=="run"&&captured.workspace_id==workspace_id&&captured.workspace_revision==7&&captured.call_id.starts_with("authority-")&&!token.stop_requested(),"Live authority callback must retain the exact owned invocation");++checks;if(!authority)throw ToolAccessDenied("Fixture file owner authority was revoked");};
++            auto guarded=make_agent_file_tool_host(store,std::move(guarded_owner));
++            const auto revoked=[&](AgentFileToolInvocation invocation,const auto& observe,bool patch=false){const auto count=store.operations("run").get().size(),before=checks.load();Task task(*guarded,std::move(invocation));const auto proposal=pending(store,count,&task);need(checks==before,"Owner authority check must wait for actual approval");const auto payload=Json::parse(proposal.spec.arguments_json);need(!payload.contains("before_effect"),"Private owner callback cannot enter the approval payload");authority=false;store.decide_operation(proposal.id,OperationDecision::allow,"fixture-controller").get();if(patch){const auto result=task.result.get();need(!result.success&&Json::parse(result.output_json)["state"]=="not_applied","Revoked patch authority must stop before its first file effect");}else rejects<ToolAccessDenied>([&]{task.result.get();});authority=true;const auto saved=store.operation(proposal.id).get();need(checks==before+1&&saved.state==OperationState::failed&&Json::parse(saved.result_json)["reason"]=="owner_authority_unavailable_before_effect","Authority loss must retain one truthful failed no-effect receipt");observe();};
++            revoked(call("authority-create","create_file",{{"path","authority-create.txt"},{"content","must not exist\n"}}),[&]{need(!std::filesystem::exists(primary/"authority-create.txt"),"Revoked owner cannot create a file");});
++            revoked(call("authority-edit","edit_file",{{"path","actual.txt"},{"old_string","created\n"},{"new_string","must not replace\n"}}),[&]{need(read(primary/"actual.txt")=="created\n","Revoked owner cannot modify an existing file");});
++            revoked(call("authority-patch","apply_patch",{{"patch_text","*** Begin Patch\n*** Add File: authority-patch-a.txt\n+must not exist\n*** Add File: authority-patch-b.txt\n+must not exist\n*** End Patch\n"}}),[&]{need(!std::filesystem::exists(primary/"authority-patch-a.txt")&&!std::filesystem::exists(primary/"authority-patch-b.txt"),"Refreshed patch guidance cannot lose live owner authority");},true);
++            std::string seed_id;{const auto count=store.operations("run").get().size();Task seed(*guarded,call("authority-seed","create_file",{{"path","authority-restore.txt"},{"content","retain this file\n"}}));const auto proposal=pending(store,count,&seed);seed_id=proposal.id;store.decide_operation(seed_id,OperationDecision::allow,"fixture-controller").get();need(seed.result.get().success,"Valid live owner must retain normal approved file creation");}
++            revoked(call("authority-restore","restore_operation",{{"operation_id",seed_id}}),[&]{need(read(primary/"authority-restore.txt")=="retain this file\n","Revoked owner cannot apply an approved inverse operation");});
++            {const auto count=store.operations("run").get().size(),before=checks.load();Task task(*guarded,call("authority-partial","apply_patch",{{"patch_text","*** Begin Patch\n*** Add File: authority-partial-a.txt\n+actual first effect\n*** Add File: authority-partial-b.txt\n+must not exist\n*** End Patch\n"}}));const auto first=pending(store,count,&task);need(checks==before,"Patch authority cannot run before first approval");store.decide_operation(first.id,OperationDecision::allow,"fixture-controller").get();const auto second=pending(store,count+1,&task);need(checks==before+1&&read(primary/"authority-partial-a.txt")=="actual first effect\n","First actual approved effect must remain before later revocation");authority=false;store.decide_operation(second.id,OperationDecision::allow,"fixture-controller").get();const auto result=task.result.get();authority=true;need(!result.success&&Json::parse(result.output_json)["state"]=="partial"&&checks==before+2&&!std::filesystem::exists(primary/"authority-partial-b.txt")&&store.operation(first.id).get().state==OperationState::succeeded&&store.operation(second.id).get().state==OperationState::failed,"Each refreshed patch file must independently revalidate authority and retain actual partial outcomes");}
++            std::cout<<"Native file-effect authority verified after approval for create, edit, restore and refreshed patches; revocation blocks each pending effect and preserves a prior actual partial patch without replay."<<std::endl;
++        }
+         store.transition("run",RunState::running,RunState::completed).get();rejects<ToolAccessDenied>([&]{host->invoke(call("retired","create_file",{{"path","retired.txt"},{"content","must not write"}}));});need(!std::filesystem::exists(primary/"retired.txt"),"A retired owner cannot dispatch more file work");store.close();
+     }
+     {PersistenceService store(database,{argv[1],argv[2]});need(store.operation(created_operation).get().state==OperationState::succeeded&&store.run("run").get().state==RunState::completed&&read(primary/"actual.txt")=="created\n","xlang3 SQLite restart must preserve the actual file outcome and retired owner");store.close();}

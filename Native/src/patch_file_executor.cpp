@@ -51,6 +51,7 @@ std::string PatchFileExecutor::execute(const std::string& id,const std::string& 
         catch(...){throw EditOutcomeUnrecorded("Patch file outcome was not recorded; claimed-effect recovery is required");}
     };
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"patch_guidance_changed_or_unavailable_before_effect"})");throw;}}
+    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
     std::string receipt;
     try{
         const auto actual=std::visit([&](const auto& file)->Json {

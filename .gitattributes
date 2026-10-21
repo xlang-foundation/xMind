@@ -190,3 +190,4 @@ doc/evidence/worker-profile-busy-cancel-*.log -text whitespace=-blank-at-eol,-bl
 doc/evidence/agent-placement-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/agent-worker-server-entry-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/agent-placement-ownership-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/file-effect-owner-authority-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

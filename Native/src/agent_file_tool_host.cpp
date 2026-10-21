@@ -64,7 +64,7 @@ public:
             auto scope=args["path"].get<std::string>();
             if(call.tool_name=="create_file"&&args.contains("create_parents")&&!args["create_parents"].is_boolean())throw std::invalid_argument("Invalid creation parent option");
             scope=call.tool_name=="create_file"&&args.value("create_parents",false)?workspace->creation_directory(scope,cancel):RepositoryInstructionContext::file_directory(scope);
-            ready=ready&&context->ready(scope,cancel);if(ready)guidance=context->precondition(scope);
+            ready=ready&&context->ready(scope,cancel);if(ready)guidance=bind_authority(context->precondition(scope),call);
         }
         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
         if(call.tool_name=="apply_patch")return patch(call,args,index,*workspace,*context,ready,expiry,cancel);
@@ -75,12 +75,20 @@ public:
         const auto make_guidance=[&](const std::vector<std::string>& paths,std::stop_token token){
             std::vector<InstructionPrecondition> conditions;
             for(const auto& path:paths){const auto directory=workspace->creation_directory(path,token);if(!context->ready(directory,token))throw ToolGuidanceChanged("Updated repository guidance must reach the model before restoring this change");conditions.push_back(context->precondition(directory));}
-            if(conditions.size()==1)return conditions.front();Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
-            InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)if(condition.verify)condition.verify(token);}};combined.validate();return combined;
+            if(conditions.size()==1)return bind_authority(conditions.front(),call);Json metadata=Json::array();for(const auto& condition:conditions)metadata.push_back(Json::parse(condition.metadata_json));
+            InstructionPrecondition combined{Json{{"version",1},{"conditions",metadata}}.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)if(condition.verify)condition.verify(token);}};combined.validate();return bind_authority(std::move(combined),call);
         };
-        return {true,RestoreExecutor(store_,*workspace,workspace_id_,call.folder_id,revision_).invoke(operation_id(),owner_.run_id,call.arguments_json,expiry,cancel,path_authorizer,make_guidance)};
+        auto restored=RestoreExecutor(store_,*workspace,workspace_id_,call.folder_id,revision_).invoke(operation_id(),owner_.run_id,call.arguments_json,expiry,cancel,path_authorizer,make_guidance);
+        const bool success=Json::parse(restored).value("state",std::string{})=="succeeded";return {success,std::move(restored)};
     }
 private:
+    std::function<void(const std::string&,std::stop_token)> dispatch_authority(const AgentFileToolInvocation& call)const{
+        if(!owner_.before_effect)return {};
+        return [check=owner_.before_effect,call](const std::string& operation,std::stop_token cancel){check(call,operation,cancel);};
+    }
+    InstructionPrecondition bind_authority(InstructionPrecondition condition,const AgentFileToolInvocation& call)const{
+        condition.before_effect=dispatch_authority(call);return condition;
+    }
     void authorize(const std::string& tool,const std::string& resource)const{
         for(const auto& layer:owner_.permission_layers)if(agent_permission_denies(layer,tool,resource))throw AgentPermissionDenied("Selected agent policy denied this file-tool resource");
     }
@@ -103,20 +111,20 @@ private:
                 const auto folder=owner_.workspace_members->folder_index(item["folder_id"].get<std::string>());if(!seen.insert(folder).second)throw std::invalid_argument("Multi-folder patches must combine each folder into one entry");
                 const auto folder_id=owner_.workspace_members->folders()[folder].folder_id;auto* folder_context=owner_.repository_context(folder);if(!folder_context)throw ToolAccessDenied("Patch folder has no admitted instruction context");
                 Json input={{"folder_id",folder_id},{"patch_text",item["patch_text"]}};if(item.contains("create_parents"))input["create_parents"]=item["create_parents"];
-                auto prepared=PatchTool(store_,owner_.workspace_members->folder_tools(folder),*folder_context,workspace_id_,folder_id,revision_,folder==0).prepare(input.dump(),cancel);
+                auto prepared=PatchTool(store_,owner_.workspace_members->folder_tools(folder),*folder_context,workspace_id_,folder_id,revision_,folder==0,dispatch_authority(call)).prepare(input.dump(),cancel);
                 if(!prepared){ready=false;break;}groups.push_back({folder,folder_id,std::move(*prepared)});
             }
             std::size_t files=0;for(const auto& group:groups){if(group.patch.plan.files.size()>128-files)throw std::invalid_argument("Cross-folder patch exceeds the 128-file batch limit");files+=group.patch.plan.files.size();authorize(group.patch);}
             ready=ready&&!groups.empty()&&groups.size()==args["patches"].size();
         }else{
-            single=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0).prepare(call.arguments_json,cancel);ready=single.has_value()&&ready;if(single)authorize(*single);
+            single=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0,dispatch_authority(call)).prepare(call.arguments_json,cancel);ready=single.has_value()&&ready;if(single)authorize(*single);
         }
         if(!ready)return guidance_required();
-        if(single){auto result=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0).execute(operation_id(),owner_.run_id,std::move(*single),expiry,cancel);const bool success=Json::parse(result).value("state",std::string{})=="succeeded";return {success,std::move(result)};}
+        if(single){auto result=PatchTool(store_,workspace,context,workspace_id_,call.folder_id,revision_,index==0,dispatch_authority(call)).execute(operation_id(),owner_.run_id,std::move(*single),expiry,cancel);const bool success=Json::parse(result).value("state",std::string{})=="succeeded";return {success,std::move(result)};}
         const auto patch_id=operation_id();Json results=Json::array(),not_requested=Json::array();std::size_t requested=0,succeeded=0,processed=0;std::string stop_reason;
         for(const auto& group:groups)requested+=group.patch.plan.files.size();
         for(std::size_t i=0;i<groups.size();++i){auto& group=groups[i];auto* folder_context=owner_.repository_context(group.index);if(!folder_context)throw ToolAccessDenied("Patch folder has no admitted instruction context");
-            const auto report=Json::parse(PatchTool(store_,owner_.workspace_members->folder_tools(group.index),*folder_context,workspace_id_,group.id,revision_,group.index==0).execute(patch_id+"-"+std::to_string(i),owner_.run_id,std::move(group.patch),expiry,cancel));++processed;succeeded+=report.value("succeeded_files",std::size_t{});results.push_back(Json{{"folder_id",group.id},{"report",report}});
+            const auto report=Json::parse(PatchTool(store_,owner_.workspace_members->folder_tools(group.index),*folder_context,workspace_id_,group.id,revision_,group.index==0,dispatch_authority(call)).execute(patch_id+"-"+std::to_string(i),owner_.run_id,std::move(group.patch),expiry,cancel));++processed;succeeded+=report.value("succeeded_files",std::size_t{});results.push_back(Json{{"folder_id",group.id},{"report",report}});
             if(report.value("state",std::string{})!="succeeded"){stop_reason=report.value("stop_reason",std::string{"folder_patch_incomplete"});for(std::size_t pending=i+1;pending<groups.size();++pending)not_requested.push_back(Json{{"folder_id",groups[pending].id},{"group_index",pending}});break;}
         }
         const auto state=succeeded==requested&&processed==groups.size()?std::string("succeeded"):succeeded?std::string("partial"):std::string("not_applied");

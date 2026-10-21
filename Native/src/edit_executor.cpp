@@ -113,6 +113,7 @@ WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string&
     };
     WorkspaceSnapshot actual;
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
+    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
     try {actual=workspace_.apply_plan(plan,cancel);}
     catch(const ToolMutationUncertain&) {finish(OperationState::uncertain,R"({"reason":"file_effect_uncertain"})");throw;}
     catch(const ToolContentConflict&) {finish(OperationState::failed,R"({"reason":"stale_edit_precondition"})");throw;}

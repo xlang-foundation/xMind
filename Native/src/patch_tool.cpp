@@ -13,7 +13,7 @@ std::optional<InstructionPrecondition> PatchTool::guidance(const std::vector<std
     bool ready=true;for(const auto& directory:scopes){const auto current=context_.ready(directory,cancel);ready=current&&ready;}
     if(!ready)return {};
     std::vector<InstructionPrecondition> conditions;for(const auto& directory:scopes)conditions.push_back(context_.precondition(directory));
-    if(conditions.size()==1)return conditions.front();
+    if(conditions.size()==1){auto condition=conditions.front();condition.before_effect=before_effect_;return condition;}
     Json metadata=Json::parse(conditions.front().metadata_json);metadata["scope_directories"]=scopes;
     std::map<std::string,Json> sources;
     for(const auto& condition:conditions){
@@ -26,7 +26,7 @@ std::optional<InstructionPrecondition> PatchTool::guidance(const std::vector<std
     }
     if(sources.size()>66)throw ToolFileError("Patch guidance source count exceeds bounds");
     metadata["sources"]=Json::array();for(const auto& [path,file]:sources)metadata["sources"].push_back(file);
-    InstructionPrecondition combined{metadata.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)condition.verify(token);}};combined.validate();return combined;
+    InstructionPrecondition combined{metadata.dump(),[conditions=std::move(conditions)](std::stop_token token){for(const auto& condition:conditions)condition.verify(token);}};combined.before_effect=before_effect_;combined.validate();return combined;
 }
 std::vector<std::string> PatchTool::directories(const WorkspacePatchFilePlan& plan,std::stop_token cancel){
     return std::visit([&](const auto& file){

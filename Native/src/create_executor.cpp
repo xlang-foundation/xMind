@@ -22,6 +22,7 @@ WorkspaceSnapshot CreateExecutor::execute(const std::string& id,const std::strin
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw EditOutcomeUnrecorded("Creation outcome could not be recorded; claimed-effect recovery is required");}};
     WorkspaceSnapshot actual;
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
+    if(guidance.before_effect){try{guidance.before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"owner_authority_unavailable_before_effect"})");throw;}}
     try{actual=workspace_.apply_creation(plan,cancel);}
     catch(const ToolMutationUncertain&){finish(OperationState::uncertain,R"({"reason":"file_creation_uncertain"})");throw;}
     catch(const ToolContentConflict&){finish(OperationState::failed,R"({"reason":"creation_precondition_conflict"})");throw;}

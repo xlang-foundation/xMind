@@ -41,6 +41,11 @@ struct AgentFileToolOwnerContext {
     std::vector<std::vector<AgentPermissionRule>> permission_layers;
     std::vector<std::string> allowed_tools;
     std::chrono::milliseconds approval_timeout{600000};
+    // Revalidate the retained owner immediately before each approved effect.
+    // A multi-file invocation may call this more than once; it cannot replay
+    // effects or replace the caller's admitted identity.
+    // The operation ID is supplied by the native executor, never by the model.
+    std::function<void(const AgentFileToolInvocation&,const std::string&,std::stop_token)> before_effect;
 };
 // Local owner adapter only. This is not an authenticated IPC endpoint, durable
 // RPC deduplicator, process supervisor or an out-of-process AgentRunner.

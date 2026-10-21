@@ -1,0 +1,56 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T02:56:51.781Z",
+    "sourceParent": "ff802d0c41371a674151bf6e628d65bdf3f65836",
+    "sourcePatchSha256": "a41fa8a51c7c43e57304185e4ab7a95bfd907881a8fbb514292a8f11d1b22f9b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 3496,
+      "launchedAt": "2026-10-21T02:43:01.594Z",
+      "completedAt": "2026-10-21T02:53:49.651Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "86875e065e4ea223deed2a31a0534a9a0ebbb60afd324f729f37bc956d0df3ad"
+    },
+    "test": {
+      "pid": 37300,
+      "launchedAt": "2026-10-21T02:53:52.801Z",
+      "completedAt": "2026-10-21T02:56:49.377Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "830541b340b68689a37fc9ae4f81eb7ee24f165c342687f1df08f41ab6b13221"
+    },
+    "total": 61,
+    "failed": 1,
+    "passed": 60,
+    "seconds": 176.52,
+    "projectFiles": 2698,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "c918d591917d2395d8a0be64381d6ab05f52712b0a446b84a3e8b151a85f46c7",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "files": {
+    "doc/evidence/file-effect-owner-authority-focused-20261020-build.log": "86875e065e4ea223deed2a31a0534a9a0ebbb60afd324f729f37bc956d0df3ad",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-build-terminal.json": "88062509525daa5266228d0d7a4da1573197bd36645ffd6b4d884f3bdaa556c2",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-ctest.log": "830541b340b68689a37fc9ae4f81eb7ee24f165c342687f1df08f41ab6b13221",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-ctest-terminal.json": "52f05f0c9c729ca237fa0fa0836fe4621becfb2b77396309138119fe264fa074",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-LastTest.log": "3e8af70b3fb012e7e55a9bcb92c0ba65da2e3a3a43b78ff94855145411e21a32",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-test-inventory.json": "b477dc3fdefd264758a33430e109ec6114b616212c99732d28aa191d7517c8ab",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-gate.json": "66371a57c371c3c4eddd1f8b8cf087bfd735ddd816fcdf12f971d269e88e52ed",
+    "doc/evidence/file-effect-owner-authority-focused-20261020-source.patch": "a41fa8a51c7c43e57304185e4ab7a95bfd907881a8fbb514292a8f11d1b22f9b"
+  },
+  "passed": false,
+  "observation": "Expanded file-host fixture failed while awaiting an actual approval proposal; other 60 focused tests passed. Original deadline and raw output retained. Follow-up must surface any early task result rather than extend the deadline.",
+  "diagnosis": "Expanded edit fixture used old_string/new_string instead of native old_text/new_text. The first gate observed an approval wait deadline; unchanged deadline plus early future diagnostics exposed native Unknown edit argument. Corrected fixture uses the registered native schema."
+}

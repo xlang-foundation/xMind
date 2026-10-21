@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 100: native_agent_file_tool_host_contract
+1/1 Test #100: native_agent_file_tool_host_contract ...***Failed    1.12 sec
+Unknown edit argument
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.14 sec
+
+The following tests FAILED:
+	100 - native_agent_file_tool_host_contract (Failed)
+Errors while running CTest

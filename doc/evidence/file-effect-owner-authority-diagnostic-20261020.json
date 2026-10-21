@@ -1,0 +1,56 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T03:01:33.303Z",
+    "sourceParent": "ff802d0c41371a674151bf6e628d65bdf3f65836",
+    "sourcePatchSha256": "d47db5bb4fed66729edca53919b11fae884f262b6db1f8e5bbfa54c447827132",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 33564,
+      "launchedAt": "2026-10-21T02:58:21.184Z",
+      "completedAt": "2026-10-21T03:01:26.967Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e0dcf71f93b99e98fa5368e90437c28c48c1256011871af6aaac38f13c84b9c2"
+    },
+    "test": {
+      "pid": 65624,
+      "launchedAt": "2026-10-21T03:01:29.666Z",
+      "completedAt": "2026-10-21T03:01:30.853Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "2af34807145ff1b6e4dab315d2f41aa98467385d265cbb2e9257f8856c2af95f"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 1.14,
+    "projectFiles": 2698,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "c918d591917d2395d8a0be64381d6ab05f52712b0a446b84a3e8b151a85f46c7",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "files": {
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-build.log": "e0dcf71f93b99e98fa5368e90437c28c48c1256011871af6aaac38f13c84b9c2",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-build-terminal.json": "2c8427593619dc3c757e75cadf4a8155d849b4a7f30b6a56c3439c8c71d29a7b",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-ctest.log": "2af34807145ff1b6e4dab315d2f41aa98467385d265cbb2e9257f8856c2af95f",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-ctest-terminal.json": "f870b95896d89ce481f39051248a6c3ff77fb4d43bd5e0f4f8c831d0724cd20a",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-LastTest.log": "6470159d4c8f580643acdeef663ee109c0171672fc5e4ffd83d023502f5f1ded",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-test-inventory.json": "4139988f88236edd127473286d28d0db3b1fda16cc329d758be4579de7126354",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-gate.json": "dc2fa54a168194f7bba748a0758e05456d1a37eabb8e930b7965cb01f03ccac4",
+    "doc/evidence/file-effect-owner-authority-diagnostic-20261020-source.patch": "d47db5bb4fed66729edca53919b11fae884f262b6db1f8e5bbfa54c447827132"
+  },
+  "passed": false,
+  "buildScope": "Target-only file-host diagnostic; the gate nativeSha256 is the existing unrelated server executable, which was not rebuilt in this diagnostic.",
+  "diagnosis": "Expanded edit fixture used old_string/new_string instead of native old_text/new_text. The first gate observed an approval wait deadline; unchanged deadline plus early future diagnostics exposed native Unknown edit argument. Corrected fixture uses the registered native schema."
+}
