@@ -1,0 +1,70 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T20:33:40.339Z",
+    "sourceParent": "6877fb1e88044b31aedbe97460b31937c5afb07e",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 68432,
+      "launchedAt": "2026-10-21T20:12:21.096Z",
+      "completedAt": "2026-10-21T20:12:48.858Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "075d30c0390bb1c029120f5b28329586b5fa027d2f0e009c539bd605b04ef855"
+    },
+    "test": {
+      "pid": 39112,
+      "launchedAt": "2026-10-21T20:12:51.826Z",
+      "completedAt": "2026-10-21T20:33:37.552Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "829d77242a458a23f638a1c84707eea40bf2e2c17b21f7a196b262a486e948c8"
+    },
+    "total": 165,
+    "failed": 0,
+    "passed": 165,
+    "seconds": 1245.68,
+    "projectFiles": 2755,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 134,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d27f36d8bcb286f4583c57bd4ffe6e26759b311d2aff8af3fb4e0ed6f3c583b0",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-remote-full-20261021-build.log": "075d30c0390bb1c029120f5b28329586b5fa027d2f0e009c539bd605b04ef855",
+    "doc/evidence/process-worker-graph-remote-full-20261021-build-terminal.json": "7f6c4b83b79cb0462683043aa3e4f323bf0cb854955799b6b9838e8f0ab07888",
+    "doc/evidence/process-worker-graph-remote-full-20261021-ctest.log": "829d77242a458a23f638a1c84707eea40bf2e2c17b21f7a196b262a486e948c8",
+    "doc/evidence/process-worker-graph-remote-full-20261021-ctest-terminal.json": "e1261d3e82c69a731eaeed6169d1dc99a6b57a748ccb75a6ac9f5415a75a273e",
+    "doc/evidence/process-worker-graph-remote-full-20261021-LastTest.log": "5fd58753b0e2b9bb68de2d7578d4642e1a2206a52db1b0350781efdffba2eacc",
+    "doc/evidence/process-worker-graph-remote-full-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-graph-remote-full-20261021-gate.json": "aa765b6d0ec924903412440ee47ce8b992eababab6578a345b8eb975362427f0",
+    "doc/evidence/process-worker-graph-remote-full-20261021-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-remote-full-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-remote-full-20261021-binaries-before-test.json": "6e4e6401f2133d44d7897c5e0b80b7f6c6de4d2935102eb7ab4c11c6b201ebbb"
+  },
+  "verified": [
+    "Complete actual165 local native test inventory passed on committed6877fb1e with empty Native/client patches.",
+    "Captured graph callable authority fix and actual graph MCP/non-streaming A2A HTTP effects pass alongside existing parent/delegated/graph SDK IPC, context, cancellation, lost receipt and fail-stop contracts.",
+    "Four callable graph cases and eight remote graph cases cover counted/uncounted execution, actual controller approval and inherited denial, canonical durable receipts, distinct workers and physical drain before join.",
+    "Protected managed profile, view, provider, persistence, tools, permissions, CLI/HTTP, graph/planning and native providers pass within the actual respective contracts. Existing planning contracts do not establish IPC planning.",
+    "Complete2755 project/16 SDK/1870 library/76 runtime/18598 dependency/134 native binary file sets and hashes remain frozen."
+  ],
+  "limitations": [
+    "Local complete gate excludes hosted-only trusted OAuth contract; expected hosted inventory166, no hosted run claimed.",
+    "Synthetic controlled provider fixtures, not new live-provider or rendered acceptance. Installed60 browser/CLI real-provider evidence remains a separate scope.",
+    "Candidate native d27f36d8/SDK1ff is not packaged or installed; existing user owners/settings/history remain untouched.",
+    "Default IPC and worker planning, combined parent compaction/overflow, graph streaming/pause/recovery and updated editor rendering remain unfinished.",
+    "Earlier intermittent0xC0000005 remains unresolved; this green suite does not establish its cause or a fix."
+  ]
+}

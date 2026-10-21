@@ -1,3 +1,21 @@
+## Complete current graph/callable IPC native regression — 2026-10-21
+
+Committed6877fb1e passes the complete actual **165/165 local native tests** in
+**1245.68s**, build/test exit0, with empty Native/client patches. The captured
+graph callable authority fix, four callable cases and eight actual HTTP MCP/A2A
+graph cases pass with the existing worker/delegation/context/tool/provider and
+CLI/HTTP/profile/persistence contracts. Protected profile lifecycle510.08s,
+local view145.67s and provider view65.26s pass without changed budgets or retries.
+All2755 project/16 SDK/1870 library/76 runtime/18598 dependency/134 native binary
+file sets and hashes remain frozen. Candidate native d27f36d8/SDK1ff.
+[Complete inventory, original logs and gate](evidence/process-worker-graph-remote-full-20261021.json).
+
+This is local regression acceptance, not a release, hosted166 result, updated
+package/installation or fresh live-provider/rendered acceptance. Existing planning
+contracts do not prove IPC planning. Default IPC/planning, combined parent
+compaction/overflow, graph streaming/pause/recovery, editor rendering and prior
+intermittent0xC0000005 diagnosis remain unfinished. Installed60 is unchanged.
+
 ## Graph IPC MCP and A2A HTTP remote methods — 2026-10-21
 
 The existing standalone remote fixture now covers eight cases: MCP and completed
