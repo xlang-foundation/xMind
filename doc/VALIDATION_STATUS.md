@@ -1,3 +1,15 @@
+## Parent/child IPC cancellation — 2026-10-21
+
+Linked controller and IPC handler stop tokens before native delegation. The new
+actual-worker test first exposed a child marked failed during parent cancellation;
+its diagnostic and failed gates are preserved. The corrected gate proves both
+child HTTP streams are in flight before cancellation, all three workers retire as
+cancelled, three charges and unused parent hold remain, and no result is invented.
+**9/9 focused contracts pass in 70.21 seconds**, with 197 controlled HTTP requests.
+[Scope and raw receipts](evidence/process-worker-parent-cancellation-linked-20261021.json).
+Child failure/lost-result, counted parent context, planning, graph/default placement,
+full regression and installed/rendered acceptance remain open.
+
 ## Parent IPC delegation rejection checks — 2026-10-21
 
 Actual parent workers now verify permission denial and exhausted shared funding:

@@ -1,0 +1,92 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T15:46:18.352Z",
+    "sourceParent": "6e846a430274f47facc62380cabf1d11c9c000b4",
+    "sourcePatchSha256": "d80d6e7edf2b05f1e8f07fe45fc58278925b5adbbc35e365dd498bdeb517572f",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 11656,
+      "launchedAt": "2026-10-21T15:44:01.856Z",
+      "completedAt": "2026-10-21T15:45:01.993Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "46ff570617eacaa535cb3ac3c37405fcbbbe46d0694be2160ac2a360f5d16867"
+    },
+    "test": {
+      "pid": 53344,
+      "launchedAt": "2026-10-21T15:45:05.098Z",
+      "completedAt": "2026-10-21T15:46:15.365Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "16fd82d1d3d5c4523d74162c45f1b745ec16173acad75f663458e1814011a20a"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 70.21,
+    "projectFiles": 2748,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "84e62fb84b358c507e5282f59b5cdc9d96b5fa569ff3f26b3cf389fd90ad4361",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-build.log": "46ff570617eacaa535cb3ac3c37405fcbbbe46d0694be2160ac2a360f5d16867",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-build-terminal.json": "dfedddbf25af4c42811ea5a4ffcd7316d5dd72f191d7752b19af4a98f33dd6ce",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-ctest.log": "16fd82d1d3d5c4523d74162c45f1b745ec16173acad75f663458e1814011a20a",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-ctest-terminal.json": "4d31060b7ee51b8fa7780ae5230722027bf4855fb180ce724ad540dc8e0a2bd1",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-LastTest.log": "9d1a6e9ae44a3e7809935e73ca3e48f51d09d7b36b00dd74a5941c8c5784512d",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-gate.json": "692fb037e35c52c7ccf0d1a9a7f4c8f5d9b6c370101e964868681d508091e5fd",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-source.patch": "d80d6e7edf2b05f1e8f07fe45fc58278925b5adbbc35e365dd498bdeb517572f",
+    "doc/evidence/process-worker-parent-cancellation-linked-20261021-binaries-before-test.json": "ba445448293986e40efbeb33417cae0018119335f502c3091d10ba0c7c36e5f1",
+    "doc/evidence/process-worker-parent-cancellation-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-cancellation-20261021-build-terminal.json": "fcffe94e7c9f87d5b621b4ee4ecbb4fb0b2a2a033f72f6f2366ba91300e6acd0",
+    "doc/evidence/process-worker-parent-cancellation-20261021-ctest.log": "418553d20b38aa9eb5f491ad528ccabfd4131d60e252cee4b75f70f7046002c1",
+    "doc/evidence/process-worker-parent-cancellation-20261021-ctest-terminal.json": "96f622c434c119166a8152132416a110f2e423eef888da329d77faca67e67778",
+    "doc/evidence/process-worker-parent-cancellation-20261021-LastTest.log": "a0f1e9b95f79643f5a5cdda54397b537c9dc19418a0a4d620dbb659172357d4c",
+    "doc/evidence/process-worker-parent-cancellation-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-cancellation-20261021-gate.json": "9c5b59ade7e69bb8471052fa04fe19ab79a83312b6efad211819881abbb48fe6",
+    "doc/evidence/process-worker-parent-cancellation-20261021-source.patch": "8732081c5911f06ee448138292a5c8f94ac243f474fcbedfdd0cd4212393ded4",
+    "doc/evidence/process-worker-parent-cancellation-20261021-binaries-before-test.json": "ef2bb63084cbdcc58f29e760c2303ebcf343b4f4df2854eb7a374c3531847a61",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-build-terminal.json": "f4b6eb8aeea10c279290130fc633dba97b6a260d3da7ec914f454dcf38b15683",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-ctest.log": "bdef6057186134a2bafb82de12aadc5f623eba4549b12675de0e4c37f0ee554f",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-ctest-terminal.json": "5ac65a7f04cbb62041a9972eba48025db2bbb3446340db6cf0421477e7dc3b08",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-LastTest.log": "c35b3d843105da65f64a64165e0b7ab57746453c2dfa384220636f7ecd5a954f",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-gate.json": "235b93197997d03e9f27eb10d1fbc4fc7b28bda2575d3fd517e8ca4f857b8937",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-source.patch": "d84d92b94dd213b06ff36269ef2d71e661f2bb941d41475d89e1da27b008b5f7",
+    "doc/evidence/process-worker-parent-cancellation-diagnostic-20261021-binaries-before-test.json": "5ebb0ca604178e2045d2b5b73c39e1f29b771b9630b91dfa1cc2ee7642217a3b"
+  },
+  "verified": [
+    "Independent HTTP peer observes both actual child streams before controller cancellation",
+    "Controller and handler stop tokens linked in backend delegation callback; cancellation directly reaches native child ownership",
+    "Parent and two children cancelled, each exactly one admitted/retired lease and user-only history; no restarted worker or fabricated final/tool result",
+    "Three dispatched model charges and unused parent continuation hold retained; both child HTTP streams aborted and service healthy/idle after physical drain",
+    "Nine focused contracts pass with 197 controlled HTTP requests and complete frozen input/binary sets"
+  ],
+  "failedRuns": {
+    "names": [
+      "process-worker-parent-cancellation-20261021",
+      "process-worker-parent-cancellation-diagnostic-20261021"
+    ],
+    "cause": "Child could observe shared-budget controller cancellation while receiving only the still-live IPC handler stop token, producing failed instead of cancelled. Diagnostic captured actual failed child with one history message. Linked controller and handler cancellation before native delegation; assertions unchanged."
+  },
+  "limitations": [
+    "Synthetic HTTP/SSE output, not live-provider acceptance",
+    "Child provider failure, unrecorded outcomes and counted parent context remain open",
+    "Planning, graph/default placement, full current regression and installed/rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}

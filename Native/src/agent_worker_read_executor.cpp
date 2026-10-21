@@ -171,7 +171,14 @@ public:
             if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
             if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
             auto shared_budget=std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel);
-            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,stop)};};
+            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget,cancel](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){
+                // Controller cancellation must reach child ownership directly;
+                // an IPC handler can remain live while its caller is draining.
+                std::stop_source combined;
+                std::stop_callback owner_cancel(cancel,[&]{combined.request_stop();});
+                std::stop_callback call_cancel(stop,[&]{combined.request_stop();});
+                return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,combined.get_token())};
+            };
         }
         if(settings_.context)policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
