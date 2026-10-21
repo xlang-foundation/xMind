@@ -1,0 +1,91 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T15:55:51.292Z",
+    "sourceParent": "181800243be5b4bde667c156ea86abaf0b6691ff",
+    "sourcePatchSha256": "c05348e6a06bb8acf6efd33723df81cc88d2951862c8642e76e7a4595eda6497",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 48228,
+      "launchedAt": "2026-10-21T15:53:16.507Z",
+      "completedAt": "2026-10-21T15:54:34.641Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f33617edcacd8498684d2676f29c1aef4134712d146b0d8cf4b32032a3f1a795"
+    },
+    "test": {
+      "pid": 17948,
+      "launchedAt": "2026-10-21T15:54:37.676Z",
+      "completedAt": "2026-10-21T15:55:48.415Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3feebccba3b7b5396c95f80269eaa846da741c8f7f5f6d9ec8dfc21eb10d4a0a"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 70.69,
+    "projectFiles": 2748,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "a7ecfed92a646954558c272a7dd53b3fe0b6c82e82e1227117745b17b83a2375",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-build.log": "f33617edcacd8498684d2676f29c1aef4134712d146b0d8cf4b32032a3f1a795",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-build-terminal.json": "681c1bfb7cf7cedf5a9cef0e6a5ac46ca8162222a415227039b4df66bd45a7d2",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-ctest.log": "3feebccba3b7b5396c95f80269eaa846da741c8f7f5f6d9ec8dfc21eb10d4a0a",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-ctest-terminal.json": "f70740a438c7fa81b944757296d528b288050850da686ac353034484c82931e5",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-LastTest.log": "007da051e72937e74e35a2dbbfe3f50d45fe2bc97d0593bcc52e9e825bc68b48",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-gate.json": "9f2820168e2bbcfc9476c4ce5d465e0520c3172f51aa9ddd0c2fad90b7a4c60f",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-source.patch": "c05348e6a06bb8acf6efd33723df81cc88d2951862c8642e76e7a4595eda6497",
+    "doc/evidence/process-worker-parent-child-failure-cause-20261021-binaries-before-test.json": "6164ea8bcf5d62dee778bc7ad6060cd29493b0e8b22b6546074aa48662ad8afe",
+    "doc/evidence/process-worker-parent-child-failure-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-child-failure-20261021-build-terminal.json": "40dfbb83ffbe741d3c9a74702451c0a4610a55f2cb19309d0f83c703bd4c17b0",
+    "doc/evidence/process-worker-parent-child-failure-20261021-ctest.log": "71710ec2d7e698e76ead8f46c6e3a8fa7e75d08249931fb272f93818ceb73281",
+    "doc/evidence/process-worker-parent-child-failure-20261021-ctest-terminal.json": "20692c223530e63e840e2ff2d610f47aa028aed0bb71979b896f9df0cf02e7de",
+    "doc/evidence/process-worker-parent-child-failure-20261021-LastTest.log": "64fc95160ba5f19002747745a10e7e6720cd96ad17bd452dfc8e7afb3bada24b",
+    "doc/evidence/process-worker-parent-child-failure-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-child-failure-20261021-gate.json": "3139af4a510f2976a2abd32338f53f9198c48359633d5041650ce41be6b0b025",
+    "doc/evidence/process-worker-parent-child-failure-20261021-source.patch": "106635fca694e11020b03531f4bd13d960dd563f0222f204c64899d5bc21dd5b",
+    "doc/evidence/process-worker-parent-child-failure-20261021-binaries-before-test.json": "43b9d673598ec1ac3c33ef5ee1c5ffbdefedafb19b87e1f904a40afa95e6882d",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-build.log": "46ff570617eacaa535cb3ac3c37405fcbbbe46d0694be2160ac2a360f5d16867",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-build-terminal.json": "6466fc3fd45810bd3f2a0ea46e989a317625a9236f3f2049c79ea243137e0e4d",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-ctest.log": "0a64f047e5d8a6f66716614548fd62394d8a097b13a9e12641a8e1c10e6d3c7b",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-ctest-terminal.json": "79bb4b5595b2d7cf7552ef7cea221c15f4c28e459f6d5f3dc5aef255ddbac9eb",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-LastTest.log": "c9c18239e8e6fbca44b86d946e69227d73dacc9be919ec6ef1a15ae892b7895d",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-gate.json": "69793d13a770af9cbebccf2bb011e0eca4c5da44a04b6cd1abeb0a56183c6f0e",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-source.patch": "2a392d0852c4c235d54af1cd240fcd53aac8ad498f27106e546ab4d84059974a",
+    "doc/evidence/process-worker-parent-child-failure-diagnostic-20261021-binaries-before-test.json": "e1581d63130f6300dde3b9c48c476f2302743176256f807d9b6696b8017d5566"
+  },
+  "verified": [
+    "Actual parent and two same-image xmind child workers use scoped SDK IPC; one child HTTP500 provider call fails, the sibling reads actual bytes and completes",
+    "Parent receives canonical joined failed/completed child outcomes and completes its final response; five model charges retained, parent hold consumed, no child retry or fabricated failed output",
+    "All three process leases retired exactly once; failed child run.failed event preserves provider_failure while coarse lease retirement uses dispatch_error; private provider error text absent from join",
+    "Nine focused contracts pass with 202 independently observed controlled HTTP requests and frozen input/binary sets"
+  ],
+  "failedRuns": {
+    "names": [
+      "process-worker-parent-child-failure-20261021",
+      "process-worker-parent-child-failure-diagnostic-20261021"
+    ],
+    "cause": "Initial fixture incorrectly expected provider_failure as a lease retirement reason. Runtime diagnostic proved backend selected provider_failure and persisted it in run.failed; repository intentionally maps failure retirement to coarse dispatch_error. Fixture now verifies both distinct records; temporary diagnostic removed, production behavior unchanged."
+  },
+  "limitations": [
+    "Synthetic provider output, not live-provider acceptance",
+    "Unrecorded outcomes and counted parent context remain open",
+    "Planning, graph/default placement, full current regression and installed/rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}

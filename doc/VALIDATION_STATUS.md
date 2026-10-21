@@ -1,3 +1,15 @@
+## Parent IPC mixed child outcomes — 2026-10-21
+
+Actual xmind workers now verify one provider-failed child alongside a completed
+read sibling. The parent consumes the canonical join and finishes; five charges
+remain, its hold is consumed, and all three workers retire without retries.
+The precise run.failed cause is provider_failure; lease retirement is the existing
+coarse dispatch_error. Private provider error text does not enter the join.
+**9/9 focused contracts pass in 70.69 seconds**, with 202 controlled HTTP requests.
+[Scope, corrected fixture expectation and raw receipts](evidence/process-worker-parent-child-failure-cause-20261021.json).
+Unrecorded outcomes, counted parent context, planning, graph/default placement,
+full regression and installed/rendered acceptance remain open.
+
 ## Parent/child IPC cancellation — 2026-10-21
 
 Linked controller and IPC handler stop tokens before native delegation. The new
