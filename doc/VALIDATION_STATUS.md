@@ -1,3 +1,26 @@
+## Native language queries in coding workers — 2026-10-21
+
+Configured language servers now enter the worker factory catalogue and native
+read owner. Registry, executable/environment and workspace membership remain
+backend-owned; queries reuse durable read claims over authenticated xlang3 SDK
+C++ remote methods. Default coding tools include language_server when configured;
+explicit allowlists continue to filter it. Registry lifetime encloses its owner
+and workspace, and workers physically retire before service idle.
+
+Actual unified xmind workers query a framed Node LSP fixture, preserve inherited
+denial and query the captured attached folder instead of the clean primary
+decoy. Actual diagnostics and folder identity reach canonical history over two
+HTTP model windows per case. **3/3 focused contracts pass in 33.57 seconds**;
+2731 project inputs, SDK/library/dependency and 133-binary file sets/hashes are
+frozen. The independent model peer observes 108 requests. The initial fixture
+miscounted a dispatcher overridden by ExecutionPlatform; failure is preserved.
+[Scope, patches and raw evidence](evidence/process-worker-language-routing-20261021.json).
+
+The LSP peer is synthetic; no new real language-service acceptance is claimed.
+Read-only factory coverage, broader regression, trusted callables, context,
+delegation/planning, default placement, installation and fresh rendered/live-
+provider acceptance remain open.
+
 ## Remote catalogue refresh regression — 2026-10-21
 
 The committed subscription-refresh implementation passes **62/62 selected

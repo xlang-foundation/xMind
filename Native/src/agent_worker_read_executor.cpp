@@ -3,6 +3,7 @@
 #include "agentflow/agent_backend_runtime.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
+#include "agentflow/language_server_tools.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/patch_tool.hpp"
@@ -54,17 +55,19 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     AgentSettings settings_;
     bool coding_=false;
     std::shared_ptr<const BoundProcessExecutable> image_;
-    std::unique_ptr<AgentRunner> validator_;
     std::unique_ptr<WorkspaceTools> primary_;
     std::shared_ptr<ProcessExecutor> process_catalogue_;
+    std::shared_ptr<LanguageServerToolRegistry> language_catalogue_;
+    std::unique_ptr<AgentRunner> validator_;
     std::shared_ptr<AgentModelGateway> gateway_;
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);}
+        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");}
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
+        if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
             if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
@@ -73,12 +76,16 @@ class WorkspaceExecutor final:public AgentRootExecutor {
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
         :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
-        validator_=std::make_unique<AgentRunner>(store_,settings_);
         primary_=std::make_unique<WorkspaceTools>(*settings_.workspace);
+        if(!settings_.language_servers.empty()){
+            language_catalogue_=settings_.language_server_registry?settings_.language_server_registry:std::make_shared<LanguageServerToolRegistry>(*primary_,settings_.language_servers);
+            settings_.language_server_registry=language_catalogue_;settings_.language_servers=language_catalogue_->profiles();
+        }
+        validator_=std::make_unique<AgentRunner>(store_,settings_);
         if(coding_&&!settings_.process_profiles.empty())process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);
         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
     }
@@ -121,6 +128,7 @@ public:
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+        for(const auto& definition:selected_tools)if(definition.name=="language_server")policy.tools.push_back(definition);
         std::unique_ptr<RemoteRunTools> remote_tools;
         if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){
             remote_tools=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);
@@ -140,6 +148,7 @@ public:
         if(settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
         owner.repository_context=[&](std::size_t index){return index<contexts.size()?contexts[index].get():nullptr;};
+        if(language_catalogue_)owner.language_server_query=[&](const AgentWorkspaceInvocation& call,std::stop_token stop){return language_catalogue_->invoke(call.arguments_json,stop,&members.folders(),settings_.language_server_dispatch);};
         owner.offered_tool=[catalogue=policy.tools](const std::string& name){return std::any_of(catalogue.begin(),catalogue.end(),[&](const auto& tool){return tool.name==name;});};
         owner.inherited_permission_layers=settings_.inherited_permission_rule_layers;owner.inherited_permission_layers.push_back(settings_.permission_rules);owner.permission_rules=request.agent_permissions;
         std::optional<AgentRemoteToolOwnerContext> remote_owner;
