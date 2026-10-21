@@ -1,3 +1,17 @@
+## Canonical worker permission denials — 2026-10-20
+
+Native worker reads now deliver and persist the same typed result for agent-policy
+and controller denials. The actual child fixture checks the policy denial code and
+exact canonical tool history, with no file dispatch. The serial Release build and
+54 focused contracts pass in 158.44 seconds with frozen inputs and binary sets
+unchanged. [Raw evidence](evidence/worker-read-denial-preparation-20261020.json).
+
+This checkpoint also adds supervisor preparation before launch, physical-only drain,
+and a backend instruction suffix after repository guidance. These APIs compile;
+dedicated fault and ordering qualification remains open. The production executor
+factory and server selection remain unfinished. This is no new full-suite,
+installed, hosted, rendered-client or live-provider acceptance.
+
 ## Immutable workspace admission for backend root executors — 2026-10-20
 
 Configured AgentService root executors now receive an immutable workspace value

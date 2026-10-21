@@ -23,7 +23,7 @@ inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const 
     check(response.finish_reason=="tool_calls"&&response.tool_calls.size()==1&&response.tool_calls[0].id==call.call_id&&response.tool_calls[0].name==call.tool_name&&response.tool_calls[0].arguments_json==call.arguments_json,"Read must use the independent provider's actual tool call");
     rejects<Conflict>([&]{reads.invoke(call);});journal.finish_model_call(call.attempt_id);
     rejects<Conflict>([&]{journal.commit_read_turn(call.attempt_id);});rejects<Conflict>([&]{journal.reserve_model_call("premature-next");});
-    if(mode=="read_denied"){rejects<Conflict>([&]{reads.invoke(call);});commit(peer,journal,call.attempt_id);return Json{{"pid",GetCurrentProcessId()},{"denied",true}}.dump();}
+    if(mode=="read_denied"){const auto denied=reads.invoke(call);check(!denied.success&&Json::parse(denied.output_json).at("error").at("code")=="agent_permission_denied","Native permission denial must reach the child as its actual typed tool result");const auto history=commit(peer,journal,call.attempt_id);check(Json::parse(history[2].json).at("content")==denied.output_json,"Child denial must exactly match canonical tool history");return Json{{"pid",GetCurrentProcessId()},{"denied",true}}.dump();}
     if(mode=="read_cancel"){
         std::stop_source stop;auto task=std::async(std::launch::async,[&]{return reads.invoke(call,stop.get_token());});
         struct Cancel{std::stop_source& stop;~Cancel(){stop.request_stop();}} cancel{stop};

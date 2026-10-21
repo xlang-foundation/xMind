@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-21T00:57:56.842Z",
+  "gate": {
+    "recordedAt": "2026-10-21T00:57:46.009Z",
+    "sourceParent": "9e0a8cc119ff3a361fdbffa8549fc6f22d34844a",
+    "sourcePatchSha256": "b8633fa52a6d52be83a6f2a268afe544589bdae4668dd8485115296e7d7eb64a",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 58220,
+      "launchedAt": "2026-10-21T00:53:05.862Z",
+      "completedAt": "2026-10-21T00:55:02.080Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "eea900239c9b02335a6c8f45b7b5a0bf44d864cbf3140a0f02d83aea27a0d1b1"
+    },
+    "test": {
+      "pid": 60336,
+      "launchedAt": "2026-10-21T00:55:05.018Z",
+      "completedAt": "2026-10-21T00:57:43.505Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9da2b69a066140e2d3fcbbc70c93c736340bc9f637ae0fbd73252e6cf8cf2e96"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 158.44,
+    "projectFiles": 2693,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "cab54a90b87cb24fd601ae3db11dc954bab1867c1b6cc427bf09955f9cd5bb9a",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-read-denial-preparation-20261020-build.log": "eea900239c9b02335a6c8f45b7b5a0bf44d864cbf3140a0f02d83aea27a0d1b1",
+    "doc/evidence/worker-read-denial-preparation-20261020-build-terminal.json": "013d35c3af6cba4d384c388ceeb8e4a369f6b75b2a75a049158aebe7182fcd81",
+    "doc/evidence/worker-read-denial-preparation-20261020-ctest.log": "9da2b69a066140e2d3fcbbc70c93c736340bc9f637ae0fbd73252e6cf8cf2e96",
+    "doc/evidence/worker-read-denial-preparation-20261020-ctest-terminal.json": "90236ebe94a4c1f80a211023b7e8c1cb47633a106bf7fd0ac6f35805f0019d4e",
+    "doc/evidence/worker-read-denial-preparation-20261020-LastTest.log": "09961e0d528b14dda52b67f28cf62e47d3d6fd6f22be2c2264d1886d5a15f0ca",
+    "doc/evidence/worker-read-denial-preparation-20261020-test-inventory.json": "0483b5a05260ef34efb3238c03faeb13683e417796bc25e3eeff9ec865e03a07",
+    "doc/evidence/worker-read-denial-preparation-20261020-gate.json": "3615ceca0da347dc52b9fcd05fd0671c3f232c02b22241cefc9e3762c04c8529"
+  },
+  "scope": "Canonical permission-denial delivery and production worker factory prerequisites",
+  "verified": [
+    "Native policy and controller denials are returned and saved as the same fixed typed tool result",
+    "Actual child fixture verifies denied result code and exact canonical tool-history content, without file dispatch",
+    "Serial Release build and 54 focused native contracts pass with all frozen inputs and binary sets unchanged"
+  ],
+  "changes": [
+    "Supervisor supports preparation before launch and physical-only drain after failed lease admission",
+    "Worker read instruction policy supports a backend suffix after repository guidance"
+  ],
+  "limitations": [
+    "Deferred supervisor launch and physical-only drain APIs compile but do not yet have dedicated failure-injection qualification",
+    "Instruction suffix ordering compiles; dedicated production factory request qualification remains open",
+    "Production executor factory and server selection remain unfinished",
+    "OS launch failure before a retained process handle requires physical reconciliation; no automatic replay or replacement is qualified",
+    "No full-suite, installed, hosted, rendered-client or live-provider acceptance claim"
+  ],
+  "passed": true
+}

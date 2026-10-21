@@ -13,15 +13,22 @@ struct AgentWorkerSupervisor::Impl {
     std::unique_ptr<AgentWorkerReadOwner> owner;
     std::unique_ptr<AgentWorkerRpcPeer> peer;
     std::mutex mutex;
-    bool started=false,ready=false,executed=false,draining=false;
+    bool started=false,ready=false,executed=false,draining=false,launch_attempted=false,lease_admitted=false;
+    std::shared_ptr<const BoundProcessExecutable> image;AgentWorkerScope scope;std::string identity;
     std::size_t callers=0;
     Impl(PersistenceService& persistence,std::shared_ptr<const BoundProcessExecutable> image,
-        AgentWorkerScope scope,std::string identity,AgentWorkerChannel::Deadline until)
-        :store(persistence),deadline(until){
+        AgentWorkerScope captured_scope,std::string captured_identity,AgentWorkerChannel::Deadline until,bool launch_now=true)
+        :store(persistence),deadline(until),image(std::move(image)),scope(std::move(captured_scope)),identity(std::move(captured_identity)){
         if(scope.root_id!=scope.run_id)throw std::invalid_argument("Worker supervisor requires an ordinary root");
-        worker=AgentWorkerProcess::launch(std::move(image),scope,deadline);
+        if(launch_now)launch();
+    }
+    void launch(){
+        if(launch_attempted||draining)throw Conflict("Worker supervisor cannot relaunch");
+        launch_attempted=true;
+        worker=AgentWorkerProcess::launch(image,scope,deadline);
         lease=store.admit_agent_worker({scope.generation,scope.root_id,scope.run_id,scope.workspace_id,
-            scope.workspace_revision,worker->pid(),std::to_string(worker->creation_time()),worker->executable_identity(),std::move(identity)}).get().spec;
+            scope.workspace_revision,worker->pid(),std::to_string(worker->creation_time()),worker->executable_identity(),identity}).get().spec;
+        lease_admitted=true;
     }
     struct Caller {
         Impl& impl;
@@ -38,10 +45,16 @@ AgentWorkerSupervisor::AgentWorkerSupervisor(PersistenceService& store,std::shar
     AgentWorkerScope scope,std::string identity,AgentWorkerChannel::Deadline deadline)
     :impl_(std::make_unique<Impl>(store,std::move(image),std::move(scope),std::move(identity),deadline)){}
 AgentWorkerSupervisor::~AgentWorkerSupervisor()=default;
+AgentWorkerSupervisor::AgentWorkerSupervisor(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
+std::unique_ptr<AgentWorkerSupervisor> AgentWorkerSupervisor::prepare(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,
+    AgentWorkerScope scope,std::string identity,AgentWorkerChannel::Deadline deadline){
+    return std::unique_ptr<AgentWorkerSupervisor>(new AgentWorkerSupervisor(std::make_unique<Impl>(store,std::move(image),std::move(scope),std::move(identity),deadline,false)));
+}
+void AgentWorkerSupervisor::launch(){std::lock_guard lock(impl_->mutex);impl_->launch();}
 void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
     std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel){
     std::lock_guard lock(impl_->mutex);
-    if(impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
+    if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
     impl_->started=true; // Startup failure is not permission to retry this child.
     impl_->owner=std::make_unique<AgentWorkerReadOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel);
@@ -55,7 +68,7 @@ RunState AgentWorkerSupervisor::execute(){Impl::Caller call(*impl_,true);return 
 void AgentWorkerSupervisor::cancel(){Impl::Caller call(*impl_,false);request_agent_worker_cancellation(*impl_->peer);}
 AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_completed(AgentWorkerChannel::Deadline deadline){
     std::lock_guard lock(impl_->mutex);
-    if(impl_->callers||!impl_->peer)throw Conflict("Worker supervisor requires joined callers and a bound peer");
+    if(impl_->callers||!impl_->lease_admitted||!impl_->peer)throw Conflict("Worker supervisor requires joined callers and a bound peer");
     // The retirement helper checks durable completion before closing the peer.
     try{const auto result=drain_completed_agent_worker(impl_->store,*impl_->worker,*impl_->peer,impl_->lease,deadline);
         impl_->draining=true;return result;}
@@ -63,7 +76,7 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_completed(AgentWorke
 }
 AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_terminal(RunState outcome,const std::string& reason,AgentWorkerChannel::Deadline deadline){
     std::lock_guard lock(impl_->mutex);
-    if(impl_->callers)throw Conflict("Worker supervisor requires joined callers before drain");
+    if(impl_->callers||!impl_->lease_admitted)throw Conflict("Worker supervisor requires joined callers and an admitted lease before terminal drain");
     const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};
     if(!((outcome==RunState::cancelled&&reason=="cancelled")||(outcome==RunState::failed&&failures.contains(reason))))throw std::invalid_argument("Invalid worker terminal observation");
     impl_->draining=true;
@@ -75,5 +88,12 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_terminal(RunState ou
     return {impl_->store.terminate_agent_worker(impl_->lease,outcome,reason).get(),exit};
 }
 const AgentWorkerLeaseSpec& AgentWorkerSupervisor::lease()const noexcept{return impl_->lease;}
-bool AgentWorkerSupervisor::alive()const{return impl_->worker->alive();}
+bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->alive();}
+bool AgentWorkerSupervisor::admitted()const{std::lock_guard lock(impl_->mutex);return impl_->lease_admitted;}
+std::uint32_t AgentWorkerSupervisor::drain_physical(AgentWorkerChannel::Deadline deadline){
+    std::lock_guard lock(impl_->mutex);if(impl_->callers)throw Conflict("Worker physical drain requires joined callers");impl_->draining=true;
+    if(!impl_->worker){if(impl_->launch_attempted)throw AgentWorkerProtocolError("Worker launch requires physical reconciliation");return 0;}
+    if(impl_->peer)return impl_->peer->drain(*impl_->worker,deadline);
+    impl_->worker->channel().close();return impl_->worker->wait(deadline);
+}
 }

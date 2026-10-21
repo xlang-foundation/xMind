@@ -12,6 +12,9 @@ public:
     AgentWorkerSupervisor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,
         AgentWorkerScope,std::string provider_identity_json,AgentWorkerChannel::Deadline);
     ~AgentWorkerSupervisor();
+    static std::unique_ptr<AgentWorkerSupervisor> prepare(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,
+        AgentWorkerScope,std::string provider_identity_json,AgentWorkerChannel::Deadline);
+    void launch();
     AgentWorkerSupervisor(const AgentWorkerSupervisor&)=delete;
     AgentWorkerSupervisor& operator=(const AgentWorkerSupervisor&)=delete;
     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
@@ -22,7 +25,12 @@ public:
     AgentWorkerTerminalObservation drain_terminal(RunState,const std::string& reason,AgentWorkerChannel::Deadline);
     const AgentWorkerLeaseSpec& lease()const noexcept;
     bool alive()const;
+    bool admitted()const;
+    // Exact physical observation only, including failed lease/startup recording.
+    // Does not assert or write any durable terminal outcome.
+    std::uint32_t drain_physical(AgentWorkerChannel::Deadline);
 private:
     struct Impl;std::unique_ptr<Impl> impl_;
+    explicit AgentWorkerSupervisor(std::unique_ptr<Impl>);
 };
 }

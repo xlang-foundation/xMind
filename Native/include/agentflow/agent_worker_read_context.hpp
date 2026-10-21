@@ -11,6 +11,7 @@ struct AgentWorkerReadRequestPolicy {
     std::vector<ModelToolDefinition> tools;
     bool include_usage=false;
     std::optional<std::int64_t> max_output_tokens;
+    std::string instruction_suffix;
 };
 // Backend-owned ordinary read context. Preparing a request works on copies of
 // real native guidance state. Only admission of a claimed, exact model request

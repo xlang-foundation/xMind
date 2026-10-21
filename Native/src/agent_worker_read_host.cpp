@@ -1,6 +1,8 @@
 #include "agentflow/agent_worker_read_host.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/repository_instruction_context.hpp"
+#include "agentflow/permission_waiter.hpp"
+#include "agentflow/agent_permissions.hpp"
 #include <condition_variable>
 #include <thread>
 
@@ -25,6 +27,8 @@ AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation& 
     const auto save=[&](const AgentReadToolResult& result){try{store_.record_agent_worker_read_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerReadOutcomeUnrecorded("Worker read result could not be recorded; stop execution and recover ownership");}};
     AgentReadToolResult result;
     try{result=native_->invoke(call,stop.get_token());}
+    catch(const AgentPermissionDenied&){result={false,R"({"error":{"code":"agent_permission_denied","message":"The selected agent permission rules denied this resource; the tool was not dispatched"}})"};}
+    catch(const PermissionDenied&){result={false,R"({"error":{"code":"permission_denied","message":"Controller denied this operation; the requested effect was not dispatched"}})"};}
     catch(...){const auto original=std::current_exception();save({false,R"({"error":{"code":"worker_read_failed","message":"The backend read did not return a result."}})"});std::rethrow_exception(original);}
     save(result);
     // Retain an actual late result as fact, but do not hand its bytes to a
