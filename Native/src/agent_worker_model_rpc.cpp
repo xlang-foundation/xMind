@@ -22,12 +22,12 @@ ProviderHttpError provider_failure(const std::string& bytes){
 AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
     const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
-        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission")throw AgentWorkerRpcRemoteError("unsupported");
+        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission"&&method!="model.rebuild_request")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto value=request_envelope(payload);
             if(method=="model.admission"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");return encode_agent_worker_model_admission(host.admission(cancel));}
             if(method=="model.prepare_request"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");const auto bytes=encode_agent_model_request(host.prepare_request(cancel));if(bytes.size()>AgentWorkerFrameCodec::max_frame_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}
             if(!value.is_object()||value.size()!=2||!value.at("attempt_id").is_string()||!value.at("request").is_string())throw AgentWorkerRpcRemoteError("rejected");const auto attempt=value.at("attempt_id").get<std::string>();if(attempt.empty()||attempt.size()>128||attempt.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw AgentWorkerRpcRemoteError("rejected");
-            const auto request=decode_agent_model_request(value.at("request").get<std::string>());return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
+            const auto request=decode_agent_model_request(value.at("request").get<std::string>());if(method=="model.rebuild_request"){const auto bytes=encode_agent_model_request(host.rebuild_request(attempt,request,cancel));if(bytes.size()>AgentWorkerFrameCodec::max_frame_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
         }catch(const AgentWorkerRpcRemoteError&){throw;}
          catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
          catch(const AgentWorkerRpcCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
@@ -54,6 +54,12 @@ ModelRequest AgentWorkerModelClient::prepare_request(std::stop_token cancel){
     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker context RPC cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker context RPC deadline elapsed");}
     catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker context RPC rejected its captured owner");if(error.code()=="cancelled")throw TransportCancelled("Worker context owner cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker context deadline elapsed");throw;}
+}
+ModelRequest AgentWorkerModelClient::rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+    try{return decode_agent_model_request(peer_.call("model.rebuild_request",Json{{"attempt_id",attempt},{"request",encode_agent_model_request(request)}}.dump(),{},cancel));}
+    catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker context rebuild RPC cancelled");}
+    catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker context rebuild RPC deadline elapsed");}
+    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker context rebuild rejected its captured owner");if(error.code()=="cancelled")throw TransportCancelled("Worker context rebuild owner cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker context rebuild deadline elapsed");throw;}
 }
 ModelCompletion AgentWorkerModelClient::complete(const std::string& attempt,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel){
     if(!sink)throw std::invalid_argument("Worker model RPC requires its event sink");

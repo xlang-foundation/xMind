@@ -8,6 +8,7 @@ public:
     explicit AgentWorkerModelClient(AgentWorkerRpcPeer& peer):peer_(peer){}
     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
     ModelRequest prepare_request(std::stop_token={});
+    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
     AgentWorkerModelAdmission admission(std::stop_token={});
 private:AgentWorkerRpcPeer& peer_;
 };

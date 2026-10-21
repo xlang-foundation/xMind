@@ -27,6 +27,7 @@ public:
     std::string provider_identity_json()const override{return provider_identity_;}
     std::string execution_policy_id()const override{return policy_id_;}
     ModelRequest prepare_request(std::stop_token cancel)override{return model_.prepare_request(cancel);}
+    ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return model_.rebuild_request(attempt,request,cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer_);}
 private:
     AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;
@@ -43,6 +44,7 @@ public:
     std::string provider_identity_json()const override{return read_->provider_identity_json();}
     std::string execution_policy_id()const override{return read_->execution_policy_id();}
     ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
+    ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return read_->rebuild_request(attempt,request,cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}

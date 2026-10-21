@@ -46,6 +46,11 @@ ModelRequest AgentWorkerModelHost::prepare_request(std::stop_token cancel){
     if(!policy_.request_context)throw Conflict("Worker model owner has no admitted request context");
     (void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();auto request=policy_.request_context(linked.get_token());check();return request;
 }
+ModelRequest AgentWorkerModelHost::rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+    std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");std::stop_source linked;std::stop_callback owner(owner_cancel_,[&]{linked.request_stop();});std::stop_callback caller(cancel,[&]{linked.request_stop();});
+    if(linked.stop_requested())throw TransportCancelled("Worker context rebuild cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker context rebuild deadline elapsed");
+    if(!policy_.rebuild_context)throw Conflict("Worker context rebuild is unavailable");(void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();return policy_.rebuild_context(attempt,request,linked.get_token());
+}
 ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel){
     std::lock_guard lock(invocation_);std::stop_source linked;std::stop_callback owner(owner_cancel_,[&]{linked.request_stop();});std::stop_callback caller(cancel,[&]{linked.request_stop();});
     auto check=[&]{if(linked.stop_requested())throw TransportCancelled("Worker model owner cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker model root deadline elapsed");};check();if(!sink)throw std::invalid_argument("Worker model event sink is required");
@@ -62,7 +67,12 @@ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const 
         catch(const AgentWorkerAuthorityCancelled&){code=AgentWorkerModelFailure::cancelled;}
         catch(const TransportTimeout&){code=AgentWorkerModelFailure::deadline;}
         catch(const AgentWorkerAuthorityExpired&){code=AgentWorkerModelFailure::deadline;}
-        catch(const ProviderHttpError&){code=AgentWorkerModelFailure::provider_failure;}
+        catch(const ProviderHttpError& error){code=AgentWorkerModelFailure::provider_failure;
+            if(error.status==400&&error.code=="context_length_exceeded"&&!first_token&&!linked.stop_requested()&&policy_.reject_context){
+                try{if(policy_.reject_context(attempt,request,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count(),linked.get_token()))code=AgentWorkerModelFailure::context_overflow;}
+                catch(...){throw AgentWorkerModelOutcomeUnrecorded("Context rejection proof could not be recorded");}
+            }
+        }
         catch(const ModelProtocolError&){code=AgentWorkerModelFailure::provider_failure;}
         catch(const TransportError&){code=AgentWorkerModelFailure::provider_failure;}
         catch(...){}

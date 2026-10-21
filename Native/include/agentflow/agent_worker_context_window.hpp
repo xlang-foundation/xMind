@@ -16,6 +16,8 @@ public:
         AgentWorkerChannel::Deadline,std::stop_token);
     ModelRequest prepare(std::stop_token);
     void admit(const std::string&,const ModelRequest&,std::stop_token);
+    bool reject(const std::string&,const ModelRequest&,std::int64_t,std::stop_token);
+    ModelRequest rebuild(const std::string&,const ModelRequest&,std::stop_token);
     ModelCallReservation reserve(const std::string&,std::stop_token);
     ModelCallReservation start(const std::string&,std::stop_token);
     ModelCallReservation finish(const std::string&,std::stop_token);
@@ -35,7 +37,7 @@ private:
     ContextOwner owner_;
     std::optional<PreparedModelContext> prepared_;
     ModelRequest raw_;
-    bool handed_out_=false;
+    bool handed_out_=false,rejected_=false,rebuild_used_=false;
     std::mutex mutex_;
 };
 }

@@ -1,0 +1,346 @@
+diff --git a/Native/include/agentflow/agent_runner_read_workspace.hpp b/Native/include/agentflow/agent_runner_read_workspace.hpp
+index e3bfed71..aaaaaa23 100644
+--- a/Native/include/agentflow/agent_runner_read_workspace.hpp
++++ b/Native/include/agentflow/agent_runner_read_workspace.hpp
+@@ -14,6 +14,7 @@ public:
+     virtual std::string provider_identity_json()const=0;
+     virtual std::string execution_policy_id()const{return "native.direct-agent";}
+     virtual ModelRequest prepare_request(std::stop_token)=0;
++    virtual ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token){throw std::logic_error("Workspace context rebuild is not admitted");}
+     virtual std::unique_ptr<AgentReadToolHost> read_host()=0;
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_context_window.hpp b/Native/include/agentflow/agent_worker_context_window.hpp
+index 15869176..e600ec3d 100644
+--- a/Native/include/agentflow/agent_worker_context_window.hpp
++++ b/Native/include/agentflow/agent_worker_context_window.hpp
+@@ -16,6 +16,8 @@ public:
+         AgentWorkerChannel::Deadline,std::stop_token);
+     ModelRequest prepare(std::stop_token);
+     void admit(const std::string&,const ModelRequest&,std::stop_token);
++    bool reject(const std::string&,const ModelRequest&,std::int64_t,std::stop_token);
++    ModelRequest rebuild(const std::string&,const ModelRequest&,std::stop_token);
+     ModelCallReservation reserve(const std::string&,std::stop_token);
+     ModelCallReservation start(const std::string&,std::stop_token);
+     ModelCallReservation finish(const std::string&,std::stop_token);
+@@ -35,7 +37,7 @@ private:
+     ContextOwner owner_;
+     std::optional<PreparedModelContext> prepared_;
+     ModelRequest raw_;
+-    bool handed_out_=false;
++    bool handed_out_=false,rejected_=false,rebuild_used_=false;
+     std::mutex mutex_;
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_model_host.hpp b/Native/include/agentflow/agent_worker_model_host.hpp
+index 4022e185..5c1a28af 100644
+--- a/Native/include/agentflow/agent_worker_model_host.hpp
++++ b/Native/include/agentflow/agent_worker_model_host.hpp
+@@ -15,6 +15,8 @@ struct AgentWorkerModelPolicy {
+     // runs after the durable model claim and before actual gateway dispatch.
+     std::function<ModelRequest(std::stop_token)> request_context;
+     std::function<void(const std::string&,const ModelRequest&,std::stop_token)> admit_context;
++    std::function<bool(const std::string&,const ModelRequest&,std::int64_t,std::stop_token)> reject_context;
++    std::function<ModelRequest(const std::string&,const ModelRequest&,std::stop_token)> rebuild_context;
+ };
+ // Backend-only model authority. The child can supply an owned request and exact
+ // funded attempt, never provider configuration, credentials or a replacement
+@@ -26,6 +28,7 @@ public:
+         std::chrono::steady_clock::time_point root_deadline,std::stop_token owner_cancel={});
+     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+     ModelRequest prepare_request(std::stop_token={});
++    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentWorkerModelAdmission admission(std::stop_token={});
+     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
+ private:
+diff --git a/Native/include/agentflow/agent_worker_model_rpc.hpp b/Native/include/agentflow/agent_worker_model_rpc.hpp
+index b15ba8ec..7ae2c77c 100644
+--- a/Native/include/agentflow/agent_worker_model_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_model_rpc.hpp
+@@ -8,6 +8,7 @@ public:
+     explicit AgentWorkerModelClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+     ModelRequest prepare_request(std::stop_token={});
++    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentWorkerModelAdmission admission(std::stop_token={});
+ private:AgentWorkerRpcPeer& peer_;
+ };
+diff --git a/Native/include/agentflow/agent_worker_records.hpp b/Native/include/agentflow/agent_worker_records.hpp
+index 885efd84..ffbf6763 100644
+--- a/Native/include/agentflow/agent_worker_records.hpp
++++ b/Native/include/agentflow/agent_worker_records.hpp
+@@ -16,7 +16,7 @@ struct AgentWorkerAuthorityCancelled:std::runtime_error {using std::runtime_erro
+ struct AgentWorkerAuthorityExpired:std::runtime_error {using std::runtime_error::runtime_error;};
+ // Backend-observed dispatch failure only; no child RPC accepts this value.
+ // Unknown retains the existing uncertainty receipt without inventing a cause.
+-enum class AgentWorkerModelFailure {unknown,cancelled,deadline,provider_failure,dispatch_error};
++enum class AgentWorkerModelFailure {unknown,cancelled,deadline,provider_failure,dispatch_error,context_overflow};
+ // Backend-created immutable process/admission metadata. No session channel key,
+ // provider credential, executable path or worker-selected authority is stored.
+ struct AgentWorkerLeaseSpec {
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 2052c6a9..15bea861 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -895,6 +895,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                 if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
+             },token);
+             }catch(const ProviderHttpError& error){
++                if(read_workspace_&&read_workspace_->execution_policy_id()=="native.context"&&!rebuild_used&&!durable_output&&error.status==400&&error.code=="context_length_exceeded"){
++                    if(!budget||!reservation)throw Conflict("Worker context rebuild has no funded native attempt");
++                    request=read_workspace_->rebuild_request(reservation->attempt_id,request,token);
++                    reservation=budget->reserve(id,ModelCallRole::parent,token);rebuild_used=true;continue;
++                }
+                 if(context_manager&&!rebuild_used&&settings_.context->compaction.automatic&&!durable_output&&
+                    error.status==400&&error.code=="context_length_exceeded"){
+                     finish_context_attempt(InferenceAttemptOutcome::context_overflow,{},"context_length_exceeded");
+diff --git a/Native/src/agent_worker_coding_owner.cpp b/Native/src/agent_worker_coding_owner.cpp
+index ffbb257b..4d97c02f 100644
+--- a/Native/src/agent_worker_coding_owner.cpp
++++ b/Native/src/agent_worker_coding_owner.cpp
+@@ -24,6 +24,8 @@ struct AgentWorkerCodingOwner::Impl {
+                 [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel);
+             model_policy.request_context=[this](std::stop_token stop){return context_window->prepare(stop);};
+             model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context_window->admit(attempt,request,stop);};
++            model_policy.reject_context=[this](const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token stop){return context_window->reject(attempt,request,elapsed,stop);};
++            model_policy.rebuild_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){return context_window->rebuild(attempt,request,stop);};
+             hooks.reserve=[this](const std::string& attempt,std::stop_token stop){return context_window->reserve(attempt,stop);};
+             hooks.start=[this](const std::string& attempt,std::stop_token stop){return context_window->start(attempt,stop);};
+             hooks.finish=[this](const std::string& attempt,std::stop_token stop){return context_window->finish(attempt,stop);};
+diff --git a/Native/src/agent_worker_context_window.cpp b/Native/src/agent_worker_context_window.cpp
+index 5fcae907..c20cf475 100644
+--- a/Native/src/agent_worker_context_window.cpp
++++ b/Native/src/agent_worker_context_window.cpp
+@@ -28,18 +28,31 @@ void AgentWorkerContextWindow::check(std::stop_token cancel){
+ }
+ ModelRequest AgentWorkerContextWindow::prepare(std::stop_token cancel){
+     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
++    if(rejected_)throw Conflict("Rejected worker context requires its one typed rebuild");
+     if(prepared_)return prepared_->request;
+     store_.validate_agent_worker_model_window(lease_,deadline_,owner_cancel_,cancel).get();
+     raw_=preview_(cancel);auto trusted=raw_;
+     std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});
+     trusted.canonical_window.reset();
+-    prepared_=manager_.prepare(owner_,trusted,budget_,nullptr,cancel);handed_out_=false;check(cancel);return prepared_->request;
++    prepared_=manager_.prepare(owner_,trusted,budget_,nullptr,cancel);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
+ }
+ void AgentWorkerContextWindow::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
+     if(!prepared_||!handed_out_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Worker changed its funded context window");
+     admit_(attempt,raw_,cancel);
+ }
++bool AgentWorkerContextWindow::reject(const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token cancel){
++    std::lock_guard lock(mutex_);check(cancel);if(!policy_.runtime.compaction.automatic||rebuild_used_)return false;
++    if(!prepared_||!handed_out_||rejected_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rejection differs from its actual funded request");
++    store_.finish_inference_attempt({prepared_->inference_step_id,attempt,InferenceAttemptOutcome::context_overflow,{},"context_length_exceeded",elapsed}).get();rejected_=true;return true;
++}
++ModelRequest AgentWorkerContextWindow::rebuild(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
++    std::lock_guard lock(mutex_);check(cancel);
++    if(!prepared_||!rejected_||rebuild_used_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rebuild differs from its one actual rejection");
++    const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="rejected")throw Conflict("Context rebuild lacks its backend rejection receipt");
++    rebuild_used_=true;auto trusted=raw_;std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});trusted.canonical_window.reset();
++    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,budget_,nullptr,cancel);prepared_=std::move(rebuilt);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
++}
+ ModelCallReservation AgentWorkerContextWindow::reserve(const std::string&,std::stop_token cancel){
+     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||handed_out_)throw Conflict("Worker context reservation is not available");
+     handed_out_=true;return prepared_->inference;
+diff --git a/Native/src/agent_worker_model_host.cpp b/Native/src/agent_worker_model_host.cpp
+index a5ba9b99..45787f57 100644
+--- a/Native/src/agent_worker_model_host.cpp
++++ b/Native/src/agent_worker_model_host.cpp
+@@ -46,6 +46,11 @@ ModelRequest AgentWorkerModelHost::prepare_request(std::stop_token cancel){
+     if(!policy_.request_context)throw Conflict("Worker model owner has no admitted request context");
+     (void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();auto request=policy_.request_context(linked.get_token());check();return request;
+ }
++ModelRequest AgentWorkerModelHost::rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
++    std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");std::stop_source linked;std::stop_callback owner(owner_cancel_,[&]{linked.request_stop();});std::stop_callback caller(cancel,[&]{linked.request_stop();});
++    if(linked.stop_requested())throw TransportCancelled("Worker context rebuild cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker context rebuild deadline elapsed");
++    if(!policy_.rebuild_context)throw Conflict("Worker context rebuild is unavailable");(void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();return policy_.rebuild_context(attempt,request,linked.get_token());
++}
+ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel){
+     std::lock_guard lock(invocation_);std::stop_source linked;std::stop_callback owner(owner_cancel_,[&]{linked.request_stop();});std::stop_callback caller(cancel,[&]{linked.request_stop();});
+     auto check=[&]{if(linked.stop_requested())throw TransportCancelled("Worker model owner cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw TransportTimeout("Worker model root deadline elapsed");};check();if(!sink)throw std::invalid_argument("Worker model event sink is required");
+@@ -62,7 +67,12 @@ ModelCompletion AgentWorkerModelHost::complete(const std::string& attempt,const
+         catch(const AgentWorkerAuthorityCancelled&){code=AgentWorkerModelFailure::cancelled;}
+         catch(const TransportTimeout&){code=AgentWorkerModelFailure::deadline;}
+         catch(const AgentWorkerAuthorityExpired&){code=AgentWorkerModelFailure::deadline;}
+-        catch(const ProviderHttpError&){code=AgentWorkerModelFailure::provider_failure;}
++        catch(const ProviderHttpError& error){code=AgentWorkerModelFailure::provider_failure;
++            if(error.status==400&&error.code=="context_length_exceeded"&&!first_token&&!linked.stop_requested()&&policy_.reject_context){
++                try{if(policy_.reject_context(attempt,request,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count(),linked.get_token()))code=AgentWorkerModelFailure::context_overflow;}
++                catch(...){throw AgentWorkerModelOutcomeUnrecorded("Context rejection proof could not be recorded");}
++            }
++        }
+         catch(const ModelProtocolError&){code=AgentWorkerModelFailure::provider_failure;}
+         catch(const TransportError&){code=AgentWorkerModelFailure::provider_failure;}
+         catch(...){}
+diff --git a/Native/src/agent_worker_model_rpc.cpp b/Native/src/agent_worker_model_rpc.cpp
+index 6233e954..1e58c4eb 100644
+--- a/Native/src/agent_worker_model_rpc.cpp
++++ b/Native/src/agent_worker_model_rpc.cpp
+@@ -22,12 +22,12 @@ ProviderHttpError provider_failure(const std::string& bytes){
+ AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
+     const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
+     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+-        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission")throw AgentWorkerRpcRemoteError("unsupported");
++        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission"&&method!="model.rebuild_request")throw AgentWorkerRpcRemoteError("unsupported");
+         try{const auto value=request_envelope(payload);
+             if(method=="model.admission"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");return encode_agent_worker_model_admission(host.admission(cancel));}
+             if(method=="model.prepare_request"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");const auto bytes=encode_agent_model_request(host.prepare_request(cancel));if(bytes.size()>AgentWorkerFrameCodec::max_frame_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}
+             if(!value.is_object()||value.size()!=2||!value.at("attempt_id").is_string()||!value.at("request").is_string())throw AgentWorkerRpcRemoteError("rejected");const auto attempt=value.at("attempt_id").get<std::string>();if(attempt.empty()||attempt.size()>128||attempt.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw AgentWorkerRpcRemoteError("rejected");
+-            const auto request=decode_agent_model_request(value.at("request").get<std::string>());return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
++            const auto request=decode_agent_model_request(value.at("request").get<std::string>());if(method=="model.rebuild_request"){const auto bytes=encode_agent_model_request(host.rebuild_request(attempt,request,cancel));if(bytes.size()>AgentWorkerFrameCodec::max_frame_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
+         }catch(const AgentWorkerRpcRemoteError&){throw;}
+          catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+          catch(const AgentWorkerRpcCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+@@ -55,6 +55,12 @@ ModelRequest AgentWorkerModelClient::prepare_request(std::stop_token cancel){
+     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker context RPC deadline elapsed");}
+     catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker context RPC rejected its captured owner");if(error.code()=="cancelled")throw TransportCancelled("Worker context owner cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker context deadline elapsed");throw;}
+ }
++ModelRequest AgentWorkerModelClient::rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
++    try{return decode_agent_model_request(peer_.call("model.rebuild_request",Json{{"attempt_id",attempt},{"request",encode_agent_model_request(request)}}.dump(),{},cancel));}
++    catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker context rebuild RPC cancelled");}
++    catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker context rebuild RPC deadline elapsed");}
++    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker context rebuild rejected its captured owner");if(error.code()=="cancelled")throw TransportCancelled("Worker context rebuild owner cancelled");if(error.code()=="timeout")throw TransportTimeout("Worker context rebuild deadline elapsed");throw;}
++}
+ ModelCompletion AgentWorkerModelClient::complete(const std::string& attempt,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token cancel){
+     if(!sink)throw std::invalid_argument("Worker model RPC requires its event sink");
+     try{return decode_agent_model_completion(peer_.call("model.complete",Json{{"attempt_id",attempt},{"request",encode_agent_model_request(request)}}.dump(),[&](const std::string& event){sink(decode_agent_model_event(event));},cancel));}
+diff --git a/Native/src/agent_worker_read_workspace.cpp b/Native/src/agent_worker_read_workspace.cpp
+index 0e1e20ce..4b109ce3 100644
+--- a/Native/src/agent_worker_read_workspace.cpp
++++ b/Native/src/agent_worker_read_workspace.cpp
+@@ -27,6 +27,7 @@ public:
+     std::string provider_identity_json()const override{return provider_identity_;}
+     std::string execution_policy_id()const override{return policy_id_;}
+     ModelRequest prepare_request(std::stop_token cancel)override{return model_.prepare_request(cancel);}
++    ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return model_.rebuild_request(attempt,request,cancel);}
+     std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer_);}
+ private:
+     AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;
+@@ -43,6 +44,7 @@ public:
+     std::string provider_identity_json()const override{return read_->provider_identity_json();}
+     std::string execution_policy_id()const override{return read_->execution_policy_id();}
+     ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
++    ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return read_->rebuild_request(attempt,request,cancel);}
+     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
+     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index faa672df..bd6b8cd4 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3169,7 +3169,7 @@ AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string&
+     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_claim_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker model dispatch not found");
+     try{const auto value=Json::parse(text(rows[0][0]));const auto& s=value.at("spec");AgentWorkerModelClaimRecord record{{s.at("generation").get<std::string>(),s.at("root_run_id").get<std::string>(),s.at("owner_run_id").get<std::string>(),s.at("attempt_id").get<std::string>(),s.at("request_binding").get<std::string>()},value.at("state").get<std::string>(),value.at("actual_response_json").get<std::string>(),value.at("response_binding").get<std::string>()};
+         record.actual_assistant_json=value.value("actual_assistant_json",std::string{});record.assistant_binding=value.value("assistant_binding",std::string{});
+-        if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
++        if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain"&&record.state!="rejected")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
+         if(!record.actual_assistant_json.empty()){if(record.state!="responded"||record.assistant_binding!=context_digest(record.actual_assistant_json))throw DatabaseError("Stored worker assistant binding differs");(void)object_json(record.actual_assistant_json,8*1024*1024);}else if(!record.assistant_binding.empty())throw DatabaseError("Worker assistant binding has no receipt");
+         if(record.state=="responded"){(void)object_json(record.actual_response_json,8*1024*1024);if(record.response_binding!=context_digest(record.actual_response_json))throw DatabaseError("Stored worker response binding differs");}
+         else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
+@@ -3461,8 +3461,15 @@ AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWork
+ }
+ 
+ AgentWorkerModelClaimRecord Repository::interrupt_agent_worker_model(const AgentWorkerModelClaimSpec& spec,AgentWorkerModelFailure failure){
+-    std::string code;switch(failure){case AgentWorkerModelFailure::unknown:break;case AgentWorkerModelFailure::cancelled:code="cancelled";break;case AgentWorkerModelFailure::deadline:code="deadline";break;case AgentWorkerModelFailure::provider_failure:code="provider_failure";break;case AgentWorkerModelFailure::dispatch_error:code="dispatch_error";break;default:throw std::invalid_argument("Invalid backend worker model failure");}
++    std::string code;switch(failure){case AgentWorkerModelFailure::unknown:break;case AgentWorkerModelFailure::cancelled:code="cancelled";break;case AgentWorkerModelFailure::deadline:code="deadline";break;case AgentWorkerModelFailure::provider_failure:code="provider_failure";break;case AgentWorkerModelFailure::dispatch_error:code="dispatch_error";break;case AgentWorkerModelFailure::context_overflow:code="context_overflow";break;default:throw std::invalid_argument("Invalid backend worker model failure");}
+     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(record.spec)!=worker_claim_spec_json(spec))throw Conflict("Worker dispatch interruption has a foreign binding");
++    if(record.state=="rejected"){if(failure!=AgentWorkerModelFailure::context_overflow)throw Conflict("Known context rejection cannot become uncertainty");tx.commit();return record;}
++    if(failure==AgentWorkerModelFailure::context_overflow){
++        if(record.state!="dispatching")throw Conflict("Context rejection requires its live dispatch");
++        const auto proof=db.execute("SELECT m.step_id FROM inference_attempt_members m JOIN inference_steps s ON s.id=m.step_id WHERE m.root_run_id=? AND m.attempt_id=? AND s.owner_run_id=? AND s.state='context_overflow' AND m.outcome='context_overflow' AND m.failure_code='context_length_exceeded'",{spec.root_run_id,spec.attempt_id,spec.owner_run_id}).rows;
++        if(proof.size()!=1)throw Conflict("Context rejection lacks its typed no-output proof");
++        record.state="rejected";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));impl_->event(spec.owner_run_id,"worker.model.rejected",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"failure_code",code}}.dump());tx.commit();return record;
++    }
+     if(record.state=="responded")throw Conflict("Acknowledged worker response cannot become uncertain");if(record.state=="uncertain"){tx.commit();return record;}record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));auto detail=Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id}};if(!code.empty())detail["failure_code"]=code;impl_->event(spec.owner_run_id,"worker.model.uncertain",detail.dump());tx.commit();return record;
+ }
+ 
+@@ -3477,6 +3484,7 @@ AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const
+         if(receipt.contains("provider_context")){if(receipt.at("provider_context")!=identity)throw Conflict("Backend assistant provider context differs");context=receipt.at("provider_context").dump();}
+         if(format_agent_model_assistant(decode_agent_model_completion(actual),identity.at("model_id").get<std::string>(),elapsed.get<std::int64_t>(),first,context)!=assistant)throw Conflict("Backend assistant differs from actual model response");
+     }
++    if(record.state=="rejected")throw Conflict("Rejected worker inference cannot acquire a response");
+     if(record.state=="responded"){if(record.actual_response_json!=actual||(!assistant.empty()&&record.actual_assistant_json!=assistant))throw Conflict("Acknowledged worker response changed");tx.commit();return record;}
+     record.state="responded";record.actual_response_json=actual;record.response_binding=context_digest(actual);
+     if(!assistant.empty()){record.actual_assistant_json=assistant;record.assistant_binding=context_digest(assistant);}
+diff --git a/Native/tests/agent_worker_coding_context_fixture.hpp b/Native/tests/agent_worker_coding_context_fixture.hpp
+index 819f5cc7..203f34c5 100644
+--- a/Native/tests/agent_worker_coding_context_fixture.hpp
++++ b/Native/tests/agent_worker_coding_context_fixture.hpp
+@@ -1,14 +1,14 @@
+ namespace worker_coding_context_fixture {
+ using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;using worker_coding_fixture::check;using worker_coding_fixture::write;
+ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::vector<std::string>& imports){
+-    for(const std::string mode:{"coding_context","coding_context_compact"}){
+-    const bool compact=mode=="coding_context_compact";
++    for(const std::string mode:{"coding_context","coding_context_compact","coding_context_overflow","coding_context_overflow_repeat"}){
++    const bool compact=mode=="coding_context_compact",overflow=mode.starts_with("coding_context_overflow"),repeat=mode=="coding_context_overflow_repeat",rolling=compact||overflow;
+     const auto directory=folder/mode;check(std::filesystem::create_directory(directory),"Context worker workspace must be fresh");write(directory/"AGENTS.md","WORKER_COUNTED_CONTEXT_GUIDANCE\n");write(directory/"actual.txt","Actual counted worker bytes\n");WorkspaceTools workspace(directory.string());
+     AgentSettings settings;settings.provider={endpoint+"/"+mode+"/responses","worker-rpc-fixture",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::responses;settings.provider.deadline=8s;settings.provider.idle_timeout=6s;settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.max_output_tokens=128;settings.credential=CredentialReference{"worker","rpc-model","provider:chat"};
+     ContextRuntimePolicy policy;policy.buffer_tokens=20;policy.compaction.maintenance_deadline_ms=10000;policy.compaction.retain_recent_groups=1;
+     const auto identity=Json{{"wire","responses"},{"model_id","worker-rpc-fixture"}}.dump();VerifiedContextCapacity capacity;capacity.provider_identity_json=identity;capacity.wire="responses";capacity.model_id="worker-rpc-fixture";capacity.route_identity=context_route_identity(settings.provider,identity);capacity.source_binding=context_digest("Explicit controlled worker capacity fixture");capacity.revision=1;capacity.verified=true;capacity.input_tokens=compact?160:4096;capacity.output_tokens=256;capacity.context_tokens=8192;capacity.default_output_tokens=128;policy.model_capacities.emplace(capacity.model_id,capacity);settings.context=policy;
+     AgentDefinitionStore(store).apply("agents:\n  - id: context.worker\n    mode: primary\n    placement: process\n    model_id: worker-rpc-fixture\n    instructions: Inspect the counted actual file.\n    tools: [read_file]\n");const std::string id="rpc-"+mode,session=id+"-session";store.create_session(session,"Production counted worker context").get();ExecutionPlatform service(store,settings,1,2,[&](PersistenceService& actual,const AgentSettings& captured){return make_agent_worker_coding_executor(actual,captured,image);});service.select_session_agent(session,service.agent_definitions().front(),0);service.submit(id,session,"Read the actual file using the counted context window.");const auto until=Clock::now()+15s;while(Clock::now()<until&&!service.idle())std::this_thread::sleep_for(5ms);
+-    check(service.idle()&&service.healthy()&&store.run(id).get().state==RunState::completed,"Counted context worker must complete and physically drain");const auto history=store.run_history(id).get();check(history.size()==(compact?6:4)&&Json::parse(history.back().json).at("content")=="Counted worker context verified."&&store.root_budget(id).get().spec.policy_id=="native.context"&&store.root_budget(id).get().model_calls_reserved==(compact?4:2),"Two typed context attempts must retain exact canonical tool history without duplicate funding");check(store.operations(id).get().empty(),"Context counting must not manufacture effect approvals");const auto events=store.events(id).get();const auto admitted=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.lease.admitted";});check(admitted!=events.end(),"Counted context requires an actual unified xmind child");const auto lease=store.agent_worker_lease(Json::parse(admitted->json).at("generation").get<std::string>()).get();check(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Counted context worker must physically retire");unsigned attempts=0;unsigned maintenance=0;for(const auto& event:events)if(event.kind=="budget.model_call.reserved"){if(Json::parse(event.json).value("purpose",std::string{})=="context_compaction"){++maintenance;continue;}const auto attempt=Json::parse(event.json).at("attempt_id").get<std::string>();const auto claim=store.agent_worker_model_claim(id,attempt).get();check(claim.state=="responded"&&claim.spec.generation==lease.spec.generation&&!claim.actual_assistant_json.empty(),"Typed inference must retain its exact actual worker response");++attempts;}check(attempts==(compact?3:2)&&maintenance==(compact?1:0),"Context reservation handoff must retain actual inference and maintenance charges without duplicate funding");XlangSqlite audit((folder/"state.sqlite").string(),imports);check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_steps WHERE root_run_id=? AND state='completed'",{id}).rows.at(0).at(0))==(compact?3:2),"Every actual inference must retain typed successful completion");check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_attempt_members m JOIN inference_steps s ON s.id=m.step_id WHERE s.root_run_id=? AND m.outcome='completed' AND length(m.input_binding)=64 AND m.binding_json!='null'",{id}).rows.at(0).at(0))==(compact?3:2),"Typed physical members must retain exact original input bindings");if(compact){AgentRunner inspector(store,settings);const auto projection=store.context_projection({ContextScopeKind::session,session},inspector.context_binding()).get();check(projection.has_value()&&projection->kind==ContextProjectionKind::responses_canonical&&!projection->actual_response_json.empty(),"Actual worker compaction must retain a canonical checkpoint and actual provider receipt");}std::cout<<"Production counted context worker "<<mode<<" verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement."<<std::endl;
++    check(service.idle()&&service.healthy()&&store.run(id).get().state==(repeat?RunState::failed:RunState::completed),"Counted context worker must complete and physically drain");const auto history=store.run_history(id).get();check(history.size()==(repeat?5:rolling?6:4)&&(repeat||Json::parse(history.back().json).at("content")=="Counted worker context verified.")&&store.root_budget(id).get().spec.policy_id=="native.context"&&store.root_budget(id).get().model_calls_reserved==(overflow?5:compact?4:2),"Two typed context attempts must retain exact canonical tool history without duplicate funding");check(store.operations(id).get().empty(),"Context counting must not manufacture effect approvals");const auto events=store.events(id).get();const auto admitted=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.lease.admitted";});check(admitted!=events.end(),"Counted context requires an actual unified xmind child");const auto lease=store.agent_worker_lease(Json::parse(admitted->json).at("generation").get<std::string>()).get();check(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Counted context worker must physically retire");unsigned attempts=0;unsigned maintenance=0;unsigned rejections=0;unsigned uncertain=0;for(const auto& event:events)if(event.kind=="budget.model_call.reserved"){if(Json::parse(event.json).value("purpose",std::string{})=="context_compaction"){++maintenance;continue;}const auto attempt=Json::parse(event.json).at("attempt_id").get<std::string>();const auto claim=store.agent_worker_model_claim(id,attempt).get();if(claim.state=="rejected"){++rejections;check(overflow&&claim.actual_response_json.empty()&&claim.actual_assistant_json.empty(),"Known rejected inference must not invent output");}else if(claim.state=="uncertain"){++uncertain;check(repeat&&claim.actual_response_json.empty(),"Repeated rejection must stop without a third dispatch");}else check(claim.state=="responded"&&claim.spec.generation==lease.spec.generation&&!claim.actual_assistant_json.empty(),"Typed inference must retain its exact actual worker response");++attempts;}check(attempts==(overflow?4:compact?3:2)&&maintenance==(rolling?1:0)&&rejections==(overflow?1:0)&&uncertain==(repeat?1:0),"Context reservation handoff must retain actual inference and maintenance charges without duplicate funding");XlangSqlite audit((folder/"state.sqlite").string(),imports);check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_steps WHERE root_run_id=? AND state='completed'",{id}).rows.at(0).at(0))==(repeat?2:rolling?3:2),"Every actual inference must retain typed successful completion");check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_attempt_members m JOIN inference_steps s ON s.id=m.step_id WHERE s.root_run_id=? AND m.outcome='completed' AND length(m.input_binding)=64 AND m.binding_json!='null'",{id}).rows.at(0).at(0))==(repeat?2:rolling?3:2),"Typed physical members must retain exact original input bindings");if(overflow){check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_steps WHERE root_run_id=? AND rebuild_count=1",{id}).rows.at(0).at(0))==1&&std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_attempt_members m JOIN inference_steps s ON s.id=m.step_id WHERE s.root_run_id=? AND m.outcome='context_overflow' AND m.failure_code='context_length_exceeded'",{id}).rows.at(0).at(0))==1,"One original logical inference may have one proved overflow and one funded rebuild only");check(std::count_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.model.rejected";})==1,"Known original overflow must have one backend rejection receipt");if(repeat)check(std::get<std::int64_t>(audit.execute("SELECT count(*) FROM inference_steps WHERE root_run_id=? AND state='interrupted'",{id}).rows.at(0).at(0))==1,"Repeated overflow must retire its logical group without another rebuild");}if(rolling){AgentRunner inspector(store,settings);const auto projection=store.context_projection({ContextScopeKind::session,session},inspector.context_binding()).get();check(projection.has_value()&&projection->kind==ContextProjectionKind::responses_canonical&&!projection->actual_response_json.empty(),"Actual worker compaction must retain a canonical checkpoint and actual provider receipt");}std::cout<<"Production counted context worker "<<mode<<" verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement."<<std::endl;
+     }
+ }
+ }
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index e411409e..e7daa07f 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -88,7 +88,7 @@ void tool_turns(PersistenceService& store){
+     root(store,"turn-root");const auto admitted=store.admit_agent_worker(lease("turn-root","turn-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+     store.reserve_agent_worker_model(admitted,"turn-next",deadline).get();store.reserve_agent_worker_model(admitted,"prestarted-next",deadline).get();store.start_agent_worker_model(admitted,"prestarted-next",deadline).get();
+     store.reserve_agent_worker_model(admitted,"turn-model",deadline).get();store.start_agent_worker_model(admitted,"turn-model",deadline).get();const auto model=claim(admitted,"turn-model");store.claim_agent_worker_model(model).get();
+-    const std::string args=R"({"path":"actual.txt"})",one=R"({"content":"first exact result","number":1.0000000000000001})",two=R"({"error":"native pre-dispatch rejection"})";ModelCompletion response{"Actual tool assistant","","tool_calls",R"({"total_tokens":17})",{{"turn-one","read_file",args},{"turn-two","read_file",args}},"[]"};const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(admitted,"turn-model",deadline).get();
++    const std::string args=R"({"path":"actual.txt"})",one=R"({"content":"first exact result","number":1.0000000000000001})",two=R"({"error":"native pre-dispatch rejection"})";ModelCompletion response{"Actual tool assistant","","tool_calls",R"({"total_tokens":17})",{{"turn-one","read_file",args},{"turn-two","read_file",args}},"[]"};const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);rejects<Conflict>([&]{store.interrupt_agent_worker_model(model,AgentWorkerModelFailure::context_overflow).get();});require(store.agent_worker_model_claim(model.root_run_id,model.attempt_id).get().state=="dispatching","Ordinary dispatch cannot invent a typed context-overflow proof");store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(admitted,"turn-model",deadline).get();
+     const auto window_events=store.events(admitted.owner_run_id).get().size();rejects<Conflict>([&]{store.validate_agent_worker_model_window(admitted,deadline).get();});require(store.events(admitted.owner_run_id).get().size()==window_events,"Premature model preview cannot mutate history or fund maintenance");
+     rejects<NotFound>([&]{store.commit_agent_worker_read_turn(admitted,"turn-model",deadline).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(admitted,"blocked-next",deadline).get();});rejects<Conflict>([&]{store.start_agent_worker_model(admitted,"turn-next",deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_model(claim(admitted,"prestarted-next")).get();});
+     rejects<Conflict>([&]{store.agent_worker_tool_event(admitted,"turn-model",0,true,deadline).get();});rejects<std::invalid_argument>([&]{store.agent_worker_tool_event(admitted,"turn-model",64,false,deadline).get();});
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index a1015581..116e75cb 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,4 +1,4 @@
+-// Independent controlled native provider; one hundred fifty-three intentional requests, no live key.
++// Independent controlled native provider; one hundred seventy-three intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+@@ -9,7 +9,7 @@ import {join} from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={worker_context_count_failure:0,worker_context_count_failure_count:1,worker_context_count_cancel:0,worker_context_count_cancel_count:1,worker_context_inference_failure:1,worker_context_inference_failure_count:1,worker_context_inference_cancel:1,worker_context_inference_cancel_count:1,coding_context:2,coding_context_count:2,coding_context_compact:3,coding_context_compact_count:4,coding_context_compact_compact:1,coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={coding_context_overflow:4,coding_context_overflow_count:5,coding_context_overflow_compact:1,coding_context_overflow_repeat:4,coding_context_overflow_repeat_count:5,coding_context_overflow_repeat_compact:1,worker_context_count_failure:0,worker_context_count_failure_count:1,worker_context_count_cancel:0,worker_context_count_cancel_count:1,worker_context_inference_failure:1,worker_context_inference_failure_count:1,worker_context_inference_cancel:1,worker_context_inference_cancel_count:1,coding_context:2,coding_context_count:2,coding_context_compact:3,coding_context_compact_count:4,coding_context_compact_compact:1,coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -53,11 +53,12 @@ const server=createServer((request,response)=>{
+    response.writeHead(500,{'content-type':'application/json'});response.end('{"error":{"code":"synthetic_context_failure","message":"controlled context transport failure"}}');return;
+   }
+   if(request.url.startsWith('/coding_context')){
+-   assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.ok(body.input.some(m=>m.role==='system'&&JSON.stringify(m).includes('WORKER_COUNTED_CONTEXT_GUIDANCE')));const match=/^\/(coding_context(?:_compact)?)\/responses(?:\/(input_tokens|compact))?$/.exec(request.url);assert.ok(match);const mode=match[1],compact=mode==='coding_context_compact';
++   assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.ok(body.input.some(m=>m.role==='system'&&JSON.stringify(m).includes('WORKER_COUNTED_CONTEXT_GUIDANCE')));const match=/^\/(coding_context(?:_compact|_overflow(?:_repeat)?)?)\/responses(?:\/(input_tokens|compact))?$/.exec(request.url);assert.ok(match);const mode=match[1],compact=mode==='coding_context_compact',overflow=mode.startsWith('coding_context_overflow'),rolling=compact||overflow;
+    const outputs=body.input.filter(m=>m.type==='function_call_output');for(const result of outputs)assert.equal(JSON.parse(result.output).content,'Actual counted worker bytes\n');
+-   if(match[2]==='input_tokens'){const key=mode+'_count';assert.ok(++counts[key]<=expected[key]);const value=compact?10+outputs.length*80+body.input.filter(m=>m.type==='compaction').length*20:42;response.writeHead(200,{'content-type':'application/json'});response.end(JSON.stringify({object:'response.input_tokens',input_tokens:value}));return;}
+-   if(match[2]==='compact'){assert.equal(compact,true);assert.equal(++counts[mode+'_compact'],1);assert.ok(outputs.length>=1);const retained=body.input.filter(m=>m.role==='user').map((m,i)=>({...m,id:'user_worker_compact_'+i,status:'completed'}));response.writeHead(200,{'content-type':'application/json'});response.end(JSON.stringify({id:'resp_worker_compaction',object:'response.compaction',created_at:1764967971,output:[...retained,{id:'cmp_worker',type:'compaction',encrypted_content:'synthetic-worker-private-canonical'}],usage:{input_tokens:31,output_tokens:7,total_tokens:38}}));return;}
+-   const phase=++counts[mode],last=compact?3:2;assert.ok(phase<=last);assert.equal(body.stream,true);assert.equal(body.max_output_tokens,128);assert.deepEqual(body.tools.map(t=>t.name),['read_file']);if(phase>1)assert.ok(outputs.length>=1);if(compact&&phase===3){assert.ok(body.input.some(m=>m.type==='compaction'&&m.encrypted_content==='synthetic-worker-private-canonical'));assert.ok(outputs.some(m=>m.call_id==='context-worker-read-2'));assert.equal(outputs.some(m=>m.call_id==='context-worker-read-1'),false);}
++   if(match[2]==='input_tokens'){const key=mode+'_count';assert.ok(++counts[key]<=expected[key]);const value=rolling?10+outputs.length*80+body.input.filter(m=>m.type==='compaction').length*20:42;response.writeHead(200,{'content-type':'application/json'});response.end(JSON.stringify({object:'response.input_tokens',input_tokens:value}));return;}
++   if(match[2]==='compact'){assert.equal(rolling,true);assert.equal(++counts[mode+'_compact'],1);assert.ok(outputs.length>=1);const retained=body.input.filter(m=>m.role==='user').map((m,i)=>({...m,id:'user_worker_compact_'+i,status:'completed'}));response.writeHead(200,{'content-type':'application/json'});response.end(JSON.stringify({id:'resp_worker_compaction',object:'response.compaction',created_at:1764967971,output:[...retained,{id:'cmp_worker',type:'compaction',encrypted_content:'synthetic-worker-private-canonical'}],usage:{input_tokens:31,output_tokens:7,total_tokens:38}}));return;}
++   const phase=++counts[mode],last=overflow?4:compact?3:2;assert.ok(phase<=last);assert.equal(body.stream,true);assert.equal(body.max_output_tokens,128);assert.deepEqual(body.tools.map(t=>t.name),['read_file']);if(phase>1)assert.ok(outputs.length>=1);if(rolling&&phase===last){assert.ok(body.input.some(m=>m.type==='compaction'&&m.encrypted_content==='synthetic-worker-private-canonical'));assert.ok(outputs.some(m=>m.call_id==='context-worker-read-2'));assert.equal(outputs.some(m=>m.call_id==='context-worker-read-1'),false);}
++   if(overflow&&(phase===3||mode.endsWith('_repeat')&&phase===4)){response.writeHead(400,{'content-type':'application/json'});response.end('{"error":{"code":"context_length_exceeded","message":"controlled no-output context rejection"}}');return;}
+    const item=phase<last?{id:'fc_worker_context_'+mode+'_'+phase,type:'function_call',status:'completed',call_id:'context-worker-read-'+phase,name:'read_file',arguments:JSON.stringify({path:'actual.txt'})}:{id:'msg_worker_context_'+mode,type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Counted worker context verified.',annotations:[]}]};sendContext(response,'resp_worker_context_'+mode+'_'+phase,[item]);return;
+   }
+   if(request.url==='/factory_notify'){
+@@ -216,7 +217,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has("worker_context_count_cancel")&&aborted.has("worker_context_inference_cancel"));assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred fifty-three requests: four failed/cancelled token counts and two failed/cancelled inference requests, five counted context inference windows plus six native token counts and one compaction, eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred seventy-three requests: two single-rebuild context cases with eight inference attempts, ten counts and two compactions, four failed/cancelled token counts and two failed/cancelled inference requests, five counted context inference windows plus six native token counts and one compaction, eleven actual skill worker windows, sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+ 
+ assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});

@@ -15,6 +15,8 @@ struct AgentWorkerModelPolicy {
     // runs after the durable model claim and before actual gateway dispatch.
     std::function<ModelRequest(std::stop_token)> request_context;
     std::function<void(const std::string&,const ModelRequest&,std::stop_token)> admit_context;
+    std::function<bool(const std::string&,const ModelRequest&,std::int64_t,std::stop_token)> reject_context;
+    std::function<ModelRequest(const std::string&,const ModelRequest&,std::stop_token)> rebuild_context;
 };
 // Backend-only model authority. The child can supply an owned request and exact
 // funded attempt, never provider configuration, credentials or a replacement
@@ -26,6 +28,7 @@ public:
         std::chrono::steady_clock::time_point root_deadline,std::stop_token owner_cancel={});
     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
     ModelRequest prepare_request(std::stop_token={});
+    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
     AgentWorkerModelAdmission admission(std::stop_token={});
     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:

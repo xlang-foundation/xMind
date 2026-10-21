@@ -28,17 +28,30 @@ void AgentWorkerContextWindow::check(std::stop_token cancel){
 }
 ModelRequest AgentWorkerContextWindow::prepare(std::stop_token cancel){
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
+    if(rejected_)throw Conflict("Rejected worker context requires its one typed rebuild");
     if(prepared_)return prepared_->request;
     store_.validate_agent_worker_model_window(lease_,deadline_,owner_cancel_,cancel).get();
     raw_=preview_(cancel);auto trusted=raw_;
     std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});
     trusted.canonical_window.reset();
-    prepared_=manager_.prepare(owner_,trusted,budget_,nullptr,cancel);handed_out_=false;check(cancel);return prepared_->request;
+    prepared_=manager_.prepare(owner_,trusted,budget_,nullptr,cancel);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
 }
 void AgentWorkerContextWindow::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
     if(!prepared_||!handed_out_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Worker changed its funded context window");
     admit_(attempt,raw_,cancel);
+}
+bool AgentWorkerContextWindow::reject(const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token cancel){
+    std::lock_guard lock(mutex_);check(cancel);if(!policy_.runtime.compaction.automatic||rebuild_used_)return false;
+    if(!prepared_||!handed_out_||rejected_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rejection differs from its actual funded request");
+    store_.finish_inference_attempt({prepared_->inference_step_id,attempt,InferenceAttemptOutcome::context_overflow,{},"context_length_exceeded",elapsed}).get();rejected_=true;return true;
+}
+ModelRequest AgentWorkerContextWindow::rebuild(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+    std::lock_guard lock(mutex_);check(cancel);
+    if(!prepared_||!rejected_||rebuild_used_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rebuild differs from its one actual rejection");
+    const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="rejected")throw Conflict("Context rebuild lacks its backend rejection receipt");
+    rebuild_used_=true;auto trusted=raw_;std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});trusted.canonical_window.reset();
+    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,budget_,nullptr,cancel);prepared_=std::move(rebuilt);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
 }
 ModelCallReservation AgentWorkerContextWindow::reserve(const std::string&,std::stop_token cancel){
     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||handed_out_)throw Conflict("Worker context reservation is not available");

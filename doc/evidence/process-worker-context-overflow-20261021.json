@@ -1,0 +1,70 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:23:16.016Z",
+    "sourceParent": "dba6683bb4b03a09cb04b9a6dc39702fd9b973c3",
+    "sourcePatchSha256": "922e83271e2bbd22994259a29c44da85cf0662c3322a00f9e72bc630ca943135",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 64864,
+      "launchedAt": "2026-10-21T13:12:19.061Z",
+      "completedAt": "2026-10-21T13:22:05.093Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "83f7c6e247c5ef28d1eca7c7712e62e5c2aeba9dcf2866c05400e11fdfe08c78"
+    },
+    "test": {
+      "pid": 21792,
+      "launchedAt": "2026-10-21T13:22:08.319Z",
+      "completedAt": "2026-10-21T13:23:13.193Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d0abfefeb765271233f0c17facc27b4ec9f12e6fa05c2f9cf8eacd5578f8b074"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 64.82,
+    "projectFiles": 2744,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e66cb6dfa85498632329e4449b732c002aad877896bbaa78c7bca9212f4cc928",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-context-overflow-20261021-build.log": "83f7c6e247c5ef28d1eca7c7712e62e5c2aeba9dcf2866c05400e11fdfe08c78",
+    "doc/evidence/process-worker-context-overflow-20261021-build-terminal.json": "833d17264234156d42d03d35acf2a208e5abb65f100d1a8b380d805185751b36",
+    "doc/evidence/process-worker-context-overflow-20261021-ctest.log": "d0abfefeb765271233f0c17facc27b4ec9f12e6fa05c2f9cf8eacd5578f8b074",
+    "doc/evidence/process-worker-context-overflow-20261021-ctest-terminal.json": "2ee6a51abae4bd62a4b27fc9b7e030be7b1ab8b6e66e795619d3b85abe07b7f0",
+    "doc/evidence/process-worker-context-overflow-20261021-LastTest.log": "c219b8cf922b764b1005ee7d4d286e8dc56527c8d3db9b54632039ff5fe7f986",
+    "doc/evidence/process-worker-context-overflow-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-context-overflow-20261021-gate.json": "906611d5d680f178b40f381f7a6481915e99a7b47f0ed5e13d355ff68815b5bb",
+    "doc/evidence/process-worker-context-overflow-20261021-source.patch": "922e83271e2bbd22994259a29c44da85cf0662c3322a00f9e72bc630ca943135",
+    "doc/evidence/process-worker-context-overflow-20261021-binaries-before-test.json": "6aacdbdff3839e5f6c7028ea1c0491346bc65222b02c5add949a550e1d00032a"
+  },
+  "verified": [
+    "Captured backend provider context_length_exceeded before output can retire its exact typed inference as context_overflow; repository requires durable typed no-output/no-effect proof before creating a known rejected worker claim",
+    "Known rejected claims retain fixed rejection receipts and cannot become uncertain or acquire invented model responses; ordinary dispatch cannot forge typed rejection",
+    "Closed xlang3 SDK C++ model.rebuild_request method accepts only exact original attempt and encoded request under its captured lease; policy, capacity, provider and credentials remain backend-only",
+    "Backend native ContextManager performs one compact-and-rebuild using the original logical inference group and original root deadline; existing journal reservation handoff returns its exact funded retry",
+    "Actual unified xmind worker recovers a third-window overflow after two completed reads, preserves original six-message history and completes three logical inference groups with one physical retry and one maintenance charge",
+    "A second actual overflow after rebuilding terminates without another rebuild, retains five charges, original tool history, first known rejection and second uncertain dispatch, and interrupts the unfinished logical group",
+    "Both actual workers preserve canonical checkpoint, newest exact tool result, typed original input bindings and physical retirement; independent peer observes 173 requests",
+    "Seven focused contracts pass with frozen project, SDK, libraries, dependencies and all 133 native binary sets"
+  ],
+  "limitations": [
+    "Additional malformed/foreign/repeated rebuild admission, post-output refusal, maintenance failure/cancellation and unrecorded-context cases still need actual-worker verification",
+    "No broader/full regression, updated installation, rendered or live-provider acceptance",
+    "Delegation/planning and graph/default placement integration remains unfinished"
+  ],
+  "passed": true
+}

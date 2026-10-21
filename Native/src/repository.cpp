@@ -3169,7 +3169,7 @@ AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string&
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_claim_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker model dispatch not found");
     try{const auto value=Json::parse(text(rows[0][0]));const auto& s=value.at("spec");AgentWorkerModelClaimRecord record{{s.at("generation").get<std::string>(),s.at("root_run_id").get<std::string>(),s.at("owner_run_id").get<std::string>(),s.at("attempt_id").get<std::string>(),s.at("request_binding").get<std::string>()},value.at("state").get<std::string>(),value.at("actual_response_json").get<std::string>(),value.at("response_binding").get<std::string>()};
         record.actual_assistant_json=value.value("actual_assistant_json",std::string{});record.assistant_binding=value.value("assistant_binding",std::string{});
-        if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
+        if(record.spec.root_run_id!=root||record.spec.attempt_id!=attempt||(record.state!="dispatching"&&record.state!="responded"&&record.state!="uncertain"&&record.state!="rejected")||worker_claim_json(record)!=value)throw DatabaseError("Invalid stored worker dispatch");
         if(!record.actual_assistant_json.empty()){if(record.state!="responded"||record.assistant_binding!=context_digest(record.actual_assistant_json))throw DatabaseError("Stored worker assistant binding differs");(void)object_json(record.actual_assistant_json,8*1024*1024);}else if(!record.assistant_binding.empty())throw DatabaseError("Worker assistant binding has no receipt");
         if(record.state=="responded"){(void)object_json(record.actual_response_json,8*1024*1024);if(record.response_binding!=context_digest(record.actual_response_json))throw DatabaseError("Stored worker response binding differs");}
         else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
@@ -3461,8 +3461,15 @@ AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWork
 }
 
 AgentWorkerModelClaimRecord Repository::interrupt_agent_worker_model(const AgentWorkerModelClaimSpec& spec,AgentWorkerModelFailure failure){
-    std::string code;switch(failure){case AgentWorkerModelFailure::unknown:break;case AgentWorkerModelFailure::cancelled:code="cancelled";break;case AgentWorkerModelFailure::deadline:code="deadline";break;case AgentWorkerModelFailure::provider_failure:code="provider_failure";break;case AgentWorkerModelFailure::dispatch_error:code="dispatch_error";break;default:throw std::invalid_argument("Invalid backend worker model failure");}
+    std::string code;switch(failure){case AgentWorkerModelFailure::unknown:break;case AgentWorkerModelFailure::cancelled:code="cancelled";break;case AgentWorkerModelFailure::deadline:code="deadline";break;case AgentWorkerModelFailure::provider_failure:code="provider_failure";break;case AgentWorkerModelFailure::dispatch_error:code="dispatch_error";break;case AgentWorkerModelFailure::context_overflow:code="context_overflow";break;default:throw std::invalid_argument("Invalid backend worker model failure");}
     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_claim(db,spec.root_run_id,spec.attempt_id);if(worker_claim_spec_json(record.spec)!=worker_claim_spec_json(spec))throw Conflict("Worker dispatch interruption has a foreign binding");
+    if(record.state=="rejected"){if(failure!=AgentWorkerModelFailure::context_overflow)throw Conflict("Known context rejection cannot become uncertainty");tx.commit();return record;}
+    if(failure==AgentWorkerModelFailure::context_overflow){
+        if(record.state!="dispatching")throw Conflict("Context rejection requires its live dispatch");
+        const auto proof=db.execute("SELECT m.step_id FROM inference_attempt_members m JOIN inference_steps s ON s.id=m.step_id WHERE m.root_run_id=? AND m.attempt_id=? AND s.owner_run_id=? AND s.state='context_overflow' AND m.outcome='context_overflow' AND m.failure_code='context_length_exceeded'",{spec.root_run_id,spec.attempt_id,spec.owner_run_id}).rows;
+        if(proof.size()!=1)throw Conflict("Context rejection lacks its typed no-output proof");
+        record.state="rejected";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));impl_->event(spec.owner_run_id,"worker.model.rejected",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"failure_code",code}}.dump());tx.commit();return record;
+    }
     if(record.state=="responded")throw Conflict("Acknowledged worker response cannot become uncertain");if(record.state=="uncertain"){tx.commit();return record;}record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));auto detail=Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id}};if(!code.empty())detail["failure_code"]=code;impl_->event(spec.owner_run_id,"worker.model.uncertain",detail.dump());tx.commit();return record;
 }
 
@@ -3477,6 +3484,7 @@ AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const
         if(receipt.contains("provider_context")){if(receipt.at("provider_context")!=identity)throw Conflict("Backend assistant provider context differs");context=receipt.at("provider_context").dump();}
         if(format_agent_model_assistant(decode_agent_model_completion(actual),identity.at("model_id").get<std::string>(),elapsed.get<std::int64_t>(),first,context)!=assistant)throw Conflict("Backend assistant differs from actual model response");
     }
+    if(record.state=="rejected")throw Conflict("Rejected worker inference cannot acquire a response");
     if(record.state=="responded"){if(record.actual_response_json!=actual||(!assistant.empty()&&record.actual_assistant_json!=assistant))throw Conflict("Acknowledged worker response changed");tx.commit();return record;}
     record.state="responded";record.actual_response_json=actual;record.response_binding=context_digest(actual);
     if(!assistant.empty()){record.actual_assistant_json=assistant;record.assistant_binding=context_digest(assistant);}

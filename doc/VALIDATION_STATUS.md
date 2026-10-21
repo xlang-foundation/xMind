@@ -1,3 +1,25 @@
+## One-shot worker context overflow recovery — 2026-10-21
+
+A captured backend context_length_exceeded rejection before output now retains
+its typed no-output/no-effect proof and a known worker rejection receipt.
+Ordinary dispatch cannot invent that proof. Authenticated xlang3 SDK C++
+model.rebuild_request accepts only the exact failed attempt/window and reuses
+the native ContextManager, original logical group, budget and root deadline.
+The child receives the existing funded retry through its journal handoff.
+
+Actual unified xmind workers verify recovery after two reads and termination
+after a second overflow. Each case retains three logical inference groups,
+one physical retry, one maintenance charge and five total charges; no tool
+work replays. Original history, actual checkpoint and latest result survive.
+**7/7 focused contracts pass in 64.82 seconds**, with 173 controlled HTTP
+requests and complete source/SDK/library/dependency/133-binary sets frozen.
+[Scope and raw evidence](evidence/process-worker-context-overflow-20261021.json).
+
+Further rebuild admission controls, post-output failures, compaction failure/
+cancellation and unrecorded-context cases remain to verify. Delegation/planning,
+graph/default placement, full regression and installed/rendered/live-provider
+acceptance remain open.
+
 ## Worker context failure and cancellation retirement — 2026-10-21
 
 Worker termination now retires unfinished typed inference members and logical
