@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed59 client225d7c49/native959f1d95/2a2ce860:160native,462/161clients;2448archive/2445installed verify. Primary32396 born2026-10-20T11:19:37.8496800Z/profile57779 remains58/dc900cad; NOT adopted. 9sessions/179messages/14roots/3children exact;7owners/3pages/settings preserved,58backup2447files. Browser57 session94456c781056c58ca46abeacb7591138/rootc601c804008ce5bab6f8b9bd50c06876 completed2reads/edit/Node4/reload; NEVER replay. See doc/VALIDATION_STATUS.md.
+- Installed60 clientcf7dfbf4/native3123b5c5/5100131c:163native,464/161clients;2447archive/2444installed/2401runtime verify; legacy Python agent worker removed. SDK1ff unchanged. Primary32396 born2026-10-20T11:19:37.8496800Z/profile57779 remains58/dc900cad; CLI59 owner68928 remains2a2ce860; neither adopted. Primary9sessions/179messages/14roots/3children/19childmsgs and CLI1session/9messages/1root exact;10owners/4pages/settings/7profiles preserved,59backup2447files. Never replay completed tasks. See doc/VALIDATION_STATUS.md.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 

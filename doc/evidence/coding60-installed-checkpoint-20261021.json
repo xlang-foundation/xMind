@@ -1,0 +1,186 @@
+{
+  "recordedAt": "2026-10-21T19:23:00.519Z",
+  "version": "0.1.60",
+  "installed": true,
+  "installedVerification": {
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.60",
+    "version": "0.1.60",
+    "checkedPayloads": 2444,
+    "nativeFiles": 2401,
+    "nativeRevision": "3123b5c540f91c7f9fc46cfafadbb41970967d21",
+    "sdkRevision": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "pairedRuntimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "manifestSha256": "98561bc2434a6ce7c06ff6d538dfcd66ebca7022735adf32a360bd1052e1d102",
+    "settingsUnchanged": true,
+    "previousProfileDirectoriesPreserved": true,
+    "listedByActualVSCodeCLI": true,
+    "renderedEditorActivated": false,
+    "releaseAccepted": false
+  },
+  "preservation": {
+    "recordedAt": "2026-10-21T19:22:06.864Z",
+    "version": "0.1.60",
+    "owners": [
+      {
+        "pid": 54928,
+        "birth": "2026-10-20T01:31:22.5893370Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "name": "node.exe"
+      },
+      {
+        "pid": 56652,
+        "birth": "2026-10-20T01:31:23.3699400Z",
+        "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe",
+        "name": "xmind.exe"
+      },
+      {
+        "pid": 67436,
+        "birth": "2026-10-20T09:50:06.0265650Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "name": "node.exe"
+      },
+      {
+        "pid": 61600,
+        "birth": "2026-10-20T09:50:06.8679030Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.57\\native-runtime\\xmind.exe",
+        "name": "xmind.exe"
+      },
+      {
+        "pid": 32396,
+        "birth": "2026-10-20T11:19:37.8496800Z",
+        "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-9f80d1a8c7ce1fadfef8d80cccf27dccdcbbed5b59a4dcef996f852c98b82aeb\\xmind.exe",
+        "name": "xmind.exe"
+      },
+      {
+        "pid": 65940,
+        "birth": "2026-10-20T11:22:59.2981170Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "name": "node.exe"
+      },
+      {
+        "pid": 58988,
+        "birth": "2026-10-20T11:23:00.1180120Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.58\\native-runtime\\xmind.exe",
+        "name": "xmind.exe"
+      },
+      {
+        "pid": 68928,
+        "birth": "2026-10-20T22:06:08.0468140Z",
+        "image": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40\\runtime-7a629f1a8e3a2971b472c69562b74f9b8c40d1a840fa3d268eee246d814c6fbb\\xmind.exe",
+        "name": "xmind.exe"
+      },
+      {
+        "pid": 15804,
+        "birth": "2026-10-20T22:17:33.5017130Z",
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "name": "node.exe"
+      },
+      {
+        "pid": 71796,
+        "birth": "2026-10-20T22:17:34.3385740Z",
+        "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.59\\native-runtime\\xmind.exe",
+        "name": "xmind.exe"
+      }
+    ],
+    "checkedLiveOwners": 10,
+    "pages": [
+      "http://127.0.0.1:55684/ui/",
+      "http://127.0.0.1:60938/ui/",
+      "http://127.0.0.1:59185/ui/",
+      "http://127.0.0.1:60299/ui/"
+    ],
+    "oldExtensionPayloadsPreserved": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "previousProfileDirectories": 7,
+    "sessions": 9,
+    "rootMessages": 179,
+    "rootRuns": 14,
+    "ownedChildren": 3,
+    "ownedChildMessages": 19,
+    "exactRootAndChildHistoryPreserved": true,
+    "configurationPreserved": true,
+    "primaryBackendUnchanged": true,
+    "primaryBackendStillPredecessorRuntime": true,
+    "editorProcesses": 0,
+    "taskSubmissions": 0,
+    "renderedEditorActivated": false,
+    "sourceSnapshotsPrivate": true,
+    "cli59Sessions": 1,
+    "cli59Messages": 9,
+    "cli59Roots": 1,
+    "cli59HistoryExact": true,
+    "passed": true
+  },
+  "predecessorBackup": {
+    "path": "C:/xMindNativeValidation/preserved-vscode-0.1.59-before-0.1.60",
+    "files": 2447,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "previousProfileDirectories": 7
+  },
+  "archive": {
+    "path": "C:/xMindNativeValidation/xmind-0.1.60-complete-win32-x64.vsix",
+    "sha256": "a7175bc5fa1497b6f2e70cf38837a91439d9c3b7ba6486ff369d9ac94f784b8c",
+    "entries": 2447
+  },
+  "qualifiedCounts": {
+    "native": 163,
+    "extension": 464,
+    "browser": 161
+  },
+  "cliListPrivateReceipt": {
+    "path": "C:/xMindNativeValidation/vscode-0.1.60-extension-list-20261021.log",
+    "sha256": "cb9727e5293886dfbf2a0a40603d162f86d746ba7ec50b6cc768b4783cf3bf13",
+    "selectedExtension": "agentflow-local.agentflow@0.1.60"
+  },
+  "privateSnapshots": [
+    {
+      "scope": "primary60",
+      "label": "before",
+      "path": "C:/xMindNativeValidation/primary60-before-20261021.json",
+      "sha256": "2044ba0c5e6b83b0c9882c717b757652f68bfe775f4d625505720b65a6787df4"
+    },
+    {
+      "scope": "primary60",
+      "label": "after-install",
+      "path": "C:/xMindNativeValidation/primary60-after-install-20261021.json",
+      "sha256": "2044ba0c5e6b83b0c9882c717b757652f68bfe775f4d625505720b65a6787df4"
+    },
+    {
+      "scope": "cli59-preserved60",
+      "label": "before",
+      "path": "C:/xMindNativeValidation/cli59-preserved60-before-20261021.json",
+      "sha256": "7e21c80f2c416d9ee328001553a2826a58f463476d7010af8bb916226e069736"
+    },
+    {
+      "scope": "cli59-preserved60",
+      "label": "after-install",
+      "path": "C:/xMindNativeValidation/cli59-preserved60-after-install-20261021.json",
+      "sha256": "7e21c80f2c416d9ee328001553a2826a58f463476d7010af8bb916226e069736"
+    }
+  ],
+  "evidence": {
+    "doc/evidence/coding60-installed-vscode-0.1.60-install-20261021.log": {
+      "source": "C:/xMindNativeValidation/vscode-0.1.60-install-20261021.log",
+      "sha256": "fb97245b24f692cf7f12736c353ebde834301179720743e44873d54aba3d87e1"
+    },
+    "doc/evidence/coding60-installed-vscode-0.1.60-install-terminal-20261021.json": {
+      "source": "C:/xMindNativeValidation/vscode-0.1.60-install-terminal-20261021.json",
+      "sha256": "8aff4abb41f4b242d44b449e0117f1568b6996e4ade90f7d240e5ed0f15003d8"
+    },
+    "doc/evidence/coding60-installed-vscode-0.1.60-installed-final-evidence-20261021.json": {
+      "source": "C:/xMindNativeValidation/vscode-0.1.60-installed-final-evidence-20261021.json",
+      "sha256": "696771b3f7fe5e501b16021a43bd745c9820e7d52b9f4bc52ebb056d6da3f43d"
+    },
+    "doc/evidence/coding60-installed-coding60-installed-preservation-20261021.json": {
+      "source": "C:/xMindNativeValidation/coding60-installed-preservation-20261021.json",
+      "sha256": "191b81cd321bb768e52dcc32b71260b8f41ec70d3a2b9a67d1478155b2c40a50"
+    }
+  },
+  "scope": "Headless actual VS Code CLI installation and payload verification; 2447-file predecessor backup, exact primary/CLI root and child histories, ten unchanged live owner identities, four live pages and seven existing profiles. No backend upgrade, task submission or editor activation.",
+  "limitations": [
+    "Primary TestProj backend 32396 remains 0.1.58/dc900cad and CLI59 backend 68928 remains its prior runtime; neither was adopted or replayed",
+    "Installed60 live-provider use and rendered browser/editor coding remain unverified",
+    "Default process execution, worker planning, earlier intermittent crash diagnosis and combined parent compaction/overflow remain open"
+  ]
+}

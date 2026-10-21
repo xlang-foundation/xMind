@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-21T19:22:06.864Z",
+  "version": "0.1.60",
+  "owners": [
+    {
+      "pid": 54928,
+      "birth": "2026-10-20T01:31:22.5893370Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "name": "node.exe"
+    },
+    {
+      "pid": 56652,
+      "birth": "2026-10-20T01:31:23.3699400Z",
+      "image": "C:\\xMindNativeValidation\\coding52-native-runtime-20261019\\xmind.exe",
+      "name": "xmind.exe"
+    },
+    {
+      "pid": 67436,
+      "birth": "2026-10-20T09:50:06.0265650Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "name": "node.exe"
+    },
+    {
+      "pid": 61600,
+      "birth": "2026-10-20T09:50:06.8679030Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.57\\native-runtime\\xmind.exe",
+      "name": "xmind.exe"
+    },
+    {
+      "pid": 32396,
+      "birth": "2026-10-20T11:19:37.8496800Z",
+      "image": "C:\\Users\\shaw9\\.xMind\\p-current\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d\\runtime-9f80d1a8c7ce1fadfef8d80cccf27dccdcbbed5b59a4dcef996f852c98b82aeb\\xmind.exe",
+      "name": "xmind.exe"
+    },
+    {
+      "pid": 65940,
+      "birth": "2026-10-20T11:22:59.2981170Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "name": "node.exe"
+    },
+    {
+      "pid": 58988,
+      "birth": "2026-10-20T11:23:00.1180120Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.58\\native-runtime\\xmind.exe",
+      "name": "xmind.exe"
+    },
+    {
+      "pid": 68928,
+      "birth": "2026-10-20T22:06:08.0468140Z",
+      "image": "C:\\xMindNativeValidation\\cli59-live-coding-20261020\\profiles\\786d53a12402934c57b412cae43e9d1d46d371abcba004432c1796f3b4b13c40\\runtime-7a629f1a8e3a2971b472c69562b74f9b8c40d1a840fa3d268eee246d814c6fbb\\xmind.exe",
+      "name": "xmind.exe"
+    },
+    {
+      "pid": 15804,
+      "birth": "2026-10-20T22:17:33.5017130Z",
+      "image": "C:\\Program Files\\nodejs\\node.exe",
+      "name": "node.exe"
+    },
+    {
+      "pid": 71796,
+      "birth": "2026-10-20T22:17:34.3385740Z",
+      "image": "C:\\Users\\shaw9\\.vscode\\extensions\\agentflow-local.agentflow-0.1.59\\native-runtime\\xmind.exe",
+      "name": "xmind.exe"
+    }
+  ],
+  "checkedLiveOwners": 10,
+  "pages": [
+    "http://127.0.0.1:55684/ui/",
+    "http://127.0.0.1:60938/ui/",
+    "http://127.0.0.1:59185/ui/",
+    "http://127.0.0.1:60299/ui/"
+  ],
+  "oldExtensionPayloadsPreserved": 2447,
+  "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+  "previousProfileDirectories": 7,
+  "sessions": 9,
+  "rootMessages": 179,
+  "rootRuns": 14,
+  "ownedChildren": 3,
+  "ownedChildMessages": 19,
+  "exactRootAndChildHistoryPreserved": true,
+  "configurationPreserved": true,
+  "primaryBackendUnchanged": true,
+  "primaryBackendStillPredecessorRuntime": true,
+  "editorProcesses": 0,
+  "taskSubmissions": 0,
+  "renderedEditorActivated": false,
+  "sourceSnapshotsPrivate": true,
+  "cli59Sessions": 1,
+  "cli59Messages": 9,
+  "cli59Roots": 1,
+  "cli59HistoryExact": true,
+  "passed": true
+}

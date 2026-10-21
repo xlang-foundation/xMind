@@ -1,3 +1,20 @@
+## Installed IPC package 0.1.60 with state preserved — 2026-10-21
+
+The actual VS Code CLI installs and lists **0.1.60** headlessly. All **2,444
+installed payloads** match the qualified archive; its 2,401-payload runtime
+contains the complete-163-qualified native image and unchanged SDK, with no legacy
+Python agent worker. The prior installation is retained in a verified **2,447-file
+backup**. Settings and seven existing profiles remain unchanged. All **10 prior
+owner identities and four pages** survive, with exact primary history
+(9 sessions, 179 root messages, 14 roots, 3 children/19 child messages) and CLI59
+history (1 session, 9 messages, 1 root). No task is submitted or replayed.
+[Installation and preservation receipts](evidence/coding60-installed-checkpoint-20261021.json).
+
+Code remains closed. Primary58 and CLI59 backends retain their prior runtimes;
+installation does not adopt them. Installed60 live-provider use, rendered client
+acceptance, default process execution, worker planning and crash diagnosis remain
+open.
+
 ## Complete IPC package 0.1.60 candidate — 2026-10-21
 
 The Windows x64 VSIX has **2,447 verified archive entries** and contains the
