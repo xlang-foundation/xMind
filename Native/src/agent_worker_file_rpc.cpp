@@ -9,7 +9,7 @@ AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost& host,const
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
         if(method!="file.invoke")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto call=AgentFileToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
-        catch(const AgentWorkerFileOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+        catch(const AgentFileToolOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
         catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
         catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
@@ -26,7 +26,7 @@ AgentFileToolResult AgentWorkerFileClient::invoke(const AgentFileToolInvocation&
         return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}
     catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker file RPC cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker file RPC deadline elapsed");}
-    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker file RPC rejected its captured call");if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker file RPC cancelled or expired");if(error.code()=="outcome_unrecorded")throw AgentWorkerFileOutcomeUnrecorded("Worker file result is unrecorded; no replay is authorized");throw ModelProtocolError("Worker file RPC failed");}
+    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker file RPC rejected its captured call");if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker file RPC cancelled or expired");if(error.code()=="outcome_unrecorded")throw AgentFileToolOutcomeUnrecorded("Worker file result is unrecorded; no replay is authorized");throw ModelProtocolError("Worker file RPC failed");}
     catch(const McpProtocolError&){throw ModelProtocolError("Invalid worker file result");}
     catch(const Json::exception&){throw ModelProtocolError("Invalid worker file result");}
 }

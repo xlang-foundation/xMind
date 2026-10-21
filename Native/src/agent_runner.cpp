@@ -151,8 +151,9 @@ AgentRunner::AgentRunner(AgentRunJournal& journal,AgentContextJournal& context_j
     std::shared_ptr<DelegationExecutor> delegation,std::shared_ptr<DynamicPlanExecutor> planning,bool preserve_dynamic_child_planning_policy)
     :journal_(journal),context_journal_(context_journal),settings_(std::move(settings)),
      model_gateway_(std::move(ports.model)),backend_catalog_(std::move(ports.catalog)),tool_hosts_(std::move(ports.tools)),backend_runtime_(std::move(ports.runtime)),
-     read_workspace_(std::move(ports.read_workspace)),delegation_(std::move(delegation)),planning_(std::move(planning)) {
+     read_workspace_(ports.coding_workspace?std::static_pointer_cast<AgentRunnerReadWorkspace>(ports.coding_workspace):ports.read_workspace),coding_workspace_(std::move(ports.coding_workspace)),delegation_(std::move(delegation)),planning_(std::move(planning)) {
     if(!model_gateway_||!backend_catalog_||!tool_hosts_||!backend_runtime_)throw std::invalid_argument("Agent execution requires every explicit backend port");
+    if(coding_workspace_&&ports.read_workspace)throw std::invalid_argument("Coding and read-only workspace admissions cannot be combined");
     if(read_workspace_){
         const auto identity=read_workspace_->workspace_id();if(identity.empty()||identity.size()>256||identity=="workspace:none"||read_workspace_->workspace_revision()<1||read_workspace_->workspace_revision()>9007199254740991LL||settings_.provider.tools!=Capability::supported)throw std::invalid_argument("Invalid admitted read workspace port");
         if(settings_.workspace||settings_.workspace_membership_snapshot||settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||settings_.provider_identity||settings_.tool_allowlist||!settings_.xlang_python_tools.empty()||!settings_.instructions.empty()||!settings_.instruction_policy.instructions.empty()||settings_.instruction_policy.revision||!settings_.permission_rules.empty()||!settings_.inherited_permission_rule_layers.empty())throw std::invalid_argument("Admitted read workspace cannot acquire local execution owners or replacement policy");
@@ -615,8 +616,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
-        const auto prepare_read_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[](const auto& tool){return !is_agent_read_tool(tool.name);}))throw Conflict("Read workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
-        if(read_workspace_)request=prepare_read_window();
+        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&is_agent_file_tool(tool.name));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+        if(read_workspace_)request=prepare_workspace_window();
         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
@@ -717,6 +718,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         };
         refresh_tools();
         std::unique_ptr<AgentFileToolHost> file_tool_host;
+        if(coding_workspace_)file_tool_host=checked_tool_host(coding_workspace_->file_host());
         if(settings_.approved_edits&&workspace_){
             AgentFileToolOwnerContext owner;owner.run_id=id;owner.primary_workspace=workspace_.get();owner.workspace_members=run_workspace_tools.get();
             owner.repository_context=repository_context_for_folder;owner.approval_timeout=settings_.run_timeout;
@@ -828,7 +830,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(encoded_metadata!=delivered_repository_metadata){journal_.append_event(id,"agent.repository_scope",encoded_metadata).get();delivered_repository_metadata=encoded_metadata;}
             }
             auto response_started=std::chrono::steady_clock::now();
-            if(read_workspace_){auto window=prepare_read_window();if(window.tools.size()!=request.tools.size()||!std::equal(window.tools.begin(),window.tools.end(),request.tools.begin(),[](const auto& a,const auto& b){return a.name==b.name&&a.description==b.description&&a.input_schema_json==b.input_schema_json;}))throw Conflict("Read workspace changed its admitted catalogue");request=std::move(window);}
+            if(read_workspace_){auto window=prepare_workspace_window();if(window.tools.size()!=request.tools.size()||!std::equal(window.tools.begin(),window.tools.end(),request.tools.begin(),[](const auto& a,const auto& b){return a.name==b.name&&a.description==b.description&&a.input_schema_json==b.input_schema_json;}))throw Conflict("Read workspace changed its admitted catalogue");request=std::move(window);}
             std::optional<std::int64_t> first_token_ms;
             std::optional<ModelCallReservation> reservation;
             std::optional<PreparedModelContext> prepared_context;
@@ -967,16 +969,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 cancelled(token);
                 const auto activity=id+":"+(reservation?reservation->attempt_id:std::to_string(turn))+":"+std::to_string(index++);
                 journal_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
-                Json output;bool success=false;
+                Json output;bool success=false;std::optional<std::string> exact_output;
                 try {
                     if(is_agent_file_tool(call.name)){
                         if(!file_tool_host)throw ToolAccessDenied("File tool is not admitted for this run");
                         AgentFileToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
-                        invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity();invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
+                        invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);
                         invocation.folder_id=invocation.workspace_id;invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid file-tool arguments");}
                         if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}
-                        auto result=file_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
+                        auto result=file_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
                     }else if(mcp_tools.contains(call.name)||(a2a_tools&&call.name.starts_with("a2a_delegate_"))){
                         if(!remote_tool_host)throw ToolAccessDenied("Remote tool is not admitted for this run");
                         AgentRemoteToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
@@ -997,7 +999,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         invocation.folder_id=invocation.workspace_id;invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid workspace read arguments");}
                         if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}
-                        auto result=read_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
+                        auto result=read_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
                     }else if(is_agent_guidance_tool(call.name)&&guidance_tool_host){
                         AgentWorkspaceInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
                         invocation.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity();invocation.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;
@@ -1048,7 +1050,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const std::invalid_argument&) {output={{"error",{{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}}}};}
                 cancelled(token);
                 journal_.append_event(id,success?"tool.completed":"tool.failed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
-                const auto content=output.dump();results.push_back(Json{{"content",content},{"tool_call_id",call.id}}.dump());
+                const auto content=exact_output.value_or(output.dump());results.push_back(Json{{"content",content},{"tool_call_id",call.id}}.dump());
                 continuation.push_back({MessageRole::tool,content,{},call.id});
             }
             // The assistant call and all matching results commit together; a
@@ -1078,6 +1080,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const PermissionCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const ToolGuidanceChanged&) {return terminate(RunState::failed,{{"reason","skill_context_unavailable"}});}
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
+      catch(const AgentFileToolOutcomeUnrecorded&){throw;}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.
       catch(const McpOutcomeUnrecorded&) {throw;}
       catch(const A2aOutcomeUnrecorded&) {throw;}

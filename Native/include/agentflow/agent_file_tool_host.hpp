@@ -8,6 +8,7 @@
 #include <stop_token>
 #include <string>
 #include <string_view>
+#include <stdexcept>
 #include <vector>
 
 namespace agentflow {
@@ -29,6 +30,9 @@ struct AgentFileToolInvocation {
     static AgentFileToolInvocation parse(std::string_view);
 };
 struct AgentFileToolResult {bool success=false;std::string output_json;};
+// A physical file outcome cannot be acknowledged durably. Stop the agent loop;
+// never synthesize a tool failure or dispatch another model to retry it.
+struct AgentFileToolOutcomeUnrecorded:std::runtime_error {using std::runtime_error::runtime_error;};
 class AgentFileToolHost {
 public:
     virtual ~AgentFileToolHost()=default;

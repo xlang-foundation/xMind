@@ -1,0 +1,11 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 81: native_agent_worker_model_rpc_contract
+1/3 Test #81: native_agent_worker_model_rpc_contract .......   Passed   13.37 sec
+    Start 83: native_agent_worker_coding_server_contract
+2/3 Test #83: native_agent_worker_coding_server_contract ...   Passed    0.75 sec
+    Start 84: native_agent_worker_ledger_contract
+3/3 Test #84: native_agent_worker_ledger_contract ..........   Passed    1.08 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  15.22 sec

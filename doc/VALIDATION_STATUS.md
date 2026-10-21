@@ -1,3 +1,33 @@
+## Production native coding workers — 2026-10-20
+
+The actual AgentRunner now runs in a coding worker using the unified xmind
+executable and xlang3 SDK C++ remote objects. Its backend owns admitted guidance,
+workspace membership, permissions, approvals, model funding and native file
+receipts. Mixed read/file activity and canonical conversation turns derive from
+those retained facts. Read-only workers cannot acquire the coding journal ports.
+An unrecorded physical file result stops the loop without inventing a tool result
+or dispatching another model. Exact native output is preserved in history.
+
+The explicit standalone `--agent-execution process-code` mode requires a workspace
+and `--workspace-edits approved`. Production-factory fixtures verify approved
+creation, inherited denial, cancellation during approval, attached-folder edits
+and failed result recording. An authenticated public client also approves one
+actual creation through the standalone server. The independent model peer sees
+exactly 73 intended requests across the complete worker contract.
+
+The serial Release build and **62/62 focused native contracts pass in 191.75
+seconds**, with 2711 project inputs, 16 SDK headers, 1870 pure-library files,
+76 runtime files, 18598 Node dependencies and 133 native binaries unchanged.
+The initial diagnostic passed 2/3 because a new read-only capability assertion
+expected Conflict instead of the endpoint's unsupported response. The corrected
+assertion verifies that exact rejection; the raw failed run is preserved.
+[Scope, patches and raw evidence](evidence/coding-worker-focused-20261020.json).
+
+This qualifies controlled native read/file coding workers. Other process-worker
+runtime capabilities still require integration. It adds no full-suite, installed,
+hosted, rendered or live-provider acceptance. Existing installations, owners,
+settings and completed user tasks remain untouched.
+
 ## Native C++ remote objects over xlang3 IPC — 2026-10-20
 
 Agent and tool workers use the SDK's C++ remote objects over shared-memory

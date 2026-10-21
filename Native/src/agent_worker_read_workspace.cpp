@@ -2,6 +2,7 @@
 #include "agentflow/agent_worker_run_journal.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/agent_worker_read_rpc.hpp"
+#include "agentflow/agent_worker_file_rpc.hpp"
 #include <utility>
 
 namespace agentflow {
@@ -25,4 +26,19 @@ private:
 };
 }
 std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerReadWorkspace>(peer,std::move(journal));}
+namespace {
+class WorkerCodingWorkspace final:public AgentRunnerCodingWorkspace {
+    AgentWorkerRpcPeer& peer_;std::shared_ptr<AgentRunnerReadWorkspace> read_;
+public:
+    WorkerCodingWorkspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),read_(make_agent_worker_read_workspace(peer,std::move(journal))){}
+    std::string workspace_id()const override{return read_->workspace_id();}
+    std::int64_t workspace_revision()const override{return read_->workspace_revision();}
+    std::string provider_identity_json()const override{return read_->provider_identity_json();}
+    ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
+    std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
+    std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+};
+}
+std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}
+
 }

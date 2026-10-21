@@ -1,0 +1,22 @@
+#pragma once
+#include "agentflow/agent_worker_read_context.hpp"
+#include "agentflow/agent_worker_file_rpc.hpp"
+
+namespace agentflow {
+// Backend-only composition. File operations share the guidance window actually
+// admitted to the model and the same serialized native workspace ownership.
+class AgentWorkerCodingContext final:public AgentReadToolHost {
+public:
+    AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
+        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={});
+    ModelRequest prepare(std::stop_token={});
+    void admit(const std::string&,const ModelRequest&,std::stop_token={});
+    AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+    AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
+    AgentWorkerFileHost& files()noexcept{return *files_;}
+private:
+    AgentWorkerReadContext reads_;
+    std::vector<ModelToolDefinition> tools_;
+    std::unique_ptr<AgentWorkerFileHost> files_;
+};
+}

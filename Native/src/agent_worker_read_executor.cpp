@@ -1,5 +1,9 @@
 #include "agentflow/agent_worker_read_executor.hpp"
 #include "agentflow/agent_worker_supervisor.hpp"
+#include "agentflow/create_executor.hpp"
+#include "agentflow/edit_executor.hpp"
+#include "agentflow/patch_tool.hpp"
+#include "agentflow/restore_executor.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
@@ -15,27 +19,29 @@ namespace {
 using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
 std::string generation(){std::random_device random;std::ostringstream text;text<<std::hex<<std::setfill('0');for(unsigned i=0;i<4;++i)text<<std::setw(8)<<random();return text.str();}
 bool bounded(const std::string& text,std::size_t size){return !text.empty()&&text.size()<=size&&text.find('\0')==std::string::npos;}
-class ReadExecutor final:public AgentRootExecutor {
+class WorkspaceExecutor final:public AgentRootExecutor {
     PersistenceService& store_;
     AgentSettings settings_;
+    bool coding_=false;
     std::shared_ptr<const BoundProcessExecutable> image_;
     std::unique_ptr<AgentRunner> validator_;
     std::unique_ptr<WorkspaceTools> primary_;
     std::shared_ptr<AgentModelGateway> gateway_;
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
-        const auto& selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
-        if(!selected)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");
+        auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};}
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
-        const auto definitions=primary_->definitions();
+        auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
-            if(!is_agent_read_tool(name)||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+            if((!is_agent_read_tool(name)&&!(coding_&&is_agent_file_tool(name)))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
         return result;
     }
 public:
-    ReadExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image)
-        :store_(store),settings_(std::move(settings)),image_(std::move(image)){
-        if(!image_||!settings_.workspace||settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
+    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
+        :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
+        if(!image_||!settings_.workspace||(!coding_&&settings_.approved_edits)||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
+        if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
         validator_=std::make_unique<AgentRunner>(store_,settings_);
@@ -80,13 +86,14 @@ public:
         if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n"+settings_.instruction_policy.instructions;
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+        if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name))policy.tools.push_back(definition);
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
         auto provider=settings_.provider;provider.model=model(request);
         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
         for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership")throw Conflict("Worker root already has an execution membership receipt");
         store_.append_event(request.run_id,"agent.workspace_membership",Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();
         if(settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
-        AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;
+        AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
         owner.repository_context=[&](std::size_t index){return index<contexts.size()?contexts[index].get():nullptr;};
         owner.offered_tool=[catalogue=policy.tools](const std::string& name){return std::any_of(catalogue.begin(),catalogue.end(),[&](const auto& tool){return tool.name==name;});};
         owner.inherited_permission_layers=settings_.inherited_permission_rule_layers;owner.inherited_permission_layers.push_back(settings_.permission_rules);owner.permission_rules=request.agent_permissions;
@@ -97,7 +104,7 @@ public:
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
         std::exception_ptr failure;
-        try{supervisor->launch();supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{
             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}
@@ -113,5 +120,7 @@ public:
     }
 };
 }
-std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<ReadExecutor>(store,std::move(settings),std::move(image));}
+std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),false);}
+std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),true);}
+
 }

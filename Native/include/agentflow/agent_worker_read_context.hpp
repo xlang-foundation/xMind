@@ -26,6 +26,7 @@ public:
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:
+    friend class AgentWorkerCodingContext;
     struct Preview;
     Preview preview(std::stop_token);
     void check(std::stop_token);

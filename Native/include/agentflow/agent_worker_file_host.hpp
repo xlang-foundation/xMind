@@ -4,7 +4,6 @@
 #include <mutex>
 
 namespace agentflow {
-struct AgentWorkerFileOutcomeUnrecorded:std::runtime_error {using std::runtime_error::runtime_error;};
 // Backend-owned native file effects. Construction retains actual workspace and
 // guidance capabilities; invocation and approved operation claims stay durable.
 // This port does not enable a worker RPC endpoint or grant dispatch by itself.

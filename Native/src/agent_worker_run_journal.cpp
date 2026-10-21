@@ -24,7 +24,7 @@ template<class T,class F> std::future<T> owned(F action){
 }
 class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
 public:
-    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel){
+    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
         if(scope_.root_id!=scope_.run_id)throw Conflict("Ordinary worker journal requires its captured root");
         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.run_id);
         if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.direct-agent"||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
@@ -63,11 +63,11 @@ public:
         if(kind.starts_with("model.")){auto actual=client_.acknowledge_model_event(progress_.current_attempt,progress_.model_event_ordinal,kind,json);++progress_.model_event_ordinal;++progress_.model_events;return actual;}
         if(kind!="tool.started"&&kind!="tool.completed"&&kind!="tool.failed")throw std::logic_error("Worker journal cannot append arbitrary events");
         const auto call_id=Json::parse(json).at("call_id").get<std::string>();const auto call=std::find_if(calls_.begin(),calls_.end(),[&](const auto& value){return value.id==call_id;});if(call==calls_.end())throw Conflict("Worker activity differs from its canonical model calls");
-        auto actual=client_.acknowledge_tool_event(progress_.current_attempt,std::distance(calls_.begin(),call),kind!="tool.started",kind,json);if(activity_.insert(actual.sequence).second)++progress_.tool_events;return actual;
+        auto actual=workspace_?client_.acknowledge_workspace_tool_event(progress_.current_attempt,std::distance(calls_.begin(),call),kind!="tool.started",kind,json):client_.acknowledge_tool_event(progress_.current_attempt,std::distance(calls_.begin(),call),kind!="tool.started",kind,json);if(activity_.insert(actual.sequence).second)++progress_.tool_events;return actual;
     });}
     std::future<void> record_tool_turn(std::string id,std::string assistant,std::vector<std::string> results,std::optional<SkillSelections> skills)override{return owned<void>([&]{
         std::lock_guard lock(mutex_);own(id);if(skills||calls_.empty()||assistant!=progress_.canonical_assistant||results.size()!=calls_.size())throw Conflict("Worker turn differs from its captured read batch");
-        const auto receipt=client_.commit_read_turn(progress_.current_attempt);const auto history=client_.run_history(id);if(receipt.message_sequences.size()!=results.size()+1)throw Conflict("Worker canonical read receipt has a different batch size");
+        const auto receipt=workspace_?client_.commit_workspace_turn(progress_.current_attempt):client_.commit_read_turn(progress_.current_attempt);const auto history=client_.run_history(id);if(receipt.message_sequences.size()!=results.size()+1)throw Conflict("Worker canonical read receipt has a different batch size");
         for(std::size_t i=0;i<receipt.message_sequences.size();++i){const auto actual=std::find_if(history.begin(),history.end(),[&](const Message& value){return value.sequence==receipt.message_sequences[i];});if(actual==history.end()||actual->role!=(i?"tool":"assistant")||actual->json!=(i?results[i-1]:assistant))throw Conflict("Worker read turn differs from backend committed facts");}
         if(turns_.insert(progress_.current_attempt).second)++progress_.tool_turns;
     });}
@@ -112,7 +112,7 @@ public:
 private:
     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
-    AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;
+    AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
 };
 }
@@ -121,4 +121,10 @@ std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(A
     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
 }
+std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
+    try{return std::make_unique<OrdinaryJournal>(peer,cancel,true);}
+    catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
+    catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
+}
+
 }

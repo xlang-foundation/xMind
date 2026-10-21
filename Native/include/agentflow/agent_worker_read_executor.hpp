@@ -8,4 +8,6 @@ namespace agentflow {
 // supplies credentials, executable paths or per-dispatch replacement policy.
 std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(
     PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>);
+std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(
+    PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>);
 }

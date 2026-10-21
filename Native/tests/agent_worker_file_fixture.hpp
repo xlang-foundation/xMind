@@ -22,9 +22,15 @@ inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const 
         std::stop_source stop;auto task=std::async(std::launch::async,[&]{return files.invoke(call,stop.get_token());});struct Stop{std::stop_source& stop;~Stop(){stop.request_stop();}} guard{stop};
         check(peer.call("fixture.await_file_pending","")=="pending","Actual file proposal must precede cancellation");stop.request_stop();rejects<ToolCancelled>([&]{task.get();});check(peer.call("fixture.await_file_cancelled","")=="cancelled","Backend must retain actual cancellation before the child returns");return Json{{"pid",GetCurrentProcessId()},{"cancelled",true}}.dump();
     }
-    if(mode=="file_unrecorded"){rejects<AgentWorkerFileOutcomeUnrecorded>([&]{files.invoke(call);});return Json{{"pid",GetCurrentProcessId()},{"unrecorded",true}}.dump();}
+    if(mode=="file_unrecorded"){rejects<AgentFileToolOutcomeUnrecorded>([&]{files.invoke(call);});return Json{{"pid",GetCurrentProcessId()},{"unrecorded",true}}.dump();}
     const auto result=files.invoke(call);
-    rejects<Conflict>([&]{journal.commit_read_turn("file-attempt");});rejects<Conflict>([&]{journal.reserve_model_call("premature-file-next");});
+    rejects<Conflict>([&]{journal.commit_read_turn("file-attempt");});
+    for(const auto* method:{"journal.commit_workspace_turn","journal.workspace_tool_event"}){
+        const auto payload=std::string(method)=="journal.commit_workspace_turn"?R"({"attempt_id":"file-attempt"})":R"({"attempt_id":"file-attempt","ordinal":0,"phase":"started"})";
+        bool unsupported=false;try{peer.call(method,payload);}catch(const AgentWorkerRpcRemoteError& error){unsupported=error.code()=="unsupported";}
+        check(unsupported,"Read-only journal must not expose coding workspace methods");
+    }
+    rejects<Conflict>([&]{journal.reserve_model_call("premature-file-next");});
     if(mode=="file_denied")check(!result.success&&Json::parse(result.output_json).at("error").at("code")=="agent_permission_denied","Actual native policy denial must cross file RPC unchanged");
     else check(result.success,"Actual approved native file RPC must succeed");
     if(mode=="file_create"){check(peer.call("fixture.rebuild_file_host","")=="rebuilt","Backend fixture must rebuild its durable file host");rejects<Conflict>([&]{files.invoke(call);});}

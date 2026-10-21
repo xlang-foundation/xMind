@@ -1,5 +1,6 @@
 #include "agentflow/agent_worker_supervisor.hpp"
 #include "agentflow/agent_worker_control.hpp"
+#include "agentflow/agent_worker_coding_owner.hpp"
 #include "agentflow/persistence_service.hpp"
 #include <mutex>
 #include <set>
@@ -11,6 +12,7 @@ struct AgentWorkerSupervisor::Impl {
     std::unique_ptr<AgentWorkerProcess> worker;
     AgentWorkerLeaseSpec lease;
     std::unique_ptr<AgentWorkerReadOwner> owner;
+    std::unique_ptr<AgentWorkerCodingOwner> coding_owner;
     std::unique_ptr<AgentWorkerRpcPeer> peer;
     std::mutex mutex;
     bool started=false,ready=false,executed=false,draining=false,launch_attempted=false,lease_admitted=false;
@@ -61,6 +63,19 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
     impl_->worker->channel().send({"worker.boot","{\"version\":1}"},impl_->deadline,cancel);
+    impl_->peer->start();
+    impl_->ready=true;
+}
+void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
+    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel){
+    std::lock_guard lock(impl_->mutex);
+    if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
+    impl_->started=true; // Startup failure is not permission to retry this child.
+    impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
+        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel);
+    impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+        [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+    impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
 }

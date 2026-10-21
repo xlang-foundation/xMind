@@ -19,6 +19,8 @@ public:
     AgentWorkerSupervisor& operator=(const AgentWorkerSupervisor&)=delete;
     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+    void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
     RunState execute();
     void cancel();
     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);

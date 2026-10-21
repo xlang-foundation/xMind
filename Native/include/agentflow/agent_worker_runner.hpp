@@ -11,4 +11,5 @@ struct AgentWorkerRunResult {
 // and cancellation propagate, including AgentTerminalHandoff; no Run is forged.
 // Backend-owned request windows are required; no child policy is substituted.
 AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerRpcPeer&,std::stop_token cancel={});
+AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerRpcPeer&,std::stop_token cancel={});
 }

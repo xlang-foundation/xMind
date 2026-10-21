@@ -35,11 +35,11 @@ AgentFileToolResult AgentWorkerFileHost::invoke(const AgentFileToolInvocation& c
     std::jthread timer([&](std::stop_token done){std::unique_lock timer_lock(timer_mutex);timer_condition.wait_until(timer_lock,done,deadline_,[]{return false;});if(!done.stop_requested())stop.request_stop();});
     store_.claim_agent_worker_file(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
     store_.start_agent_worker_file(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
-    const auto save=[&](const AgentFileToolResult& result){try{store_.record_agent_worker_file_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerFileOutcomeUnrecorded("Worker file result could not be recorded; stop execution and retain native operation ownership");}};
+    const auto save=[&](const AgentFileToolResult& result){try{store_.record_agent_worker_file_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentFileToolOutcomeUnrecorded("Worker file result could not be recorded; stop execution and retain native operation ownership");}};
     AgentFileToolResult result;std::exception_ptr interrupted;
     try{result=native_->invoke(call,stop.get_token());}
-    catch(const EditOutcomeUnrecorded&){throw AgentWorkerFileOutcomeUnrecorded("Native file outcome is unrecorded; stop execution and retain operation ownership");}
-    catch(const ToolMutationUncertain&){throw AgentWorkerFileOutcomeUnrecorded("Native file mutation is uncertain; stop execution and retain operation ownership");}
+    catch(const EditOutcomeUnrecorded&){throw AgentFileToolOutcomeUnrecorded("Native file outcome is unrecorded; stop execution and retain operation ownership");}
+    catch(const ToolMutationUncertain&){throw AgentFileToolOutcomeUnrecorded("Native file mutation is uncertain; stop execution and retain operation ownership");}
     catch(const AgentPermissionDenied&){result=failure("agent_permission_denied","The selected agent permission rules denied this resource; the tool was not dispatched");}
     catch(const PermissionDenied&){result=failure("permission_denied","Controller denied this operation; the requested effect was not dispatched");}
     catch(const PermissionExpired&){result=failure("permission_expired","Controller approval expired before the requested effect");}

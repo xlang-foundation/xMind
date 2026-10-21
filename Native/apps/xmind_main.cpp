@@ -22,7 +22,7 @@ namespace {
 void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
-        "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read] [server options]\n"
+        "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read|process-code] [server options]\n"
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
         "  xmind [local profile options] profile-info\n"

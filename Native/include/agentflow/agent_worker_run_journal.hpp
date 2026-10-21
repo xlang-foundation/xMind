@@ -19,4 +19,6 @@ public:
 };
 std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(
     AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
+std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(
+    AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
 }

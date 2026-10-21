@@ -234,7 +234,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_rpc agentflow_core agentflow_models)
   add_library(agentflow_worker_runner STATIC src/agent_worker_runner.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
-  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp)
+  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp src/agent_worker_coding_owner.cpp src/agent_worker_coding_context.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_control.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_supervisor.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_executor.cpp)
@@ -922,6 +922,10 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_server_contract.mjs" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_worker_server_contract PROPERTIES TIMEOUT 60)
+      add_test(NAME native_agent_worker_coding_server_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_coding_server_contract.mjs" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_agent_worker_coding_server_contract PROPERTIES TIMEOUT 60)
     endif()
     target_include_directories(agentflow_agent_worker_ledger_contract PRIVATE third_party)
     target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent)

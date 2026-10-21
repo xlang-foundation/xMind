@@ -110,13 +110,13 @@ int run_server(int argc,char** argv) {
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
             if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state" && key!="--agent-execution") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE] [--agent-execution thread|process-read]");
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE] [--agent-execution thread|process-read|process-code]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         const auto execution_mode=options.contains("--agent-execution")?options.at("--agent-execution"):"thread";
-        if(execution_mode!="thread"&&execution_mode!="process-read")throw std::invalid_argument("Agent execution must be thread or process-read");
-        const bool process_read=execution_mode=="process-read";
-        if(process_read){if(!options.contains("--workspace"))throw std::invalid_argument("Process read execution requires an execution workspace");for(const auto* key:{"--workspace-edits","--mcp-config","--process-config","--language-server-config","--python-tools-config","--runtime-manifest-sha256","--owner-receipt","--legacy-owner-ticket","--profile-state"})if(options.contains(key))throw std::invalid_argument("Process read execution is a standalone read-only mode; incompatible configuration supplied");}
+        if(execution_mode!="thread"&&execution_mode!="process-read"&&execution_mode!="process-code")throw std::invalid_argument("Agent execution must be thread, process-read or process-code");
+        const bool process_read=execution_mode=="process-read",process_code=execution_mode=="process-code",process_worker=process_read||process_code;
+        if(process_worker){if(!options.contains("--workspace"))throw std::invalid_argument("Process execution requires an execution workspace");for(const auto* key:{"--mcp-config","--process-config","--language-server-config","--python-tools-config","--runtime-manifest-sha256","--owner-receipt","--legacy-owner-ticket","--profile-state"})if(options.contains(key))throw std::invalid_argument("Standalone process execution received incompatible configuration");if(process_read&&options.contains("--workspace-edits"))throw std::invalid_argument("Process read execution is read-only");if(process_code&&(!options.contains("--workspace-edits")||options.at("--workspace-edits")!="approved"))throw std::invalid_argument("Process coding execution requires approved workspace edits");}
         int port=8765;
         if(options.contains("--port")) {
             const auto& value=options.at("--port");const auto parsed=std::from_chars(value.data(),value.data()+value.size(),port);
@@ -126,7 +126,7 @@ int run_server(int argc,char** argv) {
         if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local server");
         agentflow::validate_local_auth_token(token);
 #if !defined(_WIN32)
-        if(process_read)throw std::invalid_argument("Process agent execution requires Windows");
+        if(process_worker)throw std::invalid_argument("Process agent execution requires Windows");
         if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native owner replacement currently requires Windows");
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
@@ -308,8 +308,8 @@ int run_server(int argc,char** argv) {
         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
         std::unique_ptr<agentflow::EditRecoveryReader> recovery;
         agentflow::AgentRootExecutorFactory root_executor_factory;
-        if(process_read){const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));root_executor_factory=[image=std::move(image)](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return agentflow::make_agent_worker_read_executor(store,settings,image);};}
-        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_read){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};}};
+        if(process_worker){const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));root_executor_factory=[image=std::move(image),process_code](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return process_code?agentflow::make_agent_worker_coding_executor(store,settings,image):agentflow::make_agent_worker_read_executor(store,settings,image);};}
+        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code)for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);}};
 #endif
         if(options.contains("--model")) {
 #if defined(_WIN32)
@@ -319,20 +319,20 @@ int run_server(int argc,char** argv) {
             if(options.contains("--workspace")) settings.workspace=options.at("--workspace");
             bind_workspace_membership(settings);
             settings.approved_edits=options.contains("--workspace-edits");
-            if(!process_read)settings.mcp_servers=mcp_settings;
+            if(!process_worker)settings.mcp_servers=mcp_settings;
             // A server can start before a browser creates/selects its first
             // workspace. Keep the local shell catalog configured for that
             // later workspace, but do not bind execution tools to an agent
             // whose request has no verified workspace.
-            if(!process_read&&settings.workspace)settings.process_profiles=process_profiles;
-            if(!process_read)settings.language_servers=language_servers;
+            if(!process_worker&&settings.workspace)settings.process_profiles=process_profiles;
+            if(!process_worker)settings.language_servers=language_servers;
             settings.instruction_policy=instruction_policy;
-            if(!process_read)settings.xlang_python_tools=xlang_python_tools;
+            if(!process_worker)settings.xlang_python_tools=xlang_python_tools;
             configure_execution_mode(settings);
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
-            if(!process_read&&settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(!process_worker&&settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
             const auto purpose=provider_purpose(settings.provider.endpoint);
             const auto* key=std::getenv("XMIND_API_KEY");
             if(key && *key) {
@@ -356,12 +356,12 @@ int run_server(int argc,char** argv) {
         }
 #if defined(_WIN32)
         if(!executor){
-            agentflow::AgentSettings settings;if(!process_read){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
+            agentflow::AgentSettings settings;if(!process_worker){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
             bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.
-            if(!process_read&&settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(!process_worker&&settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
             std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
             std::vector<agentflow::ProviderProfileRoute> routes;
             const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format,agentflow::ChatDialect dialect=agentflow::ChatDialect::openai){

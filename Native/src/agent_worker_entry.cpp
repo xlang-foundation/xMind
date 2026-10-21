@@ -18,7 +18,8 @@ int run_agent_channel_worker(int argc,char** argv){
     const auto bootstrap_deadline=Clock::now()+std::chrono::seconds(10);
     auto channel=AgentWorkerChannel::accept_inherited(handle,bootstrap_deadline);
     const auto boot=channel->receive(bootstrap_deadline);
-    if(boot.operation!="worker.boot"||boot.payload!="{\"version\":1}")
+    const bool coding=boot.payload=="{\"version\":1,\"workspace\":\"coding\"}";
+    if(boot.operation!="worker.boot"||(!coding&&boot.payload!="{\"version\":1}"))
         throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
     // This is only a transport ceiling. Every backend operation still checks
     // the captured original deadline, current lease and owner cancellation.
@@ -31,7 +32,7 @@ int run_agent_channel_worker(int argc,char** argv){
         if(executed.exchange(true))throw AgentWorkerRpcRemoteError("rejected");
         std::stop_callback propagate(handler_cancel,[&]{execution_stop.request_stop();});
         try{
-            const auto result=execute_agent_worker_read_root(*self,execution_stop.get_token());
+            const auto result=coding?execute_agent_worker_coding_root(*self,execution_stop.get_token()):execute_agent_worker_read_root(*self,execution_stop.get_token());
             if(result.run.state!=RunState::completed)throw AgentWorkerRpcRemoteError("failed");
             return "{\"version\":1,\"outcome\":\"completed\"}";
         }catch(const AgentTerminalHandoff& intent){
