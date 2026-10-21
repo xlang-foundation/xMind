@@ -1,0 +1,66 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T06:07:22.277Z",
+    "sourceParent": "181f7eb9aa21fde3f4407b4727017af97c5352ec",
+    "sourcePatchSha256": "9dac0bfbe0e828c83e1ec425b90c8d57a5bdbd6890e5fc820f8cf41ab6ae3cbc",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 26396,
+      "launchedAt": "2026-10-21T06:06:36.880Z",
+      "completedAt": "2026-10-21T06:06:57.678Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6e683905feb280db87ed2563e322ea998a24c5b0c6eba44400802ce9c5dc0c09"
+    },
+    "test": {
+      "pid": 69932,
+      "launchedAt": "2026-10-21T06:07:00.311Z",
+      "completedAt": "2026-10-21T06:07:19.608Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cba553ec286f45053d3573c65a2e1555f3379ace196884ce0ee060a5a34b86a2"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 19.25,
+    "projectFiles": 2712,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5489cff7be66f7edd72dbbec16126b79450d6ae5f8a7339458470a2c4e361207",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-authority-focused-20261020-build.log": "6e683905feb280db87ed2563e322ea998a24c5b0c6eba44400802ce9c5dc0c09",
+    "doc/evidence/process-worker-authority-focused-20261020-build-terminal.json": "8eb7b2880d32d16f9b405ae476e2da4c763e5de08fa66d77fcc9d44520c0c3ac",
+    "doc/evidence/process-worker-authority-focused-20261020-ctest.log": "cba553ec286f45053d3573c65a2e1555f3379ace196884ce0ee060a5a34b86a2",
+    "doc/evidence/process-worker-authority-focused-20261020-ctest-terminal.json": "c21c6a6145f0e50b11591bf52475bc63ebc32315681245b20fbb6b4fd10b8314",
+    "doc/evidence/process-worker-authority-focused-20261020-LastTest.log": "bb52a90a052248cddf22f1457f701c4ac470850234179d9f41968ac609a85fed",
+    "doc/evidence/process-worker-authority-focused-20261020-test-inventory.json": "8c7a1e59acb89838494c112b80ef25609f928fa41df24bd254bd4c9cfa4a3627",
+    "doc/evidence/process-worker-authority-focused-20261020-gate.json": "04056a960ae177bcac7f44182da61e907dca6b3e759e89d93f000a8b544f06c5",
+    "doc/evidence/process-worker-authority-focused-20261020-source.patch": "9dac0bfbe0e828c83e1ec425b90c8d57a5bdbd6890e5fc820f8cf41ab6ae3cbc",
+    "doc/evidence/process-worker-authority-focused-20261020-binaries-before-test.json": "c599c82911fceea55be4b2e1fe81b7663836cc527d5e1418ed722b2d2d15b98c"
+  },
+  "verified": [
+    "Native run_process owner binds backend authority to the exact invocation and executor-chosen operation ID",
+    "Foreground and background execution check live authority after approval and before launch",
+    "Authority rejection retains a known failed operation and no command marker; background check runs on its execution thread",
+    "Existing normal process execution, output, cancellation and background lifecycle contract remains green"
+  ],
+  "limitations": [
+    "Two focused process contracts only; no broader or full native suite acceptance",
+    "Durable process claim ledger and process RPC remain unfinished",
+    "No installed, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

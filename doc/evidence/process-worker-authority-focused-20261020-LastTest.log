@@ -1,0 +1,72 @@
+Start testing: Oct 20 23:07 Pacific Daylight Time
+----------------------------------------------------------
+58/162 Testing: native_process_executor_contract
+58/162 Test: native_process_executor_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/Users/shaw9/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_process_executor_contract" start time: Oct 20 23:07 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, trusted-profile grant audit, real PowerShell PATH inheritance with secret isolation, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Shell discovery/semantics parity and model/server/editor integration remain separate.
+[process-contract] phase=workspace-setup elapsed_ms=0
+[process-contract] phase=repository-open elapsed_ms=1
+[process-contract] phase=request-validation elapsed_ms=145
+[process-contract] phase=aliased-root-approval elapsed_ms=146
+[process-contract] phase=request-validation elapsed_ms=445
+[process-contract] phase=approval-denial elapsed_ms=449
+[process-contract] phase=approval-cancellation elapsed_ms=564
+[process-contract] phase=approval-expiry elapsed_ms=582
+[process-contract] phase=stale-directory elapsed_ms=1675
+[process-contract] phase=approved-dispatch elapsed_ms=1849
+[process-contract] phase=trusted-module-path-policy elapsed_ms=2086
+[process-contract] phase=xlang3-workspace-import-path elapsed_ms=2630
+[process-contract] phase=trusted-process-profile elapsed_ms=3122
+[process-contract] phase=attached-workspace-dispatch elapsed_ms=3474
+[process-contract] phase=approved-powershell-shell elapsed_ms=3744
+[process-contract] phase=block-cpython-launches elapsed_ms=3745
+[process-contract] phase=binary-output elapsed_ms=6863
+[process-contract] phase=streamed-output elapsed_ms=7101
+[process-contract] phase=background-process elapsed_ms=7382
+[process-contract] phase=persistent-service elapsed_ms=7704
+[process-contract] phase=background-cancellation elapsed_ms=8126
+[process-contract] phase=output-flood elapsed_ms=8471
+[process-contract] phase=changed-executable elapsed_ms=8853
+[process-contract] phase=result-journal-fault elapsed_ms=13728
+[process-contract] phase=result-fault-close elapsed_ms=14023
+[process-contract] phase=restart-recovery elapsed_ms=14028
+[process-contract] phase=cross-workspace-quarantine elapsed_ms=14053
+[process-contract] phase=recovery-close elapsed_ms=14224
+[process-contract] phase=output-journal-fault elapsed_ms=14228
+[process-contract] phase=output-fault-close elapsed_ms=14646
+[process-contract] phase=timeout elapsed_ms=14650
+[process-contract] phase=interruption-close elapsed_ms=16454
+[process-contract] phase=cancel elapsed_ms=16457
+[process-contract] phase=interruption-close elapsed_ms=16863
+[process-contract] phase=complete elapsed_ms=16867
+<end of output>
+Test time =  18.53 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_executor_contract" end time: Oct 20 23:07 Pacific Daylight Time
+"native_process_executor_contract" time elapsed: 00:00:18
+----------------------------------------------------------
+
+102/162 Testing: native_agent_process_tool_host_contract
+102/162 Test: native_agent_process_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_process_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_process_tool_host_contract" start time: Oct 20 23:07 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Process-owner actual receipt: {"elapsed_ms":139,"exit_code":0,"independently_verified":false,"job_id":"a97a8e23cecd55c3700cf028d883076a","operation_id":"a97a8e23cecd55c3700cf028d883076a","output_artifact":{"operation_id":"a97a8e23cecd55c3700cf028d883076a","state":"complete","stderr_bytes":0,"stdout_bytes":18},"pid":70920,"process_tree_retired":true,"profile_id":"xlang3","stderr":{"byte_count":0,"data":"","encoding":"utf-8","retained_bytes":0},"stdout":{"byte_count":18,"data":"owner-process-ok\r\n","encoding":"utf-8","retained_bytes":18},"termination":"exited","truncated":false}
+Process-owner actual folders: {"attached_marker_content":"actual attached process\n","attached_marker_exists":true,"primary_marker_exists":false}
+process tool owner contract passed
+<end of output>
+Test time =   0.71 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_tool_host_contract" end time: Oct 20 23:07 Pacific Daylight Time
+"native_agent_process_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 20 23:07 Pacific Daylight Time

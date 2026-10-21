@@ -53,6 +53,7 @@ public:
         }
         if(!ready)return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
         if(call.tool_name=="run_process"){
+            if(owner_.before_effect)guidance.before_effect=[check=owner_.before_effect,call](const std::string& operation,std::stop_token token){check(call,operation,token);};
             AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=owner_.run_id;invocation.workspace_id=workspace_id_;invocation.workspace_revision=revision_;invocation.folder_id=call.folder_id;invocation.arguments_json=call.arguments_json;invocation.allow_background=owner_.allow_background;
             invocation.expires_unix_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
             return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};

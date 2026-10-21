@@ -1,3 +1,19 @@
+## Native process dispatch authority — 2026-10-20
+
+The process owner now binds a backend-only live authority callback to its exact
+invocation. The executor supplies the actual claimed operation ID and checks
+authority after approval, before command launch. Background jobs check on their
+execution thread. Rejection records a known failed operation without running
+the command; authority is never serialized into approval or worker values.
+
+Both focused process contracts pass in 19.25 seconds, including foreground and
+background authority revocation after controller approval, normal execution,
+output and lifecycle checks. Source, SDK, libraries, dependencies and binaries
+remain frozen across validation.
+[Scope and raw evidence](evidence/process-worker-authority-focused-20261020.json).
+Durable process claims and authenticated process RPC remain unfinished; this
+adds no broader-suite, installation or rendered acceptance.
+
 ## Process worker invocation boundary — 2026-10-20
 
 The native process owner now consumes a strict nine-field invocation codec.

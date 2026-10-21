@@ -1,0 +1,9 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  58: native_process_executor_contract
+1/2 Test  #58: native_process_executor_contract ..........   Passed   18.53 sec
+    Start 102: native_agent_process_tool_host_contract
+2/2 Test #102: native_agent_process_tool_host_contract ...   Passed    0.71 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  19.25 sec

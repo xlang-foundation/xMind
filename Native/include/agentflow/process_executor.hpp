@@ -86,7 +86,8 @@ private:
         bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background);
     std::string execute_claimed(const std::string& operation_id,const std::string& run_id,const std::string& profile_id,
         ProcessConfiguration launch,std::stop_token cancel,bool persistent=false,
-        std::shared_ptr<std::atomic_bool> intentional_stop={});
+        std::shared_ptr<std::atomic_bool> intentional_stop={},
+        std::function<void(const std::string&,std::stop_token)> before_effect={});
     PersistenceService& store_;
     WorkspaceTools& workspace_;
     std::string root_;

@@ -226,8 +226,10 @@ void ProcessExecutor::reap_workers(){
     for(auto it=workers_.begin();it!=workers_.end();){if(it->done->load(std::memory_order_acquire)){if(it->thread.joinable())it->thread.join();it=workers_.erase(it);}else ++it;}
 }
 std::string ProcessExecutor::execute_claimed(const std::string& id,const std::string& run,const std::string& profile,
-        ProcessConfiguration launch,std::stop_token cancel,bool persistent,std::shared_ptr<std::atomic_bool> intentional_stop) {
+        ProcessConfiguration launch,std::stop_token cancel,bool persistent,std::shared_ptr<std::atomic_bool> intentional_stop,
+        std::function<void(const std::string&,std::stop_token)> before_effect) {
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
+    if(before_effect){try{before_effect(id,cancel);}catch(...){finish(OperationState::failed,R"({"reason":"backend_authority_unavailable_before_process_dispatch"})");throw ProcessBeforeDispatchError("Backend process authority rejected dispatch before launch");}}
     try {
         OutputJournal output(store_,run,id,profile);OutputArtifactWriter artifact(store_,run,id);
         ProcessResult result;
@@ -338,7 +340,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel,trusted_actor);
     auto finish_before_dispatch=[&](const std::string& reason){try{store_.finish_operation(id,OperationState::failed,Json{{"reason",reason}}.dump()).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish_before_dispatch("repository_guidance_changed_or_unavailable_before_effect");throw;}}
-    if(!background)return execute_claimed(id,run,found->id,std::move(launch),cancel);
+    if(!background)return execute_claimed(id,run,found->id,std::move(launch),cancel,false,{},std::move(guidance.before_effect));
     reap_workers();
     auto done=std::make_shared<std::atomic_bool>(false);auto intentional_stop=std::make_shared<std::atomic_bool>(false);
     {
@@ -347,9 +349,9 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
         try {
             workers_.reserve(workers_.size()+1);
             auto* const self=this;const auto profile=found->id;auto owned_launch=std::move(launch);
-            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=cancel,persistent](std::stop_token shutdown)mutable{
+            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=cancel,persistent,before_effect=std::move(guidance.before_effect)](std::stop_token shutdown)mutable{
                 std::stop_source stop;std::stop_callback stop_shutdown(shutdown,[&]{stop.request_stop();});std::stop_callback stop_owner(owner_cancel,[&]{stop.request_stop();});
-                try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token(),persistent,intentional_stop);}
+                try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token(),persistent,intentional_stop,std::move(before_effect));}
                 catch(...){try{const auto current=self->store_.operation(id).get();if(current.state==OperationState::executing)self->store_.finish_operation(id,OperationState::uncertain,R"({"reason":"background_process_worker_failed"})").get();}catch(...) {}}
                 done->store(true,std::memory_order_release);
             });
