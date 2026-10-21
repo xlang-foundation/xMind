@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-21T01:31:42.563Z",
+  "gate": {
+    "recordedAt": "2026-10-21T01:31:32.461Z",
+    "sourceParent": "7376f6e7b6f136b95a178251ec66483da3fc2c3d",
+    "sourcePatchSha256": "9538826bccd4464b158238c35138edea959e984b8def058287f38edf70254b40",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 36108,
+      "launchedAt": "2026-10-21T01:27:52.215Z",
+      "completedAt": "2026-10-21T01:28:48.811Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0a62e265a2eb8a8489ffd0977ad4d395d187451601993ec6e23272d309b4a259"
+    },
+    "test": {
+      "pid": 47364,
+      "launchedAt": "2026-10-21T01:28:51.389Z",
+      "completedAt": "2026-10-21T01:31:29.958Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a1192c442e2b47158daa2a755ab6175221518e08f84e1073635a92536cec3db1"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 158.51,
+    "projectFiles": 2697,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "f40f2b466bb2facc4964c95dc1fd6c0f5b1918f30ee9811e528fe0edf71cc43b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-profile-generation-corrected-20261020-build.log": "0a62e265a2eb8a8489ffd0977ad4d395d187451601993ec6e23272d309b4a259",
+    "doc/evidence/worker-profile-generation-corrected-20261020-build-terminal.json": "b56a63dc008d5351cc89e6011aec84be9356c59d9471b6a42fd4a1e22d4576d4",
+    "doc/evidence/worker-profile-generation-corrected-20261020-ctest.log": "a1192c442e2b47158daa2a755ab6175221518e08f84e1073635a92536cec3db1",
+    "doc/evidence/worker-profile-generation-corrected-20261020-ctest-terminal.json": "f077a096469d4c589b16aa704c25aafa142abdeb7d27bd05f51e81753982ce9b",
+    "doc/evidence/worker-profile-generation-corrected-20261020-LastTest.log": "9fa39fe570ff700d3760002188d722af599581b8e9c8b2e3eb241cdd80cd81ca",
+    "doc/evidence/worker-profile-generation-corrected-20261020-test-inventory.json": "0d9db7c8801c8891348d92cd3aac078a7fe2b858cdc2889e360152faaa25ae45",
+    "doc/evidence/worker-profile-generation-corrected-20261020-gate.json": "94c209ad727a4b89b083a3019d91a2dbec336a5a3b9d3eadf2165d9f5d2fc250"
+  },
+  "scope": "Actual worker executor recreation across native provider-profile generations",
+  "verified": [
+    "Unconfigured runtime does not fabricate an executor",
+    "First profile activated and completes one actual child root",
+    "Second profile prepared inactive without replacing the active profile, then explicitly selected for a second actual child root",
+    "First profile restored for a third actual child root; four prepared executors capture exact profile identity and encrypted credential reference",
+    "Separate profiles keep distinct encrypted references and restored first profile reuses its original reference",
+    "Each root commits one actual model result and charge with exact immutable profile ID, revision, route and model",
+    "Automatic planning default is added only on built-in execution path; configured planning remains preserved for injected executors",
+    "Existing built-in provider-profile contract and 54 focused tests pass with frozen inputs and native binaries unchanged"
+  ],
+  "limitations": [
+    "This switch qualification covers idle ordinary empty-tool workers and one controlled route/model; in-flight mutation rejection, worker fault and provider-failure cases remain separate",
+    "Public placement and server entry configuration remain unwired",
+    "Broader worker effects, context and graphs remain unfinished",
+    "No full-suite, installed, hosted, rendered-client or live-provider acceptance"
+  ],
+  "passed": true
+}

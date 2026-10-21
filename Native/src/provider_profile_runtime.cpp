@@ -111,7 +111,10 @@ struct ProviderProfileRuntime::Impl {
         // or deterministic tool nodes. It remains an ordinary Agent run; the
         // model decides whether to plan, and native authority/approvals still
         // bound every child and effect.
-        if(workspace_binding&&!base.planning)base.planning.emplace();
+        // A trusted injected executor owns its explicit capability policy.
+        // Preserve configured planning; add the built-in default only for the
+        // built-in execution path, rather than silently extending a factory.
+        if(workspace_binding&&!base.planning&&!root_executor_factory)base.planning.emplace();
         state=profiles.snapshot();
         try{
             for(const auto& profile:state.profiles){

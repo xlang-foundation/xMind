@@ -1,3 +1,24 @@
+## Worker recreation across provider-profile generations — 2026-10-20
+
+ProviderProfileRuntime now adds the automatic planning default only for its
+built-in executor. Explicit planning configuration is preserved for injected
+executors. A production read-worker factory now passes an actual profile lifecycle:
+activate first profile, prepare a second inactive, select second, restore first.
+Three actual child roots commit one model result each; four prepared executors
+retain exact profile provenance and separate encrypted credential references.
+Restoring the first profile reuses its original reference. The built-in profile
+contract still passes. The serial build and 54 focused contracts pass in 158.51
+seconds with frozen inputs and native binaries unchanged.
+[Corrected evidence](evidence/worker-profile-generation-corrected-20261020.json).
+
+The first gate failed 53/54 because the new fixture put a selected model in an
+unbound route template; native policy validation rejected it before the new
+profile workers started. The fixture now leaves that model empty for saved-profile
+binding. [Original failure](evidence/worker-profile-generation-focused-20261020.json).
+This covers idle switches on one controlled route/model. Public placement, in-flight
+switch/fault qualification and broader worker capabilities remain open; no new
+full-suite, installed, hosted, rendered-client or live-provider acceptance.
+
 ## Execution-generation worker factory hook — 2026-10-20
 
 ExecutionPlatform accepts a trusted backend root-executor factory and invokes it
