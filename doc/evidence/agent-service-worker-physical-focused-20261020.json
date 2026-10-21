@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-21T00:18:30.424Z",
+  "gate": {
+    "recordedAt": "2026-10-21T00:18:11.801Z",
+    "sourceParent": "f0872d4a73cb16159c27e56c6c5a397f9bb434a3",
+    "sourcePatchSha256": "60bbf9070b0c0875a0480fe9eef9bb9e994f67d18af8ece421fe2709a4f7dc67",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 48740,
+      "launchedAt": "2026-10-21T00:13:38.795Z",
+      "completedAt": "2026-10-21T00:14:35.846Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c0c619cf94b7700df16d4fa21638306deb8f6aa212c75b34ab4a1b3edbf9c0a0"
+    },
+    "test": {
+      "pid": 26912,
+      "launchedAt": "2026-10-21T00:14:38.558Z",
+      "completedAt": "2026-10-21T00:18:07.459Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e726e670f11f7f7e27f98cbef6b5026b31fd03e15372d06c85ac0c27235d2cf3"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 208.84,
+    "projectFiles": 2693,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e855b7f8fbdfc63c7dde37b0da16a557dcd754b45a1ed61588b559087778f2ef",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-service-worker-physical-focused-20261020-build.log": "c0c619cf94b7700df16d4fa21638306deb8f6aa212c75b34ab4a1b3edbf9c0a0",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-build-terminal.json": "c8d1173c0a078df9b1331022570c94c4957b2982e5fdcd64a84d8fc08b4115f0",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-ctest.log": "e726e670f11f7f7e27f98cbef6b5026b31fd03e15372d06c85ac0c27235d2cf3",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-ctest-terminal.json": "6a19df65ed2ada3a8c3dc75d0b6cccb8c6aefb04994f78a5a039fe83c51f008c",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-LastTest.log": "d9df7f00a09aa2c9eca7827ef33a9cab13880744f2918062b3cdcaced876bba2",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-test-inventory.json": "0483b5a05260ef34efb3238c03faeb13683e417796bc25e3eeff9ec865e03a07",
+    "doc/evidence/agent-service-worker-physical-focused-20261020-gate.json": "df289bce7ac6d08d8a7f55909e12d87b8431b39e586b6121000178163aef729b"
+  },
+  "fixtureSha256": "41d8951a8935f571e6a5b7288afe937eaabc70805751a5904c8eecfc6b3452ca",
+  "productionExecutableUnchanged": true,
+  "scope": "Actual AgentService supervised child uses one-slot shared RootWorkExecutor and retains physical capacity after canonical completion until exact child exit",
+  "verified": [
+    "Service root dispatch uses shared RootAdmissionPool with one physical worker",
+    "Backend fixture holds actual product child after canonical completed facts, before supervisor drain",
+    "Independent Windows process handle verifies exact PID/birth and live process while service stays non-idle and physical running count stays one",
+    "A second staged physical action remains queued with an unresolved future while the completed child is held",
+    "Second action runs only after executor reports drain and the retained process handle observes exact child exit",
+    "Both physical actions retire and service becomes healthy/idle; canonical history and one model charge remain correct",
+    "Independent peer still verifies exactly 48 intentional requests"
+  ],
+  "limitations": [
+    "This qualifies one controlled physical-capacity ordering with a probe action, not mixed AgentService/GraphService process scheduling",
+    "Product factory/configuration, queued cancellation, shutdown/fault handling and general worker capabilities remain open",
+    "No exhaustive race/timeout, full-suite, installed, hosted, rendered-client or live-provider acceptance claim"
+  ],
+  "passed": true
+}

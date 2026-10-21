@@ -1,3 +1,25 @@
+## AgentService child retains shared physical capacity — 2026-10-20
+
+The actual supervised AgentService child now runs through a shared RootAdmissionPool
+with one physical RootWorkExecutor slot. A backend fixture holds the child after
+canonical completion and before supervisor drain. An independently retained Windows
+process handle verifies its exact PID/birth and live state while the service remains
+non-idle and physical running count stays one. A second staged action stays queued
+with an unresolved future. Only after supervisor drain and exact child exit can
+that action start; its own handle check verifies exit before proceeding. Both
+physical actions retire, service becomes healthy/idle and actual two-message history
+and one model charge remain correct. The independent peer still observes exactly
+48 intentional controlled requests.
+
+Serial Release build and 54 contracts pass in 208.84 seconds with all frozen inputs,
+file sets and binaries unchanged. Production executable remains byte-identical to
+the preceding service-dispatch checkpoint. This qualifies one controlled physical
+capacity ordering with a probe action, not mixed AgentService/GraphService process
+scheduling, exhaustive races or timeout/shutdown handling. Product factory selection,
+user placement settings, general worker capabilities and GraphService placement
+remain open. Installed59 and user state remain untouched. See
+[receipt](evidence/agent-service-worker-physical-focused-20261020.json).
+
 ## AgentService backend worker dispatch port — 2026-10-20
 
 AgentService now accepts an optional trusted backend root executor. The service

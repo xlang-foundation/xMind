@@ -21,6 +21,7 @@ public:
         store.append_event(request.run_id,"agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1},{"primary_folder_id",workspace.identity()},{"folders",Json::array({Json{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})},{"snapshot","run_admission"}}.dump()).get();
         AgentWorkerSupervisor supervisor(store,image,{request.run_id,request.run_id,workspace.identity(),"generation-"+request.run_id,1},identity,deadline);
         child_pid=supervisor.lease().pid;
+        child_birth=std::stoull(supervisor.lease().creation_time);
         const auto settle=[&](RunState intent){
             for(;;){try{if(store.run(request.run_id).get().state==RunState::completed)return supervisor.drain_completed(Clock::now()+5s).run;
                     return supervisor.drain_terminal(intent==RunState::cancelled?RunState::cancelled:RunState::failed,intent==RunState::cancelled?"cancelled":"dispatch_error",Clock::now()+5s).run;}
@@ -31,10 +32,14 @@ public:
             AgentWorkerReadRequestPolicy policy;policy.instructions="Service captured base.\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;policy.include_usage=true;
             ChatProviderConfig config{endpoint+"/product_service","worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
             supervisor.start(owner,policy,config,{},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),cancel);
-            const auto intent=supervisor.execute();const auto result=settle(intent);drained=!supervisor.alive();return result;
+            const auto intent=supervisor.execute();
+            if(hold_drain&&intent==RunState::completed){canonical_ready=true;while(!release_drain&&!cancel.stop_requested())std::this_thread::sleep_for(5ms);}
+            const auto result=settle(intent);drained=!supervisor.alive();return result;
         }catch(...){const auto failure=std::current_exception();(void)settle(cancel.stop_requested()?RunState::cancelled:RunState::failed);std::rethrow_exception(failure);}
     }
     std::atomic<unsigned> executions=0;std::atomic<bool> drained=false;std::atomic<std::uint32_t> child_pid=0;
+    std::atomic<std::uint64_t> child_birth=0;
+    std::atomic<bool> hold_drain=false,canonical_ready=false,release_drain=false;
 private:
     PersistenceService& store;std::shared_ptr<const BoundProcessExecutable> image;WorkspaceTools& workspace;RepositoryInstructionContext& guidance;std::string endpoint;Clock::time_point deadline;
 };
@@ -45,7 +50,10 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     const auto executor=std::make_shared<Executor>(store,image,workspace,guidance,endpoint,Clock::now()+20s);
     const auto catalog=AgentDefinitionStore(store).apply("agents:\n  - id: service.worker.good\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: []\n  - id: service.worker.unsupported\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: [read_file]\n");
     const std::string session="rpc-service-supervised-session",id="rpc-product_service";store.create_session(session,"Actual service-owned native worker").get();
-    AgentService service(store,settings,1,2,{},executor);const auto metadata=service.agent_definitions();
+    const auto pool=std::make_shared<RootAdmissionPool>(3,1,true);
+    executor->hold_drain=true;
+    AgentService service(store,settings,1,2,pool,executor);const auto metadata=service.agent_definitions();
+    struct Release {Executor& owner;~Release(){owner.release_drain=true;}} release{*executor};
     const auto bad=std::find_if(metadata.begin(),metadata.end(),[](const auto& item){return item.id=="service.worker.unsupported";});
     const auto good=std::find_if(metadata.begin(),metadata.end(),[](const auto& item){return item.id=="service.worker.good";});check(bad!=metadata.end()&&good!=metadata.end(),"Service fixture must expose actual registered profiles");
     service.select_session_agent(session,*bad,0);
@@ -53,9 +61,22 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     check(store.runs(session).get().empty()&&executor->executions==0&&service.healthy()&&service.idle(),"Worker validation must reject unsupported admission before any durable root or execution");
     service.select_session_agent(session,*good,1);
     service.submit(id,session,"Native child model RPC product_service.");
-    const auto until=Clock::now()+10s;while(Clock::now()<until&&(!service.idle()||store.run(id).get().state!=RunState::completed))std::this_thread::sleep_for(5ms);
+    const auto held_until=Clock::now()+5s;while(Clock::now()<held_until&&!executor->canonical_ready)std::this_thread::sleep_for(5ms);
+    check(executor->canonical_ready&&store.run(id).get().state==RunState::completed&&!service.idle()&&pool->executor()->running()==1&&!executor->drained,"Canonical completion must retain the shared physical slot and service ownership before child drain");
+    struct Observation {HANDLE handle=nullptr;~Observation(){if(handle)CloseHandle(handle);}} child{OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,executor->child_pid)};
+    check(child.handle!=nullptr,"Observe the exact supervised child process");FILETIME created,exited,kernel,user;
+    check(GetProcessTimes(child.handle,&created,&exited,&kernel,&user)!=0,"Observe supervised child birth");ULARGE_INTEGER birth;birth.LowPart=created.dwLowDateTime;birth.HighPart=created.dwHighDateTime;
+    check(birth.QuadPart==executor->child_birth&&WaitForSingleObject(child.handle,0)==WAIT_TIMEOUT,"Canonical completion must retain the exact PID/birth child alive");
+    std::atomic<bool> next_started=false;
+    const auto next=pool->executor()->stage([&,handle=child.handle](std::stop_token){check(executor->drained&&WaitForSingleObject(handle,0)==WAIT_OBJECT_0,"Next physical action cannot run before exact child exit");next_started=true;});
+    Release release_before_ticket_drain{*executor};next->commit();
+    check(next->result().wait_for(0ms)==std::future_status::timeout&&!next_started&&pool->executor()->running()==1&&pool->executor()->waiting()>=1,"Shared executor must keep the next action queued while completed child ownership is held");
+    executor->release_drain=true;check(next->result().wait_for(5s)==std::future_status::ready,"Next action must become runnable after exact physical drain");next->result().get();
+    const auto until=Clock::now()+5s;while(Clock::now()<until&&(!service.idle()||pool->executor()->running()!=0))std::this_thread::sleep_for(5ms);
     check(service.idle()&&service.healthy()&&executor->executions==1&&executor->drained&&executor->child_pid!=GetCurrentProcessId(),"AgentService must retain execution until its exact supervised child is physically drained");
     const auto history=store.run_history(id).get();check(history.size()==2&&Json::parse(history.back().json).at("content")=="Service worker complete."&&store.root_budget(id).get().model_calls_reserved==1,"Service-owned child must preserve actual canonical history and one model charge");service.close();
     std::cout<<"AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle."<<std::endl;
+    check(next_started&&pool->executor()->running()==0,"Shared executor must retire both physical actions");
+    std::cout<<"AgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain."<<std::endl;
 }
 }
