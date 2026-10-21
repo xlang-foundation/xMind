@@ -1,3 +1,23 @@
+## Configured MCP/A2A production worker regression — 2026-10-21
+
+Owner-registered A2A discovery now has production-factory acceptance through
+ExecutionPlatform and an actual separate unified xmind child. One approved
+A2A 1.0 SendMessage causes an isolated HTTP peer file effect; the next model
+window consumes its exact durable acknowledgement. Canonical history matches
+the remote claim and native operation, and the child physically retires before
+service idle. Configured HTTP MCP remains covered in the same model fixture.
+
+The serial Release build and **62/62 selected native contracts pass in 208.85
+seconds**, after a separate **3/3 A2A diagnostic pass in 30.35 seconds**.
+Frozen project/SDK/library/dependency/binary file sets remain unchanged.
+The independent model peer observes exactly 96 requests.
+[Scope, patches and raw evidence](evidence/process-worker-configured-remotes-focused-20261021.json).
+
+Dynamic catalogue refresh, remaining capabilities/default placement, full-suite
+regression, installation and fresh rendered/live-provider acceptance remain
+open. This factory fixture covers ordinary A2A 1.0 task sends; existing streaming
+transport coverage remains separately scoped. Existing owners/tasks are preserved.
+
 ## Production coding-worker remote tools and configured MCP factory — 2026-10-21
 
 Normal coding-worker startup now discovers configured native MCP/A2A registries,
