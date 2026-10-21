@@ -1,3 +1,19 @@
+## Scoped parent/leaf worker reservation replies — 2026-10-21
+
+The journal client now derives reservation role from its authenticated root/owner
+scope. Two real SDK IPC fixture children verify parent and leaf reserve/start/
+finish replies and reject 48 forged receipts, then physically retire. Replies
+are synthetic: this does not prove repository child admission or child execution.
+
+**7/7 focused contracts pass in 66.45 seconds**, with the existing independent
+provider peer still observing exactly 185 requests. Complete source, SDK,
+libraries, dependencies and 133 native binary sets/hashes remain frozen.
+[Scope and raw evidence](evidence/process-worker-journal-leaf-role-20261021.json).
+
+Delegated admission/journal/assembly/dispatch, planning, graph/default placement,
+full regression and updated installed/rendered/live-provider acceptance remain
+unfinished.
+
 ## Worker context broader regression — 2026-10-21
 
 **65/65 selected native contracts pass in 235.23 seconds** on committed
