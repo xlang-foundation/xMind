@@ -41,6 +41,11 @@ public:
     std::future<AgentWorkerReadClaimRecord> start_agent_worker_read(AgentWorkerLeaseSpec,AgentWorkspaceInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerReadClaimRecord> record_agent_worker_read_result(AgentWorkerLeaseSpec,AgentWorkspaceInvocation,bool success,std::string actual_output_json);
     std::future<AgentWorkerReadClaimRecord> agent_worker_read_claim(std::string root,std::string attempt,std::string call);
+    std::future<AgentWorkerFileClaimRecord> claim_agent_worker_file(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerFileClaimRecord> start_agent_worker_file(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerFileClaimRecord> claim_agent_worker_file_effect(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::string operation_id,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerFileClaimRecord> record_agent_worker_file_result(AgentWorkerLeaseSpec,AgentFileToolInvocation,bool success,std::string actual_output_json);
+    std::future<AgentWorkerFileClaimRecord> agent_worker_file_claim(std::string root,std::string attempt,std::string call);
     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     PersistenceService(std::string database,std::vector<std::string> import_roots,

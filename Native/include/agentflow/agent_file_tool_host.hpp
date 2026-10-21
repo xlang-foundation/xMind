@@ -35,6 +35,7 @@ public:
     virtual AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token cancel={})=0;
 };
 bool is_agent_file_tool(const std::string& name);
+void validate_agent_file_tool_invocation(const AgentFileToolInvocation&);
 
 // Backend-only construction. These capabilities must outlive the host; they
 // never form part of a worker request. Permissions and catalogue are frozen

@@ -209,6 +209,11 @@ public:
     AgentWorkerReadClaimRecord start_agent_worker_read(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&);
     AgentWorkerReadClaimRecord record_agent_worker_read_result(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerReadClaimRecord agent_worker_read_claim(const std::string& root,const std::string& attempt,const std::string& call);
+    AgentWorkerFileClaimRecord claim_agent_worker_file(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&);
+    AgentWorkerFileClaimRecord start_agent_worker_file(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&);
+    AgentWorkerFileClaimRecord claim_agent_worker_file_effect(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,const std::string& operation_id);
+    AgentWorkerFileClaimRecord record_agent_worker_file_result(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,bool success,const std::string& actual_output_json);
+    AgentWorkerFileClaimRecord agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
     Event agent_worker_tool_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned);
     // Exact durable compare-and-swap; null expected means create only if absent.

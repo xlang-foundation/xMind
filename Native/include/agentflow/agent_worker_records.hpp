@@ -4,6 +4,7 @@
 #include <vector>
 #include "agentflow/delegation_records.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/agent_file_tool_host.hpp"
 #include <variant>
 #include <stdexcept>
 
@@ -46,6 +47,16 @@ struct AgentWorkerToolTurnRecord {
     AgentWorkerModelClaimSpec model;
     std::vector<std::int64_t> message_sequences;
     std::string messages_binding;
+};
+// Backend-only ownership of one exact provider file call. Invocation entry is
+// distinct from each approved native mutation; operation IDs are backend facts.
+struct AgentWorkerFileClaimRecord {
+    AgentWorkerModelClaimSpec model;
+    AgentFileToolInvocation invocation;
+    std::string state;
+    std::vector<std::string> operation_ids;
+    bool success=false;
+    std::string actual_output_json,output_binding;
 };
 // An explicit read vocabulary, never arbitrary repository reflection. The
 // backend validates the exact captured lease in the same transaction as a read.

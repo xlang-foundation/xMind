@@ -1,0 +1,445 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index db6e24ba..9ecb364a 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -95,7 +95,7 @@ endif()
+ # Production persistence must call SQLite through embedded xlang3.
+ add_library(agentflow_models STATIC src/agent_model_values.cpp src/model_stream.cpp src/model_request.cpp src/responses_stream.cpp src/responses_request.cpp src/responses_context.cpp src/anthropic_request.cpp src/anthropic_stream.cpp src/anthropic_history.cpp src/gemini_request.cpp src/gemini_stream.cpp src/gemini_history.cpp src/gemini_model_policy.cpp src/deepseek_request.cpp src/deepseek_model_policy.cpp src/provider_model_policy.cpp src/provider_history_bridge.cpp)
+ target_include_directories(agentflow_models PUBLIC include PRIVATE third_party)
+-target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp)
++target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp src/agent_file_invocation.cpp)
+ target_link_libraries(agentflow_core PRIVATE agentflow_models)
+ add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp src/mcp_requests.cpp src/mcp_handshake.cpp src/mcp_subscriptions.cpp src/mcp_http_metadata.cpp src/mcp_http_stream.cpp src/mcp_tool_codec.cpp)
+ target_link_libraries(agentflow_core PRIVATE agentflow_mcp_wire)
+diff --git a/Native/include/agentflow/agent_file_tool_host.hpp b/Native/include/agentflow/agent_file_tool_host.hpp
+index 14d404e4..6cde3b2e 100644
+--- a/Native/include/agentflow/agent_file_tool_host.hpp
++++ b/Native/include/agentflow/agent_file_tool_host.hpp
+@@ -35,6 +35,7 @@ public:
+     virtual AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token cancel={})=0;
+ };
+ bool is_agent_file_tool(const std::string& name);
++void validate_agent_file_tool_invocation(const AgentFileToolInvocation&);
+ 
+ // Backend-only construction. These capabilities must outlive the host; they
+ // never form part of a worker request. Permissions and catalogue are frozen
+diff --git a/Native/include/agentflow/agent_worker_records.hpp b/Native/include/agentflow/agent_worker_records.hpp
+index 2d155cb7..91816b08 100644
+--- a/Native/include/agentflow/agent_worker_records.hpp
++++ b/Native/include/agentflow/agent_worker_records.hpp
+@@ -4,6 +4,7 @@
+ #include <vector>
+ #include "agentflow/delegation_records.hpp"
+ #include "agentflow/workspace_tools.hpp"
++#include "agentflow/agent_file_tool_host.hpp"
+ #include <variant>
+ #include <stdexcept>
+ 
+@@ -47,6 +48,16 @@ struct AgentWorkerToolTurnRecord {
+     std::vector<std::int64_t> message_sequences;
+     std::string messages_binding;
+ };
++// Backend-only ownership of one exact provider file call. Invocation entry is
++// distinct from each approved native mutation; operation IDs are backend facts.
++struct AgentWorkerFileClaimRecord {
++    AgentWorkerModelClaimSpec model;
++    AgentFileToolInvocation invocation;
++    std::string state;
++    std::vector<std::string> operation_ids;
++    bool success=false;
++    std::string actual_output_json,output_binding;
++};
+ // An explicit read vocabulary, never arbitrary repository reflection. The
+ // backend validates the exact captured lease in the same transaction as a read.
+ enum class AgentWorkerJournalReadKind {run,session,history,events,root_budget};
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 7c91e82f..3408b00c 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -41,6 +41,11 @@ public:
+     std::future<AgentWorkerReadClaimRecord> start_agent_worker_read(AgentWorkerLeaseSpec,AgentWorkspaceInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<AgentWorkerReadClaimRecord> record_agent_worker_read_result(AgentWorkerLeaseSpec,AgentWorkspaceInvocation,bool success,std::string actual_output_json);
+     std::future<AgentWorkerReadClaimRecord> agent_worker_read_claim(std::string root,std::string attempt,std::string call);
++    std::future<AgentWorkerFileClaimRecord> claim_agent_worker_file(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerFileClaimRecord> start_agent_worker_file(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerFileClaimRecord> claim_agent_worker_file_effect(AgentWorkerLeaseSpec,AgentFileToolInvocation,std::string operation_id,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerFileClaimRecord> record_agent_worker_file_result(AgentWorkerLeaseSpec,AgentFileToolInvocation,bool success,std::string actual_output_json);
++    std::future<AgentWorkerFileClaimRecord> agent_worker_file_claim(std::string root,std::string attempt,std::string call);
+     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     PersistenceService(std::string database,std::vector<std::string> import_roots,
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 3f6b42c1..3f0295b6 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -209,6 +209,11 @@ public:
+     AgentWorkerReadClaimRecord start_agent_worker_read(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&);
+     AgentWorkerReadClaimRecord record_agent_worker_read_result(const AgentWorkerLeaseSpec&,const AgentWorkspaceInvocation&,bool success,const std::string& actual_output_json);
+     AgentWorkerReadClaimRecord agent_worker_read_claim(const std::string& root,const std::string& attempt,const std::string& call);
++    AgentWorkerFileClaimRecord claim_agent_worker_file(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&);
++    AgentWorkerFileClaimRecord start_agent_worker_file(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&);
++    AgentWorkerFileClaimRecord claim_agent_worker_file_effect(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,const std::string& operation_id);
++    AgentWorkerFileClaimRecord record_agent_worker_file_result(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,bool success,const std::string& actual_output_json);
++    AgentWorkerFileClaimRecord agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call);
+     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
+     Event agent_worker_tool_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned);
+     // Exact durable compare-and-swap; null expected means create only if absent.
+diff --git a/Native/src/agent_file_invocation.cpp b/Native/src/agent_file_invocation.cpp
+new file mode 100644
+index 00000000..0f94f31d
+--- /dev/null
++++ b/Native/src/agent_file_invocation.cpp
+@@ -0,0 +1,53 @@
++#include "agentflow/agent_file_tool_host.hpp"
++#include "nlohmann/json.hpp"
++#include <algorithm>
++#include <set>
++namespace agentflow {
++using Json=nlohmann::json;
++namespace {
++bool bounded_id(const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;});}
++}
++bool is_agent_file_tool(const std::string& name){
++    return name=="edit_file"||name=="create_file"||name=="apply_patch"||name=="restore_operation";
++}
++void validate_agent_file_tool_invocation(const AgentFileToolInvocation& call){
++    const auto text=[](const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&value.find('\0')==std::string::npos;};
++    if(call.protocol_version!=1||!bounded_id(call.run_id,128)||!bounded_id(call.attempt_id,128)||
++       !text(call.call_id,256)||!text(call.workspace_id,256)||!text(call.folder_id,256)||
++       call.workspace_revision<1||call.workspace_revision>9007199254740991LL||
++       !is_agent_file_tool(call.tool_name)||call.arguments_json.size()>4*1024*1024)
++        throw std::invalid_argument("Invalid file-tool invocation envelope");
++}
++std::string AgentFileToolInvocation::serialize()const{
++    validate_agent_file_tool_invocation(*this);
++    return Json{{"protocol_version",protocol_version},{"run_id",run_id},{"attempt_id",attempt_id},
++        {"call_id",call_id},{"workspace_id",workspace_id},{"folder_id",folder_id},
++        {"workspace_revision",workspace_revision},{"tool_name",tool_name},{"arguments_json",arguments_json}}.dump();
++}
++AgentFileToolInvocation AgentFileToolInvocation::parse(std::string_view wire){
++    // A JSON string can expand one source byte to six escaped bytes. This
++    // value bound preserves the native 4 MiB argument limit without claiming
++    // that every such call fits a separately bounded authenticated frame.
++    if(wire.size()>6*4*1024*1024+16384)throw std::invalid_argument("File invocation wire exceeds limits");
++    Json value;std::set<std::string> keys;
++    try{
++        value=Json::parse(wire,[&](int depth,Json::parse_event_t event,Json& item){
++            if(depth>1)throw std::invalid_argument("Nested file invocation envelope");
++            if(event==Json::parse_event_t::key&&!keys.insert(item.get<std::string>()).second)
++                throw std::invalid_argument("Duplicate file invocation field");
++            return true;
++        });
++        static const std::set<std::string> expected={"protocol_version","run_id","attempt_id","call_id","workspace_id","folder_id","workspace_revision","tool_name","arguments_json"};
++        if(!value.is_object()||keys!=expected||value.size()!=expected.size())throw std::invalid_argument("Invalid file invocation fields");
++        for(const auto* field:{"run_id","attempt_id","call_id","workspace_id","folder_id","tool_name","arguments_json"})
++            if(!value.at(field).is_string())throw std::invalid_argument("Invalid file invocation text");
++        if(!value.at("protocol_version").is_number_integer()||value.at("protocol_version")!=1||
++           !value.at("workspace_revision").is_number_integer()||value.at("workspace_revision")<1||
++           value.at("workspace_revision")>9007199254740991LL)throw std::invalid_argument("Invalid file invocation version or revision");
++        AgentFileToolInvocation call;call.run_id=value.at("run_id");call.attempt_id=value.at("attempt_id");
++        call.call_id=value.at("call_id");call.workspace_id=value.at("workspace_id");call.folder_id=value.at("folder_id");
++        call.workspace_revision=value.at("workspace_revision");call.tool_name=value.at("tool_name");call.arguments_json=value.at("arguments_json");
++        validate_agent_file_tool_invocation(call);return call;
++    }catch(const Json::exception&){throw std::invalid_argument("Invalid file invocation JSON");}
++}
++}
+diff --git a/Native/src/agent_file_tool_host.cpp b/Native/src/agent_file_tool_host.cpp
+index a4777b07..421f1ef4 100644
+--- a/Native/src/agent_file_tool_host.cpp
++++ b/Native/src/agent_file_tool_host.cpp
+@@ -14,20 +14,11 @@
+ 
+ namespace agentflow {
+ using Json=nlohmann::json;
+-bool is_agent_file_tool(const std::string& name){
+-    return name=="edit_file"||name=="create_file"||name=="apply_patch"||name=="restore_operation";
+-}
++
+ namespace {
+ std::string operation_id(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}
+ bool bounded_id(const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;});}
+-void validate_file_invocation(const AgentFileToolInvocation& call){
+-    const auto text=[](const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&value.find('\0')==std::string::npos;};
+-    if(call.protocol_version!=1||!bounded_id(call.run_id,128)||!bounded_id(call.attempt_id,128)||
+-       !text(call.call_id,256)||!text(call.workspace_id,256)||!text(call.folder_id,256)||
+-       call.workspace_revision<1||call.workspace_revision>9007199254740991LL||
+-       !is_agent_file_tool(call.tool_name)||call.arguments_json.size()>4*1024*1024)
+-        throw std::invalid_argument("Invalid file-tool invocation envelope");
+-}
++
+ AgentFileToolResult guidance_required(){return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};}
+ class LocalFileToolHost final:public AgentFileToolHost {
+ public:
+@@ -45,7 +36,7 @@ public:
+         if(cancel.stop_requested())throw ToolCancelled("File-tool invocation cancelled before preparation");
+         // Match the existing model-stream value bound. Individual executors
+         // retain their tighter file/patch limits, including each folder group.
+-        validate_file_invocation(call);
++        validate_agent_file_tool_invocation(call);
+         if(call.run_id!=owner_.run_id||call.workspace_id!=workspace_id_||call.workspace_revision!=revision_)throw ToolAccessDenied("File-tool invocation differs from its admitted owner");
+         if(!is_agent_file_tool(call.tool_name)||std::find(owner_.allowed_tools.begin(),owner_.allowed_tools.end(),call.tool_name)==owner_.allowed_tools.end())throw ToolAccessDenied("File tool is outside the admitted catalogue");
+         if(store_.run(owner_.run_id).get().state!=RunState::running)throw ToolAccessDenied("File-tool owner is no longer running");
+@@ -143,37 +134,5 @@ private:
+     std::set<std::pair<std::string,std::string>> calls_;
+ };
+ }
+-std::string AgentFileToolInvocation::serialize()const{
+-    validate_file_invocation(*this);
+-    return Json{{"protocol_version",protocol_version},{"run_id",run_id},{"attempt_id",attempt_id},
+-        {"call_id",call_id},{"workspace_id",workspace_id},{"folder_id",folder_id},
+-        {"workspace_revision",workspace_revision},{"tool_name",tool_name},{"arguments_json",arguments_json}}.dump();
+-}
+-AgentFileToolInvocation AgentFileToolInvocation::parse(std::string_view wire){
+-    // A JSON string can expand one source byte to six escaped bytes. This
+-    // value bound preserves the native 4 MiB argument limit without claiming
+-    // that every such call fits a separately bounded authenticated frame.
+-    if(wire.size()>6*4*1024*1024+16384)throw std::invalid_argument("File invocation wire exceeds limits");
+-    Json value;std::set<std::string> keys;
+-    try{
+-        value=Json::parse(wire,[&](int depth,Json::parse_event_t event,Json& item){
+-            if(depth>1)throw std::invalid_argument("Nested file invocation envelope");
+-            if(event==Json::parse_event_t::key&&!keys.insert(item.get<std::string>()).second)
+-                throw std::invalid_argument("Duplicate file invocation field");
+-            return true;
+-        });
+-        static const std::set<std::string> expected={"protocol_version","run_id","attempt_id","call_id","workspace_id","folder_id","workspace_revision","tool_name","arguments_json"};
+-        if(!value.is_object()||keys!=expected||value.size()!=expected.size())throw std::invalid_argument("Invalid file invocation fields");
+-        for(const auto* field:{"run_id","attempt_id","call_id","workspace_id","folder_id","tool_name","arguments_json"})
+-            if(!value.at(field).is_string())throw std::invalid_argument("Invalid file invocation text");
+-        if(!value.at("protocol_version").is_number_integer()||value.at("protocol_version")!=1||
+-           !value.at("workspace_revision").is_number_integer()||value.at("workspace_revision")<1||
+-           value.at("workspace_revision")>9007199254740991LL)throw std::invalid_argument("Invalid file invocation version or revision");
+-        AgentFileToolInvocation call;call.run_id=value.at("run_id");call.attempt_id=value.at("attempt_id");
+-        call.call_id=value.at("call_id");call.workspace_id=value.at("workspace_id");call.folder_id=value.at("folder_id");
+-        call.workspace_revision=value.at("workspace_revision");call.tool_name=value.at("tool_name");call.arguments_json=value.at("arguments_json");
+-        validate_file_invocation(call);return call;
+-    }catch(const Json::exception&){throw std::invalid_argument("Invalid file invocation JSON");}
+-}
+ std::unique_ptr<AgentFileToolHost> make_agent_file_tool_host(PersistenceService& store,AgentFileToolOwnerContext context){return std::make_unique<LocalFileToolHost>(store,std::move(context));}
+ }
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 6fcd91f5..5197a1dd 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -219,6 +219,11 @@ std::future<AgentWorkerReadClaimRecord> PersistenceService::claim_agent_worker_r
+ std::future<AgentWorkerReadClaimRecord> PersistenceService::start_agent_worker_read(AgentWorkerLeaseSpec lease,AgentWorkspaceInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read dispatch cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker read dispatch deadline elapsed");return r.start_agent_worker_read(lease,call);});}
+ std::future<AgentWorkerReadClaimRecord> PersistenceService::record_agent_worker_read_result(AgentWorkerLeaseSpec lease,AgentWorkspaceInvocation call,bool success,std::string output){return impl_->submit([lease=std::move(lease),call=std::move(call),success,output=std::move(output)](Repository& r){return r.record_agent_worker_read_result(lease,call,success,output);});}
+ std::future<AgentWorkerReadClaimRecord> PersistenceService::agent_worker_read_claim(std::string root,std::string attempt,std::string call){return impl_->observe([root=std::move(root),attempt=std::move(attempt),call=std::move(call)](Repository& r){return r.agent_worker_read_claim(root,attempt,call);});}
++std::future<AgentWorkerFileClaimRecord> PersistenceService::claim_agent_worker_file(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker file call cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker file call deadline elapsed");return r.claim_agent_worker_file(lease,call);});}
++std::future<AgentWorkerFileClaimRecord> PersistenceService::start_agent_worker_file(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker file dispatch cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker file dispatch deadline elapsed");return r.start_agent_worker_file(lease,call);});}
++std::future<AgentWorkerFileClaimRecord> PersistenceService::claim_agent_worker_file_effect(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,std::string id,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),id=std::move(id),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker file effect cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker file effect deadline elapsed");return r.claim_agent_worker_file_effect(lease,call,id);});}
++std::future<AgentWorkerFileClaimRecord> PersistenceService::record_agent_worker_file_result(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,bool success,std::string output){return impl_->submit([lease=std::move(lease),call=std::move(call),success,output=std::move(output)](Repository& r){return r.record_agent_worker_file_result(lease,call,success,output);});}
++std::future<AgentWorkerFileClaimRecord> PersistenceService::agent_worker_file_claim(std::string root,std::string attempt,std::string call){return impl_->observe([root=std::move(root),attempt=std::move(attempt),call=std::move(call)](Repository& r){return r.agent_worker_file_claim(root,attempt,call);});}
+ std::future<AgentWorkerToolTurnRecord> PersistenceService::commit_agent_worker_read_turn(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read turn cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker read turn deadline elapsed");return r.commit_agent_worker_read_turn(lease,attempt);});}
+ std::future<Event> PersistenceService::agent_worker_tool_event(AgentWorkerLeaseSpec lease,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),ordinal,returned,deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker tool activity cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker tool activity deadline elapsed");return r.agent_worker_tool_event(lease,attempt,ordinal,returned);});}
+ std::future<ModelCallReservation> PersistenceService::finish_agent_worker_model(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 92ce1d98..f969c665 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -1636,6 +1636,7 @@ void Repository::delete_session(const std::string& id) {
+     for(const auto& target:removed){
+         if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.spec.owner_run_id') WHERE i.category='native-agent-worker-leases' AND json_extract(i.payload,'$.state')='active' AND r.session_id=? LIMIT 1",{target}).rows.empty()||!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.spec.owner_run_id') WHERE i.category='native-agent-worker-model-claims' AND json_extract(i.payload,'$.state')='dispatching' AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker or model dispatch");
+         if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-read-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker read");
++        if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-file-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker file call");
+         if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{target}).rows.empty()||
+            !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{target}).rows.empty()||
+            !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{target}).rows.empty()||
+@@ -3042,6 +3043,7 @@ void require_database_idle(XlangSqlite& db,bool allow_refresh=false){
+     require_empty("SELECT id FROM information WHERE category='native-agent-worker-leases' AND json_extract(payload,'$.state')='active' LIMIT 1","an active native worker lease");
+     require_empty("SELECT id FROM information WHERE category='native-agent-worker-model-claims' AND json_extract(payload,'$.state')='dispatching' LIMIT 1","an active worker model dispatch");
+     require_empty("SELECT id FROM information WHERE category='native-agent-worker-read-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker read");
++    require_empty("SELECT id FROM information WHERE category='native-agent-worker-file-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker file call");
+     require_empty("SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1","a queued, running or paused run");
+     require_empty("SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1","an active model call");
+     require_empty("SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1","an active delegation batch");
+@@ -3122,9 +3124,11 @@ constexpr const char* worker_current_category="native-agent-worker-current";
+ constexpr const char* worker_claim_category="native-agent-worker-model-claims";
+ constexpr const char* worker_event_category="native-agent-worker-model-events";
+ constexpr const char* worker_read_category="native-agent-worker-read-claims";
++constexpr const char* worker_file_category="native-agent-worker-file-claims";
++constexpr const char* worker_file_effect_category="native-agent-worker-file-effects";
+ constexpr const char* worker_turn_category="native-agent-worker-tool-turns";
+ constexpr const char* worker_tool_event_category="native-agent-worker-tool-events";
+-bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_turn_category||category==worker_tool_event_category;}
++bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_file_category||category==worker_file_effect_category||category==worker_turn_category||category==worker_tool_event_category;}
+ void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
+ Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
+     bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
+@@ -3167,6 +3171,30 @@ AgentWorkerReadClaimRecord read_worker_read(XlangSqlite& db,const std::string& r
+         else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker read has output");return record;
+     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker read");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker read");}
+ }
++Json worker_file_json(const AgentWorkerFileClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"invocation",record.invocation.serialize()},{"state",record.state},{"operation_ids",record.operation_ids},{"success",record.success},{"actual_output_json",record.actual_output_json},{"output_binding",record.output_binding}};}
++std::string worker_operation_binding(const Operation& operation){return context_digest(Json{{"run_id",operation.spec.run_id},{"workspace",operation.spec.workspace},{"tool",operation.spec.tool},{"arguments_json",operation.spec.arguments_json},{"resources",operation.spec.resources}}.dump());}
++Json worker_file_effect_binding(XlangSqlite& db,const AgentWorkerFileClaimRecord& record,const std::string& id){
++    bounded_identity(id);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_file_effect_category),id}).rows;
++    if(rows.size()!=1)throw DatabaseError("Worker file operation has no unique private binding");
++    const auto value=Json::parse(text(rows[0][0]));
++    if(!value.is_object()||value.size()!=5||value.at("version")!=1||value.at("model")!=worker_claim_spec_json(record.model)||value.at("invocation_binding")!=context_digest(record.invocation.serialize())||value.at("operation_id")!=id||!value.at("operation_spec_binding").is_string())throw DatabaseError("Worker file operation binding differs");
++    worker_digest(value.at("operation_spec_binding").get<std::string>());return value;
++}
++AgentWorkerFileClaimRecord read_worker_file(XlangSqlite& db,const std::string& root,const std::string& attempt,const std::string& call){
++    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_file_category),worker_read_key(root,attempt,call)}).rows;
++    if(rows.empty())throw NotFound("Worker file claim not found");
++    try{
++        const auto value=Json::parse(text(rows[0][0]));const auto& m=value.at("model");AgentWorkerFileClaimRecord record;
++        record.model={m.at("generation").get<std::string>(),m.at("root_run_id").get<std::string>(),m.at("owner_run_id").get<std::string>(),m.at("attempt_id").get<std::string>(),m.at("request_binding").get<std::string>()};
++        record.invocation=AgentFileToolInvocation::parse(value.at("invocation").get<std::string>());record.state=value.at("state").get<std::string>();record.operation_ids=value.at("operation_ids").get<std::vector<std::string>>();record.success=value.at("success").get<bool>();record.actual_output_json=value.at("actual_output_json").get<std::string>();record.output_binding=value.at("output_binding").get<std::string>();
++        if(record.model.root_run_id!=root||record.model.attempt_id!=attempt||record.invocation.attempt_id!=attempt||record.invocation.call_id!=call||record.invocation.run_id!=record.model.owner_run_id||worker_file_json(record)!=value)throw DatabaseError("Stored worker file binding differs");
++        if(record.state!="awaiting_dispatch"&&record.state!="executing"&&record.state!="returned"&&record.state!="uncertain")throw DatabaseError("Invalid worker file state");
++        if(record.operation_ids.size()>128||(record.state=="awaiting_dispatch"&&!record.operation_ids.empty())||(record.success&&record.operation_ids.empty()))throw DatabaseError("Invalid worker file effect facts");
++        std::set<std::string> seen;for(const auto& id:record.operation_ids){if(!seen.insert(id).second)throw DatabaseError("Duplicate worker file operation");(void)worker_file_effect_binding(db,record,id);}
++        if(record.state=="returned"){(void)object_json(record.actual_output_json);if(record.output_binding!=context_digest(record.actual_output_json))throw DatabaseError("Stored worker file output differs");}
++        else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker file has output");return record;
++    }catch(const Json::exception&){throw DatabaseError("Invalid stored worker file");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker file");}
++}
+ Json worker_turn_json(const AgentWorkerToolTurnRecord& turn){return {{"version",1},{"model",worker_claim_spec_json(turn.model)},{"message_sequences",turn.message_sequences},{"messages_binding",turn.messages_binding}};}
+ Json worker_turn_messages(XlangSqlite& db,const AgentWorkerToolTurnRecord& turn){
+     if(turn.message_sequences.size()<2||turn.message_sequences.size()>65)throw DatabaseError("Invalid worker tool turn size");Json messages=Json::array();std::int64_t previous=0;
+@@ -3188,10 +3216,10 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
+         try{(void)read_worker_turn(db,model.spec);}catch(const NotFound&){throw Conflict("Worker must commit its actual tool turn before another model call");}
+     }
+ }
+-AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){
++template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file){
+     (void)call.serialize();worker_current_scope(repository,db,lease);
+     if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent"||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+-    const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server"};if(!reads.contains(call.tool_name))throw Conflict("Worker read tool is not admitted");
++    const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server"};if(file?!is_agent_file_tool(call.tool_name):!reads.contains(call.tool_name))throw Conflict("Worker workspace tool is not admitted");
+     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
+     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read has no actual model receipt");
+     const auto reservation=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,call.attempt_id}).rows;
+@@ -3201,8 +3229,10 @@ AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqli
+     if(actual.finish_reason!="tool_calls")throw Conflict("Worker read requires a tool response");
+     for(const auto& tool:actual.tool_calls)if(tool.id==call.call_id){++matches;if(tool.name!=call.tool_name||tool.arguments_json!=call.arguments_json)throw Conflict("Worker read differs from the actual provider tool call");}
+     if(matches!=1)throw Conflict("Worker read provider call identity is absent or ambiguous");
+-    const auto args=Json::parse(object_json(call.arguments_json));const auto folder=args.value("folder_id",lease.workspace_id);if(call.folder_id!=folder)throw Conflict("Worker read folder differs from actual provider arguments");return model.spec;
++    const auto args=Json::parse(object_json(call.arguments_json,file?4*1024*1024:2*1024*1024));const auto folder=args.value("folder_id",lease.workspace_id);if(call.folder_id!=folder)throw Conflict("Worker workspace folder differs from actual provider arguments");return model.spec;
+ }
++AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){return worker_workspace_authority(repository,db,lease,call,false);}
++AgentWorkerModelClaimSpec worker_file_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,true);}
+ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
+     const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);const auto budget=repository.root_budget(spec.root_run_id);
+     const bool queued=allow_queued_root&&spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&owner.state==RunState::queued&&budget.spec.policy_id=="native.direct-agent";
+@@ -3229,6 +3259,7 @@ std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,cons
+     if(final){const auto response=decode_agent_model_completion(claim.actual_response_json);if(response.finish_reason!="stop"||!response.tool_calls.empty())throw Conflict("Worker cannot complete a non-final model response");
+         worker_require_tool_turns(db,lease);
+         if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_read_category),lease.root_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved read ownership");
++        if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.root_run_id')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(worker_file_category),lease.root_run_id}).rows.empty())throw Conflict("Worker cannot complete with unresolved file ownership");
+         const auto call=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,attempt}).rows;
+         const auto latest=db.execute("SELECT json_extract(payload,'$.attempt_id') FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? ORDER BY seq DESC LIMIT 1",{lease.owner_run_id,lease.root_run_id}).rows;
+         if(call.size()!=1||text(call[0][0])!="finished"||text(call[0][1])!=claim.actual_assistant_json||latest.size()!=1||text(latest[0][0])!=attempt||!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND state!='finished' LIMIT 1",{lease.root_run_id,lease.owner_run_id}).rows.empty())throw Conflict("Worker final response is not its latest fully retired attempt");
+@@ -3369,10 +3400,43 @@ AgentWorkerReadClaimRecord Repository::record_agent_worker_read_result(const Age
+     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_read_json(record).dump(),std::string(worker_read_category),worker_read_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.read.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
+ }
+ AgentWorkerReadClaimRecord Repository::agent_worker_read_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_read(impl_->database,root,attempt,call);}
++AgentWorkerFileClaimRecord Repository::claim_agent_worker_file(const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){
++    auto& db=impl_->database;Transaction tx(db);const auto model=worker_file_authority(*this,db,lease,call);AgentWorkerFileClaimRecord record{model,call,"awaiting_dispatch"};
++    const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_file_category),worker_read_key(lease.root_run_id,call.attempt_id,call.call_id),worker_file_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker file call was already claimed; no replay is authorized");
++    impl_->event(lease.owner_run_id,"worker.file.claimed",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id}}.dump());tx.commit();return record;
++}
++AgentWorkerFileClaimRecord Repository::start_agent_worker_file(const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){
++    auto& db=impl_->database;Transaction tx(db);const auto model=worker_file_authority(*this,db,lease,call);auto record=read_worker_file(db,lease.root_run_id,call.attempt_id,call.call_id);
++    if(worker_claim_spec_json(record.model)!=worker_claim_spec_json(model)||record.invocation.serialize()!=call.serialize()||record.state!="awaiting_dispatch")throw Conflict("Worker file call cannot start again or change its binding");
++    record.state="executing";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_read_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.file.dispatching",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id}}.dump());tx.commit();return record;
++}
++AgentWorkerFileClaimRecord Repository::claim_agent_worker_file_effect(const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call,const std::string& id){
++    auto& db=impl_->database;Transaction tx(db);const auto model=worker_file_authority(*this,db,lease,call);auto record=read_worker_file(db,lease.root_run_id,call.attempt_id,call.call_id);
++    if(worker_claim_spec_json(record.model)!=worker_claim_spec_json(model)||record.invocation.serialize()!=call.serialize()||record.state!="executing"||record.operation_ids.size()>=128)throw Conflict("Worker file effect lacks its exact executing invocation");
++    const auto op=operation(id);const auto tool=call.tool_name=="create_file"?"create_file":call.tool_name=="edit_file"?"replace_file":"patch_file";
++    if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||op.spec.workspace!=lease.workspace_id||op.spec.tool!=tool)throw Conflict("Worker file effect lacks its claimed native operation");
++    const auto plan=Json::parse(object_json(op.spec.arguments_json)),args=Json::parse(object_json(call.arguments_json,4*1024*1024));
++    const auto folder=plan.at("folder_id").get<std::string>();bool allowed=folder==call.folder_id;
++    if(call.tool_name=="apply_patch"&&args.contains("patches")&&args.at("patches").is_array())for(const auto& group:args.at("patches"))if(group.is_object()&&group.contains("folder_id")&&group.at("folder_id")==folder)allowed=true;
++    if(!allowed||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision)throw Conflict("Worker file operation differs from the admitted workspace scope");
++    const auto binding=Json{{"version",1},{"model",worker_claim_spec_json(model)},{"invocation_binding",context_digest(call.serialize())},{"operation_id",id},{"operation_spec_binding",worker_operation_binding(op)}};
++    const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_file_effect_category),id,binding.dump()});if(inserted.affected_rows!=1)throw Conflict("Native worker file operation was already bound; no replay is authorized");
++    record.operation_ids.push_back(id);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_read_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.file.effect_claimed",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_id",id}}.dump());tx.commit();return record;
++}
++AgentWorkerFileClaimRecord Repository::record_agent_worker_file_result(const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call,bool success,const std::string& output){
++    (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_file(db,lease.root_run_id,call.attempt_id,call.call_id);
++    if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker file result differs from its captured dispatch");
++    if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker file result changed");tx.commit();return record;}
++    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_file_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded))throw Conflict("Worker file result has an unresolved or inconsistent native effect");}
++    record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_read_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.file.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
++}
++AgentWorkerFileClaimRecord Repository::agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_file(impl_->database,root,attempt,call);}
+ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& generation,const std::string& reason){
+     const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
+     if(lease.state=="retired"){if(lease.retirement_reason!=reason)throw Conflict("Worker retirement observation changed");return lease;}
+     if(lease.revision>=9007199254740991)throw std::overflow_error("Worker lease revision exhausted");std::int64_t uncertain=0;
++    const auto files=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_file_category),generation}).rows;
++    for(const auto& row:files){const auto saved=Json::parse(text(row[0]));const auto call=AgentFileToolInvocation::parse(saved.at("invocation").get<std::string>());auto record=read_worker_file(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_read_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.file.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_ids",record.operation_ids}}.dump());}
+     const auto reads=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_read_category),generation}).rows;
+     for(const auto& row:reads){const auto saved=Json::parse(text(row[0]));const auto& invocation=saved.at("invocation").get<std::string>();const auto call=AgentWorkspaceInvocation::parse(invocation);auto record=read_worker_read(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_read_json(record).dump(),std::string(worker_read_category),worker_read_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.read.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"dispatched",record.dispatched}}.dump());}
+     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.spec.generation')=?",{std::string(worker_claim_category),generation}).rows;
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index e12cf512..679c07a3 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -102,6 +102,41 @@ void tool_turns(PersistenceService& store){
+     const auto events=store.events("turn-root").get();require(std::count_if(events.begin(),events.end(),[](const Event& event){return event.kind=="conversation.tool_turn";})==1&&std::count_if(events.begin(),events.end(),[](const Event& event){return event.kind=="worker.tool_turn.committed";})==1,"Idempotent tool turn acknowledgement must not append events");
+     store.start_agent_worker_model(admitted,"turn-next",deadline).get();store.claim_agent_worker_model(claim(admitted,"prestarted-next")).get();store.reserve_agent_worker_model(admitted,"fresh-next",deadline).get();require(store.root_budget("turn-root").get().model_calls_reserved==4,"Only committed native tool turns may release continuation funding/start/dispatch");store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.commit_agent_worker_read_turn(admitted,"turn-model",deadline).get();});
+ }
++void file_claims(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
++    // Synthetic process/model/proposal identities test durable ownership, not
++    // actual filesystem mutation. The native effect host has separate tests.
++    root(store,"file-root");const auto owner=store.admit_agent_worker(lease("file-root","file-generation")).get().spec;
++    const auto deadline=std::chrono::steady_clock::now()+30s;
++    const std::string attempt="file-model",args=R"({"path":"fixture.txt","content":"fixture"})";
++    ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{"file-one","create_file",args},{"file-two","create_file",args},{"file-denied","create_file",args},{"file-patch","apply_patch",R"({"patch_text":"synthetic ledger fixture"})"},{"file-interrupted","create_file",args},{"file-awaiting","create_file",args}},"[]"};
++    store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-fixture-model",23,5)).get();
++    AgentFileToolInvocation call;call.run_id=owner.owner_run_id;call.attempt_id=attempt;call.call_id="file-one";call.workspace_id=owner.workspace_id;call.folder_id=owner.workspace_id;call.workspace_revision=7;call.tool_name="create_file";call.arguments_json=args;
++    rejects<Conflict>([&]{store.claim_agent_worker_file(owner,call,deadline).get();});store.finish_agent_worker_model(owner,attempt,deadline).get();
++    for(unsigned field=0;field<7;++field){auto changed=call;if(field==0)changed.call_id="invented";if(field==1)changed.arguments_json=R"({"path":"foreign.txt","content":"fixture"})";if(field==2)changed.tool_name="edit_file";if(field==3)changed.folder_id="foreign";if(field==4)++changed.workspace_revision;if(field==5)changed.run_id="foreign";if(field==6)changed.attempt_id="foreign";if(field==6)rejects<NotFound>([&]{store.claim_agent_worker_file(owner,changed,deadline).get();});else rejects<Conflict>([&]{store.claim_agent_worker_file(owner,changed,deadline).get();});}
++    auto wrong=owner;++wrong.pid;rejects<Conflict>([&]{store.claim_agent_worker_file(wrong,call,deadline).get();});
++    std::stop_source stop;stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.claim_agent_worker_file(owner,call,deadline,stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.claim_agent_worker_file(owner,call,std::chrono::steady_clock::now()-1ms).get();});
++    auto first=store.claim_agent_worker_file(owner,call,deadline),duplicate=store.claim_agent_worker_file(owner,call,deadline);unsigned accepted=0,rejected=0;for(auto* result:{&first,&duplicate})try{require(result->get().state=="awaiting_dispatch","File claim must precede native entry");++accepted;}catch(const Conflict&){++rejected;}require(accepted==1&&rejected==1,"Concurrent file invocation claims must admit exactly once");
++    rejects<Conflict>([&]{store.record_agent_worker_file_result(owner,call,true,"{}").get();});store.start_agent_worker_file(owner,call,deadline).get();rejects<Conflict>([&]{store.start_agent_worker_file(owner,call,deadline).get();});
++    const auto proposal=[&](const std::string& id,const std::string& tool){OperationSpec spec{owner.owner_run_id,owner.workspace_id,tool,Json{{"workspace_id",owner.workspace_id},{"folder_id",owner.workspace_id},{"workspace_revision",7},{"path","fixture.txt"}}.dump()};const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+30000;store.request_operation(id,spec,expiry).get();return spec;};
++    const auto op=proposal("file-native-one","create_file");rejects<Conflict>([&]{store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline).get();});store.decide_operation("file-native-one",OperationDecision::allow,"synthetic-controller").get();rejects<Conflict>([&]{store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline).get();});store.claim_operation("file-native-one",op).get();
++    rejects<AgentWorkerAuthorityCancelled>([&]{store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline,stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.claim_agent_worker_file_effect(owner,call,"file-native-one",std::chrono::steady_clock::now()-1ms).get();});
++    XlangSqlite sql(path,imports);const auto before=store.events(owner.owner_run_id).get().size();sql.execute("CREATE TRIGGER fixture_file_claim_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_array_length(NEW.payload,'$.operation_ids')>0 BEGIN SELECT RAISE(ABORT,'fixture_file_claim_abort'); END");
++    bool fault=false;try{store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline).get();}catch(const DatabaseError& e){fault=std::string(e.what()).find("fixture_file_claim_abort")!=std::string::npos;}require(fault&&store.agent_worker_file_claim(owner.root_run_id,attempt,call.call_id).get().operation_ids.empty()&&store.events(owner.owner_run_id).get().size()==before,"Failed effect claim must roll back its binding, invocation and event atomically");sql.execute("DROP TRIGGER fixture_file_claim_abort");
++    require(store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline).get().operation_ids==std::vector<std::string>{"file-native-one"},"Native claimed operation must bind once after approval");rejects<Conflict>([&]{store.claim_agent_worker_file_effect(owner,call,"file-native-one",deadline).get();});
++    auto second=call;second.call_id="file-two";store.claim_agent_worker_file(owner,second,deadline).get();store.start_agent_worker_file(owner,second,deadline).get();rejects<Conflict>([&]{store.claim_agent_worker_file_effect(owner,second,"file-native-one",deadline).get();});
++    rejects<Conflict>([&]{store.record_agent_worker_file_result(owner,call,true,"{}").get();});store.finish_operation("file-native-one",OperationState::succeeded,R"({"synthetic_receipt":true})").get();
++    const std::string output=R"({"operation_id":"file-native-one","exact":1.0000000000000001})";const auto saved=store.record_agent_worker_file_result(owner,call,true,output).get();require(saved.success&&saved.actual_output_json==output&&saved.output_binding==context_digest(output),"Exact backend file result and approved operation must persist before delivery");require(store.record_agent_worker_file_result(owner,call,true,output).get().actual_output_json==output,"Identical file acknowledgement is idempotent");rejects<Conflict>([&]{store.record_agent_worker_file_result(owner,call,true,"{}").get();});rejects<Conflict>([&]{store.claim_agent_worker_file(owner,call,deadline).get();});
++    store.record_agent_worker_file_result(owner,second,false,R"({"error":"synthetic pre-effect rejection"})").get();auto denied=call;denied.call_id="file-denied";store.claim_agent_worker_file(owner,denied,deadline).get();require(store.record_agent_worker_file_result(owner,denied,false,R"({"error":"synthetic controller denial"})").get().operation_ids.empty(),"Pre-dispatch denial must not fabricate an effect");
++    auto patch=call;patch.call_id="file-patch";patch.tool_name="apply_patch";patch.arguments_json=response.tool_calls[3].arguments_json;store.claim_agent_worker_file(owner,patch,deadline).get();store.start_agent_worker_file(owner,patch,deadline).get();
++    for(unsigned i=0;i<2;++i){const auto id="file-patch-native-"+std::to_string(i);const auto spec=proposal(id,"patch_file");store.decide_operation(id,OperationDecision::allow,"synthetic-controller").get();store.claim_operation(id,spec).get();store.claim_agent_worker_file_effect(owner,patch,id,deadline).get();store.finish_operation(id,i?OperationState::failed:OperationState::succeeded,"{}").get();}
++    rejects<Conflict>([&]{store.record_agent_worker_file_result(owner,patch,true,R"({"state":"succeeded"})").get();});const auto partial=store.record_agent_worker_file_result(owner,patch,false,R"({"state":"partial","succeeded_files":1})").get();require(partial.operation_ids.size()==2&&!partial.success,"Partial patch must retain both distinct native operation receipts without claiming overall success");
++    auto interrupted=call;interrupted.call_id="file-interrupted";store.claim_agent_worker_file(owner,interrupted,deadline).get();store.start_agent_worker_file(owner,interrupted,deadline).get();const auto late=proposal("file-native-late","create_file");store.decide_operation("file-native-late",OperationDecision::allow,"synthetic-controller").get();store.claim_operation("file-native-late",late).get();store.claim_agent_worker_file_effect(owner,interrupted,"file-native-late",deadline).get();
++    auto awaiting=call;awaiting.call_id="file-awaiting";store.claim_agent_worker_file(owner,awaiting,deadline).get();rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(owner,"premature-file-continuation",deadline).get();});store.retire_agent_worker(owner.generation,"worker_exit").get();
++    require(store.agent_worker_file_claim(owner.root_run_id,attempt,interrupted.call_id).get().state=="uncertain"&&store.agent_worker_file_claim(owner.root_run_id,attempt,awaiting.call_id).get().state=="uncertain","Lease retirement must retain both entered and waiting file calls as uncertain");
++    auto replacement=owner;replacement.generation="file-replacement";store.admit_agent_worker(replacement).get();rejects<Conflict>([&]{store.start_agent_worker_file(replacement,interrupted,deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_file(replacement,interrupted,deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_file_effect(owner,interrupted,"file-native-late",deadline).get();});
++    store.finish_operation("file-native-late",OperationState::succeeded,"{}").get();require(store.record_agent_worker_file_result(owner,interrupted,true,R"({"late_actual_receipt":true})").get().success,"Late actual native receipt must remain recordable without reissuing the effect");store.retire_agent_worker(replacement.generation,"cancelled").get();store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
++    std::cout<<"Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.\n";
++}
+ void completion_receipts(PersistenceService& store){
+     root(store,"receipt-root");const auto admitted=store.admit_agent_worker(lease("receipt-root","receipt-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+     auto capture=[&](const std::string& attempt,const ModelCompletion& actual){
+@@ -121,11 +156,11 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);funding(store);completion_receipts(store);tool_turns(store);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);completion_receipts(store);tool_turns(store);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
+-        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims","native-agent-worker-model-events","native-agent-worker-read-claims","native-agent-worker-tool-turns","native-agent-worker-tool-events"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
++        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims","native-agent-worker-model-events","native-agent-worker-read-claims","native-agent-worker-file-claims","native-agent-worker-file-effects","native-agent-worker-tool-turns","native-agent-worker-tool-events"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
+         pending=claim(original,"attempt-one");start(store,"worker-root",pending.attempt_id,false);rejects<Conflict>([&]{store.claim_agent_worker_model(pending).get();});store.start_model_call("worker-root","worker-root",pending.attempt_id).get();
+         start(store,"foreign-root","foreign-attempt");auto foreign=pending;foreign.root_run_id="foreign-root";foreign.owner_run_id="foreign-root";foreign.attempt_id="foreign-attempt";rejects<Conflict>([&]{store.claim_agent_worker_model(foreign).get();});
+         auto first=store.claim_agent_worker_model(pending),second=store.claim_agent_worker_model(pending);unsigned admitted=0,rejected=0;for(auto* result:{&first,&second}){try{require(result->get().state=="dispatching","Claim must precede physical dispatch");++admitted;}catch(const Conflict&){++rejected;}}require(admitted==1&&rejected==1,"Concurrent duplicates must issue exactly one dispatch claim");
+@@ -137,7 +172,7 @@ void ledger(const std::string& path,const std::vector<std::string>& imports){
+         start(store,"worker-root","attempt-three");store.claim_agent_worker_model(claim(next,"attempt-three")).get();store.close();
+     }
+     {
+-        PersistenceService store(path,imports);const auto recovered=store.agent_worker_lease("generation-two").get();require(store.run("worker-root").get().state==RunState::failed&&recovered.state=="retired"&&recovered.retirement_reason=="backend_recovery","Exclusive startup recovery must fail interrupted owners and retire orphan generations atomically");require(store.agent_worker_model_claim("worker-root","attempt-three").get().state=="uncertain"&&store.agent_worker_model_claim("worker-root","attempt-two").get().actual_response_json==actual,"Recovery must preserve uncertainty and exact supplied acknowledgement");require(store.root_budget("worker-root").get().model_calls_reserved==3,"Recovery must retain all charged model attempts");rejects<Conflict>([&]{store.claim_agent_worker_model(pending).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","forbidden-revival")).get();});
++        PersistenceService store(path,imports);require(store.agent_worker_file_claim("file-root","file-model","file-one").get().success&&store.agent_worker_file_claim("file-root","file-model","file-patch").get().operation_ids.size()==2&&store.agent_worker_file_claim("file-root","file-model","file-awaiting").get().state=="uncertain","SQLite restart must preserve exact returned, partial and unresolved file ownership");const auto recovered=store.agent_worker_lease("generation-two").get();require(store.run("worker-root").get().state==RunState::failed&&recovered.state=="retired"&&recovered.retirement_reason=="backend_recovery","Exclusive startup recovery must fail interrupted owners and retire orphan generations atomically");require(store.agent_worker_model_claim("worker-root","attempt-three").get().state=="uncertain"&&store.agent_worker_model_claim("worker-root","attempt-two").get().actual_response_json==actual,"Recovery must preserve uncertainty and exact supplied acknowledgement");require(store.root_budget("worker-root").get().model_calls_reserved==3,"Recovery must retain all charged model attempts");rejects<Conflict>([&]{store.claim_agent_worker_model(pending).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","forbidden-revival")).get();});
+         root(store,"cancelled-root");const auto cancelled=lease("cancelled-root","cancelled-generation");store.admit_agent_worker(cancelled).get();start(store,"cancelled-root","cancelled-attempt");store.transition("cancelled-root",RunState::running,RunState::cancelled).get();rejects<Conflict>([&]{store.claim_agent_worker_model(claim(cancelled,"cancelled-attempt")).get();});store.retire_agent_worker(cancelled.generation,"cancelled").get();recovered_events=store.events("worker-root").get().size();store.close();
+     }
+     {PersistenceService store(path,imports);require(store.events("worker-root").get().size()==recovered_events&&store.root_budget("worker-root").get().model_calls_reserved==3,"Repeated owner recovery must not fabricate worker events or reset counters");store.close();}

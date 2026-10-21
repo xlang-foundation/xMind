@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-21T04:01:12.368Z",
+  "gate": {
+    "recordedAt": "2026-10-21T04:00:53.920Z",
+    "sourceParent": "478b3fd30c37a451430faa3408ae7a2c08de4b68",
+    "sourcePatchSha256": "b6169de05b159f81e80d591d53f58933307a8c67c30cd2ea263ab2eed6914f13",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 36740,
+      "launchedAt": "2026-10-21T03:56:11.599Z",
+      "completedAt": "2026-10-21T03:57:51.612Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb"
+    },
+    "test": {
+      "pid": 52504,
+      "launchedAt": "2026-10-21T03:57:55.166Z",
+      "completedAt": "2026-10-21T04:00:51.439Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ce5c184d8b2dc3c78b0d17ff32b4897abfc39002a34c5a789b25db16112e892a"
+    },
+    "total": 61,
+    "failed": 0,
+    "passed": 61,
+    "seconds": 176.23,
+    "projectFiles": 2699,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "de78286017ef44c106544ef38b4c3ce36594f9b1ea14d0fa66b127069fa1b5d1",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/file-worker-ledger-corrected-20261020-build.log": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb",
+    "doc/evidence/file-worker-ledger-corrected-20261020-build-terminal.json": "29fc1dd1725e4fafc83c6754b625c7df61b2c14da66a3959f7b2009ceda096a9",
+    "doc/evidence/file-worker-ledger-corrected-20261020-ctest.log": "ce5c184d8b2dc3c78b0d17ff32b4897abfc39002a34c5a789b25db16112e892a",
+    "doc/evidence/file-worker-ledger-corrected-20261020-ctest-terminal.json": "5e24fe3b9d6b458a23656e7783e1492c806434976f743eca857bcca91995124d",
+    "doc/evidence/file-worker-ledger-corrected-20261020-LastTest.log": "132dba979926a0ec5bb59a3cbc32ecf14562ff086b38241c7bf22ff03951514a",
+    "doc/evidence/file-worker-ledger-corrected-20261020-test-inventory.json": "b477dc3fdefd264758a33430e109ec6114b616212c99732d28aa191d7517c8ab",
+    "doc/evidence/file-worker-ledger-corrected-20261020-gate.json": "a1f1cbf09e39f781aa4c8442cea6e8536b252101ed211c6400c3710404175286",
+    "doc/evidence/file-worker-ledger-corrected-20261020-source.patch": "b6169de05b159f81e80d591d53f58933307a8c67c30cd2ea263ab2eed6914f13"
+  },
+  "scope": "Backend-only durable file-call and per-operation claims through embedded xlang3/SQLite",
+  "verified": [
+    "Exact generation, process identity, ordinary root, workspace, revision and latest finished actual model tool call authorize one file invocation",
+    "Both read and file claim keys preserve opaque 256-byte Unicode provider call IDs; the key format remains unchanged for prior valid identities",
+    "The read-only canonical turn explicitly rejects unsupported file tools before looking up read claims",
+    "Invocation entry and approved native mutation claims are separate; native operations must already be executing with matching run, workspace, revision, folder and operation kind",
+    "Each native operation has a unique private model/invocation/spec binding; duplicate, changed or replacement calls cannot replay it",
+    "Injected transaction failure rolls back operation binding, invocation update and event together",
+    "Exact output bytes and digest are retained; success requires known successful native effects and partial failure preserves prior successful operations",
+    "Lease retirement preserves unresolved ownership; late native results remain recordable without dispatch authority",
+    "Private claim/effect categories reject generic information access; active calls participate in deletion and quiescence checks",
+    "SQLite restart preserves returned, partial and unresolved claims; serial build and 61 focused contracts pass with frozen input and binary sets"
+  ],
+  "limitations": [
+    "New file-ledger cases use synthetic process/model/proposal identities; they perform no filesystem mutation",
+    "The separate existing native file-host test still covers actual mutations and approvals, but is not yet composed with these durable worker claims",
+    "No file RPC endpoint, mixed canonical tool turn or production coding worker is enabled; process-read remains read-only",
+    "No new full-suite, installed, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

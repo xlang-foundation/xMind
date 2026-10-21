@@ -1,3 +1,32 @@
+## Durable worker file claims — 2026-10-20
+
+Backend-only file claims now bind the exact current lease, ordinary root,
+workspace/revision and latest finished actual model tool call. Invocation entry
+is separate from each approved native mutation. Each operation must already be
+executing under the matching owner, scope and native tool kind, and receives a
+unique private binding to the model call and approved operation specification.
+Duplicate calls and operations cannot replay effects. Partial results retain
+prior successes; retirement preserves unresolved ownership and permits late
+actual receipts without restoring dispatch authority. Read and file claim keys
+retain opaque 256-byte Unicode provider IDs without changing earlier valid keys.
+Read-only canonical turns explicitly reject unsupported tools before claim lookup.
+
+Serial Release build and **61/61 focused contracts pass in 176.23 seconds**, with
+2699 project inputs and the SDK, libraries, runtime, dependencies and native
+binary sets frozen and verified unchanged.
+[Exact scope and raw evidence](evidence/file-worker-ledger-corrected-20261020.json).
+The initial gate passed 60/61: its new file fixture exposed a read-claim lookup
+before read-only tool validation. That rejection is now explicit;
+[original failure, logs and source patch](evidence/file-worker-ledger-focused-20261020.json)
+are preserved.
+
+The new ledger fixture uses synthetic process/model/proposal identities and
+performs no filesystem mutation. Existing actual native file-host tests pass
+separately. These capabilities are not yet composed: backend file-host ownership,
+file RPC, mixed canonical tool turns and production coding workers remain open.
+Process-read remains read-only. No new full-suite, installed, rendered or
+live-provider acceptance is claimed.
+
 ## File invocation wire values — 2026-10-20
 
 The native file-call envelope now has a strict codec preserving exact arguments

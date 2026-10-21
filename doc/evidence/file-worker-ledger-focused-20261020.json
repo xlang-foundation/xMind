@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-21T03:55:06.153Z",
+  "gate": {
+    "recordedAt": "2026-10-21T03:54:34.927Z",
+    "sourceParent": "478b3fd30c37a451430faa3408ae7a2c08de4b68",
+    "sourcePatchSha256": "8381e0e924d0516a87b4c66ede2640375fe10f944b6237232e6263c786e12253",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 69196,
+      "launchedAt": "2026-10-21T03:35:29.648Z",
+      "completedAt": "2026-10-21T03:51:30.031Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e04e154b715c0cbc78b869288a70e4b77fcfa8359587ff0db0b62c02a7186e5e"
+    },
+    "test": {
+      "pid": 68020,
+      "launchedAt": "2026-10-21T03:51:35.234Z",
+      "completedAt": "2026-10-21T03:54:32.440Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "f61c27af112ba36e828f6b679a27ffd249138c0edb80bd44d478e102ec100205"
+    },
+    "total": 61,
+    "failed": 1,
+    "passed": 60,
+    "seconds": 177.15,
+    "projectFiles": 2699,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "ebd2839065958d8ca7c61df9e5623d482bb2ffe5b77562ae3263a4e0d34bf0de",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "files": {
+    "doc/evidence/file-worker-ledger-focused-20261020-build.log": "e04e154b715c0cbc78b869288a70e4b77fcfa8359587ff0db0b62c02a7186e5e",
+    "doc/evidence/file-worker-ledger-focused-20261020-build-terminal.json": "d59d5d1c860eebd3f438549e4f9e4bf1196105460ff6129f4f6bdf1b4fa96871",
+    "doc/evidence/file-worker-ledger-focused-20261020-ctest.log": "f61c27af112ba36e828f6b679a27ffd249138c0edb80bd44d478e102ec100205",
+    "doc/evidence/file-worker-ledger-focused-20261020-ctest-terminal.json": "b84ffa04ac328537b8c6b04a1bd994cc4582a46339fedf694b951fdab0784478",
+    "doc/evidence/file-worker-ledger-focused-20261020-LastTest.log": "1b60440764a10fe6b8669bcb120a4533e2c377b8e8c601350e807870292848f1",
+    "doc/evidence/file-worker-ledger-focused-20261020-test-inventory.json": "b477dc3fdefd264758a33430e109ec6114b616212c99732d28aa191d7517c8ab",
+    "doc/evidence/file-worker-ledger-focused-20261020-gate.json": "a203533728785bfee815c66b4d721025f4fe18efeddef6dfb7cf64cf20899a1b",
+    "doc/evidence/file-worker-ledger-focused-20261020-source.patch": "8381e0e924d0516a87b4c66ede2640375fe10f944b6237232e6263c786e12253"
+  },
+  "passed": false,
+  "observation": "Serial build succeeded; 60/61 focused contracts passed. New ledger fixture exited with Worker read claim not found before its final marker.",
+  "diagnosis": "The file fixture expected the read-only journal to reject a file tool batch as Conflict. commit_agent_worker_read_turn instead looked up a nonexistent read claim before checking the tool vocabulary. The read-only boundary needs explicit supported-tool validation before its claim lookup.",
+  "separateReviewFinding": "The shared tool-claim key still limits provider call IDs to 128 ASCII bytes despite both invocation formats allowing 256 opaque bytes. A corrected gate must cover Unicode boundary IDs.",
+  "limitations": [
+    "No new ledger acceptance; synthetic process/model/proposal fixture, no live provider inference or filesystem mutation",
+    "This failed draft does not qualify file RPC or a production coding worker"
+  ]
+}
