@@ -15,7 +15,16 @@ agents:
 creating a run when that owner is absent. The current production worker factory
 supports ordinary read roots and explicit empty tool lists. It rejects unsupported
 edit, process-tool, remote-tool, planning, delegation and context capabilities.
-Server entry-point configuration for this factory remains unfinished.
+The standalone unified server enables this factory with
+`xmind serve --agent-execution process-read`, alongside the normal database,
+runtime, authentication, workspace and provider configuration. This mode offers
+the five native read tools above and disables agent effect/remote capabilities.
+It requires `--workspace` and rejects approved edits and explicit effect-tool
+configuration. The default `--agent-execution thread` retains normal execution.
+
+Managed local-profile launch and adoption reject `process-read` until the owner
+contract can capture that mode; this option currently applies to standalone
+server startup. The paired `xmind.exe` is retained as the worker executable.
 
 `placement: thread` uses the backend's native runner even when a worker executor
 is configured. Omitting placement preserves that generation's backend default.
@@ -31,6 +40,10 @@ Public metadata includes explicit placement. The shared browser/extension client
 validates it, checks selection/catalog agreement, and labels the agent option as
 “separate process” or “backend thread.” Installed and live-rendered placement
 acceptance remains open.
+
+The [standalone entry contract](evidence/agent-worker-server-entry-focused-20261020.json)
+qualifies actual authenticated HTTP admission, worker-backed native reads,
+canonical history and events through the public client on a controlled provider.
 
 The [native qualification](evidence/agent-placement-focused-20261020.json) covers
 actual explicit process and thread roots, missing-owner rejection and persisted

@@ -20,6 +20,7 @@
 #include "agentflow/context_model_policy.hpp"
 #include "agentflow/provider_yaml_config.hpp"
 #include "agentflow/execution_platform.hpp"
+#include "agentflow/agent_worker_read_executor.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/language_server_configuration.hpp"
@@ -108,10 +109,14 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state" && key!="--agent-execution") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE] [--agent-execution thread|process-read]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
+        const auto execution_mode=options.contains("--agent-execution")?options.at("--agent-execution"):"thread";
+        if(execution_mode!="thread"&&execution_mode!="process-read")throw std::invalid_argument("Agent execution must be thread or process-read");
+        const bool process_read=execution_mode=="process-read";
+        if(process_read){if(!options.contains("--workspace"))throw std::invalid_argument("Process read execution requires an execution workspace");for(const auto* key:{"--workspace-edits","--mcp-config","--process-config","--language-server-config","--python-tools-config","--runtime-manifest-sha256","--owner-receipt","--legacy-owner-ticket","--profile-state"})if(options.contains(key))throw std::invalid_argument("Process read execution is a standalone read-only mode; incompatible configuration supplied");}
         int port=8765;
         if(options.contains("--port")) {
             const auto& value=options.at("--port");const auto parsed=std::from_chars(value.data(),value.data()+value.size(),port);
@@ -121,6 +126,7 @@ int run_server(int argc,char** argv) {
         if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local server");
         agentflow::validate_local_auth_token(token);
 #if !defined(_WIN32)
+        if(process_read)throw std::invalid_argument("Process agent execution requires Windows");
         if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native owner replacement currently requires Windows");
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
@@ -301,6 +307,9 @@ int run_server(int argc,char** argv) {
         for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled,item.transport});
         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
         std::unique_ptr<agentflow::EditRecoveryReader> recovery;
+        agentflow::AgentRootExecutorFactory root_executor_factory;
+        if(process_read){const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));root_executor_factory=[image=std::move(image)](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return agentflow::make_agent_worker_read_executor(store,settings,image);};}
+        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_read){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};}};
 #endif
         if(options.contains("--model")) {
 #if defined(_WIN32)
@@ -310,19 +319,20 @@ int run_server(int argc,char** argv) {
             if(options.contains("--workspace")) settings.workspace=options.at("--workspace");
             bind_workspace_membership(settings);
             settings.approved_edits=options.contains("--workspace-edits");
-            settings.mcp_servers=mcp_settings;
+            if(!process_read)settings.mcp_servers=mcp_settings;
             // A server can start before a browser creates/selects its first
             // workspace. Keep the local shell catalog configured for that
             // later workspace, but do not bind execution tools to an agent
             // whose request has no verified workspace.
-            if(settings.workspace)settings.process_profiles=process_profiles;
-            settings.language_servers=language_servers;
+            if(!process_read&&settings.workspace)settings.process_profiles=process_profiles;
+            if(!process_read)settings.language_servers=language_servers;
             settings.instruction_policy=instruction_policy;
-            settings.xlang_python_tools=xlang_python_tools;
+            if(!process_read)settings.xlang_python_tools=xlang_python_tools;
+            configure_execution_mode(settings);
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
-            if(settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(!process_read&&settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
             const auto purpose=provider_purpose(settings.provider.endpoint);
             const auto* key=std::getenv("XMIND_API_KEY");
             if(key && *key) {
@@ -339,19 +349,19 @@ int run_server(int argc,char** argv) {
                 auto verified=persistence.resolve_credential("server",id,purpose).get();
                 settings.credential=agentflow::CredentialReference{"server",id,purpose};
             }
-            auto platform=std::make_unique<agentflow::ExecutionPlatform>(persistence,std::move(settings),workers,queue);graph_execution=platform.get();executor=std::move(platform);
+            auto platform=std::make_unique<agentflow::ExecutionPlatform>(persistence,std::move(settings),workers,queue,root_executor_factory);graph_execution=platform.get();executor=std::move(platform);
 #else
             throw std::invalid_argument("Native provider execution currently requires Windows");
 #endif
         }
 #if defined(_WIN32)
         if(!executor){
-            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
+            agentflow::AgentSettings settings;if(!process_read){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
             bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.
-            if(settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(!process_read&&settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
             std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
             std::vector<agentflow::ProviderProfileRoute> routes;
             const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format,agentflow::ChatDialect dialect=agentflow::ChatDialect::openai){
@@ -377,7 +387,7 @@ int run_server(int argc,char** argv) {
             add("mistral.chat","mistral","https://api.mistral.ai/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.mistral.ai/v1/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::mistral);
             policies.back().model_capabilities=agentflow::documented_mistral_model_policy();
             add("openrouter.chat","openrouter","https://openrouter.ai/api/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://openrouter.ai/api/v1/models",agentflow::ProviderCatalogueFormat::openrouter);
-            auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
+            auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue,root_executor_factory);
             if(!bootstrap&&!legacy)configurable->import_legacy_configuration();
             if(options.contains("--provider-config")){
                 try{configurable->import_yaml_configuration(std::filesystem::absolute(options.at("--provider-config")),configurable->configuration().revision);}

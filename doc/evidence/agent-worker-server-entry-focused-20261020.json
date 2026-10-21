@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-21T02:10:49.620Z",
+  "gate": {
+    "recordedAt": "2026-10-21T02:10:24.841Z",
+    "sourceParent": "81adc2fbf3670eee9b24a39522f50403c36e9518",
+    "sourcePatchSha256": "bc81d3e2e854b03e295cf913ee12861c87fd3b3e06c5881c33338fbc3a94a0c3",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 66700,
+      "launchedAt": "2026-10-21T02:06:17.028Z",
+      "completedAt": "2026-10-21T02:07:38.470Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dc95014a017bb2a2ccc4c27e58e39a569c0273ead0e662c34bd659f91079a55b"
+    },
+    "test": {
+      "pid": 23108,
+      "launchedAt": "2026-10-21T02:07:41.230Z",
+      "completedAt": "2026-10-21T02:10:22.322Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "79d0c6a8e0f80a9c7525efcb09e492e7f2c6d003d92d8a61a182fe27d5893edd"
+    },
+    "total": 55,
+    "failed": 0,
+    "passed": 55,
+    "seconds": 161.05,
+    "projectFiles": 2698,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "0f680190ada14ce5dce1f275d92872f0a54509fbe39fd7a0e9df8d3a24b49e8b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-worker-server-entry-focused-20261020-build.log": "dc95014a017bb2a2ccc4c27e58e39a569c0273ead0e662c34bd659f91079a55b",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-build-terminal.json": "57c1dc1faa486e07f9ad7024d3b8b608c3ccb0816f873fa890962f0f38a53036",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-ctest.log": "79d0c6a8e0f80a9c7525efcb09e492e7f2c6d003d92d8a61a182fe27d5893edd",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-ctest-terminal.json": "5b0b93104c73a82d72d5220224b1df40914c389fec070decb09e1426d18730a9",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-LastTest.log": "0d0f73f238d8bc181f04afefa75aadf11ebadf1a3b3edcdf314ed17df3f8c5e8",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-test-inventory.json": "ac8a58fcb3608cd86ed693b36103869533c14b676d38f0c4a75cf4aa18fa5983",
+    "doc/evidence/agent-worker-server-entry-focused-20261020-gate.json": "db3b8da397db09d31dcd5d1399c3f9c1964ef5ec7b4d49ae4a27a3b60c18109b"
+  },
+  "scope": "Standalone unified server process-read startup and authenticated public API worker root",
+  "verified": [
+    "Server accepts explicit thread or process-read execution mode; default path retains existing behavior",
+    "Process-read requires execution workspace and rejects incompatible startup flags before creating a database",
+    "Worker executable is retained and identity-bound from the paired unified runtime; provider/permission/workspace authority stays in parent backend",
+    "Explicit read-only mode excludes effect-tool capabilities and uses five registered native read tools",
+    "Actual unified server launched hidden; authenticated BackendClient creates session and submits one root once",
+    "Independent provider sees two authorized controlled windows and exact native file bytes in canonical continuation",
+    "HTTP history/events prove distinct worker PID, one actual read dispatch, completed lease and four canonical messages",
+    "55 focused native contracts pass with frozen source/dependency and native binary sets unchanged"
+  ],
+  "limitations": [
+    "Direct standalone fixed-model server path exercised; configurable provider factory generation has separate fixture qualification",
+    "Managed local-profile launch/adoption explicitly rejects process-read until mode is represented in its owner contract",
+    "Worker effect tools, planning/context, graph/subagent placement, recovery and installed/live-rendered acceptance remain open",
+    "No new full-native-suite, hosted, installed or live-provider acceptance"
+  ],
+  "passed": true
+}

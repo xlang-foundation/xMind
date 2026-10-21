@@ -1,3 +1,24 @@
+## Standalone read-worker server entry — 2026-10-20
+
+`xmind serve --agent-execution process-read` now constructs the production
+worker factory from the paired unified executable. This explicit read-only mode
+requires an execution workspace, offers five native read tools, and rejects
+incompatible startup options before database creation. Default startup retains
+the existing thread path. Fixed-model and provider-profile construction forward
+the factory; the new entry test exercises the fixed-model path.
+
+The actual unified server passes authenticated public session/run/history/events
+against an independent synthetic provider: a distinct child PID, exact fresh native
+file bytes, one read dispatch, two model windows and four canonical messages.
+The serial build and 55 focused native contracts pass in 161.05 seconds with frozen
+inputs and 133 native binary file sets unchanged.
+[Raw evidence](evidence/agent-worker-server-entry-focused-20261020.json).
+
+Managed local-profile launch/adoption is explicitly rejected for this mode until
+its owner contract represents the execution choice. Worker effects, context,
+planning, graph/subagent placement and recovery remain open. This adds no full
+native-suite, hosted, installed, live-rendered or live-provider acceptance.
+
 ## Explicit primary-agent placement — 2026-10-20
 
 Named agents accept optional `placement: thread` or `placement: process`.
