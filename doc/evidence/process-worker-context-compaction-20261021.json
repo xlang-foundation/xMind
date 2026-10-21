@@ -1,0 +1,69 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:03:05.944Z",
+    "sourceParent": "2462d1c9f7ccef81c4e31063f9882659c827a898",
+    "sourcePatchSha256": "a6c3a42430647719fd1d857246715edf97363f3798cb225021a418fb4fc3e22c",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 24072,
+      "launchedAt": "2026-10-21T13:01:00.454Z",
+      "completedAt": "2026-10-21T13:01:56.886Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "985c8b806c1d8f6690880916b8267d54c95a887b6432413bc6c1ff02841e8db7"
+    },
+    "test": {
+      "pid": 17680,
+      "launchedAt": "2026-10-21T13:01:59.814Z",
+      "completedAt": "2026-10-21T13:03:02.635Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c7f3963bf7bac7368551199b4f4e2622712770585c7ef26e7422f6cfd805b46f"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 62.77,
+    "projectFiles": 2743,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "597304fef826d0ae510285de79bba0d85a2198193385df4b36386e4e87cc2734",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-context-compaction-20261021-build.log": "985c8b806c1d8f6690880916b8267d54c95a887b6432413bc6c1ff02841e8db7",
+    "doc/evidence/process-worker-context-compaction-20261021-build-terminal.json": "66bb7876becdb72ad5ea4f9b6fd143535c7afcb742cb6b0bfff3d99fe1f4f3b3",
+    "doc/evidence/process-worker-context-compaction-20261021-ctest.log": "c7f3963bf7bac7368551199b4f4e2622712770585c7ef26e7422f6cfd805b46f",
+    "doc/evidence/process-worker-context-compaction-20261021-ctest-terminal.json": "c288d14ec7d6cba4cc60e009edc83f12081093f9d0c32151623ed9cc36ae7c26",
+    "doc/evidence/process-worker-context-compaction-20261021-LastTest.log": "e7be75996d25102868d5b19830c24ddae18ffbdecb821dd1b14eccd6719d77fa",
+    "doc/evidence/process-worker-context-compaction-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-context-compaction-20261021-gate.json": "ea749f3cc79bb03f9d14cbb74d437696bee6730d8f859b15aeb43b85693b4ffe",
+    "doc/evidence/process-worker-context-compaction-20261021-source.patch": "a6c3a42430647719fd1d857246715edf97363f3798cb225021a418fb4fc3e22c",
+    "doc/evidence/process-worker-context-compaction-20261021-binaries-before-test.json": "d48a5f3c623408ebd744fdb52a04825cac9b5e71fff9e44ed4e9dd91c33c312e"
+  },
+  "verified": [
+    "Actual unified xmind worker crosses a deliberately small registered context capacity after two read turns and performs one actual backend Responses compaction",
+    "Independent HTTP peer observes five context inference windows, six count requests and one compaction across counted and compacted cases, 147 total requests including existing workers",
+    "Compacted next inference contains the actual encrypted checkpoint and newest exact tool result; compacted old tool result is absent from that model window",
+    "Original six-message conversation remains intact; three inference charges plus one maintenance charge are retained with no duplicate ordinary funding",
+    "Embedded xlang3 SQLite verifies every logical inference is completed and every physical member has completed outcome and original input binding",
+    "Backend canonical projection retains its actual compaction response; exact xmind child retires without invented effect approvals",
+    "Seven focused contracts pass with frozen full project/SDK/library/dependency/133-binary sets; product executable is unchanged from counted context checkpoint"
+  ],
+  "limitations": [
+    "No worker automatic overflow recovery or actual-worker context cancellation/failure acceptance yet",
+    "No broader/full regression, installation, rendered or live-provider acceptance",
+    "Delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}

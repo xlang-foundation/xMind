@@ -1,3 +1,22 @@
+## Actual worker context compaction — 2026-10-21
+
+The actual unified xmind worker now verifies preemptive compaction through the
+backend context owner. A deliberately small registered capacity triggers one
+Responses compaction after two reads. The next model request preserves the
+objective, exact encrypted checkpoint and newest actual result; the older tool
+result is compacted from that window while original conversation stays intact.
+Three inference and one maintenance charge remain distinct. Embedded xlang3
+SQLite checks completed logical/physical inference and exact input bindings.
+
+**7/7 focused contracts pass in 62.77 seconds**, with 147 controlled HTTP
+requests and all source/SDK/library/dependency/133-binary sets/hashes frozen.
+The product executable is unchanged from the counted-context checkpoint.
+[Scope and raw evidence](evidence/process-worker-context-compaction-20261021.json).
+
+Automatic worker overflow recovery, context cancellation/failure handling,
+delegation/planning, graph/default placement and final installed acceptance
+remain open. This is not full regression or rendered/live-provider acceptance.
+
 ## Backend-owned counted context worker — 2026-10-21
 
 The coding worker path now has a backend ContextManager owner. Policy,
