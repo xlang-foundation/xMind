@@ -1,3 +1,20 @@
+## Busy profile-worker cancellation — 2026-10-20
+
+An actual streamed worker inference now qualifies the busy-generation guard:
+profile select and save/activate reject without another factory call, registry
+revision change or active-profile replacement. Cancellation observes the exact
+PID/birth child exited before runtime idle, then checks the cancelled root,
+retired lease, one retained model charge, typed uncertainty receipt and absence
+of invented assistant history. The independent peer observes stream abortion.
+Idle profile restoration still passes. The serial build and 54 focused contracts
+pass in 157.80 seconds with all frozen inputs and native binary sets unchanged.
+[Raw evidence](evidence/worker-profile-busy-cancel-focused-20261020.json).
+
+Shutdown, queue cancellation, provider failure, crashes, persistence faults and
+recovery remain separate qualification. Public placement and broader worker
+capabilities remain open; no new full-suite, installed, hosted, rendered-client
+or live-provider acceptance is claimed.
+
 ## Worker recreation across provider-profile generations — 2026-10-20
 
 ProviderProfileRuntime now adds the automatic planning default only for its

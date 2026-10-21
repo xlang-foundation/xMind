@@ -186,3 +186,4 @@ doc/evidence/worker-read-denial-preparation-*.log -text whitespace=-blank-at-eol
 doc/evidence/worker-production-factory-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/worker-platform-factory-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/worker-profile-generation-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/worker-profile-busy-cancel-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

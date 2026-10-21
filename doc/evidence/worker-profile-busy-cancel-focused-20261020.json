@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-21T01:36:59.080Z",
+  "gate": {
+    "recordedAt": "2026-10-21T01:36:49.732Z",
+    "sourceParent": "12248ac88f800f3214980ede89cc9c3ae1733922",
+    "sourcePatchSha256": "a76e5b1b52b82a32b2357a67e7717ad58b28e6c43248ff02d2e023237f8368f4",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 7360,
+      "launchedAt": "2026-10-21T01:33:10.008Z",
+      "completedAt": "2026-10-21T01:34:06.651Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0a62e265a2eb8a8489ffd0977ad4d395d187451601993ec6e23272d309b4a259"
+    },
+    "test": {
+      "pid": 48388,
+      "launchedAt": "2026-10-21T01:34:09.316Z",
+      "completedAt": "2026-10-21T01:36:47.159Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6565d709b8cb9f4a3e225e987cd3545f9f1c94dcb524e5b2d4a1209418ad7996"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 157.8,
+    "projectFiles": 2697,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "f40f2b466bb2facc4964c95dc1fd6c0f5b1918f30ee9811e528fe0edf71cc43b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-build.log": "0a62e265a2eb8a8489ffd0977ad4d395d187451601993ec6e23272d309b4a259",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-build-terminal.json": "02a38390f7eedf9547f160bc77d21277af738804d2a7d61e8a4345ea6f412b9b",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-ctest.log": "6565d709b8cb9f4a3e225e987cd3545f9f1c94dcb524e5b2d4a1209418ad7996",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-ctest-terminal.json": "de38e3f7789ec827cdf52ae46f7cc5b5401ffe7c0e6cbc6f71d4d46fda8a3c68",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-LastTest.log": "ce84084e594ad8615f179e52f7cd377a53e0fd22841cf1f21be32783387c0751",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-test-inventory.json": "0d9db7c8801c8891348d92cd3aac078a7fe2b858cdc2889e360152faaa25ae45",
+    "doc/evidence/worker-profile-busy-cancel-focused-20261020-gate.json": "a014526180f98ae9307ae8174f4ecbf84ae8af1dc942e72f269c13a20e8379ae"
+  },
+  "scope": "Busy provider-profile mutation rejection and actual service-owned worker cancellation",
+  "verified": [
+    "Native streamed model.text establishes actual active inference before mutation/cancellation",
+    "Exact retained child PID and birth verified against a live OS handle",
+    "Select and save/activate mutations reject Conflict without factory invocation, registry revision change or active profile replacement",
+    "Runtime cancellation drains exact child to OS-observed exit before runtime idle",
+    "Cancelled root and retired lease retain one charged uncertain model dispatch and only the actual user prompt; no invented assistant completion",
+    "Backend model-host receipt records typed cancelled cause; independent HTTP peer observes stream abort",
+    "Idle profile switch and restoration cases continue to pass",
+    "Serial build and 54 focused contracts pass with frozen sources and complete native binary sets unchanged"
+  ],
+  "limitations": [
+    "One controlled streaming ordinary empty-tool root; shutdown, queue cancellation, provider failure, crash, persistence fault and recovery remain separate",
+    "Public placement and server entry configuration remain unwired",
+    "No new full-suite, installed, hosted, rendered-client or live-provider acceptance"
+  ],
+  "passed": true
+}
