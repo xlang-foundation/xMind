@@ -3,6 +3,7 @@
 #include "agentflow/agent_worker_coding_owner.hpp"
 #include "agentflow/persistence_service.hpp"
 #include <mutex>
+#include <atomic>
 #include <set>
 
 namespace agentflow {
@@ -18,6 +19,7 @@ struct AgentWorkerSupervisor::Impl {
     bool started=false,ready=false,executed=false,draining=false,launch_attempted=false,lease_admitted=false;
     std::shared_ptr<const BoundProcessExecutable> image;AgentWorkerScope scope;std::string identity;
     std::size_t callers=0;
+    std::atomic<bool> outcome_unrecorded=false;
     Impl(PersistenceService& persistence,std::shared_ptr<const BoundProcessExecutable> image,
         AgentWorkerScope captured_scope,std::string captured_identity,AgentWorkerChannel::Deadline until,bool launch_now=true)
         :store(persistence),deadline(until),image(std::move(image)),scope(std::move(captured_scope)),identity(std::move(captured_identity)){
@@ -61,7 +63,7 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
     impl_->owner=std::make_unique<AgentWorkerReadOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel);
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
-        [owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+        [state=impl_.get(),owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
     impl_->worker->channel().send({"worker.boot","{\"version\":1}"},impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
@@ -74,7 +76,7 @@ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,Agent
     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner));
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
-        [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+        [state=impl_.get(),owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
     impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
@@ -103,6 +105,7 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_terminal(RunState ou
     return {impl_->store.terminate_agent_worker(impl_->lease,outcome,reason).get(),exit};
 }
 const AgentWorkerLeaseSpec& AgentWorkerSupervisor::lease()const noexcept{return impl_->lease;}
+bool AgentWorkerSupervisor::outcome_unrecorded()const noexcept{return impl_->outcome_unrecorded.load();}
 bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->alive();}
 bool AgentWorkerSupervisor::admitted()const{std::lock_guard lock(impl_->mutex);return impl_->lease_admitted;}
 std::uint32_t AgentWorkerSupervisor::drain_physical(AgentWorkerChannel::Deadline deadline){

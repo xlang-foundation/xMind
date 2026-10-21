@@ -27,8 +27,8 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
             check(pending.has_value()&&!std::filesystem::exists(target),"Coding child must wait for actual controller approval without mutation");
             if(cancelled)service.cancel(id);else store.decide_operation(pending->id,OperationDecision::allow,"coding-fixture-controller").get();
         }
-        while(Clock::now()<until&&!service.idle())std::this_thread::sleep_for(5ms);
-        check(service.idle()&&service.healthy()&&factories==1,"Coding service must physically drain one worker before idle");
+        while(Clock::now()<until&&(unrecorded?service.healthy():!service.idle()))std::this_thread::sleep_for(5ms);
+        check((unrecorded?!service.healthy():(service.idle()&&service.healthy()))&&factories==1,"Coding service must physically drain one worker before idle");
         const auto run=store.run(id).get();const auto events=store.events(id).get();const auto history=store.run_history(id).get();
         const auto admitted=std::find_if(events.begin(),events.end(),[](const auto& event){return event.kind=="worker.lease.admitted";});check(admitted!=events.end(),"Coding execution must admit an actual worker");
         const auto generation=Json::parse(admitted->json).at("generation").get<std::string>();const auto lease=store.agent_worker_lease(generation).get();check(lease.spec.pid!=GetCurrentProcessId()&&lease.state=="retired","Coding execution must retain and retire its distinct worker identity");

@@ -1,0 +1,108 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T16:07:28.141Z",
+    "sourceParent": "c865cf95919a686afb4f9b62a8782bb957830677",
+    "sourcePatchSha256": "5ea448aa7780a0c9cb4e5efbde4a093e03b5156261f0d39e48ac4be34571adae",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 70060,
+      "launchedAt": "2026-10-21T16:05:00.419Z",
+      "completedAt": "2026-10-21T16:06:09.196Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7"
+    },
+    "test": {
+      "pid": 72684,
+      "launchedAt": "2026-10-21T16:06:12.369Z",
+      "completedAt": "2026-10-21T16:07:25.198Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b06e9058ad45076aa0f86ad3b122c3e81145b2a99bc3b6af8b099e25fe196db4"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 72.78,
+    "projectFiles": 2748,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "92943a738094cc0a075ae48f441f0df68b1e5a43885a312e49fb0027c596ed4b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-build-terminal.json": "3cebc690fe6adde42a9c91d53b8e3aed7438bcaa43a1d9481b0c9397e48b4149",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-ctest.log": "b06e9058ad45076aa0f86ad3b122c3e81145b2a99bc3b6af8b099e25fe196db4",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-ctest-terminal.json": "7695d22787653800e28d62fd19d45ef96f3c909778b0f3307a6b8e53f780759d",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-LastTest.log": "938520ccbbcee326c057ccb9a6017712ba57d97b4d5323eea0cdf7634edd689f",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-gate.json": "e699c149f44c7793f60f9070ba57d5bf6628b0400643ec349a56c0e95f755a62",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-source.patch": "5ea448aa7780a0c9cb4e5efbde4a093e03b5156261f0d39e48ac4be34571adae",
+    "doc/evidence/process-worker-parent-unrecorded-async-20261021-binaries-before-test.json": "6cdba67e8518a13e01af5b288cc9164ede01bfb33d583993b32e9c4a37058542",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-build-terminal.json": "327df854fc52091970885982bdec7740665609273afb2889e20d16a5d59e0f4d",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-ctest.log": "95090ba335a23bc35867f0261f52ca29e13efa781d1111eefd399c3f4559ddfb",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-ctest-terminal.json": "f200baa848e698c721867b5fc27bedadcee4eb6dfa31d092664562abad56a3ae",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-LastTest.log": "99ee31f1f0ae36be941b5a727d0fe6c45cad5c6442d52ab06ceb4f5a30957736",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-gate.json": "d829526436d168f44454f00c72942f9a059dbd639af492336d91d3042553608f",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-source.patch": "f636c6968190578c3825de4f1eb27e63b31db9ed3e4edc868fa89b211679e13f",
+    "doc/evidence/process-worker-parent-unrecorded-20261021-binaries-before-test.json": "39865d01330092473473c747af1050bdbb2316e5903039a26dd8d9af28909a95",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-build.log": "f93563ca0f1b86136b04372630c5f10827ddd9b1cd74e9f7151334fa57383282",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-build-terminal.json": "d2f044bbe27e6c5b040ddf4b8b85e09a869711cc0c79933356d557ee89ca2846",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-ctest.log": "3f692dc57ce16f75441796c544b9b99d868dfa10529b50b38967960f515e1d4a",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-ctest-terminal.json": "ce813d92f2215576814c182471aca0bde5ad95d90a317b284f4b3f077106506b",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-LastTest.log": "3a8967ce4e0172c5b7fd33dcb66a1364e29dce1a89a35d3e44ef2aaa39dc77b2",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-gate.json": "046375bd57e4c99654c8e29986e79fddc960438662aaea3983d082bee7720b71",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-source.patch": "ce840422b61486b291af6284c6ad563f51b055762af5e77072989e88b1379f03",
+    "doc/evidence/process-worker-parent-unrecorded-stop-20261021-binaries-before-test.json": "a13d549f9c7e02091ee07f6d3990452a0f51b4ace36e219229abc2f4a1a19410",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-build-terminal.json": "646ad88b7d438a22f07c8afdd65abb92bc8eb89af257999e577fc44e39ed10b6",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-ctest.log": "0fe63b694d03770982480fba3b961c45b8dca5b1ea6b3626e62396e5a5c0b378",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-ctest-terminal.json": "86f29fe1c6bffa5f61efd798cbd6a9b2164eda275030c6ddc71e62dbe3ad8c5e",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-LastTest.log": "44f5dec447a599cfc6679bef3969bbb75ce0a1795ab256160b1dac563ecb2c9b",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-gate.json": "4860b27bd362453b7e6ce1b67fa1516d0f0fdea46fd3aeb82691e2ba9cf83988",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-source.patch": "52e1b00ea5de86adadd1500d1a8de084a4592a63ccd43a0668527b27ec8359bd",
+    "doc/evidence/process-worker-parent-unrecorded-owners-20261021-binaries-before-test.json": "fafb9f73b273ceefa84e21c2555292871ccd0cb7da396e3cec2b253f37b2437d"
+  },
+  "verified": [
+    "Actual parent and two xmind children through SDK IPC; injected parent result-write failure occurs after both children complete and native batch joins",
+    "Parent failed with user-only history; both completed child read/final histories and completed native batch result preserved; five model charges and unused parent hold retained",
+    "Parent tool claim remains uncertain with empty actual output; all three process leases retired once, no worker restart or additional model call",
+    "Supervisor captures outcome_unrecorded only from its backend handler, independently of worker failure intent; after exact terminal physical drain, executor propagates uncertainty to stop service acceptance",
+    "Existing actual file/callable/asynchronous join receipt-loss fixtures now assert stopped service and preserve their original effect, charge, history and no-replay invariants",
+    "Normal cancellation, permission denial, exhausted budget, mixed child provider outcomes and positive delegation remain passing",
+    "Nine focused contracts pass with 207 controlled HTTP requests and frozen input/binary sets"
+  ],
+  "failedRuns": {
+    "names": [
+      "process-worker-parent-unrecorded-20261021",
+      "process-worker-parent-unrecorded-stop-20261021",
+      "process-worker-parent-unrecorded-owners-20261021"
+    ],
+    "causes": [
+      "First injected-result gate did not prove required stopped-service state; initial fixture also incorrectly combined idle with unhealthy, while faulted owners intentionally remain non-idle",
+      "Retaining backend uncertainty exposed older file/callable fixture expectations of healthy idle; updated to stopped-service checks with exact effect/no-replay assertions preserved",
+      "Asynchronous join fixture also expected idle after lost receipt; updated to stopped-service check while preserving actual successful job and canonical history assertions"
+    ]
+  },
+  "limitations": [
+    "Synthetic controlled HTTP output, not live-provider acceptance",
+    "Counted parent context, planning, graph/default placement remain open",
+    "Full current regression and installed/rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}

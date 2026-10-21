@@ -29,6 +29,8 @@ public:
     const AgentWorkerLeaseSpec& lease()const noexcept;
     bool alive()const;
     bool admitted()const;
+    // Trusted backend handler observation, never a worker-selected terminal cause.
+    bool outcome_unrecorded()const noexcept;
     // Exact physical observation only, including failed lease/startup recording.
     // Does not assert or write any durable terminal outcome.
     std::uint32_t drain_physical(AgentWorkerChannel::Deadline);

@@ -229,7 +229,11 @@ public:
                     const bool cancelled=cancel.stop_requested();std::string reason=cancelled?"cancelled":Clock::now()>=deadline?"deadline":"dispatch_error";
                     // Only backend model-host events may establish provider failure.
                     if(!cancelled&&reason!="deadline")for(const auto& event:store_.events(request.run_id).get()){if(event.kind!="worker.model.uncertain")continue;const auto data=Json::parse(event.json,nullptr,false);if(data.is_object()&&data.contains("generation")&&data["generation"]==supervisor->lease().generation&&data.contains("failure_code")&&data["failure_code"]=="provider_failure")reason="provider_failure";}
-                    return supervisor->drain_terminal(cancelled?RunState::cancelled:RunState::failed,reason,Clock::now()+5s).run;
+                    const auto observed=supervisor->drain_terminal(cancelled?RunState::cancelled:RunState::failed,reason,Clock::now()+5s).run;
+                    // Preserve the backend's uncertain receipt after physical
+                    // drain; the worker's generic failure cannot clear it.
+                    if(supervisor->outcome_unrecorded()&&!cancelled&&Clock::now()<deadline)throw AgentWorkerReadOutcomeUnrecorded("Backend worker outcome requires ownership recovery");
+                    return observed;
                 }catch(const AgentWorkerChannelTimeout&){}catch(const AgentWorkerRpcTimeout&){}
             }
         }catch(...){const auto original=std::current_exception();physical();std::rethrow_exception(original);}

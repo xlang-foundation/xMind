@@ -1,3 +1,17 @@
+## Parent IPC lost-result handling — 2026-10-21
+
+Supervisor now retains trusted backend outcome_unrecorded independently of worker
+failure intent. After exact worker retirement/drain, this stops service acceptance;
+normal cancellation/deadline precedence remains intact. Injecting parent tool-result
+write failure after two children complete preserves both child histories, the native
+join, five charges and unused parent hold. Parent history remains user-only and its
+read claim uncertain, without replay. Existing file/callable/async receipt-loss
+fixtures now require stopped services and preserve actual effects/results.
+**9/9 focused contracts pass in 72.78 seconds**, with 207 controlled HTTP requests.
+[Scope and all failed/final raw receipts](evidence/process-worker-parent-unrecorded-async-20261021.json).
+Counted parent context, planning, graph/default placement, full regression and
+installed/rendered/live-provider acceptance remain open.
+
 ## Parent IPC mixed child outcomes — 2026-10-21
 
 Actual xmind workers now verify one provider-failed child alongside a completed
