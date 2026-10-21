@@ -1,3 +1,24 @@
+## Private SDK IPC planning bridge boundary — 2026-10-21
+
+AgentWorkerPlanningClient implements the planning execution interface over the
+existing SDK RPC peer. Requests carry attempt/call or accepted resume identity;
+native settings, tool arguments, canonical assistant, capabilities, budgets and
+guidance remain outside the wire. A backend-only binding resolves native owners.
+The binding codec itself does not authorize durable planning.
+
+An actual native contract child verifies invoke/resume/health, exact UTF-8
+controlled receipt/paused facts, scope and strict envelope checks, duplicate
+rejection and fail-stop on unrecorded or forged owner/call acknowledgements.
+Initial11 passed, then review added returned-call identity validation and its
+forged-result test. Final **11/11 pass in97.01s** with frozen2759 project inputs
+and SDK/library/runtime/dependency/135 native binary file sets/hashes.
+[Both gates and original raw evidence](evidence/process-worker-planning-rpc-binding-20261021.json).
+
+The child is a controlled contract image, not production xmind. Durable planning
+authorization, native scheduler binding, product worker assembly, dynamic child
+placement and paused-run handoff remain unfinished. Candidate91b58105/SDK1ff is
+not packaged or installed. Inventory166 local/167 hosted is not a full-suite claim.
+
 ## Native planning execution port for worker integration — 2026-10-21
 
 AgentRunner now depends on DynamicPlanExecution rather than the concrete

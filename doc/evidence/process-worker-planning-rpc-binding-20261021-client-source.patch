@@ -1,0 +1,12 @@
+diff --git a/Tools/ci-native.ps1 b/Tools/ci-native.ps1
+index 1298e7d0..dafa2a12 100644
+--- a/Tools/ci-native.ps1
++++ b/Tools/ci-native.ps1
+@@ -220,6 +220,7 @@ $ciExpected+='native_agent_worker_model_rpc_contract'
+ $ciExpected+='native_agent_worker_graph_no_context_contract'
+ $ciExpected+='native_agent_worker_graph_callable_contract'
+ $ciExpected+='native_agent_worker_graph_remote_contract'
++$ciExpected+='native_agent_worker_planning_rpc_contract'
+ $ciExpected+='native_nested_context_graph_engine_contract'
+ $ciExpected+='native_cli_output_contract'
+ $ciExpected+='native_agent_worker_server_contract'
