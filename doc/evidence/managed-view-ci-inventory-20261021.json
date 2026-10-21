@@ -1,0 +1,17 @@
+{
+  "recordedAt": "2026-10-21T19:08:32.559Z",
+  "sourceRevision": "1ee1b0e9b40dd5b40ba638f824731bbd2a7ef3a8",
+  "ciSourceSha256": "d3f3045a94584639a0aadbeb37a738b9a127b2a9f4fc2059d554ff168203187d",
+  "counts": {
+    "extension": 464,
+    "browser": 161
+  },
+  "trackedClientSources": 64,
+  "completedResultEvidence": "doc/evidence/worker-managed-client-native-reviewed-20261021.json",
+  "completedEvidenceSha256": "15344f4aefcbe1bbaf0c0a375aa9db2db5931b618072851d4ad056120b2cd7fd",
+  "addedTestSourceCommit": "81adc2fbf3670eee9b24a39522f50403c36e9518",
+  "metadataMatchesCompletedResults": true,
+  "runtimeAndAdapterSourcesChanged": false,
+  "hostedCiExecuted": false,
+  "scope": "CI count metadata correction verified against completed frozen local suites; not a new hosted CI run"
+}

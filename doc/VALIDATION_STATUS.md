@@ -1,3 +1,11 @@
+## View CI inventory corrected — 2026-10-21
+
+CI now expects the verified **464 extension / 161 browser tests**, including the
+two existing placement contracts. Its 64 tracked client-source count remains
+unchanged. This metadata-only correction matches the completed local results;
+no new hosted CI run is claimed.
+[Inventory receipt](evidence/managed-view-ci-inventory-20261021.json).
+
 ## Current IPC client adapters and native browser contract — 2026-10-21
 
 **464/464 extension and 161/161 browser adapter tests pass**, followed by the
