@@ -1,0 +1,214 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 9ecb364a..426d0ec1 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -221,6 +221,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_workspace.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_closed_ports.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_read_host.cpp)
++  target_sources(agentflow_agent PRIVATE src/agent_worker_file_host.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_read_context.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_rpc.cpp)
+   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
+diff --git a/Native/include/agentflow/agent_worker_file_host.hpp b/Native/include/agentflow/agent_worker_file_host.hpp
+new file mode 100644
+index 00000000..ba23889b
+--- /dev/null
++++ b/Native/include/agentflow/agent_worker_file_host.hpp
+@@ -0,0 +1,25 @@
++#pragma once
++#include "agentflow/agent_file_tool_host.hpp"
++#include "agentflow/agent_worker_records.hpp"
++#include <mutex>
++
++namespace agentflow {
++struct AgentWorkerFileOutcomeUnrecorded:std::runtime_error {using std::runtime_error::runtime_error;};
++// Backend-owned native file effects. Construction retains actual workspace and
++// guidance capabilities; invocation and approved operation claims stay durable.
++// This port does not enable a worker RPC endpoint or grant dispatch by itself.
++class AgentWorkerFileHost final:public AgentFileToolHost {
++public:
++    AgentWorkerFileHost(PersistenceService&,AgentWorkerLeaseSpec,AgentFileToolOwnerContext,
++        std::chrono::steady_clock::time_point,std::stop_token owner_cancel={});
++    AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
++    const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
++private:
++    PersistenceService& store_;
++    AgentWorkerLeaseSpec lease_;
++    std::chrono::steady_clock::time_point deadline_;
++    std::stop_token owner_cancel_;
++    std::unique_ptr<AgentFileToolHost> native_;
++    std::mutex invocation_;
++};
++}
+diff --git a/Native/src/agent_worker_file_host.cpp b/Native/src/agent_worker_file_host.cpp
+new file mode 100644
+index 00000000..5ff2eb32
+--- /dev/null
++++ b/Native/src/agent_worker_file_host.cpp
+@@ -0,0 +1,62 @@
++#include "agentflow/agent_worker_file_host.hpp"
++#include "agentflow/persistence_service.hpp"
++#include "agentflow/repository_instruction_context.hpp"
++#include "agentflow/edit_executor.hpp"
++#include "agentflow/permission_waiter.hpp"
++#include "nlohmann/json.hpp"
++#include <condition_variable>
++#include <thread>
++
++namespace agentflow {
++namespace {
++AgentFileToolResult failure(const char* code,const char* message){return {false,nlohmann::json{{"error",{{"code",code},{"message",message}}}}.dump()};}
++}
++AgentWorkerFileHost::AgentWorkerFileHost(PersistenceService& store,AgentWorkerLeaseSpec lease,
++    AgentFileToolOwnerContext owner,std::chrono::steady_clock::time_point deadline,std::stop_token cancel)
++    :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
++    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||owner.before_effect)throw std::invalid_argument("Worker file owner differs from captured lease");
++    if((owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker file workspace revision differs");
++    const auto count=owner.workspace_members?owner.workspace_members->folders().size():1;
++    for(std::size_t index=0;index<count;++index)if(!owner.repository_context(index))throw std::invalid_argument("Worker file requires native guidance context");
++    owner.before_effect=[this](const AgentFileToolInvocation& call,const std::string& id,std::stop_token stop){
++        try{store_.claim_agent_worker_file_effect(lease_,call,id,deadline_,owner_cancel_,stop).get();}
++        catch(const AgentWorkerAuthorityCancelled&){throw ToolCancelled("Worker file authority cancelled before effect");}
++        catch(const AgentWorkerAuthorityExpired&){throw ToolCancelled("Worker file authority expired before effect");}
++        catch(const Conflict&){throw ToolAccessDenied("Worker file authority unavailable before effect");}
++    };
++    native_=make_agent_file_tool_host(store_,std::move(owner));
++}
++AgentFileToolResult AgentWorkerFileHost::invoke(const AgentFileToolInvocation& call,std::stop_token caller){
++    std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker file dispatch is already active");
++    if(owner_cancel_.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker file call cancelled before entry");
++    if(std::chrono::steady_clock::now()>=deadline_)throw AgentWorkerAuthorityExpired("Worker file call deadline elapsed before entry");
++    std::stop_source stop;std::stop_callback owner_stop(owner_cancel_,[&]{stop.request_stop();});std::stop_callback caller_stop(caller,[&]{stop.request_stop();});
++    std::mutex timer_mutex;std::condition_variable_any timer_condition;
++    std::jthread timer([&](std::stop_token done){std::unique_lock timer_lock(timer_mutex);timer_condition.wait_until(timer_lock,done,deadline_,[]{return false;});if(!done.stop_requested())stop.request_stop();});
++    store_.claim_agent_worker_file(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
++    store_.start_agent_worker_file(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
++    const auto save=[&](const AgentFileToolResult& result){try{store_.record_agent_worker_file_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerFileOutcomeUnrecorded("Worker file result could not be recorded; stop execution and retain native operation ownership");}};
++    AgentFileToolResult result;std::exception_ptr interrupted;
++    try{result=native_->invoke(call,stop.get_token());}
++    catch(const EditOutcomeUnrecorded&){throw AgentWorkerFileOutcomeUnrecorded("Native file outcome is unrecorded; stop execution and retain operation ownership");}
++    catch(const ToolMutationUncertain&){throw AgentWorkerFileOutcomeUnrecorded("Native file mutation is uncertain; stop execution and retain operation ownership");}
++    catch(const AgentPermissionDenied&){result=failure("agent_permission_denied","The selected agent permission rules denied this resource; the tool was not dispatched");}
++    catch(const PermissionDenied&){result=failure("permission_denied","Controller denied this operation; the requested effect was not dispatched");}
++    catch(const PermissionExpired&){result=failure("permission_expired","Controller approval expired before the requested effect");}
++    catch(const PermissionCancelled&){result=failure("worker_file_cancelled","The backend file call was cancelled; inspect native operation receipts before requesting another change");interrupted=std::make_exception_ptr(ToolCancelled("Worker file call cancelled"));}
++    catch(const ToolCancelled&){result=failure("worker_file_cancelled","The backend file call was cancelled; inspect native operation receipts before requesting another change");interrupted=std::current_exception();}
++    catch(const ToolGuidanceChanged&){result=failure("repository_instructions_required","Updated repository guidance must reach the next model request before another change");}
++    catch(const ToolContentConflict&){result=failure("file_content_conflict","The native file precondition changed; inspect current content before requesting another change");}
++    catch(const ToolEditNeedsPatch&){result=failure("edit_requires_patch","This edit requires apply_patch rather than exact text replacement");}
++    catch(const ToolAccessDenied&){result=failure("file_access_denied","Native file access was denied; inspect operation receipts before requesting another change");}
++    catch(const ToolFileError&){result=failure("native_file_error","The native file call could not access its requested file or directory");}
++    catch(const std::invalid_argument&){result=failure("invalid_tool_arguments","The native file call rejected its argument schema");}
++    catch(...){const auto error=std::current_exception();save(failure("worker_file_failed","The backend file call did not return a result; inspect native operation receipts before requesting another change"));std::rethrow_exception(error);}
++    save(result);if(interrupted)std::rethrow_exception(interrupted);
++    // Late actual outcomes remain facts, but revocation/cancellation cannot
++    // turn them into permission to continue or deliver to a stale worker.
++    store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();
++    if(stop.stop_requested()||std::chrono::steady_clock::now()>=deadline_)throw ToolCancelled("Worker file owner cancelled or expired before delivery");
++    return result;
++}
++}
+diff --git a/Native/tests/agent_file_tool_host_contract.cpp b/Native/tests/agent_file_tool_host_contract.cpp
+index 3d45ca5b..4a171180 100644
+--- a/Native/tests/agent_file_tool_host_contract.cpp
++++ b/Native/tests/agent_file_tool_host_contract.cpp
+@@ -1,6 +1,9 @@
+ // Actual native files, backend permissions and xlang3 SQLite. Run admission,
+ // controller decisions and model-call identities are explicit test inputs.
+ #include "agentflow/agent_file_tool_host.hpp"
++#include "agentflow/agent_worker_file_host.hpp"
++#include "agentflow/agent_model_values.hpp"
++#include "agentflow/xlang_sqlite.hpp"
+ #include "agentflow/patch_tool.hpp"
+ #include "nlohmann/json.hpp"
+ #include <filesystem>
+@@ -44,9 +47,12 @@ void wire_contract(){
+     call.arguments_json.push_back('x');rejects<std::invalid_argument>([&]{call.serialize();});
+     std::cout<<"Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.\n";
+ }
++#include "agent_worker_file_host_fixture.hpp"
+ }
+ int main(int argc,char** argv){if(argc!=3)return 2;try{
+     wire_contract();
++    durable_file_host_contract({argv[1],argv[2]});
++    durable_file_result_failure_contract({argv[1],argv[2]});
+     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"secondary";std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);
+     WorkspaceTools workspace(primary.string()),attached(secondary.string());const auto workspace_id=workspace.identity(),attached_id=attached.identity();
+     WorkspaceToolSet members(workspace_id,7,{{workspace_id,workspace.root_path()},{attached_id,attached.root_path()}});
+diff --git a/Native/tests/agent_worker_file_host_fixture.hpp b/Native/tests/agent_worker_file_host_fixture.hpp
+new file mode 100644
+index 00000000..89f7cfb8
+--- /dev/null
++++ b/Native/tests/agent_worker_file_host_fixture.hpp
+@@ -0,0 +1,70 @@
++// Included inside the file-host contract's anonymous namespace. Actual native
++// mutations and controller decisions; process/model identity is synthetic.
++void durable_file_host_contract(const std::vector<std::string>& imports){
++    Directory directory;const auto primary=directory.path/"worker-primary",secondary=directory.path/"worker-attached";
++    std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);write(primary/"edit.txt","before\n");
++    WorkspaceTools workspace(primary.string()),attached(secondary.string());const auto id=workspace.identity(),attached_id=attached.identity();
++    WorkspaceToolSet members(id,7,{{id,workspace.root_path()},{attached_id,attached.root_path()}});
++    RepositoryInstructionContext guidance(workspace,workspace.repository_instructions(".")),extra_guidance(attached,attached.repository_instructions("."));guidance.prepare();extra_guidance.prepare();
++    const auto database=(directory.path/"worker-state.sqlite").string();const std::string provider=R"({"wire":"chat-completions","model_id":"worker-file-fixture"})";
++    std::string first_id,partial_first,partial_second;
++    {
++        PersistenceService store(database,imports);store.create_session("session","Durable native file host").get();store.start_prompt_run("run","session",R"({"content":"Synthetic model admission for actual approved native file effects"})",RootBudgetSpec{"native.direct-agent",1,id,provider,0,0,8,600000}).get();store.transition("run",RunState::queued,RunState::running).get();
++        store.append_event("run","agent.workspace_membership",Json{{"workspace_id",id},{"revision",7},{"folders",Json::array({{{"folder_id",id},{"root",workspace.root_path()}},{{"folder_id",attached_id},{"root",attached.root_path()}}})}}.dump()).get();
++        AgentFileToolOwnerContext owner;owner.run_id="run";owner.primary_workspace=&workspace;owner.workspace_members=&members;owner.repository_context=[&](std::size_t index){return index==0?&guidance:index==1?&extra_guidance:nullptr;};owner.allowed_tools={"create_file","edit_file","apply_patch","restore_operation"};owner.permission_layers={{{"create_file","blocked.txt","deny"}},{{"*","*","allow"}}};
++        const auto invocation=[&](const std::string& call,const std::string& tool,const Json& args){AgentFileToolInvocation value;value.run_id="run";value.attempt_id="actual-file-model";value.call_id=call;value.workspace_id=id;value.folder_id=id;value.workspace_revision=7;value.tool_name=tool;value.arguments_json=args.dump();return value;};
++        // The trusted fixture creates a real approved seed before model admission,
++        // so the captured restore call can name its actual native operation ID.
++        auto local=make_agent_file_tool_host(store,owner);std::string seed_id;
++        {const auto count=store.operations("run").get().size();Task seed(*local,invocation("fixture-seed","create_file",{{"path","restore.txt"},{"content","seed\n"}}));const auto op=pending(store,count,&seed);seed_id=op.id;store.decide_operation(seed_id,OperationDecision::allow,"fixture-controller").get();need(seed.result.get().success&&read(primary/"restore.txt")=="seed\n","Trusted seed must be one actual approved native file creation");}
++        const auto deadline=std::chrono::steady_clock::now()+30s;
++        const auto lease=store.admit_agent_worker({"native-file-host-generation","run","run",id,7,12345,"134000000000000000","synthetic-file-host-process-identity",provider}).get().spec;
++        std::vector<AgentFileToolInvocation> calls{
++            invocation("actual-create-\xe9\x9b\xaa","create_file",{{"path","created.txt"},{"content","created\n"}}),
++            invocation("actual-edit","edit_file",{{"path","edit.txt"},{"old_text","before\n"},{"new_text","after\n"}}),
++            invocation("actual-restore","restore_operation",{{"operation_id",seed_id}}),
++            invocation("actual-policy-denial","create_file",{{"path","blocked.txt"},{"content","must not exist\n"}}),
++            invocation("actual-controller-denial","create_file",{{"path","denied.txt"},{"content","must not exist\n"}}),
++            invocation("actual-cancel","create_file",{{"path","cancelled.txt"},{"content","must not exist\n"}}),
++            invocation("actual-expired","create_file",{{"path","expired.txt"},{"content","must not exist\n"}}),
++            invocation("actual-folders","apply_patch",{{"patches",Json::array({{{"folder_id",id},{"patch_text","*** Begin Patch\n*** Add File: primary-patch.txt\n+primary actual\n*** End Patch\n"}},{{"folder_id",attached_id},{"patch_text","*** Begin Patch\n*** Add File: attached-patch.txt\n+attached actual\n*** End Patch\n"}}})}}),
++            invocation("actual-revoked-partial","apply_patch",{{"patch_text","*** Begin Patch\n*** Add File: partial-first.txt\n+keep actual first\n*** Add File: partial-second.txt\n+must not exist\n*** End Patch\n"}})
++        };
++        ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{},"[]"};for(const auto& call:calls)response.tool_calls.push_back({call.call_id,call.tool_name,call.arguments_json});
++        store.reserve_agent_worker_model(lease,"actual-file-model",deadline).get();store.start_agent_worker_model(lease,"actual-file-model",deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run","actual-file-model",context_digest("synthetic backend-captured file model input")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-file-fixture",23,5)).get();store.finish_agent_worker_model(lease,"actual-file-model",deadline).get();
++        auto host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);
++        auto invalid_owner=owner;invalid_owner.before_effect=[](const auto&,const auto&,auto){};rejects<std::invalid_argument>([&]{AgentWorkerFileHost invalid(store,lease,invalid_owner,deadline);});
++        auto invalid_lease=lease;++invalid_lease.workspace_revision;rejects<std::invalid_argument>([&]{AgentWorkerFileHost invalid(store,invalid_lease,owner,deadline);});
++        const auto claim=[&](const AgentFileToolInvocation& call){return store.agent_worker_file_claim("run",call.attempt_id,call.call_id).get();};
++        const auto approve=[&](const AgentFileToolInvocation& call){std::cout<<"Durable native file host approved case "<<call.call_id<<std::endl;const auto count=store.operations("run").get().size();Task task(*host,call);const auto op=pending(store,count,&task);const auto before=claim(call);need(before.state=="executing"&&before.operation_ids.empty(),"Pending approval must retain invocation ownership without claiming a mutation");rejects<Conflict>([&]{host->invoke(calls[3]);});store.decide_operation(op.id,OperationDecision::allow,"fixture-controller").get();const auto result=task.result.get();const auto saved=claim(call);need(result.success&&saved.success&&saved.state=="returned"&&saved.actual_output_json==result.output_json&&saved.operation_ids==std::vector<std::string>{op.id}&&store.operation(op.id).get().state==OperationState::succeeded,"Actual native result must be durably bound before delivery");return op.id;};
++        first_id=approve(calls[0]);need(read(primary/"created.txt")=="created\n","Worker-owned create must mutate the actual native file");
++        const auto after_create=store.operations("run").get().size();host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);rejects<Conflict>([&]{host->invoke(calls[0]);});need(store.operations("run").get().size()==after_create&&read(primary/"created.txt")=="created\n","Reconstructed host cannot replay a completed file call");
++        approve(calls[1]);need(read(primary/"edit.txt")=="after\n","Durable owner must perform the actual approved edit");approve(calls[2]);need(!std::filesystem::exists(primary/"restore.txt"),"Durable owner must perform the actual approved inverse change");
++        std::cout<<"Durable native file host case policy denial"<<std::endl;{const auto count=store.operations("run").get().size();const auto denied=host->invoke(calls[3]);need(!denied.success&&Json::parse(denied.output_json)["error"]["code"]=="agent_permission_denied"&&claim(calls[3]).actual_output_json==denied.output_json&&claim(calls[3]).operation_ids.empty()&&store.operations("run").get().size()==count&&!std::filesystem::exists(primary/"blocked.txt"),"Native policy denial must preserve an exact no-effect result without proposing approval");}
++        std::cout<<"Durable native file host case controller denial"<<std::endl;{const auto count=store.operations("run").get().size();Task task(*host,calls[4]);const auto op=pending(store,count,&task);store.decide_operation(op.id,OperationDecision::deny,"fixture-controller").get();const auto result=task.result.get();need(!result.success&&Json::parse(result.output_json)["error"]["code"]=="permission_denied"&&claim(calls[4]).actual_output_json==result.output_json&&claim(calls[4]).operation_ids.empty()&&!std::filesystem::exists(primary/"denied.txt"),"Controller rejection must retain its exact actual denial and no effect claim");}
++        std::cout<<"Durable native file host case pending cancellation"<<std::endl;{const auto count=store.operations("run").get().size();Task task(*host,calls[5]);const auto op=pending(store,count,&task);task.stop.request_stop();rejects<ToolCancelled>([&]{task.result.get();});need(claim(calls[5]).state=="returned"&&!claim(calls[5]).success&&claim(calls[5]).operation_ids.empty()&&store.operation(op.id).get().state==OperationState::cancelled&&!std::filesystem::exists(primary/"cancelled.txt"),"Cancellation during approval must retain a known no-effect result and cancel its native proposal");}
++        std::cout<<"Durable native file host case pre-entry cancellation and expiry"<<std::endl;{std::stop_source stop;stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{host->invoke(calls[6],stop.get_token());});AgentWorkerFileHost expired(store,lease,owner,std::chrono::steady_clock::now()-1ms);rejects<AgentWorkerAuthorityExpired>([&]{expired.invoke(calls[6]);});rejects<NotFound>([&]{claim(calls[6]);});need(!std::filesystem::exists(primary/"expired.txt"),"Cancellation or expiry before entry must create no durable claim or file");}
++        std::cout<<"Durable native file host case cross-folder patch"<<std::endl;{const auto count=store.operations("run").get().size();Task task(*host,calls[7]);const auto first=pending(store,count,&task);store.decide_operation(first.id,OperationDecision::allow,"fixture-controller").get();const auto second=pending(store,count+1,&task);store.decide_operation(second.id,OperationDecision::allow,"fixture-controller").get();const auto result=task.result.get();const auto saved=claim(calls[7]);need(result.success&&saved.success&&saved.actual_output_json==result.output_json&&saved.operation_ids==std::vector<std::string>{first.id,second.id}&&read(primary/"primary-patch.txt")=="primary actual\n"&&read(secondary/"attached-patch.txt")=="attached actual\n","Each actual cross-folder mutation must bind the same admitted model call and its own approved operation");}
++        std::cout<<"Durable native file host case revoked partial patch"<<std::endl;{const auto count=store.operations("run").get().size();Task task(*host,calls[8]);const auto first=pending(store,count,&task);partial_first=first.id;store.decide_operation(first.id,OperationDecision::allow,"fixture-controller").get();const auto second=pending(store,count+1,&task);partial_second=second.id;need(read(primary/"partial-first.txt")=="keep actual first\n"&&claim(calls[8]).operation_ids==std::vector<std::string>{first.id},"First actual patch result must precede controlled authority revocation");store.retire_agent_worker(lease.generation,"worker_exit").get();store.decide_operation(second.id,OperationDecision::allow,"fixture-controller").get();rejects<Conflict>([&]{task.result.get();});const auto saved=claim(calls[8]);need(saved.state=="returned"&&!saved.success&&Json::parse(saved.actual_output_json)["state"]=="partial"&&saved.operation_ids==std::vector<std::string>{first.id}&&store.operation(first.id).get().state==OperationState::succeeded&&store.operation(second.id).get().state==OperationState::failed&&!std::filesystem::exists(primary/"partial-second.txt"),"Revocation must block the next approved effect, retain prior actual success and refuse stale delivery");}
++        need(store.run_history("run").get().size()==1&&store.root_budget("run").get().model_calls_reserved==1,"Host qualification must not fabricate canonical tool history or another model call");store.transition("run",RunState::running,RunState::cancelled).get();store.close();
++    }
++    {PersistenceService store(database,imports);need(store.operation(first_id).get().state==OperationState::succeeded&&store.operation(partial_first).get().state==OperationState::succeeded&&store.operation(partial_second).get().state==OperationState::failed&&read(primary/"created.txt")=="created\n"&&read(primary/"edit.txt")=="after\n"&&!std::filesystem::exists(primary/"restore.txt")&&read(secondary/"attached-patch.txt")=="attached actual\n","SQLite restart must preserve actual durable file receipts and native bytes");store.close();}
++    std::cout<<"Durable native file host passed actual approved create/edit/restore, cross-folder patches, policy/controller denials, cancellation, reconstruction replay rejection and revoked partial effects with SQLite restart. Synthetic process/model identity; no file RPC or child execution.\n";
++}
++void durable_file_result_failure_contract(const std::vector<std::string>& imports){
++    Directory directory;const auto root=directory.path/"workspace";std::filesystem::create_directory(root);WorkspaceTools workspace(root.string());RepositoryInstructionContext context(workspace,workspace.repository_instructions("."));context.prepare();
++    const auto database=(directory.path/"state.sqlite").string();const std::string provider=R"({"wire":"chat-completions","model_id":"worker-file-fixture"})";std::string operation_id;
++    {
++        PersistenceService store(database,imports);store.create_session("session","File result write failure").get();store.start_prompt_run("run","session",R"({"content":"Owned native file write and failed result acknowledgement"})",RootBudgetSpec{"native.direct-agent",1,workspace.identity(),provider,0,0,8,600000}).get();store.transition("run",RunState::queued,RunState::running).get();store.append_event("run","agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1}}.dump()).get();
++        const auto deadline=std::chrono::steady_clock::now()+20s;const auto lease=store.admit_agent_worker({"file-result-failure-generation","run","run",workspace.identity(),1,12345,"134000000000000000","synthetic-file-result-failure-process",provider}).get().spec;
++        AgentFileToolInvocation call;call.run_id="run";call.attempt_id="file-result-model";call.call_id="actual-write";call.workspace_id=workspace.identity();call.folder_id=workspace.identity();call.workspace_revision=1;call.tool_name="create_file";call.arguments_json=R"({"path":"actual.txt","content":"actual before acknowledgement failure\n"})";
++        ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{call.call_id,call.tool_name,call.arguments_json}},"[]"};store.reserve_agent_worker_model(lease,call.attempt_id,deadline).get();store.start_agent_worker_model(lease,call.attempt_id,deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run",call.attempt_id,context_digest("synthetic file result failure request")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-file-fixture",23,5)).get();store.finish_agent_worker_model(lease,call.attempt_id,deadline).get();
++        AgentFileToolOwnerContext owner;owner.run_id="run";owner.primary_workspace=&workspace;owner.repository_context=[&](std::size_t index){return index==0?&context:nullptr;};owner.allowed_tools={"create_file"};
++        AgentWorkerFileHost host(store,lease,owner,deadline);XlangSqlite sql(database,imports);sql.execute("CREATE TRIGGER fixture_file_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_extract(NEW.payload,'$.state')='returned' BEGIN SELECT RAISE(ABORT,'fixture_file_result_abort'); END");
++        {Task task(host,call);const auto op=pending(store,0,&task);operation_id=op.id;store.decide_operation(op.id,OperationDecision::allow,"fixture-controller").get();rejects<AgentWorkerFileOutcomeUnrecorded>([&]{task.result.get();});}
++        sql.execute("DROP TRIGGER fixture_file_result_abort");const auto saved=store.agent_worker_file_claim("run",call.attempt_id,call.call_id).get();need(saved.state=="executing"&&saved.operation_ids==std::vector<std::string>{operation_id}&&saved.actual_output_json.empty()&&store.operation(operation_id).get().state==OperationState::succeeded&&read(root/"actual.txt")=="actual before acknowledgement failure\n","Failed result acknowledgement must retain the actual mutation and unresolved call without inventing a returned result");
++        AgentWorkerFileHost rebuilt(store,lease,owner,deadline);rejects<Conflict>([&]{rebuilt.invoke(call);});need(store.operations("run").get().size()==1,"Unrecorded result cannot authorize replay after host reconstruction");store.retire_agent_worker(lease.generation,"worker_exit").get();need(store.agent_worker_file_claim("run",call.attempt_id,call.call_id).get().state=="uncertain","Retirement must preserve unresolved actual result ownership");store.transition("run",RunState::running,RunState::cancelled).get();store.close();
++    }
++    {PersistenceService store(database,imports);need(store.operation(operation_id).get().state==OperationState::succeeded&&store.agent_worker_file_claim("run","file-result-model","actual-write").get().state=="uncertain"&&read(root/"actual.txt")=="actual before acknowledgement failure\n","Restart must preserve known native success alongside unresolved worker acknowledgement");store.close();}
++    std::cout<<"Durable native file result write failure retains actual bytes, successful operation and unresolved ownership without replay or fabricated acknowledgement.\n";
++}

@@ -1,6 +1,9 @@
 // Actual native files, backend permissions and xlang3 SQLite. Run admission,
 // controller decisions and model-call identities are explicit test inputs.
 #include "agentflow/agent_file_tool_host.hpp"
+#include "agentflow/agent_worker_file_host.hpp"
+#include "agentflow/agent_model_values.hpp"
+#include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/patch_tool.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -44,9 +47,12 @@ void wire_contract(){
     call.arguments_json.push_back('x');rejects<std::invalid_argument>([&]{call.serialize();});
     std::cout<<"Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.\n";
 }
+#include "agent_worker_file_host_fixture.hpp"
 }
 int main(int argc,char** argv){if(argc!=3)return 2;try{
     wire_contract();
+    durable_file_host_contract({argv[1],argv[2]});
+    durable_file_result_failure_contract({argv[1],argv[2]});
     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"secondary";std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);
     WorkspaceTools workspace(primary.string()),attached(secondary.string());const auto workspace_id=workspace.identity(),attached_id=attached.identity();
     WorkspaceToolSet members(workspace_id,7,{{workspace_id,workspace.root_path()},{attached_id,attached.root_path()}});

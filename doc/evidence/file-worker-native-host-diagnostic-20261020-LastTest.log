@@ -1,0 +1,20 @@
+Start testing: Oct 20 21:06 Pacific Daylight Time
+----------------------------------------------------------
+100/161 Testing: native_agent_file_tool_host_contract
+100/161 Test: native_agent_file_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_file_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_file_tool_host_contract" start time: Oct 20 21:06 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.
+Native file outcome is unrecorded; stop execution and retain operation ownership
+<end of output>
+Test time =   1.37 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_file_tool_host_contract" end time: Oct 20 21:06 Pacific Daylight Time
+"native_agent_file_tool_host_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 20 21:06 Pacific Daylight Time

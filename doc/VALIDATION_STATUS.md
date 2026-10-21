@@ -1,3 +1,35 @@
+## Durable native file host — 2026-10-20
+
+The backend file host now composes native workspace/guidance/permission handling
+with durable call entry, per-operation authority and result receipts. Actual
+approved create, edit, restore and cross-folder patches persist their results
+before delivery. Reconstructed hosts cannot replay completed or unacknowledged
+calls. Cancellation and expired entry cannot grant an effect; revocation during
+a later patch approval retains the first actual success, blocks the next file
+and refuses stale delivery.
+
+A forced worker-result write failure leaves actual created bytes and the
+successful native operation intact, with the call unresolved rather than a
+fabricated acknowledgement. Retirement and SQLite restart preserve those facts.
+The serial Release build and **61/61 focused contracts pass in 184.13 seconds**,
+with 2702 project inputs and all SDK/library/runtime/dependency/binary sets
+frozen and verified unchanged.
+[Scope and raw evidence](evidence/file-worker-native-host-focused-20261020.json).
+
+The first [failed diagnostic](evidence/file-worker-native-host-diagnostic-20261020.json)
+and [call-labelled diagnostic](evidence/file-worker-native-host-calls-diagnostic-20261020.json)
+are retained verbatim. Expected lease rejection originally reached the native
+patch coordinator as an unknown exception. The host now translates it to the
+existing native pre-effect denial vocabulary, retaining truthful partial
+receipts. Deterministic entry checks also remove a timer/expiry classification
+race; queued and per-effect authority checks remain in place.
+
+The new fixture mutates actual native files using controlled model/process
+identities. It does not execute a child worker or live provider. File RPC,
+mixed canonical tool turns and production coding-worker composition remain
+unfinished; process-read remains read-only. No new full-suite, installed,
+rendered or live-provider acceptance is claimed.
+
 ## Durable worker file claims — 2026-10-20
 
 Backend-only file claims now bind the exact current lease, ordinary root,

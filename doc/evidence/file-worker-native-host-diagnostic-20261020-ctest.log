@@ -1,0 +1,14 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 100: native_agent_file_tool_host_contract
+1/1 Test #100: native_agent_file_tool_host_contract ...***Failed    1.37 sec
+Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.
+Native file outcome is unrecorded; stop execution and retain operation ownership
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.39 sec
+
+The following tests FAILED:
+	100 - native_agent_file_tool_host_contract (Failed)
+Errors while running CTest

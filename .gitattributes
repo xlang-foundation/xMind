@@ -194,3 +194,5 @@ doc/evidence/file-effect-owner-authority-*.log -text whitespace=-blank-at-eol,-b
 doc/evidence/file-invocation-wire-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/file-worker-ledger-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/file-worker-ledger-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/file-worker-native-host-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/file-worker-native-host-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

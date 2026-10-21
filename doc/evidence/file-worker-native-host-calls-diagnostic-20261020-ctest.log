@@ -1,0 +1,23 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 100: native_agent_file_tool_host_contract
+1/1 Test #100: native_agent_file_tool_host_contract ...***Failed    1.32 sec
+Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.
+Durable native file host approved case actual-create-雪
+Durable native file host approved case actual-edit
+Durable native file host approved case actual-restore
+Durable native file host case policy denial
+Durable native file host case controller denial
+Durable native file host case pending cancellation
+Durable native file host case pre-entry cancellation and expiry
+Durable native file host case cross-folder patch
+Durable native file host case revoked partial patch
+Native file outcome is unrecorded; stop execution and retain operation ownership
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.34 sec
+
+The following tests FAILED:
+	100 - native_agent_file_tool_host_contract (Failed)
+Errors while running CTest

@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-21T04:07:41.766Z",
+  "gate": {
+    "recordedAt": "2026-10-21T04:06:33.423Z",
+    "sourceParent": "a060591def258a20112ee04f741535190eab858d",
+    "sourcePatchSha256": "28793c37b73d75b153948a493a27575e62bd7323239119933fac8dc66cc6ac17",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 41604,
+      "launchedAt": "2026-10-21T04:05:42.768Z",
+      "completedAt": "2026-10-21T04:06:25.070Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "713e653bc291916f2c21ce8912d8c38ecd6f9b167a9f10bb7a823fc709f07ff2"
+    },
+    "test": {
+      "pid": 10396,
+      "launchedAt": "2026-10-21T04:06:29.449Z",
+      "completedAt": "2026-10-21T04:06:30.892Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "f30df8d5ddc6b3326d8c6f1abd1a3fa88d0219e1c9c717652aa340301b8903c5"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 1.39,
+    "projectFiles": 2702,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "de78286017ef44c106544ef38b4c3ce36594f9b1ea14d0fa66b127069fa1b5d1",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": false
+  },
+  "files": {
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-build.log": "713e653bc291916f2c21ce8912d8c38ecd6f9b167a9f10bb7a823fc709f07ff2",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-build-terminal.json": "3caa4c53a34d027c50e02c1e52d9562abaa13954fd0722a823615f85d77177c7",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-ctest.log": "f30df8d5ddc6b3326d8c6f1abd1a3fa88d0219e1c9c717652aa340301b8903c5",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-ctest-terminal.json": "ec8153ab62fa005ca6df9c7684365f9f20de7a2c599863cb375b73ff0fa7e3ae",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-LastTest.log": "cbd34cac07b0ef3efd8d05d4e268f56e595ea6ece73e3ab4b0713e08280b6ba8",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-test-inventory.json": "bfebb44dd6b4a41b7c7212aeda58821cb6f506a045d10b59a3e4825679e70930",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-gate.json": "e14a3597aae2dc3c5e6879f42f8d062551b58de383086206b6700bdb7b6d2235",
+    "doc/evidence/file-worker-native-host-diagnostic-20261020-source.patch": "28793c37b73d75b153948a493a27575e62bd7323239119933fac8dc66cc6ac17"
+  },
+  "passed": false,
+  "observation": "Target-only build succeeded; expanded file-host contract failed with Native file outcome is unrecorded before its final durable-host marker.",
+  "diagnosis": "Call-labelled diagnostics reach revoked partial patch after create/edit/restore, denials, cancellation, expiry and cross-folder effects. The backend callback forwarded a raw Conflict for revoked lease authority. Native PatchExecutor correctly treats an unknown exception as unrecorded coordination. Translate expected persistence authority rejection into native ToolAccessDenied before mutation, preserving the actual prior success and known failed second operation.",
+  "separateReviewFinding": "Expired-at-entry host can race its timer into cancellation before the persistence deadline check; add deterministic entry checks while retaining actor and per-effect revalidation.",
+  "limitations": [
+    "Target-only build does not qualify the unified server image",
+    "Controlled native file fixture uses synthetic process/model identity; no worker RPC or paid model inference"
+  ]
+}

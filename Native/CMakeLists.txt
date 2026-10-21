@@ -221,6 +221,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_workspace.cpp)
   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_closed_ports.cpp)
   target_sources(agentflow_agent PRIVATE src/agent_worker_read_host.cpp)
+  target_sources(agentflow_agent PRIVATE src/agent_worker_file_host.cpp)
   target_sources(agentflow_agent PRIVATE src/agent_worker_read_context.cpp)
   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_rpc.cpp)
   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
