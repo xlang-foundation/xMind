@@ -1,0 +1,69 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:08:27.066Z",
+    "sourceParent": "c9733f856fcd67c170ddc06109beb2907b7bf89f",
+    "sourcePatchSha256": "e1b4f785141a0b3ef578953e8f8c8e91d4830d72b91e0a3740863d032ba9bc9c",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 47064,
+      "launchedAt": "2026-10-21T13:05:57.772Z",
+      "completedAt": "2026-10-21T13:07:15.614Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a707d94f460a022f4ee233dcc30094af36aa98d8f4aec10c0f39dceb23df8b7a"
+    },
+    "test": {
+      "pid": 60752,
+      "launchedAt": "2026-10-21T13:07:18.745Z",
+      "completedAt": "2026-10-21T13:08:24.167Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8368e9083b49052c68282ebb58344ccd541644d892bb7cda11d6dd8826a20ccb"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 65.37,
+    "projectFiles": 2744,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "ab718935074e6a21b81fea1b3dd90c825e998680d4df680a2a99553a0eeb5f7d",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-context-failure-retirement-20261021-build.log": "a707d94f460a022f4ee233dcc30094af36aa98d8f4aec10c0f39dceb23df8b7a",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-build-terminal.json": "8614fcfc1c4de0f2484885e554f2c7c518118acfbf2f1e33a494599a519370c1",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-ctest.log": "8368e9083b49052c68282ebb58344ccd541644d892bb7cda11d6dd8826a20ccb",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-ctest-terminal.json": "ce94cd0d429dac87981241d764a342d2dd8773d51c62de99a897046e1bcfd779",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-LastTest.log": "e1bfea38e51bc202dfeb500d65978d5a83aba13c7deae1d4f4f65b78759a8079",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-gate.json": "b6b2419e518a09c44d49a2392d48c97252e9d3210c2f3dc09d0ff14f372b5685",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-source.patch": "e1b4f785141a0b3ef578953e8f8c8e91d4830d72b91e0a3740863d032ba9bc9c",
+    "doc/evidence/process-worker-context-failure-retirement-20261021-binaries-before-test.json": "ef0ad57cce33ca76eece90ab5874d5525cf5ec6e1c55afbfcfdeb4cb4d2f2827"
+  },
+  "verified": [
+    "Physically drained worker termination closes only unfinished typed inference members and logical steps for the exact ordinary root in the same native repository transaction",
+    "Completed inference facts, original charges and captured backend model receipts remain intact; interruption event records exact step/member counts without replay",
+    "Four actual unified xmind worker cases cover independent HTTP count failure, count cancellation, inference failure and inference cancellation",
+    "Controller cancellation waits until an independent HTTP status request confirms the actual count/inference request arrived; peer observes both aborted held requests",
+    "Count failure/cancellation has zero inference charges; dispatched failure/cancellation retains one charge and uncertain model claim with no invented response",
+    "Original user-only history and no effect approvals remain; embedded xlang3 SQLite proves no active count/compaction/inference ownership and exact interrupted typed members after physical retirement",
+    "Seven focused contracts pass with 153 controlled requests and frozen source, SDK, library, dependency and all 133 native binary sets"
+  ],
+  "limitations": [
+    "Automatic overflow recovery, context compaction failure/cancellation and unrecorded context outcome handling still need actual-worker work",
+    "Selected contracts are not full/broader regression, installation, rendered or live-provider acceptance",
+    "Delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}

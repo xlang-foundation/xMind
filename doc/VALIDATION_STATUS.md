@@ -1,3 +1,25 @@
+## Worker context failure and cancellation retirement — 2026-10-21
+
+Worker termination now retires unfinished typed inference members and logical
+steps for its exact ordinary root in the same repository transaction as model
+interruption and terminal retirement. Completed facts, captured model receipts
+and charges remain intact; no request is replayed.
+
+Four actual unified xmind worker cases verify token-count and inference
+failures/cancellation. Cancellation waits for an independent HTTP observation
+of the actual request. Count failures carry no inference charge; failed model
+dispatch retains its charge and uncertainty. Original history and no-effect
+approvals remain unchanged. Embedded xlang3 SQLite checks no active context
+records and exact typed interruption after physical child retirement.
+
+**7/7 focused contracts pass in 65.37 seconds**, with 153 controlled HTTP
+requests, 2744 project inputs and complete SDK/library/dependency/133-binary
+sets/hashes frozen. [Scope and raw evidence](evidence/process-worker-context-failure-retirement-20261021.json).
+
+Automatic overflow recovery, compaction failure/cancellation and unrecorded
+context outcomes remain open, as do delegation/planning, graph/default
+placement, full regression and installed/rendered/live-provider acceptance.
+
 ## Actual worker context compaction — 2026-10-21
 
 The actual unified xmind worker now verifies preemptive compaction through the

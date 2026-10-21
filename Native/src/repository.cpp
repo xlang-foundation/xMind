@@ -3749,6 +3749,12 @@ Run Repository::terminate_agent_worker(const AgentWorkerLeaseSpec& lease,RunStat
         changed_one(db.execute("UPDATE agent_model_call_reservations SET state='interrupted' WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state=?",{lease.root_run_id,text(row[0]),lease.owner_run_id,text(row[2])}));
         impl_->event(current.id,"budget.model_call.interrupted",Json{{"root_run_id",lease.root_run_id},{"attempt_id",text(row[0])},{"role",text(row[1])},{"was_started",text(row[2])=="started"},{"generation",lease.generation},{"reason",reason}}.dump());
     }
+    // The caller has physically drained this exact child and joined its
+    // transports. Preserve completed facts; close only unfinished typed members
+    // owned by this ordinary root. Charges and captured model receipts remain.
+    const auto context_members=db.execute("UPDATE inference_attempt_members SET outcome='interrupted',failure_code='interrupted' WHERE outcome IS NULL AND step_id IN (SELECT id FROM inference_steps WHERE root_run_id=? AND owner_run_id=? AND state IN ('reserved','started','context_overflow') AND successful_attempt_id IS NULL)",{lease.root_run_id,lease.owner_run_id}).affected_rows;
+    const auto context_steps=db.execute("UPDATE inference_steps SET state='interrupted' WHERE root_run_id=? AND owner_run_id=? AND state IN ('reserved','started','context_overflow') AND successful_attempt_id IS NULL",{lease.root_run_id,lease.owner_run_id}).affected_rows;
+    if(context_members||context_steps)impl_->event(current.id,"worker.context.interrupted",Json{{"generation",lease.generation},{"members",context_members},{"steps",context_steps},{"reason",reason},{"replayed",false}}.dump());
     impl_->retire_worker(lease.generation,outcome==RunState::cancelled?"cancelled":reason=="worker_exit"?"worker_exit":"dispatch_error");
     impl_->event(current.id,"run."+state_name(outcome),Json{{"reason",reason},{"generation",lease.generation}}.dump());
     tx.commit();current.state=outcome;return current;
