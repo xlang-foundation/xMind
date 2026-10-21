@@ -1,0 +1,216 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 426d0ec1..42cde9ea 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -224,6 +224,7 @@ add_library(agentflow_agent STATIC src/agent_worker_model_host.cpp src/agent_bac
+   target_sources(agentflow_agent PRIVATE src/agent_worker_file_host.cpp)
+   target_sources(agentflow_agent PRIVATE src/agent_worker_read_context.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_read_rpc.cpp)
++  target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_file_rpc.cpp)
+   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_model_rpc PUBLIC agentflow_worker_rpc agentflow_agent agentflow_models)
+   add_library(agentflow_worker_journal_rpc STATIC src/agent_worker_journal_rpc.cpp)
+diff --git a/Native/include/agentflow/agent_worker_file_rpc.hpp b/Native/include/agentflow/agent_worker_file_rpc.hpp
+new file mode 100644
+index 00000000..4e10b7d3
+--- /dev/null
++++ b/Native/include/agentflow/agent_worker_file_rpc.hpp
+@@ -0,0 +1,14 @@
++#pragma once
++#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_file_host.hpp"
++namespace agentflow {
++class AgentWorkerFileClient final:public AgentFileToolHost {
++public:
++    explicit AgentWorkerFileClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
++private:AgentWorkerRpcPeer& peer_;
++};
++// Only the durable backend host can bind this endpoint. A local file host or
++// worker-selected lease cannot bypass per-call and per-operation admission.
++AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost&,const AgentWorkerScope&);
++}
+diff --git a/Native/src/agent_worker_file_rpc.cpp b/Native/src/agent_worker_file_rpc.cpp
+new file mode 100644
+index 00000000..5b8c9995
+--- /dev/null
++++ b/Native/src/agent_worker_file_rpc.cpp
+@@ -0,0 +1,33 @@
++#include "agentflow/agent_worker_file_rpc.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost& host,const AgentWorkerScope& scope){
++    const auto& lease=host.lease();
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("File RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="file.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentFileToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentWorkerFileOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++AgentFileToolResult AgentWorkerFileClient::invoke(const AgentFileToolInvocation& call,std::stop_token cancel){
++    try{const auto bytes=peer_.call("file.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
++        if(value.size()!=2||!value.at("success").is_boolean()||!value.at("output_json").is_string())throw ModelProtocolError("Invalid worker file result");
++        return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}
++    catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker file RPC cancelled");}
++    catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker file RPC deadline elapsed");}
++    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker file RPC rejected its captured call");if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker file RPC cancelled or expired");if(error.code()=="outcome_unrecorded")throw AgentWorkerFileOutcomeUnrecorded("Worker file result is unrecorded; no replay is authorized");throw ModelProtocolError("Worker file RPC failed");}
++    catch(const McpProtocolError&){throw ModelProtocolError("Invalid worker file result");}
++    catch(const Json::exception&){throw ModelProtocolError("Invalid worker file result");}
++}
++}
+diff --git a/Native/tests/agent_worker_file_fixture.hpp b/Native/tests/agent_worker_file_fixture.hpp
+new file mode 100644
+index 00000000..57debf89
+--- /dev/null
++++ b/Native/tests/agent_worker_file_fixture.hpp
+@@ -0,0 +1,75 @@
++#include "agentflow/agent_worker_file_rpc.hpp"
++#include "agentflow/create_executor.hpp"
++#include "agentflow/repository_instruction_context.hpp"
++#include <fstream>
++#include <thread>
++namespace worker_file_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
++inline void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
++template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected actual child file RPC rejection");}
++inline std::string read(const std::filesystem::path& path){std::ifstream input(path,std::ios::binary);check(bool(input),"Actual native RPC file missing");return {std::istreambuf_iterator<char>(input),{}};}
++inline AgentFileToolInvocation invocation(const AgentWorkerScope& scope,const ModelToolCall& tool){AgentFileToolInvocation call;call.run_id=scope.run_id;call.attempt_id="file-attempt";call.call_id=tool.id;call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=Json::parse(tool.arguments_json).value("folder_id",scope.workspace_id);call.tool_name=tool.name;call.arguments_json=tool.arguments_json;return call;}
++inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
++    AgentWorkerFileClient files(peer);AgentWorkerJournalClient journal(peer);
++    if(method=="fixture.stale"){AgentFileToolInvocation stale;stale.run_id=peer.scope().run_id;stale.attempt_id="file-attempt";stale.call_id="actual-file";stale.workspace_id=peer.scope().workspace_id;stale.folder_id=stale.workspace_id;stale.workspace_revision=peer.scope().workspace_revision;stale.tool_name="create_file";stale.arguments_json=R"({"path":"actual.txt","content":"never replay"})";rejects<Conflict>([&]{files.invoke(stale);});return "stale-file-rejected";}
++    const auto input=decode_agent_model_request(peer.call("fixture.file_input",""));journal.reserve_model_call("file-attempt");journal.start_model_call("file-attempt");AgentWorkerModelClient model(peer);const auto response=model.complete("file-attempt",input,[](const ModelEvent&){});
++    check(response.finish_reason=="tool_calls"&&response.tool_calls.size()==1&&response.tool_calls[0].id=="actual-file"&&response.tool_calls[0].name=="create_file","File RPC must use the independent provider's actual tool call");const auto call=invocation(peer.scope(),response.tool_calls[0]);
++    rejects<Conflict>([&]{files.invoke(call);});journal.finish_model_call("file-attempt");
++    for(unsigned field=0;field<7;++field){auto invalid=call;if(field==0)invalid.call_id="forged";if(field==1)invalid.arguments_json=R"({"path":"forged.txt","content":"must not write"})";if(field==2)invalid.folder_id="foreign-folder";if(field==3)++invalid.workspace_revision;if(field==4)invalid.run_id="foreign-run";if(field==5)invalid.workspace_id="foreign-workspace";if(field==6)invalid.tool_name="edit_file";rejects<Conflict>([&]{files.invoke(invalid);});}
++    for(const auto* field:{"approval_id","operation_id","root","owner_policy"}){auto malformed=Json::parse(call.serialize());malformed[field]="forged";rejects<AgentWorkerRpcRemoteError>([&]{peer.call("file.invoke",malformed.dump());});}
++    const auto wire=call.serialize();rejects<AgentWorkerRpcRemoteError>([&]{peer.call("file.invoke",wire.substr(0,wire.size()-1)+",\"call_id\":\"actual-file\"}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("file.prepare",wire);});
++    if(mode=="file_cancel"){
++        std::stop_source stop;auto task=std::async(std::launch::async,[&]{return files.invoke(call,stop.get_token());});struct Stop{std::stop_source& stop;~Stop(){stop.request_stop();}} guard{stop};
++        check(peer.call("fixture.await_file_pending","")=="pending","Actual file proposal must precede cancellation");stop.request_stop();rejects<ToolCancelled>([&]{task.get();});check(peer.call("fixture.await_file_cancelled","")=="cancelled","Backend must retain actual cancellation before the child returns");return Json{{"pid",GetCurrentProcessId()},{"cancelled",true}}.dump();
++    }
++    if(mode=="file_unrecorded"){rejects<AgentWorkerFileOutcomeUnrecorded>([&]{files.invoke(call);});return Json{{"pid",GetCurrentProcessId()},{"unrecorded",true}}.dump();}
++    const auto result=files.invoke(call);
++    rejects<Conflict>([&]{journal.commit_read_turn("file-attempt");});rejects<Conflict>([&]{journal.reserve_model_call("premature-file-next");});
++    if(mode=="file_denied")check(!result.success&&Json::parse(result.output_json).at("error").at("code")=="agent_permission_denied","Actual native policy denial must cross file RPC unchanged");
++    else check(result.success,"Actual approved native file RPC must succeed");
++    if(mode=="file_create"){check(peer.call("fixture.rebuild_file_host","")=="rebuilt","Backend fixture must rebuild its durable file host");rejects<Conflict>([&]{files.invoke(call);});}
++    return Json{{"pid",GetCurrentProcessId()},{"success",result.success},{"actual_output_json",result.output_json}}.dump();
++}
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::string& mode,const std::vector<std::string>& imports){
++    const auto directory=folder/mode;check(std::filesystem::create_directory(directory),"Actual file RPC requires a fresh owned workspace");WorkspaceTools workspace(directory.string());RepositoryInstructionContext context(workspace,workspace.repository_instructions("."));context.prepare();
++    const std::string id="rpc-"+mode,generation="generation-"+mode,identity=R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})",marker="FILE_RPC_MARKER_"+std::to_string(std::random_device{}());const auto deadline=Clock::now()+20s;
++    store.create_session(id,"Actual child file RPC").get();store.start_prompt_run(id,id,Json{{"content","Native child file RPC "+mode+". "+marker}}.dump(),RootBudgetSpec{"native.direct-agent",1,workspace.identity(),identity,0,0,8,600000}).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1}}.dump()).get();
++    auto worker=AgentWorkerProcess::launch(image,{id,id,workspace.identity(),generation,1},deadline);check(worker->pid()!=GetCurrentProcessId(),"File proxy must execute in an actual distinct child");const auto lease=store.admit_agent_worker({generation,id,id,workspace.identity(),1,worker->pid(),std::to_string(worker->creation_time()),worker->executable_identity(),identity}).get().spec;
++    std::cout<<"Actual child file RPC "<<mode<<" child_pid="<<worker->pid()<<" creation_time="<<worker->creation_time()<<std::endl;
++    AgentFileToolOwnerContext owner;owner.run_id=id;owner.primary_workspace=&workspace;owner.repository_context=[&](std::size_t index){return index==0?&context:nullptr;};owner.allowed_tools={"create_file"};if(mode=="file_denied")owner.permission_layers={{{"create_file","**","deny"}}};
++    auto host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);auto dispatch=bind_agent_worker_file_rpc(*host,worker->channel().scope());auto foreign=worker->channel().scope();foreign.generation="foreign";rejects<Conflict>([&]{bind_agent_worker_file_rpc(*host,foreign);});
++    ModelRequest input;input.include_usage=true;input.messages.push_back({MessageRole::user,"Native child file RPC "+mode+". "+marker});input.tools={CreateExecutor::definition()};ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
++    AgentWorkerModelHost model(store,lease,config,input.tools,AgentWorkerModelPolicy{true,{}},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);auto model_rpc=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_rpc=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
++    const auto claim=[&]{return store.agent_worker_file_claim(id,"file-attempt","actual-file").get();};std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
++    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++        if(method=="fixture.file_input")return encode_agent_model_request(input);
++        if(method=="fixture.rebuild_file_host"){host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);dispatch=bind_agent_worker_file_rpc(*host,worker->channel().scope());return "rebuilt";}
++        if(method=="fixture.await_file_pending"||method=="fixture.await_file_cancelled"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){const auto operations=store.operations(id).get();if(method=="fixture.await_file_pending"&&operations.size()==1&&operations[0].state==OperationState::awaiting_approval)return "pending";if(method=="fixture.await_file_cancelled"&&operations.size()==1&&operations[0].state==OperationState::cancelled&&claim().state=="returned")return "cancelled";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual file RPC approval/cancellation deadline");}
++        if(method.starts_with("model."))return model_rpc(method,payload,std::move(sink),cancel);
++        if(method.starts_with("journal."))return journal_rpc(method,payload,std::move(sink),cancel);
++        if(!method.starts_with("file."))throw AgentWorkerRpcRemoteError("unsupported");const auto result=dispatch(method,payload,std::move(sink),cancel);
++        if(mode=="file_delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;
++    },deadline);
++    std::unique_ptr<XlangSqlite> sql;if(mode=="file_unrecorded"){sql=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);sql->execute("CREATE TRIGGER fixture_file_rpc_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-file_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_file_rpc_result_abort'); END");}
++    worker->channel().send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
++    struct Cleanup{AgentWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
++    if(mode!="file_denied"&&mode!="file_cancel"){
++        const auto until=Clock::now()+5s;std::optional<Operation> pending;
++        while(Clock::now()<until){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=op;if(pending)break;if(task.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Actual file child returned before approval: "+task.get());std::this_thread::sleep_for(5ms);}
++        check(pending.has_value()&&claim().operation_ids.empty()&&!std::filesystem::exists(directory/"actual.txt"),"Actual child must await controller approval without claiming a mutation");store.decide_operation(pending->id,OperationDecision::allow,"fixture-controller").get();
++    }
++    if(mode=="file_delivery"){
++        check(ready.wait_for(5s)==std::future_status::ready,"Actual file receipt must precede lost delivery");const auto saved=claim();check(saved.state=="returned"&&saved.success&&saved.operation_ids.size()==1&&read(directory/"actual.txt")==marker+"\n","Native file bytes and exact receipt must be durable before reply");const auto actual=decode_agent_model_completion(store.agent_worker_model_claim(id,"file-attempt").get().actual_response_json);AgentWorkerFileHost rebuilt(store,lease,owner,deadline);rejects<Conflict>([&]{rebuilt.invoke(invocation(worker->channel().scope(),actual.tool_calls.at(0)));});
++        worker->terminate();release.set_value();rejects<AgentWorkerRpcClosed>([&]{task.get();});peer.stop();check(worker->wait(Clock::now()+5s)==1,"Lost file delivery must drain its exact owned child");check(claim().actual_output_json==saved.actual_output_json&&claim().output_binding==saved.output_binding&&store.operations(id).get().size()==1,"Worker death cannot erase the durable file result or replay its effect");store.retire_agent_worker(generation,"worker_exit").get();
++    }else{
++        const auto result=Json::parse(task.get());const auto saved=claim();check(result.at("pid")==worker->pid(),"File receipt must come from the actual admitted child");
++        if(mode=="file_cancel")check(result.at("cancelled")==true&&saved.state=="returned"&&!saved.success&&saved.operation_ids.empty()&&!std::filesystem::exists(directory/"actual.txt"),"Actual child cancellation must leave a known no-effect result");
++        else if(mode=="file_unrecorded")check(result.at("unrecorded")==true&&saved.state=="executing"&&saved.actual_output_json.empty()&&saved.operation_ids.size()==1&&store.operation(saved.operation_ids.at(0)).get().state==OperationState::succeeded&&read(directory/"actual.txt")==marker+"\n","Actual child must receive fail-stop for an unrecorded acknowledgement, retaining native bytes");
++        else check(saved.state=="returned"&&saved.success==(mode!="file_denied")&&result.at("actual_output_json")==saved.actual_output_json,"Actual child must receive the exact durable native result");
++        if(mode=="file_create")check(read(directory/"actual.txt")==marker+"\n"&&store.operations(id).get().size()==1,"Rebuilt file RPC host must retain one actual mutation");if(mode=="file_denied")check(!std::filesystem::exists(directory/"actual.txt")&&store.operations(id).get().empty(),"Policy denial must precede a native proposal");
++        if(sql)sql->execute("DROP TRIGGER fixture_file_rpc_result_abort");store.retire_agent_worker(generation,"cancelled").get();check(worker->alive()&&peer.call("fixture.stale","{}")=="stale-file-rejected","Still-live child must lose file authority after revocation");peer.stop();check(worker->wait(Clock::now()+5s)==0,"Actual file worker must drain on channel closure");
++    }
++    check(store.run_history(id).get().size()==1&&store.root_budget(id).get().model_calls_reserved==1,"File RPC alone must not fabricate a canonical turn or another model call");store.transition(id,RunState::running,RunState::cancelled).get();
++    std::cout<<"Actual child file RPC "<<mode<<" verified backend-owned native effects and durable receipts without replay."<<std::endl;
++}
++}
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index e51021f0..5bf32e27 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -20,6 +20,7 @@
+ #include <iostream>
+ #include <random>
+ #include "agent_worker_read_fixture.hpp"
++#include "agent_worker_file_fixture.hpp"
+ #include "agent_worker_read_runner_fixture.hpp"
+ #include "agent_worker_context_fixture.hpp"
+ #include "agent_worker_supervisor_fixture.hpp"
+@@ -73,6 +74,7 @@ int child(int argc,char** argv){
+         if(mode=="native_runner_read"||mode=="native_runner_read_cancel"){try{std::stop_callback propagate(handler_cancel,[&]{runner_stop.request_stop();});const auto result=execute_agent_worker_read_root(*self,runner_stop.get_token());return Json{{"pid",GetCurrentProcessId()},{"actual_runner",result.run.state==RunState::completed},{"native_assembly",true},{"tool_turns",result.progress.tool_turns},{"tool_events",result.progress.tool_events},{"model_events",result.progress.model_events},{"final_assistant",result.progress.canonical_assistant}}.dump();}catch(const AgentTerminalHandoff& intent){return Json{{"pid",GetCurrentProcessId()},{"terminal_handoff",to_string(intent.outcome())}}.dump();}catch(const std::exception& error){return Json{{"runner_failure",error.what()}}.dump();}}
+         if(mode=="runner_read"||mode=="runner_read_cancel"){std::stop_callback propagate(handler_cancel,[&]{runner_stop.request_stop();});return worker_read_runner_fixture::execute(*self,runner_stop.get_token());}
+         if(mode=="read_context")return worker_context_fixture::child(*self);
++        if(mode.starts_with("file_"))return worker_file_fixture::child(*self,mode,method);
+         if(mode.starts_with("read"))return worker_read_fixture::child(*self,mode,method);
+         if(mode=="runner"||mode=="runner_error"||mode=="runner_cancel"){try{std::stop_callback propagate(handler_cancel,[&]{runner_stop.request_stop();});const auto result=worker_runner_fixture::execute(*self,runner_stop.get_token());return Json{{"pid",GetCurrentProcessId()},{"attempt_id",result.attempt},{"actual_assistant_json",result.assistant},{"observed_events",result.events},{"actual_runner",result.run.state==RunState::completed}}.dump();}catch(const AgentTerminalHandoff& intent){return Json{{"pid",GetCurrentProcessId()},{"terminal_handoff",to_string(intent.outcome())}}.dump();}catch(const std::exception& error){return Json{{"runner_failure",error.what()}}.dump();}}
+         const auto attempt=Json::parse(payload).at("attempt_id").get<std::string>();AgentWorkerModelClient client(*self);const auto input=request(mode);
+@@ -241,6 +243,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 4dd2e345..b199889c 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,10 +1,10 @@
+-// Independent controlled native provider; sixty intentional requests, no live key.
++// Independent controlled native provider; sixty-five intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -13,6 +13,11 @@ const server=createServer((request,response)=>{
+  let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{
+   const mode=request.url.slice(1);assert.ok(mode in counts);assert.ok(++counts[mode]<=expected[mode]);assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');assert.ok(!bytes.includes('synthetic-model-rpc-not-live'));
+   const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.equal(body.stream,true);assert.equal(body.stream_options.include_usage,true);
++  if(mode.startsWith('file_')){
++   assert.equal(body.messages.length,1);assert.equal(body.messages[0].role,'user');assert.ok(body.messages[0].content.startsWith('Native child file RPC '+mode+'. '));const marker=body.messages[0].content.match(/FILE_RPC_MARKER_\d+$/);assert.ok(marker);
++   assert.equal(body.tools.length,1);assert.equal(body.tools[0].function.name,'create_file');assert.deepEqual(body.tools[0].function.parameters.required,['path','content']);
++   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,{role:'assistant',tool_calls:[{index:0,id:'actual-file',type:'function',function:{name:'create_file',arguments:JSON.stringify({path:'actual.txt',content:marker[0]+'\n'})}}]},'tool_calls',usage);response.end('data: [DONE]\n\n');return;
++  }
+   if(mode.startsWith('product_factory')){
+    const read=mode!=='product_factory'&&mode!=='product_factory_profile'&&mode!=='product_factory_thread',denied=mode==='product_factory_denied',phase=read?counts[mode]:1;assert.equal(body.messages.length,phase===1?2:4);assert.equal(body.messages[0].role,'system');const text=body.messages[0].content;let previous=-1;for(const marker of ['Factory base instructions.','Factory selected instructions.','FACTORY_REPOSITORY_GUIDANCE','Factory backend policy suffix.']){const index=text.indexOf(marker);assert.ok(index>previous);previous=index;}assert.ok(text.endsWith('Factory backend policy suffix.'));assert.equal(body.max_completion_tokens,32);assert.deepEqual(body.messages[1],{role:'user',content:'Native child model RPC '+mode+'.'});
+    if(read){assert.equal(body.tools.length,1);assert.equal(body.tools[0].function.name,'read_file');}else assert.ok(!('tools' in body)||body.tools.length===0);
+@@ -67,5 +72,5 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly sixty requests: eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly sixty-five requests: five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

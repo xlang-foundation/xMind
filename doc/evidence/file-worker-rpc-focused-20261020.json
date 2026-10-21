@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-21T04:29:07.036Z",
+  "gate": {
+    "recordedAt": "2026-10-21T04:27:22.385Z",
+    "sourceParent": "a075616c0c10ecb24f722382de2f738424d32fd2",
+    "sourcePatchSha256": "d30288574583d54ff26b3c4b8adf9569ff594dd12f6a4f902e750ad7e9ee1ad4",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 35284,
+      "launchedAt": "2026-10-21T04:23:52.818Z",
+      "completedAt": "2026-10-21T04:24:20.546Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb"
+    },
+    "test": {
+      "pid": 47156,
+      "launchedAt": "2026-10-21T04:24:23.185Z",
+      "completedAt": "2026-10-21T04:27:20.175Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4553553a89ffb9fe246f46cc74ede71afe3122a9d4c7bb7403265fd96a82601c"
+    },
+    "total": 61,
+    "failed": 0,
+    "passed": 61,
+    "seconds": 176.94,
+    "projectFiles": 2705,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9e931f60d33ea94b8da24dee4680b08409363a1d5ed89223ec456f18d9a2dff9",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/file-worker-rpc-focused-20261020-build.log": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb",
+    "doc/evidence/file-worker-rpc-focused-20261020-build-terminal.json": "860cebf46d853ac9207112820b502312cb59514d34bfefd83d142a9cbe91b5cd",
+    "doc/evidence/file-worker-rpc-focused-20261020-ctest.log": "4553553a89ffb9fe246f46cc74ede71afe3122a9d4c7bb7403265fd96a82601c",
+    "doc/evidence/file-worker-rpc-focused-20261020-ctest-terminal.json": "9e1181e62cdf4b6887044b08275cae4e3756cab0f51be274164a1cb71d9eb279",
+    "doc/evidence/file-worker-rpc-focused-20261020-LastTest.log": "a9ffbfecc0d0e8affcb568d1ac9c0777b72925988d0dc18fd28bd584a1fd9bf4",
+    "doc/evidence/file-worker-rpc-focused-20261020-test-inventory.json": "ceabfec48ea80704df8ae5fcc5479d3dd47788db2a0765aeeae02085bf7d55e7",
+    "doc/evidence/file-worker-rpc-focused-20261020-gate.json": "d50aa75bdc636a2e39069ad5ee2dbc00820697e610d5352eecd9f573c6877b3b",
+    "doc/evidence/file-worker-rpc-focused-20261020-source.patch": "d30288574583d54ff26b3c4b8adf9569ff594dd12f6a4f902e750ad7e9ee1ad4"
+  },
+  "scope": "Authenticated file RPC composed with durable backend native ownership in actual isolated child fixtures",
+  "verified": [
+    "Only the durable AgentWorkerFileHost binds file.invoke; the authenticated channel scope must exactly match its retained lease",
+    "Actual child processes receive exact provider tool calls through native model RPC, with backend-only workspace/guidance/approval/persistence capabilities",
+    "Forged run, workspace, revision, folder, call, arguments and tool identities fail; unknown authority fields, duplicate envelope fields and unsupported methods fail without native proposals",
+    "Actual child creation waits for controller approval and returns exact durable native output; host reconstruction cannot replay it",
+    "Native policy denial and cancellation during approval return typed failures without a mutation",
+    "Lost reply delivery after actual creation preserves exact native bytes and result binding; the exact owned child drains and duplicate execution remains rejected",
+    "Injected result-write failure reaches the child as outcome_unrecorded, preserving actual bytes and successful native operation without a fabricated acknowledgement",
+    "Read-only canonical journal rejects file turns and cannot fund a premature continuation; file RPC alone creates no conversation turn or additional model call",
+    "Independent controlled HTTP peer verifies exactly 65 intended requests, including five actual file RPC cases; no rejected or replayed request reaches inference",
+    "Serial Release build and 61 focused contracts pass with frozen project, SDK, libraries, runtime, dependencies and native binary sets"
+  ],
+  "limitations": [
+    "Actual child file RPC cases qualify create_file and its transport/ownership failure paths; other file operations have separate native-host qualification",
+    "These controlled child fixtures do not assemble an actual coding AgentRunner or bind file RPC in the production process-read owner",
+    "Mixed canonical tool turns, admitted coding ports and production coding-worker composition remain unfinished",
+    "Synthetic model peer only; no new full-suite, installed, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

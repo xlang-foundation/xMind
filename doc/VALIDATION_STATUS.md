@@ -1,3 +1,24 @@
+## Authenticated worker file RPC — 2026-10-20
+
+Actual isolated child processes now invoke the durable backend file host over
+authenticated RPC. Five controlled cases verify approved creation, policy
+denial, cancellation during approval, lost result delivery after creation and
+an injected result-write failure. Backend ownership retains the exact native
+operation and output facts; reconstructed hosts cannot replay a call. Forged
+scope and authority fields fail before native proposals.
+
+The serial Release build and **61/61 focused contracts pass in 176.94 seconds**.
+All 2705 project inputs and SDK/library/runtime/dependency/native binary sets
+remain unchanged across validation. The independent synthetic HTTP peer
+verifies exactly 65 intended requests, including the five file RPC cases.
+[Scope and raw evidence](evidence/file-worker-rpc-focused-20261020.json).
+
+These cases qualify actual child create_file RPC and its ownership failures.
+Mixed canonical tool turns, admitted coding AgentRunner ports and production
+coding-worker composition remain unfinished. The production process-read
+owner remains read-only. This checkpoint adds no full-suite, installed,
+rendered, hosted or live-provider acceptance.
+
 ## Durable native file host — 2026-10-20
 
 The backend file host now composes native workspace/guidance/permission handling
