@@ -1,0 +1,56 @@
+Start testing: Oct 21 00:08 Pacific Daylight Time
+----------------------------------------------------------
+84/162 Testing: native_agent_worker_ledger_contract
+84/162 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_ledger_contract" start time: Oct 21 00:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.
+Durable process claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no command dispatch or process RPC.
+Durable process control ledger binds wait and stop to one captured service with distinct call receipts, no duplicate control, exact canonical observations and read-only rejection. Synthetic job facts; no native process control or RPC.
+Mixed workspace turns preserve exact ordered read/file/process results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.
+Atomic online worker terminal boundary: rollback, exact identity, queued cancellation, interrupted reservations and retained charges verified.
+Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; no child AgentRunner RPC is implemented.
+Independent peer observed exactly one native model request; rejected duplicates caused no extra HTTP.
+<end of output>
+Test time =   1.38 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_ledger_contract" end time: Oct 21 00:08 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+102/162 Testing: native_agent_process_tool_host_contract
+102/162 Test: native_agent_process_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_process_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_process_tool_host_contract" start time: Oct 21 00:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Durable process host case approved
+Durable native process host approved verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable process host case denied
+Durable native process host denied verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable process host case policy
+Durable native process host policy verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable process host case cancel
+Durable native process host cancel verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable process host case unrecorded
+Durable native process host unrecorded verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable process host case retired
+Durable native process host retired verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC.
+Durable native process controls verified real xlang3 service readiness, running observation, intentional stop, process-tree retirement, exact control receipts and no replay. Synthetic model/worker identities; no control RPC.
+Process-owner actual receipt: {"elapsed_ms":135,"exit_code":0,"independently_verified":false,"job_id":"94a55539d66155bec32b2c5046d235a4","operation_id":"94a55539d66155bec32b2c5046d235a4","output_artifact":{"operation_id":"94a55539d66155bec32b2c5046d235a4","state":"complete","stderr_bytes":0,"stdout_bytes":18},"pid":12340,"process_tree_retired":true,"profile_id":"xlang3","stderr":{"byte_count":0,"data":"","encoding":"utf-8","retained_bytes":0},"stdout":{"byte_count":18,"data":"owner-process-ok\r\n","encoding":"utf-8","retained_bytes":18},"termination":"exited","truncated":false}
+Process-owner actual folders: {"attached_marker_content":"actual attached process\n","attached_marker_exists":true,"primary_marker_exists":false}
+process tool owner contract passed
+<end of output>
+Test time =   2.94 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_tool_host_contract" end time: Oct 21 00:08 Pacific Daylight Time
+"native_agent_process_tool_host_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Oct 21 00:08 Pacific Daylight Time

@@ -58,6 +58,7 @@ public:
             invocation.expires_unix_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
             return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};
         }
+        if(owner_.before_effect){if(!args.contains("job_id")||!args.at("job_id").is_string())throw std::invalid_argument("Process control requires a captured job ID");owner_.before_effect(call,args.at("job_id").get<std::string>(),cancel);}
         auto result=call.tool_name=="wait_process"?owner_.process->wait(owner_.run_id,call.arguments_json,cancel):owner_.process->stop(owner_.run_id,call.arguments_json,cancel);
         const auto state=Json::parse(result).value("state",std::string{});
         return {state!="uncertain"&&(call.tool_name!="stop_process"||state!="stopping"),std::move(result)};

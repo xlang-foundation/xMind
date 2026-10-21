@@ -1,3 +1,27 @@
+## Durable process observation and stop RPC — 2026-10-21
+
+Wait and stop now have exact durable call ownership against an existing native
+job. Each call has a distinct operation binding, preserving a running observation
+and later stop receipt without relaunching the job. Foreign-session services and
+nonpersistent stop targets reject before control authority is acquired. Read-only
+journal ports cannot acknowledge control turns.
+
+Native tests start an approved xlang3 service, observe it running and await its
+intentional stop and process-tree retirement. An actual separate child also
+performs wait/stop through xlang3 SDK C++ RPC, rejecting forged authority and
+duplicate controls while retaining exact canonical results and physical drain.
+The service seed and model receipt in that fixture are backend-controlled.
+
+The serial Release build and **62/62 focused native contracts pass in 193.04
+seconds**, with 2721 project inputs, 16 SDK headers, 1870 pure-library files,
+76 runtime files, 18598 Node dependencies and 133 native binaries unchanged.
+The initial RPC fixture's method-whitelist failure is preserved.
+[Scope, patches and raw evidence](evidence/process-worker-control-focused-20261021.json).
+
+Worker background launch and production wait/stop catalogue exposure remain
+unfinished. This checkpoint adds no full-suite, installation, hosted, rendered
+or live-provider acceptance. Existing owners and completed tasks remain preserved.
+
 ## Unified production coding command workers — 2026-10-21
 
 The production coding factory now runs the actual AgentRunner in a unified xmind

@@ -9,7 +9,7 @@ AgentWorkerProcessHost::AgentWorkerProcessHost(PersistenceService& store,AgentWo
     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
     if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.allow_background||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker process owner differs from captured foreground lease");
     const auto count=owner.workspace_members?owner.workspace_members->folders().size():1;for(std::size_t i=0;i<count;++i)if(!owner.repository_context(i))throw std::invalid_argument("Worker process requires native guidance");
-    auto offered=owner.offered_tool;owner.offered_tool=[offered=std::move(offered)](const std::string& name){return name=="run_process"&&offered(name);};
+    auto offered=owner.offered_tool;owner.offered_tool=[offered=std::move(offered)](const std::string& name){return is_agent_process_tool(name)&&offered(name);};
     owner.before_effect=[this](const AgentProcessToolInvocation& call,const std::string& id,std::stop_token token){store_.claim_agent_worker_process_effect(lease_,call,id,deadline_,owner_cancel_,token).get();};
     native_=make_agent_process_tool_host(store_,std::move(owner));
 }

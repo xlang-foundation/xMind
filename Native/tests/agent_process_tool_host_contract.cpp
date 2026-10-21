@@ -43,9 +43,11 @@ struct Task{
 };
 Operation pending(PersistenceService& store,Task* task=nullptr){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){for(const auto& operation:store.operations("run").get())if(operation.state==OperationState::awaiting_approval)return operation;if(task&&task->result.wait_for(0ms)==std::future_status::ready){const auto early=task->result.get();throw std::runtime_error("Process returned before approval: "+early.output_json);}std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual process proposal deadline");}
 #include "agent_worker_process_host_fixture.hpp"
+#include "agent_worker_process_control_fixture.hpp"
 }
 int main(int argc,char** argv){if(argc!=4)return 2;try{
     durable_process_host_contract({argv[1],argv[2]},argv[3]);
+    durable_process_control_contract({argv[1],argv[2]},argv[3]);
     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"secondary";std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);
     WorkspaceTools workspace(primary.string()),attached(secondary.string());const auto workspace_id=workspace.identity(),attached_id=attached.identity();
     WorkspaceToolSet members(workspace_id,7,{{workspace_id,workspace.root_path()},{attached_id,attached.root_path()}});
