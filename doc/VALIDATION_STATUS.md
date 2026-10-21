@@ -1,3 +1,26 @@
+## Production delegated scheduling through xmind IPC — 2026-10-21
+
+DelegationExecutor now dispatches through a captured backend port; server
+settings bind it to the packaged xmind image. The existing scheduler retains
+capacity/admission order and physical drain before join. The dispatcher carries
+the original deadline, parent workspace snapshot, named instructions/model,
+tool intersection and permission layers. Child callable authority is removed.
+
+Actual scheduled product workers pass ordinary and counted-context cases with
+two concurrent processes each, canonical native reads/results, four shared
+charges and a held parent continuation. Counted children use execution-scoped
+native ContextManager leaf attempts: four count callbacks and four completed
+typed inference groups verified through embedded xlang3 SQLite.
+
+**7/7 focused contracts pass in 68.21 seconds**, with complete frozen inputs
+and 133 native binary sets/hashes. Existing independent HTTP peer remains at
+185 requests. New model/count responses use a synthetic native gateway. First
+fixture compile failure is preserved. [Scope and raw evidence](evidence/process-worker-delegated-scheduler-values-20261021.json).
+
+Parent worker orchestration, planning, graph/default placement, further delegated
+context/failure/permission/profiled cases, broad/full regression and updated
+installed/rendered/live-provider client acceptance remain unfinished.
+
 ## Actual concurrent delegated xmind runners — 2026-10-21
 
 Two distinct product xmind processes now execute the native runner through SDK

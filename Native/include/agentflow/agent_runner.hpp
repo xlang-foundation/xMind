@@ -33,6 +33,8 @@ struct AgentDelegationPolicy {
     std::int64_t preset_revision=1;
     std::size_t max_children=8,max_parallel=2,max_model_calls=32,max_leaf_turns=4;
 };
+struct AgentSettings;
+using AgentDelegatedExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,std::vector<AgentPermissionRule>,std::stop_token)>;
 struct AgentSettings {
     ChatProviderConfig provider;
     std::optional<std::string> workspace;
@@ -60,6 +62,8 @@ struct AgentSettings {
     std::optional<ProviderExecutionIdentity> provider_identity;
     // Explicit registered read-only leaf policy; the parent keeps its own tools.
     std::optional<AgentDelegationPolicy> delegation;
+    // Trusted backend dispatch port. Never serialized or supplied by a client.
+    AgentDelegatedExecution delegated_execution;
     // Native ordinary-root planning policy; graph nodes and depth-one children
     // must explicitly clear it rather than acquiring another root allowance.
     std::optional<DynamicPlanningPolicy> planning;

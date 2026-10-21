@@ -21,6 +21,7 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context";}
+Json worker_provider_identity(Repository&,const std::string&,const std::string&);
 bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
 void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
@@ -1827,7 +1828,7 @@ Json inference_identity(const InferenceStepSpec& s){return {{"root",s.root_run_i
 void history_owner(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role,const ContextScope& scope,const std::string& provider_identity,const std::string& authority_identity){
     const auto r=repo.run(root),o=repo.run(owner);const auto b=repo.root_budget(root);
     if(r.state!=RunState::running||o.state!=RunState::running)throw ContextBindingChanged("Context execution owners changed");
-    if(b.spec.policy_id!="native.graph-context"&&Json::parse(b.spec.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Context provider binding changed");
+    if(b.spec.policy_id!="native.graph-context"&&worker_provider_identity(repo,root,owner)!=Json::parse(provider_identity))throw ContextBindingChanged("Context provider binding changed");
     if(b.spec.policy_id=="native.dynamic-plan"){const auto caps=repo.dynamic_capabilities(root);if(!caps.catalogue_finalized)throw ContextUnavailable("Context requires its actual sealed execution catalogue");if(role==ModelCallRole::parent&&authority_identity!=caps.backend_identity)throw ContextBindingChanged("Parent context private authority differs from sealed settings");}
     if(role==ModelCallRole::parent){if(root!=owner||r.graph_root||scope.kind!=ContextScopeKind::session||scope.id!=r.session_id)throw Conflict("Parent context does not own this session");}
     else {const auto a=repo.child_admission(owner);if(a.root_run_id!=root||scope.kind!=ContextScopeKind::execution||scope.id!=owner||(a.kind!=ChildAdmissionKind::dynamic_agent&&a.kind!=ChildAdmissionKind::delegated_leaf&&!(a.kind==ChildAdmissionKind::graph_agent&&b.spec.policy_id=="native.graph-context")))throw Conflict("Child context does not own this execution");if((a.kind==ChildAdmissionKind::dynamic_agent||a.kind==ChildAdmissionKind::graph_agent)&&authority_identity!=a.backend_identity)throw ContextBindingChanged("Context authority differs from its exact captured child settings");if(a.kind==ChildAdmissionKind::graph_agent){const auto capture=repo.graph_context_owner(root);const auto& agent=graph_context_agent(capture.authority,a.graph_node_path);if(Json::parse(agent.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Graph context provider differs from its captured node model");}}
@@ -3361,6 +3362,11 @@ AgentWorkerModelClaimSpec worker_callable_authority(Repository& repository,Xlang
 AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){return worker_workspace_authority(repository,db,lease,call,false);}
 AgentWorkerModelClaimSpec worker_file_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,true);}
 AgentWorkerModelClaimSpec worker_process_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentProcessToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,false,true);}
+Json worker_provider_identity(Repository& repository,const std::string& root,const std::string& owner){
+    const auto budget=repository.root_budget(root);auto provider=Json::parse(budget.spec.provider_identity_json);
+    if(root!=owner){const auto admitted=repository.child_admission(owner);if(admitted.kind==ChildAdmissionKind::delegated_leaf){if(admitted.root_run_id!=root)throw Conflict("Delegated model identity belongs to another root");const auto history=repository.run_history(owner);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}}
+    return provider;
+}
 bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
     if(lease.owner_run_id==lease.root_run_id)return false;
     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
@@ -3376,8 +3382,7 @@ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWork
     const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");const auto budget=repository.root_budget(spec.root_run_id);
     const bool delegated=worker_delegated_owner(repository,spec);
     const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||(delegated&&root.state==RunState::running));
-    auto provider=Json::parse(budget.spec.provider_identity_json);
-    if(delegated){const auto history=repository.run_history(owner.id);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}
+    const auto provider=delegated?worker_provider_identity(repository,spec.root_run_id,spec.owner_run_id):Json::parse(budget.spec.provider_identity_json);
     if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||provider!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
     if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;

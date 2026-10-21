@@ -1,0 +1,82 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T14:33:39.939Z",
+    "sourceParent": "140fafe3bde4e70d8d833f2fc74942a42237eede",
+    "sourcePatchSha256": "16f73b8ee72a2b8796ef0a45ed61fdf4786c970acadf639590b8cdc8a351ed50",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 65788,
+      "launchedAt": "2026-10-21T14:31:08.073Z",
+      "completedAt": "2026-10-21T14:32:25.714Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8489dc650ba536b19c8a0866e182803446974faa1aeec3e87840aafce92fd510"
+    },
+    "test": {
+      "pid": 58824,
+      "launchedAt": "2026-10-21T14:32:28.790Z",
+      "completedAt": "2026-10-21T14:33:37.050Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9d33394019571d2e46c87878bffd74660f68731298359b12421711cbbb6a1925"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 68.21,
+    "projectFiles": 2747,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "349883103430afb373ef996330e1d213fa8df08339c61bbbe67553d8f2ecf5c2",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-build.log": "8489dc650ba536b19c8a0866e182803446974faa1aeec3e87840aafce92fd510",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-build-terminal.json": "84b5114d1556dbb68b1ade68b42950908fb1073c4d8ad0fbba8546337d926f8d",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-ctest.log": "9d33394019571d2e46c87878bffd74660f68731298359b12421711cbbb6a1925",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-ctest-terminal.json": "ee4d3baa494b46dda2ce117774bd943326bc92e7369fd58cc86b69aadaacbb35",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-LastTest.log": "60bd5436049134a218848ca2846f6961e15c3699584875216315ab0337a9cb8f",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-test-inventory.json": "79d0b828950a64effdd53365b2787a4ea033efa691eafd0b335244d041abb60d",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-gate.json": "597c8fbd0476545a326eafe1e795cf7212987344253cfd382a6509eac41e72a4",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-source.patch": "16f73b8ee72a2b8796ef0a45ed61fdf4786c970acadf639590b8cdc8a351ed50",
+    "doc/evidence/process-worker-delegated-scheduler-values-20261021-binaries-before-test.json": "810c94faf94d3053ef2aeb6059dd7ca735890ea3ea67be97d81403af51bc0632",
+    "doc/evidence/process-worker-delegated-scheduler-20261021-build.log": "bd457dccd5bb57bef7c016a0207103ee7b1f6b55722f62b6d362c220e08eb271",
+    "doc/evidence/process-worker-delegated-scheduler-20261021-build-terminal.json": "da15ac5f5acb41a5c750698c46489e550e2280b42361c319c2f171c4b5e3fe75",
+    "doc/evidence/process-worker-delegated-scheduler-20261021-source.patch": "7746fbc3e302a3639055173ef3a6cf91cf53d83788c07346c85e0c8df17c5e81"
+  },
+  "failedBuild": {
+    "name": "process-worker-delegated-scheduler-20261021",
+    "pid": 12244,
+    "launchedAt": "2026-10-21T14:27:01.818Z",
+    "completedAt": "2026-10-21T14:30:46.924Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "bd457dccd5bb57bef7c016a0207103ee7b1f6b55722f62b6d362c220e08eb271",
+    "cause": "New fixture inserted a JSON value directly into a PID set, provoking an ambiguous initializer-list conversion; explicit uint32 conversion fixes it. Independent read-only review also caught and corrected the required response.input_tokens object tag before any fixture runtime."
+  },
+  "verified": [
+    "DelegationExecutor scheduled actions call a captured backend dispatch port; server settings bind it to the packaged xmind executable",
+    "Existing bounded NativeChildExecutor still stages capacity before durable admission and retains physical slots until worker drain, then joins canonical results",
+    "Child dispatcher captures original parent membership and deadline, strips write/process/remote/delegation/callable authority and carries frozen named instructions, tool intersection and permission layers",
+    "Two ordinary scheduled product processes and two counted-context scheduled product processes prove concurrent model entry, one actual native read and one final reply each, exact child history, four shared charges and a held parent continuation per root",
+    "Counted child requests use the native ContextManager with execution scope and leaf role, including selected named model identity; four actual native count callbacks and four completed typed leaf inference groups verified through embedded xlang3 SQLite",
+    "All seven focused contracts pass; existing independent HTTP peer remains at exactly 185 requests; complete source/SDK/library/dependency/133-native-binary sets and hashes frozen"
+  ],
+  "limitations": [
+    "New scheduler model/count responses are synthetic native gateway acknowledgements, not live-provider or additional HTTP acceptance",
+    "Server default dispatch binding is compiled; newly installed server/UI startup and rendered acceptance are not performed",
+    "Counted child compaction/rebuild/failure/cancellation, profiled named-model cases and policy-denial cases still need verification",
+    "Parent worker orchestration, planning and graph/default placement remain unfinished; broad/full regression and updated installed browser/VS Code/CLI live acceptance remain open"
+  ],
+  "passed": true
+}

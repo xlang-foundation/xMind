@@ -13,13 +13,15 @@ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,Age
      preview_(std::move(preview)),admit_(std::move(admit)),deadline_(deadline),owner_cancel_(cancel),
      budget_(store,store.root_budget(lease_.root_run_id).get(),deadline,cancel),
      manager_(store,required_gateway(gateway_),provider_,policy_.runtime,model_message_from_history){
-    if(!gateway_||!preview_||!admit_||lease_.owner_run_id!=lease_.root_run_id||
-       store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"||
+    const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
+    if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
+    if(!gateway_||!preview_||!admit_||
+       store.root_budget(lease_.root_run_id).get().spec.policy_id!=(leaf?"native.delegation":"native.context")||
        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
         throw Conflict("Worker context differs from captured ordinary context root");
-    const auto run=store.run(lease_.owner_run_id).get();owner_.scope={ContextScopeKind::session,run.session_id};
+    const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};
     owner_.root_run_id=lease_.root_run_id;owner_.owner_run_id=lease_.owner_run_id;
-    owner_.role=ModelCallRole::parent;owner_.binding=policy_.binding;
+    owner_.role=leaf?ModelCallRole::leaf:ModelCallRole::parent;owner_.binding=policy_.binding;
 }
 void AgentWorkerContextWindow::check(std::stop_token cancel){
     if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Context owner cancelled");

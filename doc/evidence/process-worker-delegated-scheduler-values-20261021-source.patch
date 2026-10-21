@@ -1,0 +1,399 @@
+diff --git a/Native/apps/server_main.cpp b/Native/apps/server_main.cpp
+index e37c3657..70815e0e 100644
+--- a/Native/apps/server_main.cpp
++++ b/Native/apps/server_main.cpp
+@@ -308,8 +308,9 @@ int run_server(int argc,char** argv) {
+         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
+         std::unique_ptr<agentflow::EditRecoveryReader> recovery;
+         agentflow::AgentRootExecutorFactory root_executor_factory;
+-        if(process_worker){const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));root_executor_factory=[image=std::move(image),process_code](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return process_code?agentflow::make_agent_worker_coding_executor(store,settings,image):agentflow::make_agent_worker_read_executor(store,settings,image);};}
+-        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}}};
++        const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto worker_image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));
++        if(process_worker){root_executor_factory=[image=worker_image,process_code](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return process_code?agentflow::make_agent_worker_coding_executor(store,settings,image):agentflow::make_agent_worker_read_executor(store,settings,image);};}
++        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){settings.delegated_execution=agentflow::make_agent_worker_delegated_executor(persistence,worker_image);if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}}};
+ #endif
+         if(options.contains("--model")) {
+ #if defined(_WIN32)
+diff --git a/Native/include/agentflow/agent_runner.hpp b/Native/include/agentflow/agent_runner.hpp
+index 659bce67..54c73eab 100644
+--- a/Native/include/agentflow/agent_runner.hpp
++++ b/Native/include/agentflow/agent_runner.hpp
+@@ -33,6 +33,8 @@ struct AgentDelegationPolicy {
+     std::int64_t preset_revision=1;
+     std::size_t max_children=8,max_parallel=2,max_model_calls=32,max_leaf_turns=4;
+ };
++struct AgentSettings;
++using AgentDelegatedExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,std::vector<AgentPermissionRule>,std::stop_token)>;
+ struct AgentSettings {
+     ChatProviderConfig provider;
+     std::optional<std::string> workspace;
+@@ -60,6 +62,8 @@ struct AgentSettings {
+     std::optional<ProviderExecutionIdentity> provider_identity;
+     // Explicit registered read-only leaf policy; the parent keeps its own tools.
+     std::optional<AgentDelegationPolicy> delegation;
++    // Trusted backend dispatch port. Never serialized or supplied by a client.
++    AgentDelegatedExecution delegated_execution;
+     // Native ordinary-root planning policy; graph nodes and depth-one children
+     // must explicitly clear it rather than acquiring another root allowance.
+     std::optional<DynamicPlanningPolicy> planning;
+diff --git a/Native/include/agentflow/agent_worker_read_executor.hpp b/Native/include/agentflow/agent_worker_read_executor.hpp
+index ebd586da..38b96da2 100644
+--- a/Native/include/agentflow/agent_worker_read_executor.hpp
++++ b/Native/include/agentflow/agent_worker_read_executor.hpp
+@@ -4,6 +4,7 @@
+ #include "agentflow/agent_worker_channel.hpp"
+ 
+ namespace agentflow {
++AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
+ // Trusted backend factory. Captures settings and executable once; no client
+ // supplies credentials, executable paths or per-dispatch replacement policy.
+ std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index f7d38e9c..f7326343 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -895,7 +895,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                 if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
+             },token);
+             }catch(const ProviderHttpError& error){
+-                if(read_workspace_&&read_workspace_->execution_policy_id()=="native.context"&&!rebuild_used&&!durable_output&&error.status==400&&error.code=="context_length_exceeded"){
++                if(read_workspace_&&(read_workspace_->execution_policy_id()=="native.context"||read_workspace_->execution_policy_id()=="native.delegation")&&!rebuild_used&&!durable_output&&error.status==400&&error.code=="context_length_exceeded"){
+                     if(!budget||!reservation)throw Conflict("Worker context rebuild has no funded native attempt");
+                     request=read_workspace_->rebuild_request(reservation->attempt_id,request,token);
+                     reservation=budget->reserve(id,ModelCallRole::parent,token);rebuild_used=true;continue;
+diff --git a/Native/src/agent_worker_context_window.cpp b/Native/src/agent_worker_context_window.cpp
+index c20cf475..a0fd23f1 100644
+--- a/Native/src/agent_worker_context_window.cpp
++++ b/Native/src/agent_worker_context_window.cpp
+@@ -13,13 +13,15 @@ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,Age
+      preview_(std::move(preview)),admit_(std::move(admit)),deadline_(deadline),owner_cancel_(cancel),
+      budget_(store,store.root_budget(lease_.root_run_id).get(),deadline,cancel),
+      manager_(store,required_gateway(gateway_),provider_,policy_.runtime,model_message_from_history){
+-    if(!gateway_||!preview_||!admit_||lease_.owner_run_id!=lease_.root_run_id||
+-       store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"||
++    const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
++    if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
++    if(!gateway_||!preview_||!admit_||
++       store.root_budget(lease_.root_run_id).get().spec.policy_id!=(leaf?"native.delegation":"native.context")||
+        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
+         throw Conflict("Worker context differs from captured ordinary context root");
+-    const auto run=store.run(lease_.owner_run_id).get();owner_.scope={ContextScopeKind::session,run.session_id};
++    const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};
+     owner_.root_run_id=lease_.root_run_id;owner_.owner_run_id=lease_.owner_run_id;
+-    owner_.role=ModelCallRole::parent;owner_.binding=policy_.binding;
++    owner_.role=leaf?ModelCallRole::leaf:ModelCallRole::parent;owner_.binding=policy_.binding;
+ }
+ void AgentWorkerContextWindow::check(std::stop_token cancel){
+     if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Context owner cancelled");
+diff --git a/Native/src/agent_worker_journal_rpc.cpp b/Native/src/agent_worker_journal_rpc.cpp
+index 4dc01a2b..39817f32 100644
+--- a/Native/src/agent_worker_journal_rpc.cpp
++++ b/Native/src/agent_worker_journal_rpc.cpp
+@@ -65,7 +65,7 @@ std::string encode_attempt(const ModelCallReservation& r){auto value=Json{{"root
+ ModelCallReservation attempt_call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& attempt,const std::string& expected_state){
+     try{const auto v=parse(peer.call(method,Json{{"attempt_id",attempt}}.dump()));object(v,8);const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+         if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||(attempt_id(v.at("attempt_id"))!=attempt&&method!="journal.reserve_model")||text(v.at("role"))!=(role==ModelCallRole::parent?"parent":"leaf")||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference")invalid();
+-        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else if(attempt_id(v.at("attempt_id"))!=attempt)invalid();
++        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{if(budget.spec.policy_id!="native.delegation")invalid();(void)AgentWorkerJournalClient(peer).child_admission(scope.run_id);}}else if(attempt_id(v.at("attempt_id"))!=attempt)invalid();
+         const auto assistant=text(v.at("actual_assistant_json"));if((expected_state=="finished")==assistant.empty())invalid();return {scope.root_id,attempt_id(v.at("attempt_id")),scope.run_id,role,expected_state,ModelCallPurpose::inference,step,assistant};
+     }catch(const Json::exception&){invalid();}
+     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
+diff --git a/Native/src/agent_worker_read_context.cpp b/Native/src/agent_worker_read_context.cpp
+index 583a276c..114748ee 100644
+--- a/Native/src/agent_worker_read_context.cpp
++++ b/Native/src/agent_worker_read_context.cpp
+@@ -13,7 +13,7 @@ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,Persiste
+     :store_(store),lease_(std::move(lease)),owner_(std::move(owner)),policy_(std::move(policy)),owner_cancel_(cancel){
+     if(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
+     if(bool(policy_.history_owner)!=bool(policy_.history_provider))throw std::invalid_argument("Worker session history requires its captured provider route");
+-    if(policy_.history_owner&&(policy_.history_owner->root_run_id!=lease_.root_run_id||policy_.history_owner->owner_run_id!=lease_.owner_run_id||policy_.history_owner->role!=ModelCallRole::parent||policy_.history_owner->scope.kind!=ContextScopeKind::session||policy_.history_owner->provider_identity_json!=lease_.provider_identity_json))throw Conflict("Worker history differs from captured model ownership");
++    if(policy_.history_owner&&(policy_.history_owner->root_run_id!=lease_.root_run_id||policy_.history_owner->owner_run_id!=lease_.owner_run_id||policy_.history_owner->role!=(lease_.root_run_id==lease_.owner_run_id?ModelCallRole::parent:ModelCallRole::leaf)||policy_.history_owner->scope.kind!=(lease_.root_run_id==lease_.owner_run_id?ContextScopeKind::session:ContextScopeKind::execution)||policy_.history_owner->provider_identity_json!=lease_.provider_identity_json))throw Conflict("Worker history differs from captured model ownership");
+     std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
+     const auto count=owner_.workspace_members?owner_.workspace_members->folders().size():1;
+     for(std::size_t index=0;index<count;++index){auto* context=owner_.repository_context(index);if(!context)throw std::invalid_argument("Worker read context requires actual native guidance");contexts_.push_back(std::make_unique<RepositoryInstructionContext>(*context));}
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index ac06b474..f13d9888 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -54,7 +54,7 @@ public:
+ class WorkspaceExecutor final:public AgentRootExecutor {
+     PersistenceService& store_;
+     AgentSettings settings_;
+-    bool coding_=false;
++    bool coding_=false,delegated_=false;
+     std::shared_ptr<const BoundProcessExecutable> image_;
+     std::unique_ptr<WorkspaceTools> primary_;
+     std::shared_ptr<ProcessExecutor> process_catalogue_;
+@@ -79,9 +79,9 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+         return result;
+     }
+ public:
+-    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
+-        :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
+-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||(!coding_&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
++    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={})
++        :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),image_(std::move(image)){
++        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||(!coding_&&!delegated_&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
+         // AgentService owns the single admission-time membership capture.
+         settings_.workspace_membership_snapshot={};
+@@ -92,7 +92,7 @@ public:
+         }
+         if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
+         validator_=std::make_unique<AgentRunner>(store_,settings_);
+-        gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
++        gateway_=gateway?std::move(gateway):make_persistence_agent_model_gateway(store_,settings_.credential);
+     }
+     void validate(const AgentRootExecutionRequest& request)const override{
+         if(!request.placement.empty()&&request.placement!="process")throw std::invalid_argument("Only process placement can enter a process worker executor");
+@@ -106,16 +106,22 @@ public:
+         std::set<std::string> ids;std::size_t root_bytes=0;for(const auto& folder:membership.folders){if(!bounded(folder.folder_id,256)||!bounded(folder.root,32760)||folder.root.size()>262144-root_bytes||!ids.insert(folder.folder_id).second)throw std::invalid_argument("Invalid captured worker folder");root_bytes+=folder.root.size();}
+         if(!validator_->execution_budget(selected))throw std::invalid_argument("Worker requires an ordinary execution budget");
+     }
+-    Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{
+-        const auto deadline=Clock::now()+settings_.run_timeout;validate(request);
++    Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_)throw Conflict("Delegated executor requires its original shared budget");return execute_owned(request,{},cancel);}
++    Run execute_owned(const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared,std::stop_token cancel){
++        if(delegated_!=bool(shared))throw Conflict("Worker executor budget kind differs from captured admission");
++        const auto deadline=shared?shared->deadline():Clock::now()+settings_.run_timeout;validate(request);
+         const auto admitted=store_.run(request.run_id).get();
+-        if(admitted.graph_root||!admitted.parent_id.empty()||admitted.state!=RunState::queued)throw Conflict("Worker execution requires a fresh ordinary queued root");
++        if(admitted.graph_root||admitted.state!=RunState::queued||(delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
++        if(delegated_){const auto child=store_.child_admission(request.run_id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=shared->root_id()||child.preset_id!="workspace.inspect"||child.preset_revision!=1||settings_.max_turns>4)throw Conflict("Worker differs from bounded delegated admission");shared->check(cancel);}
+         const auto history=store_.run_history(request.run_id).get();
+         if(history.empty()||history.front().role!="user")throw Conflict("Worker root has no admitted prompt");
+         const auto prompt=Json::parse(history.front().json);
+         if(prompt.contains("agent_profile")&&prompt["agent_profile"].is_object()&&prompt["agent_profile"].contains("placement")&&prompt["agent_profile"]["placement"]!=request.placement)throw Conflict("Worker placement differs from its admitted prompt");
+-        const auto budget=store_.root_budget(request.run_id).get();const auto expected=*validator_->execution_budget(model(request));
+-        if(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0)throw Conflict("Worker root differs from immutable admission or was already executed");
++        const auto root=shared?shared->root_id():request.run_id;
++        const auto budget=store_.root_budget(root).get();const auto expected=*validator_->execution_budget(model(request));
++        auto provider_identity=Json::parse(budget.spec.provider_identity_json);if(delegated_)provider_identity["model_id"]=model(request);
++        if(delegated_&&provider_identity!=Json::parse(provider_context_json(settings_,model(request)).empty()?expected.provider_identity_json:provider_context_json(settings_,model(request))))throw Conflict("Delegated worker provider differs from frozen settings");
++        if(!delegated_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
+         if(cancel.stop_requested())return store_.transition(request.run_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
+         const auto& membership=*request.workspace;WorkspaceToolSet members(membership.workspace_id,membership.revision,membership.folders);
+         std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;Json folders=Json::array();
+@@ -147,8 +153,8 @@ public:
+             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+         }
+         if(settings_.provider_identity){
+-            policy.history_owner=ProviderHistoryOwner{request.run_id,request.run_id,ModelCallRole::parent,
+-                {ContextScopeKind::session,admitted.session_id},budget.spec.provider_identity_json,
++            policy.history_owner=ProviderHistoryOwner{root,request.run_id,delegated_?ModelCallRole::leaf:ModelCallRole::parent,
++                {delegated_?ContextScopeKind::execution:ContextScopeKind::session,delegated_?request.run_id:admitted.session_id},provider_identity.dump(),
+                 context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
+             policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
+         }
+@@ -157,7 +163,9 @@ public:
+         auto provider=settings_.provider;provider.model=model(request);
+         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+         for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership")throw Conflict("Worker root already has an execution membership receipt");
+-        store_.append_event(request.run_id,"agent.workspace_membership",Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();
++        auto captured_membership=Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump();
++        if(delegated_){bool found=false;for(const auto& event:store_.events(root).get())if(event.kind=="agent.workspace_membership"){captured_membership=event.json;found=true;break;}if(!found)throw Conflict("Delegated worker requires the parent membership snapshot");}
++        store_.append_event(request.run_id,"agent.workspace_membership",captured_membership).get();
+         if(settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
+         AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
+         owner.repository_context=[&](std::size_t index){return index<contexts.size()?contexts[index].get():nullptr;};
+@@ -183,7 +191,7 @@ public:
+             for(const auto& tool:settings_.xlang_python_tools)if(owner.offered_tool(tool.definition.name))context.bindings.push_back({tool.definition,[binding=&tool](const std::string& arguments,std::stop_token stop){return binding->execution==XlangPythonExecution::worker?binding->callable.invoke_json_worker(arguments,stop):binding->callable.invoke_json(arguments,stop);}});
+             if(!context.bindings.empty())callable_owner=std::move(context);
+         }
+-        auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{request.run_id,request.run_id,membership.workspace_id,generation(),membership.revision},budget.spec.provider_identity_json,deadline);
++        auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{root,request.run_id,membership.workspace_id,generation(),membership.revision},provider_identity.dump(),deadline);
+         // An observation failure cannot release the physical slot. Retain this
+         // same supervisor, including uncertain launch before a returned handle;
+         // no new child, model dispatch or durable terminal write is retried.
+@@ -206,6 +214,20 @@ public:
+     }
+ };
+ }
++AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){
++    if(!image)throw std::invalid_argument("Delegated execution requires a bound xmind image");
++    return [&store,image=std::move(image),gateway=std::move(gateway)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,std::vector<AgentPermissionRule> permissions,std::stop_token cancel){
++        if(!budget||!frozen.workspace)throw Conflict("Delegated process requires its shared workspace owner");
++        auto settings=frozen;settings.delegated_execution={};
++        if(!settings.tool_allowlist){settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"};if(!settings.language_servers.empty())settings.tool_allowlist->push_back("language_server");}
++        std::erase_if(*settings.tool_allowlist,[](const std::string& name){return !is_agent_read_tool(name)&&!is_agent_guidance_tool(name);});
++        auto membership=std::make_shared<WorkspaceMembershipSnapshot>();bool found=false;
++        for(const auto& event:store.events(budget->root_id()).get())if(event.kind=="agent.workspace_membership"){const auto value=Json::parse(event.json);membership->workspace_id=value.at("workspace_id");membership->revision=value.at("revision");for(const auto& folder:value.at("folders"))membership->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});found=true;break;}
++        if(!found)throw Conflict("Delegated process lacks captured parent membership");
++        WorkspaceExecutor executor(store,std::move(settings),image,false,true,gateway);AgentRootExecutionRequest request;request.run_id=id;request.model_id=frozen.provider.model;request.workspace=std::move(membership);request.placement="process";request.agent_permissions=std::move(permissions);
++        return executor.execute_owned(request,std::move(budget),cancel);
++    };
++}
+ std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),false);}
+ std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),true);}
+ 
+diff --git a/Native/src/agent_worker_read_owner.cpp b/Native/src/agent_worker_read_owner.cpp
+index d0b95fd7..00f5bad5 100644
+--- a/Native/src/agent_worker_read_owner.cpp
++++ b/Native/src/agent_worker_read_owner.cpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/agent_worker_read_rpc.hpp"
+ #include "agentflow/agent_worker_journal_rpc.hpp"
+ #include "agentflow/persistence_service.hpp"
++#include "agentflow/agent_worker_context_window.hpp"
+ 
+ namespace agentflow {
+ namespace {
+@@ -12,6 +13,7 @@ AgentReadToolOwnerContext captured_owner(AgentReadToolOwnerContext owner,AgentWo
+ }
+ struct AgentWorkerReadOwner::Impl {
+     AgentWorkerReadContext context;
++    std::unique_ptr<AgentWorkerContextWindow> context_window;
+     std::unique_ptr<AgentWorkerModelHost> model;
+     AgentWorkerRpcHandler model_rpc,read_rpc,journal_rpc;
+     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+@@ -22,11 +24,24 @@ struct AgentWorkerReadOwner::Impl {
+         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
+         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
+         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
++        AgentWorkerJournalModelHooks hooks;
++        if(policy.context){
++            context_window=std::make_unique<AgentWorkerContextWindow>(store,lease,provider,*policy.context,gateway,
++                [this](std::stop_token stop){return context.prepare(stop);},
++                [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel);
++            model_policy.request_context=[this](std::stop_token stop){return context_window->prepare(stop);};
++            model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context_window->admit(attempt,request,stop);};
++            model_policy.reject_context=[this](const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token stop){return context_window->reject(attempt,request,elapsed,stop);};
++            model_policy.rebuild_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){return context_window->rebuild(attempt,request,stop);};
++            hooks.reserve=[this](const std::string& attempt,std::stop_token stop){return context_window->reserve(attempt,stop);};
++            hooks.start=[this](const std::string& attempt,std::stop_token stop){return context_window->start(attempt,stop);};
++            hooks.finish=[this](const std::string& attempt,std::stop_token stop){return context_window->finish(attempt,stop);};
++        }
+         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),
+             std::move(model_policy),std::move(gateway),deadline,cancel);
+         model_rpc=bind_agent_worker_model_rpc(*model,scope);
+         read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
+-        journal_rpc=bind_agent_worker_journal_rpc(store,std::move(lease),scope,deadline,cancel);
++        journal_rpc=bind_agent_worker_journal_rpc(store,std::move(lease),scope,deadline,cancel,std::move(hooks));
+     }
+ };
+ AgentWorkerReadOwner::AgentWorkerReadOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+diff --git a/Native/src/delegation_executor.cpp b/Native/src/delegation_executor.cpp
+index e84f0bc7..2afb916f 100644
+--- a/Native/src/delegation_executor.cpp
++++ b/Native/src/delegation_executor.cpp
+@@ -73,7 +73,7 @@ std::string DelegationExecutor::invoke(const std::string& parent,const ModelTool
+     std::vector<NativeChildWork> work;work.reserve(spec.tasks.size());
+     std::size_t task_index=0;
+     if(!replay)for(const auto& task:spec.tasks){
+-        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.a2a_enabled=false;leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.max_turns=policy.max_leaf_turns;
++        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.a2a_enabled=false;leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.xlang_python_tools.clear();leaf.max_turns=policy.max_leaf_turns;
+         const auto index=task_index++;std::optional<AgentDefinition> selected_agent;if(value["tasks"][index].contains("agent_id")){const auto id=value["tasks"][index]["agent_id"].get<std::string>();const auto found=std::find_if(catalogue.entries.begin(),catalogue.entries.end(),[&](const auto& item){return item.id==id;});if(found==catalogue.entries.end()||found->mode!="subagent"||found->hidden)throw Conflict("Delegated subagent profile changed before dispatch");selected_agent=*found;}
+         auto selected_permissions=selected_agent?selected_agent->permissions:std::vector<AgentPermissionRule>{};
+         if(selected_agent){leaf.instructions.append("\n\nNamed subagent instructions (pinned native profile):\n");leaf.instructions+=selected_agent->instructions;if(!selected_agent->model_id.empty())leaf.provider.model=selected_agent->model_id;if(selected_agent->tools){if(leaf.tool_allowlist){std::vector<std::string> intersection;for(const auto& tool:*selected_agent->tools)if(std::find(leaf.tool_allowlist->begin(),leaf.tool_allowlist->end(),tool)!=leaf.tool_allowlist->end())intersection.push_back(tool);leaf.tool_allowlist=std::move(intersection);}else leaf.tool_allowlist=selected_agent->tools;}}
+@@ -81,6 +81,7 @@ std::string DelegationExecutor::invoke(const std::string& parent,const ModelTool
+         work.push_back({budget,[this,child,leaf=std::move(leaf),selected_permissions=std::move(selected_permissions),budget](std::stop_token stop)mutable{
+             if(stop.stop_requested())return impl_->store.transition(child,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_delegated_leaf"})").get();
+             if(std::chrono::steady_clock::now()>=budget->deadline())return impl_->store.transition(child,RunState::queued,RunState::failed,R"({"reason":"agent_timeout"})").get();
++            if(leaf.delegated_execution)return leaf.delegated_execution(leaf,child,budget,std::move(selected_permissions),stop);
+             AgentRunner runner(impl_->store,std::move(leaf));return runner.execute(child,stop,{},budget,{}, {},false,std::move(selected_permissions));
+         },cancel});
+     }
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index bd55ef2a..89a8220f 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -21,6 +21,7 @@ namespace agentflow {
+ namespace {
+ using Json=nlohmann::json;
+ bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context";}
++Json worker_provider_identity(Repository&,const std::string&,const std::string&);
+ bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
+ bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
+ void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
+@@ -1827,7 +1828,7 @@ Json inference_identity(const InferenceStepSpec& s){return {{"root",s.root_run_i
+ void history_owner(Repository& repo,const std::string& root,const std::string& owner,ModelCallRole role,const ContextScope& scope,const std::string& provider_identity,const std::string& authority_identity){
+     const auto r=repo.run(root),o=repo.run(owner);const auto b=repo.root_budget(root);
+     if(r.state!=RunState::running||o.state!=RunState::running)throw ContextBindingChanged("Context execution owners changed");
+-    if(b.spec.policy_id!="native.graph-context"&&Json::parse(b.spec.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Context provider binding changed");
++    if(b.spec.policy_id!="native.graph-context"&&worker_provider_identity(repo,root,owner)!=Json::parse(provider_identity))throw ContextBindingChanged("Context provider binding changed");
+     if(b.spec.policy_id=="native.dynamic-plan"){const auto caps=repo.dynamic_capabilities(root);if(!caps.catalogue_finalized)throw ContextUnavailable("Context requires its actual sealed execution catalogue");if(role==ModelCallRole::parent&&authority_identity!=caps.backend_identity)throw ContextBindingChanged("Parent context private authority differs from sealed settings");}
+     if(role==ModelCallRole::parent){if(root!=owner||r.graph_root||scope.kind!=ContextScopeKind::session||scope.id!=r.session_id)throw Conflict("Parent context does not own this session");}
+     else {const auto a=repo.child_admission(owner);if(a.root_run_id!=root||scope.kind!=ContextScopeKind::execution||scope.id!=owner||(a.kind!=ChildAdmissionKind::dynamic_agent&&a.kind!=ChildAdmissionKind::delegated_leaf&&!(a.kind==ChildAdmissionKind::graph_agent&&b.spec.policy_id=="native.graph-context")))throw Conflict("Child context does not own this execution");if((a.kind==ChildAdmissionKind::dynamic_agent||a.kind==ChildAdmissionKind::graph_agent)&&authority_identity!=a.backend_identity)throw ContextBindingChanged("Context authority differs from its exact captured child settings");if(a.kind==ChildAdmissionKind::graph_agent){const auto capture=repo.graph_context_owner(root);const auto& agent=graph_context_agent(capture.authority,a.graph_node_path);if(Json::parse(agent.provider_identity_json)!=Json::parse(provider_identity))throw ContextBindingChanged("Graph context provider differs from its captured node model");}}
+@@ -3361,6 +3362,11 @@ AgentWorkerModelClaimSpec worker_callable_authority(Repository& repository,Xlang
+ AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){return worker_workspace_authority(repository,db,lease,call,false);}
+ AgentWorkerModelClaimSpec worker_file_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,true);}
+ AgentWorkerModelClaimSpec worker_process_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentProcessToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,false,true);}
++Json worker_provider_identity(Repository& repository,const std::string& root,const std::string& owner){
++    const auto budget=repository.root_budget(root);auto provider=Json::parse(budget.spec.provider_identity_json);
++    if(root!=owner){const auto admitted=repository.child_admission(owner);if(admitted.kind==ChildAdmissionKind::delegated_leaf){if(admitted.root_run_id!=root)throw Conflict("Delegated model identity belongs to another root");const auto history=repository.run_history(owner);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}}
++    return provider;
++}
+ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
+     if(lease.owner_run_id==lease.root_run_id)return false;
+     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
+@@ -3376,8 +3382,7 @@ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWork
+     const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");const auto budget=repository.root_budget(spec.root_run_id);
+     const bool delegated=worker_delegated_owner(repository,spec);
+     const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||(delegated&&root.state==RunState::running));
+-    auto provider=Json::parse(budget.spec.provider_identity_json);
+-    if(delegated){const auto history=repository.run_history(owner.id);if(history.empty()||history.front().role!="user")throw Conflict("Worker child has no admitted objective");const auto prompt=Json::parse(history.front().json);if(prompt.contains("agent_profile")){const auto model=prompt.at("agent_profile").at("model_id").get<std::string>();if(!model.empty())provider["model_id"]=model;}auto policy=budget.spec;policy.provider_identity_json=provider.dump();(void)budget_provider_identity(policy);}
++    const auto provider=delegated?worker_provider_identity(repository,spec.root_run_id,spec.owner_run_id):Json::parse(budget.spec.provider_identity_json);
+     if((!queued&&(root.state!=RunState::running||owner.state!=RunState::running))||owner.graph_root||budget.spec.workspace_identity!=spec.workspace_id||provider!=Json::parse(spec.provider_identity_json))throw Conflict("Worker admission differs from its execution owners");
+     if(spec.owner_run_id!=spec.root_run_id){const auto child=repository.child_admission(spec.owner_run_id);if(child.root_run_id!=spec.root_run_id||(child.kind!=ChildAdmissionKind::graph_agent&&child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Worker is not an admitted agent child");}
+     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.owner_run_id}).rows;
+diff --git a/Native/tests/agent_worker_delegated_scheduler_fixture.hpp b/Native/tests/agent_worker_delegated_scheduler_fixture.hpp
+new file mode 100644
+index 00000000..414391aa
+--- /dev/null
++++ b/Native/tests/agent_worker_delegated_scheduler_fixture.hpp
+@@ -0,0 +1,35 @@
++#pragma once
++#include <set>
++#include "agentflow/agent_worker_read_executor.hpp"
++#include "agentflow/delegation_executor.hpp"
++#include "agentflow/agent_definitions.hpp"
++namespace worker_delegated_scheduler_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
++using worker_read_fixture::check;using worker_read_fixture::write;
++class Gateway final:public AgentModelGateway {
++    std::atomic<unsigned> entered_{0};worker_delegated_runner_fixture::Gateway ordinary_,named_;
++public:
++    std::atomic<unsigned> counts{0};
++    explicit Gateway(const std::string& marker):ordinary_(entered_,marker,"worker-rpc-fixture"),named_(entered_,marker,"named-reader-model"){}
++    ModelCompletion complete(const ChatProviderConfig& provider,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token stop)override{if(provider.model=="named-reader-model")check(request.messages.front().content.find("SCHEDULED_NAMED_INSTRUCTIONS")!=std::string::npos,"Scheduled named instructions must remain in the backend-owned child window");return (provider.model=="named-reader-model"?named_:ordinary_).complete(provider,request,std::move(sink),stop);}
++    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{++counts;return parse_responses_input_tokens_response(R"({"object":"response.input_tokens","input_tokens":20})");}
++    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unexpected scheduled child compaction");}
++};
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::filesystem::path& folder,const std::vector<std::string>& imports){
++    for(const bool counted:{false,true}){
++        const std::string mode=counted?"scheduled-counted-delegation":"scheduled-delegation",root="rpc-"+mode;const auto directory=folder/mode;check(std::filesystem::create_directory(directory),"Scheduled delegate needs a fresh workspace");const std::string marker="scheduled-native-read-"+std::to_string(std::random_device{}());write(directory/"AGENTS.md","DELEGATED_RUNNER_GUIDANCE\n");write(directory/"actual.txt",marker);WorkspaceTools workspace(directory.string());
++        auto gateway=std::make_shared<Gateway>(marker);AgentSettings settings;settings.provider={"https://synthetic.invalid/scheduled", "worker-rpc-fixture",Capability::supported,Capability::supported,Capability::supported};settings.provider.deadline=10s;settings.provider.idle_timeout=10s;settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.tool_allowlist=std::vector<std::string>{"read_file","edit_file"};settings.selectable_models={"worker-rpc-fixture","named-reader-model"};settings.delegation=AgentDelegationPolicy{};settings.delegation->max_model_calls=8;settings.delegated_execution=make_agent_worker_delegated_executor(store,image,gateway);
++        if(counted){settings.provider.wire=ProviderWire::responses;settings.max_output_tokens=128;ContextRuntimePolicy policy;policy.buffer_tokens=20;for(const auto* model:{"worker-rpc-fixture","named-reader-model"}){const auto identity=Json{{"wire","responses"},{"model_id",model}}.dump();auto provider=settings.provider;provider.model=model;VerifiedContextCapacity capacity;capacity.provider_identity_json=identity;capacity.wire="responses";capacity.model_id=model;capacity.route_identity=context_route_identity(provider,identity);capacity.source_binding=context_digest("Controlled scheduled leaf capacity");capacity.revision=1;capacity.verified=true;capacity.input_tokens=4096;capacity.output_tokens=256;capacity.context_tokens=8192;capacity.default_output_tokens=128;policy.model_capacities.emplace(model,capacity);}settings.context=policy;}
++        AgentDefinitionStore(store).apply("agents:\n  - id: scheduled.reader\n    mode: subagent\n    model_id: named-reader-model\n    instructions: SCHEDULED_NAMED_INSTRUCTIONS inspect actual.txt only\n    tools: [read_file]\n");
++        auto pool=std::make_shared<NativeChildExecutor>(2,8);auto delegation=std::make_shared<DelegationExecutor>(store,pool);AgentRunner admission(store,settings,delegation);store.create_session(root,"Production scheduled child process delegation").get();admission.start(root,root,"Inspect the file with two bounded delegated children");store.transition(root,RunState::queued,RunState::running).get();
++        store.append_event(root,"agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})},{"snapshot","run_admission"}}.dump()).get();
++        auto budget=std::make_shared<RootExecutionBudget>(store,store.root_budget(root).get(),Clock::now()+20s,std::stop_token{});const auto arguments=Json{{"tasks",Json::array({{{"id","one"},{"objective","Inspect actual.txt and report its result"},{"preset","workspace.inspect"}},{{"id","two"},{"objective","Inspect actual.txt and report its result"},{"preset","workspace.inspect"},{"agent_id","scheduled.reader"}}})}}.dump();ModelToolCall call{"scheduled-delegate-call","delegate_tasks",arguments};const auto assistant=Json{{"content",""},{"tool_calls",Json::array({{{"id",call.id},{"name",call.name},{"arguments",arguments}}})}}.dump();
++        const auto result=delegation->invoke(root,call,assistant,settings,budget);check(result.find("Observed delegated read")!=std::string::npos&&delegation->healthy(),"Actual bounded scheduler must collect canonical process child results");pool->close();
++        const auto children=store.owned_children(root).get();check(children.size()==2&&store.root_budget(root).get().model_calls_reserved==4&&store.root_budget(root).get().parent_calls_held==1&&store.run(root).get().state==RunState::running,"Scheduled child workers must preserve shared charges and parent continuation");std::set<std::uint32_t> pids;
++        for(const auto& child:children){check(child.run.state==RunState::completed&&store.run_history(child.run.id).get().size()==4,"Scheduled process child must retain exact read/final history");unsigned admitted=0,retired=0;for(const auto& event:store.events(child.run.id).get()){if(event.kind=="worker.lease.admitted"){pids.insert(Json::parse(event.json).at("pid").get<std::uint32_t>());++admitted;}if(event.kind=="worker.lease.retired")++retired;}check(admitted==1&&retired==1,"Scheduled child must use exactly one admitted product process and retire it");}
++        check(pids.size()==2&&gateway->counts.load()==(counted?4:0),"Two actual scheduled xmind workers must share exactly four calls and retain the configured counting policy");
++        if(counted){XlangSqlite sql((folder/"state.sqlite").string(),imports);const auto rows=sql.execute("SELECT count(*) FROM inference_steps WHERE root_run_id=? AND role='leaf' AND state='completed'",{root}).rows;check(std::get<std::int64_t>(rows.at(0).at(0))==4,"Counted scheduled workers must retain four completed typed leaf inference groups through embedded xlang3");}
++        std::cout<<"Production scheduled delegated xmind workers "<<mode<<" verified bounded queue/admission order, concurrent process dispatch, pinned named instructions/model, read-only catalogue, exact child results, four shared charges and drain-before-join; synthetic model gateway."<<std::endl;
++    }
++}
++}
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index a547e8dc..2657caf0 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -30,6 +30,7 @@
+ #include "agent_worker_context_fixture.hpp"
+ #include "agent_worker_supervisor_fixture.hpp"
+ #include "agent_worker_delegated_runner_fixture.hpp"
++#include "agent_worker_delegated_scheduler_fixture.hpp"
+ #include "agent_worker_service_fixture.hpp"
+ #include "agent_worker_factory_fixture.hpp"
+ #include "agent_worker_profile_factory_fixture.hpp"
+@@ -261,6 +262,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_delegated_runner_fixture::parent(store,product,folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_callable_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_skills_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_context_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_context_failure_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_journal_role_fixture::parent(image);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_delegated_runner_fixture::parent(store,product,folder);worker_delegated_scheduler_fixture::parent(store,product,folder,{argv[1],argv[2]});worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_callable_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_skills_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_context_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_context_failure_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_journal_role_fixture::parent(image);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

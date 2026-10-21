@@ -73,7 +73,7 @@ std::string DelegationExecutor::invoke(const std::string& parent,const ModelTool
     std::vector<NativeChildWork> work;work.reserve(spec.tasks.size());
     std::size_t task_index=0;
     if(!replay)for(const auto& task:spec.tasks){
-        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.a2a_enabled=false;leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.max_turns=policy.max_leaf_turns;
+        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.a2a_enabled=false;leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.xlang_python_tools.clear();leaf.max_turns=policy.max_leaf_turns;
         const auto index=task_index++;std::optional<AgentDefinition> selected_agent;if(value["tasks"][index].contains("agent_id")){const auto id=value["tasks"][index]["agent_id"].get<std::string>();const auto found=std::find_if(catalogue.entries.begin(),catalogue.entries.end(),[&](const auto& item){return item.id==id;});if(found==catalogue.entries.end()||found->mode!="subagent"||found->hidden)throw Conflict("Delegated subagent profile changed before dispatch");selected_agent=*found;}
         auto selected_permissions=selected_agent?selected_agent->permissions:std::vector<AgentPermissionRule>{};
         if(selected_agent){leaf.instructions.append("\n\nNamed subagent instructions (pinned native profile):\n");leaf.instructions+=selected_agent->instructions;if(!selected_agent->model_id.empty())leaf.provider.model=selected_agent->model_id;if(selected_agent->tools){if(leaf.tool_allowlist){std::vector<std::string> intersection;for(const auto& tool:*selected_agent->tools)if(std::find(leaf.tool_allowlist->begin(),leaf.tool_allowlist->end(),tool)!=leaf.tool_allowlist->end())intersection.push_back(tool);leaf.tool_allowlist=std::move(intersection);}else leaf.tool_allowlist=selected_agent->tools;}}
@@ -81,6 +81,7 @@ std::string DelegationExecutor::invoke(const std::string& parent,const ModelTool
         work.push_back({budget,[this,child,leaf=std::move(leaf),selected_permissions=std::move(selected_permissions),budget](std::stop_token stop)mutable{
             if(stop.stop_requested())return impl_->store.transition(child,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_delegated_leaf"})").get();
             if(std::chrono::steady_clock::now()>=budget->deadline())return impl_->store.transition(child,RunState::queued,RunState::failed,R"({"reason":"agent_timeout"})").get();
+            if(leaf.delegated_execution)return leaf.delegated_execution(leaf,child,budget,std::move(selected_permissions),stop);
             AgentRunner runner(impl_->store,std::move(leaf));return runner.execute(child,stop,{},budget,{}, {},false,std::move(selected_permissions));
         },cancel});
     }

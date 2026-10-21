@@ -895,7 +895,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
             },token);
             }catch(const ProviderHttpError& error){
-                if(read_workspace_&&read_workspace_->execution_policy_id()=="native.context"&&!rebuild_used&&!durable_output&&error.status==400&&error.code=="context_length_exceeded"){
+                if(read_workspace_&&(read_workspace_->execution_policy_id()=="native.context"||read_workspace_->execution_policy_id()=="native.delegation")&&!rebuild_used&&!durable_output&&error.status==400&&error.code=="context_length_exceeded"){
                     if(!budget||!reservation)throw Conflict("Worker context rebuild has no funded native attempt");
                     request=read_workspace_->rebuild_request(reservation->attempt_id,request,token);
                     reservation=budget->reserve(id,ModelCallRole::parent,token);rebuild_used=true;continue;
